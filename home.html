@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus &bull; Work List</title>
+  <link rel="icon" type="image/png" href="assets/images/image.png">
+  <link rel="stylesheet" href="assets/css/home.css?v=12">
+</head>
+
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+
+      <!-- Left Side: Company Logo -->
+      <a href="home.html" class="nav-brand">
+        <img src="assets/images/image.png" alt="Nexus Logo" class="nav-logo-img">
+      </a>
+
+      <!-- Right Side: 9 Navigation Icons (40px size with tooltips & emerald green hover) -->
+      <div class="nav-icons-group">
+
+        <!-- 1. Master Icon (Database / Stacked Disks) -->
+        <button type="button" class="nav-icon-item stroke-icon" data-tooltip="Master" aria-label="Master">
+          <svg width="40" height="40" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Top Disk -->
+            <ellipse cx="12" cy="5" rx="9" ry="3" />
+            <!-- Middle Disk Layer 1 -->
+            <path d="M21 9c0 1.66-4.03 3-9 3s-9-1.34-9-3" />
+            <!-- Middle Disk Layer 2 -->
+            <path d="M21 14c0 1.66-4.03 3-9 3s-9-1.34-9-3" />
+            <!-- Bottom Disk Base -->
+            <path d="M21 19c0 1.66-4.03 3-9 3s-9-1.34-9-3" />
+            <!-- Left & Right Vertical Walls -->
+            <line x1="3" y1="5" x2="3" y2="19" />
+            <line x1="21" y1="5" x2="21" y2="19" />
+          </svg>
+        </button>
+
+        <!-- 2. Projects Icon (Home / House Shape) -->
+        <button type="button" class="nav-icon-item stroke-icon" data-tooltip="Projects" aria-label="Projects">
+          <svg width="40" height="40" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5L12 3l9 7.5V20a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 20v-9.5z" />
+            <path d="M9 21.5V12h6v9.5" />
+          </svg>
+        </button>
+
+        <!-- 3. Accounts Icon (Person with +) -->
+        <button type="button" class="nav-icon-item fill-icon" data-tooltip="Accounts" aria-label="Accounts">
+          <svg width="40" height="40" viewBox="0 0 24 24">
+            <!-- Person Head -->
+            <circle cx="9" cy="7" r="4.5" />
+            <!-- Person Torso -->
+            <path d="M2 19c0-3.8 3.2-6.2 7-6.2 1.1 0 2.1.2 3 .7-.4 1-.5 2.1-.3 3.3H2v2.2h10.5c.5.8 1.2 1.4 2 1.8-1.7.4-3.5.6-5.5.6-3.8 0-7-2.4-7-6.4z" />
+            <!-- Plus Circle Badge -->
+            <circle cx="18" cy="16" r="4.5" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M18 13.8v4.4M15.8 16h4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+
+        <!-- 4. Admin Icon (Person with Gear) -->
+        <button type="button" class="nav-icon-item stroke-icon" data-tooltip="Admin" aria-label="Admin">
+          <svg width="40" height="40" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Person Body -->
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <!-- Gear Icon on Right -->
+            <circle cx="19" cy="11" r="2" />
+            <path d="M19 8v1M19 13v1M16 11h1M21 11h1M16.9 8.9l.7.7M20.4 12.4l.7.7M16.9 13.1l.7-.7M20.4 9.6l.7-.7" />
+          </svg>
+        </button>
+
+        <!-- 5. Worklist Icon (Alert Bell - Active Worklist in Blue) -->
+        <button type="button" class="nav-icon-item stroke-icon active-nav-tab" data-tooltip="Worklist" aria-label="Worklist">
+          <svg width="40" height="40" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Bell Dome & Body -->
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <!-- Bell Clapper -->
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            <!-- Ring wave arcs -->
+            <path d="M20.5 4.5a11 11 0 0 1 1.5 5.5" stroke-width="1.8" />
+            <path d="M3.5 4.5A11 11 0 0 0 2 10" stroke-width="1.8" />
+          </svg>
+        </button>
+
+        <!-- 6. Purchase Icon (Shopping Cart) -->
+        <button type="button" class="nav-icon-item fill-icon" data-tooltip="Purchase" aria-label="Purchase">
+          <svg width="40" height="40" viewBox="0 0 24 24">
+            <!-- Cart Basket -->
+            <path d="M3 4h2.2l1.6 3.5h14.2c.8 0 1.4.7 1.2 1.5l-2.4 7.2c-.3.8-1 1.3-1.8 1.3H9.2c-.8 0-1.5-.5-1.8-1.3L4.8 5.8H3V4z" />
+            <!-- Left Wheel -->
+            <circle cx="10" cy="20.5" r="1.8" />
+            <!-- Right Wheel -->
+            <circle cx="17.5" cy="20.5" r="1.8" />
+          </svg>
+        </button>
+
+        <!-- 7. Inventory Icon (Warehouse / Building with Grid Shelves) -->
+        <button type="button" class="nav-icon-item stroke-icon" data-tooltip="Inventory" aria-label="Inventory">
+          <svg width="40" height="40" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- House / Factory Outline -->
+            <path d="M3 9l9-6 9 6v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9z" />
+            <!-- Inner Warehouse Storage Grid -->
+            <line x1="9" y1="11" x2="9" y2="17" />
+            <line x1="15" y1="11" x2="15" y2="17" />
+            <line x1="9" y1="14" x2="15" y2="14" />
+            <line x1="9" y1="17" x2="15" y2="17" />
+            <line x1="9" y1="11" x2="15" y2="11" />
+          </svg>
+        </button>
+
+        <!-- 8. Profile Icon (User Solid Silhouette) -->
+        <button type="button" class="nav-icon-item fill-icon" data-tooltip="Profile" aria-label="Profile">
+          <svg width="40" height="40" viewBox="0 0 24 24">
+            <!-- User Head -->
+            <circle cx="12" cy="7.5" r="4.5" />
+            <!-- User Body -->
+            <path d="M4 19.5c0-4.2 3.6-7 8-7s8 2.8 8 7v1.5H4v-1.5z" />
+          </svg>
+        </button>
+
+        <!-- 9. Logout Icon (Power Off / Sign Out) -->
+        <a href="index.html" class="nav-icon-item stroke-icon" data-tooltip="Sign Out" aria-label="Sign Out" id="btnPowerOff">
+          <svg width="40" height="40" viewBox="0 0 24 24" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Power Circle Open at Top -->
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+            <!-- Center Vertical Line -->
+            <line x1="12" y1="2" x2="12" y2="12" />
+          </svg>
+        </a>
+
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Green Title Sub-Header Banner (Work List) -->
+  <header class="worklist-banner">
+    <div class="worklist-banner-inner">
+      <h1 class="worklist-banner-title">Work List</h1>
+    </div>
+  </header>
+
+  <!-- Main Work List Workspace Container -->
+  <main class="worklist-main">
+    <div class="worklist-card">
+
+      <!-- Action Toolbar (Sigma Symbol on Left, Info, Delete, CSV on Right) -->
+      <div class="worklist-toolbar">
+
+        <!-- Left Toolbar: Blue Sigma Symbol -->
+        <div class="toolbar-left">
+          <button type="button" class="toolbar-sigma-btn" id="btnSigmaSummary" data-tooltip="Summary & Totals" aria-label="Summary Totals">
+            &Sigma;
+          </button>
+        </div>
+
+        <!-- Right Toolbar: Action Icons (Info, Delete, CSV Download) -->
+        <div class="toolbar-right">
+          <!-- 1. Red Info Icon -->
+          <button type="button" class="toolbar-icon-btn btn-info-action" id="btnInfoAction" data-tooltip="Information & Details" aria-label="Information">
+            <svg width="30" height="30" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="#dc2626" />
+              <text x="12" y="17" fill="#ffffff" font-family="'Outfit', sans-serif" font-weight="700" font-size="14" font-style="italic" text-anchor="middle">i</text>
+            </svg>
+          </button>
+
+          <!-- 2. Red Delete / Trash Bin Icon -->
+          <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete">
+            <svg width="30" height="30" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+          </button>
+
+          <!-- 3. Green CSV Export Button -->
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="Export to CSV" aria-label="Export CSV">
+            <svg width="34" height="30" viewBox="0 0 28 28" fill="none">
+              <!-- Rounded Badge Frame -->
+              <rect x="2" y="3" width="24" height="22" rx="4" fill="#10b981" />
+              <!-- Downward Export Arrow -->
+              <path d="M14 6v8m0 0l-3-3m3 3l3-3" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              <!-- CSV Text Badge -->
+              <rect x="4" y="16" width="20" height="7" rx="2" fill="#047857" />
+              <text x="14" y="21.5" fill="#ffffff" font-family="sans-serif" font-weight="800" font-size="6.5" letter-spacing="0.5" text-anchor="middle">CSV</text>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Work List Data Table Container -->
+      <div class="table-container">
+        <table class="worklist-table" id="worklistTable">
+          <thead>
+            <!-- Header Row 1: Primary Column Grouping -->
+            <tr>
+              <th rowspan="2" class="th-select">Select</th>
+              <th rowspan="2" class="th-filter" data-col="submitBy">
+                <span>Submit By</span>
+                <span class="filter-funnel">&#9660;</span>
+              </th>
+              <th rowspan="2" class="th-date" data-col="submissionDate">
+                <span>Submission Date</span>
+              </th>
+              <th rowspan="2" class="th-filter" data-col="approvedBy">
+                <span>Approved By</span>
+                <span class="filter-funnel">&#9660;</span>
+              </th>
+              <th rowspan="2" class="th-filter" data-col="expenseHead">
+                <span>Expense Head</span>
+                <span class="filter-funnel">&#9660;</span>
+              </th>
+              <th rowspan="2" class="th-filter" data-col="transferTo">
+                <span>Transfer To</span>
+                <span class="filter-funnel">&#9660;</span>
+              </th>
+              <!-- Amount Grouping Header (Spanning 3 sub-columns) -->
+              <th colspan="3" class="th-amount-group">Amount</th>
+              <th rowspan="2" class="th-filter th-ageing" data-col="ageing">
+                <span>Ageing</span>
+                <span class="filter-funnel">&#9660;</span>
+              </th>
+            </tr>
+            <!-- Header Row 2: Sub-columns under Amount -->
+            <tr class="tr-sub-headers">
+              <th class="th-sub-amount">Approved</th>
+              <th class="th-sub-amount">Transferred</th>
+              <th class="th-sub-amount">Payable</th>
+            </tr>
+          </thead>
+          <tbody id="worklistTableBody">
+            <!-- Rows rendered dynamically by home.js based on selected mode (PO or Payment) -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bottom View Switcher Toggles (Payment vs PO) -->
+      <div class="worklist-footer-bar">
+        <div class="toggle-group-container">
+          <!-- Payment Toggle Button -->
+          <button type="button" class="view-toggle-btn" id="btnTogglePayment" data-view="payment">
+            Payment
+          </button>
+          <!-- PO Toggle Button (Active Green State by default) -->
+          <button type="button" class="view-toggle-btn active" id="btnTogglePO" data-view="po">
+            PO
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="home-toast" id="homeToast"></div>
+
+  <script src="assets/js/home.js?v=12"></script>
+</body>
+
+</html>

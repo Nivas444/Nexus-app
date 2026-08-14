@@ -1,0 +1,624 @@
+/* ==========================================================================
+   NEXUS ECOSYSTEM - WORK LIST & HOME PAGE STYLESHEET
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Brand Green Colors */
+  --primary-green: #00bfa5;
+  --primary-green-dark: #00a884;
+  --primary-green-light: #e0f2f1;
+  --primary-glow: rgba(0, 191, 165, 0.2);
+  --banner-green: #00cba0;
+
+  /* Neutral Palette */
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --icon-grey: #64748b;
+  --border-light: #e2e8f0;
+  --table-header-bg: #94a3b8;
+  --table-header-text: #ffffff;
+
+  /* Shadows & Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+
+  /* Transitions */
+  --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-spring: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Reset & Global */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   1. TOP NAVIGATION BAR
+   ========================================================================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.nav-container {
+  width: 100%;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Left: Logo */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.nav-brand:hover {
+  transform: scale(1.02);
+}
+
+.nav-logo-img {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.04));
+}
+
+/* Right: 9 Navigation Icons */
+.nav-icons-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-icon-item {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: transparent;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: var(--transition-spring);
+  outline: none;
+  text-decoration: none;
+  color: var(--icon-grey);
+}
+
+.nav-icon-item svg {
+  width: 40px !important;
+  height: 40px !important;
+  transition: var(--transition-spring);
+  display: block;
+}
+
+/* Stroke Icon Types */
+.nav-icon-item.stroke-icon svg {
+  stroke: var(--icon-grey);
+  fill: none;
+}
+
+/* Fill Icon Types */
+.nav-icon-item.fill-icon svg {
+  fill: var(--icon-grey);
+  stroke: none;
+}
+
+/* Hover Interaction: Transform to Emerald Green (#00bfa5) */
+.nav-icon-item:hover {
+  background: rgba(0, 191, 165, 0.08);
+  border-color: rgba(0, 191, 165, 0.3);
+  transform: translateY(-3px);
+}
+
+.nav-icon-item.stroke-icon:hover svg {
+  stroke: var(--primary-green) !important;
+  filter: drop-shadow(0 2px 8px var(--primary-glow));
+}
+
+.nav-icon-item.fill-icon:hover svg {
+  fill: var(--primary-green) !important;
+  filter: drop-shadow(0 2px 8px var(--primary-glow));
+}
+
+/* Active Nav Tab (Worklist) */
+.nav-icon-item.active-nav-tab {
+  color: #0284c7;
+}
+
+.nav-icon-item.active-nav-tab.stroke-icon svg {
+  stroke: #0284c7;
+}
+
+.nav-icon-item.active-nav-tab:hover svg {
+  stroke: var(--primary-green) !important;
+}
+
+/* Power Off Button Specific Hover */
+#btnPowerOff:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+#btnPowerOff:hover svg {
+  stroke: #ef4444 !important;
+  filter: drop-shadow(0 2px 8px rgba(239, 68, 68, 0.25));
+}
+
+/* ==========================================================================
+   2. GREEN SUB-HEADER BANNER (Work List)
+   ========================================================================== */
+.worklist-banner {
+  width: 100% !important;
+  background: #00cba0 !important;
+  padding: 12px 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 191, 165, 0.15);
+  display: block !important;
+}
+
+.worklist-banner-inner {
+  width: 100%;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+}
+
+.worklist-banner-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   3. MAIN WORK LIST CONTAINER
+   ========================================================================== */
+.worklist-main {
+  width: 100%;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 24px 32px 48px 32px;
+  flex: 1;
+}
+
+.worklist-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 24px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ==========================================================================
+   4. ACTION TOOLBAR (Sigma on Left, Info, Delete, CSV on Right)
+   ========================================================================== */
+.worklist-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-sigma-btn {
+  background: transparent;
+  border: none;
+  color: #2563eb !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem !important;
+  font-weight: 800 !important;
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-sigma-btn:hover {
+  color: #1d4ed8 !important;
+  background: rgba(37, 99, 235, 0.08);
+  transform: scale(1.1);
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.toolbar-icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.toolbar-icon-btn svg {
+  display: block;
+  transition: var(--transition);
+}
+
+.btn-info-action:hover svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.3));
+}
+
+.btn-delete-action:hover svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 6px rgba(239, 68, 68, 0.3));
+}
+
+.btn-csv-action:hover svg {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 6px rgba(16, 185, 129, 0.3));
+}
+
+/* ==========================================================================
+   5. WORK LIST DATA TABLE
+   ========================================================================== */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.worklist-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.92rem;
+  min-width: 1100px;
+}
+
+/* Table Headers */
+.worklist-table thead th {
+  background: var(--table-header-bg) !important;
+  color: var(--table-header-text) !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  text-align: center;
+  vertical-align: middle;
+  letter-spacing: 0.3px;
+}
+
+.th-filter {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.th-filter:hover {
+  background: #64748b !important;
+}
+
+.filter-funnel {
+  font-size: 0.72rem;
+  margin-left: 6px;
+  opacity: 0.85;
+  display: inline-block;
+}
+
+.th-select {
+  width: 70px;
+}
+
+.th-amount-group {
+  background: #64748b !important;
+  font-weight: 700;
+}
+
+.tr-sub-headers th {
+  background: #94a3b8 !important;
+  font-size: 0.84rem;
+  padding: 8px 12px;
+}
+
+/* Table Body */
+.worklist-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s ease;
+}
+
+.worklist-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.worklist-table tbody tr.row-selected {
+  background: rgba(0, 191, 165, 0.05);
+}
+
+.worklist-table tbody td {
+  padding: 14px 16px;
+  color: #334155;
+  font-size: 0.9rem;
+  border: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+/* Radio / Select Column */
+.td-select {
+  text-align: center;
+}
+
+.radio-select-indicator {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  border: 2px solid #cbd5e1 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: #ffffff !important;
+}
+
+.radio-select-indicator:hover {
+  border-color: var(--primary-green) !important;
+}
+
+.radio-select-indicator.selected {
+  border-color: var(--primary-green) !important;
+  background: #ffffff !important;
+}
+
+.radio-select-indicator.selected::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary-green) !important;
+  display: block;
+}
+
+/* Clickable Blue Reference Link */
+.req-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.req-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* Numeric & Alignment Columns */
+.td-amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.td-center {
+  text-align: center;
+}
+
+/* Empty View Banner */
+.empty-data-row {
+  text-align: center;
+  padding: 32px !important;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ==========================================================================
+   6. BOTTOM VIEW SWITCHER BUTTONS (Payment & PO)
+   ========================================================================== */
+.worklist-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 16px;
+}
+
+.toggle-group-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-toggle-btn {
+  height: 44px !important;
+  padding: 0 32px !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border-radius: 6px !important;
+  transition: var(--transition);
+  outline: none;
+  border: 1.5px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-toggle-btn:hover {
+  border-color: var(--primary-green) !important;
+  color: var(--primary-green-dark) !important;
+  transform: translateY(-1px);
+}
+
+/* ON State: Solid Green Background with White Text */
+.view-toggle-btn.active {
+  background: #00cba0 !important;
+  border-color: #00cba0 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 191, 165, 0.3) !important;
+}
+
+.view-toggle-btn.active:hover {
+  background: var(--primary-green-dark) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   7. FLOATING TOOLTIPS FOR ICONS
+   ========================================================================== */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  padding: 6px 12px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+}
+
+[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  border-width: 0 5px 6px 5px;
+  border-style: solid;
+  border-color: transparent transparent #0f172a transparent;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2000;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================================
+   8. TOAST NOTIFICATIONS
+   ========================================================================== */
+.home-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 32px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: var(--transition);
+  z-index: 3000;
+}
+
+.home-toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   9. RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .nav-icons-group {
+    gap: 10px;
+  }
+
+  .nav-icon-item {
+    width: 44px;
+    height: 44px;
+  }
+
+  .nav-icon-item svg {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .worklist-main {
+    padding: 16px;
+  }
+}

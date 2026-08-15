@@ -267,7 +267,7 @@ function initFormSubmission() {
       sessionStorage.setItem('nexus_user', username);
 
       setTimeout(() => {
-        window.location.href = 'home.html';
+        window.location.href = 'home.html?module=worklist';
       }, 1000);
     });
   }

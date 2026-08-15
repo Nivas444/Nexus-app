@@ -39,6 +39,11 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
@@ -51,7 +56,7 @@ body {
 }
 
 /* ==========================================================================
-   FULL PAGE 60/40 SPLIT CONTAINER
+   FULL PAGE 60/40 SPLIT CONTAINER (RESPONSIVE)
    ========================================================================== */
 .full-page-split {
   width: 100vw;
@@ -290,35 +295,6 @@ body {
   align-items: center;
 }
 
-/* Minimalist Icon Header */
-.form-header-icon {
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 28px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  transition: var(--transition-spring);
-}
-
-.form-header-icon:hover {
-  transform: translateY(-4px) scale(1.08);
-  background: rgba(255, 255, 255, 0.28);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
-}
-
-.form-header-icon svg {
-  width: 30px;
-  height: 30px;
-  stroke: #ffffff;
-}
-
 /* Icon-Only Form Structure */
 .auth-form {
   width: 100%;
@@ -433,7 +409,7 @@ body {
   stroke: currentColor;
 }
 
-/* Form Actions Row (Forgot Password on Left & Reduced Length Login on Right, Perfectly Aligned) */
+/* Form Actions Row */
 .form-actions-row {
   display: flex;
   align-items: center;
@@ -520,13 +496,6 @@ body {
 
 .btn-auth-submit:hover svg {
   transform: translateX(4px);
-}
-
-.icon-action-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-  fill: none;
 }
 
 /* Bottom Right Footer: Copyright Text */
@@ -799,6 +768,7 @@ body {
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 2000;
+  max-width: calc(100vw - 32px);
 }
 
 .toast-notification.show {
@@ -815,7 +785,7 @@ body {
 }
 
 /* ==========================================================================
-   RESPONSIVE DESIGN (Tablets & Mobile)
+   RESPONSIVE DESIGN (All Screen Dimensions)
    ========================================================================== */
 @media (max-width: 960px) {
   .full-page-split {
@@ -829,11 +799,18 @@ body {
   .split-side-left {
     min-height: auto;
     padding: 36px 24px 28px 24px;
-    gap: 32px;
+    gap: 28px;
+  }
+
+  .brand-header {
+    position: static;
+    margin-bottom: 8px;
   }
 
   .quote-container {
     margin: 0;
+    max-width: 100%;
+    padding: 12px 0;
   }
 
   .quote-heading {
@@ -842,8 +819,8 @@ body {
 
   .split-side-right {
     min-height: auto;
-    padding: 48px 24px 32px 24px;
-    gap: 36px;
+    padding: 44px 24px 32px 24px;
+    gap: 32px;
   }
 
   .footer-right {
@@ -863,14 +840,27 @@ body {
 
   .split-side-left,
   .split-side-right {
-    padding: 28px 18px 24px 18px;
+    padding: 24px 16px 20px 16px;
   }
 
   .quote-heading {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
+  }
+
+  .quote-text {
+    font-size: 1rem;
   }
 
   .form-container-wrap {
     max-width: 100%;
+  }
+
+  .auth-input {
+    font-size: 0.92rem;
+  }
+
+  .btn-auth-submit {
+    max-width: 150px;
+    font-size: 0.94rem;
   }
 }

@@ -900,16 +900,11 @@ function closeSideForm() {
 // ==========================================================================
 function initExcelFilterSystem() {
   const dropdown = document.getElementById('excelFilterDropdown');
-  const btnClose = document.getElementById('btnFilterClose');
   const btnCancel = document.getElementById('btnCancelFilter');
   const btnApply = document.getElementById('btnApplyFilter');
-  const btnClearCol = document.getElementById('btnClearColFilter');
-  const btnSortAsc = document.getElementById('btnSortAsc');
-  const btnSortDesc = document.getElementById('btnSortDesc');
   const searchInput = document.getElementById('filterSearchInput');
   const chkSelectAll = document.getElementById('chkFilterSelectAll');
 
-  if (btnClose) btnClose.addEventListener('click', closeExcelFilter);
   if (btnCancel) btnCancel.addEventListener('click', closeExcelFilter);
 
   document.addEventListener('click', (e) => {
@@ -963,37 +958,6 @@ function initExcelFilterSystem() {
       showToast(`Filter applied on ${getColumnDisplayName(currentFilterColumn)}`);
     });
   }
-
-  if (btnClearColFilter) {
-    btnClearColFilter.addEventListener('click', () => {
-      if (!currentFilterColumn) return;
-      delete activeColumnFilters[currentFilterColumn];
-      updateFilterIconBadge(currentFilterColumn);
-      applyFiltersAndRender();
-      closeExcelFilter();
-      showToast(`Cleared filter on ${getColumnDisplayName(currentFilterColumn)}`);
-    });
-  }
-
-  if (btnSortAsc) {
-    btnSortAsc.addEventListener('click', () => {
-      if (!currentFilterColumn) return;
-      sortDataset(currentFilterColumn, 'asc');
-      applyFiltersAndRender();
-      closeExcelFilter();
-      showToast(`Sorted ${getColumnDisplayName(currentFilterColumn)} Ascending`);
-    });
-  }
-
-  if (btnSortDesc) {
-    btnSortDesc.addEventListener('click', () => {
-      if (!currentFilterColumn) return;
-      sortDataset(currentFilterColumn, 'desc');
-      applyFiltersAndRender();
-      closeExcelFilter();
-      showToast(`Sorted ${getColumnDisplayName(currentFilterColumn)} Descending`);
-    });
-  }
 }
 
 function rebindFilterButtons() {
@@ -1009,14 +973,12 @@ function rebindFilterButtons() {
 function openExcelFilter(colKey, triggerBtn) {
   currentFilterColumn = colKey;
   const dropdown = document.getElementById('excelFilterDropdown');
-  const titleEl = document.getElementById('filterColTitle');
   const searchInput = document.getElementById('filterSearchInput');
   const chkList = document.getElementById('filterCheckboxList');
   const chkSelectAll = document.getElementById('chkFilterSelectAll');
 
   if (!dropdown) return;
 
-  titleEl.textContent = `Filter: ${getColumnDisplayName(colKey)}`;
   if (searchInput) searchInput.value = '';
 
   const uniqueValues = Array.from(new Set(currentDataset.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))

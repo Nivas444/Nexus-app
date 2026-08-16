@@ -19,7 +19,7 @@
   --text-muted: #64748b;
   --icon-grey: #64748b;
   --border-light: #e2e8f0;
-  --table-header-bg: #ffffff;
+  --table-header-bg: #f1f5f9;
   --table-header-text: #1e293b;
 
   /* Pale Green Hover & Selected Tints */
@@ -69,7 +69,7 @@ body {
 }
 
 /* ==========================================================================
-   1. TOP NAVIGATION BAR (High Z-Index & No Tooltip Clipping)
+   1. TOP NAVIGATION BAR
    ========================================================================== */
 .navbar {
   position: sticky;
@@ -80,7 +80,7 @@ body {
   background: #ffffff;
   border-bottom: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
-  z-index: 10000 !important; /* Ensure Navbar and Tooltips stay above green bar */
+  z-index: 10000 !important;
   display: flex;
   align-items: center;
 }
@@ -122,7 +122,7 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  overflow: visible !important; /* Critical: Do NOT clip floating hover tooltips */
+  overflow: visible !important;
   padding: 6px 0;
 }
 
@@ -144,7 +144,6 @@ body {
   flex-shrink: 0;
 }
 
-/* 40px Icon Size */
 .nav-icon-img {
   width: 40px !important;
   height: 40px !important;
@@ -153,33 +152,33 @@ body {
   object-fit: contain !important;
   display: block !important;
   transition: var(--transition-spring);
+  /* Default icon color: Clean Neutral Grey */
+  filter: grayscale(100%) opacity(0.55) brightness(0.85);
 }
 
-/* Standard Nav Hover: Emerald Green */
 .nav-icon-item:hover {
   background: rgba(0, 191, 165, 0.1);
   border-color: rgba(0, 191, 165, 0.35);
   transform: translateY(-3px);
 }
 
+/* Hover: Smoothly returns to original vibrant green color */
 .nav-icon-item:hover .nav-icon-img {
   transform: scale(1.08);
-  filter: drop-shadow(0 2px 8px var(--primary-glow));
+  filter: grayscale(0%) opacity(1) brightness(1) drop-shadow(0 2px 8px var(--primary-glow));
 }
 
-/* Active Nav Tab Highlight */
 .nav-icon-item.active-nav-tab {
   background: rgba(0, 191, 165, 0.12);
   border-color: rgba(0, 191, 165, 0.4);
 }
 
+/* Active Nav Tab: Keeps original vibrant green color */
 .nav-icon-item.active-nav-tab .nav-icon-img {
-  filter: drop-shadow(0 2px 8px var(--primary-glow));
+  filter: grayscale(0%) opacity(1) brightness(1) drop-shadow(0 2px 8px var(--primary-glow));
 }
 
-/* ==========================================================================
-   POWER OFF / SIGN OUT ICON (TURNS RED ON HOVER)
-   ========================================================================== */
+/* Power Off / Sign Out Icon */
 .nav-power-btn {
   color: #64748b;
 }
@@ -188,6 +187,7 @@ body {
   width: 40px !important;
   height: 40px !important;
   stroke: #64748b;
+  opacity: 0.65;
   display: block;
   transition: var(--transition-spring);
 }
@@ -208,7 +208,7 @@ body {
    ========================================================================== */
 .worklist-banner {
   position: relative;
-  z-index: 1; /* Below Navbar & Tooltips */
+  z-index: 1;
   width: 100% !important;
   background: #00cba0 !important;
   padding: 10px 0 !important;
@@ -234,7 +234,7 @@ body {
 }
 
 /* ==========================================================================
-   3. FULL PAGE WORKSPACE LAYOUT (EXPANDS TO BOTTOM OF PAGE)
+   3. FULL PAGE WORKSPACE LAYOUT
    ========================================================================== */
 .worklist-main-full {
   width: 100%;
@@ -244,7 +244,7 @@ body {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 76px - 44px); /* Fills vertical space to viewport bottom */
+  min-height: calc(100vh - 76px - 44px);
   background: #ffffff;
   position: relative;
 }
@@ -332,7 +332,6 @@ body {
   filter: drop-shadow(0 2px 8px rgba(0, 87, 231, 0.4));
 }
 
-/* Orange Upload Button */
 .btn-upload-orange:hover svg,
 .btn-upload-orange:hover .toolbar-icon-img {
   transform: scale(1.1);
@@ -340,7 +339,7 @@ body {
 }
 
 /* ==========================================================================
-   4. FULL-WIDTH WORK LIST TABLE (WHITE HEADERS & LIGHT ROW HOVER)
+   4. FULL-WIDTH WORK LIST TABLE (LIGHT GREY HEADER & NO VERTICAL LINES)
    ========================================================================== */
 .table-container-full {
   width: 100%;
@@ -358,17 +357,23 @@ body {
   text-align: left;
   font-size: 0.92rem;
   background: #ffffff;
+  border-left: none !important;
+  border-right: none !important;
 }
 
-/* WHITE TABLE HEADERS */
+/* LIGHT GREY TABLE HEADERS & NO VERTICAL LINES */
 .worklist-table-full thead th {
-  background: #ffffff !important;
+  background: #f1f5f9 !important; /* Light Grey Header */
   color: #1e293b !important;
   font-family: 'Outfit', sans-serif;
   font-size: 0.92rem;
   font-weight: 700;
   padding: 12px 16px;
-  border: 1px solid #e2e8f0 !important;
+  border: none !important;
+  border-top: 1px solid #e2e8f0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-left: none !important;
+  border-right: none !important;
   text-align: center;
   vertical-align: middle;
   letter-spacing: 0.3px;
@@ -407,7 +412,6 @@ body {
   transform: scale(1.15);
 }
 
-/* Active Filter Funnel State */
 .filter-funnel-btn.has-active-filter {
   background: #00cba0 !important;
   color: #ffffff !important;
@@ -421,22 +425,24 @@ body {
 
 /* Payment Grouped Amount Headers */
 .th-amount-group {
-  background: #f8fafc !important;
+  background: #e2e8f0 !important;
   color: #0f172a !important;
   font-weight: 800;
-  border: 1px solid #e2e8f0 !important;
+  border: none !important;
+  border-bottom: 1px solid #cbd5e1 !important;
 }
 
 .tr-sub-headers th {
-  background: #f8fafc !important;
+  background: #f1f5f9 !important;
   color: #475569 !important;
   font-size: 0.84rem;
   font-weight: 600;
   padding: 8px 12px;
-  border: 1px solid #e2e8f0 !important;
+  border: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
-/* Table Body Rows */
+/* Table Body Rows - NO VERTICAL LINES */
 .worklist-table-full tbody tr {
   background-color: #ffffff;
   border-bottom: 1px solid #f1f5f9;
@@ -447,7 +453,6 @@ body {
   background-color: var(--hover-pale-green) !important;
 }
 
-/* Selected Row State */
 .worklist-table-full tbody tr.row-selected {
   background-color: var(--selected-pale-green) !important;
 }
@@ -460,7 +465,10 @@ body {
   padding: 13px 16px;
   color: #334155;
   font-size: 0.9rem;
-  border: 1px solid #f1f5f9;
+  border: none !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  border-left: none !important;
+  border-right: none !important;
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -480,7 +488,7 @@ body {
   color: var(--status-inactive) !important;
 }
 
-/* Radio / Select Column */
+/* Radio / Select Column (Clean Circle) */
 .td-select {
   text-align: center;
 }
@@ -516,7 +524,6 @@ body {
   display: block;
 }
 
-/* Clickable Requisition Link */
 .req-link {
   color: #2563eb;
   font-weight: 600;
@@ -529,7 +536,6 @@ body {
   text-decoration: underline;
 }
 
-/* Numeric & Alignment Columns */
 .td-amount {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -540,7 +546,6 @@ body {
   text-align: center;
 }
 
-/* Empty View Banner */
 .empty-data-row {
   text-align: center;
   padding: 40px !important;
@@ -550,10 +555,10 @@ body {
 }
 
 /* ==========================================================================
-   5. SEGMENTED TOGGLE BUTTONS (ANCHORED AT BOTTOM LEFT OF THE PAGE)
+   5. SEGMENTED TOGGLE BUTTONS (NO TOP/BOTTOM/OUTER CORNERS, ONLY 1PX DIVIDER)
    ========================================================================== */
 .worklist-footer-bar {
-  margin-top: auto !important; /* Pushes the buttons to the bottom of the page */
+  margin-top: auto !important;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -563,15 +568,14 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Closely joined segmented button group with 1px divider */
+/* Removed top, bottom and corner borders from button box */
 .segmented-toggle-group {
   display: inline-flex;
   align-items: stretch;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 4px;
-  overflow: hidden;
-  background: #cbd5e1;
-  gap: 1px;
+  border: none !important; /* No top, bottom or outer border box */
+  border-radius: 0 !important; /* No corner radius */
+  background: transparent !important;
+  gap: 0 !important;
   flex-shrink: 0;
 }
 
@@ -583,7 +587,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.3px;
   cursor: pointer;
-  border: none;
+  border: none !important; /* No top/bottom border */
   background: #ffffff;
   color: #334155;
   transition: var(--transition);
@@ -592,6 +596,11 @@ body {
   justify-content: center;
   outline: none;
   white-space: nowrap;
+  border-right: 1px solid #cbd5e1 !important; /* Only line separating between them */
+}
+
+.segmented-btn:last-child {
+  border-right: none !important;
 }
 
 .segmented-btn:hover {
@@ -599,11 +608,8 @@ body {
   color: #0f172a;
 }
 
-/* 1px Vertical Separator Line */
 .segmented-divider {
-  width: 1px;
-  background: #cbd5e1;
-  height: 100%;
+  display: none !important; /* Cleanly handled via border-right */
 }
 
 /* Active Button State: Vibrant Green with White Text */
@@ -662,7 +668,6 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* ON State: Solid Green */
 .toggle-slide-switch input:checked + .toggle-slide-slider {
   background-color: #22c55e;
 }
@@ -699,7 +704,7 @@ body {
   background: rgba(15, 23, 42, 0.35);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
-  z-index: 20000 !important; /* On top of navbar and everything */
+  z-index: 20000 !important;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -747,7 +752,6 @@ body {
   flex-direction: column;
 }
 
-/* Header */
 .side-form-header {
   display: flex;
   align-items: center;
@@ -784,7 +788,6 @@ body {
   color: #dc2626;
 }
 
-/* Decorative Action Icons on Card */
 .side-form-top-icons {
   display: flex;
   align-items: center;
@@ -810,7 +813,6 @@ body {
   background: #f1f5f9;
 }
 
-/* Form Body */
 .side-form-body {
   padding: 8px 20px 20px 20px;
   display: flex;
@@ -867,7 +869,6 @@ body {
   text-decoration: underline;
 }
 
-/* PDF Upload / View Badge inside input */
 .form-input-wrap.with-action-badge .form-input-control {
   padding-right: 48px;
 }
@@ -911,7 +912,6 @@ body {
   line-height: 1;
 }
 
-/* Bottom Action Buttons (Checkmark & Save Disk) */
 .side-form-actions-bottom {
   display: flex;
   flex-direction: column;
@@ -939,13 +939,13 @@ body {
 }
 
 /* ==========================================================================
-   8. EXCEL-STYLE FILTER POPUP DROPDOWN
+   8. EXCEL-STYLE FILTER POPUP (SIMPLIFIED, CIRCULAR BUTTONS & SVG ICONS)
    ========================================================================== */
 .excel-filter-dropdown {
   position: absolute;
   top: 100px;
   left: 100px;
-  width: 280px;
+  width: 250px;
   max-width: calc(100vw - 24px);
   background: #ffffff;
   border: 1px solid #cbd5e1;
@@ -969,113 +969,29 @@ body {
   }
 }
 
-/* Filter Header */
-.excel-filter-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f8fafc;
-  padding: 10px 14px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.excel-filter-col-title {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 700;
-  font-size: 0.88rem;
-  color: #1e293b;
-}
-
-.excel-filter-close-btn {
-  background: transparent;
-  border: none;
-  font-size: 1.25rem;
-  line-height: 1;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 0 4px;
-  border-radius: 4px;
-  transition: var(--transition);
-}
-
-.excel-filter-close-btn:hover {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.08);
-}
-
-/* Sort Actions */
-.excel-filter-sort-group {
-  display: flex;
-  flex-direction: column;
-  padding: 6px 8px;
-}
-
-.excel-sort-btn,
-.excel-clear-col-btn {
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: 6px 8px;
-  font-size: 0.82rem;
-  color: #334155;
-  cursor: pointer;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background 0.15s ease;
-}
-
-.excel-sort-btn:hover,
-.excel-clear-col-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-}
-
-.excel-clear-col-btn {
-  color: #dc2626;
-  font-weight: 600;
-}
-
-.excel-clear-col-btn:hover {
-  background: rgba(220, 38, 38, 0.08);
-  color: #b91c1c;
-}
-
-.sort-icon {
-  font-weight: bold;
-  color: #00bfa5;
-}
-
-.excel-filter-divider {
-  height: 1px;
-  background: #e2e8f0;
-  margin: 0 8px;
-}
-
-/* Search Bar */
+/* Search Bar with Magnifying Glass Icon from icons pack */
 .excel-filter-search-wrap {
-  padding: 8px 12px;
+  padding: 10px 12px 6px 12px;
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.search-lens {
+.search-lens-img {
   position: absolute;
   left: 20px;
-  font-size: 0.75rem;
-  color: #94a3b8;
+  width: 18px;
+  height: 18px;
   pointer-events: none;
 }
 
 .excel-filter-search-input {
   width: 100%;
-  height: 32px;
-  padding: 4px 8px 4px 28px;
-  border: 1px solid #cbd5e1;
+  height: 34px;
+  padding: 4px 10px 4px 34px;
+  border: 1.5px solid #cbd5e1;
   border-radius: 6px;
-  font-size: 0.84rem;
+  font-size: 0.86rem;
   color: #1e293b;
   outline: none;
   transition: var(--transition);
@@ -1086,30 +1002,30 @@ body {
   box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.15);
 }
 
-/* Checkbox Options Box */
+/* Circular Checkbox/Radio Options Box */
 .excel-filter-options-box {
-  padding: 0 8px 8px 8px;
+  padding: 4px 10px 10px 10px;
   display: flex;
   flex-direction: column;
 }
 
 .excel-checkbox-scroll-list {
-  max-height: 150px;
+  max-height: 160px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   padding: 4px 0;
 }
 
 .excel-checkbox-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 5px 8px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.84rem;
+  font-size: 0.86rem;
   color: #334155;
   transition: background 0.15s ease;
   user-select: none;
@@ -1119,11 +1035,33 @@ body {
   background: #f1f5f9;
 }
 
+/* CIRCULAR SELECTION BUTTON (CIRCLE NOT SQUARE) */
 .excel-checkbox-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50% !important; /* Circular radio button style */
+  border: 2px solid #cbd5e1;
+  outline: none;
   cursor: pointer;
-  accent-color: #00bfa5;
-  width: 15px;
-  height: 15px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.excel-checkbox-item input[type="checkbox"]:hover {
+  border-color: var(--primary-green);
+}
+
+.excel-checkbox-item input[type="checkbox"]:checked {
+  border-color: #00cba0;
+  background: #00cba0;
+  box-shadow: inset 0 0 0 3.5px #ffffff; /* Crisp circular radio dot */
 }
 
 .excel-checkbox-item .chk-label {
@@ -1136,54 +1074,51 @@ body {
 .select-all-item {
   border-bottom: 1px solid #f1f5f9;
   margin-bottom: 4px;
+  padding-bottom: 6px;
 }
 
-/* Filter Footer Buttons */
+/* Filter Footer Action Buttons (Tick on Left Side Corner, Eraser on Right Side Corner) */
 .excel-filter-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 10px 12px;
+  justify-content: space-between; /* Tick on Left Corner, Eraser on Right Corner */
+  padding: 8px 14px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
 }
 
-.btn-excel-apply {
-  padding: 6px 14px;
-  background: #00cba0;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 700;
+.btn-filter-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-spring);
+  padding: 0;
 }
 
-.btn-excel-apply:hover {
-  background: #00a884;
+/* Cancel / Eraser Button */
+.btn-filter-cancel:hover {
+  border-color: #d62d20;
+  background: rgba(214, 45, 32, 0.08);
+  transform: scale(1.12);
+  box-shadow: 0 2px 8px rgba(214, 45, 32, 0.2);
 }
 
-.btn-excel-cancel {
-  padding: 6px 12px;
-  background: transparent;
-  color: #64748b;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.btn-excel-cancel:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+/* Apply / Tick Button */
+.btn-filter-apply:hover {
+  border-color: #008744;
+  background: rgba(0, 135, 68, 0.08);
+  transform: scale(1.12);
+  box-shadow: 0 2px 8px rgba(0, 135, 68, 0.2);
 }
 
 /* ==========================================================================
-   9. FLOATING TOOLTIPS FOR ICONS (ALWAYS ON TOP OF GREEN BAR)
+   9. FLOATING TOOLTIPS FOR ICONS
    ========================================================================== */
 [data-tooltip] {
   position: relative;
@@ -1208,7 +1143,7 @@ body {
   visibility: hidden;
   transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  z-index: 99999 !important; /* Floats fully visible above the green sub-header banner */
+  z-index: 99999 !important;
 }
 
 [data-tooltip]::before {
@@ -1263,10 +1198,8 @@ body {
 }
 
 /* ==========================================================================
-   11. COMPREHENSIVE RESPONSIVE DESIGN (All Screen Dimensions)
+   11. COMPREHENSIVE RESPONSIVE DESIGN
    ========================================================================== */
-
-/* Large Tablets & Small Laptops (992px to 1200px) */
 @media (max-width: 1200px) {
   .nav-container {
     padding: 0 18px;
@@ -1288,7 +1221,6 @@ body {
   }
 }
 
-/* Tablets (768px to 991px) */
 @media (max-width: 991px) {
   .navbar {
     min-height: 68px;
@@ -1333,7 +1265,6 @@ body {
   }
 }
 
-/* Mobile Devices & Small Tablets (481px to 767px) */
 @media (max-width: 767px) {
   .nav-container {
     padding: 0 14px;
@@ -1463,7 +1394,6 @@ body {
   }
 }
 
-/* Extra Small Phones (320px to 480px) */
 @media (max-width: 480px) {
   .nav-container {
     padding: 0 10px;
@@ -1504,7 +1434,7 @@ body {
   }
 
   .excel-filter-dropdown {
-    width: 260px;
+    width: 240px;
     left: 8px !important;
   }
 }

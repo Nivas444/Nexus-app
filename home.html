@@ -265,38 +265,17 @@
     </div>
   </div>
 
-  <!-- EXCEL-STYLE FILTER POPUP (Dynamic dropdown attached to column header) -->
+  <!-- EXCEL-STYLE FILTER POPUP (Simplified & Clean) -->
   <div class="excel-filter-dropdown" id="excelFilterDropdown" style="display: none;">
-    <!-- Filter Header -->
-    <div class="excel-filter-header">
-      <span class="excel-filter-col-title" id="filterColTitle">Filter Column</span>
-      <button type="button" class="excel-filter-close-btn" id="btnFilterClose">&times;</button>
-    </div>
-
-    <!-- Sort Quick Options -->
-    <div class="excel-filter-sort-group">
-      <button type="button" class="excel-sort-btn" id="btnSortAsc">
-        <span class="sort-icon">&uarr;</span> Sort Ascending (A &rarr; Z)
-      </button>
-      <button type="button" class="excel-sort-btn" id="btnSortDesc">
-        <span class="sort-icon">&darr;</span> Sort Descending (Z &rarr; A)
-      </button>
-      <button type="button" class="excel-clear-col-btn" id="btnClearColFilter">
-        Clear Filter From This Column
-      </button>
-    </div>
-
-    <div class="excel-filter-divider"></div>
-
-    <!-- Live Search Bar -->
+    <!-- Live Search Bar with Magnifying Glass Icon -->
     <div class="excel-filter-search-wrap">
-      <span class="search-lens">&#128269;</span>
-      <input type="text" class="excel-filter-search-input" id="filterSearchInput" placeholder="Search values...">
+      <img src="icons/Search.svg" alt="Search" class="search-lens-img">
+      <input type="text" class="excel-filter-search-input" id="filterSearchInput" placeholder="Search...">
     </div>
 
-    <!-- Checkbox Options List Container -->
+    <!-- Circular Checkbox Options List Container -->
     <div class="excel-filter-options-box">
-      <!-- Select All Checkbox -->
+      <!-- Select All Checkbox (Circular) -->
       <label class="excel-checkbox-item select-all-item">
         <input type="checkbox" id="chkFilterSelectAll" checked>
         <span class="chk-label"><strong>(Select All)</strong></span>
@@ -308,10 +287,16 @@
       </div>
     </div>
 
-    <!-- Footer Action Buttons -->
+    <!-- Footer Action Buttons (Tick on Left Corner, Eraser on Right Corner) -->
     <div class="excel-filter-footer">
-      <button type="button" class="btn-excel-apply" id="btnApplyFilter">Apply Filter</button>
-      <button type="button" class="btn-excel-cancel" id="btnCancelFilter">Cancel</button>
+      <!-- Apply Button with Tick Icon (Left Side Corner) -->
+      <button type="button" class="btn-filter-icon btn-filter-apply" id="btnApplyFilter" title="Apply Filter" aria-label="Apply">
+        <img src="icons/Approve.svg" alt="Apply" width="22" height="22">
+      </button>
+      <!-- Cancel Button with Eraser Icon (Right Side Corner) -->
+      <button type="button" class="btn-filter-icon btn-filter-cancel" id="btnCancelFilter" title="Cancel" aria-label="Cancel">
+        <img src="icons/Erase.svg" alt="Cancel" width="22" height="22">
+      </button>
     </div>
   </div>
 

@@ -101,6 +101,101 @@ const masterExpensesData = [
   }
 ];
 
+// ==========================================================================
+// INDUS TOWERS DATASET (Sub-Page from Customer Table Indus Link)
+// ==========================================================================
+let currentIndusSubpage = 'site'; // 'site', 'products', 'infra', 'projects'
+
+const indusSiteData = [
+  {
+    id: "indus-1",
+    circle: "KTN",
+    siteId: "230510678",
+    whId: "KTN",
+    siteName: "R/RL-234567",
+    district: "R/RL-234567",
+    town: "",
+    latitude: "SGST",
+    longitude: "B2B",
+    transportZone: "",
+    status: "Active"
+  },
+  {
+    id: "indus-2",
+    circle: "KK",
+    siteId: "230510678",
+    whId: "KK",
+    siteName: "R/RL-234567",
+    district: "R/RL-234567",
+    town: "",
+    latitude: "IGST",
+    longitude: "B2C",
+    transportZone: "",
+    status: "In - Active"
+  },
+  {
+    id: "indus-3",
+    circle: "AP",
+    siteId: "230510678",
+    whId: "AP",
+    siteName: "R/RL-234567",
+    district: "R/RL-234567",
+    town: "",
+    latitude: "NA",
+    longitude: "Cash",
+    transportZone: "",
+    status: "Active"
+  }
+];
+
+const indusProductsData = [
+  {
+    id: "indus-prod-1",
+    circle: "KTN",
+    siteId: "230510678",
+    whId: "KTN",
+    siteName: "Tower Structure Set A",
+    district: "Chennai North",
+    town: "Ambattur",
+    latitude: "13.0827° N",
+    longitude: "80.2707° E",
+    transportZone: "Zone 1",
+    status: "Active"
+  }
+];
+
+const indusInfraData = [
+  {
+    id: "indus-infra-1",
+    circle: "KTN",
+    siteId: "230510678",
+    whId: "KTN",
+    siteName: "Ground Base Tower 40M",
+    district: "Coimbatore",
+    town: "Peelamedu",
+    latitude: "11.0168° N",
+    longitude: "76.9558° E",
+    transportZone: "Zone 2",
+    status: "Active"
+  }
+];
+
+const indusProjectsData = [
+  {
+    id: "indus-proj-1",
+    circle: "AP",
+    siteId: "230510678",
+    whId: "AP",
+    siteName: "5G Deployment Phase II",
+    district: "Visakhapatnam",
+    town: "Gajuwaka",
+    latitude: "17.6868° N",
+    longitude: "83.2185° E",
+    transportZone: "Zone 3",
+    status: "Active"
+  }
+];
+
 // Worklist -> PO Dataset
 const poData = [
   {
@@ -202,6 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       currentMasterSubpage = 'customer';
     }
+  } else if (moduleParam === 'indus_towers') {
+    currentModule = 'indus_towers';
+    if (subpageParam) {
+      currentIndusSubpage = subpageParam;
+    } else {
+      currentIndusSubpage = 'site';
+    }
   } else if (moduleParam) {
     currentModule = moduleParam;
     if (viewParam === 'payment' || viewParam === 'po') {
@@ -249,6 +351,7 @@ function switchModule(moduleName) {
 
   const moduleTitles = {
     master: "Master (Company)",
+    indus_towers: "Indus Towers",
     worklist: "Work List",
     projects: "Projects",
     accounts: "Accounts",
@@ -266,6 +369,9 @@ function updateURL() {
 
   if (currentModule === 'master') {
     url.searchParams.set('subpage', currentMasterSubpage);
+    url.searchParams.delete('view');
+  } else if (currentModule === 'indus_towers') {
+    url.searchParams.set('subpage', currentIndusSubpage);
     url.searchParams.delete('view');
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
@@ -297,6 +403,12 @@ function renderApp() {
     renderMasterToolbar();
     renderMasterTableHead();
     renderMasterFooter();
+  } else if (currentModule === 'indus_towers') {
+    if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">Indus Towers</span>`;
+    loadIndusDataset();
+    renderIndusToolbar();
+    renderIndusTableHead();
+    renderIndusFooter();
   } else if (currentModule === 'worklist') {
     if (bannerTitle) bannerTitle.textContent = "Work List";
     loadWorklistDataset();
@@ -311,6 +423,157 @@ function renderApp() {
 
   applyFiltersAndRender();
   rebindFilterButtons();
+}
+
+// ==========================================================================
+// INDUS TOWERS MODULE RENDERERS
+// ==========================================================================
+function openIndusTowersPage() {
+  currentModule = 'indus_towers';
+  currentIndusSubpage = 'site';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to Indus Towers Details');
+}
+
+function loadIndusDataset() {
+  if (currentIndusSubpage === 'site') {
+    currentDataset = [...indusSiteData];
+  } else if (currentIndusSubpage === 'products') {
+    currentDataset = [...indusProductsData];
+  } else if (currentIndusSubpage === 'infra') {
+    currentDataset = [...indusInfraData];
+  } else if (currentIndusSubpage === 'projects') {
+    currentDataset = [...indusProjectsData];
+  }
+}
+
+function renderIndusToolbar() {
+  const toolbar = document.getElementById('worklistToolbar');
+  if (!toolbar) return;
+
+  // Indus Towers Toolbar: CSV + Orange Document Upload + Blue Plus (+) on Right
+  toolbar.innerHTML = `
+    <div class="toolbar-left"></div>
+    <div class="toolbar-right">
+      <!-- Green CSV Download Icon -->
+      <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="Export CSV" aria-label="Export CSV">
+        <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
+      </button>
+      <!-- Orange Document Upload Icon -->
+      <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Document Upload" aria-label="Document Upload">
+        <img src="icons/Document Upload.svg" alt="Document Upload" class="toolbar-icon-img" width="30" height="30">
+      </button>
+      <!-- Blue Add (+) Button -->
+      <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Site" aria-label="Add Site">
+        <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+      </button>
+    </div>
+  `;
+
+  document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+    openSideForm();
+  });
+
+  document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
+    exportToCsv();
+  });
+
+  document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
+    showToast('Document Upload initiated');
+  });
+}
+
+function renderIndusTableHead() {
+  const thead = document.getElementById('worklistTableHead');
+  if (!thead) return;
+
+  thead.innerHTML = `
+    <tr class="master-view-header">
+      <th>
+        <div class="th-content-wrap">
+          <span>Circle</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['circle'] ? 'has-active-filter' : ''}" data-filter-col="circle" title="Filter Circle">&#9660;</button>
+        </div>
+      </th>
+      <th>
+        <div class="th-content-wrap">
+          <span>Site ID</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+        </div>
+      </th>
+      <th>WH ID</th>
+      <th>
+        <div class="th-content-wrap">
+          <span>Site Name</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+        </div>
+      </th>
+      <th>
+        <div class="th-content-wrap">
+          <span>District</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['district'] ? 'has-active-filter' : ''}" data-filter-col="district" title="Filter District">&#9660;</button>
+        </div>
+      </th>
+      <th>
+        <div class="th-content-wrap">
+          <span>Town</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['town'] ? 'has-active-filter' : ''}" data-filter-col="town" title="Filter Town">&#9660;</button>
+        </div>
+      </th>
+      <th>Lattitude</th>
+      <th>Longtitude</th>
+      <th>
+        <div class="th-content-wrap">
+          <span>Transport Zone</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportZone'] ? 'has-active-filter' : ''}" data-filter-col="transportZone" title="Filter Transport Zone">&#9660;</button>
+        </div>
+      </th>
+      <th>
+        <div class="th-content-wrap">
+          <span>Status</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+        </div>
+      </th>
+    </tr>
+  `;
+}
+
+function renderIndusFooter() {
+  const footer = document.getElementById('worklistFooterBar');
+  if (!footer) return;
+
+  const subpages = [
+    { key: 'site', label: 'Site' },
+    { key: 'products', label: 'Products' },
+    { key: 'infra', label: 'Infra' },
+    { key: 'projects', label: 'Projects' }
+  ];
+
+  footer.innerHTML = `
+    <div class="segmented-toggle-group master-segmented-group indus-segmented-group">
+      ${subpages.map((sp, idx) => `
+        <button type="button" class="segmented-btn ${currentIndusSubpage === sp.key ? 'active' : ''}" data-indus-subpage="${sp.key}">
+          ${sp.label}
+        </button>
+        ${idx < subpages.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+      `).join('')}
+    </div>
+  `;
+
+  footer.querySelectorAll('.segmented-btn[data-indus-subpage]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const spKey = btn.getAttribute('data-indus-subpage');
+      if (currentIndusSubpage !== spKey) {
+        currentIndusSubpage = spKey;
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast(`Switched to Indus Towers &bull; ${btn.textContent.trim()}`);
+      }
+    });
+  });
 }
 
 // ==========================================================================
@@ -703,7 +966,7 @@ function applyFiltersAndRender() {
   if (!tbody) return;
 
   if (filteredDataset.length === 0) {
-    const colSpan = currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10);
+    const colSpan = currentModule === 'indus_towers' ? 10 : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -712,14 +975,39 @@ function applyFiltersAndRender() {
     return;
   }
 
-  if (currentModule === 'master') {
+  if (currentModule === 'indus_towers') {
+    // Render Indus Towers Rows (Matching Mockup)
+    tbody.innerHTML = filteredDataset.map(row => {
+      const isInactive = (row.status || '').toLowerCase().includes('in');
+      return `
+        <tr data-row-id="${row.id}">
+          <td>${row.circle}</td>
+          <td>
+            <a href="#" class="req-link site-id-link td-link-blue" onclick="showToast('Site ID: ${row.siteId}'); return false;">${row.siteId}</a>
+          </td>
+          <td>${row.whId}</td>
+          <td>${row.siteName}</td>
+          <td>${row.district}</td>
+          <td>${row.town || ''}</td>
+          <td>${row.latitude}</td>
+          <td>${row.longitude}</td>
+          <td>${row.transportZone || ''}</td>
+          <td class="td-center">
+            <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } else if (currentModule === 'master') {
     if (currentMasterSubpage === 'customer') {
-      // Render Customer Rows with Clean Text Status Badge (Matching Mockup)
+      // Render Customer Rows with Clean Text Status Badge & Indus Hyperlink
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = row.status.toLowerCase().includes('in');
         return `
           <tr data-row-id="${row.id}">
-            <td>${row.businessType}</td>
+            <td>
+              ${row.businessType === 'Indus' ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Indus Towers details">${row.businessType}</a>` : row.businessType}
+            </td>
             <td class="td-center">${row.customerId}</td>
             <td>${row.customerName}</td>
             <td>${row.gstNumber}</td>
@@ -828,12 +1116,123 @@ function initSideFormEvents() {
   const lblStatus = document.getElementById('lblFormStatus');
   const btnSubmit = document.getElementById('btnSubmitCustomer');
   const btnSave = document.getElementById('btnSaveCustomer');
+  const btnMessage = document.getElementById('btnCardMessage');
+  const contactPanel = document.getElementById('contactDetailsSidePanel');
+  const btnLocation = document.getElementById('btnCardLocation');
+  const locationPanel = document.getElementById('locationDetailsSidePanel');
+  const btnCloseInfra = document.getElementById('btnCloseInfraForm');
+  const btnInfraMessage = document.getElementById('btnInfraCardMessage');
 
   if (btnClose) btnClose.addEventListener('click', closeSideForm);
+  if (btnCloseInfra) btnCloseInfra.addEventListener('click', closeSideForm);
 
   if (overlay) {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeSideForm();
+    });
+  }
+
+  // Toggle Contact & Mail Side Message Popup Next to Add Customer Card
+  if (btnMessage && contactPanel) {
+    btnMessage.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (locationPanel) locationPanel.style.display = 'none';
+      const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
+      contactPanel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        showToast('Contact & Communication popup opened');
+      } else {
+        showToast('Contact popup closed');
+      }
+    });
+  }
+
+  // Toggle Contact & Mail Side Message Popup Next to Add Infra Card
+  if (btnInfraMessage && contactPanel) {
+    btnInfraMessage.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (locationPanel) locationPanel.style.display = 'none';
+      const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
+      contactPanel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        showToast('Contact & Communication popup opened');
+      } else {
+        showToast('Contact popup closed');
+      }
+    });
+  }
+
+  // Toggle Location Side Message Popup Next to Add Customer Card
+  if (btnLocation && locationPanel) {
+    btnLocation.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (contactPanel) contactPanel.style.display = 'none';
+      const isHidden = locationPanel.style.display === 'none' || locationPanel.style.display === '';
+      locationPanel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        showToast('Office Location details popup opened');
+      } else {
+        showToast('Location popup closed');
+      }
+    });
+  }
+
+  // Close Contact / Location Message Popups when user clicks outside of them
+  document.addEventListener('click', (e) => {
+    if (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') {
+      const isInsideBtn = (btnMessage && btnMessage.contains(e.target)) || (btnInfraMessage && btnInfraMessage.contains(e.target));
+      if (!contactPanel.contains(e.target) && !isInsideBtn) {
+        contactPanel.style.display = 'none';
+      }
+    }
+    if (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '') {
+      if (!locationPanel.contains(e.target) && !btnLocation.contains(e.target)) {
+        locationPanel.style.display = 'none';
+      }
+    }
+  });
+
+  // Contact Toolbar: CSV Upload & Plus Add Row
+  const btnCsvUpload = document.getElementById('btnContactCsvUpload');
+  const btnAddRow = document.getElementById('btnContactAddRow');
+  const tblContactBody = document.querySelector('#tblContactPopup tbody');
+
+  if (btnCsvUpload) {
+    btnCsvUpload.addEventListener('click', () => {
+      showToast('Contact CSV import ready');
+    });
+  }
+
+  if (btnAddRow && tblContactBody) {
+    btnAddRow.addEventListener('click', () => {
+      const newTr = document.createElement('tr');
+      newTr.innerHTML = `
+        <td class="td-link-blue" contenteditable="true">New Contact</td>
+        <td contenteditable="true">Staff</td>
+        <td contenteditable="true">+91 90000 00000</td>
+        <td contenteditable="true">new@nexus.org</td>
+        <td><span class="status-badge status-active">Active</span></td>
+      `;
+      tblContactBody.appendChild(newTr);
+      showToast('New contact row added to table');
+    });
+  }
+
+  // Location Toolbar: Plus Add Row
+  const btnLocationAddRow = document.getElementById('btnLocationAddRow');
+  const tblLocationBody = document.querySelector('#tblLocationPopup tbody');
+
+  if (btnLocationAddRow && tblLocationBody) {
+    btnLocationAddRow.addEventListener('click', () => {
+      const newTr = document.createElement('tr');
+      newTr.innerHTML = `
+        <td class="td-link-blue" contenteditable="true">New Office Location</td>
+        <td contenteditable="true">13.0000° N</td>
+        <td contenteditable="true">80.0000° E</td>
+        <td><span class="status-badge status-active">Active</span></td>
+      `;
+      tblLocationBody.appendChild(newTr);
+      showToast('New location row added to table');
     });
   }
 
@@ -850,8 +1249,61 @@ function initSideFormEvents() {
     });
   }
 
+  // Real Slide Toggle Switch Listener inside Add Infra Form
+  const infraStatusToggle = document.getElementById('inpInfraStatusToggle');
+  const lblInfraStatus = document.getElementById('lblInfraFormStatus');
+  if (infraStatusToggle && lblInfraStatus) {
+    infraStatusToggle.addEventListener('change', () => {
+      if (infraStatusToggle.checked) {
+        lblInfraStatus.textContent = "Active";
+        lblInfraStatus.classList.remove('status-off');
+      } else {
+        lblInfraStatus.textContent = "In - Active";
+        lblInfraStatus.classList.add('status-off');
+      }
+    });
+  }
+
   // Submit / Save Actions
   function handleFormSave() {
+    if (currentModule === 'indus_towers') {
+      const circle = document.getElementById('inpInfraCircle').value;
+      const siteId = document.getElementById('inpInfraSiteId').value || `23051068${currentDataset.length + 1}`;
+      const whId = document.getElementById('inpInfraWhId').value;
+      const siteName = document.getElementById('inpInfraSiteName').value || "New Site";
+      const district = document.getElementById('inpInfraDistrict').value;
+      const town = document.getElementById('inpInfraTown').value || "";
+      const latitude = document.getElementById('inpInfraLatitude').value || "13.0000° N";
+      const longitude = document.getElementById('inpInfraLongitude').value || "80.0000° E";
+      const transportZone = document.getElementById('inpInfraTransportZone').value || "";
+      const status = (infraStatusToggle && infraStatusToggle.checked) ? "Active" : "In - Active";
+
+      const newRecord = {
+        id: `indus-${Date.now()}`,
+        circle,
+        siteId,
+        whId,
+        siteName,
+        district,
+        town,
+        latitude,
+        longitude,
+        transportZone,
+        status
+      };
+
+      if (currentIndusSubpage === 'site') indusSiteData.push(newRecord);
+      else if (currentIndusSubpage === 'products') indusProductsData.push(newRecord);
+      else if (currentIndusSubpage === 'infra') indusInfraData.push(newRecord);
+      else if (currentIndusSubpage === 'projects') indusProjectsData.push(newRecord);
+
+      loadIndusDataset();
+      applyFiltersAndRender();
+      closeSideForm();
+      showToast(`Site ${siteId} successfully saved & added to table!`);
+      return;
+    }
+
     const businessType = document.getElementById('inpBusinessType').value;
     const customerId = document.getElementById('inpCustomerId').value || `23051068${masterCustomerData.length + 1}`;
     const customerName = document.getElementById('inpCustomerName').value || "";
@@ -887,12 +1339,29 @@ function initSideFormEvents() {
 
 function openSideForm() {
   const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (!overlay) return;
+
+  const addCustomerCard = document.getElementById('addCustomerCard');
+  const addInfraCard = document.getElementById('addInfraCard');
+
+  if (currentModule === 'indus_towers') {
+    if (addCustomerCard) addCustomerCard.style.display = 'none';
+    if (addInfraCard) addInfraCard.style.display = 'block';
+  } else {
+    if (addCustomerCard) addCustomerCard.style.display = 'block';
+    if (addInfraCard) addInfraCard.style.display = 'none';
+  }
+
+  overlay.style.display = 'flex';
 }
 
 function closeSideForm() {
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
+  const contactPanel = document.getElementById('contactDetailsSidePanel');
+  if (contactPanel) contactPanel.style.display = 'none';
+  const locationPanel = document.getElementById('locationDetailsSidePanel');
+  if (locationPanel) locationPanel.style.display = 'none';
 }
 
 // ==========================================================================
@@ -1030,6 +1499,15 @@ function getColumnDisplayName(colKey) {
     gstType: "GST Type",
     invoiceType: "Invoice Type",
     status: "Status",
+    circle: "Circle",
+    siteId: "Site ID",
+    whId: "WH ID",
+    siteName: "Site Name",
+    district: "District",
+    town: "Town",
+    latitude: "Lattitude",
+    longitude: "Longtitude",
+    transportZone: "Transport Zone",
     employeeId: "Employee ID",
     employeeName: "Employee Name",
     designation: "Designation",

@@ -110,144 +110,374 @@
 
   </main>
 
-  <!-- ADD CUSTOMER / ADD RECORD SIDE POPUP CARD (Small message-like on left side) -->
+  <!-- ADD CUSTOMER / ADD RECORD SIDE POPUP MODAL (Centered with Expandable Side Bar) -->
   <div class="side-form-overlay" id="sideFormOverlay" style="display: none;">
     <div class="side-form-container">
       
-      <!-- Main Form Card -->
-      <div class="side-form-card" id="addCustomerCard">
-        <!-- Header -->
-        <div class="side-form-header">
-          <div class="side-form-title-badge">Add Customer</div>
-          <button type="button" class="side-form-close-btn" id="btnCloseSideForm" aria-label="Close form">&times;</button>
+      <div class="side-form-cards-row">
+        <!-- 1. Main Add Customer Form Card -->
+        <div class="side-form-card" id="addCustomerCard">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Customer</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseSideForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right of Card (Matching Mockup) -->
+          <div class="side-form-top-icons">
+            <!-- Mail with Phone Handset (Toggles Contact Bar Next to Tab) -->
+            <button type="button" class="card-action-icon-btn" id="btnCardMessage" title="Toggle Contact & Mail Details">
+              <img src="icons/Mail_Phone.svg" alt="Mail and Phone" width="26" height="26">
+            </button>
+            <!-- Location Pin -->
+            <button type="button" class="card-action-icon-btn" id="btnCardLocation" title="Location Pin">
+              <img src="icons/Location.svg" alt="Location" width="18" height="18">
+            </button>
+            <!-- Edit Pencil -->
+            <button type="button" class="card-action-icon-btn" id="btnCardEdit" title="Edit Customer Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Rows Grid -->
+          <form class="side-form-body" id="frmAddCustomer" onsubmit="event.preventDefault();">
+            
+            <!-- 1. Business Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpBusinessType">Business Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpBusinessType">
+                  <option value="Indus / Infra / Supply / Audit" selected>Indus / Infra / Supply / Audit</option>
+                  <option value="Indus">Indus</option>
+                  <option value="Infra">Infra</option>
+                  <option value="Supply">Supply</option>
+                  <option value="Audit">Audit</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Customer ID -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustomerId">Customer ID</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustomerId" value="230510679" placeholder="Enter Customer ID">
+              </div>
+            </div>
+
+            <!-- 3. Customer Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustomerName">Customer Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustomerName" placeholder="Enter Customer Name">
+              </div>
+            </div>
+
+            <!-- 4. GST Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGstType">GST Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpGstType">
+                  <option value="SGST">SGST</option>
+                  <option value="IGST">IGST</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. GST Number with PDF badge -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGstNumber">GST Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control form-input-highlight" id="inpGstNumber" value="33ASMPM8643F">
+                <span class="input-pdf-badge" title="Upload/View PDF">
+                  <span class="pdf-up-arrow">&uarr;</span>
+                  <span class="pdf-tag">PDF</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 6. PAN Number with PDF badge -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpPanNumber">PAN Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control form-input-highlight" id="inpPanNumber" value="33ASMPM8643F">
+                <span class="input-pdf-badge" title="Upload/View PDF">
+                  <span class="pdf-up-arrow">&uarr;</span>
+                  <span class="pdf-tag">PDF</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 7. Invoice Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpInvoiceType">Invoice Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpInvoiceType">
+                  <option value="B2B">B2B</option>
+                  <option value="B2C">B2C</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 8. Address -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddress">Address</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddress" placeholder="Enter Company Address">
+              </div>
+            </div>
+
+            <!-- 9. Status (Real Slide Toggle Switch: Green ON, Red OFF) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+                <span class="toggle-status-label" id="lblFormStatus">Active</span>
+              </div>
+            </div>
+
+          </form>
         </div>
 
-        <!-- Decorative Action Icons on Top Right of Card -->
-        <div class="side-form-top-icons">
-          <!-- Mail with Phone -->
-          <button type="button" class="card-action-icon-btn" title="Contact & Mail">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-              <polyline points="22,6 12,13 2,6"></polyline>
-            </svg>
-          </button>
-          <!-- Location Pin -->
-          <button type="button" class="card-action-icon-btn" title="Location Pin">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-          </button>
-          <!-- Edit Pencil -->
-          <button type="button" class="card-action-icon-btn" title="Edit Info">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-          </button>
+        <!-- 1B. Indus / Infra Project Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addInfraCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Customer</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseInfraForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Mail+Phone & Edit) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnInfraCardMessage" title="Toggle Contact & Communication">
+              <img src="icons/Mail_Phone.svg" alt="Mail and Phone" width="26" height="26">
+            </button>
+            <button type="button" class="card-action-icon-btn" id="btnInfraCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddInfra" onsubmit="event.preventDefault();">
+            <!-- 1. Circle -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpInfraCircle">Circle</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpInfraCircle">
+                  <option value="KTN" selected>KTN</option>
+                  <option value="KK">KK</option>
+                  <option value="AP">AP</option>
+                  <option value="TN">TN</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Site ID -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpInfraSiteId">Site ID</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraSiteId" value="230510679" placeholder="Enter Site ID">
+              </div>
+            </div>
+
+            <!-- 3. WH ID (Blue Label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpInfraWhId">WH ID</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpInfraWhId">
+                  <option value="KTN" selected>KTN</option>
+                  <option value="KK">KK</option>
+                  <option value="AP">AP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Site Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpInfraSiteName">Site Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraSiteName" placeholder="Enter Site Name">
+              </div>
+            </div>
+
+            <!-- 5. District (Blue Label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpInfraDistrict">District</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpInfraDistrict">
+                  <option value="R/RL-234567" selected>R/RL-234567</option>
+                  <option value="Chennai North">Chennai North</option>
+                  <option value="Coimbatore">Coimbatore</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. Town (Blue Label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpInfraTown">Town</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraTown" placeholder="Enter Town">
+              </div>
+            </div>
+
+            <!-- 7. Site Address (Blue Label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpInfraSiteAddress">Site Address</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraSiteAddress" placeholder="Enter Site Address">
+              </div>
+            </div>
+
+            <!-- 8. Lattitude (Blue Label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpInfraLatitude">Lattitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraLatitude" placeholder="Enter Lattitude">
+              </div>
+            </div>
+
+            <!-- 9. Longtitude (Blue Label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpInfraLongitude">Longtitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraLongitude" placeholder="Enter Longtitude">
+              </div>
+            </div>
+
+            <!-- 10. Transport Zone (Blue Label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpInfraTransportZone">Transport Zone</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraTransportZone" placeholder="Enter Transport Zone">
+              </div>
+            </div>
+
+            <!-- 11. Status (Slide Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpInfraStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+                <span class="toggle-status-label" id="lblInfraFormStatus">Active</span>
+              </div>
+            </div>
+
+          </form>
         </div>
 
-        <!-- Form Rows Grid -->
-        <form class="side-form-body" id="frmAddCustomer" onsubmit="event.preventDefault();">
-          
-          <!-- 1. Business Type -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpBusinessType">Business Type</label>
-            <div class="form-input-wrap">
-              <select class="form-select-control" id="inpBusinessType">
-                <option value="Indus">Indus</option>
-                <option value="Infra">Infra</option>
-                <option value="Supply">Supply</option>
-                <option value="Audit">Audit</option>
-              </select>
+        <!-- 2. Contact & Communication Message Popup (Table View with Filters & Top Plus on Right) -->
+        <div class="side-form-card side-contact-popup" id="contactDetailsSidePanel" style="display: none;">
+          <!-- Top Toolbar: Plus Icon on Right Side (No Cross Button) -->
+          <div class="contact-popup-toolbar">
+            <div class="contact-toolbar-right">
+              <!-- Plus Icon Button -->
+              <button type="button" class="btn-contact-tool" id="btnContactAddRow" title="Add Contact">
+                <img src="icons/Add.svg" alt="Add Contact" width="26" height="26">
+              </button>
             </div>
           </div>
 
-          <!-- 2. Customer ID -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpCustomerId">Customer ID</label>
-            <div class="form-input-wrap">
-              <input type="text" class="form-input-control" id="inpCustomerId" value="230510679" placeholder="Enter Customer ID">
+          <!-- Contact Table with Filter Funnels -->
+          <div class="contact-table-wrap">
+            <table class="contact-custom-table" id="tblContactPopup">
+              <thead>
+                <tr>
+                  <th class="col-contact-name">
+                    <span>Name</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="name" title="Filter Name">▼</button>
+                  </th>
+                  <th class="col-contact-desig">
+                    <span>Designation</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="designation" title="Filter Designation">▼</button>
+                  </th>
+                  <th class="col-contact-phone">
+                    <span>Contact</span>
+                  </th>
+                  <th class="col-contact-email">
+                    <span>Email</span>
+                  </th>
+                  <th class="col-contact-status">
+                    <span>Status</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="status" title="Filter Status">▼</button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-link-blue">Indus</td>
+                  <td>Manager</td>
+                  <td>R/RL-234567</td>
+                  <td>SGST</td>
+                  <td><span class="status-badge status-active">Active</span></td>
+                </tr>
+                <tr>
+                  <td class="td-link-blue">Supply</td>
+                  <td>Lead Officer</td>
+                  <td>R/RL-234568</td>
+                  <td>IGST</td>
+                  <td><span class="status-badge status-inactive">In - Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. Location Details Message Popup (Table View with Filters & Top Plus Icon on Right) -->
+        <div class="side-form-card side-contact-popup" id="locationDetailsSidePanel" style="display: none;">
+          <!-- Top Toolbar: Plus Icon Alone on Right Side (No Cross Button) -->
+          <div class="contact-popup-toolbar">
+            <div class="contact-toolbar-right">
+              <!-- Plus Icon Button Alone -->
+              <button type="button" class="btn-contact-tool" id="btnLocationAddRow" title="Add Office Location">
+                <img src="icons/Add.svg" alt="Add Location" width="26" height="26">
+              </button>
             </div>
           </div>
 
-          <!-- 3. Customer Name -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpCustomerName">Customer Name</label>
-            <div class="form-input-wrap">
-              <input type="text" class="form-input-control" id="inpCustomerName" placeholder="Enter Customer Name">
-            </div>
+          <!-- Location Table with Filter Funnels -->
+          <div class="contact-table-wrap">
+            <table class="contact-custom-table" id="tblLocationPopup">
+              <thead>
+                <tr>
+                  <th class="col-loc-name">
+                    <span>Office Name</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="officeName" title="Filter Office Name">▼</button>
+                  </th>
+                  <th class="col-loc-lat">
+                    <span>Latitude</span>
+                  </th>
+                  <th class="col-loc-lng">
+                    <span>Longitude</span>
+                  </th>
+                  <th class="col-loc-status">
+                    <span>Status</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="locStatus" title="Filter Status">▼</button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="td-link-blue">Headquarters - Chennai</td>
+                  <td>13.0827° N</td>
+                  <td>80.2707° E</td>
+                  <td><span class="status-badge status-active">Active</span></td>
+                </tr>
+                <tr>
+                  <td class="td-link-blue">Branch - Bengaluru</td>
+                  <td>12.9716° N</td>
+                  <td>77.5946° E</td>
+                  <td><span class="status-badge status-active">Active</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-
-          <!-- 4. GST Type -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpGstType">GST Type</label>
-            <div class="form-input-wrap">
-              <select class="form-select-control" id="inpGstType">
-                <option value="SGST">SGST</option>
-                <option value="IGST">IGST</option>
-                <option value="NA">NA</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- 5. GST Number with PDF badge -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpGstNumber">GST Number</label>
-            <div class="form-input-wrap with-action-badge">
-              <input type="text" class="form-input-control form-input-highlight" id="inpGstNumber" value="33ASMPM8643F">
-              <span class="input-pdf-badge" title="Upload/View PDF">
-                <span class="pdf-up-arrow">&uarr;</span>
-                <span class="pdf-tag">PDF</span>
-              </span>
-            </div>
-          </div>
-
-          <!-- 6. PAN Number with PDF badge -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpPanNumber">PAN Number</label>
-            <div class="form-input-wrap with-action-badge">
-              <input type="text" class="form-input-control form-input-highlight" id="inpPanNumber" value="33ASMPM8643F">
-              <span class="input-pdf-badge" title="Upload/View PDF">
-                <span class="pdf-up-arrow">&uarr;</span>
-                <span class="pdf-tag">PDF</span>
-              </span>
-            </div>
-          </div>
-
-          <!-- 7. Invoice Type -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpInvoiceType">Invoice Type</label>
-            <div class="form-input-wrap">
-              <select class="form-select-control" id="inpInvoiceType">
-                <option value="B2B">B2B</option>
-                <option value="B2C">B2C</option>
-                <option value="Cash">Cash</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- 8. Address -->
-          <div class="form-row-group">
-            <label class="form-label" for="inpAddress">Address</label>
-            <div class="form-input-wrap">
-              <input type="text" class="form-input-control" id="inpAddress" placeholder="Enter Company Address">
-            </div>
-          </div>
-
-          <!-- 9. Status (Real Slide Toggle Switch: Green ON, Red OFF) -->
-          <div class="form-row-group">
-            <label class="form-label">Status</label>
-            <div class="form-input-wrap slider-wrap">
-              <label class="toggle-slide-switch">
-                <input type="checkbox" id="inpStatusToggle" checked>
-                <span class="toggle-slide-slider"></span>
-              </label>
-              <span class="toggle-status-label" id="lblFormStatus">Active</span>
-            </div>
-          </div>
-
-        </form>
+        </div>
       </div>
 
       <!-- Action Buttons Below Card (Checkmark and Save Disk) -->

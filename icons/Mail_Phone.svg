@@ -1,0 +1,14 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <defs>
+    <style>
+      .mp-blue { fill: none; stroke: #3b82f6; stroke-width: 14px; stroke-linecap: round; stroke-linejoin: round; }
+      .mp-mail-bg { fill: #eff6ff; stroke: #3b82f6; stroke-width: 12px; stroke-linejoin: round; }
+      .mp-phone { fill: #3b82f6; }
+    </style>
+  </defs>
+  <!-- Handset behind envelope -->
+  <path class="mp-phone" d="M78.5,85.2c-5.8,11.2-12.8,32.4-2.1,64.7,11.7,35.4,38.9,64.2,73.1,78.2,31.2,12.8,53.2,7.2,65.1,1.8,6.8-3.1,11.3-9.8,11.8-17.3l2.2-32.6a18.2,18.2,0,0,0-12.7-18.6l-36.2-10.4a18.2,18.2,0,0,0-18.9,5.7l-9.8,11.7c-21.8-11.4-38.6-28.2-50.1-50l11.7-9.8a18.2,18.2,0,0,0,5.7-18.9L108,66.9A18.2,18.2,0,0,0,89.4,54.2L56.8,56.4C49.3,56.9,42.6,61.4,39.5,68.2Z"/>
+  <!-- Mail Envelope -->
+  <rect class="mp-mail-bg" x="110" y="80" width="145" height="95" rx="14"/>
+  <path class="mp-blue" d="M115,88 L182.5,138 L250,88"/>
+</svg>

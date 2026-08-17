@@ -1,0 +1,15 @@
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <defs>
+    <style>
+      .doc-orange-bg { fill: #ffa700; }
+      .doc-orange-dark { fill: #d98200; }
+      .doc-white { fill: #ffffff; }
+    </style>
+  </defs>
+  <!-- Document Shape with Rounded Corners -->
+  <path class="doc-orange-bg" d="M60,36 A14,14 0 0,1 74,22 L196,22 L244,74 L244,264 A14,14 0 0,1 230,278 L74,278 A14,14 0 0,1 60,264 Z"/>
+  <!-- Folded Corner -->
+  <path class="doc-orange-dark" d="M196,22 L244,74 L208,74 A12,12 0 0,1 196,62 Z"/>
+  <!-- Up Arrow in White -->
+  <path class="doc-white" d="M150,105 L196,160 L165,160 L165,222 L135,222 L135,160 L104,160 Z"/>
+</svg>

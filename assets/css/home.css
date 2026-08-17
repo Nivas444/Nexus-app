@@ -332,10 +332,35 @@ body {
   filter: drop-shadow(0 2px 8px rgba(0, 87, 231, 0.4));
 }
 
+.btn-doc-upload-action:hover .toolbar-icon-img,
 .btn-upload-orange:hover svg,
 .btn-upload-orange:hover .toolbar-icon-img {
-  transform: scale(1.1);
-  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.4));
+  transform: scale(1.15);
+  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.45));
+}
+
+.banner-title-underline {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.business-type-link,
+.site-id-link {
+  color: #0057e7 !important;
+  text-decoration: underline !important;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.business-type-link:hover,
+.site-id-link:hover {
+  color: #003bb5 !important;
+}
+
+.form-label-blue {
+  color: #0057e7 !important;
+  font-weight: 500;
 }
 
 /* ==========================================================================
@@ -693,7 +718,7 @@ body {
 }
 
 /* ==========================================================================
-   7. ADD CUSTOMER / ADD RECORD SIDE POPUP CARD
+   7. ADD CUSTOMER / ADD RECORD SIDE POPUP CARD (CENTERED MODAL)
    ========================================================================== */
 .side-form-overlay {
   position: fixed;
@@ -701,14 +726,14 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(15, 23, 42, 0.35);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 20000 !important;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 85px 24px 24px 36px;
+  align-items: center; /* Kept centered vertically */
+  justify-content: center; /* Kept centered horizontally */
+  padding: 24px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   animation: fadeInOverlay 0.2s ease-out;
@@ -724,16 +749,63 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  max-width: 440px;
+  max-width: 1080px;
   width: 100%;
-  animation: slideInFromLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  margin-bottom: 24px;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  margin: auto;
 }
 
-@keyframes slideInFromLeft {
+@keyframes modalScaleIn {
   from {
     opacity: 0;
-    transform: translateX(-30px) scale(0.97);
+    transform: scale(0.94) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.side-form-cards-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.side-form-card {
+  width: 420px;
+  max-width: 100%;
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Contact & Communication Side Message Popup (Table View) */
+.side-contact-popup {
+  width: 580px;
+  max-width: 100%;
+  flex-shrink: 0;
+  animation: slideOutSidePanel 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideOutSidePanel {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -741,15 +813,99 @@ body {
   }
 }
 
-.side-form-card {
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
+.contact-popup-toolbar {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end; /* Right side alignment */
+  padding: 8px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.contact-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-contact-tool {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-spring);
+  border-radius: 4px;
+}
+
+.btn-contact-tool img {
+  display: block;
+  transition: var(--transition-spring);
+}
+
+.btn-contact-tool:hover img {
+  transform: scale(1.18);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+.contact-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  padding: 0 0 8px 0;
+}
+
+.contact-custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: inherit;
+  font-size: 0.84rem;
+}
+
+.contact-custom-table thead th {
+  background: #9e9e9e !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 9px 12px;
+  text-align: left;
+  white-space: nowrap;
+  border: none !important;
+  user-select: none;
+}
+
+.contact-custom-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+  font-size: 0.84rem;
+  border-left: none !important;
+  border-right: none !important;
+  background: #ffffff;
+  transition: background 0.15s ease;
+}
+
+.contact-custom-table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+.contact-th-filter-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.65rem;
+  margin-left: 4px;
+  cursor: pointer;
+  padding: 1px 3px;
+  border-radius: 2px;
+  transition: var(--transition);
+  line-height: 1;
+}
+
+.contact-th-filter-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.15);
 }
 
 .side-form-header {
@@ -792,8 +948,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 18px;
-  padding: 8px 18px 4px 18px;
+  gap: 16px;
+  padding: 10px 20px 4px 20px;
 }
 
 .card-action-icon-btn {
@@ -804,13 +960,25 @@ body {
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border-radius: 4px;
-  transition: var(--transition);
+  border-radius: 6px;
+  transition: var(--transition-spring);
+}
+
+.card-action-icon-btn img {
+  display: block;
+  transition: var(--transition-spring);
 }
 
 .card-action-icon-btn:hover {
-  transform: scale(1.15);
-  background: #f1f5f9;
+  transform: scale(1.18);
+  background: rgba(0, 191, 165, 0.1);
+}
+
+.form-textarea-control {
+  height: auto !important;
+  min-height: 60px;
+  resize: vertical;
+  padding: 8px 12px;
 }
 
 .side-form-body {
@@ -845,16 +1013,24 @@ body {
 .form-input-control,
 .form-select-control {
   width: 100%;
-  height: 34px;
-  padding: 4px 10px;
+  height: 38px;
+  padding: 6px 14px;
   border: 1.5px solid #cbd5e1;
-  border-radius: 6px;
+  border-radius: 12px !important; /* Rounded pill style matching user mockup */
   font-family: inherit;
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   color: #1e293b;
   background: #ffffff;
   outline: none;
   transition: var(--transition);
+}
+
+.form-select-control {
+  appearance: none;
+  -webkit-appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center #ffffff;
+  padding-right: 36px;
+  cursor: pointer;
 }
 
 .form-input-control:focus,
@@ -1077,44 +1253,55 @@ body {
   padding-bottom: 6px;
 }
 
-/* Filter Footer Action Buttons (Tick on Left Side Corner, Eraser on Right Side Corner) */
+/* Filter Footer Action Buttons (Tick on Left Side Corner, Eraser on Right Side Corner - NO Circle Border) */
 .excel-filter-footer {
   display: flex;
   align-items: center;
   justify-content: space-between; /* Tick on Left Corner, Eraser on Right Corner */
-  padding: 8px 14px;
+  padding: 6px 14px 8px 14px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
 }
 
 .btn-filter-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1.5px solid #cbd5e1;
-  background: #ffffff;
-  display: flex;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  padding: 4px;
   transition: var(--transition-spring);
-  padding: 0;
+  outline: none;
 }
 
-/* Cancel / Eraser Button */
-.btn-filter-cancel:hover {
-  border-color: #d62d20;
-  background: rgba(214, 45, 32, 0.08);
-  transform: scale(1.12);
-  box-shadow: 0 2px 8px rgba(214, 45, 32, 0.2);
+.btn-filter-icon img {
+  display: block !important;
+  transition: var(--transition-spring);
 }
 
-/* Apply / Tick Button */
-.btn-filter-apply:hover {
-  border-color: #008744;
-  background: rgba(0, 135, 68, 0.08);
-  transform: scale(1.12);
-  box-shadow: 0 2px 8px rgba(0, 135, 68, 0.2);
+.btn-filter-apply img {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+.btn-filter-cancel img {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* Cancel / Eraser Button (No Circle Border, Smooth Scale & Glow) */
+.btn-filter-cancel:hover img {
+  transform: scale(1.24);
+  filter: drop-shadow(0 2px 6px rgba(214, 45, 32, 0.45));
+}
+
+/* Apply / Tick Button (No Circle Border, Smooth Scale & Glow) */
+.btn-filter-apply:hover img {
+  transform: scale(1.24);
+  filter: drop-shadow(0 2px 6px rgba(0, 135, 68, 0.45));
 }
 
 /* ==========================================================================

@@ -233,6 +233,345 @@
           </form>
         </div>
 
+        <!-- 1C. Master -> Add Vendor Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addVendorCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Vendor</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseVendorForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Mail+Phone, Bank, Edit) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnVendorCardMessage" title="Toggle Contact & Communication">
+              <img src="icons/Mail_Phone.svg" alt="Mail and Phone" width="26" height="26">
+            </button>
+            <button type="button" class="card-action-icon-btn" id="btnVendorCardBank" title="Bank Details">
+              <img src="icons/Bank.svg" alt="Bank Details" width="24" height="24">
+            </button>
+            <button type="button" class="card-action-icon-btn" id="btnVendorCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddVendor" onsubmit="event.preventDefault();">
+            <!-- 1. Vendor Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorName">Vendor Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVendorName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 2. Vendor Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorType">Vendor Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpVendorType">
+                  <option value="Supply / Service" selected>Supply / Service</option>
+                  <option value="Supply">Supply</option>
+                  <option value="Service">Service</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. GST Type (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpVendorGstType">GST Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpVendorGstType">
+                  <option value="NA / SGST / IGST" selected>NA / SGST / IGST</option>
+                  <option value="NA">NA</option>
+                  <option value="SGST">SGST</option>
+                  <option value="IGST">IGST</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. GST Number (with PDF upload badge) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorGstNumber">GST Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control form-input-highlight" id="inpVendorGstNumber" value="33ASMPM8643F">
+                <span class="input-pdf-badge" title="Upload/View PDF">
+                  <span class="pdf-up-arrow">&uarr;</span>
+                  <span class="pdf-tag">PDF</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 5. Address (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpVendorAddress">Address</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVendorAddress" value="Chennai">
+              </div>
+            </div>
+
+            <!-- 6. PAN Number (with PDF upload badge) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorPanNumber">PAN Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control form-input-highlight" id="inpVendorPanNumber" value="ASMPM8643F">
+                <span class="input-pdf-badge" title="Upload/View PDF">
+                  <span class="pdf-up-arrow">&uarr;</span>
+                  <span class="pdf-tag">PDF</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 7. Status (Blue label, Centered Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpVendorStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVendor" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1D. Master -> Add Product Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addProductCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Product</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProductForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnProductCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProduct" onsubmit="event.preventDefault();">
+            <!-- 1. Product Head -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductHead">Product Head</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductHead">
+                  <option value="230510678" selected>230510678</option>
+                  <option value="230510679">230510679</option>
+                  <option value="230510680">230510680</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Product Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductCode">Product Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProductCode" placeholder="">
+              </div>
+            </div>
+
+            <!-- 3. HSN Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductHsn">HSN Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProductHsn" placeholder="">
+              </div>
+            </div>
+
+            <!-- 4. Product Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductDesc">Product Description</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProductDesc" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Uom -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductUom">Uom</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductUom">
+                  <option value="" selected></option>
+                  <option value="Pcs">Pcs</option>
+                  <option value="Mtr">Mtr</option>
+                  <option value="Kg">Kg</option>
+                  <option value="Nos">Nos</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. MSQ -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductMsq">MSQ</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProductMsq" placeholder="">
+              </div>
+            </div>
+
+            <!-- 7. MOQ -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductMoq">MOQ</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProductMoq" placeholder="">
+              </div>
+            </div>
+
+            <!-- 8. GST Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductGstRate">GST Rate</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductGstRate">
+                  <option value="1% / 2% / 10%" selected>1% / 2% / 10%</option>
+                  <option value="5%">5%</option>
+                  <option value="12%">12%</option>
+                  <option value="18%">18%</option>
+                  <option value="28%">28%</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 9. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProductStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProduct" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1E. Master -> Add Expense Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addExpenseCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Expense</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseExpenseForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnExpenseCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddExpense" onsubmit="event.preventDefault();">
+            <!-- 1. Expense Head -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseHead">Expense Head</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpExpenseHead">
+                  <option value="230510678" selected>230510678</option>
+                  <option value="230510679">230510679</option>
+                  <option value="230510680">230510680</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Expense Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseCode">Expense Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpExpenseCode" placeholder="">
+              </div>
+            </div>
+
+            <!-- 3. SAC Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseSac">SAC Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpExpenseSac" placeholder="">
+              </div>
+            </div>
+
+            <!-- 4. Expense Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseDesc">Expense Description</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpExpenseDesc" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Uom -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseUom">Uom</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpExpenseUom">
+                  <option value="" selected></option>
+                  <option value="Pcs">Pcs</option>
+                  <option value="Mtr">Mtr</option>
+                  <option value="Kg">Kg</option>
+                  <option value="Nos">Nos</option>
+                  <option value="Month">Month</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. GST Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseGstRate">GST Rate</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpExpenseGstRate">
+                  <option value="0% / 5 % / 12% / 18%" selected>0% / 5 % / 12% / 18%</option>
+                  <option value="0%">0%</option>
+                  <option value="5%">5%</option>
+                  <option value="12%">12%</option>
+                  <option value="18%">18%</option>
+                  <option value="28%">28%</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 7. TDS Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseTdsRate">TDS Rate</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpExpenseTdsRate" value="1% / 2% / 10%">
+              </div>
+            </div>
+
+            <!-- 8. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpExpenseStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitExpense" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
         <!-- 1B. Indus / Infra Project Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addInfraCard" style="display: none;">
           <!-- Header -->
@@ -474,6 +813,73 @@
               </tbody>
             </table>
           </div>
+        </div>
+
+        <!-- 4. Vendor Bank Details Panel (Matching Mockup) -->
+        <div class="side-form-card" id="bankDetailsSidePanel" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblBankVendorTitle">Vendor Name</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseBankCard" aria-label="Close bank details">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Icon Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnBankCardEdit" title="Edit Bank Details">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmBankDetails" onsubmit="event.preventDefault();">
+            <!-- 1. Account Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpBankAccountName">Account Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control bank-field-control" id="inpBankAccountName" placeholder="" readonly>
+              </div>
+            </div>
+
+            <!-- 2. Account Number with PDF badge -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpBankAccountNumber">Account Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control form-input-highlight bank-field-control" id="inpBankAccountNumber" value="33ASMPM8643F" readonly>
+                <span class="input-pdf-badge" title="Upload/View PDF">
+                  <span class="pdf-up-arrow">&uarr;</span>
+                  <span class="pdf-tag">PDF</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 3. IFSC Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpBankIfsc">IFSC Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control bank-field-control" id="inpBankIfsc" placeholder="" readonly>
+              </div>
+            </div>
+
+            <!-- 4. Bank Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control bank-field-control" id="inpBankName" placeholder="" readonly>
+              </div>
+            </div>
+
+            <!-- 5. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch" id="wrapBankStatusToggle">
+                  <input type="checkbox" id="inpBankStatusToggle" checked disabled>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </form>
         </div>
       </div>
 

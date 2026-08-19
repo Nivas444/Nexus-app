@@ -507,6 +507,7 @@ body {
   border-left: none !important;
   border-right: none !important;
   vertical-align: middle;
+  text-align: center !important; /* All tables center aligned */
   white-space: nowrap;
 }
 
@@ -574,7 +575,7 @@ body {
 }
 
 .td-amount {
-  text-align: right;
+  text-align: center !important; /* Center aligned */
   font-variant-numeric: tabular-nums;
   font-weight: 500;
 }
@@ -716,7 +717,8 @@ body {
 .slider-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center !important;
+  width: 100%;
 }
 
 .toggle-status-label {
@@ -792,7 +794,7 @@ body {
   flex-shrink: 0;
   background: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: var(--shadow-card);
   overflow: hidden;
   display: flex;
@@ -807,7 +809,7 @@ body {
   animation: slideOutSidePanel 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   background: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: var(--shadow-card);
   overflow: hidden;
   display: flex;
@@ -828,44 +830,36 @@ body {
 .contact-popup-toolbar {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Right side alignment */
-  padding: 8px 16px;
+  justify-content: flex-end;
+  padding: 12px 18px 8px 18px;
   background: #ffffff;
-  border-bottom: 1px solid #f1f5f9;
 }
 
 .contact-toolbar-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .btn-contact-tool {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 3px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-spring);
-  border-radius: 4px;
+  padding: 2px;
+  transition: var(--transition);
 }
 
-.btn-contact-tool img {
-  display: block;
-  transition: var(--transition-spring);
-}
-
-.btn-contact-tool:hover img {
+.btn-contact-tool:hover {
   transform: scale(1.18);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(0 2px 6px rgba(0, 191, 165, 0.4));
 }
 
 .contact-table-wrap {
   width: 100%;
   overflow-x: auto;
-  padding: 0 0 8px 0;
 }
 
 .contact-custom-table {
@@ -873,6 +867,7 @@ body {
   border-collapse: collapse;
   font-family: inherit;
   font-size: 0.84rem;
+  text-align: center !important;
 }
 
 .contact-custom-table thead th {
@@ -881,7 +876,7 @@ body {
   font-weight: 600;
   font-size: 0.8rem;
   padding: 9px 12px;
-  text-align: left;
+  text-align: center !important;
   white-space: nowrap;
   border: none !important;
   user-select: none;
@@ -895,6 +890,7 @@ body {
   border-left: none !important;
   border-right: none !important;
   background: #ffffff;
+  text-align: center !important;
   transition: background 0.15s ease;
 }
 
@@ -920,24 +916,35 @@ body {
   transform: scale(1.15);
 }
 
+/* Add Customer Slanted Ribbon Header Design Matching Uploaded Mockup */
 .side-form-header {
   display: flex;
-  align-items: center;
+  align-items: stretch; /* Stretches badge to fill 100% full height from top 0 */
   justify-content: space-between;
   background: #ffffff;
   padding: 0;
+  margin: 0;
   border-bottom: 1px solid #f1f5f9;
+  height: 48px;
+  overflow: hidden;
+  position: relative;
 }
 
 .side-form-title-badge {
-  background: #00cba0;
+  background: #2fd19f;
   color: #ffffff;
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
   font-size: 1.05rem;
-  padding: 10px 22px;
+  padding: 0 54px 0 24px;
   letter-spacing: 0.3px;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 0 100%);
+  white-space: nowrap;
+  user-select: none;
 }
 
 .side-form-close-btn {
@@ -947,8 +954,11 @@ body {
   line-height: 1;
   color: #ef4444;
   cursor: pointer;
-  padding: 8px 16px;
+  padding: 0 18px;
   transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .side-form-close-btn:hover {
@@ -1013,6 +1023,10 @@ body {
   color: #475569;
   min-width: 120px;
   flex-shrink: 0;
+}
+
+.form-label-blue {
+  color: #2563eb !important;
 }
 
 .form-input-wrap {

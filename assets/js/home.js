@@ -63,40 +63,104 @@ const masterCustomerData = [
   }
 ];
 
-// Master -> Vendor Dataset
+// Master -> Vendor Dataset (Matching Uploaded Mockup)
 const masterVendorData = [
   {
     id: "vend-1",
-    vendorId: "VEND-40091",
-    vendorName: "Guindy Steel Fabricators",
-    category: "Raw Materials",
-    contactNumber: "+91 94440 98765",
-    email: "guindy.steels@nexus.org",
+    vendorType: "Service",
+    vendorId: "230510678",
+    vendorName: "R/RL-234567",
+    gstNumber: "R/RL-234567",
+    panNumber: "R/RL-234567",
+    gstType: "SGST",
+    status: "Active"
+  },
+  {
+    id: "vend-2",
+    vendorType: "Supply",
+    vendorId: "230510678",
+    vendorName: "R/RL-234567",
+    gstNumber: "R/RL-234567",
+    panNumber: "R/RL-234567",
+    gstType: "IGST",
+    status: "In - Active"
+  },
+  {
+    id: "vend-3",
+    vendorType: "Service",
+    vendorId: "230510678",
+    vendorName: "R/RL-234567",
+    gstNumber: "NA",
+    panNumber: "R/RL-234567",
+    gstType: "NA",
     status: "Active"
   }
 ];
 
-// Master -> Products Dataset
+// Master -> Products Dataset (Matching Uploaded Mockup)
 const masterProductsData = [
   {
     id: "prod-1",
-    productCode: "PRD-9901",
-    productName: "Reinforced Concrete Beams",
-    unit: "Pcs",
-    rate: "14500.00",
-    hsnCode: "681099",
+    productHead: "230510678",
+    productCode: "",
+    hsnCode: "",
+    productDescription: "",
+    gstRate: "",
+    status: "Active"
+  },
+  {
+    id: "prod-2",
+    productHead: "230510678",
+    productCode: "",
+    hsnCode: "",
+    productDescription: "",
+    gstRate: "",
+    status: "In - Active"
+  },
+  {
+    id: "prod-3",
+    productHead: "230510678",
+    productCode: "",
+    hsnCode: "",
+    productDescription: "",
+    gstRate: "",
     status: "Active"
   }
 ];
 
-// Master -> Expenses Dataset
+// Master -> Expenses Dataset (Matching Uploaded Mockup)
 const masterExpensesData = [
   {
     id: "exp-1",
-    expenseCode: "EXP-501",
-    expenseHead: "Project Site Operations",
-    category: "Direct Operating",
-    budgetLimit: "500000.00",
+    expenseHead: "230510678",
+    expenseCode: "",
+    sacCode: "",
+    expenseDescription: "",
+    tdsRate: "",
+    gstRate: "",
+    uom: "",
+    status: "Active"
+  },
+  {
+    id: "exp-2",
+    expenseHead: "230510678",
+    expenseCode: "",
+    sacCode: "",
+    expenseDescription: "",
+    tdsRate: "",
+    gstRate: "",
+    uom: "",
+    status: "In - Active"
+  },
+  {
+    id: "exp-3",
+    expenseHead: "230510678",
+    expenseCode: "",
+    sacCode: "",
+    expenseDescription: "",
+    tdsRate: "",
+    gstRate: "",
+    uom: "",
     status: "Active"
   }
 ];
@@ -597,20 +661,45 @@ function renderMasterToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
-  // Master Toolbar: Green CSV Download + Blue Add (+) Button on Right
-  toolbar.innerHTML = `
-    <div class="toolbar-left"></div>
-    <div class="toolbar-right">
-      <!-- Green CSV Download Icon -->
-      <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="Export CSV" aria-label="Export CSV">
-        <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
-      </button>
-      <!-- Blue Add (+) Button -->
-      <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New Record" aria-label="Add Record">
-        <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
-      </button>
-    </div>
-  `;
+  if (currentMasterSubpage === 'vendor' || currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
+    // Toolbar: Green CSV Download + Orange Document Upload + Blue Add (+) Button on Right
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <!-- Green CSV Download Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="Export CSV" aria-label="Export CSV">
+          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Orange Document Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Upload Document" aria-label="Upload Document">
+          <img src="icons/Document Upload.svg" alt="Document Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New ${currentMasterSubpage === 'products' ? 'Product' : currentMasterSubpage === 'expenses' ? 'Expense' : 'Vendor'}" aria-label="Add Record">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
+      showToast('Document Upload dialog opened');
+    });
+  } else {
+    // Master Toolbar: Green CSV Download + Blue Add (+) Button on Right
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <!-- Green CSV Download Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="Export CSV" aria-label="Export CSV">
+          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New Record" aria-label="Add Record">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+  }
 
   document.getElementById('btnMasterAdd')?.addEventListener('click', () => {
     openSideForm();
@@ -653,6 +742,139 @@ function renderMasterTableHead() {
           <div class="th-content-wrap">
             <span>Invoice Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceType'] ? 'has-active-filter' : ''}" data-filter-col="invoiceType" title="Filter Invoice Type">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+  } else if (currentMasterSubpage === 'vendor') {
+    // Vendor Table Headers (Matching Mockup: Vendor Type, Vendor ID, Vendor Name, GST Number, PAN Number, GST Type, Status)
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th>
+          <div class="th-content-wrap">
+            <span>Vendor Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorType'] ? 'has-active-filter' : ''}" data-filter-col="vendorType" title="Filter Vendor Type">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Vendor ID</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Vendor Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>GST Number</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>PAN Number</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['panNumber'] ? 'has-active-filter' : ''}" data-filter-col="panNumber" title="Filter PAN Number">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>GST Type</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+  } else if (currentMasterSubpage === 'products') {
+    // Products Table Headers (Matching Mockup: Product Head, Product Code, HSN Code, Product Description, GST Rate, Status)
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th>
+          <div class="th-content-wrap">
+            <span>Product Head</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productHead'] ? 'has-active-filter' : ''}" data-filter-col="productHead" title="Filter Product Head">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Product Code</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>HSN Code</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Product Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productDescription'] ? 'has-active-filter' : ''}" data-filter-col="productDescription" title="Filter Product Description">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>GST Rate</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+  } else if (currentMasterSubpage === 'expenses') {
+    // Expenses Table Headers (Matching Mockup: Expense Head, Expense Code, SAC Code, Expense Description, TDS Rate, GST Rate, Uom, Status)
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th>
+          <div class="th-content-wrap">
+            <span>Expense Head</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Expense Code</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>SAC Code</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Expense Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>TDS Rate</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>GST Rate</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Uom</span>
           </div>
         </th>
         <th>
@@ -1021,6 +1243,64 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+    } else if (currentMasterSubpage === 'vendor') {
+      // Render Vendor Rows (Matching Mockup: Vendor Type, Vendor ID, Vendor Name, GST Number, PAN Number, GST Type, Status)
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        return `
+          <tr data-row-id="${row.id}">
+            <td>${row.vendorType}</td>
+            <td>${row.vendorId}</td>
+            <td>${row.vendorName}</td>
+            <td>${row.gstNumber}</td>
+            <td>${row.panNumber}</td>
+            <td>${row.gstType}</td>
+            <td class="td-center">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else if (currentMasterSubpage === 'products') {
+      // Render Products Rows (Matching Mockup: Product Head, Product Code, HSN Code, Product Description, GST Rate, Status)
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        return `
+          <tr data-row-id="${row.id}">
+            <td>
+              <a href="#" class="req-link td-link-blue" onclick="showToast('Product Head: ${row.productHead}'); return false;">${row.productHead}</a>
+            </td>
+            <td>${row.productCode || ''}</td>
+            <td>${row.hsnCode || ''}</td>
+            <td>${row.productDescription || ''}</td>
+            <td>${row.gstRate || ''}</td>
+            <td class="td-center">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else if (currentMasterSubpage === 'expenses') {
+      // Render Expenses Rows (Matching Mockup: Expense Head, Expense Code, SAC Code, Expense Description, TDS Rate, GST Rate, Uom, Status)
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        return `
+          <tr data-row-id="${row.id}">
+            <td>
+              <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Head: ${row.expenseHead}'); return false;">${row.expenseHead}</a>
+            </td>
+            <td>${row.expenseCode || ''}</td>
+            <td>${row.sacCode || ''}</td>
+            <td>${row.expenseDescription || ''}</td>
+            <td>${row.tdsRate || ''}</td>
+            <td>${row.gstRate || ''}</td>
+            <td>${row.uom || ''}</td>
+            <td class="td-center">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
     } else if (currentMasterSubpage === 'employee') {
       // Render Employee Rows with Clean Text Status Badge
       tbody.innerHTML = filteredDataset.map(row => {
@@ -1306,6 +1586,93 @@ function initSideFormEvents() {
       return;
     }
 
+    if (currentModule === 'master' && currentMasterSubpage === 'expenses') {
+      const expenseHead = document.getElementById('inpExpenseHead')?.value || "230510678";
+      const expenseCode = document.getElementById('inpExpenseCode')?.value || "";
+      const sacCode = document.getElementById('inpExpenseSac')?.value || "";
+      const expenseDescription = document.getElementById('inpExpenseDesc')?.value || "";
+      const uom = document.getElementById('inpExpenseUom')?.value || "";
+      const gstRate = document.getElementById('inpExpenseGstRate')?.value || "0% / 5 % / 12% / 18%";
+      const tdsRate = document.getElementById('inpExpenseTdsRate')?.value || "1% / 2% / 10%";
+      const expenseStatusToggle = document.getElementById('inpExpenseStatusToggle');
+      const status = (expenseStatusToggle && expenseStatusToggle.checked) ? "Active" : "In - Active";
+
+      const newRecord = {
+        id: `exp-${Date.now()}`,
+        expenseHead,
+        expenseCode,
+        sacCode,
+        expenseDescription,
+        tdsRate,
+        gstRate,
+        uom,
+        status
+      };
+
+      masterExpensesData.push(newRecord);
+      currentDataset = [...masterExpensesData];
+      applyFiltersAndRender();
+      closeSideForm();
+      showToast(`Expense ${expenseHead} successfully saved & added to table!`);
+      return;
+    }
+
+    if (currentModule === 'master' && currentMasterSubpage === 'products') {
+      const productHead = document.getElementById('inpProductHead')?.value || "230510678";
+      const productCode = document.getElementById('inpProductCode')?.value || "";
+      const hsnCode = document.getElementById('inpProductHsn')?.value || "";
+      const productDescription = document.getElementById('inpProductDesc')?.value || "";
+      const gstRate = document.getElementById('inpProductGstRate')?.value || "18%";
+      const productStatusToggle = document.getElementById('inpProductStatusToggle');
+      const status = (productStatusToggle && productStatusToggle.checked) ? "Active" : "In - Active";
+
+      const newRecord = {
+        id: `prod-${Date.now()}`,
+        productHead,
+        productCode,
+        hsnCode,
+        productDescription,
+        gstRate,
+        status
+      };
+
+      masterProductsData.push(newRecord);
+      currentDataset = [...masterProductsData];
+      applyFiltersAndRender();
+      closeSideForm();
+      showToast(`Product ${productHead} successfully saved & added to table!`);
+      return;
+    }
+
+    if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
+      const vendorName = document.getElementById('inpVendorName').value || "R/RL-234567";
+      const vendorType = document.getElementById('inpVendorType').value || "Supply / Service";
+      const gstType = document.getElementById('inpVendorGstType').value || "SGST";
+      const gstNumber = document.getElementById('inpVendorGstNumber').value || "33ASMPM8643F";
+      const panNumber = document.getElementById('inpVendorPanNumber').value || "ASMPM8643F";
+      const vendorStatusToggle = document.getElementById('inpVendorStatusToggle');
+      const status = (vendorStatusToggle && vendorStatusToggle.checked) ? "Active" : "In - Active";
+      const vendorId = `23051068${masterVendorData.length + 1}`;
+
+      const newRecord = {
+        id: `vend-${Date.now()}`,
+        vendorType,
+        vendorId,
+        vendorName,
+        gstNumber,
+        panNumber,
+        gstType,
+        status
+      };
+
+      masterVendorData.push(newRecord);
+      currentDataset = [...masterVendorData];
+      applyFiltersAndRender();
+      closeSideForm();
+      showToast(`Vendor ${vendorId} successfully saved & added to table!`);
+      return;
+    }
+
     const businessType = document.getElementById('inpBusinessType').value;
     const customerId = document.getElementById('inpCustomerId').value || `23051068${masterCustomerData.length + 1}`;
     const customerName = document.getElementById('inpCustomerName').value || "";
@@ -1337,8 +1704,150 @@ function initSideFormEvents() {
 
   const btnSubmitCustomer = document.getElementById('btnSubmitCustomer');
   const btnSubmitInfra = document.getElementById('btnSubmitInfra');
+  const btnSubmitVendor = document.getElementById('btnSubmitVendor');
+  const btnSubmitProduct = document.getElementById('btnSubmitProduct');
+  const btnSubmitExpense = document.getElementById('btnSubmitExpense');
   if (btnSubmitCustomer) btnSubmitCustomer.addEventListener('click', handleFormSave);
   if (btnSubmitInfra) btnSubmitInfra.addEventListener('click', handleFormSave);
+  if (btnSubmitVendor) btnSubmitVendor.addEventListener('click', handleFormSave);
+  if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
+  if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
+
+  const btnCloseVendorForm = document.getElementById('btnCloseVendorForm');
+  if (btnCloseVendorForm) btnCloseVendorForm.addEventListener('click', closeSideForm);
+
+  const btnCloseProductForm = document.getElementById('btnCloseProductForm');
+  if (btnCloseProductForm) btnCloseProductForm.addEventListener('click', closeSideForm);
+
+  const btnCloseExpenseForm = document.getElementById('btnCloseExpenseForm');
+  if (btnCloseExpenseForm) btnCloseExpenseForm.addEventListener('click', closeSideForm);
+
+  const btnExpenseEdit = document.getElementById('btnExpenseCardEdit');
+  if (btnExpenseEdit) {
+    btnExpenseEdit.addEventListener('click', () => {
+      showToast('Expense edit info mode activated');
+    });
+  }
+
+  const btnProductEdit = document.getElementById('btnProductCardEdit');
+  if (btnProductEdit) {
+    btnProductEdit.addEventListener('click', () => {
+      showToast('Product edit info mode activated');
+    });
+  }
+
+  const btnVendorMessage = document.getElementById('btnVendorCardMessage');
+  if (btnVendorMessage && contactPanel) {
+    btnVendorMessage.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (locationPanel) locationPanel.style.display = 'none';
+      const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
+      contactPanel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        showToast('Vendor Contact & Communication details opened');
+      } else {
+        showToast('Vendor Contact popup closed');
+      }
+    });
+  }
+
+  const bankPanel = document.getElementById('bankDetailsSidePanel');
+  const btnCloseBankCard = document.getElementById('btnCloseBankCard');
+  const btnBankCardEdit = document.getElementById('btnBankCardEdit');
+  let isBankEditable = false;
+
+  function setBankEditableState(editable) {
+    isBankEditable = editable;
+    const bankFields = document.querySelectorAll('.bank-field-control');
+    const bankStatusToggle = document.getElementById('inpBankStatusToggle');
+
+    bankFields.forEach(field => {
+      if (editable) {
+        field.removeAttribute('readonly');
+      } else {
+        field.setAttribute('readonly', 'true');
+      }
+    });
+
+    if (bankStatusToggle) {
+      bankStatusToggle.disabled = !editable;
+    }
+
+    if (btnBankCardEdit) {
+      if (editable) {
+        btnBankCardEdit.classList.add('active-edit-mode');
+      } else {
+        btnBankCardEdit.classList.remove('active-edit-mode');
+      }
+    }
+  }
+
+  if (btnCloseBankCard && bankPanel) {
+    btnCloseBankCard.addEventListener('click', () => {
+      bankPanel.style.display = 'none';
+      setBankEditableState(false);
+    });
+  }
+
+  if (btnBankCardEdit) {
+    btnBankCardEdit.addEventListener('click', () => {
+      setBankEditableState(!isBankEditable);
+      if (isBankEditable) {
+        document.getElementById('inpBankAccountName')?.focus();
+        showToast('Bank details are now editable');
+      } else {
+        showToast('Bank details saved & locked');
+      }
+    });
+  }
+
+  const btnVendorBank = document.getElementById('btnVendorCardBank');
+  if (btnVendorBank && bankPanel) {
+    btnVendorBank.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (contactPanel) contactPanel.style.display = 'none';
+      if (locationPanel) locationPanel.style.display = 'none';
+      const isHidden = bankPanel.style.display === 'none' || bankPanel.style.display === '';
+      bankPanel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        const vendorNameVal = document.getElementById('inpVendorName')?.value;
+        const titleBadge = document.getElementById('lblBankVendorTitle');
+        if (titleBadge) titleBadge.textContent = vendorNameVal || "Vendor Name";
+        setBankEditableState(false);
+        showToast('Vendor Bank details opened (Read-only)');
+      } else {
+        showToast('Bank details closed');
+      }
+    });
+  }
+
+  const btnVendorEdit = document.getElementById('btnVendorCardEdit');
+  if (btnVendorEdit) {
+    btnVendorEdit.addEventListener('click', () => {
+      showToast('Vendor edit info mode activated');
+    });
+  }
+
+  // Close Contact / Location / Bank Message Popups when user clicks outside of them
+  document.addEventListener('click', (e) => {
+    if (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') {
+      const isInsideBtn = (btnMessage && btnMessage.contains(e.target)) || (btnInfraMessage && btnInfraMessage.contains(e.target)) || (btnVendorMessage && btnVendorMessage.contains(e.target));
+      if (!contactPanel.contains(e.target) && !isInsideBtn) {
+        contactPanel.style.display = 'none';
+      }
+    }
+    if (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '') {
+      if (!locationPanel.contains(e.target) && !btnLocation.contains(e.target)) {
+        locationPanel.style.display = 'none';
+      }
+    }
+    if (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') {
+      if (!bankPanel.contains(e.target) && !(btnVendorBank && btnVendorBank.contains(e.target))) {
+        bankPanel.style.display = 'none';
+        setBankEditableState(false);
+      }
+    }
+  });
 }
 
 function openSideForm() {
@@ -1347,13 +1856,26 @@ function openSideForm() {
 
   const addCustomerCard = document.getElementById('addCustomerCard');
   const addInfraCard = document.getElementById('addInfraCard');
+  const addVendorCard = document.getElementById('addVendorCard');
+  const addProductCard = document.getElementById('addProductCard');
+  const addExpenseCard = document.getElementById('addExpenseCard');
+
+  if (addCustomerCard) addCustomerCard.style.display = 'none';
+  if (addInfraCard) addInfraCard.style.display = 'none';
+  if (addVendorCard) addVendorCard.style.display = 'none';
+  if (addProductCard) addProductCard.style.display = 'none';
+  if (addExpenseCard) addExpenseCard.style.display = 'none';
 
   if (currentModule === 'indus_towers') {
-    if (addCustomerCard) addCustomerCard.style.display = 'none';
     if (addInfraCard) addInfraCard.style.display = 'block';
+  } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
+    if (addVendorCard) addVendorCard.style.display = 'block';
+  } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
+    if (addProductCard) addProductCard.style.display = 'block';
+  } else if (currentModule === 'master' && currentMasterSubpage === 'expenses') {
+    if (addExpenseCard) addExpenseCard.style.display = 'block';
   } else {
     if (addCustomerCard) addCustomerCard.style.display = 'block';
-    if (addInfraCard) addInfraCard.style.display = 'none';
   }
 
   overlay.style.display = 'flex';
@@ -1366,6 +1888,8 @@ function closeSideForm() {
   if (contactPanel) contactPanel.style.display = 'none';
   const locationPanel = document.getElementById('locationDetailsSidePanel');
   if (locationPanel) locationPanel.style.display = 'none';
+  const bankPanel = document.getElementById('bankDetailsSidePanel');
+  if (bankPanel) bankPanel.style.display = 'none';
 }
 
 // ==========================================================================
@@ -1503,6 +2027,10 @@ function getColumnDisplayName(colKey) {
     gstType: "GST Type",
     invoiceType: "Invoice Type",
     status: "Status",
+    vendorType: "Vendor Type",
+    vendorId: "Vendor ID",
+    vendorName: "Vendor Name",
+    panNumber: "PAN Number",
     circle: "Circle",
     siteId: "Site ID",
     whId: "WH ID",
@@ -1517,12 +2045,21 @@ function getColumnDisplayName(colKey) {
     designation: "Designation",
     contactNumber: "Contact Number",
     email: "E-Mail",
+    productHead: "Product Head",
+    productCode: "Product Code",
+    hsnCode: "HSN Code",
+    productDescription: "Product Description",
+    gstRate: "GST Rate",
+    expenseHead: "Expense Head",
+    expenseCode: "Expense Code",
+    sacCode: "SAC Code",
+    expenseDescription: "Expense Description",
+    tdsRate: "TDS Rate",
+    uom: "Uom",
     submittedBy: "Submitted BY",
-    vendorName: "Vendor Name",
     submitBy: "Submit By",
     submissionDate: "Submission Date",
     approvedBy: "Approved By",
-    expenseHead: "Expense Head",
     transferTo: "Transfer To",
     ageing: "Ageing"
   };
@@ -1591,6 +2128,15 @@ function exportToCsv() {
     if (currentMasterSubpage === 'customer') {
       headers = ["Business Type", "Customer ID", "Customer Name", "GST Number", "GST Type", "Invoice Type", "Status"];
       rows = filteredDataset.map(r => [r.businessType, r.customerId, r.customerName, r.gstNumber, r.gstType, r.invoiceType, r.status]);
+    } else if (currentMasterSubpage === 'vendor') {
+      headers = ["Vendor Type", "Vendor ID", "Vendor Name", "GST Number", "PAN Number", "GST Type", "Status"];
+      rows = filteredDataset.map(r => [r.vendorType, r.vendorId, r.vendorName, r.gstNumber, r.panNumber, r.gstType, r.status]);
+    } else if (currentMasterSubpage === 'products') {
+      headers = ["Product Head", "Product Code", "HSN Code", "Product Description", "GST Rate", "Status"];
+      rows = filteredDataset.map(r => [r.productHead, r.productCode, r.hsnCode, r.productDescription, r.gstRate, r.status]);
+    } else if (currentMasterSubpage === 'expenses') {
+      headers = ["Expense Head", "Expense Code", "SAC Code", "Expense Description", "TDS Rate", "GST Rate", "Uom", "Status"];
+      rows = filteredDataset.map(r => [r.expenseHead, r.expenseCode, r.sacCode, r.expenseDescription, r.tdsRate, r.gstRate, r.uom, r.status]);
     } else if (currentMasterSubpage === 'employee') {
       headers = ["Employee ID", "Employee Name", "Designation", "Contact Number", "E-Mail", "Status"];
       rows = filteredDataset.map(r => [r.employeeId, r.employeeName, r.designation, r.contactNumber, r.email, r.status]);

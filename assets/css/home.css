@@ -130,8 +130,8 @@ body {
   width: 50px;
   height: 50px;
   border-radius: 12px;
-  background: transparent;
-  border: 1.5px solid transparent;
+  background: transparent !important;
+  border: none !important;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -157,20 +157,22 @@ body {
 }
 
 .nav-icon-item:hover {
-  background: rgba(0, 191, 165, 0.1);
-  border-color: rgba(0, 191, 165, 0.35);
-  transform: translateY(-3px);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: translateY(-2px);
 }
 
-/* Hover: Smoothly returns to original vibrant green color */
+/* Hover: Icon alone smoothly returns to original vibrant green color and glows green (No container border) */
 .nav-icon-item:hover .nav-icon-img {
-  transform: scale(1.08);
-  filter: grayscale(0%) opacity(1) brightness(1) drop-shadow(0 2px 8px var(--primary-glow));
+  transform: scale(1.12);
+  filter: grayscale(0%) opacity(1) brightness(1) drop-shadow(0 0 10px rgba(0, 203, 160, 0.8)) drop-shadow(0 0 18px rgba(0, 203, 160, 0.5));
 }
 
 .nav-icon-item.active-nav-tab {
-  background: rgba(0, 191, 165, 0.12);
-  border-color: rgba(0, 191, 165, 0.4);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Active Nav Tab: Keeps original vibrant green color */
@@ -181,6 +183,9 @@ body {
 /* Power Off / Sign Out Icon */
 .nav-power-btn {
   color: #64748b;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .nav-power-btn .nav-power-icon {
@@ -193,14 +198,15 @@ body {
 }
 
 .nav-power-btn:hover {
-  background: rgba(239, 68, 68, 0.1) !important;
-  border-color: rgba(239, 68, 68, 0.4) !important;
-  transform: translateY(-3px) scale(1.05);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  transform: translateY(-2px) scale(1.05);
 }
 
 .nav-power-btn:hover .nav-power-icon {
   stroke: #ef4444 !important;
-  filter: drop-shadow(0 2px 8px rgba(239, 68, 68, 0.35));
+  filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.75));
 }
 
 /* ==========================================================================
@@ -386,17 +392,23 @@ body {
   border-right: none !important;
 }
 
-/* LIGHT GREY TABLE HEADERS & NO VERTICAL LINES */
-.worklist-table-full thead th {
-  background: #f1f5f9 !important; /* Light Grey Header */
-  color: #1e293b !important;
+/* GREY TABLE HEADERS & NO VERTICAL LINES */
+.worklist-table-full thead th,
+.worklist-table-full thead tr th,
+.master-view-header th,
+.po-view-header th,
+.payment-view-header th,
+.tr-sub-headers th,
+.th-amount-group {
+  background: #9e9e9e !important; /* Medium Grey Header */
+  color: #ffffff !important; /* White Text */
   font-family: 'Outfit', sans-serif;
   font-size: 0.92rem;
   font-weight: 700;
   padding: 12px 16px;
   border: none !important;
-  border-top: 1px solid #e2e8f0 !important;
-  border-bottom: 1px solid #e2e8f0 !important;
+  border-top: 1px solid #8e8e8e !important;
+  border-bottom: 1px solid #8e8e8e !important;
   border-left: none !important;
   border-right: none !important;
   text-align: center;
@@ -418,7 +430,7 @@ body {
 .filter-funnel-btn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: #ffffff !important;
   cursor: pointer;
   font-size: 0.72rem;
   padding: 2px 5px;
@@ -427,21 +439,21 @@ body {
   align-items: center;
   justify-content: center;
   transition: var(--transition);
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .filter-funnel-btn:hover {
   opacity: 1;
-  color: #00bfa5;
-  background: rgba(0, 191, 165, 0.12);
-  transform: scale(1.15);
+  color: #00ffc4 !important;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.2);
 }
 
 .filter-funnel-btn.has-active-filter {
   background: #00cba0 !important;
   color: #ffffff !important;
   opacity: 1 !important;
-  box-shadow: 0 0 8px rgba(0, 203, 160, 0.5);
+  box-shadow: 0 0 8px rgba(0, 203, 160, 0.6);
 }
 
 .th-select {
@@ -1174,8 +1186,8 @@ body {
 }
 
 .excel-filter-search-input:focus {
-  border-color: var(--primary-green);
-  box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.15);
+  border-color: #94a3b8 !important;
+  box-shadow: none !important;
 }
 
 /* Circular Checkbox/Radio Options Box */
@@ -1253,7 +1265,7 @@ body {
   padding-bottom: 6px;
 }
 
-/* Filter Footer Action Buttons (Tick on Left Side Corner, Eraser on Right Side Corner - NO Circle Border) */
+/* Filter Footer Action Buttons (Tick on Left Side Corner, Eraser on Right Side Corner - NO Circle Border, SAME SIZE) */
 .excel-filter-footer {
   display: flex;
   align-items: center;
@@ -1279,12 +1291,16 @@ body {
 
 .btn-filter-icon img {
   display: block !important;
+  width: 24px !important;
+  height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
   transition: var(--transition-spring);
 }
 
 .btn-filter-apply img {
-  width: 26px !important;
-  height: 26px !important;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 .btn-filter-cancel img {
@@ -1294,14 +1310,43 @@ body {
 
 /* Cancel / Eraser Button (No Circle Border, Smooth Scale & Glow) */
 .btn-filter-cancel:hover img {
-  transform: scale(1.24);
+  transform: scale(1.2);
   filter: drop-shadow(0 2px 6px rgba(214, 45, 32, 0.45));
 }
 
 /* Apply / Tick Button (No Circle Border, Smooth Scale & Glow) */
 .btn-filter-apply:hover img {
-  transform: scale(1.24);
+  transform: scale(1.2);
   filter: drop-shadow(0 2px 6px rgba(0, 135, 68, 0.45));
+}
+
+/* Inside Submit Button in Add Customer Tab */
+.form-submit-inside-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 14px;
+  margin-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  width: 100%;
+}
+
+.btn-card-submit-inside {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: var(--transition-spring);
+  outline: none;
+}
+
+.btn-card-submit-inside:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 4px 10px rgba(0, 135, 68, 0.45));
 }
 
 /* ==========================================================================

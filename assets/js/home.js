@@ -205,7 +205,7 @@ const poData = [
     vendorName: "Guindy",
     poNo: "2026001",
     poAmount: "10000.00",
-    selected: true
+    selected: false
   },
   {
     id: "po-2",
@@ -240,7 +240,7 @@ const paymentData = [
     transferredAmount: "",
     payableAmount: "",
     ageing: 10,
-    selected: true
+    selected: false
   },
   {
     id: "pay-2",
@@ -771,11 +771,13 @@ function renderWorklistToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
+  const hasSelected = currentDataset.some(r => r.selected);
+
   if (currentWorklistView === 'po') {
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
-        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete">
+        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
       </div>
@@ -791,7 +793,7 @@ function renderWorklistToolbar() {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
           </svg>
         </button>
-        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete">
+        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="Export CSV" aria-label="Export CSV">
@@ -935,8 +937,8 @@ function initWorklistToolbarEvents() {
     const selectedIndex = currentDataset.findIndex(r => r.selected);
     if (selectedIndex !== -1) {
       const deleted = currentDataset.splice(selectedIndex, 1)[0];
-      if (currentDataset.length > 0) currentDataset[0].selected = true;
       applyFiltersAndRender();
+      updateDeleteButtonVisibility();
       showToast(`Deleted record: ${deleted.submitBy || deleted.submittedBy}`);
     } else {
       showToast('No record selected to delete.');
@@ -1333,8 +1335,10 @@ function initSideFormEvents() {
     showToast(`Customer ${customerId} successfully saved & added to table!`);
   }
 
-  if (btnSubmit) btnSubmit.addEventListener('click', handleFormSave);
-  if (btnSave) btnSave.addEventListener('click', handleFormSave);
+  const btnSubmitCustomer = document.getElementById('btnSubmitCustomer');
+  const btnSubmitInfra = document.getElementById('btnSubmitInfra');
+  if (btnSubmitCustomer) btnSubmitCustomer.addEventListener('click', handleFormSave);
+  if (btnSubmitInfra) btnSubmitInfra.addEventListener('click', handleFormSave);
 }
 
 function openSideForm() {
@@ -1553,12 +1557,23 @@ function sortDataset(colKey, direction) {
 // 8. ROW ACTIONS & CSV EXPORT
 // ==========================================================================
 window.selectRow = function(rowId) {
-  currentDataset = currentDataset.map(row => ({
-    ...row,
-    selected: row.id === rowId
-  }));
+  currentDataset = currentDataset.map(row => {
+    if (row.id === rowId) {
+      return { ...row, selected: !row.selected };
+    }
+    return { ...row, selected: false };
+  });
   applyFiltersAndRender();
+  updateDeleteButtonVisibility();
 };
+
+function updateDeleteButtonVisibility() {
+  const btnDel = document.getElementById('btnDeleteAction');
+  if (btnDel) {
+    const hasSelected = currentDataset.some(r => r.selected);
+    btnDel.style.display = hasSelected ? 'flex' : 'none';
+  }
+}
 
 window.handleReqClick = function(reqCode) {
   showToast(`Opening requisition details: ${reqCode}`);

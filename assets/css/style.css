@@ -369,6 +369,26 @@ body {
   padding: 0 16px 0 0;
 }
 
+/* Prevent Browser Autofill, Pasted, or Uploaded Text from Turning Background White */
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active,
+input.auth-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgba(0, 168, 140, 0.95) inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px rgba(0, 168, 140, 0.95) inset !important;
+  color: #ffffff !important;
+  caret-color: #ffffff !important;
+  border-radius: var(--radius-input) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.auth-input:autofill {
+  background: rgba(0, 168, 140, 0.95) !important;
+  color: #ffffff !important;
+}
+
 .auth-input::placeholder {
   color: rgba(255, 255, 255, 0.65);
   font-size: 0.95rem;

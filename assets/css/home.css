@@ -419,6 +419,60 @@ body {
   white-space: nowrap;
 }
 
+/* Product Details Bottom Segmented Sub-Navigation (Matching Image 2 Mockup) */
+.product-details-segmented-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: transparent;
+  padding: 4px 0;
+}
+
+.prod-details-btn {
+  background: #50e3a4;
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 8px 28px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.prod-details-btn:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.prod-details-btn:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.prod-details-btn:hover {
+  background: #00cba0;
+  color: #ffffff;
+}
+
+.prod-details-btn.active {
+  background: transparent !important;
+  color: #334155 !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  padding-right: 18px !important;
+  cursor: default;
+}
+
+.indus-segmented-group {
+  display: inline-flex;
+  align-items: center;
+}
+
 .th-content-wrap {
   display: inline-flex;
   align-items: center;
@@ -1021,8 +1075,9 @@ body {
   font-size: 0.88rem;
   font-weight: 600;
   color: #475569;
-  min-width: 120px;
-  flex-shrink: 0;
+  width: 165px;
+  min-width: 165px;
+  flex: 0 0 165px;
 }
 
 .form-label-blue {

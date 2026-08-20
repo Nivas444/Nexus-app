@@ -215,15 +215,41 @@ const indusSiteData = [
 const indusProductsData = [
   {
     id: "indus-prod-1",
-    circle: "KTN",
-    siteId: "230510678",
-    whId: "KTN",
-    siteName: "Tower Structure Set A",
-    district: "Chennai North",
-    town: "Ambattur",
-    latitude: "13.0827° N",
-    longitude: "80.2707° E",
-    transportZone: "Zone 1",
+    itemCode: "KTN",
+    productName: "230510678",
+    productType: "Capex",
+    productDescription: "KTN",
+    hsnSacType: "HSN",
+    hsnSacCode: "R/RL-234567",
+    activeRate: "11000.00",
+    budgetPercent: "95",
+    budgetAmount: "11000.00",
+    status: "Active"
+  },
+  {
+    id: "indus-prod-2",
+    itemCode: "KK",
+    productName: "230510678",
+    productType: "Opex",
+    productDescription: "KK",
+    hsnSacType: "SAC",
+    hsnSacCode: "R/RL-234567",
+    activeRate: "11000.00",
+    budgetPercent: "90",
+    budgetAmount: "11000.00",
+    status: "In - Active"
+  },
+  {
+    id: "indus-prod-3",
+    itemCode: "AP",
+    productName: "230510678",
+    productType: "",
+    productDescription: "AP",
+    hsnSacType: "HSN",
+    hsnSacCode: "R/RL-234567",
+    activeRate: "11000.00",
+    budgetPercent: "85",
+    budgetAmount: "11000.00",
     status: "Active"
   }
 ];
@@ -231,34 +257,174 @@ const indusProductsData = [
 const indusInfraData = [
   {
     id: "indus-infra-1",
-    circle: "KTN",
-    siteId: "230510678",
-    whId: "KTN",
-    siteName: "Ground Base Tower 40M",
-    district: "Coimbatore",
-    town: "Peelamedu",
-    latitude: "11.0168° N",
-    longitude: "76.9558° E",
-    transportZone: "Zone 2",
+    infraCategory: "KTN",
+    infraDescription: "KTN",
+    uom: "R/RL-234567",
+    make: "R/RL-234567",
+    commissioning: "Yes",
+    iMap: "Yes",
     status: "Active"
+  },
+  {
+    id: "indus-infra-2",
+    infraCategory: "KK",
+    infraDescription: "KK",
+    uom: "R/RL-234567",
+    make: "R/RL-234567",
+    commissioning: "No",
+    iMap: "No",
+    status: "In - Active"
   }
 ];
 
 const indusProjectsData = [
   {
     id: "indus-proj-1",
-    circle: "AP",
-    siteId: "230510678",
-    whId: "AP",
-    siteName: "5G Deployment Phase II",
-    district: "Visakhapatnam",
-    town: "Gajuwaka",
-    latitude: "17.6868° N",
-    longitude: "83.2185° E",
-    transportZone: "Zone 3",
+    projectType: "KTN",
+    subProjectType: "KTN",
+    tat: "45",
+    indusPm: "R/RL-234567",
+    indusScm: "R/RL-234567",
+    pm: "R/RL-234567",
+    mis: "R/RL-234567",
+    survey: "Yes",
+    additionalTransport: "Yes",
+    status: "Active"
+  },
+  {
+    id: "indus-proj-2",
+    projectType: "KK",
+    subProjectType: "KK",
+    tat: "45",
+    indusPm: "R/RL-234567",
+    indusScm: "R/RL-234567",
+    pm: "R/RL-234567",
+    mis: "R/RL-234567",
+    survey: "No",
+    additionalTransport: "No",
+    status: "In - Active"
+  },
+  {
+    id: "indus-proj-3",
+    projectType: "KTN",
+    subProjectType: "KTN",
+    tat: "45",
+    indusPm: "R/RL-234567",
+    indusScm: "R/RL-234567",
+    pm: "R/RL-234567",
+    mis: "R/RL-234567",
+    survey: "Yes",
+    additionalTransport: "No",
+    status: "Active"
+  },
+  {
+    id: "indus-proj-4",
+    projectType: "KTN",
+    subProjectType: "KTN",
+    tat: "45",
+    indusPm: "R/RL-234567",
+    indusScm: "R/RL-234567",
+    pm: "R/RL-234567",
+    mis: "R/RL-234567",
+    survey: "No",
+    additionalTransport: "Yes",
     status: "Active"
   }
 ];
+
+let currentIndusProductSubpage = 'materials';
+let selectedProductName = 'Product Name';
+
+const indusProductMaterialsData = [
+  {
+    id: "mat-1",
+    materialCode: "230510678",
+    materialHead: "230510678",
+    materialCategory: "230510678",
+    materialDescription: "230510678",
+    type: "Parent",
+    status: "Active"
+  },
+  {
+    id: "mat-2",
+    materialCode: "230510678",
+    materialHead: "230510678",
+    materialCategory: "230510678",
+    materialDescription: "230510678",
+    type: "Child",
+    status: "In - Active"
+  }
+];
+
+const indusProductExpensesData = [
+  {
+    id: "prod-exp-1",
+    expenseCode: "230510678",
+    expenseHead: "230510678",
+    expenseCategory: "230510678",
+    expenseDescription: "230510678",
+    type: "Parent",
+    status: "Active"
+  },
+  {
+    id: "prod-exp-2",
+    expenseCode: "230510678",
+    expenseHead: "230510678",
+    expenseCategory: "230510678",
+    expenseDescription: "230510678",
+    type: "Child",
+    status: "In - Active"
+  }
+];
+
+const indusProductInfraData = [
+  {
+    id: "prod-infra-1",
+    infraCode: "230510678",
+    infraCategory: "230510678",
+    infraDescription: "230510678",
+    type: "Parent",
+    status: "Active"
+  },
+  {
+    id: "prod-infra-2",
+    infraCode: "230510678",
+    infraCategory: "230510678",
+    infraDescription: "230510678",
+    type: "Child",
+    status: "In - Active"
+  }
+];
+
+const indusProductRateData = [
+  {
+    id: "prod-rate-1",
+    from: "230510678",
+    to: "230510678",
+    gbpa: "230510678",
+    rate: "Parent",
+    status: "Active"
+  },
+  {
+    id: "prod-rate-2",
+    from: "230510678",
+    to: "230510678",
+    gbpa: "230510678",
+    rate: "Child",
+    status: "In - Active"
+  }
+];
+
+function openIndusProductDetails(productName) {
+  currentModule = 'indus_towers';
+  currentIndusSubpage = 'product_details';
+  currentIndusProductSubpage = 'materials';
+  selectedProductName = productName || 'Product Name';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened Product Details for ${selectedProductName}`);
+}
 
 // Worklist -> PO Dataset
 const poData = [
@@ -468,7 +634,11 @@ function renderApp() {
     renderMasterTableHead();
     renderMasterFooter();
   } else if (currentModule === 'indus_towers') {
-    if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">Indus Towers</span>`;
+    if (currentIndusSubpage === 'product_details') {
+      if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProductName || 'Product Name'}</span>`;
+    } else {
+      if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">Indus Towers</span>`;
+    }
     loadIndusDataset();
     renderIndusToolbar();
     renderIndusTableHead();
@@ -510,6 +680,16 @@ function loadIndusDataset() {
     currentDataset = [...indusInfraData];
   } else if (currentIndusSubpage === 'projects') {
     currentDataset = [...indusProjectsData];
+  } else if (currentIndusSubpage === 'product_details') {
+    if (currentIndusProductSubpage === 'materials') {
+      currentDataset = [...indusProductMaterialsData];
+    } else if (currentIndusProductSubpage === 'expenses') {
+      currentDataset = [...indusProductExpensesData];
+    } else if (currentIndusProductSubpage === 'infra') {
+      currentDataset = [...indusProductInfraData];
+    } else if (currentIndusProductSubpage === 'rate') {
+      currentDataset = [...indusProductRateData];
+    }
   }
 }
 
@@ -517,35 +697,69 @@ function renderIndusToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
-  // Indus Towers Toolbar: CSV + Orange Document Upload + Blue Plus (+) on Right
-  toolbar.innerHTML = `
-    <div class="toolbar-left"></div>
-    <div class="toolbar-right">
-      <!-- Green CSV Download Icon -->
-      <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="Export CSV" aria-label="Export CSV">
-        <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
-      </button>
-      <!-- Orange Document Upload Icon -->
-      <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Document Upload" aria-label="Document Upload">
-        <img src="icons/Document Upload.svg" alt="Document Upload" class="toolbar-icon-img" width="30" height="30">
-      </button>
-      <!-- Blue Add (+) Button -->
-      <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Site" aria-label="Add Site">
-        <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
-      </button>
-    </div>
-  `;
+  if (currentIndusSubpage === 'product_details') {
+    // Product Details Toolbar: Single Blue Plus (+) on Right (Matching Image 1 Mockup)
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Material" aria-label="Add Material">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+    document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+      openSideForm();
+    });
+    return;
+  }
+
+  if (currentIndusSubpage === 'infra') {
+    // Indus Towers Infra Toolbar: Orange Bulk Upload + Blue Plus (+) on Right (Matching Mockup)
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <!-- Orange Bulk Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
+          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Infra" aria-label="Add Infra">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+  } else {
+    // Indus Towers Toolbar: CSV + Orange Bulk Upload + Blue Plus (+) on Right
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <!-- Green CSV Download Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="Export CSV" aria-label="Export CSV">
+          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Orange Bulk Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
+          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Record" aria-label="Add Record">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
+      exportToCsv();
+    });
+  }
 
   document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
     openSideForm();
   });
 
-  document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
-    exportToCsv();
-  });
-
   document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-    showToast('Document Upload initiated');
+    showToast('Bulk Upload initiated');
   });
 }
 
@@ -553,60 +767,416 @@ function renderIndusTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
 
-  thead.innerHTML = `
-    <tr class="master-view-header">
-      <th>
-        <div class="th-content-wrap">
-          <span>Circle</span>
-          <button type="button" class="filter-funnel-btn ${activeColumnFilters['circle'] ? 'has-active-filter' : ''}" data-filter-col="circle" title="Filter Circle">&#9660;</button>
-        </div>
-      </th>
-      <th>
-        <div class="th-content-wrap">
-          <span>Site ID</span>
-          <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
-        </div>
-      </th>
-      <th>WH ID</th>
-      <th>
-        <div class="th-content-wrap">
-          <span>Site Name</span>
-          <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
-        </div>
-      </th>
-      <th>
-        <div class="th-content-wrap">
-          <span>District</span>
-          <button type="button" class="filter-funnel-btn ${activeColumnFilters['district'] ? 'has-active-filter' : ''}" data-filter-col="district" title="Filter District">&#9660;</button>
-        </div>
-      </th>
-      <th>
-        <div class="th-content-wrap">
-          <span>Town</span>
-          <button type="button" class="filter-funnel-btn ${activeColumnFilters['town'] ? 'has-active-filter' : ''}" data-filter-col="town" title="Filter Town">&#9660;</button>
-        </div>
-      </th>
-      <th>Lattitude</th>
-      <th>Longtitude</th>
-      <th>
-        <div class="th-content-wrap">
-          <span>Transport Zone</span>
-          <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportZone'] ? 'has-active-filter' : ''}" data-filter-col="transportZone" title="Filter Transport Zone">&#9660;</button>
-        </div>
-      </th>
-      <th>
-        <div class="th-content-wrap">
-          <span>Status</span>
-          <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
-        </div>
-      </th>
-    </tr>
-  `;
+  if (currentIndusSubpage === 'product_details') {
+    if (currentIndusProductSubpage === 'materials') {
+      // 6 Columns Matching Image 1: Material Code, Material Head, Material Category, Material Description, Type, Status
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th>
+            <div class="th-content-wrap">
+              <span>Material Code</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Material Head</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialHead'] ? 'has-active-filter' : ''}" data-filter-col="materialHead" title="Filter Material Head">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Material Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialCategory'] ? 'has-active-filter' : ''}" data-filter-col="materialCategory" title="Filter Material Category">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Material Description</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialDescription'] ? 'has-active-filter' : ''}" data-filter-col="materialDescription" title="Filter Material Description">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Type</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+    } else if (currentIndusProductSubpage === 'expenses') {
+      // 6 Columns Matching Uploaded Mockup: Expense Code, Expense Head, Expense Category, Expense Description, Type, Status
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th>
+            <div class="th-content-wrap">
+              <span>Expense Code</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Expense Head</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Expense Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseCategory'] ? 'has-active-filter' : ''}" data-filter-col="expenseCategory" title="Filter Expense Category">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Expense Description</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Type</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+    } else if (currentIndusProductSubpage === 'infra') {
+      // 5 Columns Matching Uploaded Mockup: Infra Code, Infra Category, Infra Description, Type, Status
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th>
+            <div class="th-content-wrap">
+              <span>Infra Code</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCode'] ? 'has-active-filter' : ''}" data-filter-col="infraCode" title="Filter Infra Code">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Infra Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Infra Description</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraDescription'] ? 'has-active-filter' : ''}" data-filter-col="infraDescription" title="Filter Infra Description">&#9660;</button>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Type</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+    } else if (currentIndusProductSubpage === 'rate') {
+      // 5 Columns Matching Uploaded Mockup: From, To, GBPA, Rate, Status
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th>
+            <div class="th-content-wrap">
+              <span>From</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>To</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>GBPA</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Rate</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+    } else {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th>Code</th>
+          <th>Head / Description</th>
+          <th>Category</th>
+          <th>Status</th>
+        </tr>
+      `;
+    }
+    return;
+  }
+
+  if (currentIndusSubpage === 'projects') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th>
+          <div class="th-content-wrap">
+            <span>Project Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Sub - Project Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub - Project Type">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>TAT</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Indus PM</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Indus SCM</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>PM</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>MIS</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Survey</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Additional Transport</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+  } else if (currentIndusSubpage === 'infra') {
+    // Indus Towers Infra Table Headers (Matching Mockup: Infra Category, Infra Description, Uom, Make, Commissioning, I - Map, Status)
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th>
+          <div class="th-content-wrap">
+            <span>Infra Category</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Infra Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraDescription'] ? 'has-active-filter' : ''}" data-filter-col="infraDescription" title="Filter Infra Description">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Uom</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Make</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Commissioning</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>I - Map</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+  } else if (currentIndusSubpage === 'products') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th rowspan="2">
+          <div class="th-content-wrap">
+            <span>Item Code</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemCode'] ? 'has-active-filter' : ''}" data-filter-col="itemCode" title="Filter Item Code">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2">
+          <div class="th-content-wrap">
+            <span>Product Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productName'] ? 'has-active-filter' : ''}" data-filter-col="productName" title="Filter Product Name">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2">
+          <div class="th-content-wrap">
+            <span>Product Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productType'] ? 'has-active-filter' : ''}" data-filter-col="productType" title="Filter Product Type">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2">
+          <div class="th-content-wrap">
+            <span>Product Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productDescription'] ? 'has-active-filter' : ''}" data-filter-col="productDescription" title="Filter Product Description">&#9660;</button>
+          </div>
+        </th>
+        <th colspan="2">
+          <div class="th-content-wrap">
+            <span>HSN / SAC</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnSacCode'] ? 'has-active-filter' : ''}" data-filter-col="hsnSacCode" title="Filter HSN / SAC">&#9660;</button>
+          </div>
+        </th>
+        <th colspan="1">
+          <div class="th-content-wrap">
+            <span>Active Rate</span>
+          </div>
+        </th>
+        <th colspan="2">
+          <div class="th-content-wrap">
+            <span>Budget</span>
+          </div>
+        </th>
+        <th rowspan="2">
+          <div class="th-content-wrap">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+      <tr class="tr-sub-headers master-view-header">
+        <th>Type</th>
+        <th>Code</th>
+        <th>₹</th>
+        <th>%</th>
+        <th>₹</th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th>
+          <div class="th-content-wrap">
+            <span>Circle</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['circle'] ? 'has-active-filter' : ''}" data-filter-col="circle" title="Filter Circle">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Site ID</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+          </div>
+        </th>
+        <th>WH ID</th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Site Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>District</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['district'] ? 'has-active-filter' : ''}" data-filter-col="district" title="Filter District">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Town</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['town'] ? 'has-active-filter' : ''}" data-filter-col="town" title="Filter Town">&#9660;</button>
+          </div>
+        </th>
+        <th>Lattitude</th>
+        <th>Longtitude</th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Transport Zone</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportZone'] ? 'has-active-filter' : ''}" data-filter-col="transportZone" title="Filter Transport Zone">&#9660;</button>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+  }
 }
 
 function renderIndusFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
+
+  if (currentIndusSubpage === 'product_details') {
+    const prodSubpages = [
+      { key: 'materials', label: 'Materials' },
+      { key: 'expenses', label: 'Expenses' },
+      { key: 'infra', label: 'Infra' },
+      { key: 'rate', label: 'Rate' }
+    ];
+
+    footer.innerHTML = `
+      <div class="segmented-toggle-group master-segmented-group indus-segmented-group">
+        ${prodSubpages.map((sp, idx) => `
+          <button type="button" class="segmented-btn ${currentIndusProductSubpage === sp.key ? 'active' : ''}" data-prod-subpage="${sp.key}">
+            ${sp.label}
+          </button>
+          ${idx < prodSubpages.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+        `).join('')}
+      </div>
+    `;
+
+    footer.querySelectorAll('.segmented-btn[data-prod-subpage]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const spKey = btn.getAttribute('data-prod-subpage');
+        if (currentIndusProductSubpage !== spKey) {
+          currentIndusProductSubpage = spKey;
+          activeColumnFilters = {};
+          renderApp();
+          showToast(`Switched to Product &bull; ${btn.textContent.trim()}`);
+        }
+      });
+    });
+    return;
+  }
 
   const subpages = [
     { key: 'site', label: 'Site' },
@@ -662,7 +1232,7 @@ function renderMasterToolbar() {
   if (!toolbar) return;
 
   if (currentMasterSubpage === 'vendor' || currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
-    // Toolbar: Green CSV Download + Orange Document Upload + Blue Add (+) Button on Right
+    // Toolbar: Green CSV Download + Orange Bulk Upload + Blue Add (+) Button on Right
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
@@ -670,9 +1240,9 @@ function renderMasterToolbar() {
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="Export CSV" aria-label="Export CSV">
           <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
         </button>
-        <!-- Orange Document Upload Icon -->
-        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Upload Document" aria-label="Upload Document">
-          <img src="icons/Document Upload.svg" alt="Document Upload" class="toolbar-icon-img" width="30" height="30">
+        <!-- Orange Bulk Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
+          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
         <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New ${currentMasterSubpage === 'products' ? 'Product' : currentMasterSubpage === 'expenses' ? 'Expense' : 'Vendor'}" aria-label="Add Record">
@@ -682,7 +1252,7 @@ function renderMasterToolbar() {
     `;
 
     document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
-      showToast('Document Upload dialog opened');
+      showToast('Bulk Upload dialog opened');
     });
   } else {
     // Master Toolbar: Green CSV Download + Blue Add (+) Button on Right
@@ -1200,28 +1770,197 @@ function applyFiltersAndRender() {
   }
 
   if (currentModule === 'indus_towers') {
-    // Render Indus Towers Rows (Matching Mockup)
-    tbody.innerHTML = filteredDataset.map(row => {
-      const isInactive = (row.status || '').toLowerCase().includes('in');
-      return `
-        <tr data-row-id="${row.id}">
-          <td>${row.circle}</td>
-          <td>
-            <a href="#" class="req-link site-id-link td-link-blue" onclick="showToast('Site ID: ${row.siteId}'); return false;">${row.siteId}</a>
-          </td>
-          <td>${row.whId}</td>
-          <td>${row.siteName}</td>
-          <td>${row.district}</td>
-          <td>${row.town || ''}</td>
-          <td>${row.latitude}</td>
-          <td>${row.longitude}</td>
-          <td>${row.transportZone || ''}</td>
-          <td class="td-center">
-            <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
-          </td>
-        </tr>
-      `;
-    }).join('');
+    if (currentIndusSubpage === 'product_details') {
+      if (currentIndusProductSubpage === 'materials') {
+        // Render Product Details -> Materials Rows (Matching Image 1 Uploaded Mockup)
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}">
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Code: ${row.materialCode}'); return false;">${row.materialCode || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Head: ${row.materialHead}'); return false;">${row.materialHead || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Category: ${row.materialCategory}'); return false;">${row.materialCategory || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Description: ${row.materialDescription}'); return false;">${row.materialDescription || ''}</a>
+              </td>
+              <td>${row.type || ''}</td>
+              <td class="td-center">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else if (currentIndusProductSubpage === 'expenses') {
+        // Render Product Details -> Expenses Rows (Matching Uploaded Mockup)
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}">
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Code: ${row.expenseCode}'); return false;">${row.expenseCode || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Head: ${row.expenseHead}'); return false;">${row.expenseHead || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Category: ${row.expenseCategory}'); return false;">${row.expenseCategory || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Description: ${row.expenseDescription}'); return false;">${row.expenseDescription || ''}</a>
+              </td>
+              <td>${row.type || ''}</td>
+              <td class="td-center">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else if (currentIndusProductSubpage === 'infra') {
+        // Render Product Details -> Infra Rows (Matching Uploaded Mockup)
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}">
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Code: ${row.infraCode}'); return false;">${row.infraCode || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Category: ${row.infraCategory}'); return false;">${row.infraCategory || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Description: ${row.infraDescription}'); return false;">${row.infraDescription || ''}</a>
+              </td>
+              <td>${row.type || ''}</td>
+              <td class="td-center">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else if (currentIndusProductSubpage === 'rate') {
+        // Render Product Details -> Rate Rows (Matching Uploaded Mockup)
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}">
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('From: ${row.from}'); return false;">${row.from || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('To: ${row.to}'); return false;">${row.to || ''}</a>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('GBPA: ${row.gbpa}'); return false;">${row.gbpa || ''}</a>
+              </td>
+              <td>${row.rate || ''}</td>
+              <td class="td-center">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+      return;
+    }
+
+    if (currentIndusSubpage === 'projects') {
+      // Render Indus Towers -> Projects Rows (Matching Uploaded Mockup)
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        const isSurveyYes = (row.survey || '').toLowerCase() === 'yes';
+        const isTransportYes = (row.additionalTransport || '').toLowerCase() === 'yes';
+        return `
+          <tr data-row-id="${row.id}">
+            <td>
+              <a href="#" class="req-link td-link-blue" onclick="showToast('Project Type: ${row.projectType}'); return false;">${row.projectType || ''}</a>
+            </td>
+            <td>${row.subProjectType || ''}</td>
+            <td>${row.tat || ''}</td>
+            <td>${row.indusPm || ''}</td>
+            <td>${row.indusScm || ''}</td>
+            <td>${row.pm || ''}</td>
+            <td>${row.mis || ''}</td>
+            <td style="color: ${isSurveyYes ? '#2e7d32' : '#d32f2f'}; font-weight: 700;">${row.survey || ''}</td>
+            <td style="color: ${isTransportYes ? '#2e7d32' : '#d32f2f'}; font-weight: 700;">${row.additionalTransport || ''}</td>
+            <td class="td-center">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else if (currentIndusSubpage === 'infra') {
+      // Render Indus Towers -> Infra Rows (Matching Uploaded Mockup: Infra Category, Infra Description, Uom, Make, Commissioning, I - Map, Status)
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        return `
+          <tr data-row-id="${row.id}">
+            <td>
+              <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Category: ${row.infraCategory}'); return false;">${row.infraCategory || ''}</a>
+            </td>
+            <td>${row.infraDescription || ''}</td>
+            <td>${row.uom || ''}</td>
+            <td>${row.make || ''}</td>
+            <td>${row.commissioning || ''}</td>
+            <td>${row.iMap || ''}</td>
+            <td class="td-center">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else if (currentIndusSubpage === 'products') {
+      // Render Indus Towers -> Products Rows (Matching Uploaded Mockup)
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        return `
+          <tr data-row-id="${row.id}">
+            <td>${row.itemCode || ''}</td>
+            <td>
+              <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${row.productName}'); return false;">${row.productName || ''}</a>
+            </td>
+            <td>${row.productType || ''}</td>
+            <td>${row.productDescription || ''}</td>
+            <td>${row.hsnSacType || ''}</td>
+            <td>${row.hsnSacCode || ''}</td>
+            <td class="td-amount">${row.activeRate || ''}</td>
+            <td>${row.budgetPercent || ''}</td>
+            <td class="td-amount">${row.budgetAmount || ''}</td>
+            <td class="td-center">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      // Render Indus Towers Site Rows (Matching Mockup)
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        return `
+          <tr data-row-id="${row.id}">
+            <td>${row.circle}</td>
+            <td>
+              <a href="#" class="req-link site-id-link td-link-blue" onclick="showToast('Site ID: ${row.siteId}'); return false;">${row.siteId}</a>
+            </td>
+            <td>${row.whId}</td>
+            <td>${row.siteName}</td>
+            <td>${row.district}</td>
+            <td>${row.town || ''}</td>
+            <td>${row.latitude}</td>
+            <td>${row.longitude}</td>
+            <td>${row.transportZone || ''}</td>
+            <td class="td-center">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
   } else if (currentModule === 'master') {
     if (currentMasterSubpage === 'customer') {
       // Render Customer Rows with Clean Text Status Badge & Indus Hyperlink
@@ -1549,15 +2288,154 @@ function initSideFormEvents() {
   // Submit / Save Actions
   function handleFormSave() {
     if (currentModule === 'indus_towers') {
-      const circle = document.getElementById('inpInfraCircle').value;
-      const siteId = document.getElementById('inpInfraSiteId').value || `23051068${currentDataset.length + 1}`;
-      const whId = document.getElementById('inpInfraWhId').value;
-      const siteName = document.getElementById('inpInfraSiteName').value || "New Site";
-      const district = document.getElementById('inpInfraDistrict').value;
-      const town = document.getElementById('inpInfraTown').value || "";
-      const latitude = document.getElementById('inpInfraLatitude').value || "13.0000° N";
-      const longitude = document.getElementById('inpInfraLongitude').value || "80.0000° E";
-      const transportZone = document.getElementById('inpInfraTransportZone').value || "";
+      if (currentIndusSubpage === 'product_details') {
+        if (currentIndusProductSubpage === 'rate') {
+          const from = document.getElementById('inpProdRateFrom')?.value || "230510678";
+          const to = document.getElementById('inpProdRateTo')?.value || "230510678";
+          const gbpa = document.getElementById('inpProdRateGbpa')?.value || "230510678";
+          const rate = document.getElementById('inpProdRateType')?.value || "Parent";
+          const prodRateStatusToggle = document.getElementById('inpProdRateStatusToggle');
+          const status = (prodRateStatusToggle && prodRateStatusToggle.checked) ? "Active" : "In - Active";
+
+          const newRecord = {
+            id: `prod-rate-${Date.now()}`,
+            from,
+            to,
+            gbpa,
+            rate,
+            status
+          };
+
+          indusProductRateData.push(newRecord);
+          loadIndusDataset();
+          applyFiltersAndRender();
+          closeSideForm();
+          showToast(`Rate record successfully saved & added to table!`);
+          return;
+        }
+
+        if (currentIndusProductSubpage === 'infra') {
+          const infraCategory = document.getElementById('inpProdInfraCategory')?.value || "230510678";
+          const infraDescription = document.getElementById('inpProdInfraDescription')?.value || "230510678";
+          const infraCode = infraCategory;
+          const typeSelect = document.getElementById('inpProdInfraType');
+          const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
+          const prodInfraStatusToggle = document.getElementById('inpProdInfraStatusToggle');
+          const status = (prodInfraStatusToggle && prodInfraStatusToggle.checked) ? "Active" : "In - Active";
+
+          const newRecord = {
+            id: `prod-infra-${Date.now()}`,
+            infraCode,
+            infraCategory,
+            infraDescription,
+            type,
+            status
+          };
+
+          indusProductInfraData.push(newRecord);
+          loadIndusDataset();
+          applyFiltersAndRender();
+          closeSideForm();
+          showToast(`Infra ${infraCode} successfully saved & added to table!`);
+          return;
+        }
+
+        if (currentIndusProductSubpage === 'expenses') {
+          const expenseHead = document.getElementById('inpProdExpenseHead')?.value || "230510678";
+          const expenseCategory = document.getElementById('inpProdExpenseCategory')?.value || "230510678";
+          const expenseDescription = document.getElementById('inpProdExpenseDescription')?.value || "230510678";
+          const expenseCode = expenseHead;
+          const typeSelect = document.getElementById('inpProdExpenseType');
+          const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
+          const prodExpenseStatusToggle = document.getElementById('inpProdExpenseStatusToggle');
+          const status = (prodExpenseStatusToggle && prodExpenseStatusToggle.checked) ? "Active" : "In - Active";
+
+          const newRecord = {
+            id: `prod-exp-${Date.now()}`,
+            expenseCode,
+            expenseHead,
+            expenseCategory,
+            expenseDescription,
+            type,
+            status
+          };
+
+          indusProductExpensesData.push(newRecord);
+          loadIndusDataset();
+          applyFiltersAndRender();
+          closeSideForm();
+          showToast(`Expense ${expenseCode} successfully saved & added to table!`);
+          return;
+        }
+
+        const materialHead = document.getElementById('inpMaterialHead')?.value || "230510678";
+        const materialCategory = document.getElementById('inpMaterialCategory')?.value || "230510678";
+        const materialDescription = document.getElementById('inpMaterialDescription')?.value || "230510678";
+        const materialCode = materialHead;
+        const typeSelect = document.getElementById('inpMaterialType');
+        const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
+        const materialStatusToggle = document.getElementById('inpMaterialStatusToggle');
+        const status = (materialStatusToggle && materialStatusToggle.checked) ? "Active" : "In - Active";
+
+        const newRecord = {
+          id: `mat-${Date.now()}`,
+          materialCode,
+          materialHead,
+          materialCategory,
+          materialDescription,
+          type,
+          status
+        };
+
+        indusProductMaterialsData.push(newRecord);
+        loadIndusDataset();
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`Material ${materialCode} successfully saved & added to table!`);
+        return;
+      }
+
+      if (currentIndusSubpage === 'infra') {
+        const infraCategory = document.getElementById('inpInfraCategory')?.value || "KTN";
+        const infraDescription = document.getElementById('inpInfraDescription')?.value || "KTN";
+        const uom = document.getElementById('inpInfraUom')?.value || "R/RL-234567";
+        const make = document.getElementById('inpInfraMake')?.value || "R/RL-234567";
+        const commissioningToggle = document.getElementById('inpInfraCommissioningToggle');
+        const commissioning = (commissioningToggle && commissioningToggle.checked) ? "Yes" : "No";
+        const iMapToggle = document.getElementById('inpInfraIMapToggle');
+        const iMap = (iMapToggle && iMapToggle.checked) ? "Yes" : "No";
+        const infraStatusToggle = document.getElementById('inpInfraStatusToggle');
+        const status = (infraStatusToggle && infraStatusToggle.checked) ? "Active" : "In - Active";
+
+        const newRecord = {
+          id: `indus-infra-${Date.now()}`,
+          infraCategory,
+          infraDescription,
+          uom,
+          make,
+          commissioning,
+          iMap,
+          status
+        };
+
+        indusInfraData.push(newRecord);
+        loadIndusDataset();
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`Infra Category ${infraCategory} successfully saved & added to table!`);
+        return;
+      }
+
+      const circle = document.getElementById('inpInfraCircle')?.value || "KTN";
+      const siteId = document.getElementById('inpInfraSiteId')?.value || `23051068${currentDataset.length + 1}`;
+      const whId = document.getElementById('inpInfraWhId')?.value || "KTN";
+      const siteName = document.getElementById('inpInfraSiteName')?.value || "New Site";
+      const district = document.getElementById('inpInfraDistrict')?.value || "Chennai";
+      const town = document.getElementById('inpInfraTown')?.value || "";
+      const latitude = document.getElementById('inpInfraLatitude')?.value || "13.0000° N";
+      const longitude = document.getElementById('inpInfraLongitude')?.value || "80.0000° E";
+      const transportZone = document.getElementById('inpInfraTransportZone')?.value || "";
+      const infraStatusToggle = document.getElementById('inpInfraStatusToggle');
       const status = (infraStatusToggle && infraStatusToggle.checked) ? "Active" : "In - Active";
 
       const newRecord = {
@@ -1576,7 +2454,6 @@ function initSideFormEvents() {
 
       if (currentIndusSubpage === 'site') indusSiteData.push(newRecord);
       else if (currentIndusSubpage === 'products') indusProductsData.push(newRecord);
-      else if (currentIndusSubpage === 'infra') indusInfraData.push(newRecord);
       else if (currentIndusSubpage === 'projects') indusProjectsData.push(newRecord);
 
       loadIndusDataset();
@@ -1704,11 +2581,21 @@ function initSideFormEvents() {
 
   const btnSubmitCustomer = document.getElementById('btnSubmitCustomer');
   const btnSubmitInfra = document.getElementById('btnSubmitInfra');
+  const btnSubmitProject = document.getElementById('btnSubmitProject');
+  const btnSubmitMaterials = document.getElementById('btnSubmitMaterials');
+  const btnSubmitProductExpense = document.getElementById('btnSubmitProductExpense');
+  const btnSubmitProductInfra = document.getElementById('btnSubmitProductInfra');
+  const btnSubmitProductRate = document.getElementById('btnSubmitProductRate');
   const btnSubmitVendor = document.getElementById('btnSubmitVendor');
   const btnSubmitProduct = document.getElementById('btnSubmitProduct');
   const btnSubmitExpense = document.getElementById('btnSubmitExpense');
   if (btnSubmitCustomer) btnSubmitCustomer.addEventListener('click', handleFormSave);
   if (btnSubmitInfra) btnSubmitInfra.addEventListener('click', handleFormSave);
+  if (btnSubmitProject) btnSubmitProject.addEventListener('click', handleFormSave);
+  if (btnSubmitMaterials) btnSubmitMaterials.addEventListener('click', handleFormSave);
+  if (btnSubmitProductExpense) btnSubmitProductExpense.addEventListener('click', handleFormSave);
+  if (btnSubmitProductInfra) btnSubmitProductInfra.addEventListener('click', handleFormSave);
+  if (btnSubmitProductRate) btnSubmitProductRate.addEventListener('click', handleFormSave);
   if (btnSubmitVendor) btnSubmitVendor.addEventListener('click', handleFormSave);
   if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
   if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
@@ -1721,6 +2608,56 @@ function initSideFormEvents() {
 
   const btnCloseExpenseForm = document.getElementById('btnCloseExpenseForm');
   if (btnCloseExpenseForm) btnCloseExpenseForm.addEventListener('click', closeSideForm);
+
+  const btnCloseProjectForm = document.getElementById('btnCloseProjectForm');
+  if (btnCloseProjectForm) btnCloseProjectForm.addEventListener('click', closeSideForm);
+
+  const btnCloseMaterialsForm = document.getElementById('btnCloseMaterialsForm');
+  if (btnCloseMaterialsForm) btnCloseMaterialsForm.addEventListener('click', closeSideForm);
+
+  const btnCloseProductExpenseForm = document.getElementById('btnCloseProductExpenseForm');
+  if (btnCloseProductExpenseForm) btnCloseProductExpenseForm.addEventListener('click', closeSideForm);
+
+  const btnCloseProductInfraForm = document.getElementById('btnCloseProductInfraForm');
+  if (btnCloseProductInfraForm) btnCloseProductInfraForm.addEventListener('click', closeSideForm);
+
+  const btnCloseProductRateForm = document.getElementById('btnCloseProductRateForm');
+  if (btnCloseProductRateForm) btnCloseProductRateForm.addEventListener('click', closeSideForm);
+
+  const btnProductRateEdit = document.getElementById('btnProductRateCardEdit');
+  if (btnProductRateEdit) {
+    btnProductRateEdit.addEventListener('click', () => {
+      showToast('Product Rate edit info mode activated');
+    });
+  }
+
+  const btnProductInfraEdit = document.getElementById('btnProductInfraCardEdit');
+  if (btnProductInfraEdit) {
+    btnProductInfraEdit.addEventListener('click', () => {
+      showToast('Product Infra edit info mode activated');
+    });
+  }
+
+  const btnProductExpenseEdit = document.getElementById('btnProductExpenseCardEdit');
+  if (btnProductExpenseEdit) {
+    btnProductExpenseEdit.addEventListener('click', () => {
+      showToast('Product Expense edit info mode activated');
+    });
+  }
+
+  const btnMaterialsEdit = document.getElementById('btnMaterialsCardEdit');
+  if (btnMaterialsEdit) {
+    btnMaterialsEdit.addEventListener('click', () => {
+      showToast('Materials edit info mode activated');
+    });
+  }
+
+  const btnProjectEdit = document.getElementById('btnProjectCardEdit');
+  if (btnProjectEdit) {
+    btnProjectEdit.addEventListener('click', () => {
+      showToast('Project Type edit info mode activated');
+    });
+  }
 
   const btnExpenseEdit = document.getElementById('btnExpenseCardEdit');
   if (btnExpenseEdit) {
@@ -1856,18 +2793,42 @@ function openSideForm() {
 
   const addCustomerCard = document.getElementById('addCustomerCard');
   const addInfraCard = document.getElementById('addInfraCard');
+  const addProjectCard = document.getElementById('addProjectCard');
+  const addMaterialsCard = document.getElementById('addMaterialsCard');
+  const addProductExpenseCard = document.getElementById('addProductExpenseCard');
+  const addProductInfraCard = document.getElementById('addProductInfraCard');
+  const addProductRateCard = document.getElementById('addProductRateCard');
   const addVendorCard = document.getElementById('addVendorCard');
   const addProductCard = document.getElementById('addProductCard');
   const addExpenseCard = document.getElementById('addExpenseCard');
 
   if (addCustomerCard) addCustomerCard.style.display = 'none';
   if (addInfraCard) addInfraCard.style.display = 'none';
+  if (addProjectCard) addProjectCard.style.display = 'none';
+  if (addMaterialsCard) addMaterialsCard.style.display = 'none';
+  if (addProductExpenseCard) addProductExpenseCard.style.display = 'none';
+  if (addProductInfraCard) addProductInfraCard.style.display = 'none';
+  if (addProductRateCard) addProductRateCard.style.display = 'none';
   if (addVendorCard) addVendorCard.style.display = 'none';
   if (addProductCard) addProductCard.style.display = 'none';
   if (addExpenseCard) addExpenseCard.style.display = 'none';
 
   if (currentModule === 'indus_towers') {
-    if (addInfraCard) addInfraCard.style.display = 'block';
+    if (currentIndusSubpage === 'product_details') {
+      if (currentIndusProductSubpage === 'rate') {
+        if (addProductRateCard) addProductRateCard.style.display = 'block';
+      } else if (currentIndusProductSubpage === 'infra') {
+        if (addProductInfraCard) addProductInfraCard.style.display = 'block';
+      } else if (currentIndusProductSubpage === 'expenses') {
+        if (addProductExpenseCard) addProductExpenseCard.style.display = 'block';
+      } else {
+        if (addMaterialsCard) addMaterialsCard.style.display = 'block';
+      }
+    } else if (currentIndusSubpage === 'projects') {
+      if (addProjectCard) addProjectCard.style.display = 'block';
+    } else {
+      if (addInfraCard) addInfraCard.style.display = 'block';
+    }
   } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
     if (addVendorCard) addVendorCard.style.display = 'block';
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
@@ -2027,6 +2988,19 @@ function getColumnDisplayName(colKey) {
     gstType: "GST Type",
     invoiceType: "Invoice Type",
     status: "Status",
+    infraCategory: "Infra Category",
+    infraDescription: "Infra Description",
+    make: "Make",
+    commissioning: "Commissioning",
+    iMap: "I - Map",
+    itemCode: "Item Code",
+    productName: "Product Name",
+    productType: "Product Type",
+    hsnSacType: "HSN / SAC Type",
+    hsnSacCode: "HSN / SAC Code",
+    activeRate: "Active Rate",
+    budgetPercent: "Budget %",
+    budgetAmount: "Budget Amount",
     vendorType: "Vendor Type",
     vendorId: "Vendor ID",
     vendorName: "Vendor Name",
@@ -2124,7 +3098,18 @@ function exportToCsv() {
   let headers = [];
   let rows = [];
 
-  if (currentModule === 'master') {
+  if (currentModule === 'indus_towers') {
+    if (currentIndusSubpage === 'infra') {
+      headers = ["Infra Category", "Infra Description", "Uom", "Make", "Commissioning", "I - Map", "Status"];
+      rows = filteredDataset.map(r => [r.infraCategory, r.infraDescription, r.uom, r.make, r.commissioning, r.iMap, r.status]);
+    } else if (currentIndusSubpage === 'products') {
+      headers = ["Item Code", "Product Name", "Product Type", "Product Description", "HSN / SAC Type", "HSN / SAC Code", "Active Rate", "Budget %", "Budget Amount", "Status"];
+      rows = filteredDataset.map(r => [r.itemCode, r.productName, r.productType, r.productDescription, r.hsnSacType, r.hsnSacCode, r.activeRate, r.budgetPercent, r.budgetAmount, r.status]);
+    } else {
+      headers = ["Circle", "Site ID", "WH ID", "Site Name", "District", "Town", "Lattitude", "Longtitude", "Transport Zone", "Status"];
+      rows = filteredDataset.map(r => [r.circle, r.siteId, r.whId, r.siteName, r.district, r.town, r.latitude, r.longitude, r.transportZone, r.status]);
+    }
+  } else if (currentModule === 'master') {
     if (currentMasterSubpage === 'customer') {
       headers = ["Business Type", "Customer ID", "Customer Name", "GST Number", "GST Type", "Invoice Type", "Status"];
       rows = filteredDataset.map(r => [r.businessType, r.customerId, r.customerName, r.gstNumber, r.gstType, r.invoiceType, r.status]);
@@ -2156,12 +3141,12 @@ function exportToCsv() {
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `nexus_${currentModule}_${currentMasterSubpage || currentWorklistView}_${Date.now()}.csv`);
+  link.setAttribute("download", `nexus_${currentModule}_${currentIndusSubpage || currentMasterSubpage || currentWorklistView}_${Date.now()}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
-  showToast(`Exported ${currentMasterSubpage.toUpperCase()} to CSV successfully!`);
+  showToast(`Exported ${(currentIndusSubpage || currentMasterSubpage).toUpperCase()} to CSV successfully!`);
 }
 
 // ==========================================================================

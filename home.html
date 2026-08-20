@@ -576,15 +576,12 @@
         <div class="side-form-card" id="addInfraCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Customer</div>
+            <div class="side-form-title-badge">Add Infra</div>
             <button type="button" class="side-form-close-btn" id="btnCloseInfraForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Mail+Phone & Edit) -->
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
           <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnInfraCardMessage" title="Toggle Contact & Communication">
-              <img src="icons/Mail_Phone.svg" alt="Mail and Phone" width="26" height="26">
-            </button>
             <button type="button" class="card-action-icon-btn" id="btnInfraCardEdit" title="Edit Info">
               <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
             </button>
@@ -592,100 +589,69 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddInfra" onsubmit="event.preventDefault();">
-            <!-- 1. Circle -->
+            <!-- 1. Infra Category -->
             <div class="form-row-group">
-              <label class="form-label" for="inpInfraCircle">Circle</label>
+              <label class="form-label" for="inpInfraCategory">Infra Category</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpInfraCircle">
-                  <option value="KTN" selected>KTN</option>
-                  <option value="KK">KK</option>
-                  <option value="AP">AP</option>
-                  <option value="TN">TN</option>
+                <input type="text" class="form-input-control" id="inpInfraCategory" placeholder="">
+              </div>
+            </div>
+
+            <!-- 2. Infra Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpInfraDescription">Infra Description</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpInfraDescription" placeholder="">
+              </div>
+            </div>
+
+            <!-- 3. Uom -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpInfraUom">Uom</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpInfraUom">
+                  <option value="" selected></option>
+                  <option value="R/RL-234567">R/RL-234567</option>
+                  <option value="Pcs">Pcs</option>
+                  <option value="Mtr">Mtr</option>
+                  <option value="Kg">Kg</option>
+                  <option value="Nos">Nos</option>
+                  <option value="Set">Set</option>
                 </select>
               </div>
             </div>
 
-            <!-- 2. Site ID -->
+            <!-- 4. Make -->
             <div class="form-row-group">
-              <label class="form-label" for="inpInfraSiteId">Site ID</label>
+              <label class="form-label" for="inpInfraMake">Make</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpInfraSiteId" value="230510679" placeholder="Enter Site ID">
+                <input type="text" class="form-input-control" id="inpInfraMake" placeholder="">
               </div>
             </div>
 
-            <!-- 3. WH ID (Blue Label) -->
+            <!-- 5. Commissioning -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpInfraWhId">WH ID</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpInfraWhId">
-                  <option value="KTN" selected>KTN</option>
-                  <option value="KK">KK</option>
-                  <option value="AP">AP</option>
-                </select>
+              <label class="form-label">Commissioning</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpInfraCommissioningToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
               </div>
             </div>
 
-            <!-- 4. Site Name -->
+            <!-- 6. I - Map -->
             <div class="form-row-group">
-              <label class="form-label" for="inpInfraSiteName">Site Name</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpInfraSiteName" placeholder="Enter Site Name">
+              <label class="form-label">I - Map</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpInfraIMapToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
               </div>
             </div>
 
-            <!-- 5. District (Blue Label) -->
-            <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpInfraDistrict">District</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpInfraDistrict">
-                  <option value="R/RL-234567" selected>R/RL-234567</option>
-                  <option value="Chennai North">Chennai North</option>
-                  <option value="Coimbatore">Coimbatore</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 6. Town (Blue Label) -->
-            <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpInfraTown">Town</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpInfraTown" placeholder="Enter Town">
-              </div>
-            </div>
-
-            <!-- 7. Site Address (Blue Label) -->
-            <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpInfraSiteAddress">Site Address</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpInfraSiteAddress" placeholder="Enter Site Address">
-              </div>
-            </div>
-
-            <!-- 8. Lattitude (Blue Label) -->
-            <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpInfraLatitude">Lattitude</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpInfraLatitude" placeholder="Enter Lattitude">
-              </div>
-            </div>
-
-            <!-- 9. Longtitude (Blue Label) -->
-            <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpInfraLongitude">Longtitude</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpInfraLongitude" placeholder="Enter Longtitude">
-              </div>
-            </div>
-
-            <!-- 10. Transport Zone (Blue Label) -->
-            <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpInfraTransportZone">Transport Zone</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpInfraTransportZone" placeholder="Enter Transport Zone">
-              </div>
-            </div>
-
-            <!-- 11. Status (Slide Toggle Switch) -->
+            <!-- 7. Status -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -693,13 +659,455 @@
                   <input type="checkbox" id="inpInfraStatusToggle" checked>
                   <span class="toggle-slide-slider"></span>
                 </label>
-                <span class="toggle-status-label" id="lblInfraFormStatus">Active</span>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab -->
+            <!-- Submit Checkmark Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
               <button type="button" class="btn-card-submit-inside" id="btnSubmitInfra" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1F. Indus / Project Type Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addProjectCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Project Type</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProjectForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnProjectCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProject" onsubmit="event.preventDefault();">
+            <!-- 1. Project Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectType">Project Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProjectType">
+                  <option value="" selected></option>
+                  <option value="KTN">KTN</option>
+                  <option value="KK">KK</option>
+                  <option value="AP">AP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Sub - Project Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpSubProjectType">Sub - Project Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpSubProjectType">
+                  <option value="" selected></option>
+                  <option value="KTN">KTN</option>
+                  <option value="KK">KK</option>
+                  <option value="AP">AP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. TAT -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectTat">TAT</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProjectTat" placeholder="">
+              </div>
+            </div>
+
+            <!-- 4. Indus PM -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpIndusPm">Indus PM</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpIndusPm">
+                  <option value="" selected></option>
+                  <option value="R/RL-234567">R/RL-234567</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. Indus SCM -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpIndusScm">Indus SCM</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpIndusScm">
+                  <option value="" selected></option>
+                  <option value="R/RL-234567">R/RL-234567</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. PM -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectPm">PM</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProjectPm">
+                  <option value="" selected></option>
+                  <option value="R/RL-234567">R/RL-234567</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 7. Survey -->
+            <div class="form-row-group">
+              <label class="form-label">Survey</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProjectSurveyToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 8. Additional Transport -->
+            <div class="form-row-group">
+              <label class="form-label">Additional Transport</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProjectTransportToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 9. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProjectStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProject" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1G. Indus / Materials Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addMaterialsCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Materials</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseMaterialsForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnMaterialsCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddMaterials" onsubmit="event.preventDefault();">
+            <!-- 1. Material Head -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpMaterialHead">Material Head</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpMaterialHead">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Material Category -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpMaterialCategory">Material Category</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpMaterialCategory">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Material Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpMaterialDescription">Material Description</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpMaterialDescription">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpMaterialType">Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpMaterialType">
+                  <option value="Parent / Child" selected>Parent / Child</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Child">Child</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpMaterialStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitMaterials" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1H. Indus / Product Details Add Expense Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addProductExpenseCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Expense</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProductExpenseForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnProductExpenseCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProductExpense" onsubmit="event.preventDefault();">
+            <!-- 1. Expense Head -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdExpenseHead">Expense Head</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProdExpenseHead">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Expense Category -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdExpenseCategory">Expense Category</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProdExpenseCategory">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Expense Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdExpenseDescription">Expense Description</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProdExpenseDescription">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdExpenseType">Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProdExpenseType">
+                  <option value="Parent / Child" selected>Parent / Child</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Child">Child</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProdExpenseStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductExpense" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1I. Indus / Product Details Add Infra Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addProductInfraCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Infra</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProductInfraForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnProductInfraCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProductInfra" onsubmit="event.preventDefault();">
+            <!-- 1. Infra Category -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdInfraCategory">Infra Category</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProdInfraCategory">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Infra Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdInfraDescription">Infra Description</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProdInfraDescription">
+                  <option value="" selected></option>
+                  <option value="230510678">230510678</option>
+                  <option value="230510679">230510679</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdInfraType">Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProdInfraType">
+                  <option value="Parent / Child" selected>Parent / Child</option>
+                  <option value="Parent">Parent</option>
+                  <option value="Child">Child</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProdInfraStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductInfra" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1J. Indus / Product Details Add Rate Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addProductRateCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Rate</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProductRateForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnProductRateCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProductRate" onsubmit="event.preventDefault();">
+            <!-- 1. From -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdRateFrom">From</label>
+              <div class="form-input-wrap">
+                <input type="date" class="form-input-control" id="inpProdRateFrom" value="2026-01-01">
+              </div>
+            </div>
+
+            <!-- 2. To -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdRateTo">To</label>
+              <div class="form-input-wrap">
+                <input type="date" class="form-input-control" id="inpProdRateTo" value="2026-12-31">
+              </div>
+            </div>
+
+            <!-- 3. GBPA Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdRateGbpa">GBPA Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProdRateGbpa" placeholder="" value="230510678">
+              </div>
+            </div>
+
+            <!-- 4. Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdRateType">Rate</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProdRateType" placeholder="" value="Parent">
+              </div>
+            </div>
+
+            <!-- 5. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProdRateStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductRate" title="Approve & Submit" aria-label="Submit">
                 <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
               </button>
             </div>

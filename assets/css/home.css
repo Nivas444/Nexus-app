@@ -239,6 +239,62 @@ body {
   line-height: 1.2;
 }
 
+/* Back Button Icon-Alone Styles (Green Banner Bar) */
+.banner-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-right: 12px;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  line-height: 1;
+}
+
+.banner-back-btn:hover {
+  transform: scale(1.18);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+
+.banner-back-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.toolbar-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f172a !important;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar-back-btn:hover {
+  background: #00cba0 !important;
+  color: #ffffff !important;
+  border-color: #00cba0 !important;
+  transform: translateX(-3px);
+  box-shadow: 0 3px 8px rgba(0, 203, 160, 0.3);
+}
+
+.toolbar-back-btn .back-arrow {
+  font-size: 1.15rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
 /* ==========================================================================
    3. FULL PAGE WORKSPACE LAYOUT
    ========================================================================== */

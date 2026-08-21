@@ -415,6 +415,44 @@ const indusProductRateData = [
   }
 ];
 
+let selectedProjectType = "Project Type";
+let currentIndusProjectTypeSubpage = "survey"; // 'survey' | 'transport'
+
+const indusProjectSurveyData = [
+  { id: "survey-1", description: "KTN" },
+  { id: "survey-2", description: "KK" }
+];
+
+const indusProjectTransportData = [
+  {
+    id: "transport-1",
+    itemCode: "KTN",
+    itemDescription: "KTN",
+    transportZone: "Zone 1",
+    qty: "1",
+    status: "Active"
+  },
+  {
+    id: "transport-2",
+    itemCode: "KK",
+    itemDescription: "KK",
+    transportZone: "Zone 2",
+    qty: "2",
+    status: "In - Active"
+  }
+];
+
+function openIndusProjectTypeDetails(projectTypeName) {
+  selectedProjectType = projectTypeName || "Project Type";
+  currentModule = 'indus_towers';
+  currentIndusSubpage = 'project_type_details';
+  currentIndusProjectTypeSubpage = 'survey';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to ${selectedProjectType} / Sub - Project Type`);
+}
+
 function openIndusProductDetails(productName) {
   currentModule = 'indus_towers';
   currentIndusSubpage = 'product_details';
@@ -615,8 +653,47 @@ function updateURL() {
 }
 
 // ==========================================================================
-// 2. MAIN APPLICATION RENDERER
+// 2. MAIN APPLICATION RENDERER & BACK NAVIGATION
 // ==========================================================================
+function goBackSubpage() {
+  if (currentModule === 'indus_towers') {
+    if (currentIndusSubpage === 'project_type_details') {
+      currentIndusSubpage = 'projects';
+      showToast('Returned to Projects');
+    } else if (currentIndusSubpage === 'product_details') {
+      currentIndusSubpage = 'products';
+      showToast('Returned to Products');
+    } else if (currentIndusSubpage === 'infra' || currentIndusSubpage === 'projects' || currentIndusSubpage === 'products') {
+      currentIndusSubpage = 'site';
+      showToast('Returned to Site');
+    } else {
+      currentModule = 'master';
+      currentMasterSubpage = 'customer';
+      showToast('Returned to Master Customer');
+    }
+  } else if (currentModule === 'master') {
+    if (currentMasterSubpage !== 'customer') {
+      currentMasterSubpage = 'customer';
+      showToast('Returned to Customer');
+    } else {
+      currentModule = 'worklist';
+      showToast('Returned to Worklist');
+    }
+  } else {
+    currentModule = 'indus_towers';
+    currentIndusSubpage = 'site';
+  }
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+}
+
+const universalBackBtnHtml = `
+  <button type="button" class="toolbar-icon-btn btn-back-action" id="btnUniversalBack" onclick="goBackSubpage()" data-tooltip="Go Back" aria-label="Go Back">
+    <img src="icons/Backward.svg" alt="Back" class="toolbar-icon-img" width="30" height="30">
+  </button>
+`;
+
 function renderApp() {
   const bannerTitle = document.getElementById('pageBannerTitle');
 
@@ -636,6 +713,8 @@ function renderApp() {
   } else if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'product_details') {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProductName || 'Product Name'}</span>`;
+    } else if (currentIndusSubpage === 'project_type_details') {
+      if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProjectType || 'Project Type'} / Sub - Project Type</span>`;
     } else {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">Indus Towers</span>`;
     }
@@ -680,6 +759,12 @@ function loadIndusDataset() {
     currentDataset = [...indusInfraData];
   } else if (currentIndusSubpage === 'projects') {
     currentDataset = [...indusProjectsData];
+  } else if (currentIndusSubpage === 'project_type_details') {
+    if (currentIndusProjectTypeSubpage === 'transport') {
+      currentDataset = [...indusProjectTransportData];
+    } else {
+      currentDataset = [...indusProjectSurveyData];
+    }
   } else if (currentIndusSubpage === 'product_details') {
     if (currentIndusProductSubpage === 'materials') {
       currentDataset = [...indusProductMaterialsData];
@@ -697,13 +782,13 @@ function renderIndusToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
-  if (currentIndusSubpage === 'product_details') {
-    // Product Details Toolbar: Single Blue Plus (+) on Right (Matching Image 1 Mockup)
+  if (currentIndusSubpage === 'product_details' || currentIndusSubpage === 'project_type_details') {
+    // Product Details / Project Type Details Toolbar: Backward Icon on Left + Single Blue Plus (+) on Right
     toolbar.innerHTML = `
-      <div class="toolbar-left"></div>
+      <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
         <!-- Blue Add (+) Button -->
-        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Material" aria-label="Add Material">
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Record" aria-label="Add Record">
           <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
         </button>
       </div>
@@ -714,10 +799,35 @@ function renderIndusToolbar() {
     return;
   }
 
-  if (currentIndusSubpage === 'infra') {
-    // Indus Towers Infra Toolbar: Orange Bulk Upload + Blue Plus (+) on Right (Matching Mockup)
+  if (currentIndusSubpage === 'products') {
+    // Indus Towers Products Toolbar: CSV Upload + Orange Bulk Upload on Right (No + Button)
     toolbar.innerHTML = `
-      <div class="toolbar-left"></div>
+      <div class="toolbar-left">${universalBackBtnHtml}</div>
+      <div class="toolbar-right">
+        <!-- Green CSV Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Orange Bulk Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
+          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
+      exportToCsv();
+    });
+    document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
+      showToast('Bulk Upload initiated');
+    });
+    return;
+  }
+
+  if (currentIndusSubpage === 'infra') {
+    // Indus Towers Infra Toolbar: Backward Icon on Left + Orange Bulk Upload + Blue Plus (+) on Right
+    toolbar.innerHTML = `
+      <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -730,13 +840,13 @@ function renderIndusToolbar() {
       </div>
     `;
   } else {
-    // Indus Towers Toolbar: CSV + Orange Bulk Upload + Blue Plus (+) on Right
+    // Indus Towers Toolbar (Site, Projects): Backward Icon on Left + CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
     toolbar.innerHTML = `
-      <div class="toolbar-left"></div>
+      <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
-        <!-- Green CSV Download Icon -->
-        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="Export CSV" aria-label="Export CSV">
-          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
+        <!-- Green CSV Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -922,6 +1032,54 @@ function renderIndusTableHead() {
           <th>Head / Description</th>
           <th>Category</th>
           <th>Status</th>
+        </tr>
+      `;
+    }
+    return;
+  }
+
+  if (currentIndusSubpage === 'project_type_details') {
+    if (currentIndusProjectTypeSubpage === 'transport') {
+      // 5 Columns Matching Transport Mockup: Item Code, Item Description, Transport Zone, Qty, Status
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th>
+            <div class="th-content-wrap">
+              <span>Item Code</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Item Description</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Transport Zone</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Qty</span>
+            </div>
+          </th>
+          <th>
+            <div class="th-content-wrap">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+    } else {
+      // 1 Column Header Matching Survey Mockup: Description
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="text-align: center;">
+            <div class="th-content-wrap" style="justify-content: center;">
+              <span>Description</span>
+            </div>
+          </th>
         </tr>
       `;
     }
@@ -1145,6 +1303,37 @@ function renderIndusFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
+  if (currentIndusSubpage === 'project_type_details') {
+    const projTypeSubpages = [
+      { key: 'survey', label: 'Survey' },
+      { key: 'transport', label: 'Transport' }
+    ];
+
+    footer.innerHTML = `
+      <div class="segmented-toggle-group master-segmented-group indus-segmented-group">
+        ${projTypeSubpages.map((sp, idx) => `
+          <button type="button" class="segmented-btn ${currentIndusProjectTypeSubpage === sp.key ? 'active' : ''}" data-projtype-subpage="${sp.key}">
+            ${sp.label}
+          </button>
+          ${idx < projTypeSubpages.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+        `).join('')}
+      </div>
+    `;
+
+    footer.querySelectorAll('.segmented-btn[data-projtype-subpage]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const spKey = btn.getAttribute('data-projtype-subpage');
+        if (currentIndusProjectTypeSubpage !== spKey) {
+          currentIndusProjectTypeSubpage = spKey;
+          activeColumnFilters = {};
+          renderApp();
+          showToast(`Switched to ${selectedProjectType} &bull; ${btn.textContent.trim()}`);
+        }
+      });
+    });
+    return;
+  }
+
   if (currentIndusSubpage === 'product_details') {
     const prodSubpages = [
       { key: 'materials', label: 'Materials' },
@@ -1231,14 +1420,31 @@ function renderMasterToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
-  if (currentMasterSubpage === 'vendor' || currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
-    // Toolbar: Green CSV Download + Orange Bulk Upload + Blue Add (+) Button on Right
+  if (currentMasterSubpage === 'employee') {
+    // Employee Toolbar: Green CSV Upload Icon on Right (No + icon, No Backward icon)
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
-        <!-- Green CSV Download Icon -->
-        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="Export CSV" aria-label="Export CSV">
-          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
+        <!-- Green CSV Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+    document.getElementById('btnMasterCsv')?.addEventListener('click', () => {
+      exportToCsv();
+    });
+    return;
+  }
+
+  if (currentMasterSubpage === 'vendor' || currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
+    // Toolbar: Green CSV Upload + Orange Bulk Upload + Blue Add (+) Button on Right (No Backward icon)
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <!-- Green CSV Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -1255,13 +1461,13 @@ function renderMasterToolbar() {
       showToast('Bulk Upload dialog opened');
     });
   } else {
-    // Master Toolbar: Green CSV Download + Blue Add (+) Button on Right
+    // Master Customer Toolbar: Green CSV Upload + Blue Add (+) Button on Right (No Backward icon)
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
-        <!-- Green CSV Download Icon -->
-        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="Export CSV" aria-label="Export CSV">
-          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
+        <!-- Green CSV Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
         <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New Record" aria-label="Add Record">
@@ -1588,8 +1794,8 @@ function renderWorklistToolbar() {
         <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
-        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="Export CSV" aria-label="Export CSV">
-          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="28" height="28">
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="CSV Upload" aria-label="CSV Upload">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="28" height="28">
         </button>
       </div>
     `;
@@ -1869,6 +2075,38 @@ function applyFiltersAndRender() {
       return;
     }
 
+    if (currentIndusSubpage === 'project_type_details') {
+      if (currentIndusProjectTypeSubpage === 'transport') {
+        // Render Transport Rows (Matching Uploaded Mockup: Item Code, Item Description, Transport Zone, Qty, Status)
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}">
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="showToast('Item Code: ${row.itemCode}'); return false;">${row.itemCode || ''}</a>
+              </td>
+              <td>${row.itemDescription || ''}</td>
+              <td>${row.transportZone || ''}</td>
+              <td>${row.qty || ''}</td>
+              <td class="td-center">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        // Render Survey Description Rows (Matching Uploaded Mockup: KTN, KK)
+        tbody.innerHTML = filteredDataset.map(row => {
+          return `
+            <tr data-row-id="${row.id}">
+              <td style="text-align: center;">${row.description || ''}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+      return;
+    }
+
     if (currentIndusSubpage === 'projects') {
       // Render Indus Towers -> Projects Rows (Matching Uploaded Mockup)
       tbody.innerHTML = filteredDataset.map(row => {
@@ -1878,7 +2116,7 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}">
             <td>
-              <a href="#" class="req-link td-link-blue" onclick="showToast('Project Type: ${row.projectType}'); return false;">${row.projectType || ''}</a>
+              <a href="#" class="req-link td-link-blue" onclick="openIndusProjectTypeDetails('${row.projectType}'); return false;">${row.projectType || ''}</a>
             </td>
             <td>${row.subProjectType || ''}</td>
             <td>${row.tat || ''}</td>
@@ -2121,7 +2359,7 @@ function renderPlaceholderModule() {
   const toolbar = document.getElementById('worklistToolbar');
   const footer = document.getElementById('worklistFooterBar');
 
-  if (toolbar) toolbar.innerHTML = '<div class="toolbar-left"></div><div class="toolbar-right"></div>';
+  if (toolbar) toolbar.innerHTML = `<div class="toolbar-left">${universalBackBtnHtml}</div><div class="toolbar-right"></div>`;
   if (thead) thead.innerHTML = '<tr><th>Module Overview</th><th>Status</th></tr>';
   if (tbody) tbody.innerHTML = `<tr><td colspan="2" class="empty-data-row">${currentModule.toUpperCase()} Module content will be configured here.</td></tr>`;
   if (footer) footer.innerHTML = '';
@@ -2143,9 +2381,14 @@ function initSideFormEvents() {
   const locationPanel = document.getElementById('locationDetailsSidePanel');
   const btnCloseInfra = document.getElementById('btnCloseInfraForm');
   const btnInfraMessage = document.getElementById('btnInfraCardMessage');
+  const btnCloseSite = document.getElementById('btnCloseSiteForm');
+  const btnSiteMessage = document.getElementById('btnSiteCardMessage');
+  const btnSubmitSite = document.getElementById('btnSubmitSite');
 
   if (btnClose) btnClose.addEventListener('click', closeSideForm);
   if (btnCloseInfra) btnCloseInfra.addEventListener('click', closeSideForm);
+  if (btnCloseSite) btnCloseSite.addEventListener('click', closeSideForm);
+  if (btnSubmitSite) btnSubmitSite.addEventListener('click', handleFormSave);
 
   if (overlay) {
     overlay.addEventListener('click', (e) => {
@@ -2171,6 +2414,21 @@ function initSideFormEvents() {
   // Toggle Contact & Mail Side Message Popup Next to Add Infra Card
   if (btnInfraMessage && contactPanel) {
     btnInfraMessage.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (locationPanel) locationPanel.style.display = 'none';
+      const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
+      contactPanel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        showToast('Contact & Communication popup opened');
+      } else {
+        showToast('Contact popup closed');
+      }
+    });
+  }
+
+  // Toggle Contact & Mail Side Message Popup Next to Add Site Card
+  if (btnSiteMessage && contactPanel) {
+    btnSiteMessage.addEventListener('click', (e) => {
       e.stopPropagation();
       if (locationPanel) locationPanel.style.display = 'none';
       const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
@@ -2288,6 +2546,45 @@ function initSideFormEvents() {
   // Submit / Save Actions
   function handleFormSave() {
     if (currentModule === 'indus_towers') {
+      if (currentIndusSubpage === 'project_type_details') {
+        if (currentIndusProjectTypeSubpage === 'transport') {
+          const itemCode = document.getElementById('inpProjectTransItemCode')?.value || "KTN";
+          const itemDescription = document.getElementById('inpProjectTransItemDesc')?.value || "KTN";
+          const zoneSelect = document.getElementById('inpProjectTransZone');
+          const transportZone = zoneSelect ? zoneSelect.value : "Zone 1";
+          const qty = document.getElementById('inpProjectTransQty')?.value || "1";
+          const statusToggle = document.getElementById('inpProjectTransStatusToggle');
+          const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+
+          const newRecord = {
+            id: `transport-${Date.now()}`,
+            itemCode,
+            itemDescription,
+            transportZone,
+            qty,
+            status
+          };
+          indusProjectTransportData.push(newRecord);
+          loadIndusDataset();
+          applyFiltersAndRender();
+          closeSideForm();
+          showToast(`Transport item ${itemCode} successfully saved!`);
+          return;
+        }
+
+        const descriptionInput = document.getElementById('inpProjectTypeDescription')?.value || "KTN";
+        const newRecord = {
+          id: `proj-desc-${Date.now()}`,
+          description: descriptionInput
+        };
+        indusProjectSurveyData.push(newRecord);
+        loadIndusDataset();
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`Record ${descriptionInput} successfully saved!`);
+        return;
+      }
+
       if (currentIndusSubpage === 'product_details') {
         if (currentIndusProductSubpage === 'rate') {
           const from = document.getElementById('inpProdRateFrom')?.value || "230510678";
@@ -2426,17 +2723,17 @@ function initSideFormEvents() {
         return;
       }
 
-      const circle = document.getElementById('inpInfraCircle')?.value || "KTN";
-      const siteId = document.getElementById('inpInfraSiteId')?.value || `23051068${currentDataset.length + 1}`;
-      const whId = document.getElementById('inpInfraWhId')?.value || "KTN";
-      const siteName = document.getElementById('inpInfraSiteName')?.value || "New Site";
-      const district = document.getElementById('inpInfraDistrict')?.value || "Chennai";
-      const town = document.getElementById('inpInfraTown')?.value || "";
-      const latitude = document.getElementById('inpInfraLatitude')?.value || "13.0000° N";
-      const longitude = document.getElementById('inpInfraLongitude')?.value || "80.0000° E";
-      const transportZone = document.getElementById('inpInfraTransportZone')?.value || "";
-      const infraStatusToggle = document.getElementById('inpInfraStatusToggle');
-      const status = (infraStatusToggle && infraStatusToggle.checked) ? "Active" : "In - Active";
+      const circle = document.getElementById('inpSiteCircle')?.value || document.getElementById('inpInfraCircle')?.value || "KTN";
+      const siteId = document.getElementById('inpSiteId')?.value || document.getElementById('inpInfraSiteId')?.value || `23051068${currentDataset.length + 1}`;
+      const whId = document.getElementById('inpSiteWhId')?.value || document.getElementById('inpInfraWhId')?.value || "KTN";
+      const siteName = document.getElementById('inpSiteName')?.value || document.getElementById('inpInfraSiteName')?.value || "New Site";
+      const district = document.getElementById('inpSiteDistrict')?.value || document.getElementById('inpInfraDistrict')?.value || "Chennai";
+      const town = document.getElementById('inpSiteTown')?.value || document.getElementById('inpInfraTown')?.value || "";
+      const latitude = document.getElementById('inpSiteLattitude')?.value || document.getElementById('inpInfraLatitude')?.value || "13.0000° N";
+      const longitude = document.getElementById('inpSiteLongtitude')?.value || document.getElementById('inpInfraLongitude')?.value || "80.0000° E";
+      const transportZone = document.getElementById('inpSiteTransportZone')?.value || document.getElementById('inpInfraTransportZone')?.value || "";
+      const siteStatusToggle = document.getElementById('inpSiteStatusToggle') || document.getElementById('inpInfraStatusToggle');
+      const status = (siteStatusToggle && siteStatusToggle.checked) ? "Active" : "In - Active";
 
       const newRecord = {
         id: `indus-${Date.now()}`,
@@ -2586,6 +2883,8 @@ function initSideFormEvents() {
   const btnSubmitProductExpense = document.getElementById('btnSubmitProductExpense');
   const btnSubmitProductInfra = document.getElementById('btnSubmitProductInfra');
   const btnSubmitProductRate = document.getElementById('btnSubmitProductRate');
+  const btnSubmitProjectType = document.getElementById('btnSubmitProjectType');
+  const btnSubmitProjectTransport = document.getElementById('btnSubmitProjectTransport');
   const btnSubmitVendor = document.getElementById('btnSubmitVendor');
   const btnSubmitProduct = document.getElementById('btnSubmitProduct');
   const btnSubmitExpense = document.getElementById('btnSubmitExpense');
@@ -2596,6 +2895,8 @@ function initSideFormEvents() {
   if (btnSubmitProductExpense) btnSubmitProductExpense.addEventListener('click', handleFormSave);
   if (btnSubmitProductInfra) btnSubmitProductInfra.addEventListener('click', handleFormSave);
   if (btnSubmitProductRate) btnSubmitProductRate.addEventListener('click', handleFormSave);
+  if (btnSubmitProjectType) btnSubmitProjectType.addEventListener('click', handleFormSave);
+  if (btnSubmitProjectTransport) btnSubmitProjectTransport.addEventListener('click', handleFormSave);
   if (btnSubmitVendor) btnSubmitVendor.addEventListener('click', handleFormSave);
   if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
   if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
@@ -2623,6 +2924,26 @@ function initSideFormEvents() {
 
   const btnCloseProductRateForm = document.getElementById('btnCloseProductRateForm');
   if (btnCloseProductRateForm) btnCloseProductRateForm.addEventListener('click', closeSideForm);
+
+  const btnCloseProjectTypeForm = document.getElementById('btnCloseProjectTypeForm');
+  if (btnCloseProjectTypeForm) btnCloseProjectTypeForm.addEventListener('click', closeSideForm);
+
+  const btnCloseProjectTransportForm = document.getElementById('btnCloseProjectTransportForm');
+  if (btnCloseProjectTransportForm) btnCloseProjectTransportForm.addEventListener('click', closeSideForm);
+
+  const btnProjectTransportEdit = document.getElementById('btnProjectTransportCardEdit');
+  if (btnProjectTransportEdit) {
+    btnProjectTransportEdit.addEventListener('click', () => {
+      showToast('Project Transport edit info mode activated');
+    });
+  }
+
+  const btnProjectTypeEdit = document.getElementById('btnProjectTypeCardEdit');
+  if (btnProjectTypeEdit) {
+    btnProjectTypeEdit.addEventListener('click', () => {
+      showToast('Project Type edit info mode activated');
+    });
+  }
 
   const btnProductRateEdit = document.getElementById('btnProductRateCardEdit');
   if (btnProductRateEdit) {
@@ -2792,29 +3113,41 @@ function openSideForm() {
   if (!overlay) return;
 
   const addCustomerCard = document.getElementById('addCustomerCard');
+  const addSiteCard = document.getElementById('addSiteCard');
   const addInfraCard = document.getElementById('addInfraCard');
   const addProjectCard = document.getElementById('addProjectCard');
   const addMaterialsCard = document.getElementById('addMaterialsCard');
   const addProductExpenseCard = document.getElementById('addProductExpenseCard');
   const addProductInfraCard = document.getElementById('addProductInfraCard');
   const addProductRateCard = document.getElementById('addProductRateCard');
+  const addProjectTypeCard = document.getElementById('addProjectTypeCard');
+  const addProjectTransportCard = document.getElementById('addProjectTransportCard');
   const addVendorCard = document.getElementById('addVendorCard');
   const addProductCard = document.getElementById('addProductCard');
   const addExpenseCard = document.getElementById('addExpenseCard');
 
   if (addCustomerCard) addCustomerCard.style.display = 'none';
+  if (addSiteCard) addSiteCard.style.display = 'none';
   if (addInfraCard) addInfraCard.style.display = 'none';
   if (addProjectCard) addProjectCard.style.display = 'none';
   if (addMaterialsCard) addMaterialsCard.style.display = 'none';
   if (addProductExpenseCard) addProductExpenseCard.style.display = 'none';
   if (addProductInfraCard) addProductInfraCard.style.display = 'none';
   if (addProductRateCard) addProductRateCard.style.display = 'none';
+  if (addProjectTypeCard) addProjectTypeCard.style.display = 'none';
+  if (addProjectTransportCard) addProjectTransportCard.style.display = 'none';
   if (addVendorCard) addVendorCard.style.display = 'none';
   if (addProductCard) addProductCard.style.display = 'none';
   if (addExpenseCard) addExpenseCard.style.display = 'none';
 
   if (currentModule === 'indus_towers') {
-    if (currentIndusSubpage === 'product_details') {
+    if (currentIndusSubpage === 'project_type_details') {
+      if (currentIndusProjectTypeSubpage === 'transport') {
+        if (addProjectTransportCard) addProjectTransportCard.style.display = 'block';
+      } else {
+        if (addProjectTypeCard) addProjectTypeCard.style.display = 'block';
+      }
+    } else if (currentIndusSubpage === 'product_details') {
       if (currentIndusProductSubpage === 'rate') {
         if (addProductRateCard) addProductRateCard.style.display = 'block';
       } else if (currentIndusProductSubpage === 'infra') {
@@ -2826,8 +3159,12 @@ function openSideForm() {
       }
     } else if (currentIndusSubpage === 'projects') {
       if (addProjectCard) addProjectCard.style.display = 'block';
-    } else {
+    } else if (currentIndusSubpage === 'infra') {
       if (addInfraCard) addInfraCard.style.display = 'block';
+    } else if (currentIndusSubpage === 'site') {
+      if (addSiteCard) addSiteCard.style.display = 'block';
+    } else {
+      if (addSiteCard) addSiteCard.style.display = 'block';
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
     if (addVendorCard) addVendorCard.style.display = 'block';

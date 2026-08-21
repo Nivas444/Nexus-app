@@ -76,7 +76,6 @@
     </div>
   </nav>
 
-  <!-- Green Title Sub-Header Banner (Work List / Company Name) -->
   <header class="worklist-banner">
     <div class="worklist-banner-inner">
       <h1 class="worklist-banner-title" id="pageBannerTitle">Work List</h1>
@@ -173,9 +172,8 @@
               <label class="form-label" for="inpGstNumber">GST Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpGstNumber" value="33ASMPM8643F">
-                <span class="input-pdf-badge" title="Upload/View PDF">
-                  <span class="pdf-up-arrow">&uarr;</span>
-                  <span class="pdf-tag">PDF</span>
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>
@@ -185,9 +183,8 @@
               <label class="form-label" for="inpPanNumber">PAN Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpPanNumber" value="33ASMPM8643F">
-                <span class="input-pdf-badge" title="Upload/View PDF">
-                  <span class="pdf-up-arrow">&uarr;</span>
-                  <span class="pdf-tag">PDF</span>
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>
@@ -294,9 +291,8 @@
               <label class="form-label" for="inpVendorGstNumber">GST Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpVendorGstNumber" value="33ASMPM8643F">
-                <span class="input-pdf-badge" title="Upload/View PDF">
-                  <span class="pdf-up-arrow">&uarr;</span>
-                  <span class="pdf-tag">PDF</span>
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>
@@ -314,9 +310,8 @@
               <label class="form-label" for="inpVendorPanNumber">PAN Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpVendorPanNumber" value="ASMPM8643F">
-                <span class="input-pdf-badge" title="Upload/View PDF">
-                  <span class="pdf-up-arrow">&uarr;</span>
-                  <span class="pdf-tag">PDF</span>
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>
@@ -1115,6 +1110,251 @@
           </form>
         </div>
 
+        <!-- 1K. Indus / Project Type Details Add Project Type Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addProjectTypeCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Survey</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProjectTypeForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnProjectTypeCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProjectType" onsubmit="event.preventDefault();">
+            <!-- 1. Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectTypeDescription">Description</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProjectTypeDescription" placeholder="">
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectType" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1L. Indus / Project Type Details Add Transport Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addProjectTransportCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Transport</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProjectTransportForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnProjectTransportCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProjectTransport" onsubmit="event.preventDefault();">
+            <!-- 1. Item Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectTransItemCode">Item Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProjectTransItemCode" placeholder="" value="KTN">
+              </div>
+            </div>
+
+            <!-- 2. Item Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectTransItemDesc">Item Description</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProjectTransItemDesc" placeholder="" value="KTN">
+              </div>
+            </div>
+
+            <!-- 3. Transport Zone -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectTransZone">Transport Zone</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProjectTransZone">
+                  <option value="Zone 1" selected>Zone 1</option>
+                  <option value="Zone 2">Zone 2</option>
+                  <option value="Zone 3">Zone 3</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Qty -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectTransQty">Qty</label>
+              <div class="form-input-wrap">
+                <input type="number" class="form-input-control" id="inpProjectTransQty" placeholder="" value="1">
+              </div>
+            </div>
+
+            <!-- 5. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpProjectTransStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectTransport" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- 1H. Indus / Site Form Card (Add Sites Modal matching uploaded mockup) -->
+        <div class="side-form-card" id="addSiteCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Sites</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseSiteForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right (Mail+Phone & Edit) -->
+          <div class="side-form-top-icons">
+            <button type="button" class="card-action-icon-btn" id="btnSiteCardMessage" title="Toggle Contact & Communication">
+              <img src="icons/Mail_Phone.svg" alt="Mail and Phone" width="26" height="26">
+            </button>
+            <button type="button" class="card-action-icon-btn" id="btnSiteCardEdit" title="Edit Info">
+              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
+            </button>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddSite" onsubmit="event.preventDefault();">
+            <!-- 1. Circle -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpSiteCircle">Circle</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpSiteCircle">
+                  <option value="" selected></option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="TN">TN</option>
+                  <option value="Bangalore">Bangalore</option>
+                  <option value="Mumbai">Mumbai</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Site ID -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpSiteId">Site ID</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteId" placeholder="">
+              </div>
+            </div>
+
+            <!-- 3. WH ID (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpSiteWhId">WH ID</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpSiteWhId">
+                  <option value="" selected></option>
+                  <option value="WH-101">WH-101</option>
+                  <option value="WH-102">WH-102</option>
+                  <option value="WH-103">WH-103</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Site Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpSiteName">Site Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. District (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpSiteDistrict">District</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpSiteDistrict">
+                  <option value="" selected></option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="Kanchipuram">Kanchipuram</option>
+                  <option value="Tiruvallur">Tiruvallur</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. Town (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpSiteTown">Town</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteTown" placeholder="">
+              </div>
+            </div>
+
+            <!-- 7. Site Address (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpSiteAddress">Site Address</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteAddress" placeholder="">
+              </div>
+            </div>
+
+            <!-- 8. Lattitude (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpSiteLattitude">Lattitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteLattitude" placeholder="">
+              </div>
+            </div>
+
+            <!-- 9. Longtitude (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpSiteLongtitude">Longtitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteLongtitude" placeholder="">
+              </div>
+            </div>
+
+            <!-- 10. Transport Zone (Blue label) -->
+            <div class="form-row-group">
+              <label class="form-label form-label-blue" for="inpSiteTransportZone">Transport Zone</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteTransportZone" placeholder="">
+              </div>
+            </div>
+
+            <!-- 11. Status (Green Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpSiteStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitSite" title="Approve & Submit" aria-label="Submit">
+                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- 2. Contact & Communication Message Popup (Table View with Filters & Top Plus on Right) -->
         <div class="side-form-card side-contact-popup" id="contactDetailsSidePanel" style="display: none;">
           <!-- Top Toolbar: Plus Icon on Right Side (No Cross Button) -->
@@ -1253,9 +1493,8 @@
               <label class="form-label" for="inpBankAccountNumber">Account Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight bank-field-control" id="inpBankAccountNumber" value="33ASMPM8643F" readonly>
-                <span class="input-pdf-badge" title="Upload/View PDF">
-                  <span class="pdf-up-arrow">&uarr;</span>
-                  <span class="pdf-tag">PDF</span>
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>

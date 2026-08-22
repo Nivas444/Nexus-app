@@ -155,8 +155,8 @@ function initPasswordToggle() {
    4. MODALS CONTROLLER (Forgot Password & Register)
    -------------------------------------------------------------------------- */
 function initModals() {
-  // Modal triggers
   const btnForgotPwd = document.getElementById('btnForgotPassword');
+  const btnPwdKeyForgot = document.getElementById('btnPwdKeyForgot');
   const btnRegister = document.getElementById('btnRegister');
   const btnReadMore = document.getElementById('btnReadMore');
 
@@ -179,6 +179,13 @@ function initModals() {
 
   if (btnForgotPwd) {
     btnForgotPwd.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal(modalForgotPwd);
+    });
+  }
+
+  if (btnPwdKeyForgot) {
+    btnPwdKeyForgot.addEventListener('click', (e) => {
       e.preventDefault();
       openModal(modalForgotPwd);
     });

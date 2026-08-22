@@ -1787,21 +1787,25 @@ function renderWorklistToolbar() {
   } else {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 8px;">
-        <img src="icons/Payable.svg" alt="Payable" class="toolbar-icon-img" width="28" height="28">
+        <span class="toolbar-icon-wrap" data-tooltip="Payable Amount" title="Payable Amount" style="display: inline-flex; align-items: center; cursor: pointer;">
+          <img src="icons/Payable.svg" alt="Payable Amount" class="toolbar-icon-img" width="28" height="28">
+        </span>
         <span id="lblPayableAmount" class="toolbar-amount-text toolbar-amount-red">11,11,20,000.00</span>
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <div class="toolbar-bank-amount-wrap" style="display: flex; align-items: center; gap: 8px;">
-          <img src="icons/Bank.svg" alt="Bank Details" class="toolbar-icon-img" width="28" height="28">
+          <span class="toolbar-icon-wrap" data-tooltip="Bank" title="Bank" style="display: inline-flex; align-items: center; cursor: pointer;">
+            <img src="icons/Bank.svg" alt="Bank" class="toolbar-icon-img" width="28" height="28">
+          </span>
           <span id="lblBankAmount" class="toolbar-amount-text toolbar-amount-green">11,11,20,000.00</span>
         </div>
-        <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPaymentRefresh" title="Refresh" aria-label="Refresh">
+        <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPaymentRefresh" data-tooltip="Refresh" title="Refresh" aria-label="Refresh">
           <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
-        <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnPaymentDashboard" title="Dashboard" aria-label="Dashboard">
+        <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnPaymentDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard">
           <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="CSV Upload" aria-label="CSV Upload">

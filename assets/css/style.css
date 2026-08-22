@@ -369,23 +369,36 @@ body {
   padding: 0 16px 0 0;
 }
 
-/* Prevent Browser Autofill, Pasted, or Uploaded Text from Turning Background White */
+.input-lead-icon-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.input-lead-icon-btn:hover {
+  color: #ffffff;
+  transform: scale(1.15);
+}
+
+/* Prevent Browser Autofill Dark Green Box Patch Work */
 .auth-input:-webkit-autofill,
 .auth-input:-webkit-autofill:hover,
 .auth-input:-webkit-autofill:focus,
 .auth-input:-webkit-autofill:active,
 input.auth-input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px rgba(0, 168, 140, 0.95) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
   -webkit-text-fill-color: #ffffff !important;
-  box-shadow: 0 0 0 1000px rgba(0, 168, 140, 0.95) inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
   color: #ffffff !important;
   caret-color: #ffffff !important;
-  border-radius: var(--radius-input) !important;
-  transition: background-color 5000s ease-in-out 0s;
+  background-color: transparent !important;
+  transition: background-color 50000s ease-in-out 0s !important;
 }
 
 .auth-input:autofill {
-  background: rgba(0, 168, 140, 0.95) !important;
+  background: transparent !important;
   color: #ffffff !important;
 }
 
@@ -399,6 +412,18 @@ input.auth-input:-webkit-autofill {
 .auth-input:focus::placeholder {
   color: rgba(255, 255, 255, 0.4);
   transform: translateX(4px);
+}
+
+/* Remove browser default password reveal eye icon on right (Edge & WebKit) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Password Toggle Icon Button */
@@ -471,19 +496,19 @@ input.auth-input:-webkit-autofill {
   fill: none;
 }
 
-/* Right Side: Reduced Length Login Button */
+/* Full Width Login Button */
 .btn-auth-submit {
-  flex: 1;
-  max-width: 180px;
+  width: 100%;
+  max-width: 100%;
   height: 52px;
   background: #ffffff;
   color: var(--primary-green-dark);
   border: none;
   border-radius: var(--radius-pill);
   font-family: 'Outfit', sans-serif;
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -493,7 +518,6 @@ input.auth-input:-webkit-autofill {
   transition: var(--transition-spring);
   position: relative;
   overflow: hidden;
-  margin-left: auto;
 }
 
 .btn-auth-submit:hover {

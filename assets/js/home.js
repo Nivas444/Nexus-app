@@ -1425,7 +1425,7 @@ function renderMasterToolbar() {
   if (!toolbar) return;
 
   if (currentMasterSubpage === 'employee') {
-    // Employee Toolbar: Green CSV Upload Icon on Right (No + icon, No Backward icon)
+    // Employee Toolbar: Green CSV Upload Icon + Orange Bulk Upload Icon on Right
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
@@ -1433,10 +1433,17 @@ function renderMasterToolbar() {
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
           <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
+        <!-- Orange Bulk Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
+          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
       </div>
     `;
     document.getElementById('btnMasterCsv')?.addEventListener('click', () => {
       triggerCsvUpload();
+    });
+    document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
+      triggerBulkUpload();
     });
     return;
   }

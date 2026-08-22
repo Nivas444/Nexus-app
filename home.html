@@ -208,7 +208,20 @@
               </div>
             </div>
 
-            <!-- 9. Status (Real Slide Toggle Switch: Green ON, Red OFF - No wording) -->
+            <!-- 9. Circle Dropdown -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpCircle">Circle</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpCircle">
+                  <option value="KTN" selected>KTN</option>
+                  <option value="KK">KK</option>
+                  <option value="AP">AP</option>
+                  <option value="MP">MP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 10. Status (Real Slide Toggle Switch: Green ON, Red OFF - No wording) -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -250,13 +263,48 @@
               </div>
             </div>
 
-            <!-- 2. Vendor Type -->
+            <!-- 2. Business Type -->
             <div class="form-row-group">
-              <label class="form-label" for="inpVendorType">Vendor Type</label>
+              <label class="form-label" for="inpVendorType">Business Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpVendorType">
                   <option value="Supply" selected>Supply</option>
                   <option value="Service">Service</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Service Type Dropdown -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpServiceType">Service Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpServiceType">
+                  <option value="Project" selected>Project</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Audit">Audit</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- TDS Deduction Toggle Switch -->
+            <div class="form-row-group">
+              <label class="form-label">TDS Deduction</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpTdsDeductionToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- TDS Rate Dropdown -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpTdsRate">TDS Rate</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpTdsRate">
+                  <option value="1%" selected>1%</option>
+                  <option value="2%">2%</option>
+                  <option value="10%">10%</option>
                 </select>
               </div>
             </div>
@@ -519,11 +567,26 @@
             <div class="form-row-group">
               <label class="form-label" for="inpExpenseTdsRate">TDS Rate</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpExpenseTdsRate" value="1% / 2% / 10%">
+                <select class="form-select-control" id="inpExpenseTdsRate">
+                  <option value="1%" selected>1%</option>
+                  <option value="2%">2%</option>
+                  <option value="10%">10%</option>
+                </select>
               </div>
             </div>
 
-            <!-- 8. Status -->
+            <!-- 8. RCM Slidebar (Deactive Stage) -->
+            <div class="form-row-group">
+              <label class="form-label">RCM</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpExpenseRcmToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 9. Status -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -597,29 +660,29 @@
               </div>
             </div>
 
-            <!-- 5. Commissioning -->
+            <!-- 5. Commissioning (Disabled / Deactive Stage) -->
             <div class="form-row-group">
               <label class="form-label">Commissioning</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpInfraCommissioningToggle" checked>
+                  <input type="checkbox" id="inpInfraCommissioningToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- 6. I - Map -->
+            <!-- 6. I - Map (Disabled / Deactive Stage) -->
             <div class="form-row-group">
               <label class="form-label">I - Map</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpInfraIMapToggle" checked>
+                  <input type="checkbox" id="inpInfraIMapToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- 7. Status -->
+            <!-- 7. Status (Disabled / Deactive Stage) -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -720,29 +783,29 @@
               </div>
             </div>
 
-            <!-- 7. Survey -->
+            <!-- 7. Survey (Disabled / Deactive Stage) -->
             <div class="form-row-group">
               <label class="form-label">Survey</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProjectSurveyToggle" checked>
+                  <input type="checkbox" id="inpProjectSurveyToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- 8. Additional Transport -->
+            <!-- 8. Additional Transport (Disabled / Deactive Stage) -->
             <div class="form-row-group">
               <label class="form-label">Additional Transport</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProjectTransportToggle" checked>
+                  <input type="checkbox" id="inpProjectTransportToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- 9. Status -->
+            <!-- 9. Status (Disabled / Deactive Stage) -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -817,8 +880,7 @@
               <label class="form-label" for="inpMaterialType">Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpMaterialType">
-                  <option value="Parent / Child" selected>Parent / Child</option>
-                  <option value="Parent">Parent</option>
+                  <option value="Parent" selected>Parent</option>
                   <option value="Child">Child</option>
                 </select>
               </div>
@@ -899,8 +961,7 @@
               <label class="form-label" for="inpProdExpenseType">Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpProdExpenseType">
-                  <option value="Parent / Child" selected>Parent / Child</option>
-                  <option value="Parent">Parent</option>
+                  <option value="Parent" selected>Parent</option>
                   <option value="Child">Child</option>
                 </select>
               </div>
@@ -969,8 +1030,7 @@
               <label class="form-label" for="inpProdInfraType">Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpProdInfraType">
-                  <option value="Parent / Child" selected>Parent / Child</option>
-                  <option value="Parent">Parent</option>
+                  <option value="Parent" selected>Parent</option>
                   <option value="Child">Child</option>
                 </select>
               </div>
@@ -1013,16 +1073,22 @@
             <!-- 1. From -->
             <div class="form-row-group">
               <label class="form-label" for="inpProdRateFrom">From</label>
-              <div class="form-input-wrap">
-                <input type="date" class="form-input-control" id="inpProdRateFrom" value="2026-01-01">
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpProdRateFrom" value="2026-01-01" placeholder="YYYY-MM-DD">
+                <span class="input-pdf-badge" title="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
+                </span>
               </div>
             </div>
 
             <!-- 2. To -->
             <div class="form-row-group">
               <label class="form-label" for="inpProdRateTo">To</label>
-              <div class="form-input-wrap">
-                <input type="date" class="form-input-control" id="inpProdRateTo" value="2026-12-31">
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpProdRateTo" value="2026-12-31" placeholder="YYYY-MM-DD">
+                <span class="input-pdf-badge" title="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
+                </span>
               </div>
             </div>
 

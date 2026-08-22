@@ -1786,17 +1786,23 @@ function renderWorklistToolbar() {
     `;
   } else {
     toolbar.innerHTML = `
-      <div class="toolbar-left">
-        <button type="button" class="toolbar-sigma-btn" id="btnSigmaSummary" data-tooltip="Sum Amounts" aria-label="Summary">&Sigma;</button>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 8px;">
+        <img src="icons/Payable.svg" alt="Payable" class="toolbar-icon-img" width="28" height="28">
+        <span id="lblPayableAmount" class="toolbar-amount-text toolbar-amount-red">11,11,20,000.00</span>
       </div>
-      <div class="toolbar-right">
-        <button type="button" class="toolbar-icon-btn btn-info-action" id="btnInfoAction" data-tooltip="Record Details" aria-label="Information">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="#dc2626">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-          </svg>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <div class="toolbar-bank-amount-wrap" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/Bank.svg" alt="Bank Details" class="toolbar-icon-img" width="28" height="28">
+          <span id="lblBankAmount" class="toolbar-amount-text toolbar-amount-green">11,11,20,000.00</span>
+        </div>
+        <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPaymentRefresh" title="Refresh" aria-label="Refresh">
+          <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnPaymentDashboard" title="Dashboard" aria-label="Dashboard">
+          <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="CSV Upload" aria-label="CSV Upload">
           <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="28" height="28">
@@ -1917,23 +1923,31 @@ function renderWorklistFooter() {
 }
 
 function initWorklistToolbarEvents() {
-  document.getElementById('btnSigmaSummary')?.addEventListener('click', () => {
-    let total = 0;
-    filteredDataset.forEach(r => {
-      const val = parseFloat(r.approvedAmount || r.poAmount);
-      if (!isNaN(val)) total += val;
-    });
-    showToast(`Total Approved Amount: ₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${filteredDataset.length} Records)`);
+  document.getElementById('btnPaymentDashboard')?.addEventListener('click', () => {
+    showToast('Payment Dashboard opened');
   });
 
-  document.getElementById('btnInfoAction')?.addEventListener('click', () => {
-    const selected = filteredDataset.find(r => r.selected);
-    if (selected) {
-      showToast(`Selected: ${selected.submitBy || selected.submittedBy} | Amount: ₹${selected.approvedAmount || selected.poAmount}`);
-    } else {
-      showToast('Select a record to view details.');
-    }
-  });
+  const btnRefresh = document.getElementById('btnPaymentRefresh');
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', () => {
+      const img = btnRefresh.querySelector('img');
+      if (img) img.classList.add('spin-refresh-icon');
+
+      activeColumnFilters = {};
+      renderApp();
+
+      const lblPayable = document.getElementById('lblPayableAmount');
+      const lblBank = document.getElementById('lblBankAmount');
+      if (lblPayable) lblPayable.textContent = "11,11,20,000.00";
+      if (lblBank) lblBank.textContent = "11,11,20,000.00";
+
+      setTimeout(() => {
+        if (img) img.classList.remove('spin-refresh-icon');
+      }, 600);
+
+      showToast('Payment numbers & table data refreshed successfully!');
+    });
+  }
 
   document.getElementById('btnDeleteAction')?.addEventListener('click', () => {
     const selectedIndex = currentDataset.findIndex(r => r.selected);

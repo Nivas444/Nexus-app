@@ -448,7 +448,7 @@ body {
   border-right: none !important;
 }
 
-/* GREY TABLE HEADERS & NO VERTICAL LINES */
+/* GREY TABLE HEADERS WITH VERTICAL LINES (TABLE HEADER ALONE, NOT CONTENT ROWS) */
 .worklist-table-full thead th,
 .worklist-table-full thead tr th,
 .master-view-header th,
@@ -465,14 +465,22 @@ body {
   border: none !important;
   border-top: 1px solid #8e8e8e !important;
   border-bottom: 1px solid #8e8e8e !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.45) !important; /* VERTICAL LINE IN TABLE HEADER ALONE */
   border-left: none !important;
-  border-right: none !important;
   text-align: center;
   vertical-align: middle;
   letter-spacing: 0.3px;
   position: relative;
   user-select: none;
   white-space: nowrap;
+}
+
+.worklist-table-full thead th:last-child,
+.worklist-table-full thead tr th:last-child,
+.master-view-header th:last-child,
+.po-view-header th:last-child,
+.payment-view-header th:last-child {
+  border-right: none !important;
 }
 
 /* Product Details Bottom Segmented Sub-Navigation (Matching Image 2 Mockup) */

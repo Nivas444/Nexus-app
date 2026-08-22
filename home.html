@@ -130,8 +130,7 @@
               <label class="form-label" for="inpBusinessType">Business Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpBusinessType">
-                  <option value="Indus / Infra / Supply / Audit" selected>Indus / Infra / Supply / Audit</option>
-                  <option value="Indus">Indus</option>
+                  <option value="Indus" selected>Indus</option>
                   <option value="Infra">Infra</option>
                   <option value="Supply">Supply</option>
                   <option value="Audit">Audit</option>
@@ -214,16 +213,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpStatusToggle" checked>
+                  <input type="checkbox" id="inpStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab -->
+            <!-- Submit Save Button Inside Tab -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitCustomer" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitCustomer" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -238,18 +237,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseVendorForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Mail+Phone, Bank, Edit) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnVendorCardMessage" title="Toggle Contact & Communication">
-              <img src="icons/Mail_Phone.svg" alt="Mail and Phone" width="26" height="26">
-            </button>
-            <button type="button" class="card-action-icon-btn" id="btnVendorCardBank" title="Bank Details">
-              <img src="icons/Bank.svg" alt="Bank Details" width="24" height="24">
-            </button>
-            <button type="button" class="card-action-icon-btn" id="btnVendorCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddVendor" onsubmit="event.preventDefault();">
@@ -266,8 +255,7 @@
               <label class="form-label" for="inpVendorType">Vendor Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpVendorType">
-                  <option value="Supply / Service" selected>Supply / Service</option>
-                  <option value="Supply">Supply</option>
+                  <option value="Supply" selected>Supply</option>
                   <option value="Service">Service</option>
                 </select>
               </div>
@@ -278,7 +266,6 @@
               <label class="form-label form-label-blue" for="inpVendorGstType">GST Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpVendorGstType">
-                  <option value="NA / SGST / IGST" selected>NA / SGST / IGST</option>
                   <option value="NA">NA</option>
                   <option value="SGST">SGST</option>
                   <option value="IGST">IGST</option>
@@ -321,16 +308,16 @@
               <label class="form-label form-label-blue">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpVendorStatusToggle" checked>
+                  <input type="checkbox" id="inpVendorStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab -->
+            <!-- Submit Save Button Inside Tab -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitVendor" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVendor" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -345,12 +332,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseProductForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnProductCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProduct" onsubmit="event.preventDefault();">
@@ -425,10 +408,9 @@
               <label class="form-label" for="inpProductGstRate">GST Rate</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpProductGstRate">
-                  <option value="1% / 2% / 10%" selected>1% / 2% / 10%</option>
+                  <option value="18%" selected>18%</option>
                   <option value="5%">5%</option>
                   <option value="12%">12%</option>
-                  <option value="18%">18%</option>
                   <option value="28%">28%</option>
                 </select>
               </div>
@@ -439,16 +421,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProductStatusToggle" checked>
+                  <input type="checkbox" id="inpProductStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProduct" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProduct" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -463,12 +445,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseExpenseForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnExpenseCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddExpense" onsubmit="event.preventDefault();">
@@ -528,11 +506,10 @@
               <label class="form-label" for="inpExpenseGstRate">GST Rate</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpExpenseGstRate">
-                  <option value="0% / 5 % / 12% / 18%" selected>0% / 5 % / 12% / 18%</option>
+                  <option value="18%" selected>18%</option>
                   <option value="0%">0%</option>
                   <option value="5%">5%</option>
                   <option value="12%">12%</option>
-                  <option value="18%">18%</option>
                   <option value="28%">28%</option>
                 </select>
               </div>
@@ -551,16 +528,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpExpenseStatusToggle" checked>
+                  <input type="checkbox" id="inpExpenseStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitExpense" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitExpense" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -575,12 +552,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseInfraForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnInfraCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddInfra" onsubmit="event.preventDefault();">
@@ -651,16 +624,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpInfraStatusToggle" checked>
+                  <input type="checkbox" id="inpInfraStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitInfra" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitInfra" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -675,12 +648,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseProjectForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnProjectCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProject" onsubmit="event.preventDefault();">
@@ -778,16 +747,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProjectStatusToggle" checked>
+                  <input type="checkbox" id="inpProjectStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProject" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProject" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -802,12 +771,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseMaterialsForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnMaterialsCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddMaterials" onsubmit="event.preventDefault();">
@@ -864,16 +829,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpMaterialStatusToggle" checked>
+                  <input type="checkbox" id="inpMaterialStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitMaterials" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitMaterials" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -888,12 +853,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseProductExpenseForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnProductExpenseCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProductExpense" onsubmit="event.preventDefault();">
@@ -950,16 +911,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProdExpenseStatusToggle" checked>
+                  <input type="checkbox" id="inpProdExpenseStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductExpense" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductExpense" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -974,12 +935,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseProductInfraForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnProductInfraCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProductInfra" onsubmit="event.preventDefault();">
@@ -1024,16 +981,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProdInfraStatusToggle" checked>
+                  <input type="checkbox" id="inpProdInfraStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductInfra" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductInfra" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -1048,12 +1005,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseProductRateForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnProductRateCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProductRate" onsubmit="event.preventDefault();">
@@ -1094,16 +1047,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProdRateStatusToggle" checked>
+                  <input type="checkbox" id="inpProdRateStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductRate" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProductRate" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -1118,12 +1071,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseProjectTypeForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnProjectTypeCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProjectType" onsubmit="event.preventDefault();">
@@ -1135,10 +1084,10 @@
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectType" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectType" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -1153,12 +1102,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseProjectTransportForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Pencil Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnProjectTransportCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProjectTransport" onsubmit="event.preventDefault();">
@@ -1203,16 +1148,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProjectTransStatusToggle" checked>
+                  <input type="checkbox" id="inpProjectTransStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectTransport" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectTransport" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
 
@@ -1227,15 +1172,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseSiteForm" aria-label="Close form">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Mail+Phone & Edit) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnSiteCardMessage" title="Toggle Contact & Communication">
-              <img src="icons/Mail_Phone.svg" alt="Mail and Phone" width="26" height="26">
-            </button>
-            <button type="button" class="card-action-icon-btn" id="btnSiteCardEdit" title="Edit Info">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddSite" onsubmit="event.preventDefault();">
@@ -1340,16 +1278,16 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpSiteStatusToggle" checked>
+                  <input type="checkbox" id="inpSiteStatusToggle">
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
-            <!-- Submit Checkmark Button Inside Tab Centered -->
+            <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitSite" title="Approve & Submit" aria-label="Submit">
-                <img src="icons/Approve.svg" alt="Approve" width="34" height="34">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitSite" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
           </form>
@@ -1360,6 +1298,11 @@
           <!-- Top Toolbar: Plus Icon on Right Side (No Cross Button) -->
           <div class="contact-popup-toolbar">
             <div class="contact-toolbar-right">
+              <!-- Save Button -->
+              <button type="button" class="btn-filter-apply" id="btnSaveBankDetails" title="Save Bank Details">
+                <img src="icons/Save.svg" alt="Save" width="22" height="22">
+                Save
+              </button>
               <!-- Plus Icon Button -->
               <button type="button" class="btn-contact-tool" id="btnContactAddRow" title="Add Contact">
                 <img src="icons/Add.svg" alt="Add Contact" width="26" height="26">
@@ -1471,12 +1414,8 @@
             <button type="button" class="side-form-close-btn" id="btnCloseBankCard" aria-label="Close bank details">&times;</button>
           </div>
 
-          <!-- Decorative Action Icons on Top Right (Edit Icon Alone) -->
-          <div class="side-form-top-icons">
-            <button type="button" class="card-action-icon-btn" id="btnBankCardEdit" title="Edit Bank Details">
-              <img src="icons/Edit.svg" alt="Edit" width="20" height="20">
-            </button>
-          </div>
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmBankDetails" onsubmit="event.preventDefault();">

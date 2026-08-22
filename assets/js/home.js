@@ -816,7 +816,7 @@ function renderIndusToolbar() {
     `;
 
     document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
-      exportToCsv();
+      triggerCsvUpload();
     });
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
       showToast('Bulk Upload initiated');
@@ -860,7 +860,7 @@ function renderIndusToolbar() {
     `;
 
     document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
-      exportToCsv();
+      triggerCsvUpload();
     });
   }
 
@@ -1191,59 +1191,63 @@ function renderIndusTableHead() {
   } else if (currentIndusSubpage === 'products') {
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th rowspan="2">
+        <th>
           <div class="th-content-wrap">
             <span>Item Code</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemCode'] ? 'has-active-filter' : ''}" data-filter-col="itemCode" title="Filter Item Code">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2">
+        <th>
           <div class="th-content-wrap">
             <span>Product Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productName'] ? 'has-active-filter' : ''}" data-filter-col="productName" title="Filter Product Name">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2">
+        <th>
           <div class="th-content-wrap">
             <span>Product Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productType'] ? 'has-active-filter' : ''}" data-filter-col="productType" title="Filter Product Type">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2">
+        <th>
           <div class="th-content-wrap">
             <span>Product Description</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productDescription'] ? 'has-active-filter' : ''}" data-filter-col="productDescription" title="Filter Product Description">&#9660;</button>
           </div>
         </th>
-        <th colspan="2">
+        <th>
           <div class="th-content-wrap">
-            <span>HSN / SAC</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnSacCode'] ? 'has-active-filter' : ''}" data-filter-col="hsnSacCode" title="Filter HSN / SAC">&#9660;</button>
+            <span>Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnSacType'] ? 'has-active-filter' : ''}" data-filter-col="hsnSacType" title="Filter Type">&#9660;</button>
           </div>
         </th>
-        <th colspan="1">
+        <th>
           <div class="th-content-wrap">
-            <span>Active Rate</span>
+            <span>Code</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnSacCode'] ? 'has-active-filter' : ''}" data-filter-col="hsnSacCode" title="Filter Code">&#9660;</button>
           </div>
         </th>
-        <th colspan="2">
+        <th>
           <div class="th-content-wrap">
-            <span>Budget</span>
+            <span>Active Rate (₹)</span>
           </div>
         </th>
-        <th rowspan="2">
+        <th>
+          <div class="th-content-wrap">
+            <span>Budget %</span>
+          </div>
+        </th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Budget (₹)</span>
+          </div>
+        </th>
+        <th>
           <div class="th-content-wrap">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
         </th>
-      </tr>
-      <tr class="tr-sub-headers master-view-header">
-        <th>Type</th>
-        <th>Code</th>
-        <th>₹</th>
-        <th>%</th>
-        <th>₹</th>
       </tr>
     `;
   } else {
@@ -1432,7 +1436,7 @@ function renderMasterToolbar() {
       </div>
     `;
     document.getElementById('btnMasterCsv')?.addEventListener('click', () => {
-      exportToCsv();
+      triggerCsvUpload();
     });
     return;
   }
@@ -1482,7 +1486,7 @@ function renderMasterToolbar() {
   });
 
   document.getElementById('btnMasterCsv')?.addEventListener('click', () => {
-    exportToCsv();
+    triggerCsvUpload();
   });
 }
 
@@ -1978,23 +1982,17 @@ function applyFiltersAndRender() {
   if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'product_details') {
       if (currentIndusProductSubpage === 'materials') {
-        // Render Product Details -> Materials Rows (Matching Image 1 Uploaded Mockup)
+        // Render Product Details -> Materials Rows (Only Material Head is blue link)
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Code: ${row.materialCode}'); return false;">${row.materialCode || ''}</a>
-              </td>
+              <td>${row.materialCode || ''}</td>
               <td>
                 <a href="#" class="req-link td-link-blue" onclick="showToast('Material Head: ${row.materialHead}'); return false;">${row.materialHead || ''}</a>
               </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Category: ${row.materialCategory}'); return false;">${row.materialCategory || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Description: ${row.materialDescription}'); return false;">${row.materialDescription || ''}</a>
-              </td>
+              <td>${row.materialCategory || ''}</td>
+              <td>${row.materialDescription || ''}</td>
               <td>${row.type || ''}</td>
               <td class="td-center">
                 <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
@@ -3502,3 +3500,124 @@ function showToast(message) {
     toast.classList.remove('show');
   }, 3500);
 }
+
+// ==========================================================================
+// 10. CSV & PDF NATIVE FILE UPLOAD ENGINE (Filters strictly .csv and .pdf)
+// ==========================================================================
+function triggerCsvUpload() {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.csv, text/csv';
+  fileInput.style.display = 'none';
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileName = file.name;
+      const ext = fileName.split('.').pop().toLowerCase();
+      if (ext !== 'csv') {
+        showToast('Invalid file format. Please select a .csv file');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        showToast(`CSV File "${fileName}" uploaded successfully!`);
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  document.body.appendChild(fileInput);
+  fileInput.click();
+  setTimeout(() => {
+    if (document.body.contains(fileInput)) {
+      document.body.removeChild(fileInput);
+    }
+  }, 1000);
+}
+
+function triggerPdfUpload(targetInput) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.pdf, application/pdf';
+  fileInput.style.display = 'none';
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileName = file.name;
+      const ext = fileName.split('.').pop().toLowerCase();
+      if (ext !== 'pdf') {
+        showToast('Invalid file format. Please select a .pdf file');
+        return;
+      }
+      if (targetInput) {
+        if (typeof targetInput === 'string') {
+          const el = document.getElementById(targetInput);
+          if (el) el.value = fileName;
+        } else if (targetInput instanceof HTMLElement) {
+          targetInput.value = fileName;
+        }
+      }
+      showToast(`PDF Document "${fileName}" uploaded successfully!`);
+    }
+  });
+
+  document.body.appendChild(fileInput);
+  fileInput.click();
+  setTimeout(() => {
+    if (document.body.contains(fileInput)) {
+      document.body.removeChild(fileInput);
+    }
+  }, 1000);
+}
+
+function triggerBulkUpload() {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.multiple = true;
+  fileInput.setAttribute('webkitdirectory', '');
+  fileInput.setAttribute('directory', '');
+  fileInput.style.display = 'none';
+
+  fileInput.addEventListener('change', (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      showToast(`Bulk Upload: ${files.length} file(s) selected from folder successfully!`);
+    }
+  });
+
+  document.body.appendChild(fileInput);
+  fileInput.click();
+  setTimeout(() => {
+    if (document.body.contains(fileInput)) {
+      document.body.removeChild(fileInput);
+    }
+  }, 1000);
+}
+
+// Global click delegation for PDF upload badges, CSV upload, and Bulk upload buttons
+document.addEventListener('click', (e) => {
+  const pdfBadge = e.target.closest('.input-pdf-badge');
+  if (pdfBadge) {
+    e.preventDefault();
+    const parentWrap = pdfBadge.closest('.form-input-wrap');
+    const associatedInput = parentWrap ? parentWrap.querySelector('input') : null;
+    triggerPdfUpload(associatedInput);
+    return;
+  }
+
+  const csvBtn = e.target.closest('.btn-csv-action, #btnIndusCsv, #btnMasterCsv, #btnCsvAction');
+  if (csvBtn) {
+    e.preventDefault();
+    triggerCsvUpload();
+    return;
+  }
+
+  const bulkBtn = e.target.closest('.btn-doc-upload-action, #btnIndusDocUpload, #btnMasterDocUpload');
+  if (bulkBtn) {
+    e.preventDefault();
+    triggerBulkUpload();
+    return;
+  }
+});

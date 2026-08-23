@@ -610,23 +610,28 @@ body {
   width: 65px;
 }
 
-/* Payment Grouped Amount Headers */
-.th-amount-group {
-  background: #e2e8f0 !important;
-  color: #0f172a !important;
-  font-weight: 800;
+/* Payment Grouped Amount Headers - Solid Crisp White Horizontal Divider */
+th.th-amount-group,
+.payment-view-header th.th-amount-group {
+  background: #9e9e9e !important;
+  color: #ffffff !important;
+  font-weight: 700;
   border: none !important;
-  border-bottom: 1px solid #cbd5e1 !important;
+  border-bottom: 2px solid #ffffff !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
 
-.tr-sub-headers th {
-  background: #f1f5f9 !important;
-  color: #475569 !important;
-  font-size: 0.84rem;
-  font-weight: 600;
+tr.tr-sub-headers th,
+.payment-view-header tr.tr-sub-headers th {
+  background: #9e9e9e !important;
+  color: #ffffff !important;
+  font-size: 0.88rem;
+  font-weight: 700;
   padding: 8px 12px;
   border: none !important;
-  border-bottom: 1px solid #e2e8f0 !important;
+  border-top: 2px solid #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
 
 /* Table Body Rows - NO VERTICAL LINES */
@@ -951,6 +956,77 @@ body {
   flex-direction: column;
 }
 
+#addEmployeeCard,
+#addEmployeeCard.side-form-card-wide,
+.side-form-card-wide {
+  width: 860px !important;
+  min-width: 860px !important;
+  max-width: 96vw !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+#addEmployeeCard .side-form-body,
+.side-form-card-wide .side-form-body {
+  padding: 20px 24px 28px 24px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.side-form-body-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px 24px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.side-grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 0% !important;
+  box-sizing: border-box !important;
+}
+
+.side-form-body-grid .form-row-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0;
+  box-sizing: border-box !important;
+}
+
+.side-form-body-grid .form-label {
+  width: 130px !important;
+  min-width: 130px !important;
+  flex: 0 0 130px !important;
+  font-size: 0.83rem !important;
+  white-space: nowrap;
+}
+
+.side-form-body-grid .form-input-wrap {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.side-form-body-grid .form-input-control,
+.side-form-body-grid .form-select-control {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 /* Contact & Communication Side Message Popup (Table View) */
 .side-contact-popup {
   width: 580px;
@@ -1124,26 +1200,51 @@ body {
   padding: 10px 20px 4px 20px;
 }
 
-.card-action-icon-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
+.side-header-top-icons {
   display: flex;
   align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.side-top-icon-btn,
+.card-action-icon-btn,
+.side-form-top-icons button {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  padding: 4px;
-  border-radius: 6px;
-  transition: var(--transition-spring);
+  padding: 0 !important;
+  border-radius: 0 !important;
+  transition: transform 0.2s ease;
 }
 
-.card-action-icon-btn img {
+.side-top-icon-btn img,
+.card-action-icon-btn img,
+.side-form-top-icons button img {
   display: block;
-  transition: var(--transition-spring);
+  transition: transform 0.2s ease;
 }
 
-.card-action-icon-btn:hover {
+.side-top-icon-btn:hover,
+.card-action-icon-btn:hover,
+.side-form-top-icons button:hover {
   transform: scale(1.18);
-  background: rgba(0, 191, 165, 0.1);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.icon-blue {
+  filter: invert(36%) sepia(85%) saturate(1987%) hue-rotate(209deg) brightness(98%) contrast(93%);
+}
+
+.icon-green {
+  filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(118deg) brightness(95%) contrast(92%);
 }
 
 .form-textarea-control {
@@ -1348,6 +1449,56 @@ body {
   color: #1e293b;
   outline: none;
   transition: var(--transition);
+}
+
+.form-input-control {
+  width: 100%;
+  height: 38px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #1e293b;
+  font-family: inherit;
+  transition: var(--transition);
+  outline: none;
+}
+
+/* Hide native browser date icon visually while keeping input click trigger */
+.with-action-badge {
+  position: relative;
+}
+
+input[type="date"] {
+  position: relative;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #1e293b;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  background: transparent;
+  color: transparent;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
+
+input[type="date"].date-picker-control {
+  padding-right: 36px;
+  cursor: pointer;
 }
 
 .excel-filter-search-input:focus {

@@ -539,11 +539,11 @@ const paymentData = [
 ];
 
 // ==========================================================================
-// STATE MANAGEMENT (Default landing page: Worklist)
+// STATE MANAGEMENT (Default landing page: Worklist -> Payment)
 // ==========================================================================
 let currentModule = 'worklist'; // 'worklist' as default on login, or 'master'
-let currentWorklistView = 'po'; // 'po' or 'payment'
-let currentMasterSubpage = 'customer'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
+let currentWorklistView = 'payment'; // 'payment' or 'po'
+let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
 
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (subpageParam) {
       currentMasterSubpage = subpageParam;
     } else {
-      currentMasterSubpage = 'customer';
+      currentMasterSubpage = 'employee';
     }
   } else if (moduleParam === 'indus_towers') {
     currentModule = 'indus_towers';
@@ -576,12 +576,16 @@ document.addEventListener('DOMContentLoaded', () => {
     currentModule = moduleParam;
     if (viewParam === 'payment' || viewParam === 'po') {
       currentWorklistView = viewParam;
+    } else {
+      currentWorklistView = 'payment';
     }
   } else {
-    // Default after login is Worklist
+    // Default after login is Worklist -> Payment
     currentModule = 'worklist';
     if (viewParam === 'payment' || viewParam === 'po') {
       currentWorklistView = viewParam;
+    } else {
+      currentWorklistView = 'payment';
     }
   }
 
@@ -606,6 +610,12 @@ function initNavEventListeners() {
 function switchModule(moduleName) {
   currentModule = moduleName;
   activeColumnFilters = {};
+
+  if (moduleName === 'master') {
+    currentMasterSubpage = 'employee';
+  } else if (moduleName === 'worklist') {
+    currentWorklistView = 'payment';
+  }
 
   document.querySelectorAll('.nav-icon-item').forEach(btn => {
     btn.classList.remove('active-nav-tab');
@@ -1425,7 +1435,7 @@ function renderMasterToolbar() {
   if (!toolbar) return;
 
   if (currentMasterSubpage === 'employee') {
-    // Employee Toolbar: Green CSV Upload Icon + Orange Bulk Upload Icon on Right
+    // Employee Toolbar: Green CSV Upload Icon + Orange Bulk Upload Icon + Blue Add (+) Button on Right
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
@@ -1437,6 +1447,10 @@ function renderMasterToolbar() {
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
           <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
+        <!-- Blue Add (+) Button on Right Most Side -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New Employee" aria-label="Add Record">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
       </div>
     `;
     document.getElementById('btnMasterCsv')?.addEventListener('click', () => {
@@ -1444,6 +1458,9 @@ function renderMasterToolbar() {
     });
     document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
       triggerBulkUpload();
+    });
+    document.getElementById('btnMasterAdd')?.addEventListener('click', () => {
+      openSideForm();
     });
     return;
   }
@@ -1770,9 +1787,9 @@ function renderMasterFooter() {
 // ==========================================================================
 function loadWorklistDataset() {
   if (currentWorklistView === 'po') {
-    currentDataset = [...poData];
+    currentDataset = poData;
   } else {
-    currentDataset = [...paymentData];
+    currentDataset = paymentData;
   }
 }
 
@@ -1785,8 +1802,8 @@ function renderWorklistToolbar() {
   if (currentWorklistView === 'po') {
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
-      <div class="toolbar-right">
-        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
+      <div class="toolbar-right" style="display: flex; align-items: center; min-width: 44px; min-height: 44px; justify-content: flex-end;">
+        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="visibility: ${hasSelected ? 'visible' : 'hidden'}; pointer-events: ${hasSelected ? 'auto' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
       </div>
@@ -1806,9 +1823,6 @@ function renderWorklistToolbar() {
           </span>
           <span id="lblBankAmount" class="toolbar-amount-text toolbar-amount-green">11,11,20,000.00</span>
         </div>
-        <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPaymentRefresh" data-tooltip="Refresh" title="Refresh" aria-label="Refresh">
-          <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
-        </button>
         <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
@@ -2900,6 +2914,7 @@ function initSideFormEvents() {
   }
 
   const btnSubmitCustomer = document.getElementById('btnSubmitCustomer');
+  const btnSubmitEmployee = document.getElementById('btnSubmitEmployee');
   const btnSubmitInfra = document.getElementById('btnSubmitInfra');
   const btnSubmitProject = document.getElementById('btnSubmitProject');
   const btnSubmitMaterials = document.getElementById('btnSubmitMaterials');
@@ -2912,6 +2927,7 @@ function initSideFormEvents() {
   const btnSubmitProduct = document.getElementById('btnSubmitProduct');
   const btnSubmitExpense = document.getElementById('btnSubmitExpense');
   if (btnSubmitCustomer) btnSubmitCustomer.addEventListener('click', handleFormSave);
+  if (btnSubmitEmployee) btnSubmitEmployee.addEventListener('click', handleFormSave);
   if (btnSubmitInfra) btnSubmitInfra.addEventListener('click', handleFormSave);
   if (btnSubmitProject) btnSubmitProject.addEventListener('click', handleFormSave);
   if (btnSubmitMaterials) btnSubmitMaterials.addEventListener('click', handleFormSave);
@@ -2922,6 +2938,63 @@ function initSideFormEvents() {
   if (btnSubmitProjectTransport) btnSubmitProjectTransport.addEventListener('click', handleFormSave);
   if (btnSubmitVendor) btnSubmitVendor.addEventListener('click', handleFormSave);
   if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
+  if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
+
+  const btnCloseEmployeeForm = document.getElementById('btnCloseEmployeeForm');
+  if (btnCloseEmployeeForm) btnCloseEmployeeForm.addEventListener('click', closeSideForm);
+
+  // Photo Image Upload Handler
+  const btnEmpPhoto = document.getElementById('btnEmpPhotoUpload');
+  if (btnEmpPhoto) {
+    btnEmpPhoto.addEventListener('click', () => {
+      const imgInput = document.createElement('input');
+      imgInput.type = 'file';
+      imgInput.accept = 'image/*';
+      imgInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+          const photoPathInput = document.getElementById('inpEmpPhoto');
+          if (photoPathInput) photoPathInput.value = files[0].name;
+          showToast(`Selected photo: ${files[0].name}`);
+        }
+      });
+      imgInput.click();
+    });
+  }
+
+  // Qualification / PAN / Aadhar PDF Upload Handlers
+  document.querySelectorAll('.btn-emp-pdf-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const pdfInput = document.createElement('input');
+      pdfInput.type = 'file';
+      pdfInput.accept = '.pdf,application/pdf';
+      pdfInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+          showToast(`Uploaded PDF: ${files[0].name}`);
+        }
+      });
+      pdfInput.click();
+    });
+  });
+
+  // Calendar Trigger Handlers (Opens date/month/year picker)
+  document.querySelectorAll('.btn-emp-calendar-trigger, .input-pdf-badge[title*="Date"], .input-pdf-badge[title*="DOB"], .input-pdf-badge[title*="DOJ"]').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const input = trigger.parentElement.querySelector('input');
+      if (input) {
+        if (typeof input.showPicker === 'function') {
+          try {
+            input.showPicker();
+          } catch(e) {
+            input.focus();
+          }
+        } else {
+          input.focus();
+        }
+      }
+    });
+  });
   if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
 
   const btnCloseVendorForm = document.getElementById('btnCloseVendorForm');
@@ -3135,6 +3208,7 @@ function openSideForm() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
+  const addEmployeeCard = document.getElementById('addEmployeeCard');
   const addCustomerCard = document.getElementById('addCustomerCard');
   const addSiteCard = document.getElementById('addSiteCard');
   const addInfraCard = document.getElementById('addInfraCard');
@@ -3149,6 +3223,7 @@ function openSideForm() {
   const addProductCard = document.getElementById('addProductCard');
   const addExpenseCard = document.getElementById('addExpenseCard');
 
+  if (addEmployeeCard) addEmployeeCard.style.display = 'none';
   if (addCustomerCard) addCustomerCard.style.display = 'none';
   if (addSiteCard) addSiteCard.style.display = 'none';
   if (addInfraCard) addInfraCard.style.display = 'none';
@@ -3189,6 +3264,8 @@ function openSideForm() {
     } else {
       if (addSiteCard) addSiteCard.style.display = 'block';
     }
+  } else if (currentModule === 'master' && currentMasterSubpage === 'employee') {
+    if (addEmployeeCard) addEmployeeCard.style.display = 'block';
   } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
     if (addVendorCard) addVendorCard.style.display = 'block';
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
@@ -3198,6 +3275,11 @@ function openSideForm() {
   } else {
     if (addCustomerCard) addCustomerCard.style.display = 'block';
   }
+
+  // Reset all slidebar toggles to deactive stage (unchecked / OFF red) initially
+  document.querySelectorAll('#sideFormOverlay input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
 
   overlay.style.display = 'flex';
 }
@@ -3442,7 +3524,15 @@ function updateDeleteButtonVisibility() {
   const btnDel = document.getElementById('btnDeleteAction');
   if (btnDel) {
     const hasSelected = currentDataset.some(r => r.selected);
-    btnDel.style.display = hasSelected ? 'flex' : 'none';
+    if (currentWorklistView === 'po') {
+      btnDel.style.display = 'flex';
+      btnDel.style.visibility = hasSelected ? 'visible' : 'hidden';
+      btnDel.style.pointerEvents = hasSelected ? 'auto' : 'none';
+    } else {
+      btnDel.style.visibility = 'visible';
+      btnDel.style.pointerEvents = 'auto';
+      btnDel.style.display = hasSelected ? 'flex' : 'none';
+    }
   }
 }
 

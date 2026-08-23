@@ -382,6 +382,19 @@ body {
   transform: scale(1.15);
 }
 
+.reset-pwd-icon {
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.input-lead-icon-btn:hover .reset-pwd-icon {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
 /* Prevent Browser Autofill Dark Green Box Patch Work */
 .auth-input:-webkit-autofill,
 .auth-input:-webkit-autofill:hover,
@@ -504,7 +517,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   background: #ffffff;
   color: var(--primary-green-dark);
   border: none;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-input);
   font-family: 'Outfit', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;

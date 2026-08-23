@@ -672,7 +672,7 @@ function goBackSubpage() {
       showToast('Returned to Projects');
     } else if (currentIndusSubpage === 'product_details') {
       currentIndusSubpage = 'products';
-      showToast('Returned to Products');
+      showToast('Returned to GBPA');
     } else if (currentIndusSubpage === 'infra' || currentIndusSubpage === 'projects' || currentIndusSubpage === 'products') {
       currentIndusSubpage = 'site';
       showToast('Returned to Site');
@@ -810,7 +810,7 @@ function renderIndusToolbar() {
   }
 
   if (currentIndusSubpage === 'products') {
-    // Indus Towers Products Toolbar: CSV Upload + Orange Bulk Upload on Right (No + Button)
+    // Indus Towers GBPA Toolbar: CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
     toolbar.innerHTML = `
       <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
@@ -822,6 +822,10 @@ function renderIndusToolbar() {
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
           <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New GBPA" aria-label="Add GBPA">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
       </div>
     `;
 
@@ -830,6 +834,9 @@ function renderIndusToolbar() {
     });
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
       showToast('Bulk Upload initiated');
+    });
+    document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+      openSideForm();
     });
     return;
   }
@@ -1227,14 +1234,12 @@ function renderIndusTableHead() {
         </th>
         <th>
           <div class="th-content-wrap">
-            <span>Type</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnSacType'] ? 'has-active-filter' : ''}" data-filter-col="hsnSacType" title="Filter Type">&#9660;</button>
+            <span>HSN/SAC</span>
           </div>
         </th>
         <th>
           <div class="th-content-wrap">
-            <span>Code</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnSacCode'] ? 'has-active-filter' : ''}" data-filter-col="hsnSacCode" title="Filter Code">&#9660;</button>
+            <span>HSN/SAC Code</span>
           </div>
         </th>
         <th>
@@ -1383,7 +1388,7 @@ function renderIndusFooter() {
 
   const subpages = [
     { key: 'site', label: 'Site' },
-    { key: 'products', label: 'Products' },
+    { key: 'products', label: 'GBPA' },
     { key: 'infra', label: 'Infra' },
     { key: 'projects', label: 'Projects' }
   ];
@@ -2421,11 +2426,15 @@ function initSideFormEvents() {
   const btnCloseSite = document.getElementById('btnCloseSiteForm');
   const btnSiteMessage = document.getElementById('btnSiteCardMessage');
   const btnSubmitSite = document.getElementById('btnSubmitSite');
+  const btnCloseGbpa = document.getElementById('btnCloseGbpaForm');
+  const btnSubmitGbpa = document.getElementById('btnSubmitGbpa');
 
   if (btnClose) btnClose.addEventListener('click', closeSideForm);
   if (btnCloseInfra) btnCloseInfra.addEventListener('click', closeSideForm);
   if (btnCloseSite) btnCloseSite.addEventListener('click', closeSideForm);
+  if (btnCloseGbpa) btnCloseGbpa.addEventListener('click', closeSideForm);
   if (btnSubmitSite) btnSubmitSite.addEventListener('click', handleFormSave);
+  if (btnSubmitGbpa) btnSubmitGbpa.addEventListener('click', handleFormSave);
 
   if (overlay) {
     overlay.addEventListener('click', (e) => {
@@ -2757,6 +2766,40 @@ function initSideFormEvents() {
         applyFiltersAndRender();
         closeSideForm();
         showToast(`Infra Category ${infraCategory} successfully saved & added to table!`);
+        return;
+      }
+
+      if (currentIndusSubpage === 'products') {
+        const itemCode = document.getElementById('inpGbpaItemCode')?.value || "KTN";
+        const productName = document.getElementById('inpGbpaProductName')?.value || "230510678";
+        const productType = document.getElementById('inpGbpaProductType')?.value || "Capex";
+        const productDescription = document.getElementById('inpGbpaProductDescription')?.value || "KTN";
+        const uom = document.getElementById('inpGbpaUom')?.value || "Pcs";
+        const hsnSacType = document.getElementById('inpGbpaHsnSac')?.value || "HSN";
+        const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value || "R/RL-234567";
+        const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value || "95";
+        const statusToggle = document.getElementById('inpGbpaStatusToggle');
+        const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+
+        const newRecord = {
+          id: `gbpa-${Date.now()}`,
+          itemCode,
+          productName,
+          productType,
+          productDescription,
+          hsnSacType,
+          hsnSacCode,
+          activeRate: "11000.00",
+          budgetPercent,
+          budgetAmount: "11000.00",
+          status
+        };
+
+        indusProductsData.push(newRecord);
+        loadIndusDataset();
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`GBPA item ${itemCode} successfully saved & added to table!`);
         return;
       }
 
@@ -3156,22 +3199,98 @@ function initSideFormEvents() {
   }
 
   const btnVendorBank = document.getElementById('btnVendorCardBank');
-  if (btnVendorBank && bankPanel) {
-    btnVendorBank.addEventListener('click', (e) => {
+  const btnEmpBank = document.getElementById('btnEmpBankDetails');
+  
+  [btnVendorBank, btnEmpBank].forEach(btn => {
+    if (btn && bankPanel) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (contactPanel) contactPanel.style.display = 'none';
+        if (locationPanel) locationPanel.style.display = 'none';
+        if (salaryPanel) salaryPanel.style.display = 'none';
+        if (assetPanel) assetPanel.style.display = 'none';
+        const isHidden = bankPanel.style.display === 'none' || bankPanel.style.display === '';
+        bankPanel.style.display = isHidden ? 'flex' : 'none';
+        if (isHidden) {
+          showToast('Bank details opened');
+        } else {
+          showToast('Bank details closed');
+        }
+      });
+    }
+  });
+
+  const btnBankAddRow = document.getElementById('btnBankAddRow');
+  if (btnBankAddRow) {
+    btnBankAddRow.addEventListener('click', () => {
+      showToast('Add Bank Detail initiated');
+    });
+  }
+
+  const salaryPanel = document.getElementById('salaryDetailsSidePanel');
+  const assetPanel = document.getElementById('assetDetailsSidePanel');
+  const btnEmpSalary = document.getElementById('btnEmpSalaryDetails');
+  const btnEmpAsset = document.getElementById('btnEmpAssetDetails');
+  const btnCloseSalaryCard = document.getElementById('btnCloseSalaryCard');
+  const btnCloseAssetCard = document.getElementById('btnCloseAssetCard');
+
+  if (btnCloseSalaryCard && salaryPanel) {
+    btnCloseSalaryCard.addEventListener('click', () => {
+      salaryPanel.style.display = 'none';
+    });
+  }
+
+  if (btnCloseAssetCard && assetPanel) {
+    btnCloseAssetCard.addEventListener('click', () => {
+      assetPanel.style.display = 'none';
+    });
+  }
+
+  if (btnEmpSalary && salaryPanel) {
+    btnEmpSalary.addEventListener('click', (e) => {
       e.stopPropagation();
       if (contactPanel) contactPanel.style.display = 'none';
       if (locationPanel) locationPanel.style.display = 'none';
-      const isHidden = bankPanel.style.display === 'none' || bankPanel.style.display === '';
-      bankPanel.style.display = isHidden ? 'flex' : 'none';
+      if (bankPanel) bankPanel.style.display = 'none';
+      if (assetPanel) assetPanel.style.display = 'none';
+      const isHidden = salaryPanel.style.display === 'none' || salaryPanel.style.display === '';
+      salaryPanel.style.display = isHidden ? 'flex' : 'none';
       if (isHidden) {
-        const vendorNameVal = document.getElementById('inpVendorName')?.value;
-        const titleBadge = document.getElementById('lblBankVendorTitle');
-        if (titleBadge) titleBadge.textContent = vendorNameVal || "Vendor Name";
-        setBankEditableState(false);
-        showToast('Vendor Bank details opened (Read-only)');
+        showToast('Salary Details opened');
       } else {
-        showToast('Bank details closed');
+        showToast('Salary Details closed');
       }
+    });
+  }
+
+  if (btnEmpAsset && assetPanel) {
+    btnEmpAsset.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (contactPanel) contactPanel.style.display = 'none';
+      if (locationPanel) locationPanel.style.display = 'none';
+      if (bankPanel) bankPanel.style.display = 'none';
+      if (salaryPanel) salaryPanel.style.display = 'none';
+      const isHidden = assetPanel.style.display === 'none' || assetPanel.style.display === '';
+      assetPanel.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        showToast('Asset Details opened');
+      } else {
+        showToast('Asset Details closed');
+      }
+    });
+  }
+
+  const btnSalaryAddRow = document.getElementById('btnSalaryAddRow');
+  if (btnSalaryAddRow) {
+    btnSalaryAddRow.addEventListener('click', () => {
+      showToast('Add Salary Detail initiated');
+    });
+  }
+
+  const btnAssetAddRow = document.getElementById('btnAssetAddRow');
+  if (btnAssetAddRow) {
+    btnAssetAddRow.addEventListener('click', () => {
+      showToast('Add Asset Detail initiated');
     });
   }
 
@@ -3222,6 +3341,7 @@ function openSideForm() {
   const addVendorCard = document.getElementById('addVendorCard');
   const addProductCard = document.getElementById('addProductCard');
   const addExpenseCard = document.getElementById('addExpenseCard');
+  const addGbpaCard = document.getElementById('addGbpaCard');
 
   if (addEmployeeCard) addEmployeeCard.style.display = 'none';
   if (addCustomerCard) addCustomerCard.style.display = 'none';
@@ -3237,6 +3357,7 @@ function openSideForm() {
   if (addVendorCard) addVendorCard.style.display = 'none';
   if (addProductCard) addProductCard.style.display = 'none';
   if (addExpenseCard) addExpenseCard.style.display = 'none';
+  if (addGbpaCard) addGbpaCard.style.display = 'none';
 
   if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'project_type_details') {
@@ -3255,6 +3376,8 @@ function openSideForm() {
       } else {
         if (addMaterialsCard) addMaterialsCard.style.display = 'block';
       }
+    } else if (currentIndusSubpage === 'products') {
+      if (addGbpaCard) addGbpaCard.style.display = 'block';
     } else if (currentIndusSubpage === 'projects') {
       if (addProjectCard) addProjectCard.style.display = 'block';
     } else if (currentIndusSubpage === 'infra') {
@@ -3293,6 +3416,10 @@ function closeSideForm() {
   if (locationPanel) locationPanel.style.display = 'none';
   const bankPanel = document.getElementById('bankDetailsSidePanel');
   if (bankPanel) bankPanel.style.display = 'none';
+  const salaryPanel = document.getElementById('salaryDetailsSidePanel');
+  if (salaryPanel) salaryPanel.style.display = 'none';
+  const assetPanel = document.getElementById('assetDetailsSidePanel');
+  if (assetPanel) assetPanel.style.display = 'none';
 }
 
 // ==========================================================================

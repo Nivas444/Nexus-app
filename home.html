@@ -120,13 +120,13 @@
           <div class="side-form-header">
             <div class="side-form-title-badge">Add Employee</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-top-icon-btn" title="Bank Details">
+              <button type="button" class="side-top-icon-btn btn-emp-bank-trigger" id="btnEmpBankDetails" title="Bank Details">
                 <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
               </button>
-              <button type="button" class="side-top-icon-btn" title="Asset Details">
+              <button type="button" class="side-top-icon-btn btn-emp-asset-trigger" id="btnEmpAssetDetails" title="Asset Details">
                 <img src="icons/asset.svg" alt="Asset" class="icon-blue" width="28" height="28">
               </button>
-              <button type="button" class="side-top-icon-btn" title="Salary Details">
+              <button type="button" class="side-top-icon-btn btn-emp-salary-trigger" id="btnEmpSalaryDetails" title="Salary Details">
                 <img src="icons/Salary.svg" alt="Salary" class="icon-green" width="28" height="28">
               </button>
               <button type="button" class="side-top-icon-btn" title="Edit Info">
@@ -638,11 +638,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProductHead">Product Head</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProductHead">
-                  <option value="230510678" selected>230510678</option>
-                  <option value="230510679">230510679</option>
-                  <option value="230510680">230510680</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProductHead" placeholder="">
               </div>
             </div>
 
@@ -1071,7 +1067,114 @@
                 <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
+          </form>
+        </div>
 
+        <!-- 1F-2. Indus / GBPA Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addGbpaCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add GBPA</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseGbpaForm" aria-label="Close form">&times;</button>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddGbpa" onsubmit="event.preventDefault();">
+            <!-- 1. Item Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaItemCode">Item Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaItemCode" placeholder="">
+              </div>
+            </div>
+
+            <!-- 2. Product Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaProductName">Product Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaProductName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 3. Product Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaProductType">Product Type</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaProductType" placeholder="">
+              </div>
+            </div>
+
+            <!-- 4. Product Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaProductDescription">Product Description</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaProductDescription" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Uom -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaUom">Uom</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpGbpaUom">
+                  <option value="" selected></option>
+                  <option value="Pcs">Pcs</option>
+                  <option value="Mtr">Mtr</option>
+                  <option value="Nos">Nos</option>
+                  <option value="Set">Set</option>
+                  <option value="Kg">Kg</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. HSN / SAC -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaHsnSac">HSN / SAC</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpGbpaHsnSac">
+                  <option value="" selected></option>
+                  <option value="HSN">HSN</option>
+                  <option value="SAC">SAC</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 7. HSN / SAC Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaHsnSacCode">HSN / SAC Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaHsnSacCode" placeholder="">
+              </div>
+            </div>
+
+            <!-- 8. Budget (%) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaBudgetPercent">Budget (%)</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaBudgetPercent" placeholder="">
+              </div>
+            </div>
+
+            <!-- 9. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpGbpaStatusToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitGbpa" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
           </form>
         </div>
 
@@ -1584,7 +1687,35 @@
             <div class="form-row-group">
               <label class="form-label form-label-blue" for="inpSiteTransportZone">Transport Zone</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpSiteTransportZone" placeholder="">
+                <select class="form-select-control" id="inpSiteTransportZone">
+                  <option value="" selected></option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                  <option value="F">F</option>
+                  <option value="G">G</option>
+                  <option value="H">H</option>
+                  <option value="I">I</option>
+                  <option value="J">J</option>
+                  <option value="K">K</option>
+                  <option value="L">L</option>
+                  <option value="M">M</option>
+                  <option value="N">N</option>
+                  <option value="O">O</option>
+                  <option value="P">P</option>
+                  <option value="Q">Q</option>
+                  <option value="R">R</option>
+                  <option value="S">S</option>
+                  <option value="T">T</option>
+                  <option value="U">U</option>
+                  <option value="V">V</option>
+                  <option value="W">W</option>
+                  <option value="X">X</option>
+                  <option value="Y">Y</option>
+                  <option value="Z">Z</option>
+                </select>
               </div>
             </div>
 
@@ -1721,66 +1852,164 @@
           </div>
         </div>
 
-        <!-- 4. Vendor Bank Details Panel (Matching Mockup) -->
-        <div class="side-form-card" id="bankDetailsSidePanel" style="display: none;">
-          <!-- Header -->
+        <!-- 4. Bank Details Table Popup (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="bankDetailsSidePanel" style="display: none; width: 620px;">
+          <!-- Header Ribbon Badge Matching Mockup: Bank Details + Top Right Plus Icon -->
           <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblBankVendorTitle">Vendor Name</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseBankCard" aria-label="Close bank details">&times;</button>
+            <div class="side-form-title-badge" id="lblBankVendorTitle">Bank Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnBankAddRow" title="Add Bank Detail" aria-label="Add Bank Detail">
+                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseBankCard" aria-label="Close bank details">&times;</button>
+            </div>
           </div>
 
-          <!-- Decorative Action Icons on Top Right -->
-          <div class="side-form-top-icons"></div>
+          <!-- Table Body Matching Uploaded Mockup -->
+          <div class="contact-table-wrap" style="padding: 0;">
+            <table class="contact-custom-table" id="tblBankDetailsPopup">
+              <thead>
+                <tr>
+                  <th>
+                    <span>Account Name</span>
+                    <button type="button" class="contact-th-filter-btn" title="Filter Account Name">▼</button>
+                  </th>
+                  <th>
+                    <span>Account Type</span>
+                  </th>
+                  <th>
+                    <span>Account Number</span>
+                  </th>
+                  <th>
+                    <span>Bank Name</span>
+                  </th>
+                  <th>
+                    <span>IFSC Code</span>
+                  </th>
+                  <th>
+                    <span>Status</span>
+                    <button type="button" class="contact-th-filter-btn" title="Filter Status">▼</button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBankDetails">
+                <tr>
+                  <td>ABC Private Ltd</td>
+                  <td>Current</td>
+                  <td>
+                    <a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: 12345678910'); return false;">12345678910</a>
+                  </td>
+                  <td>ABC Private Ltd</td>
+                  <td>ABC Private</td>
+                  <td>
+                    <span class="status-badge status-active">Active</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-          <!-- Form Body -->
-          <form class="side-form-body" id="frmBankDetails" onsubmit="event.preventDefault();">
-            <!-- 1. Account Name -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpBankAccountName">Account Name</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control bank-field-control" id="inpBankAccountName" placeholder="" readonly>
-              </div>
+        <!-- 5. Salary Details Table Popup (Matching Uploaded Mockup 1) -->
+        <div class="side-form-card side-contact-popup" id="salaryDetailsSidePanel" style="display: none; width: 680px;">
+          <!-- Header Ribbon Badge Matching Mockup: Salary Details + Top Right Plus Icon -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Salary Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnSalaryAddRow" title="Add Salary Detail" aria-label="Add Salary Detail">
+                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseSalaryCard" aria-label="Close salary details">&times;</button>
             </div>
+          </div>
 
-            <!-- 2. Account Number with PDF badge -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpBankAccountNumber">Account Number</label>
-              <div class="form-input-wrap with-action-badge">
-                <input type="text" class="form-input-control form-input-highlight bank-field-control" id="inpBankAccountNumber" value="33ASMPM8643F" readonly>
-                <span class="input-pdf-badge" title="Upload PDF">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                </span>
-              </div>
+          <!-- Table Body Matching Uploaded Mockup 1 -->
+          <div class="contact-table-wrap" style="padding: 0;">
+            <table class="contact-custom-table" id="tblSalaryDetailsPopup">
+              <thead>
+                <tr>
+                  <th colspan="2" style="border-right: 1px solid rgba(255,255,255,0.3) !important;">From</th>
+                  <th colspan="2" style="border-right: 1px solid rgba(255,255,255,0.3) !important;">To</th>
+                  <th colspan="5" style="border-right: 1px solid rgba(255,255,255,0.3) !important;">Salary</th>
+                  <th rowspan="2" style="vertical-align: middle;">Status</th>
+                </tr>
+                <tr>
+                  <th>Year</th>
+                  <th>Month</th>
+                  <th>Year</th>
+                  <th>Month</th>
+                  <th>Basic</th>
+                  <th>HRA</th>
+                  <th>DA</th>
+                  <th>SA</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody id="tbodySalaryDetails">
+                <tr>
+                  <td>2024</td>
+                  <td>01</td>
+                  <td>2025</td>
+                  <td>12</td>
+                  <td>25000</td>
+                  <td>10000</td>
+                  <td>5000</td>
+                  <td>2000</td>
+                  <td>42000</td>
+                  <td>
+                    <span class="status-badge status-active">Active</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 6. Asset Details Table Popup (Matching Uploaded Mockup 2) -->
+        <div class="side-form-card side-contact-popup" id="assetDetailsSidePanel" style="display: none; width: 650px;">
+          <!-- Header Ribbon Badge Matching Mockup: Asset Details + Top Right Plus Icon -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Asset Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnAssetAddRow" title="Add Asset Detail" aria-label="Add Asset Detail">
+                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAssetCard" aria-label="Close asset details">&times;</button>
             </div>
+          </div>
 
-            <!-- 3. IFSC Code -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpBankIfsc">IFSC Code</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control bank-field-control" id="inpBankIfsc" placeholder="" readonly>
-              </div>
-            </div>
+          <!-- Sigma Sum Icon Bar Above Table Matching Uploaded Mockup 2 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: #ffffff;">
+            <span style="color: #2563eb; font-weight: 800; font-size: 1.5rem; line-height: 1; user-select: none;" title="Total Sum">∑</span>
+          </div>
 
-            <!-- 4. Bank Name -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpBankName">Bank Name</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control bank-field-control" id="inpBankName" placeholder="" readonly>
-              </div>
-            </div>
-
-            <!-- 5. Status -->
-            <div class="form-row-group">
-              <label class="form-label">Status</label>
-              <div class="form-input-wrap slider-wrap">
-                <label class="toggle-slide-switch" id="wrapBankStatusToggle">
-                  <input type="checkbox" id="inpBankStatusToggle" checked disabled>
-                  <span class="toggle-slide-slider"></span>
-                </label>
-              </div>
-            </div>
-
-          </form>
+          <!-- Table Body Matching Uploaded Mockup 2 -->
+          <div class="contact-table-wrap" style="padding: 0;">
+            <table class="contact-custom-table" id="tblAssetDetailsPopup">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Asset Details</th>
+                  <th>Uom</th>
+                  <th>Qty</th>
+                  <th>Rate</th>
+                  <th>Amount</th>
+                  <th>Expiry Date</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAssetDetails">
+                <tr>
+                  <td>01-01-2024</td>
+                  <td>Laptop Dell Latitude</td>
+                  <td>Nos</td>
+                  <td>1</td>
+                  <td>55000.00</td>
+                  <td>55000.00</td>
+                  <td>01-01-2027</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

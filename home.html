@@ -118,7 +118,7 @@
         <div class="side-form-card side-form-card-wide" id="addEmployeeCard" style="display: none; width: 860px !important; min-width: 860px !important;">
           <!-- Header with Title Badge & Top Action Icons (Bank, Asset, Salary, Edit) near Cancel Red X -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Employee</div>
+            <div class="side-form-title-badge" id="lblEmployeeCardTitle">Add Employee</div>
             <div class="side-header-top-icons">
               <button type="button" class="side-top-icon-btn btn-emp-bank-trigger" id="btnEmpBankDetails" title="Bank Details">
                 <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
@@ -129,8 +129,8 @@
               <button type="button" class="side-top-icon-btn btn-emp-salary-trigger" id="btnEmpSalaryDetails" title="Salary Details">
                 <img src="icons/Salary.svg" alt="Salary" class="icon-green" width="28" height="28">
               </button>
-              <button type="button" class="side-top-icon-btn" title="Edit Info">
-                <img src="icons/Edit.svg" alt="Edit" width="28" height="28">
+              <button type="button" class="side-top-icon-btn" id="btnEmpCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgEmpCardEditIcon" alt="Edit" width="28" height="28">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseEmployeeForm" aria-label="Close form">&times;</button>
             </div>
@@ -856,8 +856,13 @@
         <div class="side-form-card" id="addInfraCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Infra</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseInfraForm" aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblInfraCardTitle">Add Infra</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnInfraCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgInfraCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseInfraForm" aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -952,8 +957,13 @@
         <div class="side-form-card" id="addProjectCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Project Type</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProjectForm" aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblProjectCardTitle">Add Project Type</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProjectCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgProjectCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectForm" aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -1586,8 +1596,13 @@
         <div class="side-form-card" id="addSiteCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Sites</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseSiteForm" aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblSiteCardTitle">Add Sites</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnSiteCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgSiteCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseSiteForm" aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -1853,7 +1868,7 @@
         </div>
 
         <!-- 4. Bank Details Table Popup (Matching Uploaded Mockup) -->
-        <div class="side-form-card side-contact-popup" id="bankDetailsSidePanel" style="display: none; width: 620px;">
+        <div class="side-form-card side-contact-popup" id="bankDetailsSidePanel" style="display: none; width: 750px;">
           <!-- Header Ribbon Badge Matching Mockup: Bank Details + Top Right Plus Icon -->
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblBankVendorTitle">Bank Details</div>
@@ -2010,6 +2025,284 @@
               </tbody>
             </table>
           </div>
+        </div>
+
+        <!-- 7. Add Bank Form Card (Nested Modal) -->
+        <div class="side-form-card" id="addBankCard" style="display: none; width: 440px;">
+          <!-- Header Ribbon Badge: Add Bank -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Bank</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddBankCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddBank" onsubmit="event.preventDefault();" style="padding: 16px 24px 20px 24px;">
+            <!-- 1. Account Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankAccountName">Account Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankAccountName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 2. Account Type (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankAccountType">Account Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddBankAccountType">
+                  <option value="Savings">Savings</option>
+                  <option value="Current" selected>Current</option>
+                  <option value="Salary">Salary</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Account Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankAccountNumber">Account Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpAddBankAccountNumber" placeholder="">
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                </span>
+              </div>
+            </div>
+
+            <!-- 4. Bank Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. IFSC Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankIfsc">IFSC Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankIfsc" placeholder="">
+              </div>
+            </div>
+
+            <!-- 6. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddBankStatus" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitAddBank" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 8. Add Salary Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addSalaryCard" style="display: none; width: 440px;">
+          <!-- Header Ribbon Badge: Add Salary -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Salary</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" title="Edit Info">
+                <img src="icons/Edit.svg" alt="Edit" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddSalaryCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddSalary" onsubmit="event.preventDefault();" style="padding: 16px 24px 20px 24px;">
+            <!-- 1. From (Date Picker) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddSalaryFrom">From</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control date-picker-input" id="inpAddSalaryFrom" placeholder="dd-mm-yyyy">
+                <span class="input-pdf-badge" title="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
+                </span>
+              </div>
+            </div>
+
+            <!-- 2. To (Date Picker) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddSalaryTo">To</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control date-picker-input" id="inpAddSalaryTo" placeholder="dd-mm-yyyy">
+                <span class="input-pdf-badge" title="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
+                </span>
+              </div>
+            </div>
+
+            <!-- 3. Gross -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddSalaryGross">Gross</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddSalaryGross" placeholder="">
+              </div>
+            </div>
+
+            <!-- 4. EPF (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddSalaryEpf">EPF</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddSalaryEpf">
+                  <option value="12%" selected>12%</option>
+                  <option value="24%">24%</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. ESI (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddSalaryEsi">ESI</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddSalaryEsi">
+                  <option value="0.75%" selected>0.75%</option>
+                  <option value="3.25%">3.25%</option>
+                  <option value="N/A">N/A</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. PT (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">PT</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddSalaryPt" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 7. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddSalaryStatus" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitAddSalary" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 9. Add Asset Form Card -->
+        <div class="side-form-card" id="addAssetCard" style="display: none; width: 440px;">
+          <!-- Header Ribbon Badge: Add Asset -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Asset</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddAssetCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddAsset" onsubmit="event.preventDefault();" style="padding: 16px 24px 20px 24px;">
+            <!-- 1. Date -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddAssetDate">Date</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control date-picker-input" id="inpAddAssetDate" placeholder="dd-mm-yyyy">
+                <span class="input-pdf-badge" title="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
+                </span>
+              </div>
+            </div>
+
+            <!-- 2. Asset Details -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddAssetDetails">Asset Details</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddAssetDetails" placeholder="">
+              </div>
+            </div>
+
+            <!-- 3. Uom (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddAssetUom">Uom</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddAssetUom">
+                  <option value="Nos" selected>Nos</option>
+                  <option value="Set">Set</option>
+                  <option value="Unit">Unit</option>
+                  <option value="Pcs">Pcs</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Qty -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddAssetQty">Qty</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddAssetQty" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddAssetRate">Rate</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddAssetRate" placeholder="">
+              </div>
+            </div>
+
+            <!-- 6. Amount -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddAssetAmount">Amount</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddAssetAmount" placeholder="">
+              </div>
+            </div>
+
+            <!-- 7. Expiry Date -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddAssetExpiryDate">Expiry Date</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control date-picker-input" id="inpAddAssetExpiryDate" placeholder="dd-mm-yyyy">
+                <span class="input-pdf-badge" title="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
+                </span>
+              </div>
+            </div>
+
+            <!-- 8. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddAssetStatus" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitAddAsset" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 

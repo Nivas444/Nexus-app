@@ -2158,7 +2158,7 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}">
             <td>
-              <a href="#" class="req-link td-link-blue" onclick="openIndusProjectTypeDetails('${row.projectType}'); return false;">${row.projectType || ''}</a>
+              <a href="#" class="req-link td-link-blue" onclick="handleProjectClick('${row.id}', '${row.projectType}'); return false;">${row.projectType || ''}</a>
             </td>
             <td>${row.subProjectType || ''}</td>
             <td>${row.tat || ''}</td>
@@ -2175,15 +2175,15 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentIndusSubpage === 'infra') {
-      // Render Indus Towers -> Infra Rows (Matching Uploaded Mockup: Infra Category, Infra Description, Uom, Make, Commissioning, I - Map, Status)
+      // Render Indus Towers -> Infra Rows (Matching Uploaded Mockup)
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
           <tr data-row-id="${row.id}">
+            <td>${row.infraCategory || ''}</td>
             <td>
-              <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Category: ${row.infraCategory}'); return false;">${row.infraCategory || ''}</a>
+              <a href="#" class="req-link td-link-blue" onclick="handleInfraClick('${row.id}', '${row.infraCategory}'); return false;">${row.infraDescription || ''}</a>
             </td>
-            <td>${row.infraDescription || ''}</td>
             <td>${row.uom || ''}</td>
             <td>${row.make || ''}</td>
             <td>${row.commissioning || ''}</td>
@@ -2224,11 +2224,11 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}">
             <td>${row.circle}</td>
-            <td>
-              <a href="#" class="req-link site-id-link td-link-blue" onclick="showToast('Site ID: ${row.siteId}'); return false;">${row.siteId}</a>
-            </td>
+            <td>${row.siteId}</td>
             <td>${row.whId}</td>
-            <td>${row.siteName}</td>
+            <td>
+              <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${row.id}', '${row.siteName}'); return false;">${row.siteName}</a>
+            </td>
             <td>${row.district}</td>
             <td>${row.town || ''}</td>
             <td>${row.latitude}</td>
@@ -2328,7 +2328,7 @@ function applyFiltersAndRender() {
           <tr data-row-id="${row.id}">
             <td>${row.employeeId}</td>
             <td>
-              <a href="#" class="req-link" onclick="handleEmpClick('${row.employeeName}'); return false;">${row.employeeName}</a>
+              <a href="#" class="req-link td-link-blue" onclick="handleEmpClick('${row.id}', '${row.employeeName}'); return false;">${row.employeeName}</a>
             </td>
             <td>${row.designation}</td>
             <td>${row.contactNumber}</td>
@@ -3179,10 +3179,58 @@ function initSideFormEvents() {
     }
   }
 
+  const salaryPanel = document.getElementById('salaryDetailsSidePanel');
+  const assetPanel = document.getElementById('assetDetailsSidePanel');
+  const btnEmpSalary = document.getElementById('btnEmpSalaryDetails');
+  const btnEmpAsset = document.getElementById('btnEmpAssetDetails');
+  const btnCloseSalaryCard = document.getElementById('btnCloseSalaryCard');
+  const btnCloseAssetCard = document.getElementById('btnCloseAssetCard');
+
+  function updateCardDimmedState() {
+    const isAnyPopupOpen = 
+      (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') ||
+      (salaryPanel && salaryPanel.style.display !== 'none' && salaryPanel.style.display !== '') ||
+      (assetPanel && assetPanel.style.display !== 'none' && assetPanel.style.display !== '') ||
+      (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') ||
+      (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '');
+
+    const cardsRow = document.querySelector('.side-form-cards-row');
+    const empCard = document.getElementById('addEmployeeCard');
+    const vendorCard = document.getElementById('addVendorCard');
+    const customerCard = document.getElementById('addCustomerCard');
+
+    if (isAnyPopupOpen) {
+      if (empCard && empCard.style.display !== 'none') empCard.classList.add('card-dimmed-blurred');
+      if (vendorCard && vendorCard.style.display !== 'none') vendorCard.classList.add('card-dimmed-blurred');
+      if (customerCard && customerCard.style.display !== 'none') customerCard.classList.add('card-dimmed-blurred');
+      if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+    } else {
+      if (empCard) empCard.classList.remove('card-dimmed-blurred');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      if (customerCard) customerCard.classList.remove('card-dimmed-blurred');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+    }
+  }
+
   if (btnCloseBankCard && bankPanel) {
     btnCloseBankCard.addEventListener('click', () => {
       bankPanel.style.display = 'none';
       setBankEditableState(false);
+      updateCardDimmedState();
+    });
+  }
+
+  if (btnCloseSalaryCard && salaryPanel) {
+    btnCloseSalaryCard.addEventListener('click', () => {
+      salaryPanel.style.display = 'none';
+      updateCardDimmedState();
+    });
+  }
+
+  if (btnCloseAssetCard && assetPanel) {
+    btnCloseAssetCard.addEventListener('click', () => {
+      assetPanel.style.display = 'none';
+      updateCardDimmedState();
     });
   }
 
@@ -3211,6 +3259,7 @@ function initSideFormEvents() {
         if (assetPanel) assetPanel.style.display = 'none';
         const isHidden = bankPanel.style.display === 'none' || bankPanel.style.display === '';
         bankPanel.style.display = isHidden ? 'flex' : 'none';
+        updateCardDimmedState();
         if (isHidden) {
           showToast('Bank details opened');
         } else {
@@ -3219,32 +3268,6 @@ function initSideFormEvents() {
       });
     }
   });
-
-  const btnBankAddRow = document.getElementById('btnBankAddRow');
-  if (btnBankAddRow) {
-    btnBankAddRow.addEventListener('click', () => {
-      showToast('Add Bank Detail initiated');
-    });
-  }
-
-  const salaryPanel = document.getElementById('salaryDetailsSidePanel');
-  const assetPanel = document.getElementById('assetDetailsSidePanel');
-  const btnEmpSalary = document.getElementById('btnEmpSalaryDetails');
-  const btnEmpAsset = document.getElementById('btnEmpAssetDetails');
-  const btnCloseSalaryCard = document.getElementById('btnCloseSalaryCard');
-  const btnCloseAssetCard = document.getElementById('btnCloseAssetCard');
-
-  if (btnCloseSalaryCard && salaryPanel) {
-    btnCloseSalaryCard.addEventListener('click', () => {
-      salaryPanel.style.display = 'none';
-    });
-  }
-
-  if (btnCloseAssetCard && assetPanel) {
-    btnCloseAssetCard.addEventListener('click', () => {
-      assetPanel.style.display = 'none';
-    });
-  }
 
   if (btnEmpSalary && salaryPanel) {
     btnEmpSalary.addEventListener('click', (e) => {
@@ -3255,6 +3278,7 @@ function initSideFormEvents() {
       if (assetPanel) assetPanel.style.display = 'none';
       const isHidden = salaryPanel.style.display === 'none' || salaryPanel.style.display === '';
       salaryPanel.style.display = isHidden ? 'flex' : 'none';
+      updateCardDimmedState();
       if (isHidden) {
         showToast('Salary Details opened');
       } else {
@@ -3272,6 +3296,7 @@ function initSideFormEvents() {
       if (salaryPanel) salaryPanel.style.display = 'none';
       const isHidden = assetPanel.style.display === 'none' || assetPanel.style.display === '';
       assetPanel.style.display = isHidden ? 'flex' : 'none';
+      updateCardDimmedState();
       if (isHidden) {
         showToast('Asset Details opened');
       } else {
@@ -3280,17 +3305,172 @@ function initSideFormEvents() {
     });
   }
 
+  const btnBankAddRow = document.getElementById('btnBankAddRow');
+  const addBankCard = document.getElementById('addBankCard');
+  const btnCloseAddBankCard = document.getElementById('btnCloseAddBankCard');
+  const btnSubmitAddBank = document.getElementById('btnSubmitAddBank');
+
+  if (btnBankAddRow && addBankCard && bankPanel) {
+    btnBankAddRow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      bankPanel.classList.add('card-dimmed-blurred');
+      addBankCard.style.display = 'block';
+      showToast('Add Bank Form opened');
+    });
+  }
+
+  if (btnCloseAddBankCard && addBankCard && bankPanel) {
+    btnCloseAddBankCard.addEventListener('click', () => {
+      addBankCard.style.display = 'none';
+      bankPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  if (btnSubmitAddBank && addBankCard && bankPanel) {
+    btnSubmitAddBank.addEventListener('click', () => {
+      const accName = document.getElementById('inpAddBankAccountName')?.value.trim() || 'ABC Private Ltd';
+      const accType = document.getElementById('inpAddBankAccountType')?.value || 'Current';
+      const accNum = document.getElementById('inpAddBankAccountNumber')?.value.trim() || '12345678910';
+      const bankName = document.getElementById('inpAddBankName')?.value.trim() || 'ABC Private Ltd';
+      const ifsc = document.getElementById('inpAddBankIfsc')?.value.trim() || 'ABC Private';
+      const isStatusActive = document.getElementById('inpAddBankStatus')?.checked ?? true;
+
+      const tbody = document.getElementById('tbodyBankDetails');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${accName}</td>
+          <td>${accType}</td>
+          <td><a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: ${accNum}'); return false;">${accNum}</a></td>
+          <td>${bankName}</td>
+          <td>${ifsc}</td>
+          <td><span class="status-badge ${isStatusActive ? 'status-active' : 'status-inactive'}">${isStatusActive ? 'Active' : 'De-Active'}</span></td>
+        `;
+        tbody.insertBefore(tr, tbody.firstChild);
+      }
+
+      addBankCard.style.display = 'none';
+      bankPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+      showToast('New Bank details saved successfully!');
+    });
+  }
+
   const btnSalaryAddRow = document.getElementById('btnSalaryAddRow');
-  if (btnSalaryAddRow) {
-    btnSalaryAddRow.addEventListener('click', () => {
-      showToast('Add Salary Detail initiated');
+  const addSalaryCard = document.getElementById('addSalaryCard');
+  const btnCloseAddSalaryCard = document.getElementById('btnCloseAddSalaryCard');
+  const btnSubmitAddSalary = document.getElementById('btnSubmitAddSalary');
+
+  if (btnSalaryAddRow && addSalaryCard && salaryPanel) {
+    btnSalaryAddRow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      salaryPanel.classList.add('card-dimmed-blurred');
+      addSalaryCard.style.display = 'block';
+      showToast('Add Salary Form opened');
+    });
+  }
+
+  if (btnCloseAddSalaryCard && addSalaryCard && salaryPanel) {
+    btnCloseAddSalaryCard.addEventListener('click', () => {
+      addSalaryCard.style.display = 'none';
+      salaryPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  if (btnSubmitAddSalary && addSalaryCard && salaryPanel) {
+    btnSubmitAddSalary.addEventListener('click', () => {
+      const fromVal = document.getElementById('inpAddSalaryFrom')?.value.trim() || '2024-01';
+      const toVal = document.getElementById('inpAddSalaryTo')?.value.trim() || '2025-12';
+      const grossVal = parseFloat(document.getElementById('inpAddSalaryGross')?.value) || 42000;
+      const epf = document.getElementById('inpAddSalaryEpf')?.value || '12%';
+      const esi = document.getElementById('inpAddSalaryEsi')?.value || '0.75%';
+      const isStatusActive = document.getElementById('inpAddSalaryStatus')?.checked ?? true;
+
+      const [fromYear, fromMonth] = fromVal.includes('-') ? fromVal.split('-') : ['2024', '01'];
+      const [toYear, toMonth] = toVal.includes('-') ? toVal.split('-') : ['2025', '12'];
+      const basic = Math.round(grossVal * 0.55);
+      const hra = Math.round(grossVal * 0.25);
+      const da = Math.round(grossVal * 0.12);
+      const sa = Math.round(grossVal * 0.08);
+
+      const tbody = document.getElementById('tbodySalaryDetails');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fromYear}</td>
+          <td>${fromMonth}</td>
+          <td>${toYear}</td>
+          <td>${toMonth}</td>
+          <td>${basic}</td>
+          <td>${hra}</td>
+          <td>${da}</td>
+          <td>${sa}</td>
+          <td>${grossVal}</td>
+          <td><span class="status-badge ${isStatusActive ? 'status-active' : 'status-inactive'}">${isStatusActive ? 'Active' : 'De-Active'}</span></td>
+        `;
+        tbody.insertBefore(tr, tbody.firstChild);
+      }
+
+      addSalaryCard.style.display = 'none';
+      salaryPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+      showToast('New Salary details saved successfully!');
     });
   }
 
   const btnAssetAddRow = document.getElementById('btnAssetAddRow');
-  if (btnAssetAddRow) {
-    btnAssetAddRow.addEventListener('click', () => {
-      showToast('Add Asset Detail initiated');
+  const addAssetCard = document.getElementById('addAssetCard');
+  const btnCloseAddAssetCard = document.getElementById('btnCloseAddAssetCard');
+  const btnSubmitAddAsset = document.getElementById('btnSubmitAddAsset');
+
+  if (btnAssetAddRow && addAssetCard && assetPanel) {
+    btnAssetAddRow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      assetPanel.classList.add('card-dimmed-blurred');
+      addAssetCard.style.display = 'block';
+      showToast('Add Asset Form opened');
+    });
+  }
+
+  if (btnCloseAddAssetCard && addAssetCard && assetPanel) {
+    btnCloseAddAssetCard.addEventListener('click', () => {
+      addAssetCard.style.display = 'none';
+      assetPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  if (btnSubmitAddAsset && addAssetCard && assetPanel) {
+    btnSubmitAddAsset.addEventListener('click', () => {
+      const date = document.getElementById('inpAddAssetDate')?.value.trim() || '01-01-2024';
+      const details = document.getElementById('inpAddAssetDetails')?.value.trim() || 'Laptop Dell Latitude';
+      const uom = document.getElementById('inpAddAssetUom')?.value || 'Nos';
+      const qty = document.getElementById('inpAddAssetQty')?.value.trim() || '1';
+      const rate = document.getElementById('inpAddAssetRate')?.value.trim() || '55000.00';
+      const amount = document.getElementById('inpAddAssetAmount')?.value.trim() || (parseFloat(qty) * parseFloat(rate)).toFixed(2);
+      const expiry = document.getElementById('inpAddAssetExpiryDate')?.value.trim() || '01-01-2027';
+
+      const tbody = document.getElementById('tbodyAssetDetails');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${details}</td>
+          <td>${uom}</td>
+          <td>${qty}</td>
+          <td>${rate}</td>
+          <td>${amount}</td>
+          <td>${expiry}</td>
+        `;
+        tbody.insertBefore(tr, tbody.firstChild);
+      }
+
+      addAssetCard.style.display = 'none';
+      assetPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+      showToast('New Asset details saved successfully!');
     });
   }
 
@@ -3303,22 +3483,41 @@ function initSideFormEvents() {
 
   // Close Contact / Location / Bank Message Popups when user clicks outside of them
   document.addEventListener('click', (e) => {
+    let changed = false;
     if (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') {
       const isInsideBtn = (btnMessage && btnMessage.contains(e.target)) || (btnInfraMessage && btnInfraMessage.contains(e.target)) || (btnVendorMessage && btnVendorMessage.contains(e.target));
       if (!contactPanel.contains(e.target) && !isInsideBtn) {
         contactPanel.style.display = 'none';
+        changed = true;
       }
     }
     if (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '') {
       if (!locationPanel.contains(e.target) && !btnLocation.contains(e.target)) {
         locationPanel.style.display = 'none';
+        changed = true;
       }
     }
     if (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') {
-      if (!bankPanel.contains(e.target) && !(btnVendorBank && btnVendorBank.contains(e.target))) {
+      if (!bankPanel.contains(e.target) && !(btnVendorBank && btnVendorBank.contains(e.target)) && !(btnEmpBank && btnEmpBank.contains(e.target))) {
         bankPanel.style.display = 'none';
         setBankEditableState(false);
+        changed = true;
       }
+    }
+    if (salaryPanel && salaryPanel.style.display !== 'none' && salaryPanel.style.display !== '') {
+      if (!salaryPanel.contains(e.target) && !(btnEmpSalary && btnEmpSalary.contains(e.target))) {
+        salaryPanel.style.display = 'none';
+        changed = true;
+      }
+    }
+    if (assetPanel && assetPanel.style.display !== 'none' && assetPanel.style.display !== '') {
+      if (!assetPanel.contains(e.target) && !(btnEmpAsset && btnEmpAsset.contains(e.target))) {
+        assetPanel.style.display = 'none';
+        changed = true;
+      }
+    }
+    if (changed) {
+      updateCardDimmedState();
     }
   });
 }
@@ -3379,16 +3578,69 @@ function openSideForm() {
     } else if (currentIndusSubpage === 'products') {
       if (addGbpaCard) addGbpaCard.style.display = 'block';
     } else if (currentIndusSubpage === 'projects') {
-      if (addProjectCard) addProjectCard.style.display = 'block';
+      if (addProjectCard) {
+        addProjectCard.style.display = 'block';
+        const lblTitle = document.getElementById('lblProjectCardTitle');
+        const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
+        const btnSaveWrap = document.querySelector('#frmAddProject .form-submit-inside-wrap');
+        if (lblTitle) lblTitle.innerText = 'Add Project Type';
+        if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+        setProjectFormReadOnly(false);
+        currentViewedProjectId = null;
+        isProjectFormEditing = false;
+      }
     } else if (currentIndusSubpage === 'infra') {
-      if (addInfraCard) addInfraCard.style.display = 'block';
+      if (addInfraCard) {
+        addInfraCard.style.display = 'block';
+        const lblTitle = document.getElementById('lblInfraCardTitle');
+        const btnEditToggle = document.getElementById('btnInfraCardEditToggle');
+        const btnSaveWrap = document.querySelector('#frmAddInfra .form-submit-inside-wrap');
+        if (lblTitle) lblTitle.innerText = 'Add Infra';
+        if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+        setInfraFormReadOnly(false);
+        currentViewedInfraId = null;
+        isInfraFormEditing = false;
+      }
     } else if (currentIndusSubpage === 'site') {
-      if (addSiteCard) addSiteCard.style.display = 'block';
+      if (addSiteCard) {
+        addSiteCard.style.display = 'block';
+        const lblTitle = document.getElementById('lblSiteCardTitle');
+        const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
+        const btnSaveWrap = document.querySelector('#frmAddSite .form-submit-inside-wrap');
+        if (lblTitle) lblTitle.innerText = 'Add Sites';
+        if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+        setSiteFormReadOnly(false);
+        currentViewedSiteId = null;
+        isSiteFormEditing = false;
+      }
     } else {
       if (addSiteCard) addSiteCard.style.display = 'block';
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'employee') {
-    if (addEmployeeCard) addEmployeeCard.style.display = 'block';
+    if (addEmployeeCard) {
+      addEmployeeCard.style.display = 'block';
+      const lblTitle = document.getElementById('lblEmployeeCardTitle');
+      const btnEditToggle = document.getElementById('btnEmpCardEditToggle');
+      const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
+
+      const btnEmpBank = document.getElementById('btnEmpBankDetails');
+      const btnEmpAsset = document.getElementById('btnEmpAssetDetails');
+      const btnEmpSalary = document.getElementById('btnEmpSalaryDetails');
+      if (btnEmpBank) btnEmpBank.style.display = 'inline-flex';
+      if (btnEmpAsset) btnEmpAsset.style.display = 'inline-flex';
+      if (btnEmpSalary) btnEmpSalary.style.display = 'inline-flex';
+
+      if (lblTitle) lblTitle.innerText = 'Add Employee';
+      if (btnEditToggle) btnEditToggle.style.display = 'none';
+      if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+
+      setEmployeeFormReadOnly(false);
+      currentViewedEmpId = null;
+      isEmployeeFormEditing = false;
+    }
   } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
     if (addVendorCard) addVendorCard.style.display = 'block';
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
@@ -3667,8 +3919,564 @@ window.handleReqClick = function(reqCode) {
   showToast(`Opening requisition details: ${reqCode}`);
 };
 
-window.handleEmpClick = function(empName) {
-  showToast(`Opening employee profile: ${empName}`);
+let currentViewedEmpId = null;
+let isEmployeeFormEditing = false;
+
+function setEmployeeFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddEmployee');
+  if (!form) return;
+
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    if (input.id === 'inpEmpPhoto') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') {
+        input.setAttribute('disabled', 'true');
+      } else {
+        input.setAttribute('readonly', 'true');
+      }
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') {
+        input.removeAttribute('disabled');
+      } else {
+        input.removeAttribute('readonly');
+      }
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+
+  const badges = form.querySelectorAll('.input-pdf-badge');
+  badges.forEach(b => {
+    b.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+    b.style.opacity = isReadOnly ? '0.5' : '1';
+  });
+}
+
+window.handleEmpClick = function(empId, empName) {
+  const dataset = masterEmployeeData;
+  let emp = dataset.find(e => e.id === empId || e.employeeName === empName || e.employeeId === empId);
+
+  if (!emp) {
+    emp = {
+      id: empId || 'emp-1',
+      employeeId: "230510678",
+      employeeName: empName || "R/RL-234567",
+      empType: "On-Roll",
+      address: "123 Main Street, Tech Park",
+      contactNumber: "9876543210",
+      email: "test.employee@example.com",
+      dob: "1995-05-15",
+      bloodGroup: "A+",
+      maritalStatus: "Single",
+      qualification: "B.Tech / MCA",
+      pan: "ABCDE1234F",
+      aadhar: "1234-5678-9012",
+      epfUan: "100123456789",
+      esiCode: "31001234560000001",
+      prevExp: "02 - 00",
+      currentExp: "01 - 00",
+      totalExp: "03 - 00",
+      doj: "2023-01-10",
+      designation: "Manager",
+      status: "Active"
+    };
+  }
+
+  currentViewedEmpId = emp.id;
+  isEmployeeFormEditing = false;
+
+  openSideForm();
+
+  const card = document.getElementById('addEmployeeCard');
+  if (card) card.style.display = 'block';
+
+  // Update Header Title to View Employee
+  const lblTitle = document.getElementById('lblEmployeeCardTitle');
+  if (lblTitle) lblTitle.innerText = 'View Employee';
+
+  // Hide Bank, Asset, Salary action icons in View Employee tab
+  const btnEmpBank = document.getElementById('btnEmpBankDetails');
+  const btnEmpAsset = document.getElementById('btnEmpAssetDetails');
+  const btnEmpSalary = document.getElementById('btnEmpSalaryDetails');
+  if (btnEmpBank) btnEmpBank.style.display = 'none';
+  if (btnEmpAsset) btnEmpAsset.style.display = 'none';
+  if (btnEmpSalary) btnEmpSalary.style.display = 'none';
+
+  // Show Edit button with Blue Pencil icon
+  const btnEditToggle = document.getElementById('btnEmpCardEditToggle');
+  const imgEditIcon = document.getElementById('imgEmpCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  // Hide bottom save button container in View mode
+  const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  // Populate form fields
+  if (document.getElementById('inpEmpType')) document.getElementById('inpEmpType').value = emp.empType || 'On-Roll';
+  if (document.getElementById('inpEmpAddress')) document.getElementById('inpEmpAddress').value = emp.address || '123 Main Street, Tech Park';
+  if (document.getElementById('inpEmpMobile')) document.getElementById('inpEmpMobile').value = emp.contactNumber || '9876543210';
+  if (document.getElementById('inpEmpEmail')) document.getElementById('inpEmpEmail').value = emp.email || 'test.employee@example.com';
+  if (document.getElementById('inpEmpDob')) document.getElementById('inpEmpDob').value = emp.dob || '1995-05-15';
+  if (document.getElementById('inpEmpBloodGroup')) document.getElementById('inpEmpBloodGroup').value = emp.bloodGroup || 'A+';
+  if (document.getElementById('inpEmpMaritalStatus')) document.getElementById('inpEmpMaritalStatus').value = emp.maritalStatus || 'Single';
+  if (document.getElementById('inpEmpQualification')) document.getElementById('inpEmpQualification').value = emp.qualification || 'B.Tech / MCA';
+  if (document.getElementById('inpEmpPanNumber')) document.getElementById('inpEmpPanNumber').value = emp.pan || 'ABCDE1234F';
+  if (document.getElementById('inpEmpAadharNumber')) document.getElementById('inpEmpAadharNumber').value = emp.aadhar || '1234-5678-9012';
+  if (document.getElementById('inpEmpEpfUan')) document.getElementById('inpEmpEpfUan').value = emp.epfUan || '100123456789';
+  if (document.getElementById('inpEmpEsiCode')) document.getElementById('inpEmpEsiCode').value = emp.esiCode || '31001234560000001';
+  if (document.getElementById('inpEmpPrevExp')) document.getElementById('inpEmpPrevExp').value = emp.prevExp || '02 - 00';
+  if (document.getElementById('inpEmpCurrExp')) document.getElementById('inpEmpCurrExp').value = emp.currentExp || '01 - 00';
+  if (document.getElementById('inpEmpTotalExp')) document.getElementById('inpEmpTotalExp').value = emp.totalExp || '03 - 00';
+  if (document.getElementById('inpEmpDoj')) document.getElementById('inpEmpDoj').value = emp.doj || '2023-01-10';
+  if (document.getElementById('inpEmpDesignation')) document.getElementById('inpEmpDesignation').value = emp.designation || 'Manager';
+
+  setEmployeeFormReadOnly(true);
+  showToast(`Viewing details for employee: ${emp.employeeName}`);
+};
+
+// Wire btnEmpCardEditToggle
+document.addEventListener('DOMContentLoaded', () => {
+  const btnEmpCardEditToggle = document.getElementById('btnEmpCardEditToggle');
+  if (btnEmpCardEditToggle) {
+    btnEmpCardEditToggle.addEventListener('click', () => {
+      const lblTitle = document.getElementById('lblEmployeeCardTitle');
+      const imgIcon = document.getElementById('imgEmpCardEditIcon');
+
+      if (!isEmployeeFormEditing) {
+        // ENTER EDIT MODE
+        isEmployeeFormEditing = true;
+        setEmployeeFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Employee';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Employee form is now editable');
+      } else {
+        // SAVE EDITS
+        isEmployeeFormEditing = false;
+        
+        if (currentViewedEmpId) {
+          const emp = masterEmployeeData.find(e => e.id === currentViewedEmpId);
+          if (emp) {
+            emp.empType = document.getElementById('inpEmpType')?.value || emp.empType;
+            emp.address = document.getElementById('inpEmpAddress')?.value || emp.address;
+            emp.contactNumber = document.getElementById('inpEmpMobile')?.value || emp.contactNumber;
+            emp.email = document.getElementById('inpEmpEmail')?.value || emp.email;
+            emp.dob = document.getElementById('inpEmpDob')?.value || emp.dob;
+            emp.bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || emp.bloodGroup;
+            emp.maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || emp.maritalStatus;
+            emp.qualification = document.getElementById('inpEmpQualification')?.value || emp.qualification;
+            emp.pan = document.getElementById('inpEmpPanNumber')?.value || emp.pan;
+            emp.aadhar = document.getElementById('inpEmpAadharNumber')?.value || emp.aadhar;
+            emp.epfUan = document.getElementById('inpEmpEpfUan')?.value || emp.epfUan;
+            emp.esiCode = document.getElementById('inpEmpEsiCode')?.value || emp.esiCode;
+            emp.prevExp = document.getElementById('inpEmpPrevExp')?.value || emp.prevExp;
+            emp.currentExp = document.getElementById('inpEmpCurrExp')?.value || emp.currentExp;
+            emp.totalExp = document.getElementById('inpEmpTotalExp')?.value || emp.totalExp;
+            emp.doj = document.getElementById('inpEmpDoj')?.value || emp.doj;
+            emp.designation = document.getElementById('inpEmpDesignation')?.value || emp.designation;
+          }
+          renderTable();
+        }
+
+        setEmployeeFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Employee';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Employee details saved & updated successfully!');
+      }
+    });
+  }
+
+  // --- SITE CARD EDIT TOGGLE ---
+  const btnSiteCardEditToggle = document.getElementById('btnSiteCardEditToggle');
+  if (btnSiteCardEditToggle) {
+    btnSiteCardEditToggle.addEventListener('click', () => {
+      const lblTitle = document.getElementById('lblSiteCardTitle');
+      const imgIcon = document.getElementById('imgSiteCardEditIcon');
+
+      if (!isSiteFormEditing) {
+        isSiteFormEditing = true;
+        setSiteFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Site';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Site form is now editable');
+      } else {
+        isSiteFormEditing = false;
+        if (currentViewedSiteId) {
+          const site = indusSiteData.find(s => s.id === currentViewedSiteId);
+          if (site) {
+            site.circle = document.getElementById('inpSiteCircle')?.value || site.circle;
+            site.siteId = document.getElementById('inpSiteId')?.value || site.siteId;
+            site.whId = document.getElementById('inpSiteWhId')?.value || site.whId;
+            site.siteName = document.getElementById('inpSiteName')?.value || site.siteName;
+            site.district = document.getElementById('inpSiteDistrict')?.value || site.district;
+            site.town = document.getElementById('inpSiteTown')?.value || site.town;
+            site.address = document.getElementById('inpSiteAddress')?.value || site.address;
+            site.latitude = document.getElementById('inpSiteLattitude')?.value || site.latitude;
+            site.longitude = document.getElementById('inpSiteLongtitude')?.value || site.longitude;
+            site.transportZone = document.getElementById('inpSiteTransportZone')?.value || site.transportZone;
+          }
+          renderTable();
+        }
+        setSiteFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Site';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Site details saved & updated successfully!');
+      }
+    });
+  }
+
+  // --- INFRA CARD EDIT TOGGLE ---
+  const btnInfraCardEditToggle = document.getElementById('btnInfraCardEditToggle');
+  if (btnInfraCardEditToggle) {
+    btnInfraCardEditToggle.addEventListener('click', () => {
+      const lblTitle = document.getElementById('lblInfraCardTitle');
+      const imgIcon = document.getElementById('imgInfraCardEditIcon');
+
+      if (!isInfraFormEditing) {
+        isInfraFormEditing = true;
+        setInfraFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Infra';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Infra form is now editable');
+      } else {
+        isInfraFormEditing = false;
+        if (currentViewedInfraId) {
+          const infra = indusInfraData.find(i => i.id === currentViewedInfraId);
+          if (infra) {
+            infra.infraCategory = document.getElementById('inpInfraCategory')?.value || infra.infraCategory;
+            infra.infraDescription = document.getElementById('inpInfraDescription')?.value || infra.infraDescription;
+            infra.uom = document.getElementById('inpInfraUom')?.value || infra.uom;
+            infra.make = document.getElementById('inpInfraMake')?.value || infra.make;
+          }
+          renderTable();
+        }
+        setInfraFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Infra';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Infra details saved & updated successfully!');
+      }
+    });
+  }
+
+  // --- PROJECT CARD EDIT TOGGLE ---
+  const btnProjectCardEditToggle = document.getElementById('btnProjectCardEditToggle');
+  if (btnProjectCardEditToggle) {
+    btnProjectCardEditToggle.addEventListener('click', () => {
+      const lblTitle = document.getElementById('lblProjectCardTitle');
+      const imgIcon = document.getElementById('imgProjectCardEditIcon');
+
+      if (!isProjectFormEditing) {
+        isProjectFormEditing = true;
+        setProjectFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Project';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Project form is now editable');
+      } else {
+        isProjectFormEditing = false;
+        if (currentViewedProjectId) {
+          const proj = indusProjectsData.find(p => p.id === currentViewedProjectId);
+          if (proj) {
+            proj.projectType = document.getElementById('inpProjectType')?.value || proj.projectType;
+            proj.subProjectType = document.getElementById('inpSubProjectType')?.value || proj.subProjectType;
+            proj.tat = document.getElementById('inpProjectTat')?.value || proj.tat;
+            proj.indusPm = document.getElementById('inpIndusPm')?.value || proj.indusPm;
+            proj.indusScm = document.getElementById('inpIndusScm')?.value || proj.indusScm;
+            proj.pm = document.getElementById('inpProjectPm')?.value || proj.pm;
+          }
+          renderTable();
+        }
+        setProjectFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Project';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Project details saved & updated successfully!');
+      }
+    });
+  }
+});
+
+// --- SITE, INFRA, PROJECT VIEW HANDLERS ---
+let currentViewedSiteId = null;
+let isSiteFormEditing = false;
+
+function setSiteFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddSite');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+      else input.setAttribute('readonly', 'true');
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+      else input.removeAttribute('readonly');
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    if (isReadOnly) t.checked = false;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.handleSiteClick = function(siteId, siteName) {
+  let site = indusSiteData.find(s => s.id === siteId || s.siteName === siteName || s.siteId === siteId);
+  if (!site) {
+    site = {
+      id: siteId || 'site-1',
+      circle: "Chennai",
+      siteId: "230510678",
+      whId: "WH-101",
+      siteName: siteName || "R/RL-234567",
+      district: "Chennai",
+      town: "Ambattur",
+      address: "123 Industrial Area",
+      latitude: "13.0827",
+      longitude: "80.2707",
+      transportZone: "A",
+      status: "Active"
+    };
+  }
+
+  currentViewedSiteId = site.id;
+  isSiteFormEditing = false;
+  openSideForm();
+
+  const card = document.getElementById('addSiteCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblSiteCardTitle');
+  if (lblTitle) lblTitle.innerText = 'View Site';
+
+  const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
+  const imgEditIcon = document.getElementById('imgSiteCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddSite .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpSiteCircle')) document.getElementById('inpSiteCircle').value = site.circle || 'Chennai';
+  if (document.getElementById('inpSiteId')) document.getElementById('inpSiteId').value = site.siteId || '230510678';
+  if (document.getElementById('inpSiteWhId')) document.getElementById('inpSiteWhId').value = site.whId || 'WH-101';
+  if (document.getElementById('inpSiteName')) document.getElementById('inpSiteName').value = site.siteName || 'R/RL-234567';
+  if (document.getElementById('inpSiteDistrict')) document.getElementById('inpSiteDistrict').value = site.district || 'Chennai';
+  if (document.getElementById('inpSiteTown')) document.getElementById('inpSiteTown').value = site.town || 'Ambattur';
+  if (document.getElementById('inpSiteAddress')) document.getElementById('inpSiteAddress').value = site.address || '123 Industrial Area';
+  if (document.getElementById('inpSiteLattitude')) document.getElementById('inpSiteLattitude').value = site.latitude || '13.0827';
+  if (document.getElementById('inpSiteLongtitude')) document.getElementById('inpSiteLongtitude').value = site.longitude || '80.2707';
+  if (document.getElementById('inpSiteTransportZone')) document.getElementById('inpSiteTransportZone').value = site.transportZone || 'A';
+  
+  // Keep slidebars in DEACTIVE state (unchecked / Red OFF) when viewing
+  if (document.getElementById('inpSiteStatusToggle')) document.getElementById('inpSiteStatusToggle').checked = false;
+
+  setSiteFormReadOnly(true);
+  showToast(`Viewing site details: ${site.siteName}`);
+};
+
+let currentViewedInfraId = null;
+let isInfraFormEditing = false;
+
+function setInfraFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddInfra');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+      else input.setAttribute('readonly', 'true');
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+      else input.removeAttribute('readonly');
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    if (isReadOnly) t.checked = false;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.handleInfraClick = function(infraId, infraCat) {
+  let infra = indusInfraData.find(i => i.id === infraId || i.infraCategory === infraCat);
+  if (!infra) {
+    infra = {
+      id: infraId || 'infra-1',
+      infraCategory: infraCat || "230510678",
+      infraDescription: "Infra Description Details",
+      uom: "Nos",
+      make: "Dell",
+      commissioning: "Yes",
+      iMap: "Yes",
+      status: "Active"
+    };
+  }
+
+  currentViewedInfraId = infra.id;
+  isInfraFormEditing = false;
+  openSideForm();
+
+  const card = document.getElementById('addInfraCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblInfraCardTitle');
+  if (lblTitle) lblTitle.innerText = 'View Infra';
+
+  const btnEditToggle = document.getElementById('btnInfraCardEditToggle');
+  const imgEditIcon = document.getElementById('imgInfraCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddInfra .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpInfraCategory')) document.getElementById('inpInfraCategory').value = infra.infraCategory || '230510678';
+  if (document.getElementById('inpInfraDescription')) document.getElementById('inpInfraDescription').value = infra.infraDescription || 'Infra Description Details';
+  if (document.getElementById('inpInfraUom')) document.getElementById('inpInfraUom').value = infra.uom || 'Nos';
+  if (document.getElementById('inpInfraMake')) document.getElementById('inpInfraMake').value = infra.make || 'Dell';
+  
+  // Keep slidebars in DEACTIVE state (unchecked / Red OFF) when viewing
+  if (document.getElementById('inpInfraCommissioningToggle')) document.getElementById('inpInfraCommissioningToggle').checked = false;
+  if (document.getElementById('inpInfraIMapToggle')) document.getElementById('inpInfraIMapToggle').checked = false;
+  if (document.getElementById('inpInfraStatusToggle')) document.getElementById('inpInfraStatusToggle').checked = false;
+
+  setInfraFormReadOnly(true);
+  showToast(`Viewing infra details: ${infra.infraCategory}`);
+};
+
+let currentViewedProjectId = null;
+let isProjectFormEditing = false;
+
+function setProjectFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddProject');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+      else input.setAttribute('readonly', 'true');
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+      else input.removeAttribute('readonly');
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    if (isReadOnly) t.checked = false;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.handleProjectClick = function(projectId, projectType) {
+  let proj = indusProjectsData.find(p => p.id === projectId || p.projectType === projectType);
+  if (!proj) {
+    proj = {
+      id: projectId || 'proj-1',
+      projectType: projectType || "KTN",
+      subProjectType: "KTN",
+      tat: "15 Days",
+      indusPm: "R/RL-234567",
+      indusScm: "R/RL-234567",
+      pm: "R/RL-234567",
+      mis: "R/RL-234567",
+      survey: "Yes",
+      additionalTransport: "Yes",
+      status: "Active"
+    };
+  }
+
+  currentViewedProjectId = proj.id;
+  isProjectFormEditing = false;
+  openSideForm();
+
+  const card = document.getElementById('addProjectCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblProjectCardTitle');
+  if (lblTitle) lblTitle.innerText = 'View Project';
+
+  const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
+  const imgEditIcon = document.getElementById('imgProjectCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddProject .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpProjectType')) document.getElementById('inpProjectType').value = proj.projectType || 'KTN';
+  if (document.getElementById('inpSubProjectType')) document.getElementById('inpSubProjectType').value = proj.subProjectType || 'KTN';
+  if (document.getElementById('inpProjectTat')) document.getElementById('inpProjectTat').value = proj.tat || '15 Days';
+  if (document.getElementById('inpIndusPm')) document.getElementById('inpIndusPm').value = proj.indusPm || 'R/RL-234567';
+  if (document.getElementById('inpIndusScm')) document.getElementById('inpIndusScm').value = proj.indusScm || 'R/RL-234567';
+  if (document.getElementById('inpProjectPm')) document.getElementById('inpProjectPm').value = proj.pm || 'R/RL-234567';
+
+  // Keep slidebars in DEACTIVE state (unchecked / Red OFF) when viewing
+  if (document.getElementById('inpProjectSurveyToggle')) document.getElementById('inpProjectSurveyToggle').checked = false;
+  if (document.getElementById('inpProjectTransportToggle')) document.getElementById('inpProjectTransportToggle').checked = false;
+  if (document.getElementById('inpProjectStatusToggle')) document.getElementById('inpProjectStatusToggle').checked = false;
+
+  setProjectFormReadOnly(true);
+  showToast(`Viewing project details: ${proj.projectType}`);
 };
 
 function exportToCsv() {

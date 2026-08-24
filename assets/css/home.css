@@ -869,6 +869,18 @@ tr.tr-sub-headers th,
   transform: translateX(24px);
 }
 
+.toggle-slide-switch input:disabled + .toggle-slide-slider {
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+  pointer-events: none !important;
+}
+
+.toggle-slide-switch.disabled {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.65 !important;
+}
+
 .slider-wrap {
   display: flex;
   align-items: center;
@@ -1078,6 +1090,54 @@ tr.tr-sub-headers th,
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.side-contact-popup .side-form-header {
+  margin-bottom: 3px !important;
+}
+
+/* Card Dimmed & Blurred state when child popup is active */
+.side-form-card.card-dimmed-blurred {
+  filter: blur(4px) brightness(0.6) opacity(0.6);
+  pointer-events: none !important;
+  transition: filter 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.side-form-cards-row {
+  position: relative;
+}
+
+.side-form-cards-row.has-dimmed-card .side-contact-popup,
+.side-form-card.card-dimmed-blurred ~ .side-contact-popup {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1050 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  animation: overlapPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes overlapPopIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Nested Add Cards (Add Bank, Add Salary, Add Asset) centered overlapping on top */
+#addBankCard, #addSalaryCard, #addAssetCard {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1100 !important;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important;
+  animation: overlapPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
 @keyframes slideOutSidePanel {

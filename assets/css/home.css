@@ -1062,10 +1062,49 @@ tr.tr-sub-headers th,
   box-sizing: border-box !important;
 }
 
+#addIndusTowerCard {
+  width: 1020px !important;
+  max-width: 95vw !important;
+  padding: 0 32px 32px 32px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+#addIndusTowerCard .side-form-header {
+  margin: 0 -32px 24px -32px !important;
+  height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #ffffff !important;
+  border-bottom: none !important;
+}
+
+#addIndusTowerCard .side-form-title-badge {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 54px 0 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 0 100%) !important;
+  background: #2fd19f !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+}
+
+#addIndusTowerCard .side-header-top-icons {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding-right: 16px !important;
+  height: 100% !important;
+}
+
 #addIndusTowerCard .emp-form-grid {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 12px 28px !important;
+  gap: 18px 36px !important;
   width: 100% !important;
 }
 
@@ -1073,21 +1112,23 @@ tr.tr-sub-headers th,
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 8px !important;
+  gap: 12px !important;
   width: 100% !important;
-  min-height: 36px !important;
+  min-height: 44px !important;
   margin: 0 !important;
 }
 
 #addIndusTowerCard .form-label {
-  width: 165px !important;
-  min-width: 165px !important;
-  flex: 0 0 165px !important;
-  font-size: 0.84rem !important;
+  width: 190px !important;
+  min-width: 190px !important;
+  flex: 0 0 190px !important;
+  font-size: 0.82rem !important;
   font-weight: 600 !important;
   color: #475569 !important;
-  white-space: nowrap !important;
+  white-space: normal !important;
+  line-height: 1.25 !important;
   margin-bottom: 0 !important;
+  word-break: break-word !important;
 }
 
 #addIndusTowerCard .form-input-wrap {

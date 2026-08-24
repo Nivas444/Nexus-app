@@ -382,7 +382,8 @@ body {
   transform: scale(1.15);
 }
 
-.reset-pwd-icon {
+.reset-pwd-icon,
+.login-lead-mail-icon {
   width: 22px;
   height: 22px;
   filter: brightness(0) invert(1);
@@ -390,7 +391,9 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.input-lead-icon-btn:hover .reset-pwd-icon {
+.input-lead-icon-btn:hover .reset-pwd-icon,
+.input-field-wrap:hover .login-lead-mail-icon,
+.input-field-wrap.focused .login-lead-mail-icon {
   opacity: 1;
   transform: scale(1.15);
 }

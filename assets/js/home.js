@@ -33,7 +33,7 @@ const masterEmployeeData = [
 const masterCustomerData = [
   {
     id: "cust-1",
-    businessType: "Indus",
+    businessType: "Telecom",
     customerId: "230510678",
     customerName: "",
     gstNumber: "R/RL-234567",
@@ -629,7 +629,7 @@ function switchModule(moduleName) {
 
   const moduleTitles = {
     master: "Master (Company)",
-    indus_towers: "Indus Towers",
+    indus_towers: "Telecom",
     worklist: "Work List",
     projects: "Projects",
     accounts: "Accounts",
@@ -715,7 +715,7 @@ function renderApp() {
   if (activeNavBtn) activeNavBtn.classList.add('active-nav-tab');
 
   if (currentModule === 'master') {
-    if (bannerTitle) bannerTitle.textContent = "Company Name";
+    if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openIndusTowerPageCard(); return false;" title="View Company Name">Company Name</a>`;
     loadMasterDataset();
     renderMasterToolbar();
     renderMasterTableHead();
@@ -726,7 +726,7 @@ function renderApp() {
     } else if (currentIndusSubpage === 'project_type_details') {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProjectType || 'Project Type'} / Sub - Project Type</span>`;
     } else {
-      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openIndusTowerPageCard(); return false;" title="Open Indus Tower Page">Indus Towers</a>`;
+      if (bannerTitle) bannerTitle.textContent = "Telecom";
     }
     loadIndusDataset();
     renderIndusToolbar();
@@ -757,7 +757,7 @@ function openIndusTowersPage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
-  showToast('Navigated to Indus Towers Details');
+  showToast('Navigated to Telecom Details');
 }
 
 function loadIndusDataset() {
@@ -1131,16 +1131,19 @@ function renderIndusTableHead() {
         <th>
           <div class="th-content-wrap">
             <span>Indus SCM</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['indusScm'] ? 'has-active-filter' : ''}" data-filter-col="indusScm" title="Filter Indus SCM">&#9660;</button>
           </div>
         </th>
         <th>
           <div class="th-content-wrap">
             <span>PM</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['pm'] ? 'has-active-filter' : ''}" data-filter-col="pm" title="Filter PM">&#9660;</button>
           </div>
         </th>
         <th>
           <div class="th-content-wrap">
             <span>MIS</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['mis'] ? 'has-active-filter' : ''}" data-filter-col="mis" title="Filter MIS">&#9660;</button>
           </div>
         </th>
         <th>
@@ -1245,11 +1248,6 @@ function renderIndusTableHead() {
         <th>
           <div class="th-content-wrap">
             <span>Active Rate (₹)</span>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Budget %</span>
           </div>
         </th>
         <th>
@@ -1412,7 +1410,7 @@ function renderIndusFooter() {
         activeColumnFilters = {};
         updateURL();
         renderApp();
-        showToast(`Switched to Indus Towers &bull; ${btn.textContent.trim()}`);
+        showToast(`Switched to Telecom &bull; ${btn.textContent.trim()}`);
       }
     });
   });
@@ -1669,11 +1667,6 @@ function renderMasterTableHead() {
           <div class="th-content-wrap">
             <span>Expense Description</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>TDS Rate</span>
           </div>
         </th>
         <th>
@@ -2209,7 +2202,6 @@ function applyFiltersAndRender() {
             <td>${row.hsnSacType || ''}</td>
             <td>${row.hsnSacCode || ''}</td>
             <td class="td-amount">${row.activeRate || ''}</td>
-            <td>${row.budgetPercent || ''}</td>
             <td class="td-amount">${row.budgetAmount || ''}</td>
             <td class="td-center">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
@@ -2249,7 +2241,7 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}">
             <td>
-              ${row.businessType === 'Indus' ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Indus Towers details">${row.businessType}</a>` : row.businessType}
+              ${row.businessType === 'Telecom' ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Telecom details">${row.businessType}</a>` : row.businessType}
             </td>
             <td class="td-center">${row.customerId}</td>
             <td>${row.customerName}</td>
@@ -2300,7 +2292,7 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentMasterSubpage === 'expenses') {
-      // Render Expenses Rows (Matching Mockup: Expense Head, Expense Code, SAC Code, Expense Description, TDS Rate, GST Rate, Uom, Status)
+      // Render Expenses Rows (Matching Mockup: Expense Head, Expense Code, SAC Code, Expense Description, GST Rate, Uom, Status)
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
@@ -2311,7 +2303,6 @@ function applyFiltersAndRender() {
             <td>${row.expenseCode || ''}</td>
             <td>${row.sacCode || ''}</td>
             <td>${row.expenseDescription || ''}</td>
-            <td>${row.tdsRate || ''}</td>
             <td>${row.gstRate || ''}</td>
             <td>${row.uom || ''}</td>
             <td class="td-center">
@@ -3541,6 +3532,7 @@ function openSideForm() {
   const addProductCard = document.getElementById('addProductCard');
   const addExpenseCard = document.getElementById('addExpenseCard');
   const addGbpaCard = document.getElementById('addGbpaCard');
+  const addIndusTowerCard = document.getElementById('addIndusTowerCard');
 
   if (addEmployeeCard) addEmployeeCard.style.display = 'none';
   if (addCustomerCard) addCustomerCard.style.display = 'none';
@@ -3557,6 +3549,7 @@ function openSideForm() {
   if (addProductCard) addProductCard.style.display = 'none';
   if (addExpenseCard) addExpenseCard.style.display = 'none';
   if (addGbpaCard) addGbpaCard.style.display = 'none';
+  if (addIndusTowerCard) addIndusTowerCard.style.display = 'none';
 
   if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'project_type_details') {
@@ -3582,9 +3575,13 @@ function openSideForm() {
         addProjectCard.style.display = 'block';
         const lblTitle = document.getElementById('lblProjectCardTitle');
         const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
+        const btnTransport = document.getElementById('btnProjectTransportIcon');
+        const btnSurvey = document.getElementById('btnProjectSurveyIcon');
         const btnSaveWrap = document.querySelector('#frmAddProject .form-submit-inside-wrap');
         if (lblTitle) lblTitle.innerText = 'Add Project Type';
         if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnTransport) btnTransport.style.display = 'none';
+        if (btnSurvey) btnSurvey.style.display = 'none';
         if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
         setProjectFormReadOnly(false);
         currentViewedProjectId = null;
@@ -3674,17 +3671,19 @@ function closeSideForm() {
   if (assetPanel) assetPanel.style.display = 'none';
 }
 
-window.toggleSlideInput = function(toggleId, inputId) {
+window.toggleSlideInput = function(toggleId, targetId) {
   const toggle = document.getElementById(toggleId);
-  const input = document.getElementById(inputId);
-  if (!toggle || !input) return;
+  const target = document.getElementById(targetId);
+  if (!toggle || !target) return;
 
   if (toggle.checked) {
-    input.style.display = 'block';
-    input.focus();
+    target.style.display = target.classList.contains('slide-dynamic-wrap') ? 'flex' : 'block';
+    const textInput = target.tagName === 'INPUT' ? target : target.querySelector('input[type="text"]');
+    if (textInput) textInput.focus();
   } else {
-    input.style.display = 'none';
-    input.value = '';
+    target.style.display = 'none';
+    const textInput = target.tagName === 'INPUT' ? target : target.querySelector('input[type="text"]');
+    if (textInput) textInput.value = '';
   }
 };
 
@@ -3699,6 +3698,8 @@ window.openIndusTowerPageCard = function() {
   const indusCard = document.getElementById('addIndusTowerCard');
   if (indusCard) {
     indusCard.style.display = 'block';
+    const lblTitle = document.getElementById('lblIndusTowerCardTitle');
+    if (lblTitle) lblTitle.innerText = 'View Company Name';
     
     // Enable all slidebars in addIndusTowerCard so they are WORKABLE
     const toggles = indusCard.querySelectorAll('input[type="checkbox"]');
@@ -3713,7 +3714,7 @@ window.openIndusTowerPageCard = function() {
   }
 
   overlay.style.display = 'flex';
-  showToast('Opened Indus Tower Page');
+  showToast('Opened View Company Name');
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -3798,7 +3799,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnSubmitIndus) {
     btnSubmitIndus.addEventListener('click', () => {
       closeSideForm();
-      showToast('Indus Tower Page details saved successfully!');
+      showToast('Telecom Page details saved successfully!');
     });
   }
 });
@@ -4349,6 +4350,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  const btnProjectTransportIcon = document.getElementById('btnProjectTransportIcon');
+  if (btnProjectTransportIcon) {
+    btnProjectTransportIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showToast('Transport details opened');
+    });
+  }
+
+  const btnProjectSurveyIcon = document.getElementById('btnProjectSurveyIcon');
+  if (btnProjectSurveyIcon) {
+    btnProjectSurveyIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showToast('Survey PDF document opened');
+    });
+  }
 });
 
 // --- SITE, INFRA, PROJECT VIEW HANDLERS ---
@@ -4591,8 +4608,12 @@ window.handleProjectClick = function(projectId, projectType) {
   if (lblTitle) lblTitle.innerText = 'View Project';
 
   const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
+  const btnTransport = document.getElementById('btnProjectTransportIcon');
+  const btnSurvey = document.getElementById('btnProjectSurveyIcon');
   const imgEditIcon = document.getElementById('imgProjectCardEditIcon');
   if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (btnTransport) btnTransport.style.display = 'flex';
+  if (btnSurvey) btnSurvey.style.display = 'flex';
   if (imgEditIcon) {
     imgEditIcon.src = 'icons/Edit.svg';
     imgEditIcon.title = 'Edit Info';

@@ -379,7 +379,7 @@
               <label class="form-label" for="inpBusinessType">Business Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpBusinessType">
-                  <option value="Indus" selected>Indus</option>
+                  <option value="Telecom" selected>Telecom</option>
                   <option value="Infra">Infra</option>
                   <option value="Supply">Supply</option>
                   <option value="Audit">Audit</option>
@@ -400,6 +400,14 @@
               <label class="form-label" for="inpCustomerName">Customer Name</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpCustomerName" placeholder="Enter Customer Name">
+              </div>
+            </div>
+
+            <!-- PO Starting Digits (Max 3 Digits Only) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustomerPoDigits">PO Starting Digits</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustomerPoDigits" maxlength="3" placeholder="3 Digits" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3);">
               </div>
             </div>
 
@@ -696,6 +704,38 @@
               </div>
             </div>
 
+            <!-- Stock Prices -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductStockPrices">Stock Prices</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProductStockPrices" placeholder="Enter Stock Prices">
+              </div>
+            </div>
+
+            <!-- OH -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductOh">OH</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductOh">
+                  <option value="1%" selected>1%</option>
+                  <option value="2%">2%</option>
+                  <option value="10%">10%</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Margin -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductMargin">Margin</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductMargin">
+                  <option value="1%" selected>1%</option>
+                  <option value="2%">2%</option>
+                  <option value="10%">10%</option>
+                </select>
+              </div>
+            </div>
+
             <!-- 8. GST Rate -->
             <div class="form-row-group">
               <label class="form-label" for="inpProductGstRate">GST Rate</label>
@@ -747,11 +787,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpExpenseHead">Expense Head</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpExpenseHead">
-                  <option value="230510678" selected>230510678</option>
-                  <option value="230510679">230510679</option>
-                  <option value="230510680">230510680</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpExpenseHead" placeholder="Enter Expense Head">
               </div>
             </div>
 
@@ -959,6 +995,12 @@
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblProjectCardTitle">Add Project Type</div>
             <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProjectTransportIcon" style="display: none;">
+                <img src="icons/Vehicle.svg" alt="Transport" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnProjectSurveyIcon" style="display: none;">
+                <img src="icons/PDF Upload.svg" alt="Survey" width="28" height="28">
+              </button>
               <button type="button" class="side-top-icon-btn" id="btnProjectCardEditToggle" title="Edit Info" style="display: none;">
                 <img src="icons/Edit.svg" id="imgProjectCardEditIcon" alt="Edit" width="28" height="28">
               </button>
@@ -1084,7 +1126,7 @@
         <div class="side-form-card side-form-card-wide" id="addIndusTowerCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblIndusTowerCardTitle">Indus tower page</div>
+            <div class="side-form-title-badge" id="lblIndusTowerCardTitle">View Company Name</div>
             <div class="side-header-top-icons">
               <button type="button" class="side-top-icon-btn" title="Bank Details" id="btnIndusTowerBank">
                 <img src="icons/Bank.svg" alt="Bank Details" width="26" height="26">
@@ -1144,10 +1186,16 @@
                   <label class="form-label">Registered Address</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusRegAddressToggle" onchange="toggleSlideInput('inpIndusRegAddressToggle', 'txtIndusRegAddress')">
+                      <input type="checkbox" id="inpIndusRegAddressToggle" onchange="toggleSlideInput('inpIndusRegAddressToggle', 'wrapIndusRegAddress')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRegAddress" placeholder="Enter Registered Address" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusRegAddress" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRegAddress" placeholder="Enter Registered Address" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusRegAddress" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusRegAddress').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1156,10 +1204,16 @@
                   <label class="form-label">PAN Number</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusPanToggle" onchange="toggleSlideInput('inpIndusPanToggle', 'txtIndusPan')">
+                      <input type="checkbox" id="inpIndusPanToggle" onchange="toggleSlideInput('inpIndusPanToggle', 'wrapIndusPan')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPan" placeholder="Enter PAN Number" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusPan" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPan" placeholder="Enter PAN Number" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusPan" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusPan').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1168,10 +1222,16 @@
                   <label class="form-label">GST Code</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusGstToggle" onchange="toggleSlideInput('inpIndusGstToggle', 'txtIndusGst')">
+                      <input type="checkbox" id="inpIndusGstToggle" onchange="toggleSlideInput('inpIndusGstToggle', 'wrapIndusGst')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusGst" placeholder="Enter GST Code" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusGst" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusGst" placeholder="Enter GST Code" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusGst" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusGst').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1180,10 +1240,16 @@
                   <label class="form-label">TAN Number</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusTanToggle" onchange="toggleSlideInput('inpIndusTanToggle', 'txtIndusTan')">
+                      <input type="checkbox" id="inpIndusTanToggle" onchange="toggleSlideInput('inpIndusTanToggle', 'wrapIndusTan')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusTan" placeholder="Enter TAN Number" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusTan" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusTan" placeholder="Enter TAN Number" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusTan" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusTan').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1192,10 +1258,16 @@
                   <label class="form-label">UDYAM Code</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusUdyamToggle" onchange="toggleSlideInput('inpIndusUdyamToggle', 'txtIndusUdyam')">
+                      <input type="checkbox" id="inpIndusUdyamToggle" onchange="toggleSlideInput('inpIndusUdyamToggle', 'wrapIndusUdyam')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusUdyam" placeholder="Enter UDYAM Code" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusUdyam" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusUdyam" placeholder="Enter UDYAM Code" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusUdyam" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusUdyam').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1204,10 +1276,16 @@
                   <label class="form-label">ROC Certificate</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusRocToggle" onchange="toggleSlideInput('inpIndusRocToggle', 'txtIndusRoc')">
+                      <input type="checkbox" id="inpIndusRocToggle" onchange="toggleSlideInput('inpIndusRocToggle', 'wrapIndusRoc')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRoc" placeholder="Enter ROC Certificate No." style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusRoc" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRoc" placeholder="Enter ROC Certificate No." style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusRoc" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusRoc').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1219,10 +1297,16 @@
                   <label class="form-label">EPF Code</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusEpfToggle" onchange="toggleSlideInput('inpIndusEpfToggle', 'txtIndusEpf')">
+                      <input type="checkbox" id="inpIndusEpfToggle" onchange="toggleSlideInput('inpIndusEpfToggle', 'wrapIndusEpf')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEpf" placeholder="Enter EPF Code" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusEpf" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEpf" placeholder="Enter EPF Code" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusEpf" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusEpf').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1231,10 +1315,16 @@
                   <label class="form-label">ESI Code</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusEsiToggle" onchange="toggleSlideInput('inpIndusEsiToggle', 'txtIndusEsi')">
+                      <input type="checkbox" id="inpIndusEsiToggle" onchange="toggleSlideInput('inpIndusEsiToggle', 'wrapIndusEsi')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEsi" placeholder="Enter ESI Code" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusEsi" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEsi" placeholder="Enter ESI Code" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusEsi" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusEsi').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1243,10 +1333,16 @@
                   <label class="form-label">PTEC Code</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusPtecToggle" onchange="toggleSlideInput('inpIndusPtecToggle', 'txtIndusPtec')">
+                      <input type="checkbox" id="inpIndusPtecToggle" onchange="toggleSlideInput('inpIndusPtecToggle', 'wrapIndusPtec')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPtec" placeholder="Enter PTEC Code" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusPtec" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPtec" placeholder="Enter PTEC Code" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusPtec" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusPtec').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1255,10 +1351,16 @@
                   <label class="form-label">LWF Code</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusLwfToggle" onchange="toggleSlideInput('inpIndusLwfToggle', 'txtIndusLwf')">
+                      <input type="checkbox" id="inpIndusLwfToggle" onchange="toggleSlideInput('inpIndusLwfToggle', 'wrapIndusLwf')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusLwf" placeholder="Enter LWF Code" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusLwf" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusLwf" placeholder="Enter LWF Code" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusLwf" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusLwf').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1267,10 +1369,16 @@
                   <label class="form-label">Establishment Registration Code</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusEstRegToggle" onchange="toggleSlideInput('inpIndusEstRegToggle', 'txtIndusEstReg')">
+                      <input type="checkbox" id="inpIndusEstRegToggle" onchange="toggleSlideInput('inpIndusEstRegToggle', 'wrapIndusEstReg')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEstReg" placeholder="Enter Est. Reg. Code" style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusEstReg" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEstReg" placeholder="Enter Est. Reg. Code" style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusEstReg" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusEstReg').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1279,10 +1387,16 @@
                   <label class="form-label">WC Policy</label>
                   <div class="form-input-wrap slider-input-wrap">
                     <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusWcPolicyToggle" onchange="toggleSlideInput('inpIndusWcPolicyToggle', 'txtIndusWcPolicy')">
+                      <input type="checkbox" id="inpIndusWcPolicyToggle" onchange="toggleSlideInput('inpIndusWcPolicyToggle', 'wrapIndusWcPolicy')">
                       <span class="toggle-slide-slider"></span>
                     </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusWcPolicy" placeholder="Enter WC Policy No." style="display: none;">
+                    <div class="slide-dynamic-wrap" id="wrapIndusWcPolicy" style="display: none; position: relative; flex: 1; align-items: center;">
+                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusWcPolicy" placeholder="Enter WC Policy No." style="padding-right: 38px; width: 100%;">
+                      <input type="file" id="fileIndusWcPolicy" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                      <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileIndusWcPolicy').click();" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1873,9 +1987,9 @@
               </div>
             </div>
 
-            <!-- 3. WH ID (Blue label) -->
+            <!-- 3. WH ID -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpSiteWhId">WH ID</label>
+              <label class="form-label" for="inpSiteWhId">WH ID</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpSiteWhId">
                   <option value="" selected></option>
@@ -1894,9 +2008,9 @@
               </div>
             </div>
 
-            <!-- 5. District (Blue label) -->
+            <!-- 5. District -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpSiteDistrict">District</label>
+              <label class="form-label" for="inpSiteDistrict">District</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpSiteDistrict">
                   <option value="" selected></option>
@@ -1907,41 +2021,41 @@
               </div>
             </div>
 
-            <!-- 6. Town (Blue label) -->
+            <!-- 6. Town -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpSiteTown">Town</label>
+              <label class="form-label" for="inpSiteTown">Town</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpSiteTown" placeholder="">
               </div>
             </div>
 
-            <!-- 7. Site Address (Blue label) -->
+            <!-- 7. Site Address -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpSiteAddress">Site Address</label>
+              <label class="form-label" for="inpSiteAddress">Site Address</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpSiteAddress" placeholder="">
               </div>
             </div>
 
-            <!-- 8. Lattitude (Blue label) -->
+            <!-- 8. Lattitude -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpSiteLattitude">Lattitude</label>
+              <label class="form-label" for="inpSiteLattitude">Lattitude</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpSiteLattitude" placeholder="">
               </div>
             </div>
 
-            <!-- 9. Longtitude (Blue label) -->
+            <!-- 9. Longtitude -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpSiteLongtitude">Longtitude</label>
+              <label class="form-label" for="inpSiteLongtitude">Longtitude</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpSiteLongtitude" placeholder="">
               </div>
             </div>
 
-            <!-- 10. Transport Zone (Blue label) -->
+            <!-- 10. Transport Zone -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpSiteTransportZone">Transport Zone</label>
+              <label class="form-label" for="inpSiteTransportZone">Transport Zone</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpSiteTransportZone">
                   <option value="" selected></option>
@@ -2167,7 +2281,7 @@
         </div>
 
         <!-- 5. Salary Details Table Popup (Matching Uploaded Mockup 1) -->
-        <div class="side-form-card side-contact-popup" id="salaryDetailsSidePanel" style="display: none; width: 680px;">
+        <div class="side-form-card side-contact-popup" id="salaryDetailsSidePanel" style="display: none; width: 880px;">
           <!-- Header Ribbon Badge Matching Mockup: Salary Details + Top Right Plus Icon -->
           <div class="side-form-header">
             <div class="side-form-title-badge">Salary Details</div>
@@ -2207,11 +2321,11 @@
                   <td>01</td>
                   <td>2025</td>
                   <td>12</td>
-                  <td>25000</td>
-                  <td>10000</td>
-                  <td>5000</td>
-                  <td>2000</td>
-                  <td>42000</td>
+                  <td>25000.00</td>
+                  <td>10000.00</td>
+                  <td>5000.00</td>
+                  <td>2000.00</td>
+                  <td>42000.00</td>
                   <td>
                     <span class="status-badge status-active">Active</span>
                   </td>

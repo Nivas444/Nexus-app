@@ -726,7 +726,7 @@ function renderApp() {
     } else if (currentIndusSubpage === 'project_type_details') {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProjectType || 'Project Type'} / Sub - Project Type</span>`;
     } else {
-      if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">Indus Towers</span>`;
+      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openIndusTowerPageCard(); return false;" title="Open Indus Tower Page">Indus Towers</a>`;
     }
     loadIndusDataset();
     renderIndusToolbar();
@@ -3674,6 +3674,135 @@ function closeSideForm() {
   if (assetPanel) assetPanel.style.display = 'none';
 }
 
+window.toggleSlideInput = function(toggleId, inputId) {
+  const toggle = document.getElementById(toggleId);
+  const input = document.getElementById(inputId);
+  if (!toggle || !input) return;
+
+  if (toggle.checked) {
+    input.style.display = 'block';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = '';
+  }
+};
+
+window.openIndusTowerPageCard = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Hide all side cards first
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const indusCard = document.getElementById('addIndusTowerCard');
+  if (indusCard) {
+    indusCard.style.display = 'block';
+    
+    // Enable all slidebars in addIndusTowerCard so they are WORKABLE
+    const toggles = indusCard.querySelectorAll('input[type="checkbox"]');
+    toggles.forEach(t => {
+      t.disabled = false;
+      const parentSwitch = t.closest('.toggle-slide-switch');
+      if (parentSwitch) {
+        parentSwitch.style.pointerEvents = 'auto';
+        parentSwitch.style.opacity = '1';
+      }
+    });
+  }
+
+  overlay.style.display = 'flex';
+  showToast('Opened Indus Tower Page');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btnCloseIndusTower = document.getElementById('btnCloseIndusTowerForm');
+  if (btnCloseIndusTower) {
+    btnCloseIndusTower.addEventListener('click', closeSideForm);
+  }
+
+  const btnLogo = document.getElementById('btnIndusTowerLogo');
+  const fileLogo = document.getElementById('inpIndusTowerLogoFile');
+  const imgLogoPreview = document.getElementById('imgIndusTowerLogoPreview');
+  const lblLogoFileName = document.getElementById('lblIndusTowerLogoFileName');
+
+  if (btnLogo && fileLogo) {
+    btnLogo.addEventListener('click', () => {
+      fileLogo.click();
+    });
+
+    fileLogo.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        if (lblLogoFileName) {
+          lblLogoFileName.textContent = file.name;
+          lblLogoFileName.style.display = 'inline';
+        }
+        if (file.type.startsWith('image/') && imgLogoPreview) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            imgLogoPreview.src = evt.target.result;
+            imgLogoPreview.style.width = '30px';
+            imgLogoPreview.style.height = '30px';
+            imgLogoPreview.style.borderRadius = '4px';
+            imgLogoPreview.style.objectFit = 'cover';
+          };
+          reader.readAsDataURL(file);
+        }
+        showToast('Logo uploaded: ' + file.name);
+      }
+    });
+  }
+
+  const btnEdit = document.getElementById('btnIndusTowerEdit');
+  if (btnEdit) {
+    btnEdit.addEventListener('click', () => showToast('Edit clicked'));
+  }
+
+  const btnBank = document.getElementById('btnIndusTowerBank');
+  if (btnBank) {
+    btnBank.addEventListener('click', () => {
+      openSidePanel('bank');
+      showToast('Bank details clicked');
+    });
+  }
+
+  const btnLoc = document.getElementById('btnIndusTowerLocation');
+  if (btnLoc) {
+    btnLoc.addEventListener('click', () => {
+      openSidePanel('location');
+      showToast('Location clicked');
+    });
+  }
+
+  const btnAshoka = document.getElementById('btnIndusTowerAshokaChakra');
+  if (btnAshoka) {
+    btnAshoka.addEventListener('click', () => showToast('National holiday'));
+  }
+
+  const btnWcCalendar = document.getElementById('btnIndusWcExpiryCalendar');
+  const inpWcExpiry = document.getElementById('inpIndusWcExpiry');
+  if (btnWcCalendar && inpWcExpiry) {
+    btnWcCalendar.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof inpWcExpiry.showPicker === 'function') {
+        inpWcExpiry.showPicker();
+      } else {
+        inpWcExpiry.focus();
+      }
+    });
+  }
+
+  const btnSubmitIndus = document.getElementById('btnSubmitIndusTower');
+  if (btnSubmitIndus) {
+    btnSubmitIndus.addEventListener('click', () => {
+      closeSideForm();
+      showToast('Indus Tower Page details saved successfully!');
+    });
+  }
+});
+
 // ==========================================================================
 // 7. EXCEL-STYLE FILTER ENGINE
 // ==========================================================================
@@ -4277,6 +4406,9 @@ window.handleSiteClick = function(siteId, siteName) {
   isSiteFormEditing = false;
   openSideForm();
 
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
   const card = document.getElementById('addSiteCard');
   if (card) card.style.display = 'block';
 
@@ -4362,6 +4494,9 @@ window.handleInfraClick = function(infraId, infraCat) {
   isInfraFormEditing = false;
   openSideForm();
 
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
   const card = document.getElementById('addInfraCard');
   if (card) card.style.display = 'block';
 
@@ -4445,6 +4580,9 @@ window.handleProjectClick = function(projectId, projectType) {
   currentViewedProjectId = proj.id;
   isProjectFormEditing = false;
   openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
 
   const card = document.getElementById('addProjectCard');
   if (card) card.style.display = 'block';

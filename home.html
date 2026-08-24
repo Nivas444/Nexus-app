@@ -1080,6 +1080,247 @@
           </form>
         </div>
 
+        <!-- 1F-3. Indus Tower Page Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-form-card-wide" id="addIndusTowerCard" style="display: none;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblIndusTowerCardTitle">Indus tower page</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" title="Bank Details" id="btnIndusTowerBank">
+                <img src="icons/Bank.svg" alt="Bank Details" width="26" height="26">
+              </button>
+              <button type="button" class="side-top-icon-btn" title="National holiday" id="btnIndusTowerAshokaChakra">
+                <img src="icons/Ashoka_Chakra.svg" alt="National holiday" width="26" height="26">
+              </button>
+              <button type="button" class="side-top-icon-btn" title="Location" id="btnIndusTowerLocation">
+                <img src="icons/Location.svg" alt="Location" width="26" height="26">
+              </button>
+              <button type="button" class="side-top-icon-btn" title="Edit" id="btnIndusTowerEdit">
+                <img src="icons/Edit.svg" alt="Edit" width="26" height="26">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseIndusTowerForm" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Decorative Action Icons on Top Right -->
+          <div class="side-form-top-icons"></div>
+
+          <!-- Form Body (2-Column Grid matching uploaded mockup) -->
+          <form class="side-form-body" id="frmAddIndusTower" onsubmit="event.preventDefault();">
+            <input type="file" id="inpIndusTowerLogoFile" accept="image/*" style="display: none;">
+            
+            <div class="emp-form-grid">
+              
+              <!-- LEFT COLUMN -->
+              <div class="emp-grid-col">
+                <!-- 1. Logo -->
+                <div class="form-row-group">
+                  <label class="form-label">Logo</label>
+                  <div class="form-input-wrap">
+                    <button type="button" class="btn-pdf-upload-badge" id="btnIndusTowerLogo" title="Upload Logo" style="background: transparent; border: none; cursor: pointer; padding: 2px;">
+                      <img src="icons/Image Upload.svg" alt="Logo" id="imgIndusTowerLogoPreview" width="28" height="28">
+                    </button>
+                    <span id="lblIndusTowerLogoFileName" style="margin-left: 8px; font-size: 0.82rem; color: #475569; display: none;"></span>
+                  </div>
+                </div>
+
+                <!-- 2. Company Type -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpIndusCompanyType">Company Type</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpIndusCompanyType">
+                      <option value="" selected></option>
+                      <option value="Private Limited">Private Limited</option>
+                      <option value="Public Limited">Public Limited</option>
+                      <option value="LLP">LLP</option>
+                      <option value="Partnership">Partnership</option>
+                      <option value="Proprietorship">Proprietorship</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 3. Registered Address -->
+                <div class="form-row-group">
+                  <label class="form-label">Registered Address</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusRegAddressToggle" onchange="toggleSlideInput('inpIndusRegAddressToggle', 'txtIndusRegAddress')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRegAddress" placeholder="Enter Registered Address" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 4. PAN Number -->
+                <div class="form-row-group">
+                  <label class="form-label">PAN Number</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusPanToggle" onchange="toggleSlideInput('inpIndusPanToggle', 'txtIndusPan')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPan" placeholder="Enter PAN Number" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 5. GST Code -->
+                <div class="form-row-group">
+                  <label class="form-label">GST Code</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusGstToggle" onchange="toggleSlideInput('inpIndusGstToggle', 'txtIndusGst')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusGst" placeholder="Enter GST Code" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 6. TAN Number -->
+                <div class="form-row-group">
+                  <label class="form-label">TAN Number</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusTanToggle" onchange="toggleSlideInput('inpIndusTanToggle', 'txtIndusTan')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusTan" placeholder="Enter TAN Number" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 7. UDYAM Code -->
+                <div class="form-row-group">
+                  <label class="form-label">UDYAM Code</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusUdyamToggle" onchange="toggleSlideInput('inpIndusUdyamToggle', 'txtIndusUdyam')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusUdyam" placeholder="Enter UDYAM Code" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 8. ROC Certificate -->
+                <div class="form-row-group">
+                  <label class="form-label">ROC Certificate</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusRocToggle" onchange="toggleSlideInput('inpIndusRocToggle', 'txtIndusRoc')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRoc" placeholder="Enter ROC Certificate No." style="display: none;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT COLUMN -->
+              <div class="emp-grid-col">
+                <!-- 1. EPF Code -->
+                <div class="form-row-group">
+                  <label class="form-label">EPF Code</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusEpfToggle" onchange="toggleSlideInput('inpIndusEpfToggle', 'txtIndusEpf')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEpf" placeholder="Enter EPF Code" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 2. ESI Code -->
+                <div class="form-row-group">
+                  <label class="form-label">ESI Code</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusEsiToggle" onchange="toggleSlideInput('inpIndusEsiToggle', 'txtIndusEsi')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEsi" placeholder="Enter ESI Code" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 3. PTEC Code -->
+                <div class="form-row-group">
+                  <label class="form-label">PTEC Code</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusPtecToggle" onchange="toggleSlideInput('inpIndusPtecToggle', 'txtIndusPtec')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPtec" placeholder="Enter PTEC Code" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 4. LWF Code -->
+                <div class="form-row-group">
+                  <label class="form-label">LWF Code</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusLwfToggle" onchange="toggleSlideInput('inpIndusLwfToggle', 'txtIndusLwf')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusLwf" placeholder="Enter LWF Code" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 5. Establishment Registration Code -->
+                <div class="form-row-group">
+                  <label class="form-label">Establishment Registration Code</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusEstRegToggle" onchange="toggleSlideInput('inpIndusEstRegToggle', 'txtIndusEstReg')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEstReg" placeholder="Enter Est. Reg. Code" style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 6. WC Policy -->
+                <div class="form-row-group">
+                  <label class="form-label">WC Policy</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusWcPolicyToggle" onchange="toggleSlideInput('inpIndusWcPolicyToggle', 'txtIndusWcPolicy')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusWcPolicy" placeholder="Enter WC Policy No." style="display: none;">
+                  </div>
+                </div>
+
+                <!-- 7. WC Expiry Date -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpIndusWcExpiry">WC Expiry Date</label>
+                  <div class="form-input-wrap date-input-wrap" style="position: relative; display: flex; align-items: center;">
+                    <input type="date" class="form-input-control date-picker-control" id="inpIndusWcExpiry" style="padding-right: 38px;">
+                    <button type="button" class="input-pdf-badge input-date-badge" id="btnIndusWcExpiryCalendar" title="Select Date" style="position: absolute; right: 6px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                      <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 8. E - Invoice -->
+                <div class="form-row-group">
+                  <label class="form-label">E - Invoice</label>
+                  <div class="form-input-wrap slider-input-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpIndusEInvoiceToggle" onchange="toggleSlideInput('inpIndusEInvoiceToggle', 'txtIndusEInvoice')">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEInvoice" placeholder="Enter E-Invoice Code" style="display: none;">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitIndusTower" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- 1F-2. Indus / GBPA Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addGbpaCard" style="display: none;">
           <!-- Header -->

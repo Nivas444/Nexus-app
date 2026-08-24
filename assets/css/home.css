@@ -239,6 +239,18 @@ body {
   line-height: 1.2;
 }
 
+.banner-title-link {
+  color: #ffffff !important;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.banner-title-link:hover {
+  opacity: 0.85;
+  filter: brightness(1.1);
+}
+
 /* Back Button Icon-Alone Styles (Green Banner Bar) */
 .banner-back-btn {
   display: inline-flex;
@@ -888,6 +900,33 @@ tr.tr-sub-headers th,
   width: 100%;
 }
 
+.slider-input-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+}
+
+.slide-dynamic-input {
+  flex: 1 !important;
+  height: 36px !important;
+  padding: 6px 12px !important;
+  border: 1.5px solid #00cba0 !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  outline: none !important;
+  box-shadow: 0 2px 6px rgba(0, 203, 160, 0.15) !important;
+  animation: expandInput 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes expandInput {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .toggle-status-label {
   font-size: 0.88rem;
   font-weight: 700;
@@ -1021,6 +1060,42 @@ tr.tr-sub-headers th,
   padding: 20px 24px 28px 24px !important;
   width: 100% !important;
   box-sizing: border-box !important;
+}
+
+#addIndusTowerCard .emp-form-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px 28px !important;
+  width: 100% !important;
+}
+
+#addIndusTowerCard .form-row-group {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-height: 36px !important;
+  margin: 0 !important;
+}
+
+#addIndusTowerCard .form-label {
+  width: 165px !important;
+  min-width: 165px !important;
+  flex: 0 0 165px !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  white-space: nowrap !important;
+  margin-bottom: 0 !important;
+}
+
+#addIndusTowerCard .form-input-wrap {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .side-form-body-grid {

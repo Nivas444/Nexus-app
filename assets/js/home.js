@@ -856,8 +856,17 @@ function renderIndusToolbar() {
         </button>
       </div>
     `;
-  } else {
-    // Indus Towers Toolbar (Site, Projects): Backward Icon on Left + CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
+    document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
+      showToast('Bulk Upload initiated');
+    });
+    document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+      openSideForm();
+    });
+    return;
+  }
+
+  if (currentIndusSubpage === 'site') {
+    // Indus Towers Site Toolbar: Backward Icon + CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
     toolbar.innerHTML = `
       <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
@@ -870,7 +879,7 @@ function renderIndusToolbar() {
           <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
-        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Record" aria-label="Add Record">
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Site" aria-label="Add Site">
           <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
         </button>
       </div>
@@ -879,12 +888,40 @@ function renderIndusToolbar() {
     document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
       triggerCsvUpload();
     });
+    document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
+      showToast('Bulk Upload initiated');
+    });
+    document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+      openSideForm();
+    });
+    return;
   }
 
+  // Indus Towers Toolbar (Projects): Backward Icon on Left + CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
+  toolbar.innerHTML = `
+    <div class="toolbar-left">${universalBackBtnHtml}</div>
+    <div class="toolbar-right">
+      <!-- Green CSV Upload Icon -->
+      <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+        <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+      </button>
+      <!-- Orange Bulk Upload Icon -->
+      <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
+        <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
+      </button>
+      <!-- Blue Add (+) Button -->
+      <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Record" aria-label="Add Record">
+        <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+      </button>
+    </div>
+  `;
+
+  document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
+    triggerCsvUpload();
+  });
   document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
     openSideForm();
   });
-
   document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
     showToast('Bulk Upload initiated');
   });
@@ -2415,7 +2452,7 @@ function initSideFormEvents() {
   const btnCloseInfra = document.getElementById('btnCloseInfraForm');
   const btnInfraMessage = document.getElementById('btnInfraCardMessage');
   const btnCloseSite = document.getElementById('btnCloseSiteForm');
-  const btnSiteMessage = document.getElementById('btnSiteCardMessage');
+  const btnSiteMessage = document.getElementById('btnSiteCardMessageIcon') || document.getElementById('btnSiteCardMessage');
   const btnSubmitSite = document.getElementById('btnSubmitSite');
   const btnCloseGbpa = document.getElementById('btnCloseGbpaForm');
   const btnSubmitGbpa = document.getElementById('btnSubmitGbpa');
@@ -3605,9 +3642,11 @@ function openSideForm() {
         addSiteCard.style.display = 'block';
         const lblTitle = document.getElementById('lblSiteCardTitle');
         const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
+        const btnSiteMsg = document.getElementById('btnSiteCardMessageIcon');
         const btnSaveWrap = document.querySelector('#frmAddSite .form-submit-inside-wrap');
         if (lblTitle) lblTitle.innerText = 'Add Sites';
         if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnSiteMsg) btnSiteMsg.style.display = 'none';
         if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
         setSiteFormReadOnly(false);
         currentViewedSiteId = null;
@@ -3685,6 +3724,22 @@ window.toggleSlideInput = function(toggleId, targetId) {
     const textInput = target.tagName === 'INPUT' ? target : target.querySelector('input[type="text"]');
     if (textInput) textInput.value = '';
   }
+};
+
+window.openContactDetailsSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const contactPanel = document.getElementById('contactDetailsSidePanel');
+  if (contactPanel) {
+    contactPanel.style.display = 'block';
+  }
+
+  overlay.style.display = 'flex';
+  showToast('Opened Contact Details');
 };
 
 window.openIndusTowerPageCard = function() {
@@ -3772,7 +3827,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLoc = document.getElementById('btnIndusTowerLocation');
   if (btnLoc) {
     btnLoc.addEventListener('click', () => {
-      openSidePanel('location');
       showToast('Location clicked');
     });
   }
@@ -4433,8 +4487,10 @@ window.handleSiteClick = function(siteId, siteName) {
   if (lblTitle) lblTitle.innerText = 'View Site';
 
   const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
+  const btnSiteMsg = document.getElementById('btnSiteCardMessageIcon');
   const imgEditIcon = document.getElementById('imgSiteCardEditIcon');
   if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (btnSiteMsg) btnSiteMsg.style.display = 'flex';
   if (imgEditIcon) {
     imgEditIcon.src = 'icons/Edit.svg';
     imgEditIcon.title = 'Edit Info';

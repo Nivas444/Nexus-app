@@ -1953,6 +1953,9 @@
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblSiteCardTitle">Add Sites</div>
             <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnSiteCardMessageIcon" title="Contact Details" style="display: none;">
+                <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="28" height="28">
+              </button>
               <button type="button" class="side-top-icon-btn" id="btnSiteCardEditToggle" title="Edit Info" style="display: none;">
                 <img src="icons/Edit.svg" id="imgSiteCardEditIcon" alt="Edit" width="28" height="28">
               </button>
@@ -2110,24 +2113,16 @@
         </div>
 
         <!-- 2. Contact & Communication Message Popup (Table View with Filters & Top Plus on Right) -->
-        <div class="side-form-card side-contact-popup" id="contactDetailsSidePanel" style="display: none;">
-          <!-- Top Toolbar: Plus Icon on Right Side (No Cross Button) -->
-          <div class="contact-popup-toolbar">
-            <div class="contact-toolbar-right">
-              <!-- Save Button -->
-              <button type="button" class="btn-filter-apply" id="btnSaveBankDetails" title="Save Bank Details">
-                <img src="icons/Save.svg" alt="Save" width="22" height="22">
-                Save
-              </button>
-              <!-- Plus Icon Button -->
-              <button type="button" class="btn-contact-tool" id="btnContactAddRow" title="Add Contact">
-                <img src="icons/Add.svg" alt="Add Contact" width="26" height="26">
-              </button>
-            </div>
+        <div class="side-form-card side-contact-popup" id="contactDetailsSidePanel" style="display: none; width: 720px;">
+          <!-- Top Toolbar: Large Blue Plus Icon on Right Side (Matching Uploaded Mockup) -->
+          <div class="contact-popup-toolbar" style="display: flex; justify-content: flex-end; padding: 12px 20px 8px 20px;">
+            <button type="button" class="btn-contact-tool" id="btnContactAddRow" title="Add Contact" style="background: transparent; border: none; cursor: pointer; padding: 0;">
+              <img src="icons/Add.svg" alt="Add Contact" width="40" height="40">
+            </button>
           </div>
 
           <!-- Contact Table with Filter Funnels -->
-          <div class="contact-table-wrap">
+          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
             <table class="contact-custom-table" id="tblContactPopup">
               <thead>
                 <tr>
@@ -2140,10 +2135,10 @@
                     <button type="button" class="contact-th-filter-btn" data-filter-col="designation" title="Filter Designation">▼</button>
                   </th>
                   <th class="col-contact-phone">
-                    <span>Contact</span>
+                    <span>Contact Number</span>
                   </th>
                   <th class="col-contact-email">
-                    <span>Email</span>
+                    <span>E-Mail</span>
                   </th>
                   <th class="col-contact-status">
                     <span>Status</span>
@@ -2154,17 +2149,10 @@
               <tbody>
                 <tr>
                   <td class="td-link-blue">Indus</td>
-                  <td>Manager</td>
+                  <td></td>
+                  <td></td>
                   <td>R/RL-234567</td>
                   <td>SGST</td>
-                  <td><span class="status-badge status-active">Active</span></td>
-                </tr>
-                <tr>
-                  <td class="td-link-blue">Supply</td>
-                  <td>Lead Officer</td>
-                  <td>R/RL-234568</td>
-                  <td>IGST</td>
-                  <td><span class="status-badge status-inactive">In - Active</span></td>
                 </tr>
               </tbody>
             </table>

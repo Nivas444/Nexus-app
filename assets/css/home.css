@@ -1208,6 +1208,15 @@ tr.tr-sub-headers th,
   flex-direction: column;
 }
 
+.blue-mail-phone-icon {
+  filter: invert(32%) sepia(90%) saturate(2800%) hue-rotate(212deg) brightness(98%) contrast(96%) !important;
+}
+
+.toolbar-icon-btn:hover .blue-mail-phone-icon {
+  filter: invert(24%) sepia(90%) saturate(3000%) hue-rotate(212deg) brightness(90%) contrast(98%) !important;
+  transform: scale(1.1);
+}
+
 .side-contact-popup .side-form-header {
   margin-bottom: 3px !important;
 }

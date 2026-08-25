@@ -1327,13 +1327,18 @@ tr.tr-sub-headers th,
   padding: 9px 12px;
   text-align: center !important;
   white-space: nowrap;
+  border-left: 1px solid #ffffff !important;
   border-right: 1px solid #ffffff !important;
   border-bottom: 1px solid #ffffff !important;
   user-select: none;
 }
 
+.contact-custom-table thead th:first-child {
+  border-left: 1px solid #ffffff !important;
+}
+
 .contact-custom-table thead th:last-child {
-  border-right: none !important;
+  border-right: 1px solid #ffffff !important;
 }
 
 .contact-custom-table thead tr:last-child th {

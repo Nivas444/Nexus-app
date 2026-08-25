@@ -3708,6 +3708,14 @@ function closeSideForm() {
   if (salaryPanel) salaryPanel.style.display = 'none';
   const assetPanel = document.getElementById('assetDetailsSidePanel');
   if (assetPanel) assetPanel.style.display = 'none';
+  const transportPanel = document.getElementById('transportDetailsSidePanel');
+  if (transportPanel) transportPanel.style.display = 'none';
+  const projectDocPanel = document.getElementById('projectTypeDocSidePanel');
+  if (projectDocPanel) projectDocPanel.style.display = 'none';
+  // Remove blur from any dimmed cards and has-dimmed-card from row
+  document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
 }
 
 window.toggleSlideInput = function(toggleId, targetId) {
@@ -3741,6 +3749,61 @@ window.openContactDetailsSidePanel = function() {
   overlay.style.display = 'flex';
   showToast('Opened Contact Details');
 };
+
+// Opens Transport Details panel as an overlay over the current View Project card
+// The project card stays mounted in the DOM – no data is cleared
+window.openTransportDetailsSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim/blur the project card but keep it visible (data stays intact)
+  const projectCard = document.getElementById('addProjectCard');
+  if (projectCard) projectCard.classList.add('card-dimmed-blurred');
+
+  // Mark the row so the CSS overlay positioning kicks in
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide any other popup panels that might be open
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'projectTypeDocSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const transportPanel = document.getElementById('transportDetailsSidePanel');
+  if (transportPanel) transportPanel.style.display = 'block';
+
+  overlay.style.display = 'flex';
+};
+
+// Opens Project Type / Sub - Project Type Document panel as an overlay over the current View Project card
+// The project card stays mounted in the DOM – no data is cleared or deleted
+window.openProjectDocSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim/blur the project card but keep it visible (data stays intact)
+  const projectCard = document.getElementById('addProjectCard');
+  if (projectCard) projectCard.classList.add('card-dimmed-blurred');
+
+  // Mark the row so the CSS overlay positioning kicks in
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide any other popup panels that might be open
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const docPanel = document.getElementById('projectTypeDocSidePanel');
+  if (docPanel) docPanel.style.display = 'block';
+
+  overlay.style.display = 'flex';
+};
+
 
 window.openIndusTowerPageCard = function() {
   const overlay = document.getElementById('sideFormOverlay');
@@ -4409,7 +4472,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnProjectTransportIcon) {
     btnProjectTransportIcon.addEventListener('click', (e) => {
       e.stopPropagation();
-      showToast('Transport details opened');
+      openTransportDetailsSidePanel();
+    });
+  }
+
+  // Close button for transport panel
+  const btnCloseTransport = document.getElementById('btnCloseTransportPanel');
+  if (btnCloseTransport) {
+    btnCloseTransport.addEventListener('click', () => {
+      const tp = document.getElementById('transportDetailsSidePanel');
+      if (tp) tp.style.display = 'none';
+      // Restore project card visibility
+      const projectCard = document.getElementById('addProjectCard');
+      if (projectCard) projectCard.classList.remove('card-dimmed-blurred');
+      // Remove has-dimmed-card from row
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
     });
   }
 
@@ -4417,7 +4495,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnProjectSurveyIcon) {
     btnProjectSurveyIcon.addEventListener('click', (e) => {
       e.stopPropagation();
-      showToast('Survey PDF document opened');
+      openProjectDocSidePanel();
+    });
+  }
+
+  // Close button for project type doc panel
+  const btnCloseProjectDoc = document.getElementById('btnCloseProjectDocPanel');
+  if (btnCloseProjectDoc) {
+    btnCloseProjectDoc.addEventListener('click', () => {
+      const dp = document.getElementById('projectTypeDocSidePanel');
+      if (dp) dp.style.display = 'none';
+      // Restore project card visibility
+      const projectCard = document.getElementById('addProjectCard');
+      if (projectCard) projectCard.classList.remove('card-dimmed-blurred');
+      // Remove has-dimmed-card from row
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
     });
   }
 });

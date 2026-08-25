@@ -2647,6 +2647,106 @@
             </div>
           </form>
         </div>
+
+        <!-- 10. Transport Details Side Panel (View Project → Transport Icon) -->
+        <div class="side-form-card side-contact-popup" id="transportDetailsSidePanel" style="display: none; width: 820px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Transport Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnTransportAddRow" title="Add Transport Record" aria-label="Add Transport">
+                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseTransportPanel" aria-label="Close transport details">&times;</button>
+            </div>
+          </div>
+
+          <!-- Transport Table -->
+          <div class="contact-table-wrap" style="padding: 0;">
+            <table class="contact-custom-table" id="tblTransportDetails">
+              <thead>
+                <tr>
+                  <th>
+                    <span>Item Code</span>
+                    <button type="button" class="contact-th-filter-btn" title="Filter Item Code">▼</button>
+                  </th>
+                  <th>
+                    <span>Item Description</span>
+                    <button type="button" class="contact-th-filter-btn" title="Filter Item Description">▼</button>
+                  </th>
+                  <th>
+                    <span>Transport Zone</span>
+                    <button type="button" class="contact-th-filter-btn" title="Filter Transport Zone">▼</button>
+                  </th>
+                  <th>
+                    <span>Qty</span>
+                  </th>
+                  <th>
+                    <span>Status</span>
+                    <button type="button" class="contact-th-filter-btn" title="Filter Status">▼</button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyTransportDetails">
+                <tr>
+                  <td class="td-link-blue">ITM-001</td>
+                  <td>Tower Component – KTN Type A</td>
+                  <td>A</td>
+                  <td>12</td>
+                  <td><span class="status-badge status-active">Active</span></td>
+                </tr>
+                <tr>
+                  <td class="td-link-blue">ITM-002</td>
+                  <td>Cable Harness Set – KK Grade</td>
+                  <td>B</td>
+                  <td>8</td>
+                  <td><span class="status-badge status-active">Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 11. Project Type / Sub - Project Type Details Side Panel (View Project → PDF Upload Icon) -->
+        <div class="side-form-card side-contact-popup" id="projectTypeDocSidePanel" style="display: none; width: 620px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Project Type / Sub - Project Type</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectDocPanel" aria-label="Close project type details">&times;</button>
+            </div>
+          </div>
+
+          <!-- Top Toolbar: Plus Icon on Right Side matching Mockup -->
+          <div class="contact-popup-toolbar" style="display: flex; justify-content: flex-end; padding: 10px 20px 6px 20px;">
+            <button type="button" class="btn-contact-tool" id="btnProjectDocAddRow" title="Add Project Type" style="background: transparent; border: none; cursor: pointer; padding: 0;">
+              <img src="icons/Add.svg" alt="Add" width="36" height="36">
+            </button>
+          </div>
+
+          <!-- Project Type Description Table -->
+          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblProjectDocDetails">
+              <thead>
+                <tr>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: center;">
+                    <span>Description</span>
+                    <button type="button" class="contact-th-filter-btn" title="Filter Description">▼</button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyProjectDocDetails">
+                <tr>
+                  <td class="td-link-blue" style="text-align: left !important; padding-left: 20px; font-weight: 500;">KTN</td>
+                </tr>
+                <tr>
+                  <td class="td-link-blue" style="text-align: left !important; padding-left: 20px; font-weight: 500;">KK</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
     </div>

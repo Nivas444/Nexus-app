@@ -620,8 +620,9 @@ function switchModule(moduleName) {
   document.querySelectorAll('.nav-icon-item').forEach(btn => {
     btn.classList.remove('active-nav-tab');
   });
-
-  const activeBtn = document.querySelector(`.nav-icon-item[data-module="${moduleName}"]`);
+  // indus_towers is a sub-section of master — glow the Master icon for both
+  const navModuleSwitch = (moduleName === 'indus_towers') ? 'master' : moduleName;
+  const activeBtn = document.querySelector(`.nav-icon-item[data-module="${navModuleSwitch}"]`);
   if (activeBtn) activeBtn.classList.add('active-nav-tab');
 
   updateURL();
@@ -711,7 +712,9 @@ function renderApp() {
   document.querySelectorAll('.nav-icon-item').forEach(btn => {
     btn.classList.remove('active-nav-tab');
   });
-  const activeNavBtn = document.querySelector(`.nav-icon-item[data-module="${currentModule}"]`);
+  // indus_towers is a sub-section of master — glow the Master icon for both
+  const navModule = (currentModule === 'indus_towers') ? 'master' : currentModule;
+  const activeNavBtn = document.querySelector(`.nav-icon-item[data-module="${navModule}"]`);
   if (activeNavBtn) activeNavBtn.classList.add('active-nav-tab');
 
   if (currentModule === 'master') {
@@ -1163,6 +1166,7 @@ function renderIndusTableHead() {
         <th>
           <div class="th-content-wrap">
             <span>Indus PM</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['indusPm'] ? 'has-active-filter' : ''}" data-filter-col="indusPm" title="Filter Indus PM">&#9660;</button>
           </div>
         </th>
         <th>
@@ -1181,16 +1185,6 @@ function renderIndusTableHead() {
           <div class="th-content-wrap">
             <span>MIS</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['mis'] ? 'has-active-filter' : ''}" data-filter-col="mis" title="Filter MIS">&#9660;</button>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Survey</span>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Additional Transport</span>
           </div>
         </th>
         <th>
@@ -2044,7 +2038,9 @@ function applyFiltersAndRender() {
   if (!tbody) return;
 
   if (filteredDataset.length === 0) {
-    const colSpan = currentModule === 'indus_towers' ? 10 : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10));
+    const colSpan = currentModule === 'indus_towers'
+      ? (currentIndusSubpage === 'projects' ? 8 : 10)
+      : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -2180,11 +2176,9 @@ function applyFiltersAndRender() {
     }
 
     if (currentIndusSubpage === 'projects') {
-      // Render Indus Towers -> Projects Rows (Matching Uploaded Mockup)
+      // Render Indus Towers -> Projects Rows (Survey & Additional Transport columns removed)
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
-        const isSurveyYes = (row.survey || '').toLowerCase() === 'yes';
-        const isTransportYes = (row.additionalTransport || '').toLowerCase() === 'yes';
         return `
           <tr data-row-id="${row.id}">
             <td>
@@ -2196,8 +2190,6 @@ function applyFiltersAndRender() {
             <td>${row.indusScm || ''}</td>
             <td>${row.pm || ''}</td>
             <td>${row.mis || ''}</td>
-            <td style="color: ${isSurveyYes ? '#2e7d32' : '#d32f2f'}; font-weight: 700;">${row.survey || ''}</td>
-            <td style="color: ${isTransportYes ? '#2e7d32' : '#d32f2f'}; font-weight: 700;">${row.additionalTransport || ''}</td>
             <td class="td-center">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
             </td>

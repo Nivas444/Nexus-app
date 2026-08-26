@@ -910,6 +910,8 @@ tr.tr-sub-headers th,
 
 .slide-dynamic-input {
   flex: 1 !important;
+  min-width: 0 !important;
+  width: 100% !important;
   height: 36px !important;
   padding: 6px 12px !important;
   border: 1.5px solid #00cba0 !important;
@@ -920,6 +922,8 @@ tr.tr-sub-headers th,
   outline: none !important;
   box-shadow: 0 2px 6px rgba(0, 203, 160, 0.15) !important;
   animation: expandInput 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 @keyframes expandInput {
@@ -1063,8 +1067,8 @@ tr.tr-sub-headers th,
 }
 
 #addIndusTowerCard {
-  width: 1020px !important;
-  max-width: 95vw !important;
+  width: 1280px !important;
+  max-width: 98vw !important;
   padding: 0 32px 32px 32px !important;
   box-sizing: border-box !important;
   overflow: hidden !important;

@@ -566,9 +566,9 @@
               </div>
             </div>
 
-            <!-- 3. GST Type (Blue label) -->
+            <!-- 3. GST Type -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpVendorGstType">GST Type</label>
+              <label class="form-label" for="inpVendorGstType">GST Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpVendorGstType">
                   <option value="NA">NA</option>
@@ -589,9 +589,9 @@
               </div>
             </div>
 
-            <!-- 5. Address (Blue label) -->
+            <!-- 5. Address -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue" for="inpVendorAddress">Address</label>
+              <label class="form-label" for="inpVendorAddress">Address</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpVendorAddress" placeholder="Enter Address">
               </div>
@@ -608,9 +608,20 @@
               </div>
             </div>
 
-            <!-- 7. Status (Blue label, Centered Toggle Switch) -->
+            <!-- TCS Deduction Toggle Switch (deactivated by default) -->
             <div class="form-row-group">
-              <label class="form-label form-label-blue">Status</label>
+              <label class="form-label">TCS Deduction</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpTcsDeductionToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 7. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
                   <input type="checkbox" id="inpVendorStatusToggle">
@@ -628,6 +639,7 @@
 
           </form>
         </div>
+
 
         <!-- 1D. Master -> Add Product Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addProductCard" style="display: none;">

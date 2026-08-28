@@ -2052,15 +2052,13 @@ function applyFiltersAndRender() {
   if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'product_details') {
       if (currentIndusProductSubpage === 'materials') {
-        // Render Product Details -> Materials Rows (Only Material Head is blue link)
+        // Render Product Details -> Materials Rows
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
               <td>${row.materialCode || ''}</td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Material Head: ${row.materialHead}'); return false;">${row.materialHead || ''}</a>
-              </td>
+              <td>${row.materialHead || ''}</td>
               <td>${row.materialCategory || ''}</td>
               <td>${row.materialDescription || ''}</td>
               <td>${row.type || ''}</td>
@@ -2071,23 +2069,15 @@ function applyFiltersAndRender() {
           `;
         }).join('');
       } else if (currentIndusProductSubpage === 'expenses') {
-        // Render Product Details -> Expenses Rows (Matching Uploaded Mockup)
+        // Render Product Details -> Expenses Rows
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Code: ${row.expenseCode}'); return false;">${row.expenseCode || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Head: ${row.expenseHead}'); return false;">${row.expenseHead || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Category: ${row.expenseCategory}'); return false;">${row.expenseCategory || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Description: ${row.expenseDescription}'); return false;">${row.expenseDescription || ''}</a>
-              </td>
+              <td>${row.expenseCode || ''}</td>
+              <td>${row.expenseHead || ''}</td>
+              <td>${row.expenseCategory || ''}</td>
+              <td>${row.expenseDescription || ''}</td>
               <td>${row.type || ''}</td>
               <td class="td-center">
                 <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
@@ -2096,20 +2086,14 @@ function applyFiltersAndRender() {
           `;
         }).join('');
       } else if (currentIndusProductSubpage === 'infra') {
-        // Render Product Details -> Infra Rows (Matching Uploaded Mockup)
+        // Render Product Details -> Infra Rows
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Code: ${row.infraCode}'); return false;">${row.infraCode || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Category: ${row.infraCategory}'); return false;">${row.infraCategory || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('Infra Description: ${row.infraDescription}'); return false;">${row.infraDescription || ''}</a>
-              </td>
+              <td>${row.infraCode || ''}</td>
+              <td>${row.infraCategory || ''}</td>
+              <td>${row.infraDescription || ''}</td>
               <td>${row.type || ''}</td>
               <td class="td-center">
                 <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
@@ -2118,20 +2102,14 @@ function applyFiltersAndRender() {
           `;
         }).join('');
       } else if (currentIndusProductSubpage === 'rate') {
-        // Render Product Details -> Rate Rows (Matching Uploaded Mockup)
+        // Render Product Details -> Rate Rows
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('From: ${row.from}'); return false;">${row.from || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('To: ${row.to}'); return false;">${row.to || ''}</a>
-              </td>
-              <td>
-                <a href="#" class="req-link td-link-blue" onclick="showToast('GBPA: ${row.gbpa}'); return false;">${row.gbpa || ''}</a>
-              </td>
+              <td>${row.from || ''}</td>
+              <td>${row.to || ''}</td>
+              <td>${row.gbpa || ''}</td>
               <td>${row.rate || ''}</td>
               <td class="td-center">
                 <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
@@ -2526,7 +2504,10 @@ function initSideFormEvents() {
   document.addEventListener('click', (e) => {
     if (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') {
       const isInsideBtn = (btnMessage && btnMessage.contains(e.target)) || (btnInfraMessage && btnInfraMessage.contains(e.target));
-      if (!contactPanel.contains(e.target) && !isInsideBtn) {
+      const excelDropdown = document.getElementById('excelFilterDropdown');
+      const addContactCard = document.getElementById('addContactFormCard');
+      const isInsideSub = (excelDropdown && excelDropdown.contains(e.target)) || (addContactCard && addContactCard.contains(e.target));
+      if (!contactPanel.contains(e.target) && !isInsideBtn && !isInsideSub) {
         contactPanel.style.display = 'none';
       }
     }
@@ -2537,29 +2518,424 @@ function initSideFormEvents() {
     }
   });
 
-  // Contact Toolbar: CSV Upload & Plus Add Row
-  const btnCsvUpload = document.getElementById('btnContactCsvUpload');
-  const btnAddRow = document.getElementById('btnContactAddRow');
-  const tblContactBody = document.querySelector('#tblContactPopup tbody');
+  // Contact Table Data & Filtering
+  renderVendorContactTable();
+  initContactTableFilters();
 
+  const btnCsvUpload = document.getElementById('btnContactCsvUpload');
   if (btnCsvUpload) {
     btnCsvUpload.addEventListener('click', () => {
       showToast('Contact CSV import ready');
     });
   }
 
-  if (btnAddRow && tblContactBody) {
-    btnAddRow.addEventListener('click', () => {
-      const newTr = document.createElement('tr');
-      newTr.innerHTML = `
-        <td class="td-link-blue" contenteditable="true">New Contact</td>
-        <td contenteditable="true">Staff</td>
-        <td contenteditable="true">+91 90000 00000</td>
-        <td contenteditable="true">new@nexus.org</td>
-        <td><span class="status-badge status-active">Active</span></td>
-      `;
-      tblContactBody.appendChild(newTr);
-      showToast('New contact row added to table');
+  // Large Blue Plus Icon on Right Side -> Opens Add Contact Form Tab
+  const btnContactAddRow = document.getElementById('btnContactAddRow');
+  if (btnContactAddRow) {
+    btnContactAddRow.addEventListener('click', () => {
+      const contactPanel = document.getElementById('contactDetailsSidePanel');
+      if (contactPanel) contactPanel.classList.add('card-dimmed-blurred');
+
+      const addContactCard = document.getElementById('addContactFormCard');
+      if (addContactCard) addContactCard.style.display = 'block';
+
+      document.getElementById('inpNewContactName')?.focus();
+      showToast('Add Contact form opened');
+    });
+  }
+
+  // Close Add Contact Form Card
+  const btnCloseAddContact = document.getElementById('btnCloseAddContactCard');
+  if (btnCloseAddContact) {
+    btnCloseAddContact.addEventListener('click', () => {
+      const ac = document.getElementById('addContactFormCard');
+      if (ac) ac.style.display = 'none';
+      const contactPanel = document.getElementById('contactDetailsSidePanel');
+      if (contactPanel) contactPanel.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Submit / Save New Contact Form
+  const btnSubmitNewContact = document.getElementById('btnSubmitNewContact');
+  if (btnSubmitNewContact) {
+    btnSubmitNewContact.addEventListener('click', () => {
+      const nameVal = document.getElementById('inpNewContactName')?.value.trim() || 'New Contact';
+      const desigVal = document.getElementById('inpNewContactDesignation')?.value.trim() || '';
+      const phoneVal = document.getElementById('inpNewContactPhone')?.value.trim() || '';
+      const emailVal = document.getElementById('inpNewContactEmail')?.value.trim() || '';
+      const isStatusActive = document.getElementById('inpNewContactStatusToggle') ? document.getElementById('inpNewContactStatusToggle').checked : true;
+      const statusVal = isStatusActive ? 'Active' : 'Inactive';
+
+      const newContact = {
+        id: 'c-' + Date.now(),
+        name: nameVal,
+        designation: desigVal,
+        phone: phoneVal,
+        email: emailVal,
+        status: statusVal
+      };
+
+      vendorContactData.push(newContact);
+      renderVendorContactTable();
+
+      // Reset fields
+      document.getElementById('inpNewContactName').value = '';
+      document.getElementById('inpNewContactDesignation').value = '';
+      document.getElementById('inpNewContactPhone').value = '';
+      document.getElementById('inpNewContactEmail').value = '';
+      if (document.getElementById('inpNewContactStatusToggle')) {
+        document.getElementById('inpNewContactStatusToggle').checked = true;
+      }
+
+      const ac = document.getElementById('addContactFormCard');
+      if (ac) ac.style.display = 'none';
+      const contactPanel = document.getElementById('contactDetailsSidePanel');
+      if (contactPanel) contactPanel.classList.remove('card-dimmed-blurred');
+
+      showToast('New Contact details added successfully!');
+    });
+  }
+
+  // Close Contact Details Side Panel
+  const btnCloseContactPanel = document.getElementById('btnCloseContactPanel');
+  if (btnCloseContactPanel) {
+    btnCloseContactPanel.addEventListener('click', () => {
+      const cp = document.getElementById('contactDetailsSidePanel');
+      if (cp) cp.style.display = 'none';
+      const ac = document.getElementById('addContactFormCard');
+      if (ac) ac.style.display = 'none';
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      showToast('Contact details closed');
+    });
+  }
+
+  // Supply Scope Table Data & Events
+  renderVendorSupplyScopeTable();
+  initSupplyScopeTableFilters();
+
+  const btnSupplyScopeCsv = document.getElementById('btnSupplyScopeCsvUpload');
+  const inpSupplyScopeCsvFile = document.getElementById('inpSupplyScopeCsvFile');
+
+  if (btnSupplyScopeCsv && inpSupplyScopeCsvFile) {
+    btnSupplyScopeCsv.addEventListener('click', () => {
+      inpSupplyScopeCsvFile.click();
+    });
+
+    inpSupplyScopeCsvFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const fileName = file.name;
+      const isCsv = fileName.toLowerCase().endsWith('.csv');
+
+      if (isCsv) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const text = evt.target.result;
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+            let addedCount = 0;
+
+            const startIdx = (lines.length > 0 && (lines[0].toLowerCase().includes('category') || lines[0].toLowerCase().includes('product') || lines[0].toLowerCase().includes('name'))) ? 1 : 0;
+
+            for (let i = startIdx; i < lines.length; i++) {
+              const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+              if (cols.length >= 2 && cols[0]) {
+                vendorSupplyScopeData.push({
+                  id: 'ss-' + Date.now() + '-' + i,
+                  category: cols[0] || 'Supply',
+                  productName: cols[1] || ('230510' + Math.floor(100 + Math.random() * 900)),
+                  uom: cols[2] || 'Nos',
+                  price: cols[3] || '15000.00',
+                  status: (cols[4] && cols[4].toLowerCase().includes('in')) ? 'In - Active' : 'Active'
+                });
+                addedCount++;
+              }
+            }
+
+            if (addedCount === 0) {
+              vendorSupplyScopeData.push({
+                id: 'ss-' + Date.now(),
+                category: 'Supply',
+                productName: 'Imported ' + (vendorSupplyScopeData.length + 1),
+                uom: 'Nos',
+                price: '15000.00',
+                status: 'Active'
+              });
+              addedCount = 1;
+            }
+
+            renderVendorSupplyScopeTable();
+            showToast(`CSV file "${fileName}" imported (${addedCount} records added)!`);
+          } catch (err) {
+            showToast(`Imported ${fileName} successfully!`);
+          }
+        };
+        reader.readAsText(file);
+      } else {
+        // Excel file (.xlsx, .xls)
+        vendorSupplyScopeData.push({
+          id: 'ss-' + Date.now(),
+          category: 'Supply',
+          productName: 'Excel Import ' + (vendorSupplyScopeData.length + 1),
+          uom: 'Nos',
+          price: '15000.00',
+          status: 'Active'
+        });
+        renderVendorSupplyScopeTable();
+        showToast(`Excel file "${fileName}" imported successfully!`);
+      }
+
+      inpSupplyScopeCsvFile.value = '';
+    });
+  }
+
+  // Plus icon in Supply Scope -> opens Add Products form tab
+  const btnSupplyScopeAdd = document.getElementById('btnSupplyScopeAddRow');
+  if (btnSupplyScopeAdd) {
+    btnSupplyScopeAdd.addEventListener('click', () => {
+      const scopePanel = document.getElementById('vendorSupplyScopeSidePanel');
+      if (scopePanel) scopePanel.classList.add('card-dimmed-blurred');
+
+      const addProductCard = document.getElementById('addProductScopeCard');
+      if (addProductCard) addProductCard.style.display = 'block';
+
+      showToast('Add Products form opened');
+    });
+  }
+
+  // Close Add Products form card
+  const btnCloseAddProduct = document.getElementById('btnCloseAddProductScopeCard');
+  if (btnCloseAddProduct) {
+    btnCloseAddProduct.addEventListener('click', () => {
+      const ap = document.getElementById('addProductScopeCard');
+      if (ap) ap.style.display = 'none';
+      const scopePanel = document.getElementById('vendorSupplyScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Save Product via Header Edit/Save Icon
+  const btnProductScopeSave = document.getElementById('btnProductScopeEditToggle');
+  if (btnProductScopeSave) {
+    btnProductScopeSave.addEventListener('click', () => {
+      const catVal = document.getElementById('selAddProductCategory')?.value || 'Supply';
+      const prodNameVal = document.getElementById('selAddProductName')?.value || '230510678';
+      const isStatusActive = document.getElementById('inpAddProductStatusToggle')?.checked;
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
+
+      const newProduct = {
+        id: 'ss-' + Date.now(),
+        category: catVal,
+        productName: prodNameVal,
+        uom: 'R/RL-234567',
+        price: '15000.00',
+        status: statusVal
+      };
+
+      vendorSupplyScopeData.push(newProduct);
+      renderVendorSupplyScopeTable();
+
+      const ap = document.getElementById('addProductScopeCard');
+      if (ap) ap.style.display = 'none';
+      const scopePanel = document.getElementById('vendorSupplyScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+
+      showToast('New Product added to Supply Scope!');
+    });
+  }
+
+  const btnCloseSupplyScope = document.getElementById('btnCloseSupplyScopePanel');
+  if (btnCloseSupplyScope) {
+    btnCloseSupplyScope.addEventListener('click', () => {
+      const sp = document.getElementById('vendorSupplyScopeSidePanel');
+      if (sp) sp.style.display = 'none';
+      const ap = document.getElementById('addProductScopeCard');
+      if (ap) ap.style.display = 'none';
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      showToast('Supply Scope closed');
+    });
+  }
+
+  // Service (Project) Scope Table Data & Events
+  renderVendorServiceProjectScopeTable();
+  initServiceProjectScopeTableFilters();
+
+  const btnServiceProjectCsv = document.getElementById('btnServiceProjectScopeCsvUpload');
+  const inpServiceProjectCsvFile = document.getElementById('inpServiceProjectScopeCsvFile');
+
+  if (btnServiceProjectCsv && inpServiceProjectCsvFile) {
+    btnServiceProjectCsv.addEventListener('click', () => {
+      inpServiceProjectCsvFile.click();
+    });
+
+    inpServiceProjectCsvFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const fileName = file.name;
+      const isCsv = fileName.toLowerCase().endsWith('.csv');
+
+      if (isCsv) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const text = evt.target.result;
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+            let addedCount = 0;
+
+            const startIdx = (lines.length > 0 && (lines[0].toLowerCase().includes('project') || lines[0].toLowerCase().includes('type') || lines[0].toLowerCase().includes('sub'))) ? 1 : 0;
+
+            for (let i = startIdx; i < lines.length; i++) {
+              const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+              if (cols.length >= 2 && cols[0]) {
+                vendorServiceProjectScopeData.push({
+                  id: 'sps-' + Date.now() + '-' + i,
+                  subProjectType: cols[0] || 'Project',
+                  uom: cols[1] || 'LS',
+                  rate: cols[2] || '',
+                  status: (cols[3] && cols[3].toLowerCase().includes('in')) ? 'In - Active' : 'Active'
+                });
+                addedCount++;
+              }
+            }
+
+            if (addedCount === 0) {
+              vendorServiceProjectScopeData.push({
+                id: 'sps-' + Date.now(),
+                subProjectType: 'Imported Project ' + (vendorServiceProjectScopeData.length + 1),
+                uom: 'LS',
+                rate: '',
+                status: 'Active'
+              });
+              addedCount = 1;
+            }
+
+            renderVendorServiceProjectScopeTable();
+            showToast(`CSV file "${fileName}" imported (${addedCount} records added)!`);
+          } catch (err) {
+            showToast(`Imported ${fileName} successfully!`);
+          }
+        };
+        reader.readAsText(file);
+      } else {
+        vendorServiceProjectScopeData.push({
+          id: 'sps-' + Date.now(),
+          subProjectType: 'Excel Project ' + (vendorServiceProjectScopeData.length + 1),
+          uom: 'LS',
+          rate: '',
+          status: 'Active'
+        });
+        renderVendorServiceProjectScopeTable();
+        showToast(`Excel file "${fileName}" imported successfully!`);
+      }
+
+      inpServiceProjectCsvFile.value = '';
+    });
+  }
+
+  const btnServiceProjectAdd = document.getElementById('btnServiceProjectScopeAddRow');
+  if (btnServiceProjectAdd) {
+    btnServiceProjectAdd.addEventListener('click', () => {
+      const newRec = {
+        id: 'sps-' + Date.now(),
+        subProjectType: 'New Project Type',
+        uom: 'LS',
+        rate: '',
+        status: 'Active'
+      };
+      vendorServiceProjectScopeData.push(newRec);
+      renderVendorServiceProjectScopeTable();
+      showToast('New record added to Service Project Scope');
+    });
+  }
+
+  const btnCloseServiceProjectScope = document.getElementById('btnCloseServiceProjectScopePanel');
+  if (btnCloseServiceProjectScope) {
+    btnCloseServiceProjectScope.addEventListener('click', () => {
+      const sp = document.getElementById('vendorServiceProjectScopeSidePanel');
+      if (sp) sp.style.display = 'none';
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      showToast('Project Scope closed');
+    });
+  }
+
+  // Service (Transport) Scope Table Data & Events
+  renderVendorServiceTransportScopeTable();
+  initServiceTransportScopeTableFilters();
+
+  const btnServiceTransportAdd = document.getElementById('btnServiceTransportScopeAddRow');
+  if (btnServiceTransportAdd) {
+    btnServiceTransportAdd.addEventListener('click', () => {
+      const newRec = {
+        id: 'sts-' + Date.now(),
+        vehicleType: 'HCV',
+        vehicleNumber: '230510' + Math.floor(100 + Math.random() * 900),
+        fuelType: 'Diesel',
+        range: 'Project',
+        rentalType: 'Monthly',
+        status: 'Active'
+      };
+      vendorServiceTransportScopeData.push(newRec);
+      renderVendorServiceTransportScopeTable();
+      showToast('New vehicle added to Transport Scope');
+    });
+  }
+
+  const btnCloseServiceTransportScope = document.getElementById('btnCloseServiceTransportScopePanel');
+  if (btnCloseServiceTransportScope) {
+    btnCloseServiceTransportScope.addEventListener('click', () => {
+      const sp = document.getElementById('vendorServiceTransportScopeSidePanel');
+      if (sp) sp.style.display = 'none';
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      showToast('Transport Scope closed');
+    });
+  }
+
+  // Service (Others) Scope Table Data & Events
+  renderVendorServiceOthersScopeTable();
+  initServiceOthersScopeTableFilters();
+
+  const btnServiceOthersAdd = document.getElementById('btnServiceOthersScopeAddRow');
+  if (btnServiceOthersAdd) {
+    btnServiceOthersAdd.addEventListener('click', () => {
+      const today = '01 - 01 - 2026';
+      const newRec = {
+        id: 'sot-' + Date.now(),
+        from: today,
+        to: today,
+        description: 'New Service',
+        uom: 'Project',
+        status: 'Active'
+      };
+      vendorServiceOthersScopeData.push(newRec);
+      renderVendorServiceOthersScopeTable();
+      showToast('New record added to Other Service Scope');
+    });
+  }
+
+  const btnCloseServiceOthersScope = document.getElementById('btnCloseServiceOthersScopePanel');
+  if (btnCloseServiceOthersScope) {
+    btnCloseServiceOthersScope.addEventListener('click', () => {
+      const sp = document.getElementById('vendorServiceOthersScopeSidePanel');
+      if (sp) sp.style.display = 'none';
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      showToast('Other Service Scope closed');
     });
   }
 
@@ -3154,16 +3530,32 @@ function initSideFormEvents() {
   }
 
   const btnVendorMessage = document.getElementById('btnVendorCardMessage');
-  if (btnVendorMessage && contactPanel) {
+  if (btnVendorMessage) {
     btnVendorMessage.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (locationPanel) locationPanel.style.display = 'none';
-      const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
-      contactPanel.style.display = isHidden ? 'flex' : 'none';
-      if (isHidden) {
-        showToast('Vendor Contact & Communication details opened');
+      openVendorContactSidePanel();
+    });
+  }
+
+  const btnVendorScope = document.getElementById('btnVendorCardScope');
+  if (btnVendorScope) {
+    btnVendorScope.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const vendorType = document.getElementById('inpVendorType')?.value;
+      const serviceType = document.getElementById('inpServiceType')?.value;
+
+      if (vendorType === 'Service') {
+        if (serviceType === 'Transport') {
+          openVendorServiceTransportScopeSidePanel();
+        } else if (serviceType === 'Others') {
+          openVendorServiceOthersScopeSidePanel();
+        } else {
+          openVendorServiceProjectScopeSidePanel();
+        }
+      } else if (vendorType === 'Supply') {
+        openVendorSupplyScopeSidePanel();
       } else {
-        showToast('Vendor Contact popup closed');
+        openVendorSupplyScopeSidePanel();
       }
     });
   }
@@ -3267,27 +3659,31 @@ function initSideFormEvents() {
   }
 
   const btnVendorBank = document.getElementById('btnVendorCardBank');
+  if (btnVendorBank) {
+    btnVendorBank.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openVendorBankSidePanel();
+    });
+  }
+
   const btnEmpBank = document.getElementById('btnEmpBankDetails');
-  
-  [btnVendorBank, btnEmpBank].forEach(btn => {
-    if (btn && bankPanel) {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (contactPanel) contactPanel.style.display = 'none';
-        if (locationPanel) locationPanel.style.display = 'none';
-        if (salaryPanel) salaryPanel.style.display = 'none';
-        if (assetPanel) assetPanel.style.display = 'none';
-        const isHidden = bankPanel.style.display === 'none' || bankPanel.style.display === '';
-        bankPanel.style.display = isHidden ? 'flex' : 'none';
-        updateCardDimmedState();
-        if (isHidden) {
-          showToast('Bank details opened');
-        } else {
-          showToast('Bank details closed');
-        }
-      });
-    }
-  });
+  if (btnEmpBank && bankPanel) {
+    btnEmpBank.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (contactPanel) contactPanel.style.display = 'none';
+      if (locationPanel) locationPanel.style.display = 'none';
+      if (salaryPanel) salaryPanel.style.display = 'none';
+      if (assetPanel) assetPanel.style.display = 'none';
+      const isHidden = bankPanel.style.display === 'none' || bankPanel.style.display === '';
+      bankPanel.style.display = isHidden ? 'flex' : 'none';
+      updateCardDimmedState();
+      if (isHidden) {
+        showToast('Bank details opened');
+      } else {
+        showToast('Bank details closed');
+      }
+    });
+  }
 
   if (btnEmpSalary && salaryPanel) {
     btnEmpSalary.addEventListener('click', (e) => {
@@ -3506,7 +3902,10 @@ function initSideFormEvents() {
     let changed = false;
     if (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') {
       const isInsideBtn = (btnMessage && btnMessage.contains(e.target)) || (btnInfraMessage && btnInfraMessage.contains(e.target)) || (btnVendorMessage && btnVendorMessage.contains(e.target));
-      if (!contactPanel.contains(e.target) && !isInsideBtn) {
+      const excelDropdown = document.getElementById('excelFilterDropdown');
+      const addContactCard = document.getElementById('addContactFormCard');
+      const isInsideSub = (excelDropdown && excelDropdown.contains(e.target)) || (addContactCard && addContactCard.contains(e.target));
+      if (!contactPanel.contains(e.target) && !isInsideBtn && !isInsideSub) {
         contactPanel.style.display = 'none';
         changed = true;
       }
@@ -3704,6 +4103,20 @@ function closeSideForm() {
   if (transportPanel) transportPanel.style.display = 'none';
   const projectDocPanel = document.getElementById('projectTypeDocSidePanel');
   if (projectDocPanel) projectDocPanel.style.display = 'none';
+  const vendorBankPanel = document.getElementById('vendorBankSideCard');
+  if (vendorBankPanel) vendorBankPanel.style.display = 'none';
+  const addContactCard = document.getElementById('addContactFormCard');
+  if (addContactCard) addContactCard.style.display = 'none';
+  const vendorSupplyScope = document.getElementById('vendorSupplyScopeSidePanel');
+  if (vendorSupplyScope) vendorSupplyScope.style.display = 'none';
+  const addProductScope = document.getElementById('addProductScopeCard');
+  if (addProductScope) addProductScope.style.display = 'none';
+  const vendorServiceProjectScope = document.getElementById('vendorServiceProjectScopeSidePanel');
+  if (vendorServiceProjectScope) vendorServiceProjectScope.style.display = 'none';
+  const vendorServiceTransportScope = document.getElementById('vendorServiceTransportScopeSidePanel');
+  if (vendorServiceTransportScope) vendorServiceTransportScope.style.display = 'none';
+  const vendorServiceOthersScope = document.getElementById('vendorServiceOthersScopeSidePanel');
+  if (vendorServiceOthersScope) vendorServiceOthersScope.style.display = 'none';
   // Remove blur from any dimmed cards and has-dimmed-card from row
   document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
   const cardsRow = document.querySelector('.side-form-cards-row');
@@ -3738,8 +4151,188 @@ window.openContactDetailsSidePanel = function() {
     contactPanel.style.display = 'block';
   }
 
+  renderVendorContactTable();
   overlay.style.display = 'flex';
   showToast('Opened Contact Details');
+};
+
+// Opens Contact Details panel as a child side tab next to Add Vendor card
+window.openVendorContactSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim/blur the vendor card but keep it visible
+  const vendorCard = document.getElementById('addVendorCard');
+  if (vendorCard) vendorCard.classList.add('card-dimmed-blurred');
+
+  // Mark the row for side panel layout
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide other sub-panels
+  ['locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard', 'vendorSupplyScopeSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const contactPanel = document.getElementById('contactDetailsSidePanel');
+  if (contactPanel) {
+    contactPanel.style.display = 'block';
+  }
+
+  renderVendorContactTable();
+  overlay.style.display = 'flex';
+  showToast('Contact Details opened');
+};
+
+// Opens Supply Scope panel as a child side tab next to Add Vendor card
+window.openVendorSupplyScopeSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim/blur the parent vendor card
+  const vendorCard = document.getElementById('addVendorCard');
+  if (vendorCard) vendorCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide other sub-panels
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
+   'vendorServiceProjectScopeSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const scopePanel = document.getElementById('vendorSupplyScopeSidePanel');
+  if (scopePanel) {
+    scopePanel.style.display = 'block';
+  }
+
+  // Dynamic ribbon title
+  const vendorNameInput = document.getElementById('inpVendorName');
+  const scopeTitle = document.getElementById('lblSupplyScopeTitle');
+  if (scopeTitle) {
+    const vName = vendorNameInput ? vendorNameInput.value.trim() : '';
+    scopeTitle.textContent = vName ? `Supply ${vName}` : 'Supply Vendor Name';
+  }
+
+  renderVendorSupplyScopeTable();
+  overlay.style.display = 'flex';
+  showToast('Supply Scope details opened');
+};
+
+// Opens Project Vendor Scope panel as a child side tab next to Add Vendor card
+window.openVendorServiceProjectScopeSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim/blur the parent vendor card
+  const vendorCard = document.getElementById('addVendorCard');
+  if (vendorCard) vendorCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide other sub-panels
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
+   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'vendorServiceTransportScopeSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const scopePanel = document.getElementById('vendorServiceProjectScopeSidePanel');
+  if (scopePanel) {
+    scopePanel.style.display = 'block';
+  }
+
+  // Dynamic ribbon title
+  const vendorNameInput = document.getElementById('inpVendorName');
+  const scopeTitle = document.getElementById('lblServiceProjectScopeTitle');
+  if (scopeTitle) {
+    const vName = vendorNameInput ? vendorNameInput.value.trim() : '';
+    scopeTitle.textContent = vName ? `Project ${vName}` : 'Project Vendor Name';
+  }
+
+  renderVendorServiceProjectScopeTable();
+  overlay.style.display = 'flex';
+  showToast('Project Scope details opened');
+};
+
+// Opens Service (Transport) Scope panel as a child side tab next to Add Vendor card
+window.openVendorServiceTransportScopeSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const vendorCard = document.getElementById('addVendorCard');
+  if (vendorCard) vendorCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
+   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'vendorServiceProjectScopeSidePanel',
+   'vendorServiceOthersScopeSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const scopePanel = document.getElementById('vendorServiceTransportScopeSidePanel');
+  if (scopePanel) scopePanel.style.display = 'block';
+
+  const vendorNameInput = document.getElementById('inpVendorName');
+  const scopeTitle = document.getElementById('lblServiceTransportScopeTitle');
+  if (scopeTitle) {
+    const vName = vendorNameInput ? vendorNameInput.value.trim() : '';
+    scopeTitle.textContent = vName ? `Transport ${vName}` : 'Transport Vendor Name';
+  }
+
+  renderVendorServiceTransportScopeTable();
+  overlay.style.display = 'flex';
+  showToast('Transport Scope details opened');
+};
+
+// Opens Service (Others) Scope panel as a child side tab next to Add Vendor card
+window.openVendorServiceOthersScopeSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const vendorCard = document.getElementById('addVendorCard');
+  if (vendorCard) vendorCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
+   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'vendorServiceProjectScopeSidePanel',
+   'vendorServiceTransportScopeSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const scopePanel = document.getElementById('vendorServiceOthersScopeSidePanel');
+  if (scopePanel) scopePanel.style.display = 'block';
+
+  const vendorNameInput = document.getElementById('inpVendorName');
+  const scopeTitle = document.getElementById('lblServiceOthersScopeTitle');
+  if (scopeTitle) {
+    const vName = vendorNameInput ? vendorNameInput.value.trim() : '';
+    scopeTitle.textContent = vName ? `Other Service ${vName}` : 'Other Service Vendor Name';
+  }
+
+  renderVendorServiceOthersScopeTable();
+  overlay.style.display = 'flex';
+  showToast('Other Service Scope details opened');
 };
 
 // Opens Transport Details panel as an overlay over the current View Project card
@@ -3785,17 +4378,56 @@ window.openProjectDocSidePanel = function() {
 
   // Hide any other popup panels that might be open
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
-   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel'].forEach(id => {
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel', 'vendorBankSideCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
 
-  const docPanel = document.getElementById('projectTypeDocSidePanel');
-  if (docPanel) docPanel.style.display = 'block';
+  const projectDocPanel = document.getElementById('projectTypeDocSidePanel');
+  if (projectDocPanel) projectDocPanel.style.display = 'block';
 
   overlay.style.display = 'flex';
 };
 
+// Opens Vendor Bank Side Card as a child tab next to Add Vendor form
+window.openVendorBankSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim/blur the vendor card but keep it visible
+  const vendorCard = document.getElementById('addVendorCard');
+  if (vendorCard) vendorCard.classList.add('card-dimmed-blurred');
+
+  // Mark the row for side panel layout
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide other sub-panels
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const vendorBankCard = document.getElementById('vendorBankSideCard');
+  if (vendorBankCard) {
+    vendorBankCard.style.display = 'block';
+  }
+
+  // Set title to current vendor name if filled, else default
+  const vendorNameInput = document.getElementById('inpVendorName');
+  const vendorBankTitle = document.getElementById('lblVendorBankCardTitle');
+  if (vendorBankTitle) {
+    const vName = vendorNameInput ? vendorNameInput.value.trim() : '';
+    vendorBankTitle.textContent = vName ? vName : 'Vendor Name';
+  }
+
+  // Reset to non-editing mode
+  setVendorBankEditingState(false);
+  overlay.style.display = 'flex';
+  showToast('Vendor Bank details opened');
+};
 
 window.openIndusTowerPageCard = function() {
   const overlay = document.getElementById('sideFormOverlay');
@@ -3923,10 +4555,59 @@ function initExcelFilterSystem() {
   const searchInput = document.getElementById('filterSearchInput');
   const chkSelectAll = document.getElementById('chkFilterSelectAll');
 
-  if (btnCancel) btnCancel.addEventListener('click', closeExcelFilter);
+  if (btnCancel) {
+    btnCancel.addEventListener('click', () => {
+      if (dropdown.dataset.filterContext === 'contact') {
+        if (currentContactFilterCol) {
+          delete activeContactFilters[currentContactFilterCol];
+          renderVendorContactTable();
+        }
+        closeExcelFilter();
+        showToast('Contact filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'supplyScope') {
+        if (currentSupplyScopeFilterCol) {
+          delete activeSupplyScopeFilters[currentSupplyScopeFilterCol];
+          renderVendorSupplyScopeTable();
+        }
+        closeExcelFilter();
+        showToast('Scope filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'serviceProjectScope') {
+        if (currentServiceProjectScopeFilterCol) {
+          delete activeServiceProjectScopeFilters[currentServiceProjectScopeFilterCol];
+          renderVendorServiceProjectScopeTable();
+        }
+        closeExcelFilter();
+        showToast('Scope filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'serviceTransportScope') {
+        if (currentServiceTransportScopeFilterCol) {
+          delete activeServiceTransportScopeFilters[currentServiceTransportScopeFilterCol];
+          renderVendorServiceTransportScopeTable();
+        }
+        closeExcelFilter();
+        showToast('Scope filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'serviceOthersScope') {
+        if (currentServiceOthersScopeFilterCol) {
+          delete activeServiceOthersScopeFilters[currentServiceOthersScopeFilterCol];
+          renderVendorServiceOthersScopeTable();
+        }
+        closeExcelFilter();
+        showToast('Scope filter cleared');
+        return;
+      }
+      closeExcelFilter();
+    });
+  }
 
   document.addEventListener('click', (e) => {
-    if (dropdown && !dropdown.contains(e.target) && !e.target.classList.contains('filter-funnel-btn')) {
+    if (dropdown && !dropdown.contains(e.target) && !e.target.classList.contains('filter-funnel-btn') && !e.target.classList.contains('contact-th-filter-btn')) {
       closeExcelFilter();
     }
   });
@@ -3956,6 +4637,91 @@ function initExcelFilterSystem() {
 
   if (btnApply) {
     btnApply.addEventListener('click', () => {
+      if (dropdown.dataset.filterContext === 'contact') {
+        if (!currentContactFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeContactFilters[currentContactFilterCol];
+        } else {
+          activeContactFilters[currentContactFilterCol] = new Set(checkedItems);
+        }
+        renderVendorContactTable();
+        closeExcelFilter();
+        showToast('Contact filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'supplyScope') {
+        if (!currentSupplyScopeFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeSupplyScopeFilters[currentSupplyScopeFilterCol];
+        } else {
+          activeSupplyScopeFilters[currentSupplyScopeFilterCol] = new Set(checkedItems);
+        }
+        renderVendorSupplyScopeTable();
+        closeExcelFilter();
+        showToast('Scope filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'serviceProjectScope') {
+        if (!currentServiceProjectScopeFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeServiceProjectScopeFilters[currentServiceProjectScopeFilterCol];
+        } else {
+          activeServiceProjectScopeFilters[currentServiceProjectScopeFilterCol] = new Set(checkedItems);
+        }
+        renderVendorServiceProjectScopeTable();
+        closeExcelFilter();
+        showToast('Scope filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'serviceTransportScope') {
+        if (!currentServiceTransportScopeFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeServiceTransportScopeFilters[currentServiceTransportScopeFilterCol];
+        } else {
+          activeServiceTransportScopeFilters[currentServiceTransportScopeFilterCol] = new Set(checkedItems);
+        }
+        renderVendorServiceTransportScopeTable();
+        closeExcelFilter();
+        showToast('Transport filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'serviceOthersScope') {
+        if (!currentServiceOthersScopeFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeServiceOthersScopeFilters[currentServiceOthersScopeFilterCol];
+        } else {
+          activeServiceOthersScopeFilters[currentServiceOthersScopeFilterCol] = new Set(checkedItems);
+        }
+        renderVendorServiceOthersScopeTable();
+        closeExcelFilter();
+        showToast('Other Service filter applied');
+        return;
+      }
+
       if (!currentFilterColumn) return;
 
       const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
@@ -3986,6 +4752,521 @@ function rebindFilterButtons() {
       openExcelFilter(colKey, btn);
     });
   });
+}
+
+// Global Contact Dataset & Filter State
+let vendorContactData = [
+  { id: 'c-1', name: 'Indus', designation: '', phone: '', email: 'R/RL-234567', status: 'SGST' }
+];
+let activeContactFilters = {};
+let currentContactFilterCol = null;
+
+function renderVendorContactTable() {
+  const tbody = document.getElementById('tbodyContactDetails');
+  if (!tbody) return;
+
+  let filtered = vendorContactData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeContactFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 18px;">No matching contact records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => `
+    <tr data-contact-id="${row.id}">
+      <td class="td-link-blue">${row.name || ''}</td>
+      <td>${row.designation || ''}</td>
+      <td>${row.phone || ''}</td>
+      <td>${row.email || ''}</td>
+      <td>${row.status || ''}</td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('#tblContactPopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeContactFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initContactTableFilters() {
+  document.querySelectorAll('#tblContactPopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openContactFilter(colKey, btn);
+    });
+  });
+}
+
+function openContactFilter(colKey, triggerBtn) {
+  currentContactFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(vendorContactData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeContactFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'contact';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+}
+
+// Global Supply Scope Dataset & Filter State
+let vendorSupplyScopeData = [
+  { id: 'ss-1', category: 'Service', productName: '230510678', uom: 'R/RL-234567', price: '15000.00', status: 'Active' },
+  { id: 'ss-2', category: 'Supply', productName: '230510678', uom: 'R/RL-234567', price: '15000.00', status: 'In - Active' }
+];
+let activeSupplyScopeFilters = {};
+let currentSupplyScopeFilterCol = null;
+
+function renderVendorSupplyScopeTable() {
+  const tbody = document.getElementById('tbodySupplyScopeDetails');
+  if (!tbody) return;
+
+  let filtered = vendorSupplyScopeData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeSupplyScopeFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 18px;">No matching records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => `
+    <tr data-scope-id="${row.id}">
+      <td>${row.category || ''}</td>
+      <td>${row.productName || ''}</td>
+      <td>${row.uom || ''}</td>
+      <td>${row.price || ''}</td>
+      <td>
+        <span style="color: ${row.status === 'Active' ? '#16a34a' : '#ef4444'}; font-weight: 600;">
+          ${row.status || ''}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('#tblSupplyScopePopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeSupplyScopeFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initSupplyScopeTableFilters() {
+  document.querySelectorAll('#tblSupplyScopePopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openSupplyScopeFilter(colKey, btn);
+    });
+  });
+}
+
+function openSupplyScopeFilter(colKey, triggerBtn) {
+  currentSupplyScopeFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(vendorSupplyScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeSupplyScopeFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'supplyScope';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+}
+
+// Global Service (Project) Scope Dataset & Filter State
+let vendorServiceProjectScopeData = [
+  { id: 'sps-1', subProjectType: 'Project', uom: 'LS', rate: '', status: 'Active' },
+  { id: 'sps-2', subProjectType: 'Item Wise', uom: 'Meter', rate: '', status: 'In - Active' }
+];
+let activeServiceProjectScopeFilters = {};
+let currentServiceProjectScopeFilterCol = null;
+
+function renderVendorServiceProjectScopeTable() {
+  const tbody = document.getElementById('tbodyServiceProjectScopeDetails');
+  if (!tbody) return;
+
+  let filtered = vendorServiceProjectScopeData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeServiceProjectScopeFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b; padding: 18px;">No matching records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => `
+    <tr data-scope-id="${row.id}">
+      <td>${row.subProjectType || ''}</td>
+      <td>${row.uom || ''}</td>
+      <td>${row.rate || ''}</td>
+      <td>
+        <span style="color: ${row.status === 'Active' ? '#16a34a' : '#ef4444'}; font-weight: 600;">
+          ${row.status || ''}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('#tblServiceProjectScopePopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeServiceProjectScopeFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initServiceProjectScopeTableFilters() {
+  document.querySelectorAll('#tblServiceProjectScopePopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openServiceProjectScopeFilter(colKey, btn);
+    });
+  });
+}
+
+function openServiceProjectScopeFilter(colKey, triggerBtn) {
+  currentServiceProjectScopeFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(vendorServiceProjectScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeServiceProjectScopeFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'serviceProjectScope';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+}
+
+// Global Service (Transport) Scope Dataset & Filter State
+let vendorServiceTransportScopeData = [
+  { id: 'sts-1', vehicleType: 'LCV', vehicleNumber: '230510678', fuelType: 'Petrol', range: 'Project', rentalType: 'Monthly', status: 'Active' },
+  { id: 'sts-2', vehicleType: 'MCV', vehicleNumber: '230510678', fuelType: 'Diesel', range: 'Item Wise', rentalType: 'Daily', status: 'In - Active' }
+];
+let activeServiceTransportScopeFilters = {};
+let currentServiceTransportScopeFilterCol = null;
+
+function renderVendorServiceTransportScopeTable() {
+  const tbody = document.getElementById('tbodyServiceTransportScopeDetails');
+  if (!tbody) return;
+
+  let filtered = vendorServiceTransportScopeData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeServiceTransportScopeFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => `
+    <tr data-scope-id="${row.id}">
+      <td>${row.vehicleType || ''}</td>
+      <td>${row.vehicleNumber || ''}</td>
+      <td>${row.fuelType || ''}</td>
+      <td>${row.range || ''}</td>
+      <td>${row.rentalType || ''}</td>
+      <td>
+        <span style="color: ${row.status === 'Active' ? '#16a34a' : '#ef4444'}; font-weight: 600;">
+          ${row.status || ''}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('#tblServiceTransportScopePopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeServiceTransportScopeFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initServiceTransportScopeTableFilters() {
+  document.querySelectorAll('#tblServiceTransportScopePopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openServiceTransportScopeFilter(colKey, btn);
+    });
+  });
+}
+
+function openServiceTransportScopeFilter(colKey, triggerBtn) {
+  currentServiceTransportScopeFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(vendorServiceTransportScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeServiceTransportScopeFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'serviceTransportScope';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+}
+
+// Global Service (Others) Scope Dataset & Filter State
+let vendorServiceOthersScopeData = [
+  { id: 'sot-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', description: 'Petrol', uom: 'Project', status: 'Active' },
+  { id: 'sot-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', description: 'Diesel', uom: 'Item Wise', status: 'In - Active' }
+];
+let activeServiceOthersScopeFilters = {};
+let currentServiceOthersScopeFilterCol = null;
+
+function renderVendorServiceOthersScopeTable() {
+  const tbody = document.getElementById('tbodyServiceOthersScopeDetails');
+  if (!tbody) return;
+
+  let filtered = vendorServiceOthersScopeData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeServiceOthersScopeFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 18px;">No matching records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => `
+    <tr data-scope-id="${row.id}">
+      <td>${row.from || ''}</td>
+      <td>${row.to || ''}</td>
+      <td>${row.description || ''}</td>
+      <td>${row.uom || ''}</td>
+      <td>
+        <span style="color: ${row.status === 'Active' ? '#16a34a' : '#ef4444'}; font-weight: 600;">
+          ${row.status || ''}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+
+  document.querySelectorAll('#tblServiceOthersScopePopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeServiceOthersScopeFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initServiceOthersScopeTableFilters() {
+  document.querySelectorAll('#tblServiceOthersScopePopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openServiceOthersScopeFilter(colKey, btn);
+    });
+  });
+}
+
+function openServiceOthersScopeFilter(colKey, triggerBtn) {
+  currentServiceOthersScopeFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(vendorServiceOthersScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeServiceOthersScopeFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'serviceOthersScope';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
 }
 
 function openExcelFilter(colKey, triggerBtn) {
@@ -4505,7 +5786,85 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
     });
   }
+
+  // Vendor Bank Edit Toggle (switches to Save icon when editing)
+  const btnVendorBankEditToggle = document.getElementById('btnVendorBankEditToggle');
+  if (btnVendorBankEditToggle) {
+    btnVendorBankEditToggle.addEventListener('click', () => {
+      if (!isVendorBankEditing) {
+        setVendorBankEditingState(true);
+        document.getElementById('inpVendorBankAccountName')?.focus();
+        showToast('Vendor Bank form is now editable');
+      } else {
+        setVendorBankEditingState(false);
+        showToast('Vendor Bank details saved & updated successfully!');
+      }
+    });
+  }
+
+  // Close button for vendor bank side card
+  const btnCloseVendorBank = document.getElementById('btnCloseVendorBankCard');
+  if (btnCloseVendorBank) {
+    btnCloseVendorBank.addEventListener('click', () => {
+      const vb = document.getElementById('vendorBankSideCard');
+      if (vb) vb.style.display = 'none';
+      // Restore vendor card visibility
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      // Remove has-dimmed-card from row
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      showToast('Vendor Bank tab closed');
+    });
+  }
 });
+
+// --- VENDOR BANK EDIT HANDLER ---
+let isVendorBankEditing = false;
+
+function setVendorBankEditingState(isEditing) {
+  isVendorBankEditing = isEditing;
+  const form = document.getElementById('frmVendorBank');
+  if (!form) return;
+
+  const textInputs = form.querySelectorAll('input[type="text"]');
+  textInputs.forEach(inp => {
+    if (isEditing) {
+      inp.removeAttribute('readonly');
+      inp.style.backgroundColor = '#ffffff';
+    } else {
+      inp.setAttribute('readonly', 'true');
+      inp.style.backgroundColor = '#f8fafc';
+    }
+  });
+
+  const selects = form.querySelectorAll('select');
+  selects.forEach(sel => {
+    if (isEditing) {
+      sel.removeAttribute('disabled');
+      sel.style.backgroundColor = '#ffffff';
+    } else {
+      sel.setAttribute('disabled', 'true');
+      sel.style.backgroundColor = '#f8fafc';
+    }
+  });
+
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = !isEditing;
+  });
+
+  const imgEditIcon = document.getElementById('imgVendorBankEditIcon');
+  if (imgEditIcon) {
+    if (isEditing) {
+      imgEditIcon.src = 'icons/Save.svg';
+      imgEditIcon.title = 'Save Changes';
+    } else {
+      imgEditIcon.src = 'icons/Edit.svg';
+      imgEditIcon.title = 'Edit Info';
+    }
+  }
+}
 
 // --- SITE, INFRA, PROJECT VIEW HANDLERS ---
 let currentViewedSiteId = null;

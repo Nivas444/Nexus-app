@@ -504,7 +504,18 @@
           <!-- Header -->
           <div class="side-form-header">
             <div class="side-form-title-badge">Add Vendor</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseVendorForm" aria-label="Close form">&times;</button>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVendorCardBank" title="Bank Details">
+                <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnVendorCardMessage" title="Contact Details">
+                <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnVendorCardScope" title="Scope">
+                <img src="icons/scope.svg" alt="Scope" class="blue-scope-icon" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseVendorForm" aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -538,7 +549,7 @@
                 <select class="form-select-control" id="inpServiceType">
                   <option value="Project" selected>Project</option>
                   <option value="Transport">Transport</option>
-                  <option value="Audit">Audit</option>
+                  <option value="Others">Others</option>
                 </select>
               </div>
             </div>
@@ -2126,11 +2137,15 @@
 
         <!-- 2. Contact & Communication Message Popup (Table View with Filters & Top Plus on Right) -->
         <div class="side-form-card side-contact-popup" id="contactDetailsSidePanel" style="display: none; width: 720px;">
-          <!-- Top Toolbar: Large Blue Plus Icon on Right Side (Matching Uploaded Mockup) -->
-          <div class="contact-popup-toolbar" style="display: flex; justify-content: flex-end; padding: 12px 20px 8px 20px;">
-            <button type="button" class="btn-contact-tool" id="btnContactAddRow" title="Add Contact" style="background: transparent; border: none; cursor: pointer; padding: 0;">
-              <img src="icons/Add.svg" alt="Add Contact" width="40" height="40">
-            </button>
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Contact Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnContactAddRow" title="Add Contact" aria-label="Add Contact">
+                <img src="icons/Add.svg" alt="Add Contact" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseContactPanel" aria-label="Close contact details">&times;</button>
+            </div>
           </div>
 
           <!-- Contact Table with Filter Funnels -->
@@ -2158,7 +2173,7 @@
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="tbodyContactDetails">
                 <tr>
                   <td class="td-link-blue">Indus</td>
                   <td></td>
@@ -2753,6 +2768,437 @@
                 </tr>
                 <tr>
                   <td class="td-link-blue" style="text-align: left !important; padding-left: 20px; font-weight: 500;">KK</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 12. Vendor Bank Details Side Panel (Add Vendor → Bank Icon) -->
+        <div class="side-form-card side-contact-popup" id="vendorBankSideCard" style="display: none; width: 460px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblVendorBankCardTitle">Vendor Name</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVendorBankEditToggle" title="Edit Info">
+                <img src="icons/Edit.svg" id="imgVendorBankEditIcon" alt="Edit" width="26" height="26">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseVendorBankCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmVendorBank" onsubmit="event.preventDefault();" style="padding: 16px 24px 20px 24px;">
+            <!-- 1. Account Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorBankAccountName">Account Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankAccountName" placeholder="" readonly>
+              </div>
+            </div>
+
+            <!-- 2. Account Number (with PDF upload badge) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorBankAccountNumber">Account Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankAccountNumber" placeholder="" readonly>
+                <input type="file" id="fileVendorBankDoc" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileVendorBankDoc').click();" style="cursor: pointer;">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                </span>
+              </div>
+            </div>
+
+            <!-- 3. IFSC Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorBankIfsc">IFSC Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankIfsc" placeholder="" readonly>
+              </div>
+            </div>
+
+            <!-- 4. Bank Name (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control vendor-bank-field" id="inpVendorBankName" disabled>
+                  <option value="" selected></option>
+                  <option value="State Bank of India">State Bank of India</option>
+                  <option value="HDFC Bank">HDFC Bank</option>
+                  <option value="ICICI Bank">ICICI Bank</option>
+                  <option value="Axis Bank">Axis Bank</option>
+                  <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                  <option value="Punjab National Bank">Punjab National Bank</option>
+                  <option value="Bank of Baroda">Bank of Baroda</option>
+                  <option value="Canara Bank">Canara Bank</option>
+                  <option value="Union Bank of India">Union Bank of India</option>
+                  <option value="IndusInd Bank">IndusInd Bank</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpVendorBankStatusToggle" checked disabled>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 13. Add Contact Details Form Card (Triggered by + icon in Contact Details) -->
+        <div class="side-form-card side-contact-popup" id="addContactFormCard" style="display: none; width: 480px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Contact Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddContactCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body collecting: Name, Designation, Contact Number, E-Mail, Status -->
+          <form class="side-form-body" id="frmAddContact" onsubmit="event.preventDefault();" style="padding: 18px 24px 24px 24px;">
+            <!-- 1. Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpNewContactName">Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpNewContactName" placeholder="Enter Name">
+              </div>
+            </div>
+
+            <!-- 2. Designation -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpNewContactDesignation">Designation</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpNewContactDesignation" placeholder="Enter Designation">
+              </div>
+            </div>
+
+            <!-- 3. Contact Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpNewContactPhone">Contact Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpNewContactPhone" placeholder="Enter Contact Number">
+              </div>
+            </div>
+
+            <!-- 4. E-Mail -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpNewContactEmail">E-Mail</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpNewContactEmail" placeholder="Enter E-Mail">
+              </div>
+            </div>
+
+            <!-- 5. Status (Slide Switch for Activate / Deactivate) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpNewContactStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab -->
+            <div class="form-submit-inside-wrap" style="margin-top: 14px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitNewContact" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 14. Supply Vendor Scope Tab (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="vendorSupplyScopeSidePanel" style="display: none; width: 780px;">
+          <!-- Hidden File Input for CSV / Excel selection from user's system -->
+          <input type="file" id="inpSupplyScopeCsvFile" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
+
+          <!-- Header with Standard Slanted Ribbon Badge in Existing Green (#2fd19f) -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblSupplyScopeTitle">Supply Vendor Name</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnSupplyScopeCsvUpload" title="Upload CSV / Excel" aria-label="Upload CSV or Excel">
+                <img src="icons/CSV upload.svg" alt="Upload CSV" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnSupplyScopeAddRow" title="Add Row" aria-label="Add Row">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseSupplyScopePanel" aria-label="Close supply scope">&times;</button>
+            </div>
+          </div>
+
+          <!-- Supply Scope Table with Filter Funnels -->
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblSupplyScopePopup">
+              <thead>
+                <tr>
+                  <th class="col-scope-cat">
+                    <span>Product Category</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="category" title="Filter Product Category">▼</button>
+                  </th>
+                  <th class="col-scope-name">
+                    <span>Product Name</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="productName" title="Filter Product Name">▼</button>
+                  </th>
+                  <th class="col-scope-uom">
+                    <span>Uom</span>
+                  </th>
+                  <th class="col-scope-price">
+                    <span>price</span>
+                  </th>
+                  <th class="col-scope-status">
+                    <span>Status</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodySupplyScopeDetails">
+                <tr>
+                  <td>Service</td>
+                  <td>230510678</td>
+                  <td>R/RL-234567</td>
+                  <td>15000.00</td>
+                  <td><span style="color: #16a34a; font-weight: 600;">Active</span></td>
+                </tr>
+                <tr>
+                  <td>Supply</td>
+                  <td>230510678</td>
+                  <td>R/RL-234567</td>
+                  <td>15000.00</td>
+                  <td><span style="color: #ef4444; font-weight: 600;">In - Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 15. Add Products Form Card (Triggered by + icon in Supply Scope) -->
+        <div class="side-form-card side-contact-popup" id="addProductScopeCard" style="display: none; width: 440px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Products</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProductScopeEditToggle" title="Save Product" aria-label="Save Product">
+                <img src="icons/Edit.svg" id="imgProductScopeEditIcon" alt="Save Product" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddProductScopeCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body matching mockup -->
+          <form class="side-form-body" id="frmAddProductScope" onsubmit="event.preventDefault();" style="padding: 22px 24px 28px 24px;">
+            <!-- 1. Product Category -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddProductCategory">Product Category</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddProductCategory">
+                  <option value="Supply" selected>Supply</option>
+                  <option value="Service">Service</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Product Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddProductName">Product Name</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddProductName">
+                  <option value="230510678" selected>230510678</option>
+                  <option value="230510679">230510679</option>
+                  <option value="450012999">450012999</option>
+                  <option value="880011222">880011222</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Status (Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddProductStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 16. Project Vendor Scope Tab (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="vendorServiceProjectScopeSidePanel" style="display: none; width: 780px;">
+          <!-- Hidden File Input for CSV / Excel selection from user's system -->
+          <input type="file" id="inpServiceProjectScopeCsvFile" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
+
+          <!-- Header with Standard Slanted Ribbon Badge in Existing Green (#2fd19f) -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblServiceProjectScopeTitle">Project Vendor Name</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnServiceProjectScopeCsvUpload" title="Upload CSV / Excel" aria-label="Upload CSV or Excel">
+                <img src="icons/CSV upload.svg" alt="Upload CSV" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnServiceProjectScopeAddRow" title="Add Row" aria-label="Add Row">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseServiceProjectScopePanel" aria-label="Close project scope">&times;</button>
+            </div>
+          </div>
+
+          <!-- Scope Table with Filter Funnel on Sub - Project Type -->
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblServiceProjectScopePopup">
+              <thead>
+                <tr>
+                  <th class="col-scope-subtype">
+                    <span>Sub - Project Type</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="subProjectType" title="Filter Sub - Project Type">▼</button>
+                  </th>
+                  <th class="col-scope-uom">
+                    <span>Uom</span>
+                  </th>
+                  <th class="col-scope-rate">
+                    <span>Rate</span>
+                  </th>
+                  <th class="col-scope-status">
+                    <span>Status</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyServiceProjectScopeDetails">
+                <tr>
+                  <td>Project</td>
+                  <td>LS</td>
+                  <td></td>
+                  <td><span style="color: #16a34a; font-weight: 600;">Active</span></td>
+                </tr>
+                <tr>
+                  <td>Item Wise</td>
+                  <td>Meter</td>
+                  <td></td>
+                  <td><span style="color: #ef4444; font-weight: 600;">In - Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 17. Transport Vendor Scope Tab -->
+        <div class="side-form-card side-contact-popup" id="vendorServiceTransportScopeSidePanel" style="display: none; width: 840px;">
+          <!-- Header with Standard Slanted Ribbon Badge in Existing Green (#2fd19f) -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblServiceTransportScopeTitle">Transport Vendor Name</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnServiceTransportScopeAddRow" title="Add Row" aria-label="Add Row">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseServiceTransportScopePanel" aria-label="Close transport scope">&times;</button>
+            </div>
+          </div>
+
+          <!-- Scope Table with Filter Funnels -->
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblServiceTransportScopePopup">
+              <thead>
+                <tr>
+                  <th class="col-scope-vtype">
+                    <span>Vehicle Type</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="vehicleType" title="Filter Vehicle Type">▼</button>
+                  </th>
+                  <th class="col-scope-vnum">
+                    <span>Vehicle Number</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="vehicleNumber" title="Filter Vehicle Number">▼</button>
+                  </th>
+                  <th class="col-scope-fuel">
+                    <span>Fuel Type</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="fuelType" title="Filter Fuel Type">▼</button>
+                  </th>
+                  <th class="col-scope-range">
+                    <span>Range</span>
+                  </th>
+                  <th class="col-scope-rental">
+                    <span>Rental Type</span>
+                  </th>
+                  <th class="col-scope-status">
+                    <span>Status</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyServiceTransportScopeDetails">
+                <tr>
+                  <td>LCV</td>
+                  <td>230510678</td>
+                  <td>Petrol</td>
+                  <td>Project</td>
+                  <td>Monthly</td>
+                  <td><span style="color: #16a34a; font-weight: 600;">Active</span></td>
+                </tr>
+                <tr>
+                  <td>MCV</td>
+                  <td>230510678</td>
+                  <td>Diesel</td>
+                  <td>Item Wise</td>
+                  <td>Daily</td>
+                  <td><span style="color: #ef4444; font-weight: 600;">In - Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 18. Other Service Vendor Scope Tab (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="vendorServiceOthersScopeSidePanel" style="display: none; width: 780px;">
+          <!-- Header with Standard Slanted Ribbon Badge in Existing Green (#2fd19f) -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblServiceOthersScopeTitle">Other Service Vendor Name</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnServiceOthersScopeAddRow" title="Add Row" aria-label="Add Row">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseServiceOthersScopePanel" aria-label="Close other service scope">&times;</button>
+            </div>
+          </div>
+
+          <!-- Scope Table with Filter on Description -->
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblServiceOthersScopePopup">
+              <thead>
+                <tr>
+                  <th class="col-scope-from">
+                    <span>From</span>
+                  </th>
+                  <th class="col-scope-to">
+                    <span>To</span>
+                  </th>
+                  <th class="col-scope-desc">
+                    <span>Description</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="description" title="Filter Description">▼</button>
+                  </th>
+                  <th class="col-scope-uom">
+                    <span>Uom</span>
+                  </th>
+                  <th class="col-scope-status">
+                    <span>Status</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyServiceOthersScopeDetails">
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>Petrol</td>
+                  <td>Project</td>
+                  <td><span style="color: #16a34a; font-weight: 600;">Active</span></td>
+                </tr>
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>Diesel</td>
+                  <td>Item Wise</td>
+                  <td><span style="color: #ef4444; font-weight: 600;">In - Active</span></td>
                 </tr>
               </tbody>
             </table>

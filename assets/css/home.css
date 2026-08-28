@@ -1059,6 +1059,252 @@ tr.tr-sub-headers th,
   min-width: 0 !important;
 }
 
+#vendorBankSideCard {
+  width: 480px !important;
+  max-width: 95vw !important;
+  box-sizing: border-box !important;
+}
+
+#vendorBankSideCard .side-form-body {
+  padding: 18px 24px 24px 24px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+#vendorBankSideCard .form-row-group {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#vendorBankSideCard .form-label {
+  width: 140px !important;
+  min-width: 140px !important;
+  flex: 0 0 140px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  white-space: nowrap !important;
+}
+
+#vendorBankSideCard .form-input-wrap {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#vendorBankSideCard .form-input-control,
+#vendorBankSideCard .form-select-control {
+  width: 100% !important;
+  height: 38px !important;
+  border-radius: 8px !important;
+}
+
+#addContactFormCard {
+  width: 480px !important;
+  max-width: 95vw !important;
+  box-sizing: border-box !important;
+}
+
+#addContactFormCard .side-form-body {
+  padding: 18px 24px 24px 24px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+#addContactFormCard .form-row-group {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#addContactFormCard .form-label {
+  width: 140px !important;
+  min-width: 140px !important;
+  flex: 0 0 140px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  white-space: nowrap !important;
+}
+
+#addContactFormCard .form-input-wrap {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#addContactFormCard .form-input-control {
+  width: 100% !important;
+  height: 38px !important;
+  border-radius: 8px !important;
+}
+
+#vendorSupplyScopeSidePanel {
+  width: 780px !important;
+  max-width: 96vw !important;
+  box-sizing: border-box !important;
+}
+
+#tblSupplyScopePopup th {
+  background: #b5b5b5 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 10px 14px !important;
+  font-size: 0.86rem !important;
+  border-right: 1px solid #ffffff !important;
+}
+
+#tblSupplyScopePopup th:last-child {
+  border-right: none !important;
+}
+
+#tblSupplyScopePopup td {
+  padding: 12px 14px !important;
+  font-size: 0.88rem !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+#addProductScopeCard {
+  width: 440px !important;
+  max-width: 95vw !important;
+  box-sizing: border-box !important;
+}
+
+#addProductScopeCard .side-form-body {
+  padding: 22px 24px 28px 24px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+#addProductScopeCard .form-row-group {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#addProductScopeCard .form-label {
+  width: 140px !important;
+  min-width: 140px !important;
+  flex: 0 0 140px !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  white-space: nowrap !important;
+}
+
+#addProductScopeCard .form-input-wrap {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#addProductScopeCard .form-select-control {
+  width: 100% !important;
+  height: 38px !important;
+  border-radius: 8px !important;
+}
+
+#vendorServiceProjectScopeSidePanel {
+  width: 780px !important;
+  max-width: 96vw !important;
+  box-sizing: border-box !important;
+}
+
+#tblServiceProjectScopePopup th {
+  background: #b5b5b5 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 10px 14px !important;
+  font-size: 0.86rem !important;
+  border-right: 1px solid #ffffff !important;
+}
+
+#tblServiceProjectScopePopup th:last-child {
+  border-right: none !important;
+}
+
+#tblServiceProjectScopePopup td {
+  padding: 12px 14px !important;
+  font-size: 0.88rem !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+#vendorServiceTransportScopeSidePanel {
+  width: 840px !important;
+  max-width: 96vw !important;
+  box-sizing: border-box !important;
+}
+
+#tblServiceTransportScopePopup th {
+  background: #b5b5b5 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 10px 14px !important;
+  font-size: 0.86rem !important;
+  border-right: 1px solid #ffffff !important;
+}
+
+#tblServiceTransportScopePopup th:last-child {
+  border-right: none !important;
+}
+
+#tblServiceTransportScopePopup td {
+  padding: 12px 14px !important;
+  font-size: 0.88rem !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+#vendorServiceOthersScopeSidePanel {
+  width: 780px !important;
+  max-width: 96vw !important;
+  box-sizing: border-box !important;
+}
+
+#tblServiceOthersScopePopup th {
+  background: #b5b5b5 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 10px 14px !important;
+  font-size: 0.86rem !important;
+  border-right: 1px solid #ffffff !important;
+}
+
+#tblServiceOthersScopePopup th:last-child {
+  border-right: none !important;
+}
+
+#tblServiceOthersScopePopup td {
+  padding: 12px 14px !important;
+  font-size: 0.88rem !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
 #addEmployeeCard .side-form-body,
 .side-form-card-wide .side-form-body {
   padding: 20px 24px 28px 24px !important;
@@ -1212,11 +1458,13 @@ tr.tr-sub-headers th,
   flex-direction: column;
 }
 
-.blue-mail-phone-icon {
+.blue-mail-phone-icon,
+.blue-scope-icon {
   filter: invert(32%) sepia(90%) saturate(2800%) hue-rotate(212deg) brightness(98%) contrast(96%) !important;
 }
 
-.toolbar-icon-btn:hover .blue-mail-phone-icon {
+.toolbar-icon-btn:hover .blue-mail-phone-icon,
+.toolbar-icon-btn:hover .blue-scope-icon {
   filter: invert(24%) sepia(90%) saturate(3000%) hue-rotate(212deg) brightness(90%) contrast(98%) !important;
   transform: scale(1.1);
 }

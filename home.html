@@ -2984,7 +2984,7 @@
             <div class="side-form-title-badge">Add Products</div>
             <div class="side-header-top-icons">
               <button type="button" class="side-top-icon-btn" id="btnProductScopeEditToggle" title="Save Product" aria-label="Save Product">
-                <img src="icons/Edit.svg" id="imgProductScopeEditIcon" alt="Save Product" width="24" height="24">
+                <img src="icons/Save.svg" id="imgProductScopeEditIcon" alt="Save Product" width="24" height="24">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseAddProductScopeCard" aria-label="Close form">&times;</button>
             </div>
@@ -3086,6 +3086,177 @@
           </div>
         </div>
 
+        <!-- 16B. Add Sub - Project Type Form Card (Triggered by + icon in Project Scope) -->
+        <div class="side-form-card side-contact-popup" id="addSubProjectTypeCard" style="display: none; width: 440px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Sub - Project Type</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnSubProjectTypeReport" title="Payment Report" aria-label="Payment Report">
+                <img src="icons/Payment Report.svg" alt="Payment Report" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddSubProjectTypeCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body matching mockup -->
+          <form class="side-form-body" id="frmAddSubProjectType" onsubmit="event.preventDefault();" style="padding: 22px 24px 28px 24px;">
+            <!-- 1. Sub - Project Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddSubProjectType">Sub - Project Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddSubProjectType">
+                  <option value="Project" selected>Project</option>
+                  <option value="Item Wise">Item Wise</option>
+                  <option value="Supply & Install">Supply & Install</option>
+                  <option value="Consultancy">Consultancy</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Uom -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddSubProjectUom">Uom</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddSubProjectUom">
+                  <option value="PO / LS" selected>PO / LS</option>
+                  <option value="LS">LS</option>
+                  <option value="Meter">Meter</option>
+                  <option value="Nos">Nos</option>
+                  <option value="Kg">Kg</option>
+                  <option value="Sq.Ft">Sq.Ft</option>
+                  <option value="Days">Days</option>
+                  <option value="Month">Month</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Status (Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddSubProjectStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered at Bottom -->
+            <div class="form-submit-inside-wrap" style="margin-top: 20px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitSubProjectType" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 16C. Sub - Project Type Report / Rate Details Tab (Triggered by Payment Report icon in Add Sub - Project Type) -->
+        <div class="side-form-card side-contact-popup" id="subProjectTypeReportCard" style="display: none; width: 720px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblSubProjectTypeReportTitle">Sub - Project Type</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnSubProjectReportAddRow" title="Add Details" aria-label="Add Details">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseSubProjectReportCard" aria-label="Close report">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table with From, To, Rate, Status -->
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblSubProjectTypeReportPopup">
+              <thead>
+                <tr>
+                  <th class="col-scope-from"><span>From</span></th>
+                  <th class="col-scope-to"><span>To</span></th>
+                  <th class="col-scope-rate"><span>Rate</span></th>
+                  <th class="col-scope-status"><span>Status</span></th>
+                </tr>
+              </thead>
+              <tbody id="tbodySubProjectTypeReportDetails">
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>2000.00</td>
+                  <td><span style="color: #16a34a; font-weight: 600;">Active</span></td>
+                </tr>
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>2000.00</td>
+                  <td><span style="color: #ef4444; font-weight: 600;">In - Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 16D. Add Sub - Project Rate / Details Form Card (Triggered by + icon in Sub - Project Type Report Tab) -->
+        <div class="side-form-card side-contact-popup" id="addSubProjectRateFormCard" style="display: none; width: 440px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Sub - Project Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddSubProjectRateCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddSubProjectRate" onsubmit="event.preventDefault();" style="padding: 22px 24px 28px 24px;">
+            <!-- 1. From (with working calendar icon) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpSubProjectRateFrom">From</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpSubProjectRateFrom" placeholder="DD - MM - YYYY" value="01 - 01 - 2026">
+                <input type="date" id="inpSubProjectRateFromNative" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                <button type="button" class="input-pdf-badge btn-sub-project-calendar" id="btnSubProjectRateFromCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. To (with working calendar icon) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpSubProjectRateTo">To</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpSubProjectRateTo" placeholder="DD - MM - YYYY" value="01 - 01 - 2026">
+                <input type="date" id="inpSubProjectRateToNative" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                <button type="button" class="input-pdf-badge btn-sub-project-calendar" id="btnSubProjectRateToCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpSubProjectRateValue">Rate</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSubProjectRateValue" placeholder="Enter Rate" value="2000.00">
+              </div>
+            </div>
+
+            <!-- 4. Status (Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpSubProjectRateStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered at Bottom -->
+            <div class="form-submit-inside-wrap" style="margin-top: 20px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitSubProjectRate" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- 17. Transport Vendor Scope Tab -->
         <div class="side-form-card side-contact-popup" id="vendorServiceTransportScopeSidePanel" style="display: none; width: 840px;">
           <!-- Header with Standard Slanted Ribbon Badge in Existing Green (#2fd19f) -->
@@ -3149,6 +3320,216 @@
           </div>
         </div>
 
+        <!-- 17B. Add Vehicle Form Card (Triggered by + icon in Transport Scope) -->
+        <div class="side-form-card side-contact-popup" id="addVehicleScopeCard" style="display: none; width: 440px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Vehicle</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVehicleReportIcon" title="Payment Report" aria-label="Payment Report">
+                <img src="icons/Payment Report.svg" alt="Payment Report" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddVehicleScopeCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body matching mockup -->
+          <form class="side-form-body" id="frmAddVehicleScope" onsubmit="event.preventDefault();" style="padding: 22px 24px 28px 24px;">
+            <!-- 1. Vehicle Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddVehicleType">Vehicle Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddVehicleType">
+                  <option value="LCV" selected>LCV</option>
+                  <option value="MCV">MCV</option>
+                  <option value="HCV">HCV</option>
+                  <option value="Trailer">Trailer</option>
+                  <option value="Dumper">Dumper</option>
+                  <option value="JCB">JCB</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Vehicle Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddVehicleNumber">Vehicle Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddVehicleNumber" placeholder="Enter Vehicle Number" value="230510678">
+              </div>
+            </div>
+
+            <!-- 3. Fuel Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddVehicleFuelType">Fuel Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddVehicleFuelType">
+                  <option value="Petrol" selected>Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Electric">Electric</option>
+                  <option value="CNG">CNG</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Range -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddVehicleRange">Range</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddVehicleRange" placeholder="Enter Range" value="Project">
+              </div>
+            </div>
+
+            <!-- 5. Rental Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddVehicleRentalType">Rental Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddVehicleRentalType">
+                  <option value="Monthly" selected>Monthly</option>
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Hourly">Hourly</option>
+                  <option value="Per Trip">Per Trip</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. Status (Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddVehicleStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered at Bottom -->
+            <div class="form-submit-inside-wrap" style="margin-top: 20px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVehicleScope" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 17C. Vehicle Payment Report / Rate Details Tab (Triggered by Payment Report icon in Add Vehicle) -->
+        <div class="side-form-card side-contact-popup" id="vehicleReportCard" style="display: none; width: 780px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblVehicleReportTitle">Vehicle #:</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVehicleReportAddRow" title="Add Details" aria-label="Add Details">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseVehicleReportCard" aria-label="Close report">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table with From, To, Rental Amount, Halt Amount, Status -->
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblVehicleReportPopup">
+              <thead>
+                <tr>
+                  <th class="col-scope-from"><span>From</span></th>
+                  <th class="col-scope-to"><span>To</span></th>
+                  <th class="col-scope-rental"><span>Rental Amount</span></th>
+                  <th class="col-scope-halt"><span>Halt Amount</span></th>
+                  <th class="col-scope-status"><span>Status</span></th>
+                </tr>
+              </thead>
+              <tbody id="tbodyVehicleReportDetails">
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>2000.00</td>
+                  <td>2000.00</td>
+                  <td><span style="color: #16a34a; font-weight: 600;">Active</span></td>
+                </tr>
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>2000.00</td>
+                  <td>2000.00</td>
+                  <td><span style="color: #ef4444; font-weight: 600;">In - Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 17D. Add Vehicle Rate / Details Form Card (Triggered by + icon in Vehicle Report Tab) -->
+        <div class="side-form-card side-contact-popup" id="addVehicleRateFormCard" style="display: none; width: 440px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Vehicle Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddVehicleRateCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddVehicleRate" onsubmit="event.preventDefault();" style="padding: 22px 24px 28px 24px;">
+            <!-- 1. From (with working calendar icon) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleRateFrom">From</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpVehicleRateFrom" placeholder="DD - MM - YYYY" value="01 - 01 - 2026">
+                <input type="date" id="inpVehicleRateFromNative" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                <button type="button" class="input-pdf-badge btn-vehicle-calendar" id="btnVehicleRateFromCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. To (with working calendar icon) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleRateTo">To</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpVehicleRateTo" placeholder="DD - MM - YYYY" value="01 - 01 - 2026">
+                <input type="date" id="inpVehicleRateToNative" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                <button type="button" class="input-pdf-badge btn-vehicle-calendar" id="btnVehicleRateToCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Rental Amount -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleRentalAmount">Rental Amount</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleRentalAmount" placeholder="Enter Rental Amount" value="2000.00">
+              </div>
+            </div>
+
+            <!-- 4. Halt Amount -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleHaltAmount">Halt Amount</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleHaltAmount" placeholder="Enter Halt Amount" value="2000.00">
+              </div>
+            </div>
+
+            <!-- 5. Status (Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpVehicleRateStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered at Bottom -->
+            <div class="form-submit-inside-wrap" style="margin-top: 20px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVehicleRate" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- 18. Other Service Vendor Scope Tab (Matching Uploaded Mockup) -->
         <div class="side-form-card side-contact-popup" id="vendorServiceOthersScopeSidePanel" style="display: none; width: 780px;">
           <!-- Header with Standard Slanted Ribbon Badge in Existing Green (#2fd19f) -->
@@ -3203,6 +3584,187 @@
               </tbody>
             </table>
           </div>
+        </div>
+
+        <!-- 18B. Add Service Form Card (Triggered by + icon in Other Service Scope) -->
+        <div class="side-form-card side-contact-popup" id="addOtherServiceScopeCard" style="display: none; width: 440px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Service</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnOtherServiceReportIcon" title="Payment Report" aria-label="Payment Report">
+                <img src="icons/Payment Report.svg" alt="Payment Report" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddOtherServiceScopeCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body matching mockup -->
+          <form class="side-form-body" id="frmAddOtherServiceScope" onsubmit="event.preventDefault();" style="padding: 22px 24px 28px 24px;">
+            <!-- 1. Service Description -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddOtherServiceDesc">Service Description</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddOtherServiceDesc">
+                  <option value="Petrol" selected>Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Catering">Catering</option>
+                  <option value="Security">Security</option>
+                  <option value="Cleaning">Cleaning</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Uom -->
+            <div class="form-row-group">
+              <label class="form-label" for="selAddOtherServiceUom">Uom</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selAddOtherServiceUom">
+                  <option value="Project" selected>Project</option>
+                  <option value="Item Wise">Item Wise</option>
+                  <option value="Per Day">Per Day</option>
+                  <option value="Per Month">Per Month</option>
+                  <option value="Hours">Hours</option>
+                  <option value="Nos">Nos</option>
+                  <option value="Litre">Litre</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOtherServiceRate">Rate</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOtherServiceRate" placeholder="Enter Rate" value="1500.00">
+              </div>
+            </div>
+
+            <!-- 4. Status (Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddOtherServiceStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered at Bottom -->
+            <div class="form-submit-inside-wrap" style="margin-top: 20px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitOtherServiceScope" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 18C. Other Service Payment Report / Rate Details Tab (Triggered by Payment Report icon in Add Service) -->
+        <div class="side-form-card side-contact-popup" id="otherServiceReportCard" style="display: none; width: 720px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblOtherServiceReportTitle">Service Description</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnOtherServiceReportAddRow" title="Add Details" aria-label="Add Details">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseOtherServiceReportCard" aria-label="Close report">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table with From, To, Rate, Status -->
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblOtherServiceReportPopup">
+              <thead>
+                <tr>
+                  <th class="col-scope-from"><span>From</span></th>
+                  <th class="col-scope-to"><span>To</span></th>
+                  <th class="col-scope-rate"><span>Rate</span></th>
+                  <th class="col-scope-status"><span>Status</span></th>
+                </tr>
+              </thead>
+              <tbody id="tbodyOtherServiceReportDetails">
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>2000.00</td>
+                  <td><span style="color: #16a34a; font-weight: 600;">Active</span></td>
+                </tr>
+                <tr>
+                  <td>01 - 01 - 2026</td>
+                  <td>01 - 01 - 2026</td>
+                  <td>2000.00</td>
+                  <td><span style="color: #ef4444; font-weight: 600;">In - Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 18D. Add Other Service Rate / Details Form Card (Triggered by + icon in Service Description Report Tab) -->
+        <div class="side-form-card side-contact-popup" id="addOtherServiceRateFormCard" style="display: none; width: 440px;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Service Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddOtherServiceRateCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddOtherServiceRate" onsubmit="event.preventDefault();" style="padding: 22px 24px 28px 24px;">
+            <!-- 1. From (with working calendar icon) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpOtherServiceRateFrom">From</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpOtherServiceRateFrom" placeholder="DD - MM - YYYY" value="01 - 01 - 2026">
+                <input type="date" id="inpOtherServiceRateFromNative" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                <button type="button" class="input-pdf-badge btn-other-service-calendar" id="btnOtherServiceRateFromCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. To (with working calendar icon) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpOtherServiceRateTo">To</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpOtherServiceRateTo" placeholder="DD - MM - YYYY" value="01 - 01 - 2026">
+                <input type="date" id="inpOtherServiceRateToNative" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+                <button type="button" class="input-pdf-badge btn-other-service-calendar" id="btnOtherServiceRateToCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Rate -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpOtherServiceRateAmount">Rate</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpOtherServiceRateAmount" placeholder="Enter Rate" value="2000.00">
+              </div>
+            </div>
+
+            <!-- 4. Status (Toggle Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpOtherServiceRateStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered at Bottom -->
+            <div class="form-submit-inside-wrap" style="margin-top: 20px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitOtherServiceRate" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
         </div>
 
       </div>

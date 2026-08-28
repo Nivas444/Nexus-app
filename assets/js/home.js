@@ -2843,16 +2843,174 @@ function initSideFormEvents() {
   const btnServiceProjectAdd = document.getElementById('btnServiceProjectScopeAddRow');
   if (btnServiceProjectAdd) {
     btnServiceProjectAdd.addEventListener('click', () => {
+      const scopePanel = document.getElementById('vendorServiceProjectScopeSidePanel');
+      if (scopePanel) scopePanel.classList.add('card-dimmed-blurred');
+
+      const addSubProjCard = document.getElementById('addSubProjectTypeCard');
+      if (addSubProjCard) addSubProjCard.style.display = 'block';
+
+      showToast('Add Sub - Project Type form opened');
+    });
+  }
+
+  // Close Add Sub - Project Type form card
+  const btnCloseAddSubProject = document.getElementById('btnCloseAddSubProjectTypeCard');
+  if (btnCloseAddSubProject) {
+    btnCloseAddSubProject.addEventListener('click', () => {
+      const ap = document.getElementById('addSubProjectTypeCard');
+      if (ap) ap.style.display = 'none';
+      const scopePanel = document.getElementById('vendorServiceProjectScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Save Sub - Project Type via Bottom Save Button
+  const btnSubmitSubProject = document.getElementById('btnSubmitSubProjectType');
+  if (btnSubmitSubProject) {
+    btnSubmitSubProject.addEventListener('click', () => {
+      const subTypeVal = document.getElementById('selAddSubProjectType')?.value || 'Project';
+      const uomVal = document.getElementById('selAddSubProjectUom')?.value || 'PO / LS';
+      const isStatusActive = document.getElementById('inpAddSubProjectStatusToggle')?.checked;
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
+
       const newRec = {
         id: 'sps-' + Date.now(),
-        subProjectType: 'New Project Type',
-        uom: 'LS',
+        subProjectType: subTypeVal,
+        uom: uomVal,
         rate: '',
-        status: 'Active'
+        status: statusVal
       };
+
       vendorServiceProjectScopeData.push(newRec);
       renderVendorServiceProjectScopeTable();
-      showToast('New record added to Service Project Scope');
+
+      const ap = document.getElementById('addSubProjectTypeCard');
+      if (ap) ap.style.display = 'none';
+      const scopePanel = document.getElementById('vendorServiceProjectScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+
+      showToast('New Sub - Project Type added to Project Scope!');
+    });
+  }
+
+  // Sub - Project Type Payment Report Table Data & Events
+  renderSubProjectTypeReportTable();
+
+  // Helper for working calendar date picker
+  function initCalendarPicker(btnId, inputId, nativeId) {
+    const btn = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    const native = document.getElementById(nativeId);
+
+    function triggerCalendar() {
+      if (native) {
+        if (typeof native.showPicker === 'function') {
+          try { native.showPicker(); } catch(e) { native.click(); }
+        } else {
+          native.click();
+        }
+      }
+    }
+
+    if (btn) btn.addEventListener('click', triggerCalendar);
+    if (input) input.addEventListener('click', triggerCalendar);
+
+    if (native) {
+      native.addEventListener('change', (e) => {
+        const val = e.target.value; // YYYY-MM-DD
+        if (val) {
+          const parts = val.split('-');
+          if (parts.length === 3) {
+            const formatted = `${parts[2]} - ${parts[1]} - ${parts[0]}`;
+            if (input) input.value = formatted;
+          }
+        }
+      });
+    }
+  }
+
+  initCalendarPicker('btnSubProjectRateFromCalendar', 'inpSubProjectRateFrom', 'inpSubProjectRateFromNative');
+  initCalendarPicker('btnSubProjectRateToCalendar', 'inpSubProjectRateTo', 'inpSubProjectRateToNative');
+
+  // Sub - Project Type Payment Report Icon Click (Opens Sub - Project Type Report Tab)
+  const btnSubProjReport = document.getElementById('btnSubProjectTypeReport');
+  if (btnSubProjReport) {
+    btnSubProjReport.addEventListener('click', () => {
+      const subProjCard = document.getElementById('addSubProjectTypeCard');
+      if (subProjCard) subProjCard.classList.add('card-dimmed-blurred');
+
+      const reportCard = document.getElementById('subProjectTypeReportCard');
+      if (reportCard) reportCard.style.display = 'block';
+
+      renderSubProjectTypeReportTable();
+      showToast('Sub - Project Type Details opened');
+    });
+  }
+
+  // Close Sub - Project Type Report Tab
+  const btnCloseSubProjReport = document.getElementById('btnCloseSubProjectReportCard');
+  if (btnCloseSubProjReport) {
+    btnCloseSubProjReport.addEventListener('click', () => {
+      const reportCard = document.getElementById('subProjectTypeReportCard');
+      if (reportCard) reportCard.style.display = 'none';
+      const addRateCard = document.getElementById('addSubProjectRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const subProjCard = document.getElementById('addSubProjectTypeCard');
+      if (subProjCard) subProjCard.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Plus (+) icon in Sub - Project Type Report Tab (Opens Add Sub - Project Details Form)
+  const btnSubProjReportAdd = document.getElementById('btnSubProjectReportAddRow');
+  if (btnSubProjReportAdd) {
+    btnSubProjReportAdd.addEventListener('click', () => {
+      const reportCard = document.getElementById('subProjectTypeReportCard');
+      if (reportCard) reportCard.classList.add('card-dimmed-blurred');
+
+      const addRateCard = document.getElementById('addSubProjectRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'block';
+
+      showToast('Add Sub - Project Details form opened');
+    });
+  }
+
+  // Close Add Sub - Project Details Form
+  const btnCloseAddSubProjectRate = document.getElementById('btnCloseAddSubProjectRateCard');
+  if (btnCloseAddSubProjectRate) {
+    btnCloseAddSubProjectRate.addEventListener('click', () => {
+      const addRateCard = document.getElementById('addSubProjectRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const reportCard = document.getElementById('subProjectTypeReportCard');
+      if (reportCard) reportCard.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Save Sub - Project Rate Details via Bottom Save Button
+  const btnSubmitSubProjRate = document.getElementById('btnSubmitSubProjectRate');
+  if (btnSubmitSubProjRate) {
+    btnSubmitSubProjRate.addEventListener('click', () => {
+      const fromVal = document.getElementById('inpSubProjectRateFrom')?.value || '01 - 01 - 2026';
+      const toVal = document.getElementById('inpSubProjectRateTo')?.value || '01 - 01 - 2026';
+      const rateVal = document.getElementById('inpSubProjectRateValue')?.value || '2000.00';
+      const isStatusActive = document.getElementById('inpSubProjectRateStatusToggle')?.checked;
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
+
+      subProjectTypeReportData.push({
+        id: 'sptr-' + Date.now(),
+        from: fromVal,
+        to: toVal,
+        rate: rateVal,
+        status: statusVal
+      });
+
+      renderSubProjectTypeReportTable();
+
+      const addRateCard = document.getElementById('addSubProjectRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const reportCard = document.getElementById('subProjectTypeReportCard');
+      if (reportCard) reportCard.classList.remove('card-dimmed-blurred');
+
+      showToast('New details added to Sub - Project Type!');
     });
   }
 
@@ -2861,6 +3019,12 @@ function initSideFormEvents() {
     btnCloseServiceProjectScope.addEventListener('click', () => {
       const sp = document.getElementById('vendorServiceProjectScopeSidePanel');
       if (sp) sp.style.display = 'none';
+      const ap = document.getElementById('addSubProjectTypeCard');
+      if (ap) ap.style.display = 'none';
+      const repCard = document.getElementById('subProjectTypeReportCard');
+      if (repCard) repCard.style.display = 'none';
+      const rateCard = document.getElementById('addSubProjectRateFormCard');
+      if (rateCard) rateCard.style.display = 'none';
       const vendorCard = document.getElementById('addVendorCard');
       if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
       const cardsRow = document.querySelector('.side-form-cards-row');
@@ -2869,25 +3033,156 @@ function initSideFormEvents() {
     });
   }
 
-  // Service (Transport) Scope Table Data & Events
-  renderVendorServiceTransportScopeTable();
-  initServiceTransportScopeTableFilters();
-
   const btnServiceTransportAdd = document.getElementById('btnServiceTransportScopeAddRow');
   if (btnServiceTransportAdd) {
     btnServiceTransportAdd.addEventListener('click', () => {
+      const scopePanel = document.getElementById('vendorServiceTransportScopeSidePanel');
+      if (scopePanel) scopePanel.classList.add('card-dimmed-blurred');
+
+      const addVehCard = document.getElementById('addVehicleScopeCard');
+      if (addVehCard) addVehCard.style.display = 'block';
+
+      showToast('Add Vehicle form opened');
+    });
+  }
+
+  // Close Add Vehicle form card
+  const btnCloseAddVehicle = document.getElementById('btnCloseAddVehicleScopeCard');
+  if (btnCloseAddVehicle) {
+    btnCloseAddVehicle.addEventListener('click', () => {
+      const addVehCard = document.getElementById('addVehicleScopeCard');
+      if (addVehCard) addVehCard.style.display = 'none';
+      const scopePanel = document.getElementById('vendorServiceTransportScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Save Vehicle via Bottom Save Button
+  const btnSubmitVehicle = document.getElementById('btnSubmitVehicleScope');
+  if (btnSubmitVehicle) {
+    btnSubmitVehicle.addEventListener('click', () => {
+      const vTypeVal = document.getElementById('selAddVehicleType')?.value || 'LCV';
+      const vNumVal = document.getElementById('inpAddVehicleNumber')?.value || ('230510' + Math.floor(100 + Math.random() * 900));
+      const fuelVal = document.getElementById('selAddVehicleFuelType')?.value || 'Petrol';
+      const rangeVal = document.getElementById('inpAddVehicleRange')?.value || 'Project';
+      const rentalVal = document.getElementById('selAddVehicleRentalType')?.value || 'Monthly';
+      const isStatusActive = document.getElementById('inpAddVehicleStatusToggle')?.checked;
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
+
       const newRec = {
         id: 'sts-' + Date.now(),
-        vehicleType: 'HCV',
-        vehicleNumber: '230510' + Math.floor(100 + Math.random() * 900),
-        fuelType: 'Diesel',
-        range: 'Project',
-        rentalType: 'Monthly',
-        status: 'Active'
+        vehicleType: vTypeVal,
+        vehicleNumber: vNumVal,
+        fuelType: fuelVal,
+        range: rangeVal,
+        rentalType: rentalVal,
+        status: statusVal
       };
+
       vendorServiceTransportScopeData.push(newRec);
       renderVendorServiceTransportScopeTable();
-      showToast('New vehicle added to Transport Scope');
+
+      const addVehCard = document.getElementById('addVehicleScopeCard');
+      if (addVehCard) addVehCard.style.display = 'none';
+      const scopePanel = document.getElementById('vendorServiceTransportScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+
+      showToast('New Vehicle added to Transport Scope!');
+    });
+  }
+
+  // Vehicle Payment Report Table Data & Events
+  renderVehicleReportTable();
+  initCalendarPicker('btnVehicleRateFromCalendar', 'inpVehicleRateFrom', 'inpVehicleRateFromNative');
+  initCalendarPicker('btnVehicleRateToCalendar', 'inpVehicleRateTo', 'inpVehicleRateToNative');
+
+  // Vehicle Payment Report Icon Click (Opens Vehicle # Report Tab)
+  const btnVehReport = document.getElementById('btnVehicleReportIcon');
+  if (btnVehReport) {
+    btnVehReport.addEventListener('click', () => {
+      const addVehCard = document.getElementById('addVehicleScopeCard');
+      if (addVehCard) addVehCard.classList.add('card-dimmed-blurred');
+
+      const vNum = document.getElementById('inpAddVehicleNumber')?.value.trim();
+      const reportTitle = document.getElementById('lblVehicleReportTitle');
+      if (reportTitle) {
+        reportTitle.textContent = vNum ? `Vehicle #: ${vNum}` : 'Vehicle #:';
+      }
+
+      const reportCard = document.getElementById('vehicleReportCard');
+      if (reportCard) reportCard.style.display = 'block';
+
+      renderVehicleReportTable();
+      showToast('Vehicle Payment Report opened');
+    });
+  }
+
+  // Close Vehicle Payment Report Tab
+  const btnCloseVehReport = document.getElementById('btnCloseVehicleReportCard');
+  if (btnCloseVehReport) {
+    btnCloseVehReport.addEventListener('click', () => {
+      const reportCard = document.getElementById('vehicleReportCard');
+      if (reportCard) reportCard.style.display = 'none';
+      const addRateCard = document.getElementById('addVehicleRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const addVehCard = document.getElementById('addVehicleScopeCard');
+      if (addVehCard) addVehCard.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Plus (+) icon in Vehicle Report Tab (Opens Add Vehicle Details Form)
+  const btnVehReportAdd = document.getElementById('btnVehicleReportAddRow');
+  if (btnVehReportAdd) {
+    btnVehReportAdd.addEventListener('click', () => {
+      const reportCard = document.getElementById('vehicleReportCard');
+      if (reportCard) reportCard.classList.add('card-dimmed-blurred');
+
+      const addRateCard = document.getElementById('addVehicleRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'block';
+
+      showToast('Add Vehicle Details form opened');
+    });
+  }
+
+  // Close Add Vehicle Details Form
+  const btnCloseAddVehicleRate = document.getElementById('btnCloseAddVehicleRateCard');
+  if (btnCloseAddVehicleRate) {
+    btnCloseAddVehicleRate.addEventListener('click', () => {
+      const addRateCard = document.getElementById('addVehicleRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const reportCard = document.getElementById('vehicleReportCard');
+      if (reportCard) reportCard.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Save Vehicle Rate Details via Bottom Save Button
+  const btnSubmitVehRate = document.getElementById('btnSubmitVehicleRate');
+  if (btnSubmitVehRate) {
+    btnSubmitVehRate.addEventListener('click', () => {
+      const fromVal = document.getElementById('inpVehicleRateFrom')?.value || '01 - 01 - 2026';
+      const toVal = document.getElementById('inpVehicleRateTo')?.value || '01 - 01 - 2026';
+      const rentVal = document.getElementById('inpVehicleRentalAmount')?.value || '2000.00';
+      const haltVal = document.getElementById('inpVehicleHaltAmount')?.value || '2000.00';
+      const isStatusActive = document.getElementById('inpVehicleRateStatusToggle')?.checked;
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
+
+      vehicleReportData.push({
+        id: 'vr-' + Date.now(),
+        from: fromVal,
+        to: toVal,
+        rentalAmount: rentVal,
+        haltAmount: haltVal,
+        status: statusVal
+      });
+
+      renderVehicleReportTable();
+
+      const addRateCard = document.getElementById('addVehicleRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const reportCard = document.getElementById('vehicleReportCard');
+      if (reportCard) reportCard.classList.remove('card-dimmed-blurred');
+
+      showToast('New details added to Vehicle Report!');
     });
   }
 
@@ -2896,6 +3191,12 @@ function initSideFormEvents() {
     btnCloseServiceTransportScope.addEventListener('click', () => {
       const sp = document.getElementById('vendorServiceTransportScopeSidePanel');
       if (sp) sp.style.display = 'none';
+      const addVehCard = document.getElementById('addVehicleScopeCard');
+      if (addVehCard) addVehCard.style.display = 'none';
+      const vehRepCard = document.getElementById('vehicleReportCard');
+      if (vehRepCard) vehRepCard.style.display = 'none';
+      const vehRateCard = document.getElementById('addVehicleRateFormCard');
+      if (vehRateCard) vehRateCard.style.display = 'none';
       const vendorCard = document.getElementById('addVendorCard');
       if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
       const cardsRow = document.querySelector('.side-form-cards-row');
@@ -2911,18 +3212,149 @@ function initSideFormEvents() {
   const btnServiceOthersAdd = document.getElementById('btnServiceOthersScopeAddRow');
   if (btnServiceOthersAdd) {
     btnServiceOthersAdd.addEventListener('click', () => {
+      const scopePanel = document.getElementById('vendorServiceOthersScopeSidePanel');
+      if (scopePanel) scopePanel.classList.add('card-dimmed-blurred');
+
+      const addOtherCard = document.getElementById('addOtherServiceScopeCard');
+      if (addOtherCard) addOtherCard.style.display = 'block';
+
+      showToast('Add Service form opened');
+    });
+  }
+
+  // Close Add Other Service form card
+  const btnCloseAddOtherService = document.getElementById('btnCloseAddOtherServiceScopeCard');
+  if (btnCloseAddOtherService) {
+    btnCloseAddOtherService.addEventListener('click', () => {
+      const addOtherCard = document.getElementById('addOtherServiceScopeCard');
+      if (addOtherCard) addOtherCard.style.display = 'none';
+      const scopePanel = document.getElementById('vendorServiceOthersScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Save Other Service via Bottom Save Button
+  const btnSubmitOtherService = document.getElementById('btnSubmitOtherServiceScope');
+  if (btnSubmitOtherService) {
+    btnSubmitOtherService.addEventListener('click', () => {
+      const descVal = document.getElementById('selAddOtherServiceDesc')?.value || 'Petrol';
+      const uomVal = document.getElementById('selAddOtherServiceUom')?.value || 'Project';
+      const rateVal = document.getElementById('inpAddOtherServiceRate')?.value || '1500.00';
+      const isStatusActive = document.getElementById('inpAddOtherServiceStatusToggle')?.checked;
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
       const today = '01 - 01 - 2026';
+
       const newRec = {
         id: 'sot-' + Date.now(),
         from: today,
         to: today,
-        description: 'New Service',
-        uom: 'Project',
-        status: 'Active'
+        description: descVal,
+        uom: uomVal,
+        status: statusVal
       };
+
       vendorServiceOthersScopeData.push(newRec);
       renderVendorServiceOthersScopeTable();
-      showToast('New record added to Other Service Scope');
+
+      const addOtherCard = document.getElementById('addOtherServiceScopeCard');
+      if (addOtherCard) addOtherCard.style.display = 'none';
+      const scopePanel = document.getElementById('vendorServiceOthersScopeSidePanel');
+      if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
+
+      showToast('New Service added to Other Service Scope!');
+    });
+  }
+
+  // Other Service Payment Report Table Data & Events
+  renderOtherServiceReportTable();
+  initCalendarPicker('btnOtherServiceRateFromCalendar', 'inpOtherServiceRateFrom', 'inpOtherServiceRateFromNative');
+  initCalendarPicker('btnOtherServiceRateToCalendar', 'inpOtherServiceRateTo', 'inpOtherServiceRateToNative');
+
+  // Other Service Payment Report Icon Click (Opens Service Description Report Tab)
+  const btnOtherServiceReport = document.getElementById('btnOtherServiceReportIcon');
+  if (btnOtherServiceReport) {
+    btnOtherServiceReport.addEventListener('click', () => {
+      const addOtherCard = document.getElementById('addOtherServiceScopeCard');
+      if (addOtherCard) addOtherCard.classList.add('card-dimmed-blurred');
+
+      const sDesc = document.getElementById('selAddOtherServiceDesc')?.value;
+      const reportTitle = document.getElementById('lblOtherServiceReportTitle');
+      if (reportTitle) {
+        reportTitle.textContent = sDesc ? sDesc : 'Service Description';
+      }
+
+      const reportCard = document.getElementById('otherServiceReportCard');
+      if (reportCard) reportCard.style.display = 'block';
+
+      renderOtherServiceReportTable();
+      showToast('Service Payment Report opened');
+    });
+  }
+
+  // Close Other Service Payment Report Tab
+  const btnCloseOtherServiceReport = document.getElementById('btnCloseOtherServiceReportCard');
+  if (btnCloseOtherServiceReport) {
+    btnCloseOtherServiceReport.addEventListener('click', () => {
+      const reportCard = document.getElementById('otherServiceReportCard');
+      if (reportCard) reportCard.style.display = 'none';
+      const addRateCard = document.getElementById('addOtherServiceRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const addOtherCard = document.getElementById('addOtherServiceScopeCard');
+      if (addOtherCard) addOtherCard.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Plus (+) icon in Service Description Report Tab (Opens Add Service Details Form)
+  const btnOtherServiceReportAdd = document.getElementById('btnOtherServiceReportAddRow');
+  if (btnOtherServiceReportAdd) {
+    btnOtherServiceReportAdd.addEventListener('click', () => {
+      const reportCard = document.getElementById('otherServiceReportCard');
+      if (reportCard) reportCard.classList.add('card-dimmed-blurred');
+
+      const addRateCard = document.getElementById('addOtherServiceRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'block';
+
+      showToast('Add Service Details form opened');
+    });
+  }
+
+  // Close Add Other Service Details Form
+  const btnCloseAddOtherServiceRate = document.getElementById('btnCloseAddOtherServiceRateCard');
+  if (btnCloseAddOtherServiceRate) {
+    btnCloseAddOtherServiceRate.addEventListener('click', () => {
+      const addRateCard = document.getElementById('addOtherServiceRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const reportCard = document.getElementById('otherServiceReportCard');
+      if (reportCard) reportCard.classList.remove('card-dimmed-blurred');
+    });
+  }
+
+  // Save Other Service Rate Details via Bottom Save Button
+  const btnSubmitOtherServiceRate = document.getElementById('btnSubmitOtherServiceRate');
+  if (btnSubmitOtherServiceRate) {
+    btnSubmitOtherServiceRate.addEventListener('click', () => {
+      const fromVal = document.getElementById('inpOtherServiceRateFrom')?.value || '01 - 01 - 2026';
+      const toVal = document.getElementById('inpOtherServiceRateTo')?.value || '01 - 01 - 2026';
+      const rateVal = document.getElementById('inpOtherServiceRateAmount')?.value || '2000.00';
+      const isStatusActive = document.getElementById('inpOtherServiceRateStatusToggle')?.checked;
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
+
+      otherServiceReportData.push({
+        id: 'osr-' + Date.now(),
+        from: fromVal,
+        to: toVal,
+        rate: rateVal,
+        status: statusVal
+      });
+
+      renderOtherServiceReportTable();
+
+      const addRateCard = document.getElementById('addOtherServiceRateFormCard');
+      if (addRateCard) addRateCard.style.display = 'none';
+      const reportCard = document.getElementById('otherServiceReportCard');
+      if (reportCard) reportCard.classList.remove('card-dimmed-blurred');
+
+      showToast('New details added to Service Report!');
     });
   }
 
@@ -2931,6 +3363,12 @@ function initSideFormEvents() {
     btnCloseServiceOthersScope.addEventListener('click', () => {
       const sp = document.getElementById('vendorServiceOthersScopeSidePanel');
       if (sp) sp.style.display = 'none';
+      const addOtherCard = document.getElementById('addOtherServiceScopeCard');
+      if (addOtherCard) addOtherCard.style.display = 'none';
+      const osrCard = document.getElementById('otherServiceReportCard');
+      if (osrCard) osrCard.style.display = 'none';
+      const osrRateCard = document.getElementById('addOtherServiceRateFormCard');
+      if (osrRateCard) osrRateCard.style.display = 'none';
       const vendorCard = document.getElementById('addVendorCard');
       if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
       const cardsRow = document.querySelector('.side-form-cards-row');
@@ -4111,6 +4549,24 @@ function closeSideForm() {
   if (vendorSupplyScope) vendorSupplyScope.style.display = 'none';
   const addProductScope = document.getElementById('addProductScopeCard');
   if (addProductScope) addProductScope.style.display = 'none';
+  const addSubProjectTypeScope = document.getElementById('addSubProjectTypeCard');
+  if (addSubProjectTypeScope) addSubProjectTypeScope.style.display = 'none';
+  const subProjectTypeReportScope = document.getElementById('subProjectTypeReportCard');
+  if (subProjectTypeReportScope) subProjectTypeReportScope.style.display = 'none';
+  const addSubProjectRateScope = document.getElementById('addSubProjectRateFormCard');
+  if (addSubProjectRateScope) addSubProjectRateScope.style.display = 'none';
+  const addVehicleScope = document.getElementById('addVehicleScopeCard');
+  if (addVehicleScope) addVehicleScope.style.display = 'none';
+  const vehicleReportScope = document.getElementById('vehicleReportCard');
+  if (vehicleReportScope) vehicleReportScope.style.display = 'none';
+  const addVehicleRateScope = document.getElementById('addVehicleRateFormCard');
+  if (addVehicleRateScope) addVehicleRateScope.style.display = 'none';
+  const addOtherServiceScope = document.getElementById('addOtherServiceScopeCard');
+  if (addOtherServiceScope) addOtherServiceScope.style.display = 'none';
+  const otherServiceReportScope = document.getElementById('otherServiceReportCard');
+  if (otherServiceReportScope) otherServiceReportScope.style.display = 'none';
+  const addOtherServiceRateScope = document.getElementById('addOtherServiceRateFormCard');
+  if (addOtherServiceRateScope) addOtherServiceRateScope.style.display = 'none';
   const vendorServiceProjectScope = document.getElementById('vendorServiceProjectScopeSidePanel');
   if (vendorServiceProjectScope) vendorServiceProjectScope.style.display = 'none';
   const vendorServiceTransportScope = document.getElementById('vendorServiceTransportScopeSidePanel');
@@ -4203,7 +4659,9 @@ window.openVendorSupplyScopeSidePanel = function() {
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
    'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
-   'vendorServiceProjectScopeSidePanel'].forEach(id => {
+   'vendorServiceProjectScopeSidePanel', 'addSubProjectTypeCard', 'subProjectTypeReportCard',
+   'addSubProjectRateFormCard', 'addVehicleScopeCard', 'vehicleReportCard', 'addVehicleRateFormCard',
+   'vendorServiceOthersScopeSidePanel', 'addOtherServiceScopeCard', 'otherServiceReportCard', 'addOtherServiceRateFormCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -4242,7 +4700,11 @@ window.openVendorServiceProjectScopeSidePanel = function() {
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
    'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
-   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'vendorServiceTransportScopeSidePanel'].forEach(id => {
+   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'addSubProjectTypeCard',
+   'subProjectTypeReportCard', 'addSubProjectRateFormCard', 'addVehicleScopeCard',
+   'vehicleReportCard', 'addVehicleRateFormCard',
+   'vendorServiceTransportScopeSidePanel', 'vendorServiceOthersScopeSidePanel',
+   'addOtherServiceScopeCard', 'otherServiceReportCard', 'addOtherServiceRateFormCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -4279,8 +4741,11 @@ window.openVendorServiceTransportScopeSidePanel = function() {
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
    'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
-   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'vendorServiceProjectScopeSidePanel',
-   'vendorServiceOthersScopeSidePanel'].forEach(id => {
+   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'addSubProjectTypeCard',
+   'subProjectTypeReportCard', 'addSubProjectRateFormCard', 'addVehicleScopeCard',
+   'vehicleReportCard', 'addVehicleRateFormCard',
+   'vendorServiceProjectScopeSidePanel', 'vendorServiceOthersScopeSidePanel',
+   'addOtherServiceScopeCard', 'otherServiceReportCard', 'addOtherServiceRateFormCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -4314,8 +4779,11 @@ window.openVendorServiceOthersScopeSidePanel = function() {
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
    'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
-   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'vendorServiceProjectScopeSidePanel',
-   'vendorServiceTransportScopeSidePanel'].forEach(id => {
+   'vendorSupplyScopeSidePanel', 'addProductScopeCard', 'addSubProjectTypeCard',
+   'subProjectTypeReportCard', 'addSubProjectRateFormCard', 'addVehicleScopeCard',
+   'vehicleReportCard', 'addVehicleRateFormCard',
+   'vendorServiceProjectScopeSidePanel', 'vendorServiceTransportScopeSidePanel',
+   'addOtherServiceScopeCard', 'otherServiceReportCard', 'addOtherServiceRateFormCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -5267,6 +5735,79 @@ function openServiceOthersScopeFilter(colKey, triggerBtn) {
   dropdown.style.left = `${Math.max(12, leftPos)}px`;
 
   if (searchInput) searchInput.focus();
+}
+
+// Global Sub - Project Type Payment Report Dataset
+let subProjectTypeReportData = [
+  { id: 'sptr-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'Active' },
+  { id: 'sptr-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'In - Active' }
+];
+
+function renderSubProjectTypeReportTable() {
+  const tbody = document.getElementById('tbodySubProjectTypeReportDetails');
+  if (!tbody) return;
+
+  tbody.innerHTML = subProjectTypeReportData.map(row => `
+    <tr data-report-id="${row.id}">
+      <td>${row.from || ''}</td>
+      <td>${row.to || ''}</td>
+      <td>${row.rate || ''}</td>
+      <td>
+        <span style="color: ${row.status === 'Active' ? '#16a34a' : '#ef4444'}; font-weight: 600;">
+          ${row.status || ''}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// Global Vehicle Payment Report Dataset
+let vehicleReportData = [
+  { id: 'vr-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rentalAmount: '2000.00', haltAmount: '2000.00', status: 'Active' },
+  { id: 'vr-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rentalAmount: '2000.00', haltAmount: '2000.00', status: 'In - Active' }
+];
+
+function renderVehicleReportTable() {
+  const tbody = document.getElementById('tbodyVehicleReportDetails');
+  if (!tbody) return;
+
+  tbody.innerHTML = vehicleReportData.map(row => `
+    <tr data-report-id="${row.id}">
+      <td>${row.from || ''}</td>
+      <td>${row.to || ''}</td>
+      <td>${row.rentalAmount || ''}</td>
+      <td>${row.haltAmount || ''}</td>
+      <td>
+        <span style="color: ${row.status === 'Active' ? '#16a34a' : '#ef4444'}; font-weight: 600;">
+          ${row.status || ''}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// Global Other Service Payment Report Dataset
+let otherServiceReportData = [
+  { id: 'osr-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'Active' },
+  { id: 'osr-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'In - Active' }
+];
+
+function renderOtherServiceReportTable() {
+  const tbody = document.getElementById('tbodyOtherServiceReportDetails');
+  if (!tbody) return;
+
+  tbody.innerHTML = otherServiceReportData.map(row => `
+    <tr data-report-id="${row.id}">
+      <td>${row.from || ''}</td>
+      <td>${row.to || ''}</td>
+      <td>${row.rate || ''}</td>
+      <td>
+        <span style="color: ${row.status === 'Active' ? '#16a34a' : '#ef4444'}; font-weight: 600;">
+          ${row.status || ''}
+        </span>
+      </td>
+    </tr>
+  `).join('');
 }
 
 function openExcelFilter(colKey, triggerBtn) {

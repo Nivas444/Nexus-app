@@ -1180,13 +1180,25 @@ tr.tr-sub-headers th,
   border-bottom: 1px solid #e2e8f0 !important;
 }
 
-#addProductScopeCard {
+#addProductScopeCard,
+#addSubProjectTypeCard,
+#addSubProjectRateFormCard,
+#addVehicleScopeCard,
+#addVehicleRateFormCard,
+#addOtherServiceScopeCard,
+#addOtherServiceRateFormCard {
   width: 440px !important;
   max-width: 95vw !important;
   box-sizing: border-box !important;
 }
 
-#addProductScopeCard .side-form-body {
+#addProductScopeCard .side-form-body,
+#addSubProjectTypeCard .side-form-body,
+#addSubProjectRateFormCard .side-form-body,
+#addVehicleScopeCard .side-form-body,
+#addVehicleRateFormCard .side-form-body,
+#addOtherServiceScopeCard .side-form-body,
+#addOtherServiceRateFormCard .side-form-body {
   padding: 22px 24px 28px 24px !important;
   width: 100% !important;
   box-sizing: border-box !important;
@@ -1195,7 +1207,13 @@ tr.tr-sub-headers th,
   gap: 16px !important;
 }
 
-#addProductScopeCard .form-row-group {
+#addProductScopeCard .form-row-group,
+#addSubProjectTypeCard .form-row-group,
+#addSubProjectRateFormCard .form-row-group,
+#addVehicleScopeCard .form-row-group,
+#addVehicleRateFormCard .form-row-group,
+#addOtherServiceScopeCard .form-row-group,
+#addOtherServiceRateFormCard .form-row-group {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -1205,7 +1223,13 @@ tr.tr-sub-headers th,
   box-sizing: border-box !important;
 }
 
-#addProductScopeCard .form-label {
+#addProductScopeCard .form-label,
+#addSubProjectTypeCard .form-label,
+#addSubProjectRateFormCard .form-label,
+#addVehicleScopeCard .form-label,
+#addVehicleRateFormCard .form-label,
+#addOtherServiceScopeCard .form-label,
+#addOtherServiceRateFormCard .form-label {
   width: 140px !important;
   min-width: 140px !important;
   flex: 0 0 140px !important;
@@ -1215,16 +1239,67 @@ tr.tr-sub-headers th,
   white-space: nowrap !important;
 }
 
-#addProductScopeCard .form-input-wrap {
+#addProductScopeCard .form-input-wrap,
+#addSubProjectTypeCard .form-input-wrap,
+#addSubProjectRateFormCard .form-input-wrap,
+#addVehicleScopeCard .form-input-wrap,
+#addVehicleRateFormCard .form-input-wrap,
+#addOtherServiceScopeCard .form-input-wrap,
+#addOtherServiceRateFormCard .form-input-wrap {
   flex: 1 1 0% !important;
   width: 100% !important;
   min-width: 0 !important;
 }
 
-#addProductScopeCard .form-select-control {
+#addProductScopeCard .form-select-control,
+#addSubProjectTypeCard .form-select-control,
+#addSubProjectRateFormCard .form-select-control,
+#addSubProjectRateFormCard .form-input-control,
+#addVehicleScopeCard .form-select-control,
+#addVehicleScopeCard .form-input-control,
+#addVehicleRateFormCard .form-select-control,
+#addVehicleRateFormCard .form-input-control,
+#addOtherServiceScopeCard .form-select-control,
+#addOtherServiceScopeCard .form-input-control,
+#addOtherServiceRateFormCard .form-select-control,
+#addOtherServiceRateFormCard .form-input-control {
   width: 100% !important;
   height: 38px !important;
   border-radius: 8px !important;
+}
+
+#subProjectTypeReportCard,
+#vehicleReportCard,
+#otherServiceReportCard {
+  width: 780px !important;
+  max-width: 96vw !important;
+  box-sizing: border-box !important;
+}
+
+#tblSubProjectTypeReportPopup th,
+#tblVehicleReportPopup th,
+#tblOtherServiceReportPopup th {
+  background: #b5b5b5 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 10px 14px !important;
+  font-size: 0.86rem !important;
+  border-right: 1px solid #ffffff !important;
+}
+
+#tblSubProjectTypeReportPopup th:last-child,
+#tblVehicleReportPopup th:last-child,
+#tblOtherServiceReportPopup th:last-child {
+  border-right: none !important;
+}
+
+#tblSubProjectTypeReportPopup td,
+#tblVehicleReportPopup td,
+#tblOtherServiceReportPopup td {
+  padding: 12px 14px !important;
+  font-size: 0.88rem !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
 #vendorServiceProjectScopeSidePanel {
@@ -1469,8 +1544,11 @@ tr.tr-sub-headers th,
   transform: scale(1.1);
 }
 
-.side-contact-popup .side-form-header {
-  margin-bottom: 3px !important;
+.side-contact-popup .side-form-header,
+.side-form-card .side-form-header {
+  margin-bottom: 0 !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 /* Card Dimmed & Blurred state when child popup is active */

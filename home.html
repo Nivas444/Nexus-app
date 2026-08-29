@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=34">
+  <link rel="stylesheet" href="assets/css/home.css?v=45">
 </head>
 
 <body>
@@ -543,7 +543,7 @@
             </div>
 
             <!-- Service Type Dropdown -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowVendorServiceType" style="display: none;">
               <label class="form-label" for="inpServiceType">Service Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpServiceType">
@@ -555,7 +555,7 @@
             </div>
 
             <!-- TDS Deduction Toggle Switch -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowVendorTdsDeduction" style="display: none;">
               <label class="form-label">TDS Deduction</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
@@ -566,7 +566,7 @@
             </div>
 
             <!-- TDS Rate Dropdown -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowVendorTdsRate" style="display: none;">
               <label class="form-label" for="inpTdsRate">TDS Rate</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpTdsRate">
@@ -620,7 +620,7 @@
             </div>
 
             <!-- TCS Deduction Toggle Switch (deactivated by default) -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowVendorTcsDeduction">
               <label class="form-label">TCS Deduction</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
@@ -656,8 +656,13 @@
         <div class="side-form-card" id="addProductCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Product</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProductForm" aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblProductCardTitle">Add Product</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProductCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgProductCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProductForm" aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -797,8 +802,13 @@
         <div class="side-form-card" id="addExpenseCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Expense</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseExpenseForm" aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblExpenseCardTitle">Add Expense</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnExpenseCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgExpenseCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseExpenseForm" aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -810,7 +820,15 @@
             <div class="form-row-group">
               <label class="form-label" for="inpExpenseHead">Expense Head</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpExpenseHead" placeholder="Enter Expense Head">
+                <select class="form-select-control" id="inpExpenseHead">
+                  <option value="Project" selected>Project</option>
+                  <option value="Purchase">Purchase</option>
+                  <option value="Employee">Employee</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Accounts">Accounts</option>
+                  <option value="Statutory">Statutory</option>
+                </select>
               </div>
             </div>
 
@@ -3830,7 +3848,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=34"></script>
+  <script src="assets/js/home.js?v=45"></script>
 </body>
 
 </html>

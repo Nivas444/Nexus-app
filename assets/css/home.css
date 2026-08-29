@@ -492,26 +492,25 @@ body {
   border-right: none !important;
 }
 
-/* GREY TABLE HEADERS WITH VERTICAL LINES (TABLE HEADER ALONE, NOT CONTENT ROWS) */
+/* GREY TABLE HEADERS WITH WHITE VERTICAL & HORIZONTAL DIVIDING LINES */
 .worklist-table-full thead th,
 .worklist-table-full thead tr th,
 .master-view-header th,
 .po-view-header th,
-.payment-view-header th,
-.tr-sub-headers th,
-.th-amount-group {
+.payment-view-header th {
   background: #9e9e9e !important; /* Medium Grey Header */
   color: #ffffff !important; /* White Text */
   font-family: 'Outfit', sans-serif;
   font-size: 0.92rem;
   font-weight: 700;
-  padding: 12px 16px;
+  padding: 12px 8px;
+  box-sizing: border-box;
   border: none !important;
   border-top: 1px solid #8e8e8e !important;
   border-bottom: 1px solid #8e8e8e !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.45) !important; /* VERTICAL LINE IN TABLE HEADER ALONE */
+  border-right: 1.5px solid #ffffff !important; /* CRISP WHITE VERTICAL LINE */
   border-left: none !important;
-  text-align: center;
+  text-align: center !important;
   vertical-align: middle;
   letter-spacing: 0.3px;
   position: relative;
@@ -519,12 +518,45 @@ body {
   white-space: nowrap;
 }
 
+/* Payment Grouped Header: Solid White Horizontal Line under "Amount" */
+.payment-view-header .th-amount-group {
+  border-bottom: 1.5px solid #ffffff !important; /* CRISP WHITE LINE UNDER AMOUNT */
+  border-right: 1.5px solid #ffffff !important;
+  padding: 10px 8px !important;
+  text-align: center !important;
+}
+
+/* Payment Sub-headers: Approved, Transferred, Payable with White Dividing Lines */
+.tr-sub-headers th {
+  background: #9e9e9e !important;
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.90rem;
+  font-weight: 700;
+  padding: 10px 8px !important;
+  box-sizing: border-box;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: 1px solid #8e8e8e !important;
+  border-right: 1.5px solid #ffffff !important; /* CRISP WHITE VERTICAL LINE BETWEEN SUB-HEADERS */
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+.tr-sub-headers th:last-child {
+  border-right: 1.5px solid #ffffff !important; /* Retain right border to divide Payable from Ageing */
+}
+
 .worklist-table-full thead th:last-child,
 .worklist-table-full thead tr th:last-child,
 .master-view-header th:last-child,
-.po-view-header th:last-child,
+.po-view-header th:last-child {
+  border-right: none !important;
+}
+
 .payment-view-header th:last-child {
   border-right: none !important;
+  border-left: 1.5px solid #ffffff !important; /* CRISP WHITE LINE BETWEEN AMOUNT/PAYABLE & AGEING */
 }
 
 /* Product Details Bottom Segmented Sub-Navigation (Matching Image 2 Mockup) */
@@ -582,10 +614,13 @@ body {
 }
 
 .th-content-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   gap: 6px;
+  width: 100% !important;
+  text-align: center !important;
+  margin: 0 auto !important;
 }
 
 /* Filter Funnel Icon Button inside Table Header */
@@ -1757,6 +1792,8 @@ tr.tr-sub-headers th,
 .col-bank-acc-name {
   min-width: 320px !important;
   width: 320px !important;
+}
+td.col-bank-acc-name {
   text-align: left !important;
   padding-left: 14px !important;
   white-space: nowrap !important;
@@ -1764,6 +1801,8 @@ tr.tr-sub-headers th,
 .col-bank-name {
   min-width: 300px !important;
   width: 300px !important;
+}
+td.col-bank-name {
   text-align: left !important;
   padding-left: 14px !important;
   white-space: nowrap !important;
@@ -1794,6 +1833,8 @@ tr.tr-sub-headers th,
 }
 .col-salary-sub {
   min-width: 115px !important;
+}
+td.col-salary-sub {
   text-align: right !important;
   padding-right: 14px !important;
   font-variant-numeric: tabular-nums;
@@ -1814,6 +1855,8 @@ tr.tr-sub-headers th,
 }
 .col-asset-detail {
   min-width: 220px !important;
+}
+td.col-asset-detail {
   text-align: left !important;
   padding-left: 14px !important;
   white-space: nowrap !important;
@@ -1826,6 +1869,8 @@ tr.tr-sub-headers th,
 }
 .col-asset-rate {
   min-width: 110px !important;
+}
+td.col-asset-rate {
   text-align: right !important;
   padding-right: 14px !important;
   font-variant-numeric: tabular-nums;
@@ -1833,6 +1878,8 @@ tr.tr-sub-headers th,
 }
 .col-asset-amount {
   min-width: 110px !important;
+}
+td.col-asset-amount {
   text-align: right !important;
   padding-right: 14px !important;
   font-variant-numeric: tabular-nums;
@@ -1842,6 +1889,140 @@ tr.tr-sub-headers th,
   min-width: 115px !important;
   white-space: nowrap !important;
 }
+
+/* ==========================================================================
+   TELECOM & GBPA SUBPAGES COLUMN SIZING & HEADER CENTERING
+   ========================================================================== */
+
+/* Universal Header Centering for All Sized Table Headers */
+.worklist-table-full thead th,
+.worklist-table-full thead tr th,
+.master-view-header th,
+th[class*="col-"],
+th.col-site-circle, th.col-site-id, th.col-site-wh, th.col-site-name, th.col-site-district, th.col-site-town, th.col-site-lat, th.col-site-lng, th.col-site-transport-zone, th.col-site-status,
+th.col-gbpa-item-code, th.col-gbpa-product-name, th.col-gbpa-product-type, th.col-gbpa-product-desc, th.col-gbpa-hsn-sac, th.col-gbpa-hsn-code, th.col-gbpa-active-rate, th.col-gbpa-budget, th.col-gbpa-status,
+th.col-telecom-infra-category, th.col-telecom-infra-desc, th.col-telecom-infra-uom, th.col-telecom-infra-make, th.col-telecom-infra-commissioning, th.col-telecom-infra-imap, th.col-telecom-infra-status,
+th.col-gbpa-mat-code, th.col-gbpa-mat-head, th.col-gbpa-mat-cat, th.col-gbpa-mat-desc, th.col-gbpa-mat-type, th.col-gbpa-mat-status,
+th.col-gbpa-exp-code, th.col-gbpa-exp-head, th.col-gbpa-exp-cat, th.col-gbpa-exp-desc, th.col-gbpa-exp-type, th.col-gbpa-exp-status,
+th.col-gbpa-infra-code, th.col-gbpa-infra-cat, th.col-gbpa-infra-desc, th.col-gbpa-infra-type, th.col-gbpa-infra-status,
+th.col-bank-acc-name, th.col-bank-name, th.col-bank-acc-type, th.col-bank-acc-num, th.col-bank-ifsc, th.col-bank-status,
+th.col-salary-year, th.col-salary-month, th.col-salary-sub, th.col-salary-status,
+th.col-asset-date, th.col-asset-detail, th.col-asset-uom, th.col-asset-qty, th.col-asset-rate, th.col-asset-amount, th.col-asset-expiry,
+th.col-master-vendor-type, th.col-master-vendor-id, th.col-master-vendor-name, th.col-master-vendor-gst-num, th.col-master-vendor-pan, th.col-master-vendor-gst-type, th.col-master-vendor-status {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* 1. Site Page (Telecom) */
+.col-site-circle { min-width: 100px !important; width: 100px !important; }
+.col-site-id { min-width: 105px !important; width: 105px !important; }
+.col-site-wh { min-width: 95px !important; width: 95px !important; }
+.col-site-name { min-width: 180px !important; width: 190px !important; }
+td.col-site-name { text-align: left !important; padding-left: 14px !important; }
+.col-site-district { min-width: 220px !important; width: 230px !important; } /* Extended */
+td.col-site-district { text-align: left !important; padding-left: 14px !important; }
+.col-site-town { min-width: 200px !important; width: 210px !important; } /* Extended */
+td.col-site-town { text-align: left !important; padding-left: 14px !important; }
+.col-site-lat { min-width: 110px !important; width: 110px !important; }
+td.col-site-lat { text-align: center !important; }
+.col-site-lng { min-width: 115px !important; width: 115px !important; }
+td.col-site-lng { text-align: center !important; }
+.col-site-transport-zone { min-width: 145px !important; width: 150px !important; } /* Sized to fit 'Transport Zone' & filter button cleanly */
+td.col-site-transport-zone { text-align: center !important; }
+.col-site-status { min-width: 95px !important; width: 95px !important; }
+td.col-site-status { text-align: center !important; }
+
+/* 2. GBPA Page (Telecom) */
+.col-gbpa-item-code { min-width: 150px !important; width: 160px !important; } /* 20 char */
+td.col-gbpa-item-code { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-product-name { min-width: 320px !important; width: 340px !important; } /* 50 char */
+td.col-gbpa-product-name { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-product-type { min-width: 120px !important; width: 125px !important; } /* Fits 'Product Type' + filter */
+td.col-gbpa-product-type { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-product-desc { min-width: 320px !important; width: 340px !important; } /* 50 char */
+td.col-gbpa-product-desc { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-hsn-sac { min-width: 100px !important; width: 100px !important; }
+td.col-gbpa-hsn-sac { text-align: center !important; }
+.col-gbpa-hsn-code { min-width: 125px !important; width: 130px !important; }
+td.col-gbpa-hsn-code { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-active-rate { min-width: 120px !important; width: 125px !important; }
+td.col-gbpa-active-rate { text-align: right !important; padding-right: 14px !important; }
+.col-gbpa-budget { min-width: 115px !important; width: 120px !important; }
+td.col-gbpa-budget { text-align: right !important; padding-right: 14px !important; }
+.col-gbpa-status { min-width: 95px !important; width: 95px !important; }
+td.col-gbpa-status { text-align: center !important; }
+
+/* 3. Infra Page (Telecom) */
+.col-telecom-infra-category { min-width: 190px !important; width: 200px !important; } /* 25 char */
+td.col-telecom-infra-category { text-align: left !important; padding-left: 14px !important; }
+.col-telecom-infra-desc { min-width: 330px !important; width: 350px !important; } /* 50 char */
+td.col-telecom-infra-desc { text-align: left !important; padding-left: 14px !important; }
+.col-telecom-infra-uom { min-width: 80px !important; width: 85px !important; }
+td.col-telecom-infra-uom { text-align: center !important; }
+.col-telecom-infra-make { min-width: 105px !important; width: 110px !important; }
+td.col-telecom-infra-make { text-align: left !important; padding-left: 14px !important; }
+.col-telecom-infra-commissioning { min-width: 130px !important; width: 135px !important; }
+td.col-telecom-infra-commissioning { text-align: left !important; padding-left: 14px !important; }
+.col-telecom-infra-imap { min-width: 90px !important; width: 95px !important; }
+td.col-telecom-infra-imap { text-align: center !important; }
+.col-telecom-infra-status { min-width: 95px !important; width: 95px !important; }
+td.col-telecom-infra-status { text-align: center !important; }
+
+/* 4. Material Page (GBPA) */
+.col-gbpa-mat-code { min-width: 180px !important; width: 190px !important; } /* 25 char */
+td.col-gbpa-mat-code { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-mat-head { min-width: 300px !important; width: 320px !important; } /* 50 char */
+td.col-gbpa-mat-head { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-mat-cat { min-width: 300px !important; width: 320px !important; } /* 50 char */
+td.col-gbpa-mat-cat { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-mat-desc { min-width: 300px !important; width: 320px !important; } /* 50 char */
+td.col-gbpa-mat-desc { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-mat-type { min-width: 85px !important; width: 90px !important; } /* Reduced */
+td.col-gbpa-mat-type { text-align: center !important; }
+.col-gbpa-mat-status { min-width: 90px !important; width: 90px !important; } /* Reduced */
+td.col-gbpa-mat-status { text-align: center !important; }
+
+/* 5. Expense Page (GBPA) */
+.col-gbpa-exp-code { min-width: 180px !important; width: 190px !important; } /* 25 char */
+td.col-gbpa-exp-code { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-exp-head { min-width: 300px !important; width: 320px !important; } /* 50 char */
+td.col-gbpa-exp-head { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-exp-cat { min-width: 300px !important; width: 320px !important; } /* 50 char */
+td.col-gbpa-exp-cat { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-exp-desc { min-width: 300px !important; width: 320px !important; } /* 50 char */
+td.col-gbpa-exp-desc { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-exp-type { min-width: 85px !important; width: 90px !important; } /* Reduced */
+td.col-gbpa-exp-type { text-align: center !important; }
+.col-gbpa-exp-status { min-width: 90px !important; width: 90px !important; } /* Reduced */
+td.col-gbpa-exp-status { text-align: center !important; }
+
+/* 6. Infra Page (GBPA) */
+.col-gbpa-infra-code { min-width: 180px !important; width: 190px !important; } /* 25 char */
+td.col-gbpa-infra-code { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-infra-cat { min-width: 320px !important; width: 340px !important; } /* 50 char */
+td.col-gbpa-infra-cat { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-infra-desc { min-width: 320px !important; width: 340px !important; text-align: left !important; } /* 50 char */
+td.col-gbpa-infra-desc { text-align: left !important; padding-left: 14px !important; }
+.col-gbpa-infra-type { min-width: 85px !important; width: 90px !important; } /* Reduced */
+td.col-gbpa-infra-type { text-align: center !important; }
+.col-gbpa-infra-status { min-width: 90px !important; width: 90px !important; } /* Reduced */
+td.col-gbpa-infra-status { text-align: center !important; }
+
+/* 7. Vendor Page (Master) */
+.col-master-vendor-type { min-width: 125px !important; width: 130px !important; }
+td.col-master-vendor-type { text-align: left !important; padding-left: 14px !important; }
+.col-master-vendor-id { min-width: 110px !important; width: 110px !important; }
+td.col-master-vendor-id { text-align: center !important; }
+.col-master-vendor-name { min-width: 320px !important; width: 340px !important; } /* Extended to 50 char */
+td.col-master-vendor-name { text-align: left !important; padding-left: 14px !important; }
+.col-master-vendor-gst-num { min-width: 135px !important; width: 140px !important; }
+td.col-master-vendor-gst-num { text-align: center !important; }
+.col-master-vendor-pan { min-width: 120px !important; width: 125px !important; }
+td.col-master-vendor-pan { text-align: center !important; }
+.col-master-vendor-gst-type { min-width: 110px !important; width: 115px !important; }
+td.col-master-vendor-gst-type { text-align: center !important; }
+.col-master-vendor-status { min-width: 95px !important; width: 95px !important; }
+td.col-master-vendor-status { text-align: center !important; }
 
 /* Calendar Button Trigger in Side Forms */
 .btn-calendar-trigger {

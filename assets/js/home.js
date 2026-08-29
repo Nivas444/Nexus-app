@@ -101,67 +101,270 @@ const masterVendorData = [
 const masterProductsData = [
   {
     id: "prod-1",
-    productHead: "230510678",
-    productCode: "",
-    hsnCode: "",
-    productDescription: "",
-    gstRate: "",
+    productHead: "Telecom Tower Mast",
+    productCode: "PRD-TTM-001",
+    hsnCode: "73082019",
+    productDescription: "40M Galvanized Tubular Telecom Tower Mast Structure",
+    uom: "Nos",
+    msq: "10",
+    moq: "2",
+    stockPrices: "4,50,000.00",
+    oh: "2%",
+    margin: "10%",
+    gstRate: "18%",
     status: "Active"
   },
   {
     id: "prod-2",
-    productHead: "230510678",
-    productCode: "",
-    hsnCode: "",
-    productDescription: "",
-    gstRate: "",
-    status: "In - Active"
+    productHead: "Optical Fiber Cable",
+    productCode: "PRD-OFC-002",
+    hsnCode: "85447090",
+    productDescription: "24-Core Armored Outdoor Single-Mode Fiber Cable",
+    uom: "Mtr",
+    msq: "5000",
+    moq: "500",
+    stockPrices: "85.00",
+    oh: "1%",
+    margin: "5%",
+    gstRate: "18%",
+    status: "Active"
   },
   {
     id: "prod-3",
-    productHead: "230510678",
-    productCode: "",
-    hsnCode: "",
-    productDescription: "",
-    gstRate: "",
-    status: "Active"
+    productHead: "Power Distribution Unit",
+    productCode: "PRD-PDU-003",
+    hsnCode: "85371000",
+    productDescription: "AC/DC Dual Power Distribution Panel with Surge Protection",
+    uom: "Pcs",
+    msq: "25",
+    moq: "5",
+    stockPrices: "32,000.00",
+    oh: "2%",
+    margin: "8%",
+    gstRate: "18%",
+    status: "In - Active"
   }
 ];
 
-// Master -> Expenses Dataset (Matching Uploaded Mockup)
+/// Master -> Expenses Dataset (Matching Uploaded Mockup)
 const masterExpensesData = [
   {
     id: "exp-1",
-    expenseHead: "230510678",
-    expenseCode: "",
-    sacCode: "",
-    expenseDescription: "",
-    tdsRate: "",
-    gstRate: "",
-    uom: "",
+    expenseHead: "Project",
+    expenseCode: "EXP-PRJ-001",
+    sacCode: "998313",
+    expenseDescription: "Site Infrastructure & Telecom Tower Installation",
+    tdsRate: "2%",
+    gstRate: "18%",
+    uom: "Pcs",
+    rcm: "No",
     status: "Active"
   },
   {
     id: "exp-2",
-    expenseHead: "230510678",
-    expenseCode: "",
-    sacCode: "",
-    expenseDescription: "",
-    tdsRate: "",
-    gstRate: "",
-    uom: "",
-    status: "In - Active"
+    expenseHead: "Purchase",
+    expenseCode: "EXP-PUR-002",
+    sacCode: "998719",
+    expenseDescription: "Procurement of Cables, Hardware & Consumables",
+    tdsRate: "1%",
+    gstRate: "18%",
+    uom: "Nos",
+    rcm: "No",
+    status: "Active"
   },
   {
     id: "exp-3",
-    expenseHead: "230510678",
-    expenseCode: "",
-    sacCode: "",
-    expenseDescription: "",
-    tdsRate: "",
-    gstRate: "",
-    uom: "",
+    expenseHead: "Employee",
+    expenseCode: "EXP-EMP-003",
+    sacCode: "998519",
+    expenseDescription: "Field Staff Allowances, Travel & Reimbursements",
+    tdsRate: "10%",
+    gstRate: "0%",
+    uom: "Month",
+    rcm: "No",
     status: "Active"
+  },
+  {
+    id: "exp-4",
+    expenseHead: "Transport",
+    expenseCode: "EXP-TRN-004",
+    sacCode: "996511",
+    expenseDescription: "Logistics, Vehicle Freight & Heavy Cargo Dispatch",
+    tdsRate: "2%",
+    gstRate: "5%",
+    uom: "Nos",
+    rcm: "Yes",
+    status: "Active"
+  },
+  {
+    id: "exp-5",
+    expenseHead: "Admin",
+    expenseCode: "EXP-ADM-005",
+    sacCode: "998599",
+    expenseDescription: "Office Maintenance, Utilities & Facility Operations",
+    tdsRate: "10%",
+    gstRate: "18%",
+    uom: "Month",
+    rcm: "No",
+    status: "Active"
+  },
+  {
+    id: "exp-6",
+    expenseHead: "Accounts",
+    expenseCode: "EXP-ACC-006",
+    sacCode: "998222",
+    expenseDescription: "Statutory Audit, Legal & Financial Consultancy",
+    tdsRate: "10%",
+    gstRate: "18%",
+    uom: "Nos",
+    rcm: "No",
+    status: "Active"
+  },
+  {
+    id: "exp-7",
+    expenseHead: "Statutory",
+    expenseCode: "EXP-STA-007",
+    sacCode: "999112",
+    expenseDescription: "Government Licensing, Spectrum & Municipal Filings",
+    tdsRate: "0%",
+    gstRate: "0%",
+    uom: "Nos",
+    rcm: "No",
+    status: "Active"
+  }
+];
+
+// Worklist -> Payment Dataset (All 7 Expense Heads: Project, Purchase, Employee, Transport, Admin, Accounts, Statutory)
+const paymentData = [
+  {
+    id: "pay-1",
+    submitBy: "R/RL-234567",
+    submissionDate: "12/08/2026 10:15:30",
+    approvedBy: "R/RL-234567",
+    expenseHead: "Project",
+    transferTo: "Guindy Hub",
+    approvedAmount: "1,50,000.00",
+    transferredAmount: "1,00,000.00",
+    payableAmount: "50,000.00",
+    ageing: 12,
+    selected: false
+  },
+  {
+    id: "pay-2",
+    submitBy: "R/RL-234568",
+    submissionDate: "14/08/2026 11:30:00",
+    approvedBy: "R/RL-234567",
+    expenseHead: "Purchase",
+    transferTo: "Ambattur Central",
+    approvedAmount: "3,45,000.00",
+    transferredAmount: "2,00,000.00",
+    payableAmount: "1,45,000.00",
+    ageing: 10,
+    selected: false
+  },
+  {
+    id: "pay-3",
+    submitBy: "R/RL-234570",
+    submissionDate: "16/08/2026 14:20:15",
+    approvedBy: "R/RL-234589",
+    expenseHead: "Employee",
+    transferTo: "Chennai HQ",
+    approvedAmount: "45,000.00",
+    transferredAmount: "20,000.00",
+    payableAmount: "25,000.00",
+    ageing: 8,
+    selected: false
+  },
+  {
+    id: "pay-4",
+    submitBy: "R/RL-234572",
+    submissionDate: "18/08/2026 09:45:00",
+    approvedBy: "R/RL-234589",
+    expenseHead: "Transport",
+    transferTo: "Madurai Depot",
+    approvedAmount: "85,000.00",
+    transferredAmount: "50,000.00",
+    payableAmount: "35,000.00",
+    ageing: 6,
+    selected: false
+  },
+  {
+    id: "pay-5",
+    submitBy: "R/RL-234575",
+    submissionDate: "20/08/2026 16:10:45",
+    approvedBy: "R/RL-234567",
+    expenseHead: "Admin",
+    transferTo: "Coimbatore Facility",
+    approvedAmount: "28,500.00",
+    transferredAmount: "14,000.00",
+    payableAmount: "14,500.00",
+    ageing: 5,
+    selected: false
+  },
+  {
+    id: "pay-6",
+    submitBy: "R/RL-234578",
+    submissionDate: "22/08/2026 12:00:20",
+    approvedBy: "R/RL-234589",
+    expenseHead: "Accounts",
+    transferTo: "Corporate Bank Escrow",
+    approvedAmount: "65,000.00",
+    transferredAmount: "30,000.00",
+    payableAmount: "35,000.00",
+    ageing: 4,
+    selected: false
+  },
+  {
+    id: "pay-7",
+    submitBy: "R/RL-234580",
+    submissionDate: "24/08/2026 15:30:10",
+    approvedBy: "R/RL-234567",
+    expenseHead: "Statutory",
+    transferTo: "Govt Treasury Disbursal",
+    approvedAmount: "2,10,000.00",
+    transferredAmount: "1,50,000.00",
+    payableAmount: "60,000.00",
+    ageing: 3,
+    selected: false
+  },
+  {
+    id: "pay-8",
+    submitBy: "R/RL-234583",
+    submissionDate: "25/08/2026 10:05:00",
+    approvedBy: "R/RL-234589",
+    expenseHead: "Project",
+    transferTo: "Salem Station",
+    approvedAmount: "1,80,000.00",
+    transferredAmount: "1,20,000.00",
+    payableAmount: "60,000.00",
+    ageing: 2,
+    selected: false
+  },
+  {
+    id: "pay-9",
+    submitBy: "R/RL-234585",
+    submissionDate: "26/08/2026 13:40:00",
+    approvedBy: "R/RL-234567",
+    expenseHead: "Purchase",
+    transferTo: "Tiruchirappalli Yard",
+    approvedAmount: "95,000.00",
+    transferredAmount: "60,000.00",
+    payableAmount: "35,000.00",
+    ageing: 2,
+    selected: false
+  },
+  {
+    id: "pay-10",
+    submitBy: "R/RL-234588",
+    submissionDate: "27/08/2026 17:15:25",
+    approvedBy: "R/RL-234589",
+    expenseHead: "Transport",
+    transferTo: "Tirunelveli Terminal",
+    approvedAmount: "52,000.00",
+    transferredAmount: "30,000.00",
+    payableAmount: "22,000.00",
+    ageing: 1,
+    selected: false
   }
 ];
 
@@ -495,48 +698,7 @@ const poData = [
   }
 ];
 
-// Worklist -> Payment Dataset
-const paymentData = [
-  {
-    id: "pay-1",
-    submitBy: "R/RL-234567",
-    submissionDate: "DD/MM/YYYY HH:mm:ss",
-    approvedBy: "R/RL-234567",
-    expenseHead: "Project",
-    transferTo: "Guindy",
-    approvedAmount: "10000.00",
-    transferredAmount: "",
-    payableAmount: "",
-    ageing: 10,
-    selected: false
-  },
-  {
-    id: "pay-2",
-    submitBy: "R/RL-234567",
-    submissionDate: "DD/MM/YYYY HH:mm:ss",
-    approvedBy: "R/RL-234567",
-    expenseHead: "Purchase",
-    transferTo: "Guindy",
-    approvedAmount: "10000.00",
-    transferredAmount: "",
-    payableAmount: "",
-    ageing: 10,
-    selected: false
-  },
-  {
-    id: "pay-3",
-    submitBy: "R/RL-234589",
-    submissionDate: "DD/MM/YYYY HH:mm:ss",
-    approvedBy: "R/RL-234589",
-    expenseHead: "Operations",
-    transferTo: "Ambattur",
-    approvedAmount: "24500.00",
-    transferredAmount: "12000.00",
-    payableAmount: "12500.00",
-    ageing: 5,
-    selected: false
-  }
-];
+
 
 // ==========================================================================
 // STATE MANAGEMENT (Default landing page: Worklist -> Payment)
@@ -939,35 +1101,35 @@ function renderIndusTableHead() {
       // 6 Columns Matching Image 1: Material Code, Material Head, Material Category, Material Description, Type, Status
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th>
+          <th class="col-gbpa-mat-code">
             <div class="th-content-wrap">
               <span>Material Code</span>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-mat-head">
             <div class="th-content-wrap">
               <span>Material Head</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialHead'] ? 'has-active-filter' : ''}" data-filter-col="materialHead" title="Filter Material Head">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-mat-cat">
             <div class="th-content-wrap">
               <span>Material Category</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialCategory'] ? 'has-active-filter' : ''}" data-filter-col="materialCategory" title="Filter Material Category">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-mat-desc">
             <div class="th-content-wrap">
               <span>Material Description</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialDescription'] ? 'has-active-filter' : ''}" data-filter-col="materialDescription" title="Filter Material Description">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-mat-type">
             <div class="th-content-wrap">
               <span>Type</span>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-mat-status">
             <div class="th-content-wrap">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -979,35 +1141,35 @@ function renderIndusTableHead() {
       // 6 Columns Matching Uploaded Mockup: Expense Code, Expense Head, Expense Category, Expense Description, Type, Status
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th>
+          <th class="col-gbpa-exp-code">
             <div class="th-content-wrap">
               <span>Expense Code</span>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-exp-head">
             <div class="th-content-wrap">
               <span>Expense Head</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-exp-cat">
             <div class="th-content-wrap">
               <span>Expense Category</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseCategory'] ? 'has-active-filter' : ''}" data-filter-col="expenseCategory" title="Filter Expense Category">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-exp-desc">
             <div class="th-content-wrap">
               <span>Expense Description</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-exp-type">
             <div class="th-content-wrap">
               <span>Type</span>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-exp-status">
             <div class="th-content-wrap">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -1019,30 +1181,30 @@ function renderIndusTableHead() {
       // 5 Columns Matching Uploaded Mockup: Infra Code, Infra Category, Infra Description, Type, Status
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th>
+          <th class="col-gbpa-infra-code">
             <div class="th-content-wrap">
               <span>Infra Code</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCode'] ? 'has-active-filter' : ''}" data-filter-col="infraCode" title="Filter Infra Code">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-infra-cat">
             <div class="th-content-wrap">
               <span>Infra Category</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-infra-desc">
             <div class="th-content-wrap">
               <span>Infra Description</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraDescription'] ? 'has-active-filter' : ''}" data-filter-col="infraDescription" title="Filter Infra Description">&#9660;</button>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-infra-type">
             <div class="th-content-wrap">
               <span>Type</span>
             </div>
           </th>
-          <th>
+          <th class="col-gbpa-infra-status">
             <div class="th-content-wrap">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -1196,42 +1358,42 @@ function renderIndusTableHead() {
       </tr>
     `;
   } else if (currentIndusSubpage === 'infra') {
-    // Indus Towers Infra Table Headers (Matching Mockup: Infra Category, Infra Description, Uom, Make, Commissioning, I - Map, Status)
+    // Indus Towers Infra Table Headers (Infra Category 25char, Infra Description 50char, Uom, Make, Commissioning, I - Map, Status)
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
+        <th class="col-telecom-infra-category">
           <div class="th-content-wrap">
             <span>Infra Category</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-telecom-infra-desc">
           <div class="th-content-wrap">
             <span>Infra Description</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraDescription'] ? 'has-active-filter' : ''}" data-filter-col="infraDescription" title="Filter Infra Description">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-telecom-infra-uom">
           <div class="th-content-wrap">
             <span>Uom</span>
           </div>
         </th>
-        <th>
+        <th class="col-telecom-infra-make">
           <div class="th-content-wrap">
             <span>Make</span>
           </div>
         </th>
-        <th>
+        <th class="col-telecom-infra-commissioning">
           <div class="th-content-wrap">
             <span>Commissioning</span>
           </div>
         </th>
-        <th>
+        <th class="col-telecom-infra-imap">
           <div class="th-content-wrap">
             <span>I - Map</span>
           </div>
         </th>
-        <th>
+        <th class="col-telecom-infra-status">
           <div class="th-content-wrap">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -1242,51 +1404,51 @@ function renderIndusTableHead() {
   } else if (currentIndusSubpage === 'products') {
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
+        <th class="col-gbpa-item-code">
           <div class="th-content-wrap">
             <span>Item Code</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemCode'] ? 'has-active-filter' : ''}" data-filter-col="itemCode" title="Filter Item Code">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-product-name">
           <div class="th-content-wrap">
             <span>Product Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productName'] ? 'has-active-filter' : ''}" data-filter-col="productName" title="Filter Product Name">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-product-type">
           <div class="th-content-wrap">
             <span>Product Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productType'] ? 'has-active-filter' : ''}" data-filter-col="productType" title="Filter Product Type">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-product-desc">
           <div class="th-content-wrap">
             <span>Product Description</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productDescription'] ? 'has-active-filter' : ''}" data-filter-col="productDescription" title="Filter Product Description">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-hsn-sac">
           <div class="th-content-wrap">
             <span>HSN/SAC</span>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-hsn-code">
           <div class="th-content-wrap">
             <span>HSN/SAC Code</span>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-active-rate">
           <div class="th-content-wrap">
             <span>Active Rate (₹)</span>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-budget">
           <div class="th-content-wrap">
             <span>Budget (₹)</span>
           </div>
         </th>
-        <th>
+        <th class="col-gbpa-status">
           <div class="th-content-wrap">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -1297,46 +1459,46 @@ function renderIndusTableHead() {
   } else {
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
+        <th class="col-site-circle">
           <div class="th-content-wrap">
             <span>Circle</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['circle'] ? 'has-active-filter' : ''}" data-filter-col="circle" title="Filter Circle">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-site-id">
           <div class="th-content-wrap">
             <span>Site ID</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
           </div>
         </th>
-        <th>WH ID</th>
-        <th>
+        <th class="col-site-wh">WH ID</th>
+        <th class="col-site-name">
           <div class="th-content-wrap">
             <span>Site Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-site-district">
           <div class="th-content-wrap">
             <span>District</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['district'] ? 'has-active-filter' : ''}" data-filter-col="district" title="Filter District">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-site-town">
           <div class="th-content-wrap">
             <span>Town</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['town'] ? 'has-active-filter' : ''}" data-filter-col="town" title="Filter Town">&#9660;</button>
           </div>
         </th>
-        <th>Lattitude</th>
-        <th>Longtitude</th>
-        <th>
+        <th class="col-site-lat">Lattitude</th>
+        <th class="col-site-lng">Longtitude</th>
+        <th class="col-site-transport-zone">
           <div class="th-content-wrap">
             <span>Transport Zone</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportZone'] ? 'has-active-filter' : ''}" data-filter-col="transportZone" title="Filter Transport Zone">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-site-status">
           <div class="th-content-wrap">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -1594,40 +1756,40 @@ function renderMasterTableHead() {
     // Vendor Table Headers (Matching Mockup: Vendor Type, Vendor ID, Vendor Name, GST Number, PAN Number, GST Type, Status)
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
+        <th class="col-master-vendor-type">
           <div class="th-content-wrap">
             <span>Vendor Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorType'] ? 'has-active-filter' : ''}" data-filter-col="vendorType" title="Filter Vendor Type">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-master-vendor-id">
           <div class="th-content-wrap">
             <span>Vendor ID</span>
           </div>
         </th>
-        <th>
+        <th class="col-master-vendor-name">
           <div class="th-content-wrap">
             <span>Vendor Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-master-vendor-gst-num">
           <div class="th-content-wrap">
             <span>GST Number</span>
           </div>
         </th>
-        <th>
+        <th class="col-master-vendor-pan">
           <div class="th-content-wrap">
             <span>PAN Number</span>
           </div>
         </th>
-        <th>
+        <th class="col-master-vendor-gst-type">
           <div class="th-content-wrap">
             <span>GST Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['gstType'] ? 'has-active-filter' : ''}" data-filter-col="gstType" title="Filter GST Type">&#9660;</button>
           </div>
         </th>
-        <th>
+        <th class="col-master-vendor-status">
           <div class="th-content-wrap">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -2057,12 +2219,12 @@ function applyFiltersAndRender() {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
-              <td>${row.materialCode || ''}</td>
-              <td>${row.materialHead || ''}</td>
-              <td>${row.materialCategory || ''}</td>
-              <td>${row.materialDescription || ''}</td>
-              <td>${row.type || ''}</td>
-              <td class="td-center">
+              <td class="col-gbpa-mat-code">${row.materialCode || ''}</td>
+              <td class="col-gbpa-mat-head">${row.materialHead || ''}</td>
+              <td class="col-gbpa-mat-cat">${row.materialCategory || ''}</td>
+              <td class="col-gbpa-mat-desc">${row.materialDescription || ''}</td>
+              <td class="col-gbpa-mat-type td-center">${row.type || ''}</td>
+              <td class="col-gbpa-mat-status td-center">
                 <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
               </td>
             </tr>
@@ -2074,12 +2236,12 @@ function applyFiltersAndRender() {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
-              <td>${row.expenseCode || ''}</td>
-              <td>${row.expenseHead || ''}</td>
-              <td>${row.expenseCategory || ''}</td>
-              <td>${row.expenseDescription || ''}</td>
-              <td>${row.type || ''}</td>
-              <td class="td-center">
+              <td class="col-gbpa-exp-code">${row.expenseCode || ''}</td>
+              <td class="col-gbpa-exp-head">${row.expenseHead || ''}</td>
+              <td class="col-gbpa-exp-cat">${row.expenseCategory || ''}</td>
+              <td class="col-gbpa-exp-desc">${row.expenseDescription || ''}</td>
+              <td class="col-gbpa-exp-type td-center">${row.type || ''}</td>
+              <td class="col-gbpa-exp-status td-center">
                 <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
               </td>
             </tr>
@@ -2091,11 +2253,11 @@ function applyFiltersAndRender() {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}">
-              <td>${row.infraCode || ''}</td>
-              <td>${row.infraCategory || ''}</td>
-              <td>${row.infraDescription || ''}</td>
-              <td>${row.type || ''}</td>
-              <td class="td-center">
+              <td class="col-gbpa-infra-code">${row.infraCode || ''}</td>
+              <td class="col-gbpa-infra-cat">${row.infraCategory || ''}</td>
+              <td class="col-gbpa-infra-desc">${row.infraDescription || ''}</td>
+              <td class="col-gbpa-infra-type td-center">${row.type || ''}</td>
+              <td class="col-gbpa-infra-status td-center">
                 <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
               </td>
             </tr>
@@ -2180,15 +2342,15 @@ function applyFiltersAndRender() {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
           <tr data-row-id="${row.id}">
-            <td>${row.infraCategory || ''}</td>
-            <td>
+            <td class="col-telecom-infra-category">${row.infraCategory || ''}</td>
+            <td class="col-telecom-infra-desc">
               <a href="#" class="req-link td-link-blue" onclick="handleInfraClick('${row.id}', '${row.infraCategory}'); return false;">${row.infraDescription || ''}</a>
             </td>
-            <td>${row.uom || ''}</td>
-            <td>${row.make || ''}</td>
-            <td>${row.commissioning || ''}</td>
-            <td>${row.iMap || ''}</td>
-            <td class="td-center">
+            <td class="col-telecom-infra-uom td-center">${row.uom || ''}</td>
+            <td class="col-telecom-infra-make">${row.make || ''}</td>
+            <td class="col-telecom-infra-commissioning">${row.commissioning || ''}</td>
+            <td class="col-telecom-infra-imap td-center">${row.iMap || ''}</td>
+            <td class="col-telecom-infra-status td-center">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
             </td>
           </tr>
@@ -2200,17 +2362,17 @@ function applyFiltersAndRender() {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
           <tr data-row-id="${row.id}">
-            <td>${row.itemCode || ''}</td>
-            <td>
+            <td class="col-gbpa-item-code">${row.itemCode || ''}</td>
+            <td class="col-gbpa-product-name">
               <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${row.productName}'); return false;">${row.productName || ''}</a>
             </td>
-            <td>${row.productType || ''}</td>
-            <td>${row.productDescription || ''}</td>
-            <td>${row.hsnSacType || ''}</td>
-            <td>${row.hsnSacCode || ''}</td>
-            <td class="td-amount">${row.activeRate || ''}</td>
-            <td class="td-amount">${row.budgetAmount || ''}</td>
-            <td class="td-center">
+            <td class="col-gbpa-product-type">${row.productType || ''}</td>
+            <td class="col-gbpa-product-desc">${row.productDescription || ''}</td>
+            <td class="col-gbpa-hsn-sac td-center">${row.hsnSacType || ''}</td>
+            <td class="col-gbpa-hsn-code">${row.hsnSacCode || ''}</td>
+            <td class="col-gbpa-active-rate td-amount">${row.activeRate || ''}</td>
+            <td class="col-gbpa-budget td-amount">${row.budgetAmount || ''}</td>
+            <td class="col-gbpa-status td-center">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
             </td>
           </tr>
@@ -2222,18 +2384,18 @@ function applyFiltersAndRender() {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
           <tr data-row-id="${row.id}">
-            <td>${row.circle}</td>
-            <td>${row.siteId}</td>
-            <td>${row.whId}</td>
-            <td>
+            <td class="col-site-circle">${row.circle}</td>
+            <td class="col-site-id">${row.siteId}</td>
+            <td class="col-site-wh">${row.whId}</td>
+            <td class="col-site-name">
               <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${row.id}', '${row.siteName}'); return false;">${row.siteName}</a>
             </td>
-            <td>${row.district}</td>
-            <td>${row.town || ''}</td>
-            <td>${row.latitude}</td>
-            <td>${row.longitude}</td>
-            <td>${row.transportZone || ''}</td>
-            <td class="td-center">
+            <td class="col-site-district">${row.district}</td>
+            <td class="col-site-town">${row.town || ''}</td>
+            <td class="col-site-lat">${row.latitude}</td>
+            <td class="col-site-lng">${row.longitude}</td>
+            <td class="col-site-transport-zone td-center">${row.transportZone || ''}</td>
+            <td class="col-site-status td-center">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
             </td>
           </tr>
@@ -2267,13 +2429,13 @@ function applyFiltersAndRender() {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
           <tr data-row-id="${row.id}">
-            <td>${row.vendorType}</td>
-            <td>${row.vendorId}</td>
-            <td>${row.vendorName}</td>
-            <td>${row.gstNumber}</td>
-            <td>${row.panNumber}</td>
-            <td>${row.gstType}</td>
-            <td class="td-center">
+            <td class="col-master-vendor-type">${row.vendorType}</td>
+            <td class="col-master-vendor-id td-center">${row.vendorId}</td>
+            <td class="col-master-vendor-name">${row.vendorName}</td>
+            <td class="col-master-vendor-gst-num td-center">${row.gstNumber}</td>
+            <td class="col-master-vendor-pan td-center">${row.panNumber}</td>
+            <td class="col-master-vendor-gst-type td-center">${row.gstType}</td>
+            <td class="col-master-vendor-status td-center">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
             </td>
           </tr>
@@ -2286,7 +2448,7 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}">
             <td>
-              <a href="#" class="req-link td-link-blue" onclick="showToast('Product Head: ${row.productHead}'); return false;">${row.productHead}</a>
+              <a href="#" class="req-link td-link-blue" onclick="openViewProductCard('${row.id}'); return false;">${row.productHead}</a>
             </td>
             <td>${row.productCode || ''}</td>
             <td>${row.hsnCode || ''}</td>
@@ -2305,7 +2467,7 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}">
             <td>
-              <a href="#" class="req-link td-link-blue" onclick="showToast('Expense Head: ${row.expenseHead}'); return false;">${row.expenseHead}</a>
+              <a href="#" class="req-link td-link-blue" onclick="openViewExpenseCard('${row.id}'); return false;">${row.expenseHead}</a>
             </td>
             <td>${row.expenseCode || ''}</td>
             <td>${row.sacCode || ''}</td>
@@ -3675,13 +3837,15 @@ function initSideFormEvents() {
     }
 
     if (currentModule === 'master' && currentMasterSubpage === 'expenses') {
-      const expenseHead = document.getElementById('inpExpenseHead')?.value || "230510678";
+      const expenseHead = document.getElementById('inpExpenseHead')?.value || "Project";
       const expenseCode = document.getElementById('inpExpenseCode')?.value || "";
       const sacCode = document.getElementById('inpExpenseSac')?.value || "";
       const expenseDescription = document.getElementById('inpExpenseDesc')?.value || "";
-      const uom = document.getElementById('inpExpenseUom')?.value || "";
-      const gstRate = document.getElementById('inpExpenseGstRate')?.value || "0% / 5 % / 12% / 18%";
-      const tdsRate = document.getElementById('inpExpenseTdsRate')?.value || "1% / 2% / 10%";
+      const uom = document.getElementById('inpExpenseUom')?.value || "Pcs";
+      const gstRate = document.getElementById('inpExpenseGstRate')?.value || "18%";
+      const tdsRate = document.getElementById('inpExpenseTdsRate')?.value || "1%";
+      const expenseRcmToggle = document.getElementById('inpExpenseRcmToggle');
+      const rcm = (expenseRcmToggle && expenseRcmToggle.checked) ? "Yes" : "No";
       const expenseStatusToggle = document.getElementById('inpExpenseStatusToggle');
       const status = (expenseStatusToggle && expenseStatusToggle.checked) ? "Active" : "In - Active";
 
@@ -3691,9 +3855,10 @@ function initSideFormEvents() {
         expenseCode,
         sacCode,
         expenseDescription,
-        tdsRate,
-        gstRate,
         uom,
+        gstRate,
+        tdsRate,
+        rcm,
         status
       };
 
@@ -3710,6 +3875,12 @@ function initSideFormEvents() {
       const productCode = document.getElementById('inpProductCode')?.value || "";
       const hsnCode = document.getElementById('inpProductHsn')?.value || "";
       const productDescription = document.getElementById('inpProductDesc')?.value || "";
+      const uom = document.getElementById('inpProductUom')?.value || "Pcs";
+      const msq = document.getElementById('inpProductMsq')?.value || "";
+      const moq = document.getElementById('inpProductMoq')?.value || "";
+      const stockPrices = document.getElementById('inpProductStockPrices')?.value || "";
+      const oh = document.getElementById('inpProductOh')?.value || "1%";
+      const margin = document.getElementById('inpProductMargin')?.value || "1%";
       const gstRate = document.getElementById('inpProductGstRate')?.value || "18%";
       const productStatusToggle = document.getElementById('inpProductStatusToggle');
       const status = (productStatusToggle && productStatusToggle.checked) ? "Active" : "In - Active";
@@ -3720,6 +3891,12 @@ function initSideFormEvents() {
         productCode,
         hsnCode,
         productDescription,
+        uom,
+        msq,
+        moq,
+        stockPrices,
+        oh,
+        margin,
         gstRate,
         status
       };
@@ -4003,6 +4180,41 @@ function initSideFormEvents() {
       }
     });
   }
+  // --- ADD VENDOR: BUSINESS TYPE CONTROLLER (SHOW/HIDE TCS DEDUCTION & SERVICE FIELDS) ---
+  function updateVendorBusinessTypeFields() {
+    const vType = document.getElementById('inpVendorType')?.value;
+    const rowServiceType = document.getElementById('rowVendorServiceType');
+    const rowTdsDeduction = document.getElementById('rowVendorTdsDeduction');
+    const rowTdsRate = document.getElementById('rowVendorTdsRate');
+    const rowTcsDeduction = document.getElementById('rowVendorTcsDeduction');
+
+    if (vType === 'Supply') {
+      // Show TCS Deduction when Supply is selected
+      if (rowTcsDeduction) rowTcsDeduction.style.display = 'flex';
+      // Hide Service-only fields
+      if (rowServiceType) rowServiceType.style.display = 'none';
+      if (rowTdsDeduction) rowTdsDeduction.style.display = 'none';
+      if (rowTdsRate) rowTdsRate.style.display = 'none';
+    } else if (vType === 'Service') {
+      // Hide TCS Deduction when Service is selected
+      if (rowTcsDeduction) rowTcsDeduction.style.display = 'none';
+      // Show Service-only fields
+      if (rowServiceType) rowServiceType.style.display = 'flex';
+      if (rowTdsDeduction) rowTdsDeduction.style.display = 'flex';
+      if (rowTdsRate) rowTdsRate.style.display = 'flex';
+    }
+  }
+  window.updateVendorBusinessTypeFields = updateVendorBusinessTypeFields;
+
+  const inpVendorType = document.getElementById('inpVendorType');
+  const inpTdsToggle = document.getElementById('inpTdsDeductionToggle');
+  if (inpVendorType) {
+    inpVendorType.addEventListener('change', updateVendorBusinessTypeFields);
+  }
+  if (inpTdsToggle) {
+    inpTdsToggle.addEventListener('change', updateVendorBusinessTypeFields);
+  }
+  updateVendorBusinessTypeFields();
 
   const bankPanel = document.getElementById('bankDetailsSidePanel');
   const btnCloseBankCard = document.getElementById('btnCloseBankCard');
@@ -4779,10 +4991,33 @@ function openSideForm() {
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
     if (addVendorCard) addVendorCard.style.display = 'block';
+    if (typeof updateVendorBusinessTypeFields === 'function') updateVendorBusinessTypeFields();
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
-    if (addProductCard) addProductCard.style.display = 'block';
+    if (addProductCard) {
+      addProductCard.style.display = 'block';
+      const lblTitle = document.getElementById('lblProductCardTitle');
+      const btnEditToggle = document.getElementById('btnProductCardEditToggle');
+      const btnSaveWrap = document.querySelector('#frmAddProduct .form-submit-inside-wrap');
+      if (lblTitle) lblTitle.innerText = 'Add Product';
+      if (btnEditToggle) btnEditToggle.style.display = 'none';
+      if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+      setProductFormReadOnly(false);
+      currentViewedProductId = null;
+      isProductFormEditing = false;
+    }
   } else if (currentModule === 'master' && currentMasterSubpage === 'expenses') {
-    if (addExpenseCard) addExpenseCard.style.display = 'block';
+    if (addExpenseCard) {
+      addExpenseCard.style.display = 'block';
+      const lblTitle = document.getElementById('lblExpenseCardTitle');
+      const btnEditToggle = document.getElementById('btnExpenseCardEditToggle');
+      const btnSaveWrap = document.querySelector('#frmAddExpense .form-submit-inside-wrap');
+      if (lblTitle) lblTitle.innerText = 'Add Expense';
+      if (btnEditToggle) btnEditToggle.style.display = 'none';
+      if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+      setExpenseFormReadOnly(false);
+      currentViewedExpenseId = null;
+      isExpenseFormEditing = false;
+    }
   } else {
     if (addCustomerCard) addCustomerCard.style.display = 'block';
   }
@@ -6553,6 +6788,106 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Wire btnProductCardEditToggle
+  const btnProductCardEditToggle = document.getElementById('btnProductCardEditToggle');
+  if (btnProductCardEditToggle) {
+    btnProductCardEditToggle.addEventListener('click', () => {
+      const lblTitle = document.getElementById('lblProductCardTitle');
+      const imgIcon = document.getElementById('imgProductCardEditIcon');
+
+      if (!isProductFormEditing) {
+        // ENTER EDIT MODE
+        isProductFormEditing = true;
+        setProductFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Product';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Product form is now editable');
+      } else {
+        // SAVE EDITS
+        isProductFormEditing = false;
+        if (currentViewedProductId) {
+          const prod = masterProductsData.find(p => p.id === currentViewedProductId);
+          if (prod) {
+            prod.productHead = document.getElementById('inpProductHead')?.value || prod.productHead;
+            prod.productCode = document.getElementById('inpProductCode')?.value || prod.productCode;
+            prod.hsnCode = document.getElementById('inpProductHsn')?.value || prod.hsnCode;
+            prod.productDescription = document.getElementById('inpProductDesc')?.value || prod.productDescription;
+            prod.uom = document.getElementById('inpProductUom')?.value || prod.uom;
+            prod.msq = document.getElementById('inpProductMsq')?.value || prod.msq;
+            prod.moq = document.getElementById('inpProductMoq')?.value || prod.moq;
+            prod.stockPrices = document.getElementById('inpProductStockPrices')?.value || prod.stockPrices;
+            prod.oh = document.getElementById('inpProductOh')?.value || prod.oh;
+            prod.margin = document.getElementById('inpProductMargin')?.value || prod.margin;
+            prod.gstRate = document.getElementById('inpProductGstRate')?.value || prod.gstRate;
+            const statusToggle = document.getElementById('inpProductStatusToggle');
+            prod.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+          }
+          currentDataset = [...masterProductsData];
+          applyFiltersAndRender();
+        }
+        setProductFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Product';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Product details saved & updated successfully!');
+      }
+    });
+  }
+
+  // Wire btnExpenseCardEditToggle
+  const btnExpenseCardEditToggle = document.getElementById('btnExpenseCardEditToggle');
+  if (btnExpenseCardEditToggle) {
+    btnExpenseCardEditToggle.addEventListener('click', () => {
+      const lblTitle = document.getElementById('lblExpenseCardTitle');
+      const imgIcon = document.getElementById('imgExpenseCardEditIcon');
+
+      if (!isExpenseFormEditing) {
+        // ENTER EDIT MODE
+        isExpenseFormEditing = true;
+        setExpenseFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Expense';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Expense form is now editable');
+      } else {
+        // SAVE EDITS
+        isExpenseFormEditing = false;
+        if (currentViewedExpenseId) {
+          const exp = masterExpensesData.find(e => e.id === currentViewedExpenseId);
+          if (exp) {
+            exp.expenseHead = document.getElementById('inpExpenseHead')?.value || exp.expenseHead;
+            exp.expenseCode = document.getElementById('inpExpenseCode')?.value || exp.expenseCode;
+            exp.sacCode = document.getElementById('inpExpenseSac')?.value || exp.sacCode;
+            exp.expenseDescription = document.getElementById('inpExpenseDesc')?.value || exp.expenseDescription;
+            exp.uom = document.getElementById('inpExpenseUom')?.value || exp.uom;
+            exp.gstRate = document.getElementById('inpExpenseGstRate')?.value || exp.gstRate;
+            exp.tdsRate = document.getElementById('inpExpenseTdsRate')?.value || exp.tdsRate;
+            const rcmToggle = document.getElementById('inpExpenseRcmToggle');
+            exp.rcm = (rcmToggle && rcmToggle.checked) ? "Yes" : "No";
+            const statusToggle = document.getElementById('inpExpenseStatusToggle');
+            exp.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+          }
+          currentDataset = [...masterExpensesData];
+          applyFiltersAndRender();
+        }
+        setExpenseFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Expense';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Expense details saved & updated successfully!');
+      }
+    });
+  }
+
   const btnProjectTransportIcon = document.getElementById('btnProjectTransportIcon');
   if (btnProjectTransportIcon) {
     btnProjectTransportIcon.addEventListener('click', (e) => {
@@ -6948,6 +7283,194 @@ window.handleProjectClick = function(projectId, projectType) {
 
   setProjectFormReadOnly(true);
   showToast(`Viewing project details: ${proj.projectType}`);
+};
+
+let currentViewedProductId = null;
+let isProductFormEditing = false;
+
+function setProductFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddProduct');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+      else input.setAttribute('readonly', 'true');
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+      else input.removeAttribute('readonly');
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.openViewProductCard = function(productId) {
+  let prod = masterProductsData.find(p => p.id === productId || p.productHead === productId);
+  if (!prod) {
+    prod = {
+      id: productId || 'prod-1',
+      productHead: "Telecom Tower Mast",
+      productCode: "PRD-TTM-001",
+      hsnCode: "73082019",
+      productDescription: "40M Galvanized Tubular Telecom Tower Mast Structure",
+      uom: "Nos",
+      msq: "10",
+      moq: "2",
+      stockPrices: "4,50,000.00",
+      oh: "2%",
+      margin: "10%",
+      gstRate: "18%",
+      status: "Active"
+    };
+  }
+
+  currentViewedProductId = prod.id;
+  isProductFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addProductCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblProductCardTitle');
+  if (lblTitle) lblTitle.innerText = 'View Product';
+
+  const btnEditToggle = document.getElementById('btnProductCardEditToggle');
+  const imgEditIcon = document.getElementById('imgProductCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddProduct .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpProductHead')) document.getElementById('inpProductHead').value = prod.productHead || '';
+  if (document.getElementById('inpProductCode')) document.getElementById('inpProductCode').value = prod.productCode || '';
+  if (document.getElementById('inpProductHsn')) document.getElementById('inpProductHsn').value = prod.hsnCode || '';
+  if (document.getElementById('inpProductDesc')) document.getElementById('inpProductDesc').value = prod.productDescription || '';
+  if (document.getElementById('inpProductUom')) document.getElementById('inpProductUom').value = prod.uom || 'Pcs';
+  if (document.getElementById('inpProductMsq')) document.getElementById('inpProductMsq').value = prod.msq || '';
+  if (document.getElementById('inpProductMoq')) document.getElementById('inpProductMoq').value = prod.moq || '';
+  if (document.getElementById('inpProductStockPrices')) document.getElementById('inpProductStockPrices').value = prod.stockPrices || '';
+  if (document.getElementById('inpProductOh')) document.getElementById('inpProductOh').value = prod.oh || '1%';
+  if (document.getElementById('inpProductMargin')) document.getElementById('inpProductMargin').value = prod.margin || '1%';
+  if (document.getElementById('inpProductGstRate')) document.getElementById('inpProductGstRate').value = prod.gstRate || '18%';
+
+  const statusToggle = document.getElementById('inpProductStatusToggle');
+  if (statusToggle) {
+    statusToggle.checked = (prod.status || '').toLowerCase() === 'active';
+  }
+
+  setProductFormReadOnly(true);
+  showToast(`Viewing product details: ${prod.productHead}`);
+};
+
+let currentViewedExpenseId = null;
+let isExpenseFormEditing = false;
+
+function setExpenseFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddExpense');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+      else input.setAttribute('readonly', 'true');
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+      else input.removeAttribute('readonly');
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.openViewExpenseCard = function(expenseId) {
+  let exp = masterExpensesData.find(e => e.id === expenseId || e.expenseHead === expenseId);
+  if (!exp) {
+    exp = {
+      id: expenseId || 'exp-1',
+      expenseHead: "Project",
+      expenseCode: "EXP-PRJ-001",
+      sacCode: "998313",
+      expenseDescription: "Site Infrastructure & Telecom Tower Installation",
+      uom: "Pcs",
+      gstRate: "18%",
+      tdsRate: "1%",
+      rcm: "No",
+      status: "Active"
+    };
+  }
+
+  currentViewedExpenseId = exp.id;
+  isExpenseFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addExpenseCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblExpenseCardTitle');
+  if (lblTitle) lblTitle.innerText = 'View Expense';
+
+  const btnEditToggle = document.getElementById('btnExpenseCardEditToggle');
+  const imgEditIcon = document.getElementById('imgExpenseCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddExpense .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpExpenseHead')) document.getElementById('inpExpenseHead').value = exp.expenseHead || 'Project';
+  if (document.getElementById('inpExpenseCode')) document.getElementById('inpExpenseCode').value = exp.expenseCode || '';
+  if (document.getElementById('inpExpenseSac')) document.getElementById('inpExpenseSac').value = exp.sacCode || '';
+  if (document.getElementById('inpExpenseDesc')) document.getElementById('inpExpenseDesc').value = exp.expenseDescription || '';
+  if (document.getElementById('inpExpenseUom')) document.getElementById('inpExpenseUom').value = exp.uom || 'Pcs';
+  if (document.getElementById('inpExpenseGstRate')) document.getElementById('inpExpenseGstRate').value = exp.gstRate || '18%';
+  if (document.getElementById('inpExpenseTdsRate')) document.getElementById('inpExpenseTdsRate').value = exp.tdsRate || '1%';
+
+  const rcmToggle = document.getElementById('inpExpenseRcmToggle');
+  if (rcmToggle) {
+    rcmToggle.checked = (exp.rcm || '').toLowerCase() === 'yes' || exp.rcm === true;
+  }
+
+  const statusToggle = document.getElementById('inpExpenseStatusToggle');
+  if (statusToggle) {
+    statusToggle.checked = (exp.status || '').toLowerCase() === 'active';
+  }
+
+  setExpenseFormReadOnly(true);
+  showToast(`Viewing expense details: ${exp.expenseHead}`);
 };
 
 function exportToCsv() {

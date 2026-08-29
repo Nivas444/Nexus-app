@@ -1749,6 +1749,115 @@ tr.tr-sub-headers th,
   transform: scale(1.15);
 }
 
+/* Bank Details Popup & Columns (Extended to fit 50 chars cleanly) */
+#bankDetailsSidePanel {
+  width: 1120px !important;
+  max-width: 96vw !important;
+}
+.col-bank-acc-name {
+  min-width: 320px !important;
+  width: 320px !important;
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+.col-bank-name {
+  min-width: 300px !important;
+  width: 300px !important;
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+.col-bank-acc-type {
+  min-width: 110px !important;
+}
+.col-bank-acc-num {
+  min-width: 140px !important;
+}
+.col-bank-ifsc {
+  min-width: 120px !important;
+}
+.col-bank-status {
+  min-width: 90px !important;
+}
+
+/* Salary Details Popup & Columns (Extended to fit 6-7 digit numbers with decimals) */
+#salaryDetailsSidePanel {
+  width: 960px !important;
+  max-width: 96vw !important;
+}
+.col-salary-year {
+  min-width: 65px !important;
+}
+.col-salary-month {
+  min-width: 60px !important;
+}
+.col-salary-sub {
+  min-width: 115px !important;
+  text-align: right !important;
+  padding-right: 14px !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap !important;
+}
+.col-salary-status {
+  min-width: 95px !important;
+}
+
+/* Asset Details Popup & Columns (Extended to fit Date, Asset Details, Rate, Amount, Expiry Date) */
+#assetDetailsSidePanel {
+  width: 850px !important;
+  max-width: 96vw !important;
+}
+.col-asset-date {
+  min-width: 115px !important;
+  white-space: nowrap !important;
+}
+.col-asset-detail {
+  min-width: 220px !important;
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+.col-asset-uom {
+  min-width: 70px !important;
+}
+.col-asset-qty {
+  min-width: 65px !important;
+}
+.col-asset-rate {
+  min-width: 110px !important;
+  text-align: right !important;
+  padding-right: 14px !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap !important;
+}
+.col-asset-amount {
+  min-width: 110px !important;
+  text-align: right !important;
+  padding-right: 14px !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap !important;
+}
+.col-asset-expiry {
+  min-width: 115px !important;
+  white-space: nowrap !important;
+}
+
+/* Calendar Button Trigger in Side Forms */
+.btn-calendar-trigger {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.15s ease;
+}
+.btn-calendar-trigger:hover {
+  transform: scale(1.12);
+}
+
 /* Add Customer Slanted Ribbon Header Design Matching Uploaded Mockup */
 .side-form-header {
   display: flex;
@@ -2111,6 +2220,162 @@ input[type="date"]::-webkit-clear-button {
 input[type="date"].date-picker-control {
   padding-right: 36px;
   cursor: pointer;
+}
+
+/* Nexus Floating Calendar Dropdown */
+.nexus-calendar-dropdown {
+  position: absolute;
+  z-index: 100050;
+  width: 280px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  padding: 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  user-select: none;
+  animation: calPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+@keyframes calPopIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cal-nav-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+}
+
+.cal-nav-btn:hover {
+  background: #00bfa5;
+  color: #ffffff;
+}
+
+.cal-title-wrap {
+  display: flex;
+  gap: 6px;
+}
+
+.cal-select-month,
+.cal-select-year {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+  background: #ffffff;
+  cursor: pointer;
+  outline: none;
+}
+
+.cal-select-month:focus,
+.cal-select-year:focus {
+  border-color: #00bfa5;
+}
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.cal-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.cal-day-cell {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #1e293b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.cal-day-cell:hover:not(.empty-day) {
+  background: #e6f9f5;
+  color: #00897b;
+  font-weight: 700;
+}
+
+.cal-day-cell.selected {
+  background: #00bfa5 !important;
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.cal-day-cell.today {
+  border: 1.5px solid #00bfa5;
+  font-weight: 700;
+}
+
+.cal-day-cell.empty-day {
+  cursor: default;
+}
+
+.cal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cal-btn-today,
+.cal-btn-clear {
+  background: transparent;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.cal-btn-today {
+  color: #00bfa5;
+}
+.cal-btn-today:hover {
+  background: #e6f9f5;
+}
+
+.cal-btn-clear {
+  color: #ef4444;
+}
+.cal-btn-clear:hover {
+  background: #fef2f2;
 }
 
 .excel-filter-search-input:focus {

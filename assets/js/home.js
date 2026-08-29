@@ -1619,12 +1619,12 @@ function renderMasterTableHead() {
         <th>
           <div class="th-content-wrap">
             <span>PAN Number</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['panNumber'] ? 'has-active-filter' : ''}" data-filter-col="panNumber" title="Filter PAN Number">&#9660;</button>
           </div>
         </th>
         <th>
           <div class="th-content-wrap">
             <span>GST Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['gstType'] ? 'has-active-filter' : ''}" data-filter-col="gstType" title="Filter GST Type">&#9660;</button>
           </div>
         </th>
         <th>
@@ -3856,9 +3856,15 @@ function initSideFormEvents() {
   });
 
   // Calendar Trigger Handlers (Opens date/month/year picker)
-  document.querySelectorAll('.btn-emp-calendar-trigger, .input-pdf-badge[title*="Date"], .input-pdf-badge[title*="DOB"], .input-pdf-badge[title*="DOJ"]').forEach(trigger => {
-    trigger.addEventListener('click', () => {
-      const input = trigger.parentElement.querySelector('input');
+  document.querySelectorAll('.btn-emp-calendar-trigger, .btn-calendar-trigger, .input-pdf-badge[title*="Date"], .input-pdf-badge[title*="DOB"], .input-pdf-badge[title*="DOJ"]').forEach(trigger => {
+    trigger.addEventListener('click', (e) => {
+      let input = null;
+      if (trigger.getAttribute('for')) {
+        input = document.getElementById(trigger.getAttribute('for'));
+      }
+      if (!input && trigger.parentElement) {
+        input = trigger.parentElement.querySelector('input[type="date"], input');
+      }
       if (input) {
         if (typeof input.showPicker === 'function') {
           try {
@@ -4211,6 +4217,252 @@ function initSideFormEvents() {
     });
   }
 
+  // ==========================================================================
+  // NEXUS INTERACTIVE CALENDAR DROPDOWN COMPONENT
+  // ==========================================================================
+  const calDropdown = document.getElementById('nexusCalendarDropdown');
+  const calPrevBtn = document.getElementById('calPrevMonth');
+  const calNextBtn = document.getElementById('calNextMonth');
+  const calSelectMonth = document.getElementById('calSelectMonth');
+  const calSelectYear = document.getElementById('calSelectYear');
+  const calDaysGrid = document.getElementById('calDaysGrid');
+  const calBtnToday = document.getElementById('calBtnToday');
+  const calBtnClear = document.getElementById('calBtnClear');
+
+  let calActiveInput = null;
+  let calCurrentYear = new Date().getFullYear();
+  let calCurrentMonth = new Date().getMonth(); // 0-11
+  let calSelectedDate = null;
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  function populateCalDropdowns() {
+    if (!calSelectMonth || !calSelectYear) return;
+    calSelectMonth.innerHTML = monthNames.map((m, idx) => `<option value="${idx}">${m.substring(0, 3)}</option>`).join('');
+
+    const startYear = 1970;
+    const endYear = 2050;
+    let yearOptions = '';
+    for (let y = startYear; y <= endYear; y++) {
+      yearOptions += `<option value="${y}">${y}</option>`;
+    }
+    calSelectYear.innerHTML = yearOptions;
+
+    calSelectMonth.addEventListener('change', () => {
+      calCurrentMonth = parseInt(calSelectMonth.value, 10);
+      renderCalendarDays();
+    });
+
+    calSelectYear.addEventListener('change', () => {
+      calCurrentYear = parseInt(calSelectYear.value, 10);
+      renderCalendarDays();
+    });
+
+    if (calPrevBtn) {
+      calPrevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        calCurrentMonth--;
+        if (calCurrentMonth < 0) {
+          calCurrentMonth = 11;
+          calCurrentYear--;
+        }
+        renderCalendarDays();
+      });
+    }
+
+    if (calNextBtn) {
+      calNextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        calCurrentMonth++;
+        if (calCurrentMonth > 11) {
+          calCurrentMonth = 0;
+          calCurrentYear++;
+        }
+        renderCalendarDays();
+      });
+    }
+
+    if (calBtnToday) {
+      calBtnToday.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const now = new Date();
+        selectCalendarDate(now.getFullYear(), now.getMonth(), now.getDate());
+      });
+    }
+
+    if (calBtnClear) {
+      calBtnClear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (calActiveInput) {
+          calActiveInput.value = '';
+          calActiveInput.dispatchEvent(new Event('input'));
+          calActiveInput.dispatchEvent(new Event('change'));
+        }
+        closeNexusCalendar();
+      });
+    }
+  }
+
+  function renderCalendarDays() {
+    if (!calDaysGrid || !calSelectMonth || !calSelectYear) return;
+    calSelectMonth.value = calCurrentMonth;
+    calSelectYear.value = calCurrentYear;
+
+    const firstDayIndex = new Date(calCurrentYear, calCurrentMonth, 1).getDay(); // 0 is Sun
+    const totalDays = new Date(calCurrentYear, calCurrentMonth + 1, 0).getDate();
+    const today = new Date();
+
+    let gridHtml = '';
+
+    for (let i = 0; i < firstDayIndex; i++) {
+      gridHtml += '<div class="cal-day-cell empty-day"></div>';
+    }
+
+    for (let day = 1; day <= totalDays; day++) {
+      const isToday = today.getFullYear() === calCurrentYear && today.getMonth() === calCurrentMonth && today.getDate() === day;
+      const isSelected = calSelectedDate &&
+        calSelectedDate.getFullYear() === calCurrentYear &&
+        calSelectedDate.getMonth() === calCurrentMonth &&
+        calSelectedDate.getDate() === day;
+
+      const classes = ['cal-day-cell'];
+      if (isToday) classes.push('today');
+      if (isSelected) classes.push('selected');
+
+      gridHtml += `<div class="${classes.join(' ')}" data-day="${day}">${day}</div>`;
+    }
+
+    calDaysGrid.innerHTML = gridHtml;
+
+    calDaysGrid.querySelectorAll('.cal-day-cell:not(.empty-day)').forEach(cell => {
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const day = parseInt(cell.getAttribute('data-day'), 10);
+        selectCalendarDate(calCurrentYear, calCurrentMonth, day);
+      });
+    });
+  }
+
+  function selectCalendarDate(year, monthIndex, day) {
+    if (calActiveInput) {
+      const dd = String(day).padStart(2, '0');
+      const mm = String(monthIndex + 1).padStart(2, '0');
+      const formatted = `${dd} - ${mm} - ${year}`;
+      calActiveInput.value = formatted;
+      calActiveInput.dispatchEvent(new Event('input'));
+      calActiveInput.dispatchEvent(new Event('change'));
+    }
+    closeNexusCalendar();
+  }
+
+  function openNexusCalendar(inputElement, triggerBtn) {
+    if (!calDropdown) return;
+    if (calActiveInput === inputElement && calDropdown.style.display === 'block') {
+      closeNexusCalendar();
+      return;
+    }
+
+    calActiveInput = inputElement;
+
+    const val = (inputElement.value || '').trim();
+    const parts = val.split('-').map(s => parseInt(s.trim(), 10));
+    if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+      let d, m, y;
+      if (parts[0] > 1000) {
+        y = parts[0]; m = parts[1] - 1; d = parts[2];
+      } else {
+        d = parts[0]; m = parts[1] - 1; y = parts[2];
+      }
+      calCurrentYear = y;
+      calCurrentMonth = m;
+      calSelectedDate = new Date(y, m, d);
+    } else {
+      const now = new Date();
+      calCurrentYear = now.getFullYear();
+      calCurrentMonth = now.getMonth();
+      calSelectedDate = now;
+    }
+
+    renderCalendarDays();
+
+    calDropdown.style.display = 'block';
+    calDropdown.style.visibility = 'hidden';
+
+    requestAnimationFrame(() => {
+      const target = triggerBtn || inputElement;
+      const rect = target.getBoundingClientRect();
+      const dropWidth = calDropdown.offsetWidth || 280;
+      const dropHeight = calDropdown.offsetHeight || 310;
+
+      let top = rect.bottom + window.scrollY + 6;
+      let left = rect.right - dropWidth + window.scrollX;
+
+      if (left < 10) left = rect.left + window.scrollX;
+      if (left + dropWidth > window.innerWidth - 10) {
+        left = window.innerWidth - dropWidth - 14;
+      }
+      if (top + dropHeight > window.innerHeight + window.scrollY - 10) {
+        top = rect.top + window.scrollY - dropHeight - 6;
+      }
+
+      calDropdown.style.top = `${Math.max(10, top)}px`;
+      calDropdown.style.left = `${Math.max(10, left)}px`;
+      calDropdown.style.visibility = 'visible';
+    });
+  }
+
+  function closeNexusCalendar() {
+    if (calDropdown) calDropdown.style.display = 'none';
+    calActiveInput = null;
+  }
+
+  document.addEventListener('click', (e) => {
+    if (calDropdown && calDropdown.style.display === 'block') {
+      if (!calDropdown.contains(e.target) &&
+          !e.target.closest('.btn-calendar-trigger') &&
+          !e.target.closest('.nexus-cal-input') &&
+          !e.target.closest('.btn-sub-project-calendar')) {
+        closeNexusCalendar();
+      }
+    }
+  });
+
+  window.attachNexusCalendar = function(inputId, btnId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    if (input) {
+      input.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openNexusCalendar(input, btn || input);
+      });
+    }
+    if (btn) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openNexusCalendar(input || btn, btn);
+      });
+    }
+  };
+
+  populateCalDropdowns();
+
+  // Attach to Salary and Asset inputs
+  attachNexusCalendar('inpAddSalaryFrom', 'btnSalaryFromCalendar');
+  attachNexusCalendar('inpAddSalaryTo', 'btnSalaryToCalendar');
+  attachNexusCalendar('inpAddAssetDate', 'btnAssetDateCalendar');
+  attachNexusCalendar('inpAddAssetExpiryDate', 'btnAssetExpiryDateCalendar');
+
+  // Also attach to all Sub-Project, Vehicle, and Other Service Rate calendar fields
+  attachNexusCalendar('inpSubProjectRateFrom', 'btnSubProjectRateFromCalendar');
+  attachNexusCalendar('inpSubProjectRateTo', 'btnSubProjectRateToCalendar');
+  attachNexusCalendar('inpVehicleRateFrom', 'btnVehicleRateFromCalendar');
+  attachNexusCalendar('inpVehicleRateTo', 'btnVehicleRateToCalendar');
+  attachNexusCalendar('inpOtherServiceRateFrom', 'btnOtherServiceRateFromCalendar');
+  attachNexusCalendar('inpOtherServiceRateTo', 'btnOtherServiceRateToCalendar');
+
   const btnSalaryAddRow = document.getElementById('btnSalaryAddRow');
   const addSalaryCard = document.getElementById('addSalaryCard');
   const btnCloseAddSalaryCard = document.getElementById('btnCloseAddSalaryCard');
@@ -4228,46 +4480,60 @@ function initSideFormEvents() {
   if (btnCloseAddSalaryCard && addSalaryCard && salaryPanel) {
     btnCloseAddSalaryCard.addEventListener('click', () => {
       addSalaryCard.style.display = 'none';
+      closeNexusCalendar();
       salaryPanel.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
     });
   }
 
+  function parseYearMonth(val, fallbackYear, fallbackMonth) {
+    if (!val) return [fallbackYear, fallbackMonth];
+    const parts = val.split('-').map(s => s.trim());
+    if (parts.length === 3) {
+      return parts[0].length === 4 ? [parts[0], parts[1]] : [parts[2] || fallbackYear, parts[1] || fallbackMonth];
+    } else if (parts.length === 2) {
+      return parts[0].length === 4 ? [parts[0], parts[1]] : [parts[1], parts[0]];
+    }
+    return [fallbackYear, fallbackMonth];
+  }
+
   if (btnSubmitAddSalary && addSalaryCard && salaryPanel) {
     btnSubmitAddSalary.addEventListener('click', () => {
-      const fromVal = document.getElementById('inpAddSalaryFrom')?.value.trim() || '2024-01';
-      const toVal = document.getElementById('inpAddSalaryTo')?.value.trim() || '2025-12';
+      const fromVal = document.getElementById('inpAddSalaryFrom')?.value.trim() || '01 - 01 - 2026';
+      const toVal = document.getElementById('inpAddSalaryTo')?.value.trim() || '31 - 12 - 2026';
       const grossVal = parseFloat(document.getElementById('inpAddSalaryGross')?.value) || 42000;
       const epf = document.getElementById('inpAddSalaryEpf')?.value || '12%';
       const esi = document.getElementById('inpAddSalaryEsi')?.value || '0.75%';
       const isStatusActive = document.getElementById('inpAddSalaryStatus')?.checked ?? true;
 
-      const [fromYear, fromMonth] = fromVal.includes('-') ? fromVal.split('-') : ['2024', '01'];
-      const [toYear, toMonth] = toVal.includes('-') ? toVal.split('-') : ['2025', '12'];
-      const basic = Math.round(grossVal * 0.55);
-      const hra = Math.round(grossVal * 0.25);
-      const da = Math.round(grossVal * 0.12);
-      const sa = Math.round(grossVal * 0.08);
+      const [fromYear, fromMonth] = parseYearMonth(fromVal, '2026', '01');
+      const [toYear, toMonth] = parseYearMonth(toVal, '2026', '12');
+      const basic = (grossVal * 0.55).toFixed(2);
+      const hra = (grossVal * 0.25).toFixed(2);
+      const da = (grossVal * 0.12).toFixed(2);
+      const sa = (grossVal * 0.08).toFixed(2);
+      const total = grossVal.toFixed(2);
 
       const tbody = document.getElementById('tbodySalaryDetails');
       if (tbody) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${fromYear}</td>
-          <td>${fromMonth}</td>
-          <td>${toYear}</td>
-          <td>${toMonth}</td>
-          <td>${basic}</td>
-          <td>${hra}</td>
-          <td>${da}</td>
-          <td>${sa}</td>
-          <td>${grossVal}</td>
-          <td><span class="status-badge ${isStatusActive ? 'status-active' : 'status-inactive'}">${isStatusActive ? 'Active' : 'De-Active'}</span></td>
+          <td class="col-salary-year">${fromYear}</td>
+          <td class="col-salary-month">${fromMonth}</td>
+          <td class="col-salary-year">${toYear}</td>
+          <td class="col-salary-month">${toMonth}</td>
+          <td class="col-salary-sub col-salary-basic">${basic}</td>
+          <td class="col-salary-sub col-salary-hra">${hra}</td>
+          <td class="col-salary-sub col-salary-da">${da}</td>
+          <td class="col-salary-sub col-salary-sa">${sa}</td>
+          <td class="col-salary-sub col-salary-total">${total}</td>
+          <td class="col-salary-status"><span class="status-badge ${isStatusActive ? 'status-active' : 'status-inactive'}">${isStatusActive ? 'Active' : 'De-Active'}</span></td>
         `;
         tbody.insertBefore(tr, tbody.firstChild);
       }
 
       addSalaryCard.style.display = 'none';
+      closeNexusCalendar();
       salaryPanel.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
       showToast('New Salary details saved successfully!');
@@ -4291,6 +4557,7 @@ function initSideFormEvents() {
   if (btnCloseAddAssetCard && addAssetCard && assetPanel) {
     btnCloseAddAssetCard.addEventListener('click', () => {
       addAssetCard.style.display = 'none';
+      closeNexusCalendar();
       assetPanel.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
     });
@@ -4298,30 +4565,34 @@ function initSideFormEvents() {
 
   if (btnSubmitAddAsset && addAssetCard && assetPanel) {
     btnSubmitAddAsset.addEventListener('click', () => {
-      const date = document.getElementById('inpAddAssetDate')?.value.trim() || '01-01-2024';
+      const date = document.getElementById('inpAddAssetDate')?.value.trim() || '01 - 01 - 2026';
       const details = document.getElementById('inpAddAssetDetails')?.value.trim() || 'Laptop Dell Latitude';
       const uom = document.getElementById('inpAddAssetUom')?.value || 'Nos';
       const qty = document.getElementById('inpAddAssetQty')?.value.trim() || '1';
       const rate = document.getElementById('inpAddAssetRate')?.value.trim() || '55000.00';
       const amount = document.getElementById('inpAddAssetAmount')?.value.trim() || (parseFloat(qty) * parseFloat(rate)).toFixed(2);
-      const expiry = document.getElementById('inpAddAssetExpiryDate')?.value.trim() || '01-01-2027';
+      const expiry = document.getElementById('inpAddAssetExpiryDate')?.value.trim() || '01 - 01 - 2027';
+
+      const rateNum = parseFloat(rate) || 0;
+      const amountNum = parseFloat(amount) || 0;
 
       const tbody = document.getElementById('tbodyAssetDetails');
       if (tbody) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${date}</td>
-          <td>${details}</td>
-          <td>${uom}</td>
-          <td>${qty}</td>
-          <td>${rate}</td>
-          <td>${amount}</td>
-          <td>${expiry}</td>
+          <td class="col-asset-date">${date}</td>
+          <td class="col-asset-detail">${details}</td>
+          <td class="col-asset-uom">${uom}</td>
+          <td class="col-asset-qty">${qty}</td>
+          <td class="col-asset-rate">${rateNum.toFixed(2)}</td>
+          <td class="col-asset-amount">${amountNum.toFixed(2)}</td>
+          <td class="col-asset-expiry">${expiry}</td>
         `;
         tbody.insertBefore(tr, tbody.firstChild);
       }
 
       addAssetCard.style.display = 'none';
+      closeNexusCalendar();
       assetPanel.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
       showToast('New Asset details saved successfully!');

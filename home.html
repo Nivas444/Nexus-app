@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=31">
+  <link rel="stylesheet" href="assets/css/home.css?v=34">
 </head>
 
 <body>
@@ -2238,7 +2238,7 @@
         </div>
 
         <!-- 4. Bank Details Table Popup (Matching Uploaded Mockup) -->
-        <div class="side-form-card side-contact-popup" id="bankDetailsSidePanel" style="display: none; width: 750px;">
+        <div class="side-form-card side-contact-popup" id="bankDetailsSidePanel" style="display: none; width: 1120px; max-width: 96vw;">
           <!-- Header Ribbon Badge Matching Mockup: Bank Details + Top Right Plus Icon -->
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblBankVendorTitle">Bank Details</div>
@@ -2255,23 +2255,23 @@
             <table class="contact-custom-table" id="tblBankDetailsPopup">
               <thead>
                 <tr>
-                  <th>
+                  <th class="col-bank-acc-name">
                     <span>Account Name</span>
                     <button type="button" class="contact-th-filter-btn" title="Filter Account Name">▼</button>
                   </th>
-                  <th>
+                  <th class="col-bank-acc-type">
                     <span>Account Type</span>
                   </th>
-                  <th>
+                  <th class="col-bank-acc-num">
                     <span>Account Number</span>
                   </th>
-                  <th>
+                  <th class="col-bank-name">
                     <span>Bank Name</span>
                   </th>
-                  <th>
+                  <th class="col-bank-ifsc">
                     <span>IFSC Code</span>
                   </th>
-                  <th>
+                  <th class="col-bank-status">
                     <span>Status</span>
                     <button type="button" class="contact-th-filter-btn" title="Filter Status">▼</button>
                   </th>
@@ -2279,14 +2279,14 @@
               </thead>
               <tbody id="tbodyBankDetails">
                 <tr>
-                  <td>ABC Private Ltd</td>
-                  <td>Current</td>
-                  <td>
+                  <td class="col-bank-acc-name">ABC Private Ltd</td>
+                  <td class="col-bank-acc-type">Current</td>
+                  <td class="col-bank-acc-num">
                     <a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: 12345678910'); return false;">12345678910</a>
                   </td>
-                  <td>ABC Private Ltd</td>
-                  <td>ABC Private</td>
-                  <td>
+                  <td class="col-bank-name">ABC Private Ltd</td>
+                  <td class="col-bank-ifsc">ABC Private</td>
+                  <td class="col-bank-status">
                     <span class="status-badge status-active">Active</span>
                   </td>
                 </tr>
@@ -2296,7 +2296,7 @@
         </div>
 
         <!-- 5. Salary Details Table Popup (Matching Uploaded Mockup 1) -->
-        <div class="side-form-card side-contact-popup" id="salaryDetailsSidePanel" style="display: none; width: 880px;">
+        <div class="side-form-card side-contact-popup" id="salaryDetailsSidePanel" style="display: none; width: 960px; max-width: 96vw;">
           <!-- Header Ribbon Badge Matching Mockup: Salary Details + Top Right Plus Icon -->
           <div class="side-form-header">
             <div class="side-form-title-badge">Salary Details</div>
@@ -2316,32 +2316,32 @@
                   <th colspan="2" style="border-right: 1px solid rgba(255,255,255,0.3) !important;">From</th>
                   <th colspan="2" style="border-right: 1px solid rgba(255,255,255,0.3) !important;">To</th>
                   <th colspan="5" style="border-right: 1px solid rgba(255,255,255,0.3) !important;">Salary</th>
-                  <th rowspan="2" style="vertical-align: middle;">Status</th>
+                  <th rowspan="2" class="col-salary-status" style="vertical-align: middle;">Status</th>
                 </tr>
                 <tr>
-                  <th>Year</th>
-                  <th>Month</th>
-                  <th>Year</th>
-                  <th>Month</th>
-                  <th>Basic</th>
-                  <th>HRA</th>
-                  <th>DA</th>
-                  <th>SA</th>
-                  <th>Total</th>
+                  <th class="col-salary-year">Year</th>
+                  <th class="col-salary-month">Month</th>
+                  <th class="col-salary-year">Year</th>
+                  <th class="col-salary-month">Month</th>
+                  <th class="col-salary-sub col-salary-basic">Basic</th>
+                  <th class="col-salary-sub col-salary-hra">HRA</th>
+                  <th class="col-salary-sub col-salary-da">DA</th>
+                  <th class="col-salary-sub col-salary-sa">SA</th>
+                  <th class="col-salary-sub col-salary-total">Total</th>
                 </tr>
               </thead>
               <tbody id="tbodySalaryDetails">
                 <tr>
-                  <td>2024</td>
-                  <td>01</td>
-                  <td>2025</td>
-                  <td>12</td>
-                  <td>25000.00</td>
-                  <td>10000.00</td>
-                  <td>5000.00</td>
-                  <td>2000.00</td>
-                  <td>42000.00</td>
-                  <td>
+                  <td class="col-salary-year">2024</td>
+                  <td class="col-salary-month">01</td>
+                  <td class="col-salary-year">2025</td>
+                  <td class="col-salary-month">12</td>
+                  <td class="col-salary-sub col-salary-basic">25000.00</td>
+                  <td class="col-salary-sub col-salary-hra">10000.00</td>
+                  <td class="col-salary-sub col-salary-da">5000.00</td>
+                  <td class="col-salary-sub col-salary-sa">2000.00</td>
+                  <td class="col-salary-sub col-salary-total">42000.00</td>
+                  <td class="col-salary-status">
                     <span class="status-badge status-active">Active</span>
                   </td>
                 </tr>
@@ -2351,7 +2351,7 @@
         </div>
 
         <!-- 6. Asset Details Table Popup (Matching Uploaded Mockup 2) -->
-        <div class="side-form-card side-contact-popup" id="assetDetailsSidePanel" style="display: none; width: 650px;">
+        <div class="side-form-card side-contact-popup" id="assetDetailsSidePanel" style="display: none; width: 850px; max-width: 96vw;">
           <!-- Header Ribbon Badge Matching Mockup: Asset Details + Top Right Plus Icon -->
           <div class="side-form-header">
             <div class="side-form-title-badge">Asset Details</div>
@@ -2373,24 +2373,24 @@
             <table class="contact-custom-table" id="tblAssetDetailsPopup">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Asset Details</th>
-                  <th>Uom</th>
-                  <th>Qty</th>
-                  <th>Rate</th>
-                  <th>Amount</th>
-                  <th>Expiry Date</th>
+                  <th class="col-asset-date">Date</th>
+                  <th class="col-asset-detail">Asset Details</th>
+                  <th class="col-asset-uom">Uom</th>
+                  <th class="col-asset-qty">Qty</th>
+                  <th class="col-asset-rate">Rate</th>
+                  <th class="col-asset-amount">Amount</th>
+                  <th class="col-asset-expiry">Expiry Date</th>
                 </tr>
               </thead>
               <tbody id="tbodyAssetDetails">
                 <tr>
-                  <td>01-01-2024</td>
-                  <td>Laptop Dell Latitude</td>
-                  <td>Nos</td>
-                  <td>1</td>
-                  <td>55000.00</td>
-                  <td>55000.00</td>
-                  <td>01-01-2027</td>
+                  <td class="col-asset-date">01-01-2024</td>
+                  <td class="col-asset-detail">Laptop Dell Latitude</td>
+                  <td class="col-asset-uom">Nos</td>
+                  <td class="col-asset-qty">1</td>
+                  <td class="col-asset-rate">55000.00</td>
+                  <td class="col-asset-amount">55000.00</td>
+                  <td class="col-asset-expiry">01-01-2027</td>
                 </tr>
               </tbody>
             </table>
@@ -2495,10 +2495,10 @@
             <div class="form-row-group">
               <label class="form-label" for="inpAddSalaryFrom">From</label>
               <div class="form-input-wrap with-action-badge">
-                <input type="text" class="form-input-control date-picker-input" id="inpAddSalaryFrom" placeholder="dd-mm-yyyy">
-                <span class="input-pdf-badge" title="Select Date">
-                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
-                </span>
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpAddSalaryFrom" placeholder="DD - MM - YYYY" value="01 - 01 - 2026" readonly style="cursor: pointer; background: #ffffff;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnSalaryFromCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
               </div>
             </div>
 
@@ -2506,10 +2506,10 @@
             <div class="form-row-group">
               <label class="form-label" for="inpAddSalaryTo">To</label>
               <div class="form-input-wrap with-action-badge">
-                <input type="text" class="form-input-control date-picker-input" id="inpAddSalaryTo" placeholder="dd-mm-yyyy">
-                <span class="input-pdf-badge" title="Select Date">
-                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
-                </span>
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpAddSalaryTo" placeholder="DD - MM - YYYY" value="31 - 12 - 2026" readonly style="cursor: pointer; background: #ffffff;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnSalaryToCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
               </div>
             </div>
 
@@ -2592,10 +2592,10 @@
             <div class="form-row-group">
               <label class="form-label" for="inpAddAssetDate">Date</label>
               <div class="form-input-wrap with-action-badge">
-                <input type="text" class="form-input-control date-picker-input" id="inpAddAssetDate" placeholder="dd-mm-yyyy">
-                <span class="input-pdf-badge" title="Select Date">
-                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
-                </span>
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpAddAssetDate" placeholder="DD - MM - YYYY" value="01 - 01 - 2026" readonly style="cursor: pointer; background: #ffffff;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnAssetDateCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
               </div>
             </div>
 
@@ -2648,10 +2648,10 @@
             <div class="form-row-group">
               <label class="form-label" for="inpAddAssetExpiryDate">Expiry Date</label>
               <div class="form-input-wrap with-action-badge">
-                <input type="text" class="form-input-control date-picker-input" id="inpAddAssetExpiryDate" placeholder="dd-mm-yyyy">
-                <span class="input-pdf-badge" title="Select Date">
-                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
-                </span>
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpAddAssetExpiryDate" placeholder="DD - MM - YYYY" value="01 - 01 - 2027" readonly style="cursor: pointer; background: #ffffff;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnAssetExpiryDateCalendar" title="Select Date" aria-label="Select Date">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
               </div>
             </div>
 
@@ -3807,10 +3807,30 @@
     </div>
   </div>
 
+  <!-- NEXUS INTERACTIVE CALENDAR DROPDOWN -->
+  <div class="nexus-calendar-dropdown" id="nexusCalendarDropdown" style="display: none;">
+    <div class="cal-header">
+      <button type="button" class="cal-nav-btn" id="calPrevMonth" title="Previous Month">&lt;</button>
+      <div class="cal-title-wrap">
+        <select class="cal-select-month" id="calSelectMonth"></select>
+        <select class="cal-select-year" id="calSelectYear"></select>
+      </div>
+      <button type="button" class="cal-nav-btn" id="calNextMonth" title="Next Month">&gt;</button>
+    </div>
+    <div class="cal-weekdays">
+      <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+    </div>
+    <div class="cal-days-grid" id="calDaysGrid"></div>
+    <div class="cal-footer">
+      <button type="button" class="cal-btn-today" id="calBtnToday">Today</button>
+      <button type="button" class="cal-btn-clear" id="calBtnClear">Clear</button>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=30"></script>
+  <script src="assets/js/home.js?v=34"></script>
 </body>
 
 </html>

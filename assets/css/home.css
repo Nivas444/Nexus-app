@@ -1268,6 +1268,46 @@ tr.tr-sub-headers th,
   border-radius: 8px !important;
 }
 
+#addProductScopeCard .side-form-header,
+#addSubProjectTypeCard .side-form-header,
+#addSubProjectRateFormCard .side-form-header,
+#addVehicleScopeCard .side-form-header,
+#addVehicleRateFormCard .side-form-header,
+#addOtherServiceScopeCard .side-form-header,
+#addOtherServiceRateFormCard .side-form-header {
+  background: #ffffff !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  margin-bottom: 0 !important;
+  outline: none !important;
+  overflow: hidden !important;
+}
+
+#addProductScopeCard .side-form-title-badge,
+#addSubProjectTypeCard .side-form-title-badge,
+#addSubProjectRateFormCard .side-form-title-badge,
+#addVehicleScopeCard .side-form-title-badge,
+#addVehicleRateFormCard .side-form-title-badge,
+#addOtherServiceScopeCard .side-form-title-badge,
+#addOtherServiceRateFormCard .side-form-title-badge {
+  height: calc(100% + 6px) !important;
+  margin-top: 0 !important;
+  margin-bottom: -6px !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#addProductScopeCard .side-form-body,
+#addSubProjectTypeCard .side-form-body,
+#addSubProjectRateFormCard .side-form-body,
+#addVehicleScopeCard .side-form-body,
+#addVehicleRateFormCard .side-form-body,
+#addOtherServiceScopeCard .side-form-body,
+#addOtherServiceRateFormCard .side-form-body {
+  border-top: none !important;
+  margin-top: 0 !important;
+}
+
 #subProjectTypeReportCard,
 #vehicleReportCard,
 #otherServiceReportCard {
@@ -1714,12 +1754,14 @@ tr.tr-sub-headers th,
   display: flex;
   align-items: stretch; /* Stretches badge to fill 100% full height from top 0 */
   justify-content: space-between;
-  background: #ffffff;
+  background: #ffffff !important;
   padding: 0;
-  margin: 0;
+  margin: 0 !important;
   border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
   height: 48px;
-  overflow: hidden;
+  overflow: hidden !important;
   position: relative;
 }
 
@@ -1733,11 +1775,14 @@ tr.tr-sub-headers th,
   letter-spacing: 0.3px;
   display: flex;
   align-items: center;
-  height: 100%;
-  margin: 0;
+  height: calc(100% + 6px) !important;
+  margin-top: 0 !important;
+  margin-bottom: -6px !important;
   clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 0 100%);
   white-space: nowrap;
   user-select: none;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .side-form-close-btn {

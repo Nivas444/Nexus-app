@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=45">
+  <link rel="stylesheet" href="assets/css/home.css?v=52">
 </head>
 
 <body>
@@ -1179,7 +1179,7 @@
                 <img src="icons/Location.svg" alt="Location" width="26" height="26">
               </button>
               <button type="button" class="side-top-icon-btn" title="Edit" id="btnIndusTowerEdit">
-                <img src="icons/Edit.svg" alt="Edit" width="26" height="26">
+                <img src="icons/Edit.svg" alt="Edit" id="imgIndusTowerEditIcon" width="26" height="26">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseIndusTowerForm" aria-label="Close form">&times;</button>
             </div>
@@ -2204,59 +2204,55 @@
           </div>
         </div>
 
-        <!-- 3. Location Details Message Popup (Table View with Filters & Top Plus Icon on Right) -->
-        <div class="side-form-card side-contact-popup" id="locationDetailsSidePanel" style="display: none;">
-          <!-- Top Toolbar: Plus Icon Alone on Right Side (No Cross Button) -->
-          <div class="contact-popup-toolbar">
-            <div class="contact-toolbar-right">
-              <!-- Plus Icon Button Alone -->
-              <button type="button" class="btn-contact-tool" id="btnLocationAddRow" title="Add Office Location">
-                <img src="icons/Add.svg" alt="Add Location" width="26" height="26">
+        <!-- 3. Office Location Table Popup (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="locationDetailsSidePanel" style="display: none; width: 960px; max-width: 96vw;">
+          <!-- Header Ribbon Badge Matching Mockup: Office Location + Top Right Plus Icon -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblLocationCardTitle">Office Location</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnLocationAddRow" title="Add Office Location" aria-label="Add Office Location">
+                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
               </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseLocationCard" aria-label="Close location details">&times;</button>
             </div>
           </div>
 
-          <!-- Location Table with Filter Funnels -->
-          <div class="contact-table-wrap">
+          <!-- Table Body Matching Uploaded Mockup -->
+          <div class="contact-table-wrap" style="padding: 0;">
             <table class="contact-custom-table" id="tblLocationPopup">
               <thead>
                 <tr>
+                  <th class="col-loc-code">
+                    <span>Office Code</span>
+                  </th>
                   <th class="col-loc-name">
                     <span>Office Name</span>
                     <button type="button" class="contact-th-filter-btn" data-filter-col="officeName" title="Filter Office Name">▼</button>
                   </th>
                   <th class="col-loc-lat">
-                    <span>Latitude</span>
+                    <span>Lattitude</span>
                   </th>
                   <th class="col-loc-lng">
-                    <span>Longitude</span>
+                    <span>Longtitude</span>
+                  </th>
+                  <th class="col-loc-incharge">
+                    <span>In - Charge</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="inCharge" title="Filter In-Charge">▼</button>
                   </th>
                   <th class="col-loc-status">
                     <span>Status</span>
-                    <button type="button" class="contact-th-filter-btn" data-filter-col="locStatus" title="Filter Status">▼</button>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="status" title="Filter Status">▼</button>
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td class="td-link-blue">Headquarters - Chennai</td>
-                  <td>13.0827° N</td>
-                  <td>80.2707° E</td>
-                  <td><span class="status-badge status-active">Active</span></td>
-                </tr>
-                <tr>
-                  <td class="td-link-blue">Branch - Bengaluru</td>
-                  <td>12.9716° N</td>
-                  <td>77.5946° E</td>
-                  <td><span class="status-badge status-active">Active</span></td>
-                </tr>
+              <tbody id="tbodyLocationDetails">
               </tbody>
             </table>
           </div>
         </div>
 
         <!-- 4. Bank Details Table Popup (Matching Uploaded Mockup) -->
-        <div class="side-form-card side-contact-popup" id="bankDetailsSidePanel" style="display: none; width: 1120px; max-width: 96vw;">
+        <div class="side-form-card side-contact-popup" id="bankDetailsSidePanel" style="display: none; width: 1140px; max-width: 96vw;">
           <!-- Header Ribbon Badge Matching Mockup: Bank Details + Top Right Plus Icon -->
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblBankVendorTitle">Bank Details</div>
@@ -2275,39 +2271,77 @@
                 <tr>
                   <th class="col-bank-acc-name">
                     <span>Account Name</span>
-                    <button type="button" class="contact-th-filter-btn" title="Filter Account Name">▼</button>
-                  </th>
-                  <th class="col-bank-acc-type">
-                    <span>Account Type</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="accountName" title="Filter Account Name">▼</button>
                   </th>
                   <th class="col-bank-acc-num">
                     <span>Account Number</span>
                   </th>
                   <th class="col-bank-name">
                     <span>Bank Name</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="bankName" title="Filter Bank Name">▼</button>
                   </th>
                   <th class="col-bank-ifsc">
                     <span>IFSC Code</span>
                   </th>
+                  <th class="col-bank-responsible">
+                    <span>Responsible</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="responsible" title="Filter Responsible">▼</button>
+                  </th>
                   <th class="col-bank-status">
                     <span>Status</span>
-                    <button type="button" class="contact-th-filter-btn" title="Filter Status">▼</button>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="status" title="Filter Status">▼</button>
                   </th>
                 </tr>
               </thead>
               <tbody id="tbodyBankDetails">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4B. Holidays Table Popup (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="holidaysSidePanel" style="display: none; width: 800px; max-width: 96vw;">
+          <!-- Header Ribbon Badge Matching Mockup: Holidays + Top Right Plus Icon -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblHolidaysCardTitle">Holidays</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnHolidayAddRow" title="Add Holiday" aria-label="Add Holiday">
+                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseHolidaysCard" aria-label="Close holidays">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Body Matching Uploaded Mockup -->
+          <div class="contact-table-wrap" style="padding: 0;">
+            <table class="contact-custom-table" id="tblHolidaysPopup">
+              <thead>
                 <tr>
-                  <td class="col-bank-acc-name">ABC Private Ltd</td>
-                  <td class="col-bank-acc-type">Current</td>
-                  <td class="col-bank-acc-num">
-                    <a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: 12345678910'); return false;">12345678910</a>
-                  </td>
-                  <td class="col-bank-name">ABC Private Ltd</td>
-                  <td class="col-bank-ifsc">ABC Private</td>
-                  <td class="col-bank-status">
-                    <span class="status-badge status-active">Active</span>
-                  </td>
+                  <th class="col-holiday-year">
+                    <span>Year</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="year" title="Filter Year">▼</button>
+                  </th>
+                  <th class="col-holiday-month">
+                    <span>Month</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="month" title="Filter Month">▼</button>
+                  </th>
+                  <th class="col-holiday-date">
+                    <span>Date</span>
+                  </th>
+                  <th class="col-holiday-day">
+                    <span>Day</span>
+                  </th>
+                  <th class="col-holiday-name">
+                    <span>Holiday Name</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="holidayName" title="Filter Holiday Name">▼</button>
+                  </th>
+                  <th class="col-holiday-status">
+                    <span>Status</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="status" title="Filter Status">▼</button>
+                  </th>
                 </tr>
+              </thead>
+              <tbody id="tbodyHolidaysDetails">
               </tbody>
             </table>
           </div>
@@ -2416,7 +2450,7 @@
         </div>
 
         <!-- 7. Add Bank Form Card (Nested Modal) -->
-        <div class="side-form-card" id="addBankCard" style="display: none; width: 440px;">
+        <div class="side-form-card" id="addBankCard" style="display: none; width: 460px;">
           <!-- Header Ribbon Badge: Add Bank -->
           <div class="side-form-header">
             <div class="side-form-title-badge">Add Bank</div>
@@ -2435,30 +2469,19 @@
               </div>
             </div>
 
-            <!-- 2. Account Type (Dropdown) -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpAddBankAccountType">Account Type</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpAddBankAccountType">
-                  <option value="Savings">Savings</option>
-                  <option value="Current" selected>Current</option>
-                  <option value="Salary">Salary</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 3. Account Number -->
+            <!-- 2. Account Number -->
             <div class="form-row-group">
               <label class="form-label" for="inpAddBankAccountNumber">Account Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control" id="inpAddBankAccountNumber" placeholder="">
-                <span class="input-pdf-badge" title="Upload PDF">
+                <input type="file" id="fileAddBankDoc" accept="application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                <span class="input-pdf-badge" title="Upload PDF" onclick="document.getElementById('fileAddBankDoc').click();" style="cursor: pointer;">
                   <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>
 
-            <!-- 4. Bank Name -->
+            <!-- 3. Bank Name -->
             <div class="form-row-group">
               <label class="form-label" for="inpAddBankName">Bank Name</label>
               <div class="form-input-wrap">
@@ -2466,11 +2489,19 @@
               </div>
             </div>
 
-            <!-- 5. IFSC Code -->
+            <!-- 4. IFSC Code -->
             <div class="form-row-group">
               <label class="form-label" for="inpAddBankIfsc">IFSC Code</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpAddBankIfsc" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Responsible -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankResponsible">Responsible</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankResponsible" placeholder="">
               </div>
             </div>
 
@@ -2488,6 +2519,251 @@
             <!-- Submit Save Button Inside Tab Centered -->
             <div class="form-submit-inside-wrap">
               <button type="button" class="btn-card-submit-inside" id="btnSubmitAddBank" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 7B. Add Holiday Form Card (Nested Modal) -->
+        <div class="side-form-card" id="addHolidayCard" style="display: none; width: 440px;">
+          <!-- Header Ribbon Badge: Add Holiday -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Holiday</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddHolidayCard" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddHoliday" onsubmit="event.preventDefault();" style="padding: 16px 24px 20px 24px;">
+            <!-- 1. Year (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddHolidayYear">Year</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddHolidayYear">
+                  <option value="2026" selected>2026</option>
+                  <option value="2025">2025</option>
+                  <option value="2024">2024</option>
+                  <option value="2027">2027</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Month (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddHolidayMonth">Month</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddHolidayMonth">
+                  <option value="January" selected>January</option>
+                  <option value="February">February</option>
+                  <option value="March">March</option>
+                  <option value="April">April</option>
+                  <option value="May">May</option>
+                  <option value="June">June</option>
+                  <option value="July">July</option>
+                  <option value="August">August</option>
+                  <option value="September">September</option>
+                  <option value="October">October</option>
+                  <option value="November">November</option>
+                  <option value="December">December</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Date -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddHolidayDate">Date</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddHolidayDate" placeholder="e.g. 26" value="26">
+              </div>
+            </div>
+
+            <!-- 4. Day (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddHolidayDay">Day</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddHolidayDay">
+                  <option value="Monday" selected>Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. Holiday Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddHolidayName">Holiday Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddHolidayName" placeholder="Enter Holiday Name">
+              </div>
+            </div>
+
+            <!-- 6. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddHolidayStatus" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitAddHoliday" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 7C. Add Office Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="addOfficeLocationCard" style="display: none; width: 440px; max-height: 92vh; overflow-y: auto;">
+          <!-- Header Ribbon Badge: Add Office -->
+          <div class="side-form-header" style="position: sticky; top: 0; z-index: 10; background: #ffffff;">
+            <div class="side-form-title-badge" id="lblAddOfficeTitle">Add Office</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddOfficeLocationCard" aria-label="Close form" style="color: #ef4444; font-size: 24px; font-weight: bold;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddOfficeLocation" onsubmit="event.preventDefault();" style="padding: 14px 20px 18px 20px;">
+            <!-- 1. Office Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationCode">Office Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationCode" placeholder="">
+              </div>
+            </div>
+
+            <!-- 2. Office Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationName">Office Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 3. Address -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationAddress">Address</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationAddress" placeholder="">
+              </div>
+            </div>
+
+            <!-- 4. Lattitude -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationLat">Lattitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationLat" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Longtitude -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationLng">Longtitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationLng" placeholder="">
+              </div>
+            </div>
+
+            <!-- 6. In - Charge (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationIncharge">In - Charge</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddOfficeLocationIncharge">
+                  <option value="" selected disabled></option>
+                  <option value="Rajesh Kumar">Rajesh Kumar</option>
+                  <option value="Priya Sharma">Priya Sharma</option>
+                  <option value="Amit Patel">Amit Patel</option>
+                  <option value="Suresh Reddy">Suresh Reddy</option>
+                  <option value="Anirban Das">Anirban Das</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 7. LL Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationLLName">LL Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationLLName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 8. LL Contact Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationLLContact">LL Contact Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationLLContact" placeholder="">
+              </div>
+            </div>
+
+            <!-- 9. Rental Amount -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationRental">Rental Amount</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationRental" placeholder="">
+              </div>
+            </div>
+
+            <!-- 10. TDS Dedusction (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationTDSDeduction">TDS Dedusction</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddOfficeLocationTDSDeduction">
+                  <option value="" selected disabled></option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="Applicable">Applicable</option>
+                  <option value="Not Applicable">Not Applicable</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 11. TDS Rate (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationTDSRate">TDS Rate</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpAddOfficeLocationTDSRate">
+                  <option value="1% / 2% / 10%" selected>1% / 2% / 10%</option>
+                  <option value="1%">1%</option>
+                  <option value="2%">2%</option>
+                  <option value="5%">5%</option>
+                  <option value="10%">10%</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 12. EB SC Numer -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddOfficeLocationEBSC">EB SC Numer</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddOfficeLocationEBSC" placeholder="">
+              </div>
+            </div>
+
+            <!-- 13. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpAddOfficeLocationStatus" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitAddOfficeLocation" title="Save" aria-label="Submit">
                 <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
@@ -3848,7 +4124,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=45"></script>
+  <script src="assets/js/home.js?v=52"></script>
 </body>
 
 </html>

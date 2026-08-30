@@ -1659,8 +1659,8 @@ tr.tr-sub-headers th,
   }
 }
 
-/* Nested Add Cards (Add Bank, Add Salary, Add Asset) centered overlapping on top */
-#addBankCard, #addSalaryCard, #addAssetCard {
+/* Nested Add Cards (Add Bank, Add Salary, Add Asset, Add Holiday, Add Office Location) centered overlapping on top */
+#addBankCard, #addSalaryCard, #addAssetCard, #addHolidayCard, #addOfficeLocationCard {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
@@ -1784,40 +1784,166 @@ tr.tr-sub-headers th,
   transform: scale(1.15);
 }
 
-/* Bank Details Popup & Columns (Extended to fit 50 chars cleanly) */
+/* Office Location Details Popup & Columns (Extended to 25 chars for Office Name and In-Charge) */
+#locationDetailsSidePanel {
+  width: 960px !important;
+  max-width: 96vw !important;
+}
+.col-loc-code {
+  min-width: 110px !important;
+  width: 110px !important;
+}
+td.col-loc-code {
+  text-align: center !important;
+}
+.col-loc-name {
+  min-width: 255px !important;
+  width: 255px !important;
+}
+td.col-loc-name {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+.col-loc-lat {
+  min-width: 110px !important;
+  width: 110px !important;
+}
+td.col-loc-lat {
+  text-align: center !important;
+}
+.col-loc-lng {
+  min-width: 110px !important;
+  width: 110px !important;
+}
+td.col-loc-lng {
+  text-align: center !important;
+}
+.col-loc-incharge {
+  min-width: 255px !important;
+  width: 255px !important;
+}
+td.col-loc-incharge {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+.col-loc-status {
+  min-width: 95px !important;
+  width: 95px !important;
+}
+td.col-loc-status {
+  text-align: center !important;
+}
+
+/* Bank Details Popup & Columns (Extended to 25 chars for Account Name, Number, Bank Name) */
 #bankDetailsSidePanel {
-  width: 1120px !important;
+  width: 1140px !important;
   max-width: 96vw !important;
 }
 .col-bank-acc-name {
-  min-width: 320px !important;
-  width: 320px !important;
+  min-width: 255px !important;
+  width: 255px !important;
 }
 td.col-bank-acc-name {
   text-align: left !important;
   padding-left: 14px !important;
   white-space: nowrap !important;
 }
+.col-bank-acc-num {
+  min-width: 230px !important;
+  width: 230px !important;
+}
+td.col-bank-acc-num {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
 .col-bank-name {
-  min-width: 300px !important;
-  width: 300px !important;
+  min-width: 255px !important;
+  width: 255px !important;
 }
 td.col-bank-name {
   text-align: left !important;
   padding-left: 14px !important;
   white-space: nowrap !important;
 }
-.col-bank-acc-type {
-  min-width: 110px !important;
-}
-.col-bank-acc-num {
-  min-width: 140px !important;
-}
 .col-bank-ifsc {
-  min-width: 120px !important;
+  min-width: 140px !important;
+  width: 140px !important;
+}
+td.col-bank-ifsc {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+.col-bank-responsible {
+  min-width: 150px !important;
+  width: 150px !important;
+}
+td.col-bank-responsible {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
 }
 .col-bank-status {
-  min-width: 90px !important;
+  min-width: 100px !important;
+  width: 100px !important;
+}
+td.col-bank-status {
+  text-align: center !important;
+}
+
+/* Holidays Popup & Columns (Extended to 25 chars for Holiday Name) */
+#holidaysSidePanel {
+  width: 800px !important;
+  max-width: 96vw !important;
+}
+.col-holiday-year {
+  min-width: 95px !important;
+  width: 95px !important;
+}
+td.col-holiday-year {
+  text-align: center !important;
+}
+.col-holiday-month {
+  min-width: 120px !important;
+  width: 120px !important;
+}
+td.col-holiday-month {
+  text-align: left !important;
+  padding-left: 14px !important;
+}
+.col-holiday-date {
+  min-width: 85px !important;
+  width: 85px !important;
+}
+td.col-holiday-date {
+  text-align: center !important;
+}
+.col-holiday-day {
+  min-width: 110px !important;
+  width: 110px !important;
+}
+td.col-holiday-day {
+  text-align: left !important;
+  padding-left: 14px !important;
+}
+.col-holiday-name {
+  min-width: 255px !important;
+  width: 255px !important;
+}
+td.col-holiday-name {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+.col-holiday-status {
+  min-width: 95px !important;
+  width: 95px !important;
+}
+td.col-holiday-status {
+  text-align: center !important;
 }
 
 /* Salary Details Popup & Columns (Extended to fit 6-7 digit numbers with decimals) */

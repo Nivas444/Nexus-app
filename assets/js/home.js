@@ -2680,9 +2680,15 @@ function initSideFormEvents() {
     }
   });
 
-  // Contact Table Data & Filtering
+  // Contact, Bank, Holiday & Location Table Data & Filtering
   renderVendorContactTable();
   initContactTableFilters();
+  renderCompanyBankTable();
+  initCompanyBankTableFilters();
+  renderCompanyHolidaysTable();
+  initCompanyHolidaysTableFilters();
+  renderCompanyLocationTable();
+  initCompanyLocationTableFilters();
 
   const btnCsvUpload = document.getElementById('btnContactCsvUpload');
   if (btnCsvUpload) {
@@ -3539,23 +3545,7 @@ function initSideFormEvents() {
     });
   }
 
-  // Location Toolbar: Plus Add Row
-  const btnLocationAddRow = document.getElementById('btnLocationAddRow');
-  const tblLocationBody = document.querySelector('#tblLocationPopup tbody');
 
-  if (btnLocationAddRow && tblLocationBody) {
-    btnLocationAddRow.addEventListener('click', () => {
-      const newTr = document.createElement('tr');
-      newTr.innerHTML = `
-        <td class="td-link-blue" contenteditable="true">New Office Location</td>
-        <td contenteditable="true">13.0000° N</td>
-        <td contenteditable="true">80.0000° E</td>
-        <td><span class="status-badge status-active">Active</span></td>
-      `;
-      tblLocationBody.appendChild(newTr);
-      showToast('New location row added to table');
-    });
-  }
 
   // Real Slide Toggle Switch Listener inside Add Customer Form
   if (statusToggle && lblStatus) {
@@ -4255,8 +4245,10 @@ function initSideFormEvents() {
   const btnCloseAssetCard = document.getElementById('btnCloseAssetCard');
 
   function updateCardDimmedState() {
+    const holidayPanel = document.getElementById('holidaysSidePanel');
     const isAnyPopupOpen = 
       (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') ||
+      (holidayPanel && holidayPanel.style.display !== 'none' && holidayPanel.style.display !== '') ||
       (salaryPanel && salaryPanel.style.display !== 'none' && salaryPanel.style.display !== '') ||
       (assetPanel && assetPanel.style.display !== 'none' && assetPanel.style.display !== '') ||
       (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') ||
@@ -4266,16 +4258,19 @@ function initSideFormEvents() {
     const empCard = document.getElementById('addEmployeeCard');
     const vendorCard = document.getElementById('addVendorCard');
     const customerCard = document.getElementById('addCustomerCard');
+    const indusCard = document.getElementById('addIndusTowerCard');
 
     if (isAnyPopupOpen) {
       if (empCard && empCard.style.display !== 'none') empCard.classList.add('card-dimmed-blurred');
       if (vendorCard && vendorCard.style.display !== 'none') vendorCard.classList.add('card-dimmed-blurred');
       if (customerCard && customerCard.style.display !== 'none') customerCard.classList.add('card-dimmed-blurred');
+      if (indusCard && indusCard.style.display !== 'none') indusCard.classList.add('card-dimmed-blurred');
       if (cardsRow) cardsRow.classList.add('has-dimmed-card');
     } else {
       if (empCard) empCard.classList.remove('card-dimmed-blurred');
       if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
       if (customerCard) customerCard.classList.remove('card-dimmed-blurred');
+      if (indusCard) indusCard.classList.remove('card-dimmed-blurred');
       if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
     }
   }
@@ -4284,6 +4279,29 @@ function initSideFormEvents() {
     btnCloseBankCard.addEventListener('click', () => {
       bankPanel.style.display = 'none';
       setBankEditableState(false);
+      const indusCard = document.getElementById('addIndusTowerCard');
+      if (indusCard) indusCard.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  const holidayPanel = document.getElementById('holidaysSidePanel');
+  const btnCloseHolidaysCard = document.getElementById('btnCloseHolidaysCard');
+  if (btnCloseHolidaysCard && holidayPanel) {
+    btnCloseHolidaysCard.addEventListener('click', () => {
+      holidayPanel.style.display = 'none';
+      const indusCard = document.getElementById('addIndusTowerCard');
+      if (indusCard) indusCard.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  const btnCloseLocationCard = document.getElementById('btnCloseLocationCard');
+  if (btnCloseLocationCard && locationPanel) {
+    btnCloseLocationCard.addEventListener('click', () => {
+      locationPanel.style.display = 'none';
+      const indusCard = document.getElementById('addIndusTowerCard');
+      if (indusCard) indusCard.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
     });
   }
@@ -4402,30 +4420,149 @@ function initSideFormEvents() {
   if (btnSubmitAddBank && addBankCard && bankPanel) {
     btnSubmitAddBank.addEventListener('click', () => {
       const accName = document.getElementById('inpAddBankAccountName')?.value.trim() || 'ABC Private Ltd';
-      const accType = document.getElementById('inpAddBankAccountType')?.value || 'Current';
       const accNum = document.getElementById('inpAddBankAccountNumber')?.value.trim() || '12345678910';
       const bankName = document.getElementById('inpAddBankName')?.value.trim() || 'ABC Private Ltd';
       const ifsc = document.getElementById('inpAddBankIfsc')?.value.trim() || 'ABC Private';
+      const responsible = document.getElementById('inpAddBankResponsible')?.value.trim() || 'ABC Private';
       const isStatusActive = document.getElementById('inpAddBankStatus')?.checked ?? true;
 
-      const tbody = document.getElementById('tbodyBankDetails');
-      if (tbody) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${accName}</td>
-          <td>${accType}</td>
-          <td><a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: ${accNum}'); return false;">${accNum}</a></td>
-          <td>${bankName}</td>
-          <td>${ifsc}</td>
-          <td><span class="status-badge ${isStatusActive ? 'status-active' : 'status-inactive'}">${isStatusActive ? 'Active' : 'De-Active'}</span></td>
-        `;
-        tbody.insertBefore(tr, tbody.firstChild);
-      }
+      const newRecord = {
+        id: `cbank-${Date.now()}`,
+        accountName: accName,
+        accountNumber: accNum,
+        bankName: bankName,
+        ifscCode: ifsc,
+        responsible: responsible,
+        status: isStatusActive ? 'Active' : 'De-Active'
+      };
+
+      companyBankData.unshift(newRecord);
+      renderCompanyBankTable();
 
       addBankCard.style.display = 'none';
       bankPanel.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
-      showToast('New Bank details saved successfully!');
+      showToast(`Bank details for ${accName} added successfully!`);
+    });
+  }
+
+  const btnHolidayAddRow = document.getElementById('btnHolidayAddRow');
+  const addHolidayCard = document.getElementById('addHolidayCard');
+  const btnCloseAddHolidayCard = document.getElementById('btnCloseAddHolidayCard');
+  const btnSubmitAddHoliday = document.getElementById('btnSubmitAddHoliday');
+
+  if (btnHolidayAddRow && addHolidayCard && holidayPanel) {
+    btnHolidayAddRow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      holidayPanel.classList.add('card-dimmed-blurred');
+      addHolidayCard.style.display = 'block';
+      const frm = document.getElementById('frmAddHoliday');
+      if (frm) frm.reset();
+      showToast('Add Holiday Form opened');
+    });
+  }
+
+  if (btnCloseAddHolidayCard && addHolidayCard && holidayPanel) {
+    btnCloseAddHolidayCard.addEventListener('click', () => {
+      addHolidayCard.style.display = 'none';
+      holidayPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  if (btnSubmitAddHoliday && addHolidayCard && holidayPanel) {
+    btnSubmitAddHoliday.addEventListener('click', () => {
+      const year = document.getElementById('inpAddHolidayYear')?.value.trim() || '2026';
+      const month = document.getElementById('inpAddHolidayMonth')?.value.trim() || 'January';
+      const date = document.getElementById('inpAddHolidayDate')?.value.trim() || '26';
+      const day = document.getElementById('inpAddHolidayDay')?.value.trim() || 'Monday';
+      const holidayName = document.getElementById('inpAddHolidayName')?.value.trim() || 'Republic Day';
+      const isStatusActive = document.getElementById('inpAddHolidayStatus')?.checked ?? true;
+
+      const newRecord = {
+        id: `h-${Date.now()}`,
+        year: year,
+        month: month,
+        date: date,
+        day: day,
+        holidayName: holidayName,
+        status: isStatusActive ? 'Active' : 'In - Active'
+      };
+
+      companyHolidaysData.unshift(newRecord);
+      renderCompanyHolidaysTable();
+
+      addHolidayCard.style.display = 'none';
+      holidayPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+      showToast(`Holiday "${holidayName}" added successfully!`);
+    });
+  }
+
+  const btnLocationAddRow = document.getElementById('btnLocationAddRow');
+  const addOfficeLocationCard = document.getElementById('addOfficeLocationCard');
+  const btnCloseAddOfficeLocationCard = document.getElementById('btnCloseAddOfficeLocationCard');
+  const btnSubmitAddOfficeLocation = document.getElementById('btnSubmitAddOfficeLocation');
+
+  if (btnLocationAddRow && addOfficeLocationCard && locationPanel) {
+    btnLocationAddRow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      locationPanel.classList.add('card-dimmed-blurred');
+      addOfficeLocationCard.style.display = 'block';
+      const frm = document.getElementById('frmAddOfficeLocation');
+      if (frm) frm.reset();
+      showToast('Add Office Location Form opened');
+    });
+  }
+
+  if (btnCloseAddOfficeLocationCard && addOfficeLocationCard && locationPanel) {
+    btnCloseAddOfficeLocationCard.addEventListener('click', () => {
+      addOfficeLocationCard.style.display = 'none';
+      locationPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  if (btnSubmitAddOfficeLocation && addOfficeLocationCard && locationPanel) {
+    btnSubmitAddOfficeLocation.addEventListener('click', () => {
+      const code = document.getElementById('inpAddOfficeLocationCode')?.value.trim() || 'LOC-005';
+      const name = document.getElementById('inpAddOfficeLocationName')?.value.trim() || 'Regional Office';
+      const address = document.getElementById('inpAddOfficeLocationAddress')?.value.trim() || '';
+      const lat = document.getElementById('inpAddOfficeLocationLat')?.value.trim() || '13.0827° N';
+      const lng = document.getElementById('inpAddOfficeLocationLng')?.value.trim() || '80.2707° E';
+      const incharge = document.getElementById('inpAddOfficeLocationIncharge')?.value.trim() || 'Manager';
+      const llName = document.getElementById('inpAddOfficeLocationLLName')?.value.trim() || '';
+      const llContact = document.getElementById('inpAddOfficeLocationLLContact')?.value.trim() || '';
+      const rental = document.getElementById('inpAddOfficeLocationRental')?.value.trim() || '';
+      const tdsDeduction = document.getElementById('inpAddOfficeLocationTDSDeduction')?.value.trim() || '';
+      const tdsRate = document.getElementById('inpAddOfficeLocationTDSRate')?.value.trim() || '';
+      const ebSc = document.getElementById('inpAddOfficeLocationEBSC')?.value.trim() || '';
+      const isStatusActive = document.getElementById('inpAddOfficeLocationStatus')?.checked ?? true;
+
+      const newRecord = {
+        id: `loc-${Date.now()}`,
+        officeCode: code,
+        officeName: name,
+        address: address,
+        latitude: lat,
+        longitude: lng,
+        inCharge: incharge,
+        llName: llName,
+        llContact: llContact,
+        rental: rental,
+        tdsDeduction: tdsDeduction,
+        tdsRate: tdsRate,
+        ebSc: ebSc,
+        status: isStatusActive ? 'Active' : 'In - Active'
+      };
+
+      companyLocationData.unshift(newRecord);
+      renderCompanyLocationTable();
+
+      addOfficeLocationCard.style.display = 'none';
+      locationPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+      showToast(`Office "${name}" added successfully!`);
     });
   }
 
@@ -5039,6 +5176,12 @@ function closeSideForm() {
   if (locationPanel) locationPanel.style.display = 'none';
   const bankPanel = document.getElementById('bankDetailsSidePanel');
   if (bankPanel) bankPanel.style.display = 'none';
+  const holidayPanel = document.getElementById('holidaysSidePanel');
+  if (holidayPanel) holidayPanel.style.display = 'none';
+  const addHolidayCard = document.getElementById('addHolidayCard');
+  if (addHolidayCard) addHolidayCard.style.display = 'none';
+  const addOfficeLocationCard = document.getElementById('addOfficeLocationCard');
+  if (addOfficeLocationCard) addOfficeLocationCard.style.display = 'none';
   const salaryPanel = document.getElementById('salaryDetailsSidePanel');
   if (salaryPanel) salaryPanel.style.display = 'none';
   const assetPanel = document.getElementById('assetDetailsSidePanel');
@@ -5403,6 +5546,151 @@ window.openVendorBankSidePanel = function() {
   showToast('Vendor Bank details opened');
 };
 
+// Opens Company Bank Details panel as a child tab next to View Company card
+window.openCompanyBankSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim the parent addIndusTowerCard
+  const indusCard = document.getElementById('addIndusTowerCard');
+  if (indusCard) indusCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide other sub-panels
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
+   'vendorSupplyScopeSidePanel', 'addBankCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const bankPanel = document.getElementById('bankDetailsSidePanel');
+  if (bankPanel) {
+    bankPanel.classList.remove('card-dimmed-blurred');
+    bankPanel.style.display = 'block';
+  }
+
+  renderCompanyBankTable();
+  overlay.style.display = 'flex';
+  showToast('Bank details opened');
+};
+
+// Opens Company Holidays Details panel as a child tab next to View Company card
+window.openCompanyHolidaysSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim the parent addIndusTowerCard
+  const indusCard = document.getElementById('addIndusTowerCard');
+  if (indusCard) indusCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide other sub-panels
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
+   'vendorSupplyScopeSidePanel', 'addBankCard', 'addHolidayCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const holidayPanel = document.getElementById('holidaysSidePanel');
+  if (holidayPanel) {
+    holidayPanel.classList.remove('card-dimmed-blurred');
+    holidayPanel.style.display = 'block';
+  }
+
+  renderCompanyHolidaysTable();
+  overlay.style.display = 'flex';
+  showToast('Holidays opened');
+};
+
+// Opens Company Office Location Details panel as a child tab next to View Company card
+window.openCompanyLocationSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Dim the parent addIndusTowerCard
+  const indusCard = document.getElementById('addIndusTowerCard');
+  if (indusCard) indusCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  // Hide other sub-panels
+  ['contactDetailsSidePanel', 'bankDetailsSidePanel', 'holidaysSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'projectTypeDocSidePanel', 'vendorBankSideCard', 'addContactFormCard',
+   'vendorSupplyScopeSidePanel', 'addBankCard', 'addHolidayCard', 'addOfficeLocationCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const locPanel = document.getElementById('locationDetailsSidePanel');
+  if (locPanel) {
+    locPanel.classList.remove('card-dimmed-blurred');
+    locPanel.style.display = 'block';
+  }
+
+  renderCompanyLocationTable();
+  overlay.style.display = 'flex';
+  showToast('Office Location opened');
+};
+
+let isIndusTowerEditing = false;
+
+function setIndusTowerFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddIndusTower');
+  if (!form) return;
+
+  const inputs = form.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox' || input.type === 'file') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') {
+        input.setAttribute('disabled', 'true');
+      } else {
+        input.setAttribute('readonly', 'true');
+      }
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') {
+        input.removeAttribute('disabled');
+      } else {
+        input.removeAttribute('readonly');
+      }
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+
+  const uploadBadges = form.querySelectorAll('.input-pdf-badge, .btn-pdf-upload-badge, #btnIndusWcExpiryCalendar');
+  uploadBadges.forEach(b => {
+    b.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+    b.style.opacity = isReadOnly ? '0.65' : '1';
+    b.style.cursor = isReadOnly ? 'default' : 'pointer';
+  });
+
+  const submitBtn = document.getElementById('btnSubmitIndusTower');
+  if (submitBtn) {
+    submitBtn.style.display = isReadOnly ? 'none' : 'flex';
+  }
+}
+
 window.openIndusTowerPageCard = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -5417,16 +5705,15 @@ window.openIndusTowerPageCard = function() {
     const lblTitle = document.getElementById('lblIndusTowerCardTitle');
     if (lblTitle) lblTitle.innerText = 'View Company Name';
     
-    // Enable all slidebars in addIndusTowerCard so they are WORKABLE
-    const toggles = indusCard.querySelectorAll('input[type="checkbox"]');
-    toggles.forEach(t => {
-      t.disabled = false;
-      const parentSwitch = t.closest('.toggle-slide-switch');
-      if (parentSwitch) {
-        parentSwitch.style.pointerEvents = 'auto';
-        parentSwitch.style.opacity = '1';
-      }
-    });
+    // Set to read-only view mode initially until edit button is clicked
+    isIndusTowerEditing = false;
+    setIndusTowerFormReadOnly(true);
+
+    const imgIcon = document.getElementById('imgIndusTowerEditIcon');
+    if (imgIcon) {
+      imgIcon.src = 'icons/Edit.svg';
+      imgIcon.title = 'Edit Info';
+    }
   }
 
   overlay.style.display = 'flex';
@@ -5446,7 +5733,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnLogo && fileLogo) {
     btnLogo.addEventListener('click', () => {
-      fileLogo.click();
+      if (isIndusTowerEditing) fileLogo.click();
     });
 
     fileLogo.addEventListener('change', (e) => {
@@ -5474,27 +5761,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnEdit = document.getElementById('btnIndusTowerEdit');
   if (btnEdit) {
-    btnEdit.addEventListener('click', () => showToast('Edit clicked'));
+    btnEdit.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const lblTitle = document.getElementById('lblIndusTowerCardTitle');
+      const imgIcon = document.getElementById('imgIndusTowerEditIcon');
+
+      if (!isIndusTowerEditing) {
+        // ENTER EDIT MODE
+        isIndusTowerEditing = true;
+        setIndusTowerFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Company Name';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Company Name form is now editable');
+      } else {
+        // SAVE EDITS
+        isIndusTowerEditing = false;
+        setIndusTowerFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Company Name';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Company details saved & updated successfully!');
+      }
+    });
   }
 
   const btnBank = document.getElementById('btnIndusTowerBank');
   if (btnBank) {
-    btnBank.addEventListener('click', () => {
-      openSidePanel('bank');
-      showToast('Bank details clicked');
+    btnBank.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openCompanyBankSidePanel();
     });
   }
 
   const btnLoc = document.getElementById('btnIndusTowerLocation');
   if (btnLoc) {
-    btnLoc.addEventListener('click', () => {
-      showToast('Location clicked');
+    btnLoc.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openCompanyLocationSidePanel();
     });
   }
 
   const btnAshoka = document.getElementById('btnIndusTowerAshokaChakra');
   if (btnAshoka) {
-    btnAshoka.addEventListener('click', () => showToast('National holiday'));
+    btnAshoka.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openCompanyHolidaysSidePanel();
+    });
   }
 
   const btnWcCalendar = document.getElementById('btnIndusWcExpiryCalendar');
@@ -5502,6 +5819,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnWcCalendar && inpWcExpiry) {
     btnWcCalendar.addEventListener('click', (e) => {
       e.preventDefault();
+      if (!isIndusTowerEditing) return;
       if (typeof inpWcExpiry.showPicker === 'function') {
         inpWcExpiry.showPicker();
       } else {
@@ -5513,8 +5831,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnSubmitIndus = document.getElementById('btnSubmitIndusTower');
   if (btnSubmitIndus) {
     btnSubmitIndus.addEventListener('click', () => {
+      isIndusTowerEditing = false;
+      setIndusTowerFormReadOnly(true);
+      const lblTitle = document.getElementById('lblIndusTowerCardTitle');
+      if (lblTitle) lblTitle.innerText = 'View Company Name';
+      const imgIcon = document.getElementById('imgIndusTowerEditIcon');
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
       closeSideForm();
-      showToast('Telecom Page details saved successfully!');
+      showToast('Company Name details saved successfully!');
     });
   }
 });
@@ -5565,6 +5892,33 @@ function initExcelFilterSystem() {
         }
         closeExcelFilter();
         showToast('Scope filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'companyLocation') {
+        if (currentCompanyLocationFilterCol) {
+          delete activeCompanyLocationFilters[currentCompanyLocationFilterCol];
+          renderCompanyLocationTable();
+        }
+        closeExcelFilter();
+        showToast('Location filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'companyHolidays') {
+        if (currentCompanyHolidaysFilterCol) {
+          delete activeCompanyHolidaysFilters[currentCompanyHolidaysFilterCol];
+          renderCompanyHolidaysTable();
+        }
+        closeExcelFilter();
+        showToast('Holiday filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'companyBank') {
+        if (currentCompanyBankFilterCol) {
+          delete activeCompanyBankFilters[currentCompanyBankFilterCol];
+          renderCompanyBankTable();
+        }
+        closeExcelFilter();
+        showToast('Bank filter cleared');
         return;
       }
       if (dropdown.dataset.filterContext === 'serviceOthersScope') {
@@ -5679,6 +6033,57 @@ function initExcelFilterSystem() {
         return;
       }
 
+      if (dropdown.dataset.filterContext === 'companyLocation') {
+        if (!currentCompanyLocationFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeCompanyLocationFilters[currentCompanyLocationFilterCol];
+        } else {
+          activeCompanyLocationFilters[currentCompanyLocationFilterCol] = new Set(checkedItems);
+        }
+        renderCompanyLocationTable();
+        closeExcelFilter();
+        showToast('Location filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'companyHolidays') {
+        if (!currentCompanyHolidaysFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeCompanyHolidaysFilters[currentCompanyHolidaysFilterCol];
+        } else {
+          activeCompanyHolidaysFilters[currentCompanyHolidaysFilterCol] = new Set(checkedItems);
+        }
+        renderCompanyHolidaysTable();
+        closeExcelFilter();
+        showToast('Holiday filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'companyBank') {
+        if (!currentCompanyBankFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeCompanyBankFilters[currentCompanyBankFilterCol];
+        } else {
+          activeCompanyBankFilters[currentCompanyBankFilterCol] = new Set(checkedItems);
+        }
+        renderCompanyBankTable();
+        closeExcelFilter();
+        showToast('Bank filter applied');
+        return;
+      }
+
       if (dropdown.dataset.filterContext === 'serviceOthersScope') {
         if (!currentServiceOthersScopeFilterCol) return;
         const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
@@ -5726,6 +6131,443 @@ function rebindFilterButtons() {
       openExcelFilter(colKey, btn);
     });
   });
+}
+
+// Global Company Bank Dataset & Filter State
+let companyBankData = [
+  {
+    id: 'cbank-1',
+    accountName: 'ABC Private Ltd',
+    accountNumber: '12345678910',
+    bankName: 'ABC Private Ltd',
+    ifscCode: 'ABC Private',
+    responsible: 'ABC Private',
+    status: 'Active'
+  },
+  {
+    id: 'cbank-2',
+    accountName: 'Nexus Telecom Corp',
+    accountNumber: '98765432101',
+    bankName: 'HDFC Bank',
+    ifscCode: 'HDFC0001234',
+    responsible: 'John Doe',
+    status: 'Active'
+  },
+  {
+    id: 'cbank-3',
+    accountName: 'Nexus Infra Solutions',
+    accountNumber: '45678912301',
+    bankName: 'State Bank of India',
+    ifscCode: 'SBIN0004567',
+    responsible: 'Sarah Jenkins',
+    status: 'De-Active'
+  }
+];
+let activeCompanyBankFilters = {};
+let currentCompanyBankFilterCol = null;
+
+function renderCompanyBankTable() {
+  const tbody = document.getElementById('tbodyBankDetails');
+  if (!tbody) return;
+
+  let filtered = companyBankData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeCompanyBankFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching bank records found.</td></tr>`;
+    updateCompanyBankFilterBtnStates();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => {
+    const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
+    return `
+      <tr data-bank-id="${row.id}">
+        <td class="col-bank-acc-name">${row.accountName || ''}</td>
+        <td class="col-bank-acc-num">
+          <a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: ${row.accountNumber}'); return false;">${row.accountNumber || ''}</a>
+        </td>
+        <td class="col-bank-name">${row.bankName || ''}</td>
+        <td class="col-bank-ifsc">${row.ifscCode || ''}</td>
+        <td class="col-bank-responsible">${row.responsible || ''}</td>
+        <td class="col-bank-status">
+          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'De-Active' : 'Active'}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updateCompanyBankFilterBtnStates();
+}
+
+function updateCompanyBankFilterBtnStates() {
+  document.querySelectorAll('#tblBankDetailsPopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeCompanyBankFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initCompanyBankTableFilters() {
+  document.querySelectorAll('#tblBankDetailsPopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openCompanyBankFilter(colKey, btn);
+    });
+  });
+}
+
+function openCompanyBankFilter(colKey, triggerBtn) {
+  currentCompanyBankFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(companyBankData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeCompanyBankFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'companyBank';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+}
+
+// Global Company Holidays Dataset & Filter State
+let companyHolidaysData = [
+  {
+    id: 'h-1',
+    year: '2026',
+    month: 'January',
+    date: '26',
+    day: 'Monday',
+    holidayName: 'Republic Day',
+    status: 'Active'
+  },
+  {
+    id: 'h-2',
+    year: '2026',
+    month: 'August',
+    date: '15',
+    day: 'Saturday',
+    holidayName: 'Independence Day',
+    status: 'Active'
+  },
+  {
+    id: 'h-3',
+    year: '2026',
+    month: 'October',
+    date: '02',
+    day: 'Friday',
+    holidayName: 'Gandhi Jayanti',
+    status: 'Active'
+  },
+  {
+    id: 'h-4',
+    year: '2026',
+    month: 'November',
+    date: '08',
+    day: 'Sunday',
+    holidayName: 'Diwali',
+    status: 'Active'
+  },
+  {
+    id: 'h-5',
+    year: '2026',
+    month: 'December',
+    date: '25',
+    day: 'Friday',
+    holidayName: 'Christmas Day',
+    status: 'Active'
+  }
+];
+let activeCompanyHolidaysFilters = {};
+let currentCompanyHolidaysFilterCol = null;
+
+function renderCompanyHolidaysTable() {
+  const tbody = document.getElementById('tbodyHolidaysDetails');
+  if (!tbody) return;
+
+  let filtered = companyHolidaysData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeCompanyHolidaysFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching holidays found.</td></tr>`;
+    updateCompanyHolidaysFilterBtnStates();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => {
+    const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
+    return `
+      <tr data-holiday-id="${row.id}">
+        <td class="col-holiday-year td-center">${row.year || ''}</td>
+        <td class="col-holiday-month">${row.month || ''}</td>
+        <td class="col-holiday-date td-center">${row.date || ''}</td>
+        <td class="col-holiday-day">${row.day || ''}</td>
+        <td class="col-holiday-name">${row.holidayName || ''}</td>
+        <td class="col-holiday-status td-center">
+          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'In - Active' : 'Active'}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updateCompanyHolidaysFilterBtnStates();
+}
+
+function updateCompanyHolidaysFilterBtnStates() {
+  document.querySelectorAll('#tblHolidaysPopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeCompanyHolidaysFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initCompanyHolidaysTableFilters() {
+  document.querySelectorAll('#tblHolidaysPopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openCompanyHolidaysFilter(colKey, btn);
+    });
+  });
+}
+
+function openCompanyHolidaysFilter(colKey, triggerBtn) {
+  currentCompanyHolidaysFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(companyHolidaysData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeCompanyHolidaysFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'companyHolidays';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+}
+
+// Global Company Office Location Dataset & Filter State
+let companyLocationData = [
+  {
+    id: 'loc-1',
+    officeCode: 'LOC-001',
+    officeName: 'Headquarters - Chennai',
+    latitude: '13.0827° N',
+    longitude: '80.2707° E',
+    inCharge: 'Rajesh Kumar',
+    status: 'Active'
+  },
+  {
+    id: 'loc-2',
+    officeCode: 'LOC-002',
+    officeName: 'Branch - Bengaluru',
+    latitude: '12.9716° N',
+    longitude: '77.5946° E',
+    inCharge: 'Priya Sharma',
+    status: 'Active'
+  },
+  {
+    id: 'loc-3',
+    officeCode: 'LOC-003',
+    officeName: 'Regional - Mumbai',
+    latitude: '19.0760° N',
+    longitude: '72.8777° E',
+    inCharge: 'Amit Patel',
+    status: 'Active'
+  },
+  {
+    id: 'loc-4',
+    officeCode: 'LOC-004',
+    officeName: 'Hub - Hyderabad',
+    latitude: '17.3850° N',
+    longitude: '78.4867° E',
+    inCharge: 'Suresh Reddy',
+    status: 'Active'
+  }
+];
+let activeCompanyLocationFilters = {};
+let currentCompanyLocationFilterCol = null;
+
+function renderCompanyLocationTable() {
+  const tbody = document.getElementById('tbodyLocationDetails');
+  if (!tbody) return;
+
+  let filtered = companyLocationData.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeCompanyLocationFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching office locations found.</td></tr>`;
+    updateCompanyLocationFilterBtnStates();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => {
+    const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
+    return `
+      <tr data-location-id="${row.id}">
+        <td class="col-loc-code td-center">${row.officeCode || ''}</td>
+        <td class="col-loc-name">${row.officeName || ''}</td>
+        <td class="col-loc-lat td-center">${row.latitude || ''}</td>
+        <td class="col-loc-lng td-center">${row.longitude || ''}</td>
+        <td class="col-loc-incharge">${row.inCharge || ''}</td>
+        <td class="col-loc-status td-center">
+          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'In - Active' : 'Active'}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updateCompanyLocationFilterBtnStates();
+}
+
+function updateCompanyLocationFilterBtnStates() {
+  document.querySelectorAll('#tblLocationPopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeCompanyLocationFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initCompanyLocationTableFilters() {
+  document.querySelectorAll('#tblLocationPopup .contact-th-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openCompanyLocationFilter(colKey, btn);
+    });
+  });
+}
+
+function openCompanyLocationFilter(colKey, triggerBtn) {
+  currentCompanyLocationFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(companyLocationData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeCompanyLocationFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'companyLocation';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
 }
 
 // Global Contact Dataset & Filter State

@@ -234,6 +234,53 @@ const masterExpensesData = [
   }
 ];
 
+// Worklist -> Project Payment Details Dataset (Matching Uploaded Mockup)
+let selectedProjectPaymentReq = "R/RL-234567";
+const worklistProjectPaymentItems = [
+  {
+    id: "wpp-1",
+    selected: true,
+    expenseType: "PO",
+    boqName: "JCB Charges",
+    uom: "",
+    qty: "",
+    rateRequested: "",
+    rateValidated: "",
+    rateApproved: "",
+    amountBasic: "",
+    amountGst: "",
+    amountTotal: ""
+  },
+  {
+    id: "wpp-2",
+    selected: true,
+    expenseType: "Non - PO",
+    boqName: "",
+    uom: "",
+    qty: "",
+    rateRequested: "",
+    rateValidated: "",
+    rateApproved: "",
+    amountBasic: "",
+    amountGst: "",
+    amountTotal: ""
+  },
+  {
+    id: "wpp-3",
+    selected: true,
+    expenseType: "",
+    boqName: "",
+    uom: "",
+    qty: "",
+    rateRequested: "",
+    rateValidated: "",
+    rateApproved: "",
+    amountBasic: "",
+    amountGst: "",
+    amountTotal: ""
+  }
+];
+
 // Worklist -> Payment Dataset (All 7 Expense Heads: Project, Purchase, Employee, Transport, Admin, Accounts, Statutory)
 const paymentData = [
   {
@@ -736,7 +783,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } else if (moduleParam) {
     currentModule = moduleParam;
-    if (viewParam === 'payment' || viewParam === 'po') {
+    if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
       currentWorklistView = viewParam;
     } else {
       currentWorklistView = 'payment';
@@ -744,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     // Default after login is Worklist -> Payment
     currentModule = 'worklist';
-    if (viewParam === 'payment' || viewParam === 'po') {
+    if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
       currentWorklistView = viewParam;
     } else {
       currentWorklistView = 'payment';
@@ -852,6 +899,15 @@ function goBackSubpage() {
       currentModule = 'worklist';
       showToast('Returned to Worklist');
     }
+  } else if (currentModule === 'worklist') {
+    if (currentWorklistView === 'project_payment') {
+      isProjectPaymentEditing = false;
+      currentWorklistView = 'payment';
+      showToast('Returned to Payment Page');
+    } else {
+      currentModule = 'master';
+      currentMasterSubpage = 'customer';
+    }
   } else {
     currentModule = 'indus_towers';
     currentIndusSubpage = 'site';
@@ -898,7 +954,19 @@ function renderApp() {
     renderIndusTableHead();
     renderIndusFooter();
   } else if (currentModule === 'worklist') {
-    if (bannerTitle) bannerTitle.textContent = "Work List";
+    if (bannerTitle) {
+      if (currentWorklistView === 'project_payment') {
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content">
+            <div class="banner-left-title">${selectedProjectPaymentReq || 'R/RL-234567'} / New Build / With DG</div>
+            <div class="banner-center-title">230510678 / ( O - Capex )</div>
+            <div class="banner-right-title">IN-123456 / Guindy</div>
+          </div>
+        `;
+      } else {
+        bannerTitle.textContent = "Work List";
+      }
+    }
     loadWorklistDataset();
     renderWorklistToolbar();
     renderWorklistTableHead();
@@ -1977,7 +2045,9 @@ function renderMasterFooter() {
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
-  if (currentWorklistView === 'po') {
+  if (currentWorklistView === 'project_payment') {
+    currentDataset = worklistProjectPaymentItems;
+  } else if (currentWorklistView === 'po') {
     currentDataset = poData;
   } else {
     currentDataset = paymentData;
@@ -1990,7 +2060,53 @@ function renderWorklistToolbar() {
 
   const hasSelected = currentDataset.some(r => r.selected);
 
-  if (currentWorklistView === 'po') {
+  if (currentWorklistView === 'project_payment') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
+        </div>
+
+        <!-- Stat 1: Summation Total -->
+        <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">12,00,000.00</span>
+        </div>
+
+        <!-- Stat 2: Validated / Paid (Green Paid _ Received.svg) -->
+        <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">10,00,000.00</span>
+        </div>
+      </div>
+
+      <!-- Right Action Icons Group -->
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <!-- Stat 3: Balance / Payable (Red Payable.svg) moved to right side -->
+        <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px; margin-right: 6px;">
+          <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">2,00,000.00</span>
+        </div>
+
+        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
+          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
+          <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Payment Report" onclick="openProjectPaymentReportModal()">
+          <img src="icons/Payment Report.svg" alt="Payment Report" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Approve" onclick="showToast('Approved')">
+          <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn btn-project-payment-edit" id="btnProjectPaymentEdit" title="${isProjectPaymentEditing ? 'Save Changes' : 'Edit Details'}" onclick="toggleProjectPaymentEditMode()">
+          <img src="${isProjectPaymentEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isProjectPaymentEditing ? 'Save' : 'Edit'}" width="28" height="28">
+        </button>
+      </div>
+    `;
+    return;
+  } else if (currentWorklistView === 'po') {
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; min-width: 44px; min-height: 44px; justify-content: flex-end;">
@@ -2034,7 +2150,27 @@ function renderWorklistTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
 
-  if (currentWorklistView === 'po') {
+  if (currentWorklistView === 'project_payment') {
+    thead.innerHTML = `
+      <tr class="project-payment-header-row1">
+        <th rowspan="2" style="width: 70px;">Select</th>
+        <th rowspan="2" style="width: 140px;">Expense Type</th>
+        <th rowspan="2" style="width: 180px;">BOQ Name</th>
+        <th rowspan="2" style="width: 80px;">Uom</th>
+        <th rowspan="2" style="width: 80px;">Qty</th>
+        <th colspan="3">Rate</th>
+        <th colspan="3">Amount</th>
+      </tr>
+      <tr class="project-payment-header-row2">
+        <th style="width: 110px;">Requested</th>
+        <th style="width: 110px;">Validated</th>
+        <th style="width: 110px;">Approved</th>
+        <th style="width: 110px;">Basic</th>
+        <th style="width: 110px;">GST</th>
+        <th style="width: 110px;">Total</th>
+      </tr>
+    `;
+  } else if (currentWorklistView === 'po') {
     thead.innerHTML = `
       <tr class="po-view-header">
         <th class="th-select">Select</th>
@@ -2104,6 +2240,11 @@ function renderWorklistTableHead() {
 function renderWorklistFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
+
+  if (currentWorklistView === 'project_payment') {
+    footer.innerHTML = '';
+    return;
+  }
 
   footer.innerHTML = `
     <div class="segmented-toggle-group">
@@ -2511,7 +2652,74 @@ function applyFiltersAndRender() {
       `).join('');
     }
   } else if (currentModule === 'worklist') {
-    if (currentWorklistView === 'po') {
+    if (currentWorklistView === 'project_payment') {
+      tbody.innerHTML = filteredDataset.map((row, idx) => {
+        const isSelected = row.selected;
+        if (isProjectPaymentEditing) {
+          return `
+            <tr class="project-payment-row" data-row-id="${row.id || idx}">
+              <td class="td-select td-center">
+                <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleProjectPaymentRowSelect('${row.id}')" aria-label="Select row"></div>
+              </td>
+              <td class="td-center">
+                <select class="project-table-edit-input" data-row-id="${row.id}" data-field="expenseType" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; cursor: pointer;">
+                  <option value="PO" ${row.expenseType === 'PO' ? 'selected' : ''}>PO</option>
+                  <option value="Non - PO" ${row.expenseType === 'Non - PO' ? 'selected' : ''}>Non - PO</option>
+                  <option value="" ${!row.expenseType ? 'selected' : ''}>-- Select --</option>
+                </select>
+              </td>
+              <td>
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="boqName" value="${row.boqName || ''}" placeholder="BOQ Name" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; cursor: text;">
+              </td>
+              <td class="td-center">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="uom" value="${row.uom || ''}" placeholder="Uom" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: center; cursor: text;">
+              </td>
+              <td class="td-center">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="qty" value="${row.qty || ''}" placeholder="Qty" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: center; cursor: text;">
+              </td>
+              <td class="td-amount">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="rateRequested" value="${row.rateRequested || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+              </td>
+              <td class="td-amount">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="rateValidated" value="${row.rateValidated || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+              </td>
+              <td class="td-amount">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="rateApproved" value="${row.rateApproved || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+              </td>
+              <td class="td-amount">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="amountBasic" value="${row.amountBasic || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+              </td>
+              <td class="td-amount">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="amountGst" value="${row.amountGst || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+              </td>
+              <td class="td-amount">
+                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="amountTotal" value="${row.amountTotal || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+              </td>
+            </tr>
+          `;
+        } else {
+          return `
+            <tr class="project-payment-row" data-row-id="${row.id || idx}">
+              <td class="td-select td-center">
+                <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleProjectPaymentRowSelect('${row.id}')" aria-label="Select row"></div>
+              </td>
+              <td class="td-center" style="font-weight: 500;">${row.expenseType || ''}</td>
+              <td>
+                ${row.boqName ? `<a href="#" class="boq-link" onclick="showToast('BOQ: ${row.boqName}'); return false;">${row.boqName}</a>` : ''}
+              </td>
+              <td class="td-center">${row.uom || ''}</td>
+              <td class="td-center">${row.qty || ''}</td>
+              <td class="td-amount">${row.rateRequested || ''}</td>
+              <td class="td-amount">${row.rateValidated || ''}</td>
+              <td class="td-amount">${row.rateApproved || ''}</td>
+              <td class="td-amount">${row.amountBasic || ''}</td>
+              <td class="td-amount">${row.amountGst || ''}</td>
+              <td class="td-amount">${row.amountTotal || ''}</td>
+            </tr>
+          `;
+        }
+      }).join('');
+    } else if (currentWorklistView === 'po') {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
         return `
@@ -2532,13 +2740,17 @@ function applyFiltersAndRender() {
     } else {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
+        const isProject = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'project');
         return `
           <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
             <td class="td-select">
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="selectRow('${row.id}')" aria-label="Select row"></div>
             </td>
             <td>
-              <a href="#" class="req-link" onclick="handleReqClick('${row.submitBy}'); return false;">${row.submitBy}</a>
+              ${isProject 
+                ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistProjectPayment('${row.submitBy}', '${row.id}'); return false;">${row.submitBy}</a>`
+                : `<span>${row.submitBy}</span>`
+              }
             </td>
             <td class="td-center">${row.submissionDate}</td>
             <td>${row.approvedBy}</td>
@@ -5222,6 +5434,14 @@ function closeSideForm() {
   if (vendorServiceTransportScope) vendorServiceTransportScope.style.display = 'none';
   const vendorServiceOthersScope = document.getElementById('vendorServiceOthersScopeSidePanel');
   if (vendorServiceOthersScope) vendorServiceOthersScope.style.display = 'none';
+  const notesModal = document.getElementById('projectPaymentNotesModal');
+  if (notesModal) notesModal.style.display = 'none';
+  const projectBankModal = document.getElementById('projectPaymentBankModal');
+  if (projectBankModal) projectBankModal.style.display = 'none';
+  const reportModal = document.getElementById('projectPaymentReportModal');
+  if (reportModal) reportModal.style.display = 'none';
+  const boqDetailModal = document.getElementById('boqDetailModal');
+  if (boqDetailModal) boqDetailModal.style.display = 'none';
   // Remove blur from any dimmed cards and has-dimmed-card from row
   document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
   const cardsRow = document.querySelector('.side-form-cards-row');
@@ -7327,6 +7547,547 @@ function updateDeleteButtonVisibility() {
 window.handleReqClick = function(reqCode) {
   showToast(`Opening requisition details: ${reqCode}`);
 };
+
+let isProjectPaymentEditing = false;
+
+window.openWorklistProjectPayment = function(reqCode, rowId) {
+  isProjectPaymentEditing = false;
+  currentModule = 'worklist';
+  currentWorklistView = 'project_payment';
+  selectedProjectPaymentReq = reqCode || 'R/RL-234567';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened Project Requisition: ${selectedProjectPaymentReq}`);
+};
+
+window.toggleProjectPaymentRowSelect = function(rowId) {
+  const item = worklistProjectPaymentItems.find(i => i.id === rowId);
+  if (item) {
+    item.selected = !item.selected;
+    applyFiltersAndRender();
+  }
+};
+
+window.toggleProjectPaymentEditMode = function() {
+  if (!isProjectPaymentEditing) {
+    isProjectPaymentEditing = true;
+    renderWorklistToolbar();
+    applyFiltersAndRender();
+    showToast('Project payment table is now editable');
+  } else {
+    // Save table input values
+    const inputs = document.querySelectorAll('.project-table-edit-input');
+    inputs.forEach(input => {
+      const rowId = input.getAttribute('data-row-id');
+      const field = input.getAttribute('data-field');
+      const item = worklistProjectPaymentItems.find(i => i.id === rowId);
+      if (item && field) {
+        item[field] = input.value.trim();
+      }
+    });
+    isProjectPaymentEditing = false;
+    renderWorklistToolbar();
+    applyFiltersAndRender();
+    showToast('Project payment details saved successfully');
+  }
+};
+
+let isProjectPaymentNotesEditing = false;
+
+let worklistProjectPaymentNotes = [
+  {
+    id: "pnote-1",
+    date: "12/08/2026",
+    name: "R/RL-234567",
+    remarks: "Initial requisition raised for approval",
+    status: "RAISED"
+  },
+  {
+    id: "pnote-2",
+    date: "14/08/2026",
+    name: "Supervisor",
+    remarks: "Site inspection & DG check completed",
+    status: "Approved"
+  },
+  {
+    id: "pnote-3",
+    date: "16/08/2026",
+    name: "Accounts Desk",
+    remarks: "Awaiting final invoice validation",
+    status: "Pending"
+  }
+];
+
+function renderProjectPaymentNotesTable() {
+  const tbody = document.getElementById('tbodyProjectPaymentNotes');
+  if (!tbody) return;
+
+  const btnEdit = document.getElementById('btnProjectNotesEditToggle');
+  const imgEdit = document.getElementById('imgProjectNotesEditIcon');
+  if (btnEdit && imgEdit) {
+    btnEdit.title = isProjectPaymentNotesEditing ? 'Save Changes' : 'Edit Details';
+    imgEdit.src = isProjectPaymentNotesEditing ? 'icons/Save.svg' : 'icons/Edit.svg';
+    imgEdit.alt = isProjectPaymentNotesEditing ? 'Save' : 'Edit';
+  }
+
+  if (isProjectPaymentNotesEditing) {
+    tbody.innerHTML = worklistProjectPaymentNotes.map((note, idx) => `
+      <tr data-note-id="${note.id || idx}">
+        <td class="td-center" style="padding: 6px 8px;">
+          <input type="text" class="project-notes-edit-input" data-note-id="${note.id}" data-field="date" value="${note.date || ''}" placeholder="Date" style="width: 100%; height: 30px; padding: 2px 6px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: center; cursor: text;">
+        </td>
+        <td style="padding: 6px 8px;">
+          <input type="text" class="project-notes-edit-input" data-note-id="${note.id}" data-field="name" value="${note.name || ''}" placeholder="Name" style="width: 100%; height: 30px; padding: 2px 6px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; cursor: text;">
+        </td>
+        <td style="padding: 6px 8px;">
+          <input type="text" class="project-notes-edit-input" data-note-id="${note.id}" data-field="remarks" value="${note.remarks || ''}" placeholder="Remarks" style="width: 100%; height: 30px; padding: 2px 6px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; cursor: text;">
+        </td>
+        <td class="td-center" style="padding: 6px 8px;">
+          <select class="project-notes-edit-input project-note-status-dropdown" data-note-id="${note.id}" data-field="status" style="width: 100%; height: 30px; padding: 2px 6px; font-size: 0.85rem; font-weight: 600; color: #3730a3; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; cursor: pointer;">
+            <option value="RAISED" ${note.status === 'RAISED' ? 'selected' : ''}>RAISED</option>
+            <option value="Approved" ${note.status === 'Approved' ? 'selected' : ''}>Approved</option>
+            <option value="Pending" ${note.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  } else {
+    tbody.innerHTML = worklistProjectPaymentNotes.map((note, idx) => `
+      <tr data-note-id="${note.id || idx}">
+        <td class="td-center" style="white-space: nowrap; font-size: 0.88rem; padding: 8px 10px;">${note.date}</td>
+        <td style="font-weight: 500; font-size: 0.88rem; padding: 8px 10px;">${note.name}</td>
+        <td style="font-size: 0.88rem; padding: 8px 10px;">${note.remarks}</td>
+        <td class="td-center" style="padding: 6px 10px;">
+          <select class="project-note-status-dropdown" onchange="updateProjectPaymentNoteStatus('${note.id}', this.value)" style="width: 100%; height: 30px; padding: 2px 6px; font-size: 0.85rem; font-weight: 600; color: #3730a3; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; outline: none; cursor: pointer;">
+            <option value="RAISED" ${note.status === 'RAISED' ? 'selected' : ''}>RAISED</option>
+            <option value="Approved" ${note.status === 'Approved' ? 'selected' : ''}>Approved</option>
+            <option value="Pending" ${note.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  }
+}
+
+window.updateProjectPaymentNoteStatus = function(noteId, newStatus) {
+  const note = worklistProjectPaymentNotes.find(n => n.id === noteId);
+  if (note) {
+    note.status = newStatus;
+    showToast(`Status updated to ${newStatus}`);
+  }
+};
+
+window.toggleProjectPaymentNotesEditMode = function() {
+  if (!isProjectPaymentNotesEditing) {
+    isProjectPaymentNotesEditing = true;
+    renderProjectPaymentNotesTable();
+    showToast('Notes & remarks table is now editable');
+  } else {
+    // Save table input values
+    const inputs = document.querySelectorAll('.project-notes-edit-input');
+    inputs.forEach(input => {
+      const noteId = input.getAttribute('data-note-id');
+      const field = input.getAttribute('data-field');
+      const note = worklistProjectPaymentNotes.find(n => n.id === noteId);
+      if (note && field) {
+        note[field] = input.value.trim();
+      }
+    });
+    isProjectPaymentNotesEditing = false;
+    renderProjectPaymentNotesTable();
+    showToast('Notes & remarks saved successfully');
+  }
+};
+
+window.openProjectPaymentNotesModal = function() {
+  isProjectPaymentNotesEditing = false;
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Hide other sub-panels
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const notesModal = document.getElementById('projectPaymentNotesModal');
+  if (notesModal) {
+    notesModal.style.display = 'block';
+  }
+
+  renderProjectPaymentNotesTable();
+  overlay.style.display = 'flex';
+  showToast('Notes & Remarks opened');
+};
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#btnCloseProjectPaymentNotes')) {
+    isProjectPaymentNotesEditing = false;
+    const notesModal = document.getElementById('projectPaymentNotesModal');
+    if (notesModal) notesModal.style.display = 'none';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+  if (e.target.closest('#btnCloseProjectPaymentBankModal')) {
+    isProjectPaymentBankEditing = false;
+    const bankModal = document.getElementById('projectPaymentBankModal');
+    if (bankModal) bankModal.style.display = 'none';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+  if (e.target.closest('#btnCloseProjectPaymentReportModal')) {
+    const reportModal = document.getElementById('projectPaymentReportModal');
+    if (reportModal) reportModal.style.display = 'none';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+  // Close BOQ filter menu when clicking outside
+  if (!e.target.closest('#btnFilterHistoryBoq') && !e.target.closest('#historyBoqFilterMenu')) {
+    const filterMenu = document.getElementById('historyBoqFilterMenu');
+    if (filterMenu && filterMenu.style.display === 'block') {
+      filterMenu.style.display = 'none';
+    }
+  }
+});
+
+let isProjectPaymentBankEditing = false;
+
+let projectPaymentBankFields = [
+  { id: "bank_acc_name", label: "Account Name", value: "Nexus Infra Pvt Ltd" },
+  { id: "bank_acc_no", label: "Account Number", value: "987654321012" },
+  { id: "bank_ifsc", label: "IFSC Code", value: "HDFC0001234" },
+  { id: "bank_name", label: "Bank Name", value: "HDFC Bank" }
+];
+
+function renderProjectPaymentBankFields() {
+  const container = document.getElementById('containerProjectPaymentBankFields');
+  if (!container) return;
+
+  const btnEdit = document.getElementById('btnProjectBankEditToggle');
+  const imgEdit = document.getElementById('imgProjectBankEditIcon');
+  if (btnEdit && imgEdit) {
+    btnEdit.title = isProjectPaymentBankEditing ? 'Save Changes' : 'Edit Details';
+    imgEdit.src = isProjectPaymentBankEditing ? 'icons/Save.svg' : 'icons/Edit.svg';
+    imgEdit.alt = isProjectPaymentBankEditing ? 'Save' : 'Edit';
+  }
+
+  container.innerHTML = projectPaymentBankFields.map((field, idx) => `
+    <div class="project-bank-field-row" data-field-id="${field.id}">
+      <label class="project-bank-field-label" for="inpBankField_${field.id}">${field.label}</label>
+      <input type="text" 
+             class="project-bank-field-input ${isProjectPaymentBankEditing ? 'editing' : ''}" 
+             id="inpBankField_${field.id}" 
+             data-field-id="${field.id}" 
+             value="${field.value || ''}" 
+             placeholder="Enter ${field.label}"
+             ${isProjectPaymentBankEditing ? '' : 'readonly'}
+      >
+    </div>
+  `).join('');
+}
+
+window.toggleProjectPaymentBankEditMode = function() {
+  if (!isProjectPaymentBankEditing) {
+    isProjectPaymentBankEditing = true;
+    renderProjectPaymentBankFields();
+    showToast('Bank details are now editable');
+  } else {
+    // Save field values
+    const inputs = document.querySelectorAll('.project-bank-field-input');
+    inputs.forEach(inp => {
+      const fieldId = inp.getAttribute('data-field-id');
+      const f = projectPaymentBankFields.find(item => item.id === fieldId);
+      if (f) {
+        f.value = inp.value.trim();
+      }
+    });
+    isProjectPaymentBankEditing = false;
+    renderProjectPaymentBankFields();
+    showToast('Bank details saved successfully');
+  }
+};
+
+window.addProjectPaymentBankField = function() {
+  const fieldName = prompt("Enter new field name (e.g. Branch Name, UPI ID):");
+  if (!fieldName || !fieldName.trim()) return;
+
+  const newId = 'field_' + Date.now();
+  projectPaymentBankFields.push({
+    id: newId,
+    label: fieldName.trim(),
+    value: ""
+  });
+  
+  isProjectPaymentBankEditing = true;
+  renderProjectPaymentBankFields();
+  showToast(`Field "${fieldName.trim()}" added`);
+  
+  setTimeout(() => {
+    const newInp = document.getElementById(`inpBankField_${newId}`);
+    if (newInp) newInp.focus();
+  }, 100);
+};
+
+window.openProjectPaymentBankModal = function() {
+  isProjectPaymentBankEditing = false;
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Hide other sub-panels
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const bankModal = document.getElementById('projectPaymentBankModal');
+  if (bankModal) {
+    bankModal.style.display = 'block';
+  }
+
+  renderProjectPaymentBankFields();
+  overlay.style.display = 'flex';
+  showToast('Bank details opened');
+};
+
+let paymentHistoryReportData = [
+  {
+    id: "hist-1",
+    boqName: "25 X 3 Earth Strip",
+    qty: "12",
+    po: "50,000.00",
+    budget: "60,000.00",
+    used: "40,000.00",
+    available: "20,000.00"
+  },
+  {
+    id: "hist-2",
+    boqName: "DG Connection 25KVA",
+    qty: "1",
+    po: "1,50,000.00",
+    budget: "1,80,000.00",
+    used: "1,20,000.00",
+    available: "60,000.00"
+  },
+  {
+    id: "hist-3",
+    boqName: "Battery Bank 48V",
+    qty: "2",
+    po: "2,00,000.00",
+    budget: "2,20,000.00",
+    used: "1,80,000.00",
+    available: "40,000.00"
+  },
+  {
+    id: "hist-4",
+    boqName: "Copper Earthing Cable",
+    qty: "50",
+    po: "75,000.00",
+    budget: "90,000.00",
+    used: "65,000.00",
+    available: "25,000.00"
+  }
+];
+
+let historySelectedBoqFilters = new Set();
+
+function renderPaymentHistoryTable() {
+  const tbody = document.getElementById('tbodyPaymentHistoryReport');
+  if (!tbody) return;
+
+  const filtered = paymentHistoryReportData.filter(item => {
+    if (historySelectedBoqFilters.size === 0) return true;
+    return historySelectedBoqFilters.has(item.boqName);
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: #94a3b8;">No records match the selected filter</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => `
+    <tr>
+      <td style="padding: 8px 12px; font-weight: 500;">
+        <a href="javascript:void(0)" style="color: #4338ca; text-decoration: underline; cursor: pointer; font-weight: 600;" onclick="openBoqDetailModal('${row.id}')">${row.boqName}</a>
+      </td>
+      <td class="td-center" style="padding: 8px 10px;">${row.qty}</td>
+      <td class="td-amount" style="padding: 8px 10px; text-align: right;">${row.po}</td>
+      <td class="td-amount" style="padding: 8px 10px; text-align: right;">${row.budget}</td>
+      <td class="td-amount" style="padding: 8px 10px; text-align: right;">${row.used}</td>
+      <td class="td-amount" style="padding: 8px 10px; text-align: right;">${row.available}</td>
+    </tr>
+  `).join('');
+}
+
+window.togglePaymentHistoryBoqFilter = function(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('historyBoqFilterMenu');
+  if (!menu) return;
+
+  if (menu.style.display === 'block') {
+    menu.style.display = 'none';
+  } else {
+    menu.style.display = 'block';
+    renderHistoryBoqCheckboxList();
+  }
+};
+
+function renderHistoryBoqCheckboxList(searchQuery = '') {
+  const container = document.getElementById('containerHistoryBoqCheckboxes');
+  if (!container) return;
+
+  const uniqueBoqNames = Array.from(new Set(paymentHistoryReportData.map(item => item.boqName)));
+  const filteredNames = uniqueBoqNames.filter(name => name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  container.innerHTML = filteredNames.map(name => {
+    const isChecked = historySelectedBoqFilters.size === 0 || historySelectedBoqFilters.has(name);
+    return `
+      <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer; color: #1e293b;">
+        <input type="checkbox" class="chk-history-boq-item" value="${name}" ${isChecked ? 'checked' : ''}>
+        <span>${name}</span>
+      </label>
+    `;
+  }).join('');
+}
+
+window.filterHistoryBoqCheckboxList = function(val) {
+  renderHistoryBoqCheckboxList(val);
+};
+
+window.applyHistoryBoqFilter = function(e) {
+  if (e) e.stopPropagation();
+  const checkboxes = document.querySelectorAll('.chk-history-boq-item');
+  const allUniqueNames = Array.from(new Set(paymentHistoryReportData.map(item => item.boqName)));
+  
+  historySelectedBoqFilters.clear();
+  let checkedCount = 0;
+  checkboxes.forEach(chk => {
+    if (chk.checked) {
+      historySelectedBoqFilters.add(chk.value);
+      checkedCount++;
+    }
+  });
+
+  if (checkedCount === allUniqueNames.length || checkedCount === 0) {
+    historySelectedBoqFilters.clear();
+  }
+
+  const menu = document.getElementById('historyBoqFilterMenu');
+  if (menu) menu.style.display = 'none';
+
+  renderPaymentHistoryTable();
+  showToast(`Filter applied (${checkedCount} selected)`);
+};
+
+window.clearHistoryBoqFilter = function(e) {
+  if (e) e.stopPropagation();
+  historySelectedBoqFilters.clear();
+  const menu = document.getElementById('historyBoqFilterMenu');
+  if (menu) menu.style.display = 'none';
+
+  renderPaymentHistoryTable();
+  showToast('BOQ filter cleared');
+};
+
+window.openProjectPaymentReportModal = function() {
+  historySelectedBoqFilters.clear();
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Hide other sub-panels
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const reportModal = document.getElementById('projectPaymentReportModal');
+  if (reportModal) {
+    reportModal.style.display = 'block';
+  }
+
+  renderPaymentHistoryTable();
+  overlay.style.display = 'flex';
+  showToast('Payment History opened');
+};
+
+// BOQ Detail data keyed by history item id
+let boqDetailData = {
+  'hist-1': [
+    { id: 'bd-1', selected: false, requestDate: '12-06-2025', requestBy: 'Rajesh K', expenseType: 'Parent', expenseDesc: 'Earth Strip 25x3mm', uom: 'Mtr', qty: '12', rate: '450.00', basic: '5,400.00', gst: '972.00', total: '6,372.00', transferTo: 'Site A', txnDate: '15-06-2025' },
+    { id: 'bd-2', selected: false, requestDate: '14-06-2025', requestBy: 'Suresh M', expenseType: 'Child', expenseDesc: 'Installation charges', uom: 'Lot', qty: '1', rate: '2,000.00', basic: '2,000.00', gst: '360.00', total: '2,360.00', transferTo: 'Site A', txnDate: '16-06-2025' }
+  ],
+  'hist-2': [
+    { id: 'bd-3', selected: false, requestDate: '01-07-2025', requestBy: 'Anil P', expenseType: 'Parent', expenseDesc: 'DG Connection 25KVA', uom: 'Nos', qty: '1', rate: '1,50,000.00', basic: '1,50,000.00', gst: '27,000.00', total: '1,77,000.00', transferTo: 'Site B', txnDate: '05-07-2025' }
+  ],
+  'hist-3': [
+    { id: 'bd-4', selected: false, requestDate: '10-07-2025', requestBy: 'Deepak S', expenseType: 'Parent', expenseDesc: 'Battery Bank 48V', uom: 'Set', qty: '2', rate: '1,00,000.00', basic: '2,00,000.00', gst: '36,000.00', total: '2,36,000.00', transferTo: 'Site C', txnDate: '12-07-2025' },
+    { id: 'bd-5', selected: false, requestDate: '11-07-2025', requestBy: 'Mohan R', expenseType: 'Child', expenseDesc: 'Battery wiring', uom: 'Mtr', qty: '20', rate: '250.00', basic: '5,000.00', gst: '900.00', total: '5,900.00', transferTo: 'Site C', txnDate: '13-07-2025' }
+  ],
+  'hist-4': [
+    { id: 'bd-6', selected: false, requestDate: '20-07-2025', requestBy: 'Kiran V', expenseType: 'Parent', expenseDesc: 'Copper Earthing Cable', uom: 'Mtr', qty: '50', rate: '1,500.00', basic: '75,000.00', gst: '13,500.00', total: '88,500.00', transferTo: 'Site D', txnDate: '22-07-2025' }
+  ]
+};
+
+function renderBoqDetailTable(historyId) {
+  const tbody = document.getElementById('tbodyBoqDetail');
+  if (!tbody) return;
+
+  const rows = boqDetailData[historyId] || [];
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align: center; padding: 24px; color: #94a3b8;">No detail records available</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td class="td-center" style="padding: 6px 4px;"><input type="checkbox" class="chk-boq-detail-select" data-detail-id="${row.id}" ${row.selected ? 'checked' : ''}></td>
+      <td class="td-center" style="padding: 6px 8px; white-space: nowrap; font-size: 0.85rem;">${row.requestDate}</td>
+      <td style="padding: 6px 8px; font-size: 0.85rem;">${row.requestBy}</td>
+      <td class="td-center" style="padding: 6px 8px; font-size: 0.85rem; font-weight: 600;">${row.expenseType}</td>
+      <td style="padding: 6px 8px; font-size: 0.85rem;">${row.expenseDesc}</td>
+      <td class="td-center" style="padding: 6px 8px; font-size: 0.85rem;">${row.uom}</td>
+      <td class="td-center" style="padding: 6px 8px; font-size: 0.85rem;">${row.qty}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem;">${row.rate}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem;">${row.basic}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem;">${row.gst}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem; font-weight: 600;">${row.total}</td>
+      <td style="padding: 6px 8px; font-size: 0.85rem;">${row.transferTo}</td>
+      <td class="td-center" style="padding: 6px 8px; white-space: nowrap; font-size: 0.85rem;">${row.txnDate}</td>
+    </tr>
+  `).join('');
+}
+
+window.openBoqDetailModal = function(historyId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Find BOQ name from history data
+  const historyItem = paymentHistoryReportData.find(item => item.id === historyId);
+  const boqTitle = historyItem ? historyItem.boqName : 'BOQ Name';
+
+  // Update title
+  const lblTitle = document.getElementById('lblBoqDetailTitle');
+  if (lblTitle) lblTitle.textContent = boqTitle;
+
+  // Hide other sub-panels
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const boqModal = document.getElementById('boqDetailModal');
+  if (boqModal) {
+    boqModal.style.display = 'block';
+  }
+
+  renderBoqDetailTable(historyId);
+  overlay.style.display = 'flex';
+};
+
+// Close BOQ Detail handler
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#btnCloseBoqDetailModal')) {
+    const boqModal = document.getElementById('boqDetailModal');
+    if (boqModal) boqModal.style.display = 'none';
+    // Re-show Payment History modal
+    const reportModal = document.getElementById('projectPaymentReportModal');
+    if (reportModal) {
+      reportModal.style.display = 'block';
+    }
+  }
+});
 
 let currentViewedEmpId = null;
 let isEmployeeFormEditing = false;

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=52">
+  <link rel="stylesheet" href="assets/css/home.css?v=66">
 </head>
 
 <body>
@@ -2449,6 +2449,173 @@
           </div>
         </div>
 
+        <!-- Project Payment Notes & Remarks Popup Tab (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="projectPaymentNotesModal" style="display: none; width: 680px; max-width: 96vw;">
+          <!-- Header Ribbon Badge: Notes & Remarks + Edit and Close Buttons -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblProjectPaymentNotesTitle">Notes &amp; Remarks</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProjectNotesEditToggle" title="Edit Details" aria-label="Edit Details" onclick="toggleProjectPaymentNotesEditMode()">
+                <img src="icons/Edit.svg" alt="Edit" width="24" height="24" id="imgProjectNotesEditIcon">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectPaymentNotes" aria-label="Close notes">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Body Matching Uploaded Mockup -->
+          <div class="contact-table-wrap" style="padding: 0;">
+            <table class="contact-custom-table" id="tblProjectPaymentNotes">
+              <thead>
+                <tr>
+                  <th style="width: 120px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">
+                    <span>Date</span>
+                  </th>
+                  <th style="width: 150px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">
+                    <span>Name</span>
+                  </th>
+                  <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">
+                    <span>Remarks</span>
+                  </th>
+                  <th style="width: 160px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">
+                    <span>Status</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyProjectPaymentNotes">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Project Payment Bank Details Tab Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card" id="projectPaymentBankModal" style="display: none; width: 480px; max-width: 96vw;">
+          <!-- Header Ribbon Badge: Bank Details + Top Right Icons: +, Edit, Close -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblProjectPaymentBankTitle">Bank Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProjectBankAddField" title="Add Field" aria-label="Add Field" onclick="addProjectPaymentBankField()">
+                <img src="icons/Add.svg" alt="Add Field" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnProjectBankEditToggle" title="Edit Details" aria-label="Edit Details" onclick="toggleProjectPaymentBankEditMode()">
+                <img src="icons/Edit.svg" alt="Edit" width="24" height="24" id="imgProjectBankEditIcon">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectPaymentBankModal" aria-label="Close bank details" style="color: #dc2626; font-size: 26px; font-weight: 700; line-height: 1;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmProjectPaymentBank" onsubmit="event.preventDefault();" style="padding: 20px 24px 24px 24px;">
+            <div id="containerProjectPaymentBankFields">
+              <!-- Dynamically rendered fields -->
+            </div>
+          </form>
+        </div>
+
+        <!-- Project Payment History Report Tab Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="projectPaymentReportModal" style="display: none; width: 750px; max-width: 96vw;">
+          <!-- Header Ribbon Badge: Payment History + Close Button -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblProjectPaymentReportTitle">Payment History</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectPaymentReportModal" aria-label="Close report" style="color: #dc2626; font-size: 26px; font-weight: 700; line-height: 1;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Top Metric with Summation Icon -->
+          <div style="padding: 14px 20px 8px 20px; display: flex; align-items: center; gap: 8px;">
+            <img src="icons/summation.svg" alt="Total Sum" width="32" height="32">
+          </div>
+
+          <!-- Table Body Matching Uploaded Mockup -->
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow: visible;">
+            <table class="contact-custom-table" id="tblPaymentHistoryReport" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="project-payment-header-row1">
+                  <th rowspan="2" style="width: 220px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center; position: relative;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>BOQ Name</span>
+                      <button type="button" class="history-th-filter-btn" id="btnFilterHistoryBoq" title="Filter BOQ Name" onclick="togglePaymentHistoryBoqFilter(event)" style="background: none; border: none; color: #ffffff; cursor: pointer; font-size: 11px; padding: 2px;">▼</button>
+                    </div>
+                    <!-- Column Filter Dropdown Menu -->
+                    <div class="history-filter-menu" id="historyBoqFilterMenu" style="display: none; position: absolute; top: 100%; left: 0; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); z-index: 1000; min-width: 210px; padding: 10px; text-align: left; font-weight: normal;">
+                      <div style="margin-bottom: 6px; font-weight: 600; font-size: 0.82rem; color: #475569;">Filter by BOQ Name</div>
+                      <input type="text" placeholder="Search..." id="inpSearchHistoryBoq" oninput="filterHistoryBoqCheckboxList(this.value)" style="width: 100%; height: 26px; font-size: 0.8rem; padding: 2px 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 8px; box-sizing: border-box; outline: none;">
+                      <div id="containerHistoryBoqCheckboxes" style="max-height: 140px; overflow-y: auto; margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px;">
+                        <!-- Rendered Checkboxes -->
+                      </div>
+                      <div style="display: flex; justify-content: flex-end; gap: 6px; border-top: 1px solid #f1f5f9; padding-top: 6px;">
+                        <button type="button" onclick="clearHistoryBoqFilter(event)" style="padding: 3px 8px; font-size: 0.78rem; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer;">Clear</button>
+                        <button type="button" onclick="applyHistoryBoqFilter(event)" style="padding: 3px 8px; font-size: 0.78rem; background: #2563eb; color: #ffffff; border: none; border-radius: 4px; cursor: pointer;">Apply</button>
+                      </div>
+                    </div>
+                  </th>
+                  <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">
+                    <span>Qty</span>
+                  </th>
+                  <th colspan="4" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; border-bottom: 1.5px solid #ffffff;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+                <tr class="project-payment-header-row2">
+                  <th style="width: 105px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">PO</th>
+                  <th style="width: 105px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Budget</th>
+                  <th style="width: 105px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Used</th>
+                  <th style="width: 105px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Available</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPaymentHistoryReport">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BOQ Detail Tab Card (Opened from Payment History BOQ Name hyperlink) -->
+        <div class="side-form-card side-contact-popup" id="boqDetailModal" style="display: none; width: 950px; max-width: 97vw;">
+          <!-- Header Ribbon Badge: BOQ Name + Close Button -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblBoqDetailTitle">BOQ Name</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseBoqDetailModal" aria-label="Close BOQ detail" style="color: #dc2626; font-size: 26px; font-weight: 700; line-height: 1;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Top Metric Row: Summation, Green (Paid), Red (Payable), Notes -->
+          <div style="padding: 10px 20px 6px 20px; display: flex; align-items: center; justify-content: space-between;">
+            <img src="icons/summation.svg" alt="Total Sum" width="28" height="28">
+            <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="cursor: pointer;" title="Paid / Received">
+            <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="cursor: pointer;" title="Payable">
+            <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28" style="cursor: pointer;" title="Notes & Remarks">
+          </div>
+
+          <!-- Table -->
+          <div class="contact-table-wrap" style="padding: 0 12px 20px 12px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblBoqDetail" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="project-payment-header-row1">
+                  <th rowspan="2" style="width: 50px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Select</th>
+                  <th rowspan="2" style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Request Date</th>
+                  <th rowspan="2" style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Request By</th>
+                  <th rowspan="2" style="width: 105px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Expense Type</th>
+                  <th rowspan="2" style="width: 140px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Expense Description</th>
+                  <th rowspan="2" style="width: 55px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Uom</th>
+                  <th rowspan="2" style="width: 55px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Qty</th>
+                  <th rowspan="2" style="width: 80px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Rate</th>
+                  <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; border-bottom: 1.5px solid #ffffff;">Amount</th>
+                  <th rowspan="2" style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Transfer To</th>
+                  <th rowspan="2" style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">TXN Date</th>
+                </tr>
+                <tr class="project-payment-header-row2">
+                  <th style="width: 80px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Basic</th>
+                  <th style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST</th>
+                  <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBoqDetail">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- 7. Add Bank Form Card (Nested Modal) -->
         <div class="side-form-card" id="addBankCard" style="display: none; width: 460px;">
           <!-- Header Ribbon Badge: Add Bank -->
@@ -4124,7 +4291,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=52"></script>
+  <script src="assets/js/home.js?v=66"></script>
 </body>
 
 </html>

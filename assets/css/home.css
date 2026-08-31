@@ -237,6 +237,7 @@ body {
   color: #ffffff !important;
   letter-spacing: 0.3px;
   line-height: 1.2;
+  width: 100% !important;
 }
 
 .banner-title-link {
@@ -3170,3 +3171,208 @@ input[type="date"].date-picker-control {
     left: 8px !important;
   }
 }
+
+/* ==========================================================================
+   WORKLIST PROJECT PAYMENT REQUISITION DETAILS VIEW
+   ========================================================================== */
+.project-payment-banner-content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  letter-spacing: 0.2px;
+}
+
+.project-payment-metrics-row {
+  background: #ffffff;
+  padding: 10px 16px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.project-payment-metrics-left {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.project-payment-metrics-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.project-payment-header-row1 th,
+.project-payment-header-row2 th {
+  background-color: #8c9399 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  border: 1px solid #ffffff !important;
+  padding: 8px 10px !important;
+  font-size: 0.88rem !important;
+}
+
+.project-payment-header-row1 th[colspan] {
+  border-bottom: 1.5px solid #ffffff !important;
+}
+
+.clickable-project-link {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: color 0.15s ease;
+}
+
+.clickable-project-link:hover {
+  color: #1d4ed8 !important;
+}
+
+.boq-link {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
+
+.boq-link:hover {
+  color: #1d4ed8 !important;
+}
+
+.worklist-table-full tbody tr.project-payment-row,
+.worklist-table-full tbody tr.project-payment-row td {
+  background-color: #ffffff !important;
+}
+
+.worklist-table-full tbody tr.project-payment-row:hover,
+.worklist-table-full tbody tr.project-payment-row:hover td {
+  background-color: #f8fafc !important;
+}
+
+input.project-table-edit-input,
+select.project-table-edit-input,
+.worklist-table-full tbody td input.project-table-edit-input,
+.worklist-table-full tbody td select.project-table-edit-input {
+  width: 100% !important;
+  height: 30px !important;
+  padding: 3px 8px !important;
+  font-size: 0.88rem !important;
+  font-family: inherit !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #000000 !important;
+  border-radius: 4px !important;
+  outline: none !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  cursor: text !important;
+}
+
+input.project-table-edit-input:focus,
+select.project-table-edit-input:focus,
+.worklist-table-full tbody td input.project-table-edit-input:focus,
+.worklist-table-full tbody td select.project-table-edit-input:focus {
+  border: 1px solid #000000 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background-color: #ffffff !important;
+}
+
+select.project-table-edit-input {
+  cursor: pointer !important;
+}
+
+input.project-notes-edit-input,
+select.project-notes-edit-input {
+  width: 100% !important;
+  height: 30px !important;
+  padding: 3px 6px !important;
+  font-size: 0.88rem !important;
+  font-family: inherit !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #000000 !important;
+  border-radius: 4px !important;
+  outline: none !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  cursor: text !important;
+}
+
+input.project-notes-edit-input:focus,
+select.project-notes-edit-input:focus {
+  border: 1px solid #000000 !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background-color: #ffffff !important;
+}
+
+select.project-notes-edit-input {
+  cursor: pointer !important;
+}
+
+.project-bank-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.project-bank-field-label {
+  flex: 0 0 140px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.project-bank-field-input {
+  flex: 1;
+  height: 36px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #1e293b;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.project-bank-field-input[readonly] {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  cursor: default;
+}
+
+.project-bank-field-input.editing {
+  background-color: #ffffff !important;
+  border-color: #000000 !important;
+  cursor: text !important;
+}
+
+.project-bank-field-input.editing:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 1px #000000 !important;
+}
+
+
+
+
+
+
+

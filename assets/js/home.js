@@ -900,7 +900,7 @@ function goBackSubpage() {
       showToast('Returned to Worklist');
     }
   } else if (currentModule === 'worklist') {
-    if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment') {
+    if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment') {
       isProjectPaymentEditing = false;
       currentWorklistView = 'payment';
       showToast('Returned to Payment Page');
@@ -961,6 +961,35 @@ function renderApp() {
             <div class="banner-left-title">${selectedProjectPaymentReq || 'R/RL-234567'} / New Build / With DG</div>
             <div class="banner-center-title">230510678 / ( O - Capex )</div>
             <div class="banner-right-title">IN-123456 / Guindy</div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'purchase_payment') {
+        const purchaseInfo = purchaseDetailData[selectedPurchasePayId || 'pay-2'] || purchaseDetailData['pay-2'];
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content">
+            <div class="banner-left-title">${purchaseInfo.supplier || 'Supplier Name'}</div>
+            <div class="banner-center-title">PO No : ${purchaseInfo.poNo || ''}</div>
+            <div class="banner-right-title">Invoice No: ${purchaseInfo.invoiceNo || ''}</div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'employee_payment') {
+        const empInfo = employeeDetailData[selectedEmployeePayId || 'pay-3'] || employeeDetailData['pay-3'];
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content">
+            <div class="banner-left-title">${empInfo.employeeName || 'Employee Name'}</div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'transport_payment') {
+        const transInfo = transportDetailData[selectedTransportPayId || 'pay-4'] || transportDetailData['pay-4'];
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content">
+            <div class="banner-left-title">${transInfo.transporterName || 'Transporter Name'}</div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'accounts_payment') {
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content">
+            <div class="banner-left-title">Accounts</div>
           </div>
         `;
       } else {
@@ -2050,6 +2079,15 @@ function loadWorklistDataset() {
   } else if (currentWorklistView === 'purchase_payment') {
     const detail = purchaseDetailData[selectedPurchasePayId || 'pay-2'] || purchaseDetailData['pay-2'];
     currentDataset = detail.lineItems || [];
+  } else if (currentWorklistView === 'employee_payment') {
+    const empDetail = employeeDetailData[selectedEmployeePayId || 'pay-3'] || employeeDetailData['pay-3'];
+    currentDataset = empDetail.lineItems || [];
+  } else if (currentWorklistView === 'transport_payment') {
+    const transDetail = transportDetailData[selectedTransportPayId || 'pay-4'] || transportDetailData['pay-4'];
+    currentDataset = transDetail.lineItems || [];
+  } else if (currentWorklistView === 'accounts_payment') {
+    const accDetail = accountsDetailData[selectedAccountsPayId || 'pay-6'] || accountsDetailData['pay-6'];
+    currentDataset = accDetail.lineItems || [];
   } else if (currentWorklistView === 'po') {
     currentDataset = poData;
   } else {
@@ -2112,50 +2150,147 @@ function renderWorklistToolbar() {
   } else if (currentWorklistView === 'purchase_payment') {
     const detail = purchaseDetailData[selectedPurchasePayId || 'pay-2'] || purchaseDetailData['pay-2'];
     toolbar.innerHTML = `
-      <div style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
-        <!-- Full Length Regular Green Header Ribbon -->
-        <div style="background: #48bb78; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-radius: 6px; color: #ffffff; font-weight: 700; font-size: 0.95rem; box-sizing: border-box;">
-          <span>${detail.supplier || 'Supplier Name'}</span>
-          <span>PO No : ${detail.poNo || ''}</span>
-          <span>Invoice No: ${detail.invoiceNo || ''}</span>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
         </div>
 
-        <!-- Metrics & Actions Bar -->
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-          <!-- Left Side: Back Button + Summation + Paid -->
-          <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-            <div style="display: inline-flex; align-items: center;">
-              ${universalBackBtnHtml}
-            </div>
-
-            <!-- Stat 1: Summation Total -->
-            <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
-              <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-              <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${detail.totalAmt || '12,00,000.00'}</span>
-            </div>
-
-            <!-- Stat 2: Validated / Paid (Green Paid _ Received.svg) -->
-            <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
-              <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
-              <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">${detail.paidAmt || '10,00,000.00'}</span>
-            </div>
-          </div>
-
-          <!-- Right Side: Payable + Notes + Bank -->
-          <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
-            <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px; margin-right: 6px;">
-              <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
-              <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">${detail.payableAmt || '2,00,000.00'}</span>
-            </div>
-
-            <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
-              <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
-            </button>
-            <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
-              <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
-            </button>
-          </div>
+        <!-- Stat 1: Summation Total -->
+        <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${detail.totalAmt || '12,00,000.00'}</span>
         </div>
+
+        <!-- Stat 2: Validated / Paid (Green Paid _ Received.svg) -->
+        <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">${detail.paidAmt || '10,00,000.00'}</span>
+        </div>
+      </div>
+
+      <!-- Right Side: Payable + Notes + Bank -->
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px; margin-right: 6px;">
+          <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">${detail.payableAmt || '2,00,000.00'}</span>
+        </div>
+
+        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
+          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
+          <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+        </button>
+      </div>
+    `;
+    return;
+  } else if (currentWorklistView === 'employee_payment') {
+    const empDetail = employeeDetailData[selectedEmployeePayId || 'pay-3'] || employeeDetailData['pay-3'];
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
+        </div>
+
+        <!-- Stat 1: Summation Total -->
+        <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${empDetail.totalAmt || '12,00,000.00'}</span>
+        </div>
+
+        <!-- Stat 2: Validated / Paid -->
+        <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">${empDetail.paidAmt || '10,00,000.00'}</span>
+        </div>
+      </div>
+
+      <!-- Right Side: Payable + Notes + Bank + Edit -->
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px; margin-right: 6px;">
+          <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">${empDetail.payableAmt || '2,00,000.00'}</span>
+        </div>
+
+        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
+          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
+          <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Edit" onclick="showToast('Edit mode')">
+          <img src="icons/Edit.svg" alt="Edit" width="28" height="28">
+        </button>
+      </div>
+    `;
+    return;
+  } else if (currentWorklistView === 'transport_payment') {
+    const transDetail = transportDetailData[selectedTransportPayId || 'pay-4'] || transportDetailData['pay-4'];
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
+        </div>
+
+        <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${transDetail.totalAmt || '12,00,000.00'}</span>
+        </div>
+
+        <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">${transDetail.paidAmt || '10,00,000.00'}</span>
+        </div>
+      </div>
+
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px; margin-right: 6px;">
+          <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">${transDetail.payableAmt || '2,00,000.00'}</span>
+        </div>
+
+        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
+          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
+          <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Edit" onclick="showToast('Edit mode')">
+          <img src="icons/Edit.svg" alt="Edit" width="28" height="28">
+        </button>
+      </div>
+    `;
+    return;
+  } else if (currentWorklistView === 'accounts_payment') {
+    const accDetail = accountsDetailData[selectedAccountsPayId || 'pay-6'] || accountsDetailData['pay-6'];
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
+        </div>
+        <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${accDetail.totalAmt || '12,00,000.00'}</span>
+        </div>
+        <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">${accDetail.paidAmt || '10,00,000.00'}</span>
+        </div>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px; margin-right: 6px;">
+          <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+          <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">${accDetail.payableAmt || '2,00,000.00'}</span>
+        </div>
+        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
+          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
+          <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn" title="Edit" onclick="showToast('Edit mode')">
+          <img src="icons/Edit.svg" alt="Edit" width="28" height="28">
+        </button>
       </div>
     `;
     return;
@@ -2237,6 +2372,46 @@ function renderWorklistTableHead() {
         <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total Amount</th>
       </tr>
     `;
+  } else if (currentWorklistView === 'employee_payment') {
+    thead.innerHTML = `
+      <tr class="project-payment-header-row1">
+        <th rowspan="2" style="width: 320px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+      </tr>
+      <tr class="project-payment-header-row2">
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
+      </tr>
+    `;
+  } else if (currentWorklistView === 'transport_payment') {
+    thead.innerHTML = `
+      <tr class="project-payment-header-row1">
+        <th rowspan="2" style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vehicle Type</th>
+        <th rowspan="2" style="width: 260px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
+        <th rowspan="2" style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">From</th>
+        <th rowspan="2" style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">To</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+      </tr>
+      <tr class="project-payment-header-row2">
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
+      </tr>
+    `;
+  } else if (currentWorklistView === 'accounts_payment') {
+    thead.innerHTML = `
+      <tr class="project-payment-header-row1">
+        <th rowspan="2" style="width: 120px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Expense Type</th>
+        <th rowspan="2" style="width: 320px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+      </tr>
+      <tr class="project-payment-header-row2">
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
+      </tr>
+    `;
   } else if (currentWorklistView === 'po') {
     thead.innerHTML = `
       <tr class="po-view-header">
@@ -2308,7 +2483,7 @@ function renderWorklistFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
-  if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment') {
+  if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment') {
     footer.innerHTML = '';
     return;
   }
@@ -2807,6 +2982,52 @@ function applyFiltersAndRender() {
           </tr>
         `).join('');
       }
+    } else if (currentWorklistView === 'employee_payment') {
+      const empItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== ''));
+      if (empItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+      } else {
+        tbody.innerHTML = empItems.map(item => `
+          <tr>
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtRequest || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtValidated || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtApproved || ''}</td>
+          </tr>
+        `).join('');
+      }
+    } else if (currentWorklistView === 'transport_payment') {
+      const transItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.vehicleType && item.vehicleType.trim() !== ''));
+      if (transItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+      } else {
+        tbody.innerHTML = transItems.map(item => `
+          <tr>
+            <td class="td-center" style="padding: 8px 10px;">${item.vehicleType || ''}</td>
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
+            <td class="td-center" style="padding: 8px 10px;">${item.from || ''}</td>
+            <td class="td-center" style="padding: 8px 10px;">${item.to || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtRequest || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtValidated || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtApproved || ''}</td>
+          </tr>
+        `).join('');
+      }
+    } else if (currentWorklistView === 'accounts_payment') {
+      const accItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.expenseType && item.expenseType.trim() !== ''));
+      if (accItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+      } else {
+        tbody.innerHTML = accItems.map(item => `
+          <tr>
+            <td class="td-center" style="padding: 8px 10px;">${item.expenseType || ''}</td>
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtRequest || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtValidated || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.amtApproved || ''}</td>
+          </tr>
+        `).join('');
+      }
     } else if (currentWorklistView === 'po') {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
@@ -2830,6 +3051,9 @@ function applyFiltersAndRender() {
         const isSelected = row.selected;
         const isProject = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'project');
         const isPurchase = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'purchase');
+        const isEmployee = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'employee');
+        const isTransport = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'transport');
+        const isAccounts = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'accounts');
         return `
           <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
             <td class="td-select">
@@ -2840,17 +3064,18 @@ function applyFiltersAndRender() {
                 ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistProjectPayment('${row.submitBy}', '${row.id}'); return false;">${row.submitBy}</a>`
                 : isPurchase
                   ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistPurchasePayment('${row.id}'); return false;">${row.submitBy}</a>`
-                  : `<span>${row.submitBy}</span>`
+                  : isEmployee
+                    ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistEmployeePayment('${row.id}'); return false;">${row.submitBy}</a>`
+                    : isTransport
+                      ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistTransportPayment('${row.id}'); return false;">${row.submitBy}</a>`
+                      : isAccounts
+                        ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistAccountsPayment('${row.id}'); return false;">${row.submitBy}</a>`
+                        : `<span>${row.submitBy}</span>`
               }
             </td>
             <td class="td-center">${row.submissionDate}</td>
             <td>${row.approvedBy}</td>
-            <td>
-              ${isPurchase
-                ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistPurchasePayment('${row.id}'); return false;">${row.expenseHead}</a>`
-                : `${row.expenseHead}`
-              }
-            </td>
+            <td>${row.expenseHead}</td>
             <td>${row.transferTo}</td>
             <td class="td-amount">${row.approvedAmount || ''}</td>
             <td class="td-amount">${row.transferredAmount || ''}</td>
@@ -7669,6 +7894,89 @@ window.openWorklistPurchasePayment = function(payId) {
   updateURL();
   renderApp();
   showToast('Opened Purchase Requisition Page');
+};
+
+// ========================================================================
+// EMPLOYEE PAYMENT PAGE (from Payment Worklist - Submit By / Employee)
+// ========================================================================
+
+let selectedEmployeePayId = 'pay-3';
+
+let employeeDetailData = {
+  'pay-3': {
+    employeeName: 'Employee Name',
+    totalAmt: '12,00,000.00',
+    paidAmt: '10,00,000.00',
+    payableAmt: '2,00,000.00',
+    lineItems: [
+      { description: 'JCB Charges', amtRequest: '', amtValidated: '', amtApproved: '' }
+    ]
+  }
+};
+
+window.openWorklistEmployeePayment = function(payId) {
+  currentModule = 'worklist';
+  currentWorklistView = 'employee_payment';
+  selectedEmployeePayId = payId || 'pay-3';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Employee Requisition Page');
+};
+
+// ========================================================================
+// TRANSPORT PAYMENT PAGE (from Payment Worklist - Submit By / Transport)
+// ========================================================================
+
+let selectedTransportPayId = 'pay-4';
+
+let transportDetailData = {
+  'pay-4': {
+    transporterName: 'Transporter Name',
+    totalAmt: '12,00,000.00',
+    paidAmt: '10,00,000.00',
+    payableAmt: '2,00,000.00',
+    lineItems: [
+      { vehicleType: '', description: 'JCB Charges', from: '', to: '', amtRequest: '', amtValidated: '', amtApproved: '' }
+    ]
+  }
+};
+
+window.openWorklistTransportPayment = function(payId) {
+  currentModule = 'worklist';
+  currentWorklistView = 'transport_payment';
+  selectedTransportPayId = payId || 'pay-4';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Transport Requisition Page');
+};
+
+// ========================================================================
+// ACCOUNTS PAYMENT PAGE (from Payment Worklist - Submit By / Accounts)
+// ========================================================================
+
+let selectedAccountsPayId = 'pay-6';
+
+let accountsDetailData = {
+  'pay-6': {
+    totalAmt: '12,00,000.00',
+    paidAmt: '10,00,000.00',
+    payableAmt: '2,00,000.00',
+    lineItems: [
+      { expenseType: '', description: 'JCB Charges', amtRequest: '', amtValidated: '', amtApproved: '' }
+    ]
+  }
+};
+
+window.openWorklistAccountsPayment = function(payId) {
+  currentModule = 'worklist';
+  currentWorklistView = 'accounts_payment';
+  selectedAccountsPayId = payId || 'pay-6';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Accounts Requisition Page');
 };
 
 window.toggleProjectPaymentRowSelect = function(rowId) {

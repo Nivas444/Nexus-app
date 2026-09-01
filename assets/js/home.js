@@ -900,7 +900,7 @@ function goBackSubpage() {
       showToast('Returned to Worklist');
     }
   } else if (currentModule === 'worklist') {
-    if (currentWorklistView === 'project_payment') {
+    if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment') {
       isProjectPaymentEditing = false;
       currentWorklistView = 'payment';
       showToast('Returned to Payment Page');
@@ -2047,6 +2047,9 @@ function renderMasterFooter() {
 function loadWorklistDataset() {
   if (currentWorklistView === 'project_payment') {
     currentDataset = worklistProjectPaymentItems;
+  } else if (currentWorklistView === 'purchase_payment') {
+    const detail = purchaseDetailData[selectedPurchasePayId || 'pay-2'] || purchaseDetailData['pay-2'];
+    currentDataset = detail.lineItems || [];
   } else if (currentWorklistView === 'po') {
     currentDataset = poData;
   } else {
@@ -2103,6 +2106,56 @@ function renderWorklistToolbar() {
         <button type="button" class="toolbar-icon-btn btn-project-payment-edit" id="btnProjectPaymentEdit" title="${isProjectPaymentEditing ? 'Save Changes' : 'Edit Details'}" onclick="toggleProjectPaymentEditMode()">
           <img src="${isProjectPaymentEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isProjectPaymentEditing ? 'Save' : 'Edit'}" width="28" height="28">
         </button>
+      </div>
+    `;
+    return;
+  } else if (currentWorklistView === 'purchase_payment') {
+    const detail = purchaseDetailData[selectedPurchasePayId || 'pay-2'] || purchaseDetailData['pay-2'];
+    toolbar.innerHTML = `
+      <div style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+        <!-- Full Length Regular Green Header Ribbon -->
+        <div style="background: #48bb78; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-radius: 6px; color: #ffffff; font-weight: 700; font-size: 0.95rem; box-sizing: border-box;">
+          <span>${detail.supplier || 'Supplier Name'}</span>
+          <span>PO No : ${detail.poNo || ''}</span>
+          <span>Invoice No: ${detail.invoiceNo || ''}</span>
+        </div>
+
+        <!-- Metrics & Actions Bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <!-- Left Side: Back Button + Summation + Paid -->
+          <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+            <div style="display: inline-flex; align-items: center;">
+              ${universalBackBtnHtml}
+            </div>
+
+            <!-- Stat 1: Summation Total -->
+            <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
+              <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
+              <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${detail.totalAmt || '12,00,000.00'}</span>
+            </div>
+
+            <!-- Stat 2: Validated / Paid (Green Paid _ Received.svg) -->
+            <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
+              <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
+              <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">${detail.paidAmt || '10,00,000.00'}</span>
+            </div>
+          </div>
+
+          <!-- Right Side: Payable + Notes + Bank -->
+          <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+            <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px; margin-right: 6px;">
+              <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+              <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">${detail.payableAmt || '2,00,000.00'}</span>
+            </div>
+
+            <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
+              <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
+            </button>
+            <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
+              <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+            </button>
+          </div>
+        </div>
       </div>
     `;
     return;
@@ -2168,6 +2221,20 @@ function renderWorklistTableHead() {
         <th style="width: 110px;">Basic</th>
         <th style="width: 110px;">GST</th>
         <th style="width: 110px;">Total</th>
+      </tr>
+    `;
+  } else if (currentWorklistView === 'purchase_payment') {
+    thead.innerHTML = `
+      <tr class="project-payment-header-row1">
+        <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">HSN Code</th>
+        <th style="width: 200px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
+        <th style="width: 65px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Uom</th>
+        <th style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">PO Qty</th>
+        <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Invoice Qty</th>
+        <th style="width: 80px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Basic Amount</th>
+        <th style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST Amount</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total Amount</th>
       </tr>
     `;
   } else if (currentWorklistView === 'po') {
@@ -2241,7 +2308,7 @@ function renderWorklistFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
-  if (currentWorklistView === 'project_payment') {
+  if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment') {
     footer.innerHTML = '';
     return;
   }
@@ -2719,6 +2786,27 @@ function applyFiltersAndRender() {
           `;
         }
       }).join('');
+    } else if (currentWorklistView === 'purchase_payment') {
+      const validItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.hsnCode && item.hsnCode.trim() !== ''));
+      if (validItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+      } else {
+        tbody.innerHTML = validItems.map(item => `
+          <tr>
+            <td class="td-center" style="padding: 8px 10px;">${item.hsnCode || ''}</td>
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">
+              ${item.description || ''}
+            </td>
+            <td class="td-center" style="padding: 8px 10px;">${item.uom || ''}</td>
+            <td class="td-center" style="padding: 8px 10px;">${item.poQty || ''}</td>
+            <td class="td-center" style="padding: 8px 10px;">${item.invoiceQty || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.rate || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.basicAmt || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right;">${item.gstAmt || ''}</td>
+            <td class="td-amount" style="padding: 8px 10px; text-align: right; font-weight: 600;">${item.totalAmt || ''}</td>
+          </tr>
+        `).join('');
+      }
     } else if (currentWorklistView === 'po') {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
@@ -2741,6 +2829,7 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
         const isProject = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'project');
+        const isPurchase = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'purchase');
         return `
           <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
             <td class="td-select">
@@ -2749,12 +2838,19 @@ function applyFiltersAndRender() {
             <td>
               ${isProject 
                 ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistProjectPayment('${row.submitBy}', '${row.id}'); return false;">${row.submitBy}</a>`
-                : `<span>${row.submitBy}</span>`
+                : isPurchase
+                  ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistPurchasePayment('${row.id}'); return false;">${row.submitBy}</a>`
+                  : `<span>${row.submitBy}</span>`
               }
             </td>
             <td class="td-center">${row.submissionDate}</td>
             <td>${row.approvedBy}</td>
-            <td>${row.expenseHead}</td>
+            <td>
+              ${isPurchase
+                ? `<a href="#" class="req-link clickable-project-link" onclick="openWorklistPurchasePayment('${row.id}'); return false;">${row.expenseHead}</a>`
+                : `${row.expenseHead}`
+              }
+            </td>
             <td>${row.transferTo}</td>
             <td class="td-amount">${row.approvedAmount || ''}</td>
             <td class="td-amount">${row.transferredAmount || ''}</td>
@@ -5442,6 +5538,8 @@ function closeSideForm() {
   if (reportModal) reportModal.style.display = 'none';
   const boqDetailModal = document.getElementById('boqDetailModal');
   if (boqDetailModal) boqDetailModal.style.display = 'none';
+  const purchaseDetailModal = document.getElementById('purchaseDetailModal');
+  if (purchaseDetailModal) purchaseDetailModal.style.display = 'none';
   // Remove blur from any dimmed cards and has-dimmed-card from row
   document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
   const cardsRow = document.querySelector('.side-form-cards-row');
@@ -7561,6 +7659,18 @@ window.openWorklistProjectPayment = function(reqCode, rowId) {
   showToast(`Opened Project Requisition: ${selectedProjectPaymentReq}`);
 };
 
+let selectedPurchasePayId = 'pay-2';
+
+window.openWorklistPurchasePayment = function(payId) {
+  currentModule = 'worklist';
+  currentWorklistView = 'purchase_payment';
+  selectedPurchasePayId = payId || 'pay-2';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Purchase Requisition Page');
+};
+
 window.toggleProjectPaymentRowSelect = function(rowId) {
   const item = worklistProjectPaymentItems.find(i => i.id === rowId);
   if (item) {
@@ -8088,6 +8198,163 @@ document.addEventListener('click', (e) => {
     }
   }
 });
+
+// ========================================================================
+// PURCHASE DETAIL MODAL (from Payment Worklist - Submit By / Purchase)
+// ========================================================================
+
+// Purchase detail data keyed by payment row id
+let purchaseDetailData = {
+  'pay-2': {
+    supplier: 'Supplier Name',
+    poNo: '',
+    invoiceNo: '',
+    totalAmt: '12,00,000.00',
+    paidAmt: '10,00,000.00',
+    payableAmt: '2,00,000.00',
+    lineItems: [
+      { hsnCode: '', description: 'JCB Charges', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' }
+    ]
+  },
+  'pay-9': {
+    supplier: 'Supplier Name',
+    poNo: '',
+    invoiceNo: '',
+    totalAmt: '12,00,000.00',
+    paidAmt: '10,00,000.00',
+    payableAmt: '2,00,000.00',
+    lineItems: [
+      { hsnCode: '', description: 'JCB Charges', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' }
+    ]
+  }
+};
+
+// Track which payment row opened the purchase detail (for back-navigation)
+let currentPurchasePaymentId = null;
+
+function renderPurchaseDetailTable(payId) {
+  const tbody = document.getElementById('tbodyPurchaseDetail');
+  if (!tbody) return;
+
+  const detail = purchaseDetailData[payId] || { lineItems: [] };
+  const validItems = (detail.lineItems || []).filter(item => (item.description && item.description.trim() !== '') || (item.hsnCode && item.hsnCode.trim() !== ''));
+  if (validItems.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = validItems.map(item => `
+    <tr>
+      <td class="td-center" style="padding: 6px 8px; font-size: 0.85rem;">${item.hsnCode || ''}</td>
+      <td style="padding: 6px 8px; font-size: 0.85rem; color: #4338ca; font-weight: 500;">${item.description || ''}</td>
+      <td class="td-center" style="padding: 6px 8px; font-size: 0.85rem;">${item.uom || ''}</td>
+      <td class="td-center" style="padding: 6px 8px; font-size: 0.85rem;">${item.poQty || ''}</td>
+      <td class="td-center" style="padding: 6px 8px; font-size: 0.85rem;">${item.invoiceQty || ''}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem;">${item.rate || ''}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem;">${item.basicAmt || ''}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem;">${item.gstAmt || ''}</td>
+      <td class="td-amount" style="padding: 6px 8px; text-align: right; font-size: 0.85rem; font-weight: 600;">${item.totalAmt || ''}</td>
+    </tr>
+  `).join('');
+}
+
+window.openPurchaseDetailModal = function(payId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  currentPurchasePaymentId = payId;
+
+  // Get detail data or create default
+  const detail = purchaseDetailData[payId] || {
+    supplier: 'Supplier Name',
+    poNo: '',
+    invoiceNo: '',
+    totalAmt: '0.00',
+    paidAmt: '0.00',
+    payableAmt: '0.00',
+    lineItems: [
+      { hsnCode: '', description: '', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' },
+      { hsnCode: '', description: '', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' },
+      { hsnCode: '', description: '', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' },
+      { hsnCode: '', description: '', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' },
+      { hsnCode: '', description: '', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' }
+    ]
+  };
+
+  // Update header labels
+  const lblSupplier = document.getElementById('lblPurchaseSupplier');
+  if (lblSupplier) lblSupplier.textContent = detail.supplier;
+  const lblPONo = document.getElementById('lblPurchasePONo');
+  if (lblPONo) lblPONo.textContent = detail.poNo;
+  const lblInvNo = document.getElementById('lblPurchaseInvoiceNo');
+  if (lblInvNo) lblInvNo.textContent = detail.invoiceNo;
+
+  // Update amounts
+  const lblTotal = document.getElementById('lblPurchaseTotalAmt');
+  if (lblTotal) lblTotal.textContent = detail.totalAmt;
+  const lblPaid = document.getElementById('lblPurchasePaidAmt');
+  if (lblPaid) lblPaid.textContent = detail.paidAmt;
+  const lblPayable = document.getElementById('lblPurchasePayableAmt');
+  if (lblPayable) lblPayable.textContent = detail.payableAmt;
+
+  // Hide other sub-panels
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const purchaseModal = document.getElementById('purchaseDetailModal');
+  if (purchaseModal) {
+    purchaseModal.style.display = 'block';
+  }
+
+  renderPurchaseDetailTable(payId);
+  overlay.style.display = 'flex';
+};
+
+// Close Purchase Detail handler
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#btnClosePurchaseDetailModal')) {
+    const purchaseModal = document.getElementById('purchaseDetailModal');
+    if (purchaseModal) purchaseModal.style.display = 'none';
+    // Close the entire overlay since we came from the main table
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+    currentPurchasePaymentId = null;
+  }
+});
+
+// Open Notes tab from Purchase Detail
+window.openPurchaseNotesTab = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Hide purchase modal, show notes modal
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const notesModal = document.getElementById('projectPaymentNotesModal');
+  if (notesModal) {
+    notesModal.style.display = 'block';
+  }
+  overlay.style.display = 'flex';
+};
+
+// Open Bank tab from Purchase Detail
+window.openPurchaseBankTab = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  // Hide purchase modal, show bank modal
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const bankModal = document.getElementById('projectPaymentBankModal');
+  if (bankModal) {
+    bankModal.style.display = 'block';
+  }
+
+  renderProjectPaymentBankFields();
+  overlay.style.display = 'flex';
+};
 
 let currentViewedEmpId = null;
 let isEmployeeFormEditing = false;

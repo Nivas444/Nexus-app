@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=66">
+  <link rel="stylesheet" href="assets/css/home.css?v=69">
 </head>
 
 <body>
@@ -2449,6 +2449,58 @@
           </div>
         </div>
 
+        <!-- Purchase Detail Tab Card (Opened from Payment Worklist - Submit By / Purchase) -->
+        <div class="side-form-card side-contact-popup" id="purchaseDetailModal" style="display: none; width: 950px; max-width: 97vw;">
+          <!-- Header Ribbon Badge: Supplier Name, PO No, Invoice No -->
+          <div class="side-form-header" style="background: #48bb78; display: flex; align-items: center; justify-content: space-between; padding: 10px 18px; border-radius: 10px 10px 0 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; color: #ffffff; font-weight: 700; font-size: 0.92rem; padding-right: 12px;">
+              <span id="lblPurchaseSupplier">Supplier Name</span>
+              <span>PO No : <span id="lblPurchasePONo" style="color: #ffffff;"></span></span>
+              <span>Invoice No: <span id="lblPurchaseInvoiceNo" style="color: #ffffff;"></span></span>
+            </div>
+            <button type="button" class="side-form-close-btn" id="btnClosePurchaseDetailModal" aria-label="Close purchase detail" style="color: #ffffff; font-size: 26px; font-weight: 700; line-height: 1;">&times;</button>
+          </div>
+
+          <!-- Top Metric Row: Summation + Amount, Paid + Amount, Payable + Amount, Notes, Bank -->
+          <div style="padding: 10px 20px 6px 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="icons/summation.svg" alt="Total Sum" width="28" height="28">
+              <span id="lblPurchaseTotalAmt" style="font-weight: 700; font-size: 0.95rem; color: #1e293b;">12,00,000.00</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="cursor: pointer;" title="Paid / Received">
+              <span id="lblPurchasePaidAmt" style="font-weight: 700; font-size: 0.95rem; color: #16a34a;">10,00,000.00</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="cursor: pointer;" title="Payable">
+              <span id="lblPurchasePayableAmt" style="font-weight: 700; font-size: 0.95rem; color: #dc2626;">2,00,000.00</span>
+            </div>
+            <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28" style="cursor: pointer;" title="Notes &amp; Remarks" onclick="openPurchaseNotesTab()">
+            <img src="icons/Bank.svg" alt="Bank" width="28" height="28" style="cursor: pointer;" title="Bank Details" onclick="openPurchaseBankTab()">
+          </div>
+
+          <!-- Table -->
+          <div class="contact-table-wrap" style="padding: 0 12px 20px 12px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPurchaseDetail" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">HSN Code</th>
+                  <th style="width: 200px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
+                  <th style="width: 65px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Uom</th>
+                  <th style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">PO Qty</th>
+                  <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Invoice Qty</th>
+                  <th style="width: 80px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+                  <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Basic Amount</th>
+                  <th style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST Amount</th>
+                  <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total Amount</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPurchaseDetail">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Project Payment Notes & Remarks Popup Tab (Matching Uploaded Mockup) -->
         <div class="side-form-card side-contact-popup" id="projectPaymentNotesModal" style="display: none; width: 680px; max-width: 96vw;">
           <!-- Header Ribbon Badge: Notes & Remarks + Edit and Close Buttons -->
@@ -4291,7 +4343,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=66"></script>
+  <script src="assets/js/home.js?v=69"></script>
 </body>
 
 </html>

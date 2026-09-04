@@ -521,7 +521,8 @@ body {
 
 /* Payment Grouped Header: Solid White Horizontal Line under "Amount" */
 .payment-view-header .th-amount-group {
-  border-bottom: 1.5px solid #ffffff !important; /* CRISP WHITE LINE UNDER AMOUNT */
+  border-top: none !important;
+  border-bottom: 1px solid #ffffff !important;
   border-right: 1.5px solid #ffffff !important;
   padding: 10px 8px !important;
   text-align: center !important;
@@ -665,7 +666,8 @@ th.th-amount-group,
   color: #ffffff !important;
   font-weight: 700;
   border: none !important;
-  border-bottom: 2px solid #ffffff !important;
+  border-top: none !important;
+  border-bottom: 1px solid #ffffff !important;
   border-right: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
 
@@ -677,7 +679,7 @@ tr.tr-sub-headers th,
   font-weight: 700;
   padding: 8px 12px;
   border: none !important;
-  border-top: 2px solid #ffffff !important;
+  border-top: none !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.45) !important;
 }
@@ -3254,8 +3256,10 @@ input[type="date"].date-picker-control {
 }
 
 .worklist-table-full tbody tr.project-payment-row:hover,
-.worklist-table-full tbody tr.project-payment-row:hover td {
-  background-color: #f8fafc !important;
+.worklist-table-full tbody tr.project-payment-row:hover td,
+.worklist-table-full tbody tr.project-payment-row.row-selected,
+.worklist-table-full tbody tr.project-payment-row.row-selected td {
+  background-color: #e8f5e9 !important; /* VERY LIGHT GREEN HIGHLIGHTING */
 }
 
 input.project-table-edit-input,
@@ -3369,6 +3373,38 @@ select.project-notes-edit-input {
   border-color: #000000 !important;
   box-shadow: 0 0 0 1px #000000 !important;
 }
+
+/* Permanent light green highlight for approved project payment rows */
+.worklist-table-full tbody tr.project-payment-row.row-approved-permanently,
+.worklist-table-full tbody tr.project-payment-row.row-approved-permanently td {
+  background-color: #dcfce7 !important; /* Very light green permanent highlight */
+}
+
+/* Payment History BOQ Name cell content left alignment override */
+#tblPaymentHistoryReport tbody td:first-child,
+#tblPaymentHistoryReport tbody td:first-child a {
+  text-align: left !important;
+  justify-content: flex-start !important;
+}
+
+/* Amount Header borders: No border above, crisp 1.5px white border below matching other headers */
+.payment-view-header .th-amount-group,
+th.th-amount-group,
+.payment-view-header th.th-amount-group {
+  border-top: none !important;
+  border-top-width: 0 !important;
+  border-top-color: transparent !important;
+  border-bottom: 1.5px solid #ffffff !important;
+  border-right: 1.5px solid #ffffff !important;
+}
+
+tr.tr-sub-headers th,
+.payment-view-header tr.tr-sub-headers th {
+  border-top: none !important;
+  border-top-width: 0 !important;
+  border-top-color: transparent !important;
+}
+
 
 
 

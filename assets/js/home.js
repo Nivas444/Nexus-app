@@ -861,7 +861,14 @@ function goBackSubpage() {
       showToast('Returned to Worklist');
     }
   } else if (currentModule === 'worklist') {
-    if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
+    if (currentWorklistView === 'po_rfq_compare') {
+      currentWorklistView = 'po_supplier';
+      showToast('Returned to Supplier Details');
+    } else if (currentWorklistView === 'po_supplier') {
+      isPoSupplierEditing = false;
+      currentWorklistView = 'po';
+      showToast('Returned to PO Page');
+    } else if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
       isProjectPaymentEditing = false;
       currentWorklistView = 'payment';
       showToast('Returned to Payment Page');
@@ -963,6 +970,19 @@ function renderApp() {
         bannerTitle.innerHTML = `
           <div class="project-payment-banner-content">
             <div class="banner-left-title">Statutory</div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'po_supplier') {
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content">
+            <div class="banner-left-title">${selectedPoSupplierName || 'Supplier Name'}</div>
+            <div class="banner-right-title">${selectedPoNo || 'PO #'}</div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'po_rfq_compare') {
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content">
+            <div class="banner-left-title">${selectedRfqNo || 'RFQ # :'}</div>
           </div>
         `;
       } else {
@@ -2067,6 +2087,10 @@ function loadWorklistDataset() {
   } else if (currentWorklistView === 'statutory_payment') {
     const statutoryDetail = statutoryDetailData[selectedStatutoryPayId || 'pay-7'] || statutoryDetailData['pay-7'];
     currentDataset = statutoryDetail.lineItems || [];
+  } else if (currentWorklistView === 'po_supplier') {
+    currentDataset = poSupplierItems;
+  } else if (currentWorklistView === 'po_rfq_compare') {
+    currentDataset = poRfqCompareItems;
   } else if (currentWorklistView === 'po') {
     currentDataset = poData;
   } else {
@@ -2331,6 +2355,37 @@ function renderWorklistToolbar() {
         </button>
       </div>
     `;
+  } else if (currentWorklistView === 'po_supplier') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
+        </div>
+        <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/summation.svg" alt="Total Sum" width="28" height="28" style="vertical-align: middle;">
+        </div>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <img src="icons/sync.svg" alt="Sync" width="26" height="26" class="icon-blue-filter" style="cursor: pointer;" onclick="openWorklistPoRfqCompare()" title="Compare RFQ / Vendors">
+        <button type="button" class="toolbar-icon-btn" id="btnPoSupplierEditToggle" onclick="togglePoSupplierEditMode()" data-tooltip="${isPoSupplierEditing ? 'Save' : 'Edit'}" aria-label="${isPoSupplierEditing ? 'Save' : 'Edit'}">
+          <img src="${isPoSupplierEditing ? 'icons/save.svg' : 'icons/edit.svg'}" alt="${isPoSupplierEditing ? 'Save' : 'Edit'}" class="toolbar-icon-img" width="24" height="24">
+        </button>
+      </div>
+    `;
+    return;
+  } else if (currentWorklistView === 'po_rfq_compare') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
+        </div>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <button type="button" class="toolbar-icon-btn" title="Edit" onclick="showToast('RFQ Comparison Edit mode')">
+          <img src="icons/edit.svg" alt="Edit" width="24" height="24">
+        </button>
+      </div>
+    `;
     return;
   } else if (currentWorklistView === 'po') {
     toolbar.innerHTML = `
@@ -2376,6 +2431,12 @@ function renderWorklistFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
+  if (currentWorklistView === 'po_supplier' || currentWorklistView === 'po_rfq_compare') {
+    footer.innerHTML = '';
+    footer.style.display = 'none';
+    return;
+  }
+
   if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
     footer.style.display = 'flex';
     footer.style.justifyContent = 'center';
@@ -2389,6 +2450,10 @@ function renderWorklistFooter() {
     return;
   }
 
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'flex-start';
+  footer.style.alignItems = 'center';
+  footer.style.width = '100%';
   footer.innerHTML = `
     <div class="segmented-toggle-group">
       <button type="button" class="segmented-btn ${currentWorklistView === 'payment' ? 'active' : ''}" id="btnTogglePayment">
@@ -2526,6 +2591,50 @@ function renderWorklistTableHead() {
         <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
       </tr>
     `;
+  } else if (currentWorklistView === 'po_supplier') {
+    thead.innerHTML = `
+      <tr class="project-payment-header-row1">
+        <th rowspan="2" style="width: 70px;">Select</th>
+        <th rowspan="2" style="width: 220px;">Material Description</th>
+        <th rowspan="2" style="width: 80px;">Uom</th>
+        <th colspan="2">Qty</th>
+        <th colspan="2">Rate</th>
+        <th colspan="3">Amount</th>
+      </tr>
+      <tr class="project-payment-header-row2">
+        <th style="width: 90px;">Stock</th>
+        <th style="width: 90px;">PR</th>
+        <th style="width: 100px;">Existing</th>
+        <th style="width: 100px;">New</th>
+        <th style="width: 110px;">Basic</th>
+        <th style="width: 110px;">GST</th>
+        <th style="width: 110px;">Total</th>
+      </tr>
+    `;
+  } else if (currentWorklistView === 'po_rfq_compare') {
+    thead.innerHTML = `
+      <tr class="project-payment-header-row1">
+        <th rowspan="2" style="width: 180px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Material Description</th>
+        <th rowspan="2" style="width: 60px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Uom</th>
+        <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 1 Name</th>
+        <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 2 Name</th>
+        <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 3 Name</th>
+      </tr>
+      <tr class="project-payment-header-row2">
+        <th style="width: 80px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+        <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+        <th style="width: 70px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST</th>
+        <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total</th>
+        <th style="width: 80px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+        <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+        <th style="width: 70px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST</th>
+        <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total</th>
+        <th style="width: 80px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+        <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+        <th style="width: 70px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST</th>
+        <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total</th>
+      </tr>
+    `;
   } else if (currentWorklistView === 'po') {
     thead.innerHTML = `
       <tr class="po-view-header">
@@ -2593,47 +2702,6 @@ function renderWorklistTableHead() {
   }
 }
 
-function renderWorklistFooter() {
-  const footer = document.getElementById('worklistFooterBar');
-  if (!footer) return;
-
-  if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
-    footer.innerHTML = '';
-    return;
-  }
-
-  footer.innerHTML = `
-    <div class="segmented-toggle-group">
-      <button type="button" class="segmented-btn ${currentWorklistView === 'payment' ? 'active' : ''}" id="btnTogglePayment">
-        Payment
-      </button>
-      <div class="segmented-divider"></div>
-      <button type="button" class="segmented-btn ${currentWorklistView === 'po' ? 'active' : ''}" id="btnTogglePO">
-        PO
-      </button>
-    </div>
-  `;
-
-  document.getElementById('btnTogglePO')?.addEventListener('click', () => {
-    if (currentWorklistView !== 'po') {
-      currentWorklistView = 'po';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Switched to PO Page');
-    }
-  });
-
-  document.getElementById('btnTogglePayment')?.addEventListener('click', () => {
-    if (currentWorklistView !== 'payment') {
-      currentWorklistView = 'payment';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Switched to Payment Page');
-    }
-  });
-}
 
 function initWorklistToolbarEvents() {
   document.getElementById('btnPaymentDashboard')?.addEventListener('click', () => {
@@ -2695,6 +2763,28 @@ function applyFiltersAndRender() {
 
   const tbody = document.getElementById('worklistTableBody');
   if (!tbody) return;
+
+  if (currentWorklistView === 'po_rfq_compare') {
+    tbody.innerHTML = `
+      <tr>
+        <td style="height: 38px;">&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+      </tr>
+    `;
+    return;
+  }
 
   if (filteredDataset.length === 0) {
     const colSpan = currentModule === 'indus_towers'
@@ -3156,6 +3246,53 @@ function applyFiltersAndRender() {
           </tr>
         `).join('');
       }
+    } else if (currentWorklistView === 'po_supplier') {
+      tbody.innerHTML = filteredDataset.map((row, idx) => {
+        const isSelected = row.selected;
+        return `
+          <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id || idx}">
+            <td class="td-select td-center">
+              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="togglePoSupplierRowSelect('${row.id}')" aria-label="Select row"></div>
+            </td>
+            <td style="padding: 8px 12px; font-weight: 500;">${row.materialDescription || ''}</td>
+            <td class="td-center">${row.uom || ''}</td>
+            <td class="td-center">
+              ${isPoSupplierEditing ? `
+                <input type="text" class="po-supplier-edit-input" data-row-id="${row.id}" data-field="stock" value="${row.stock || ''}" placeholder="0" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: center; cursor: text;">
+              ` : `${row.stock || ''}`}
+            </td>
+            <td class="td-center">${row.pr || ''}</td>
+            <td class="td-amount">
+              ${isPoSupplierEditing ? `
+                <input type="text" class="po-supplier-edit-input" data-row-id="${row.id}" data-field="existing" value="${row.existing || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+              ` : `${row.existing || ''}`}
+            </td>
+            <td class="td-amount">${row.newRate || ''}</td>
+            <td class="td-amount">${row.basic || ''}</td>
+            <td class="td-amount">${row.gst || ''}</td>
+            <td class="td-amount">${row.total || ''}</td>
+          </tr>
+        `;
+      }).join('');
+    } else if (currentWorklistView === 'po_rfq_compare') {
+      tbody.innerHTML = `
+        <tr>
+          <td style="height: 38px;">&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+      `;
     } else if (currentWorklistView === 'po') {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
@@ -3165,10 +3302,10 @@ function applyFiltersAndRender() {
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="selectRow('${row.id}')" aria-label="Select row"></div>
             </td>
             <td class="td-center">${row.submissionDate}</td>
+            <td style="color: #000000; font-weight: 400;">${row.submittedBy}</td>
             <td>
-              <a href="#" class="req-link" onclick="handleReqClick('${row.submittedBy}'); return false;">${row.submittedBy}</a>
+              <a href="#" class="req-link td-link-blue" onclick="openWorklistPoSupplier('${row.vendorName}', '${row.poNo}'); return false;">${row.vendorName}</a>
             </td>
-            <td>${row.vendorName}</td>
             <td class="td-center">${row.poNo}</td>
             <td class="td-amount">${row.poAmount}</td>
           </tr>
@@ -10030,3 +10167,93 @@ document.addEventListener('click', (e) => {
     return;
   }
 });
+
+// ==========================================================================
+// 11. WORKLIST PO SUPPLIER DETAIL VIEW & EDITING ENGINE
+// ==========================================================================
+let isPoSupplierEditing = false;
+let selectedPoSupplierName = 'Supplier Name';
+let selectedPoNo = 'PO #';
+let selectedRfqNo = 'RFQ # :';
+
+let poSupplierItems = [
+  { id: 'pos-1', selected: false, materialDescription: 'PO', uom: 'Nos', stock: '10', pr: '5', existing: '1500.00', newRate: '1500.00', basic: '15000.00', gst: '2700.00', total: '17700.00' },
+  { id: 'pos-2', selected: false, materialDescription: 'Non - PO', uom: 'LS', stock: '2', pr: '1', existing: '5000.00', newRate: '5000.00', basic: '5000.00', gst: '900.00', total: '5900.00' },
+  { id: 'pos-3', selected: false, materialDescription: 'Service', uom: 'Nos', stock: '0', pr: '2', existing: '2500.00', newRate: '2500.00', basic: '5000.00', gst: '900.00', total: '5900.00' }
+];
+
+let poRfqCompareItems = [];
+
+window.openWorklistPoSupplier = function(vendorName, poNo) {
+  isPoSupplierEditing = false;
+  poSupplierItems.forEach(item => item.selected = false);
+  currentModule = 'worklist';
+  currentWorklistView = 'po_supplier';
+  selectedPoSupplierName = vendorName || 'Supplier Name';
+  selectedPoNo = poNo || 'PO #';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened Supplier Details: ${selectedPoSupplierName}`);
+};
+
+window.openWorklistPoRfqCompare = function(rfqNo) {
+  currentModule = 'worklist';
+  currentWorklistView = 'po_rfq_compare';
+  selectedRfqNo = rfqNo || 'RFQ # :';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened RFQ Comparison Page');
+};
+
+window.togglePoSupplierRowSelect = function(rowId) {
+  const item = poSupplierItems.find(i => i.id === rowId);
+  if (item) {
+    item.selected = !item.selected;
+    applyFiltersAndRender();
+  }
+};
+
+window.togglePoSupplierEditMode = function() {
+  if (!isPoSupplierEditing) {
+    isPoSupplierEditing = true;
+    renderWorklistToolbar();
+    applyFiltersAndRender();
+    showToast('Stock and Existing columns are now editable');
+  } else {
+    const inputs = document.querySelectorAll('.po-supplier-edit-input');
+    inputs.forEach(input => {
+      const rowId = input.getAttribute('data-row-id');
+      const field = input.getAttribute('data-field');
+      const item = poSupplierItems.find(i => i.id === rowId);
+      if (item && field) {
+        item[field] = input.value.trim();
+      }
+    });
+    isPoSupplierEditing = false;
+    renderWorklistToolbar();
+    applyFiltersAndRender();
+    showToast('Supplier PO details saved successfully!');
+  }
+};
+
+window.openRfqCompareModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  document.querySelectorAll('#sideFormOverlay .side-form-card').forEach(card => {
+    if (card.id !== 'rfqCompareModal') card.style.display = 'none';
+  });
+  const modal = document.getElementById('rfqCompareModal');
+  if (modal) modal.style.display = 'block';
+  if (overlay) overlay.style.display = 'block';
+  showToast('RFQ Comparison modal opened');
+};
+
+window.closeRfqCompareModal = function() {
+  const modal = document.getElementById('rfqCompareModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+

@@ -242,7 +242,7 @@ body {
 
 .banner-title-link {
   color: #ffffff !important;
-  text-decoration: underline;
+  text-decoration: none !important;
   cursor: pointer;
   transition: opacity 0.2s ease, filter 0.2s ease;
 }
@@ -447,14 +447,14 @@ body {
 }
 
 .banner-title-underline {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration: none !important;
+  text-underline-offset: 0;
 }
 
 .business-type-link,
 .site-id-link {
   color: #0057e7 !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
@@ -770,13 +770,13 @@ tr.tr-sub-headers th,
 .req-link {
   color: #2563eb;
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: none !important;
   transition: var(--transition);
 }
 
 .req-link:hover {
   color: #1d4ed8;
-  text-decoration: underline;
+  text-decoration: none !important;
 }
 
 .td-amount {
@@ -2351,7 +2351,7 @@ td.col-master-vendor-status { text-align: center !important; }
 .form-input-highlight {
   color: #2563eb;
   font-weight: 600;
-  text-decoration: underline;
+  text-decoration: none !important;
 }
 
 .form-input-wrap.with-action-badge .form-input-control {
@@ -3229,7 +3229,7 @@ input[type="date"].date-picker-control {
 
 .clickable-project-link {
   color: #2563eb !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
   font-weight: 600 !important;
   cursor: pointer !important;
   transition: color 0.15s ease;
@@ -3237,11 +3237,12 @@ input[type="date"].date-picker-control {
 
 .clickable-project-link:hover {
   color: #1d4ed8 !important;
+  text-decoration: none !important;
 }
 
 .boq-link {
   color: #2563eb !important;
-  text-decoration: underline !important;
+  text-decoration: none !important;
   font-weight: 600 !important;
   cursor: pointer !important;
 }
@@ -3404,6 +3405,45 @@ tr.tr-sub-headers th,
   border-top-width: 0 !important;
   border-top-color: transparent !important;
 }
+
+/* PO Supplier Detail View Blue Icon Filter */
+.icon-blue-filter {
+  filter: invert(34%) sepia(85%) saturate(1917%) hue-rotate(209deg) brightness(96%) contrast(92%);
+}
+
+/* ==========================================================================
+   GLOBAL OVERRIDE: REMOVE ALL UNDERLINES FROM ALL HYPERLINKS PLATFORM-WIDE
+   ========================================================================== */
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited,
+.req-link,
+.req-link:hover,
+.banner-title-link,
+.banner-title-link:hover,
+.banner-title-underline,
+.banner-title-underline:hover,
+.business-type-link,
+.business-type-link:hover,
+.site-id-link,
+.site-id-link:hover,
+.clickable-project-link,
+.clickable-project-link:hover,
+.boq-link,
+.boq-link:hover,
+.form-input-highlight,
+.td-link-blue,
+.td-link-blue:hover,
+#tblPaymentHistoryReport tbody td a,
+#tblPaymentHistoryReport tbody td a:hover,
+#tblPaymentHistoryReport tbody td:first-child a,
+#tblPaymentHistoryReport tbody td:first-child a:hover {
+  text-decoration: none !important;
+}
+
+
 
 
 

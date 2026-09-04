@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=80">
+  <link rel="stylesheet" href="assets/css/home.css?v=89">
 </head>
 
 <body>
@@ -2665,6 +2665,87 @@
           </div>
         </div>
 
+        <!-- RFQ / Vendor Compare Modal (Opened from Supplier PO sync icon) -->
+        <div class="side-form-card side-contact-popup" id="rfqCompareModal" style="display: none; width: 1200px; max-width: 98vw;">
+          <!-- Header Ribbon Badge: RFQ # + Close Button -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblRfqCompareTitle">RFQ # :</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseRfqCompareModal" onclick="closeRfqCompareModal()" aria-label="Close RFQ comparison" style="color: #dc2626; font-size: 32px; font-weight: 700; line-height: 1;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Action Bar: Edit Icon -->
+          <div style="padding: 10px 20px 6px 20px; display: flex; justify-content: flex-end; align-items: center;">
+            <button type="button" class="toolbar-icon-btn" id="btnRfqCompareEdit" onclick="showToast('RFQ Comparison Edit mode')" title="Edit" aria-label="Edit">
+              <img src="icons/edit.svg" alt="Edit" width="24" height="24">
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="contact-table-wrap" style="padding: 0 12px 20px 12px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblRfqCompare" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="project-payment-header-row1">
+                  <th rowspan="2" style="width: 180px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Material Description</th>
+                  <th rowspan="2" style="width: 60px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Uom</th>
+                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 1 Name</th>
+                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 2 Name</th>
+                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 3 Name</th>
+                </tr>
+                <tr class="project-payment-header-row2">
+                  <th style="width: 80px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+                  <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+                  <th style="width: 70px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST</th>
+                  <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total</th>
+                  <th style="width: 80px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+                  <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+                  <th style="width: 70px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST</th>
+                  <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total</th>
+                  <th style="width: 80px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
+                  <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+                  <th style="width: 70px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST</th>
+                  <th style="width: 90px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Total</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyRfqCompare">
+                <tr>
+                  <td style="text-align: left; font-weight: 500;">Material Item 1</td>
+                  <td class="td-center">Nos</td>
+                  <td class="td-amount">1500.00</td>
+                  <td class="td-amount">15000.00</td>
+                  <td class="td-amount">2700.00</td>
+                  <td class="td-amount" style="font-weight: 600;">17700.00</td>
+                  <td class="td-amount">1600.00</td>
+                  <td class="td-amount">16000.00</td>
+                  <td class="td-amount">2880.00</td>
+                  <td class="td-amount" style="font-weight: 600;">18880.00</td>
+                  <td class="td-amount">1450.00</td>
+                  <td class="td-amount">14500.00</td>
+                  <td class="td-amount">2610.00</td>
+                  <td class="td-amount" style="font-weight: 600;">17110.00</td>
+                </tr>
+                <tr>
+                  <td style="text-align: left; font-weight: 500;">Material Item 2</td>
+                  <td class="td-center">LS</td>
+                  <td class="td-amount">5000.00</td>
+                  <td class="td-amount">5000.00</td>
+                  <td class="td-amount">900.00</td>
+                  <td class="td-amount" style="font-weight: 600;">5900.00</td>
+                  <td class="td-amount">5200.00</td>
+                  <td class="td-amount">5200.00</td>
+                  <td class="td-amount">936.00</td>
+                  <td class="td-amount" style="font-weight: 600;">6136.00</td>
+                  <td class="td-amount">4800.00</td>
+                  <td class="td-amount">4800.00</td>
+                  <td class="td-amount">864.00</td>
+                  <td class="td-amount" style="font-weight: 600;">5664.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- 7. Add Bank Form Card (Nested Modal) -->
         <div class="side-form-card" id="addBankCard" style="display: none; width: 460px;">
           <!-- Header Ribbon Badge: Add Bank -->
@@ -4340,7 +4421,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=80"></script>
+  <script src="assets/js/home.js?v=89"></script>
 </body>
 
 </html>

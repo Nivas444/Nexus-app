@@ -68,31 +68,49 @@ const masterVendorData = [
   {
     id: "vend-1",
     vendorType: "Service",
+    serviceType: "Project",
     vendorId: "230510678",
     vendorName: "R/RL-234567",
-    gstNumber: "R/RL-234567",
-    panNumber: "R/RL-234567",
+    tdsDeduction: true,
+    tdsCode: "1027",
+    tdsRate: "1%",
     gstType: "SGST",
+    gstNumber: "33ASMPM8643F1Z5",
+    address: "123 Telecom Tower Complex, Chennai",
+    panNumber: "ASMPM8643F",
+    tcsDeduction: false,
     status: "Active"
   },
   {
     id: "vend-2",
     vendorType: "Supply",
-    vendorId: "230510678",
-    vendorName: "R/RL-234567",
-    gstNumber: "R/RL-234567",
-    panNumber: "R/RL-234567",
+    serviceType: "Project",
+    vendorId: "230510679",
+    vendorName: "Steel Infra Supplies Ltd",
+    tdsDeduction: false,
+    tdsCode: "1031",
+    tdsRate: "2%",
     gstType: "IGST",
+    gstNumber: "29AABCU9603R1ZM",
+    address: "45 Industrial Area, Bengaluru",
+    panNumber: "AABCU9603R",
+    tcsDeduction: true,
     status: "In - Active"
   },
   {
     id: "vend-3",
     vendorType: "Service",
-    vendorId: "230510678",
-    vendorName: "R/RL-234567",
-    gstNumber: "NA",
-    panNumber: "R/RL-234567",
+    serviceType: "Transport",
+    vendorId: "230510680",
+    vendorName: "Express Logistics Services",
+    tdsDeduction: true,
+    tdsCode: "1023",
+    tdsRate: "1%",
     gstType: "NA",
+    gstNumber: "NA",
+    address: "78 Transport Nagar, Hyderabad",
+    panNumber: "BKMPM4321K",
+    tcsDeduction: false,
     status: "Active"
   }
 ];
@@ -2437,13 +2455,15 @@ function renderWorklistFooter() {
     return;
   }
 
-  if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
+  if ((currentWorklistView.endsWith('_payment') && currentWorklistView !== 'payment') || currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
     footer.style.display = 'flex';
     footer.style.justifyContent = 'center';
     footer.style.alignItems = 'center';
     footer.style.width = '100%';
+    footer.style.setProperty('margin-top', '12px', 'important');
+    footer.style.setProperty('padding', '12px 0 16px 0', 'important');
     footer.innerHTML = `
-      <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" data-tooltip="Submit" title="Submit" aria-label="Submit" onclick="showToast('Submitted successfully')" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+      <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openTransferDetailsModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
         <img src="icons/Submit.svg" alt="Submit" width="32" height="32">
       </button>
     `;
@@ -2454,6 +2474,8 @@ function renderWorklistFooter() {
   footer.style.justifyContent = 'flex-start';
   footer.style.alignItems = 'center';
   footer.style.width = '100%';
+  footer.style.marginTop = 'auto';
+  footer.style.padding = '24px';
   footer.innerHTML = `
     <div class="segmented-toggle-group">
       <button type="button" class="segmented-btn ${currentWorklistView === 'payment' ? 'active' : ''}" id="btnTogglePayment">
@@ -3018,7 +3040,9 @@ function applyFiltersAndRender() {
           <tr data-row-id="${row.id}">
             <td class="col-master-vendor-type">${row.vendorType}</td>
             <td class="col-master-vendor-id td-center">${row.vendorId}</td>
-            <td class="col-master-vendor-name">${row.vendorName}</td>
+            <td class="col-master-vendor-name">
+              <a href="#" class="req-link td-link-blue" onclick="openViewVendorCard('${row.id}'); return false;">${row.vendorName}</a>
+            </td>
             <td class="col-master-vendor-gst-num td-center">${row.gstNumber}</td>
             <td class="col-master-vendor-pan td-center">${row.panNumber}</td>
             <td class="col-master-vendor-gst-type td-center">${row.gstType}</td>
@@ -4978,24 +5002,26 @@ function initSideFormEvents() {
   function updateVendorBusinessTypeFields() {
     const vType = document.getElementById('inpVendorType')?.value;
     const rowServiceType = document.getElementById('rowVendorServiceType');
-    const rowTdsDeduction = document.getElementById('rowVendorTdsDeduction');
-    const rowTdsRate = document.getElementById('rowVendorTdsRate');
     const rowTcsDeduction = document.getElementById('rowVendorTcsDeduction');
+    const rowTdsDeduction = document.getElementById('rowVendorTdsDeduction');
+    const rowTdsCode = document.getElementById('rowVendorTdsCode');
+    const rowTdsRate = document.getElementById('rowVendorTdsRate');
+
+    // Ensure TDS fields are always visible
+    if (rowTdsDeduction) rowTdsDeduction.style.display = 'flex';
+    if (rowTdsCode) rowTdsCode.style.display = 'flex';
+    if (rowTdsRate) rowTdsRate.style.display = 'flex';
 
     if (vType === 'Supply') {
       // Show TCS Deduction when Supply is selected
       if (rowTcsDeduction) rowTcsDeduction.style.display = 'flex';
-      // Hide Service-only fields
+      // Hide Service Type field
       if (rowServiceType) rowServiceType.style.display = 'none';
-      if (rowTdsDeduction) rowTdsDeduction.style.display = 'none';
-      if (rowTdsRate) rowTdsRate.style.display = 'none';
     } else if (vType === 'Service') {
       // Hide TCS Deduction when Service is selected
       if (rowTcsDeduction) rowTcsDeduction.style.display = 'none';
-      // Show Service-only fields
+      // Show Service Type field
       if (rowServiceType) rowServiceType.style.display = 'flex';
-      if (rowTdsDeduction) rowTdsDeduction.style.display = 'flex';
-      if (rowTdsRate) rowTdsRate.style.display = 'flex';
     }
   }
   window.updateVendorBusinessTypeFields = updateVendorBusinessTypeFields;
@@ -5931,8 +5957,26 @@ function openSideForm() {
       isEmployeeFormEditing = false;
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
-    if (addVendorCard) addVendorCard.style.display = 'block';
-    if (typeof updateVendorBusinessTypeFields === 'function') updateVendorBusinessTypeFields();
+    if (addVendorCard) {
+      addVendorCard.style.display = 'block';
+      const lblTitle = document.getElementById('lblVendorCardTitle');
+      const btnEditToggle = document.getElementById('btnVendorCardEditToggle');
+      const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
+      if (lblTitle) lblTitle.innerText = 'Add Vendor';
+      if (btnEditToggle) btnEditToggle.style.display = 'none';
+      if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+      const btnBank = document.getElementById('btnVendorCardBank');
+      const btnMessage = document.getElementById('btnVendorCardMessage');
+      const btnScope = document.getElementById('btnVendorCardScope');
+      if (btnBank) btnBank.style.display = 'inline-flex';
+      if (btnMessage) btnMessage.style.display = 'inline-flex';
+      if (btnScope) btnScope.style.display = 'inline-flex';
+
+      setVendorFormReadOnly(false);
+      currentViewedVendorId = null;
+      isVendorFormEditing = false;
+      if (typeof updateVendorBusinessTypeFields === 'function') updateVendorBusinessTypeFields();
+    }
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
     if (addProductCard) {
       addProductCard.style.display = 'block';
@@ -9390,6 +9434,59 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Wire btnVendorCardEditToggle
+  const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
+  if (btnVendorCardEditToggle) {
+    btnVendorCardEditToggle.addEventListener('click', () => {
+      const lblTitle = document.getElementById('lblVendorCardTitle');
+      const imgIcon = document.getElementById('imgVendorCardEditIcon');
+
+      if (!isVendorFormEditing) {
+        // ENTER EDIT MODE
+        isVendorFormEditing = true;
+        setVendorFormReadOnly(false);
+        if (lblTitle) lblTitle.innerText = 'Edit Vendor';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.title = 'Save Changes';
+        }
+        showToast('Vendor form is now editable');
+      } else {
+        // SAVE EDITS
+        isVendorFormEditing = false;
+        if (currentViewedVendorId) {
+          const vend = masterVendorData.find(v => v.id === currentViewedVendorId);
+          if (vend) {
+            vend.vendorName = document.getElementById('inpVendorName')?.value || vend.vendorName;
+            vend.vendorType = document.getElementById('inpVendorType')?.value || vend.vendorType;
+            vend.serviceType = document.getElementById('inpServiceType')?.value || vend.serviceType;
+            const chkTds = document.getElementById('inpTdsDeductionToggle');
+            vend.tdsDeduction = chkTds ? chkTds.checked : vend.tdsDeduction;
+            vend.tdsCode = document.getElementById('inpTdsCode')?.value || vend.tdsCode;
+            vend.tdsRate = document.getElementById('inpTdsRate')?.value || vend.tdsRate;
+            vend.gstType = document.getElementById('inpVendorGstType')?.value || vend.gstType;
+            vend.gstNumber = document.getElementById('inpVendorGstNumber')?.value || vend.gstNumber;
+            vend.address = document.getElementById('inpVendorAddress')?.value || vend.address;
+            vend.panNumber = document.getElementById('inpVendorPanNumber')?.value || vend.panNumber;
+            const chkTcs = document.getElementById('inpTcsDeductionToggle');
+            vend.tcsDeduction = chkTcs ? chkTcs.checked : vend.tcsDeduction;
+            const statusToggle = document.getElementById('inpVendorStatusToggle');
+            vend.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+          }
+          currentDataset = [...masterVendorData];
+          applyFiltersAndRender();
+        }
+        setVendorFormReadOnly(true);
+        if (lblTitle) lblTitle.innerText = 'View Vendor';
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Vendor details saved & updated successfully!');
+      }
+    });
+  }
+
   const btnProjectTransportIcon = document.getElementById('btnProjectTransportIcon');
   if (btnProjectTransportIcon) {
     btnProjectTransportIcon.addEventListener('click', (e) => {
@@ -9785,6 +9882,119 @@ window.handleProjectClick = function(projectId, projectType) {
 
   setProjectFormReadOnly(true);
   showToast(`Viewing project details: ${proj.projectType}`);
+};
+
+let currentViewedVendorId = null;
+let isVendorFormEditing = false;
+
+function setVendorFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddVendor');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+      else input.setAttribute('readonly', 'true');
+      input.style.backgroundColor = '#f8fafc';
+    } else {
+      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+      else input.removeAttribute('readonly');
+      input.style.backgroundColor = '#ffffff';
+    }
+  });
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.setVendorFormReadOnly = setVendorFormReadOnly;
+
+window.openViewVendorCard = function(vendorId) {
+  let vend = masterVendorData.find(v => v.id === vendorId || v.vendorName === vendorId || v.vendorId === vendorId);
+  if (!vend) {
+    vend = {
+      id: vendorId || 'vend-1',
+      vendorType: "Service",
+      serviceType: "Project",
+      vendorId: "230510678",
+      vendorName: "R/RL-234567",
+      tdsDeduction: true,
+      tdsCode: "1027",
+      tdsRate: "1%",
+      gstType: "SGST",
+      gstNumber: "33ASMPM8643F1Z5",
+      address: "123 Telecom Tower Complex, Chennai",
+      panNumber: "ASMPM8643F",
+      tcsDeduction: false,
+      status: "Active"
+    };
+  }
+
+  currentViewedVendorId = vend.id;
+  isVendorFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addVendorCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblVendorCardTitle');
+  if (lblTitle) lblTitle.innerText = 'View Vendor';
+
+  const btnEditToggle = document.getElementById('btnVendorCardEditToggle');
+  const imgEditIcon = document.getElementById('imgVendorCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnBank = document.getElementById('btnVendorCardBank');
+  const btnMessage = document.getElementById('btnVendorCardMessage');
+  const btnScope = document.getElementById('btnVendorCardScope');
+  if (btnBank) btnBank.style.display = 'none';
+  if (btnMessage) btnMessage.style.display = 'none';
+  if (btnScope) btnScope.style.display = 'none';
+
+  const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpVendorName')) document.getElementById('inpVendorName').value = vend.vendorName || '';
+  if (document.getElementById('inpVendorType')) document.getElementById('inpVendorType').value = vend.vendorType || 'Supply';
+  if (document.getElementById('inpServiceType')) document.getElementById('inpServiceType').value = vend.serviceType || 'Project';
+  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = vend.tdsCode || '';
+  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = vend.tdsRate || '1%';
+  if (document.getElementById('inpVendorGstType')) document.getElementById('inpVendorGstType').value = vend.gstType || 'NA';
+  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = vend.gstNumber || '';
+  if (document.getElementById('inpVendorAddress')) document.getElementById('inpVendorAddress').value = vend.address || '';
+  if (document.getElementById('inpVendorPanNumber')) document.getElementById('inpVendorPanNumber').value = vend.panNumber || '';
+
+  const chkTds = document.getElementById('inpTdsDeductionToggle');
+  if (chkTds) chkTds.checked = vend.tdsDeduction === true;
+
+  const chkTcs = document.getElementById('inpTcsDeductionToggle');
+  if (chkTcs) chkTcs.checked = vend.tcsDeduction === true;
+
+  const statusToggle = document.getElementById('inpVendorStatusToggle');
+  if (statusToggle) {
+    statusToggle.checked = (vend.status || '').toLowerCase() === 'active';
+  }
+
+  if (typeof updateVendorBusinessTypeFields === 'function') {
+    updateVendorBusinessTypeFields();
+  }
+
+  setVendorFormReadOnly(true);
+  showToast(`Viewing vendor details: ${vend.vendorName}`);
 };
 
 let currentViewedProductId = null;
@@ -10255,5 +10465,72 @@ window.closeRfqCompareModal = function() {
   if (modal) modal.style.display = 'none';
   if (overlay) overlay.style.display = 'none';
 };
+
+// ==========================================================================
+// 12. TRANSFER DETAILS MODAL (PAYMENT SUBPAGES SUBMIT ACTION)
+// ==========================================================================
+
+window.openTransferDetailsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'transferDetailsModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('transferDetailsModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+
+    // Reset fields to default (all slidebars in deactive state)
+    const chkPartial = document.getElementById('chkPartialPayment');
+    if (chkPartial) chkPartial.checked = false;
+    const rowProcess = document.getElementById('rowProcessPayment');
+    if (rowProcess) rowProcess.style.display = 'none';
+    const inpProcess = document.getElementById('inpProcessPayment');
+    if (inpProcess) inpProcess.value = '';
+    const selBank = document.getElementById('selTransferBank');
+    if (selBank) selBank.selectedIndex = 0;
+    const chkImps = document.getElementById('chkImpsTransfer');
+    if (chkImps) chkImps.checked = false;
+    const chkWhatsapp = document.getElementById('chkWhatsappReceipt');
+    if (chkWhatsapp) chkWhatsapp.checked = false;
+  }
+};
+
+window.closeTransferDetailsModal = function() {
+  const modal = document.getElementById('transferDetailsModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.togglePartialPaymentField = function(isChecked) {
+  const rowProcess = document.getElementById('rowProcessPayment');
+  if (rowProcess) {
+    rowProcess.style.display = isChecked ? 'flex' : 'none';
+    if (isChecked) {
+      const inpProcess = document.getElementById('inpProcessPayment');
+      if (inpProcess) inpProcess.focus();
+    }
+  }
+};
+
+window.submitTransferDetails = function() {
+  const chkPartial = document.getElementById('chkPartialPayment');
+  const inpProcess = document.getElementById('inpProcessPayment');
+
+  if (chkPartial && chkPartial.checked && inpProcess && !inpProcess.value.trim()) {
+    showToast('Please enter Process payment amount');
+    inpProcess.focus();
+    return;
+  }
+
+  showToast('Transfer Details Submitted Successfully!');
+  closeTransferDetailsModal();
+};
+
 
 

@@ -4116,3 +4116,31 @@ a:visited,
   visibility: hidden !important;
   content: none !important;
 }
+
+/* Compare RFQ Table Specific Borders: Horizontal lines on rows, no vertical lines in body contents */
+.po-rfq-compare-table {
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+}
+
+.po-rfq-compare-table thead th {
+  border: 1px solid #ffffff !important;
+}
+
+.po-rfq-compare-table tbody td {
+  border-top: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.po-rfq-compare-table tfoot td {
+  border-top: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-left: none !important;
+  border-right: 1px solid #e2e8f0 !important;
+}
+
+.po-rfq-compare-table tfoot td:last-child {
+  border-right: none !important;
+}

@@ -2132,7 +2132,7 @@ function renderWorklistToolbar() {
         <!-- Stat 1: Summation Total -->
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">12,00,000.00</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">12,00,000.00</span>
         </div>
 
         <!-- Stat 2: Validated / Paid -->
@@ -2148,23 +2148,19 @@ function renderWorklistToolbar() {
         </div>
       </div>
 
-      <!-- Right Action Icons Group -->
+      <!-- Right Action Icons Group: Only Edit, Tick (Approve), Notes when row is selected -->
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
-        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
-          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
-        </button>
-        <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
-          <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
-        </button>
-        <button type="button" class="toolbar-icon-btn" title="Payment Report" onclick="openProjectPaymentReportModal()">
-          <img src="icons/Payment Report.svg" alt="Payment Report" width="28" height="28">
+        ${hasSelected ? `
+        <button type="button" class="toolbar-icon-btn btn-project-payment-edit" id="btnProjectPaymentEdit" title="${isProjectPaymentEditing ? 'Save Changes' : 'Edit Details'}" onclick="toggleProjectPaymentEditMode()">
+          <img src="${isProjectPaymentEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isProjectPaymentEditing ? 'Save' : 'Edit'}" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn" title="Approve" onclick="approveSelectedProjectPaymentRows()">
           <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
         </button>
-        <button type="button" class="toolbar-icon-btn btn-project-payment-edit" id="btnProjectPaymentEdit" title="${isProjectPaymentEditing ? 'Save Changes' : 'Edit Details'}" onclick="toggleProjectPaymentEditMode()">
-          <img src="${isProjectPaymentEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isProjectPaymentEditing ? 'Save' : 'Edit'}" width="28" height="28">
+        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
+          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
         </button>
+        ` : ''}
       </div>
     `;
     return;
@@ -2179,7 +2175,7 @@ function renderWorklistToolbar() {
         <!-- Stat 1: Summation Total -->
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${detail.totalAmt || '12,00,000.00'}</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${detail.totalAmt || '12,00,000.00'}</span>
         </div>
 
         <!-- Stat 2: Validated / Paid -->
@@ -2208,7 +2204,7 @@ function renderWorklistToolbar() {
         <!-- Stat 1: Summation Total -->
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${empDetail.totalAmt || '12,00,000.00'}</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${empDetail.totalAmt || '12,00,000.00'}</span>
         </div>
 
         <!-- Stat 2: Validated / Paid -->
@@ -2232,7 +2228,7 @@ function renderWorklistToolbar() {
         <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
           <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
         </button>
-        <button type="button" class="toolbar-icon-btn" title="Edit" onclick="showToast('Edit mode')">
+        <button type="button" class="toolbar-icon-btn" title="Edit" onclick="showToast('Edit employee payment')">
           <img src="icons/Edit.svg" alt="Edit" width="28" height="28">
         </button>
       </div>
@@ -2248,7 +2244,7 @@ function renderWorklistToolbar() {
 
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${transDetail.totalAmt || '12,00,000.00'}</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${transDetail.totalAmt || '12,00,000.00'}</span>
         </div>
 
         <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
@@ -2284,7 +2280,7 @@ function renderWorklistToolbar() {
         </div>
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${accDetail.totalAmt || '12,00,000.00'}</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${accDetail.totalAmt || '12,00,000.00'}</span>
         </div>
         <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
@@ -2317,7 +2313,7 @@ function renderWorklistToolbar() {
         </div>
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${adminDetail.totalAmt || '12,00,000.00'}</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${adminDetail.totalAmt || '12,00,000.00'}</span>
         </div>
         <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
@@ -2350,7 +2346,7 @@ function renderWorklistToolbar() {
         </div>
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #2563eb; letter-spacing: 0.3px;">${statutoryDetail.totalAmt || '12,00,000.00'}</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${statutoryDetail.totalAmt || '12,00,000.00'}</span>
         </div>
         <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
@@ -2449,9 +2445,24 @@ function renderWorklistFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
-  if (currentWorklistView === 'po_supplier' || currentWorklistView === 'po_rfq_compare') {
+  if (currentWorklistView === 'po_rfq_compare') {
     footer.innerHTML = '';
     footer.style.display = 'none';
+    return;
+  }
+
+  if (currentWorklistView === 'po_supplier') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'center';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.setProperty('margin-top', '12px', 'important');
+    footer.style.setProperty('padding', '12px 0 16px 0', 'important');
+    footer.innerHTML = `
+      <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoSupplierSubmit" aria-label="Submit" onclick="submitPoSupplier()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+        <img src="icons/Submit.svg" alt="Submit" width="32" height="32">
+      </button>
+    `;
     return;
   }
 
@@ -2661,17 +2672,17 @@ function renderWorklistTableHead() {
     thead.innerHTML = `
       <tr class="po-view-header">
         <th class="th-select">Select</th>
+        <th>
+          <div class="th-content-wrap">
+            <span>Vendor Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
+          </div>
+        </th>
         <th>Submission Date</th>
         <th>
           <div class="th-content-wrap">
             <span>Submitted BY</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['submittedBy'] ? 'has-active-filter' : ''}" data-filter-col="submittedBy" title="Filter Submitted BY">&#9660;</button>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Vendor Name</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
           </div>
         </th>
         <th>PO No</th>
@@ -3325,11 +3336,11 @@ function applyFiltersAndRender() {
             <td class="td-select">
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="selectRow('${row.id}')" aria-label="Select row"></div>
             </td>
-            <td class="td-center">${row.submissionDate}</td>
-            <td style="color: #000000; font-weight: 400;">${row.submittedBy}</td>
             <td>
               <a href="#" class="req-link td-link-blue" onclick="openWorklistPoSupplier('${row.vendorName}', '${row.poNo}'); return false;">${row.vendorName}</a>
             </td>
+            <td class="td-center">${row.submissionDate}</td>
+            <td style="color: #000000; font-weight: 400;">${row.submittedBy}</td>
             <td class="td-center">${row.poNo}</td>
             <td class="td-amount">${row.poAmount}</td>
           </tr>
@@ -8355,6 +8366,7 @@ window.toggleProjectPaymentRowSelect = function(rowId) {
     if (!item.selected) {
       item.approved = false;
     }
+    renderWorklistToolbar();
     applyFiltersAndRender();
   }
 };
@@ -9042,20 +9054,29 @@ function setEmployeeFormReadOnly(isReadOnly) {
   const inputs = form.querySelectorAll('input, select');
   inputs.forEach(input => {
     if (input.id === 'inpEmpPhoto') return;
-    if (isReadOnly) {
-      if (input.tagName === 'SELECT') {
-        input.setAttribute('disabled', 'true');
-      } else {
-        input.setAttribute('readonly', 'true');
+    if (input.type === 'checkbox') {
+      input.disabled = isReadOnly;
+      const parentSwitch = input.closest('.toggle-slide-switch') || input.closest('label');
+      if (parentSwitch) {
+        parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+        parentSwitch.style.opacity = isReadOnly ? '0.7' : '1';
       }
-      input.style.backgroundColor = '#f8fafc';
     } else {
-      if (input.tagName === 'SELECT') {
-        input.removeAttribute('disabled');
+      if (isReadOnly) {
+        if (input.tagName === 'SELECT') {
+          input.setAttribute('disabled', 'true');
+        } else {
+          input.setAttribute('readonly', 'true');
+        }
+        input.style.backgroundColor = '#f8fafc';
       } else {
-        input.removeAttribute('readonly');
+        if (input.tagName === 'SELECT') {
+          input.removeAttribute('disabled');
+        } else {
+          input.removeAttribute('readonly');
+        }
+        input.style.backgroundColor = '#ffffff';
       }
-      input.style.backgroundColor = '#ffffff';
     }
   });
 
@@ -10407,14 +10428,72 @@ window.openWorklistPoSupplier = function(vendorName, poNo) {
   showToast(`Opened Supplier Details: ${selectedPoSupplierName}`);
 };
 
+function updatePoRfqCompareTotals() {
+  const tbody = document.getElementById('poRfqCompareModalTbody');
+  if (!tbody) return;
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  let v1Total = 0;
+  let v2Total = 0;
+  let v3Total = 0;
+
+  rows.forEach(r => {
+    const cells = r.querySelectorAll('td');
+    if (cells.length >= 14) {
+      const v1 = parseFloat(cells[5].textContent.replace(/,/g, '').trim()) || 0;
+      const v2 = parseFloat(cells[9].textContent.replace(/,/g, '').trim()) || 0;
+      const v3 = parseFloat(cells[13].textContent.replace(/,/g, '').trim()) || 0;
+      v1Total += v1;
+      v2Total += v2;
+      v3Total += v3;
+    }
+  });
+
+  const totals = [
+    { id: 'rfqTotalVendor1', val: v1Total },
+    { id: 'rfqTotalVendor2', val: v2Total },
+    { id: 'rfqTotalVendor3', val: v3Total }
+  ];
+
+  const sorted = [...totals].sort((a, b) => a.val - b.val);
+  const minVal = sorted[0].val;
+  const maxVal = sorted[sorted.length - 1].val;
+
+  totals.forEach(t => {
+    const el = document.getElementById(t.id);
+    if (!el) return;
+    el.textContent = t.val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (t.val === minVal) {
+      el.style.color = '#16a34a'; // Green (Low)
+    } else if (t.val === maxVal) {
+      el.style.color = '#dc2626'; // Red (High)
+    } else {
+      el.style.color = '#ea580c'; // Orange (Mid)
+    }
+  });
+}
+
 window.openWorklistPoRfqCompare = function(rfqNo) {
-  currentModule = 'worklist';
-  currentWorklistView = 'po_rfq_compare';
-  selectedRfqNo = rfqNo || 'RFQ # :';
-  activeColumnFilters = {};
-  updateURL();
-  renderApp();
-  showToast('Opened RFQ Comparison Page');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const allCards = overlay.querySelectorAll('.side-form-card');
+  allCards.forEach(c => c.style.display = 'none');
+
+  const modal = document.getElementById('poRfqCompareModal');
+  if (modal) {
+    modal.style.display = 'block';
+  }
+  updatePoRfqCompareTotals();
+  overlay.style.display = 'flex';
+  showToast('Opened RFQ Comparison Tab');
+};
+
+window.closePoRfqCompareModal = function() {
+  const modal = document.getElementById('poRfqCompareModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
 };
 
 window.togglePoSupplierRowSelect = function(rowId) {
@@ -10505,6 +10584,13 @@ window.closeTransferDetailsModal = function() {
   if (modal) modal.style.display = 'none';
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
+
+  if (currentWorklistView !== 'payment') {
+    currentWorklistView = 'payment';
+    activeColumnFilters = {};
+    updateURL();
+    renderApp();
+  }
 };
 
 window.togglePartialPaymentField = function(isChecked) {
@@ -10530,6 +10616,10 @@ window.submitTransferDetails = function() {
 
   showToast('Transfer Details Submitted Successfully!');
   closeTransferDetailsModal();
+};
+
+window.submitPoSupplier = function() {
+  showToast('PO Details Submitted Successfully!');
 };
 
 

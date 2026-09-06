@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=100">
+  <link rel="stylesheet" href="assets/css/home.css?v=104">
 </head>
 
 <body>
@@ -3114,7 +3114,9 @@
                   <option value="kotak">Kotak Mahindra Bank - 3344</option>
                 </select>
                 <span
-                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #2563eb; font-size: 12px;">▼</span>
+                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; align-items: center; justify-content: center;">
+                  <img src="icons/dropdown-arrow.svg" alt="Select" width="16" height="16">
+                </span>
               </div>
             </div>
 
@@ -3177,6 +3179,111 @@
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- RFQ Comparison Modal Tab (Opened from Compare RFQ icon on PO page / PO subpage) -->
+        <div class="side-form-card side-contact-popup" id="poRfqCompareModal"
+          style="display: none; width: 1450px; max-width: 98vw; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); overflow: hidden;">
+          <!-- Header Ribbon Badge: Compare RFQ + Red Close Button (No edit icon) -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Compare RFQ</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnClosePoRfqCompareModal"
+                onclick="closePoRfqCompareModal()" aria-label="Close Compare RFQ">&times;</button>
+            </div>
+          </div>
+
+          <!-- Modal Body: Extended Table Container (No slidebar / scrollbar) -->
+          <div class="po-rfq-compare-body" style="padding: 20px 24px 28px 24px; overflow-x: hidden;">
+            <table class="data-table po-rfq-compare-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+              <thead>
+                <tr class="project-payment-header-row1">
+                  <th rowspan="2" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center; padding: 6px 10px; white-space: nowrap;">Material Description</th>
+                  <th rowspan="2" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center; padding: 6px 8px; white-space: nowrap;">Uom</th>
+                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">Vendor 1 Name</th>
+                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">Vendor 2 Name</th>
+                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">Vendor 3 Name</th>
+                </tr>
+                <tr class="project-payment-header-row2">
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">Rate</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Amount</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">GST</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Total</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">Rate</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Amount</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">GST</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Total</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">Rate</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Amount</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">GST</th>
+                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Total</th>
+                </tr>
+              </thead>
+              <tbody id="poRfqCompareModalTbody">
+                <tr>
+                  <td style="height: 44px; font-weight: 500; color: #1e293b; padding: 10px 10px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">40M Galvanized Tubular Telecom Tower Mast</td>
+                  <td class="td-center" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">Nos</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">4,50,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">9,00,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,62,000.00</td>
+                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">10,62,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">4,65,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">9,30,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,67,400.00</td>
+                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">10,97,400.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">4,40,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">8,80,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,58,400.00</td>
+                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">10,38,400.00</td>
+                </tr>
+                <tr>
+                  <td style="height: 44px; font-weight: 500; color: #1e293b; padding: 10px 10px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">High Tensile Fasteners & Anchor Bolts Kit</td>
+                  <td class="td-center" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">Set</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">45,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">90,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">16,200.00</td>
+                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,06,200.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">48,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">96,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">17,280.00</td>
+                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,13,280.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">44,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">88,000.00</td>
+                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">15,840.00</td>
+                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,03,840.00</td>
+                </tr>
+              </tbody>
+              <tfoot id="poRfqCompareModalTfoot">
+                <tr style="background: #ffffff; height: 44px;">
+                  <td colspan="2" style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">Payment Terms</td>
+                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">100% Advance</td>
+                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">30 Days</td>
+                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">45 Days</td>
+                </tr>
+                <tr style="background: #ffffff; height: 44px;">
+                  <td colspan="2" style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">Transportation Charges</td>
+                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">Including</td>
+                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">Extra at actual</td>
+                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">Extra at actual</td>
+                </tr>
+                <tr style="background: #ffffff; height: 44px;">
+                  <td colspan="2" style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">Total Amount</td>
+                  <td colspan="4" style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                    <!-- Mid Amount: Orange -->
+                    <a href="#" class="rfq-total-link" id="rfqTotalVendor1" style="color: #ea580c; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">11,68,200.00</a>
+                  </td>
+                  <td colspan="4" style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                    <!-- High Amount: Red -->
+                    <a href="#" class="rfq-total-link" id="rfqTotalVendor2" style="color: #dc2626; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">12,10,680.00</a>
+                  </td>
+                  <td colspan="4" style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">
+                    <!-- Low Amount: Green -->
+                    <a href="#" class="rfq-total-link" id="rfqTotalVendor3" style="color: #16a34a; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">11,42,240.00</a>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         </div>
 
@@ -4993,7 +5100,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=100"></script>
+  <script src="assets/js/home.js?v=104"></script>
 </body>
 
 </html>

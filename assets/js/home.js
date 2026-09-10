@@ -824,6 +824,10 @@ let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 
 let currentWorklistView = 'payment'; // 'payment' or 'po'
 let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
 let currentProjectsSubpage = 'projects'; // 'projects' or 'supply'
+let currentProjectsView = 'main'; // 'main' or 'details'
+let selectedProjectCustomer = 'Altis';
+let selectedProjectId = 'proj-1';
+let currentProjectDetailTab = ''; // 'expenses', 'materials', 'infra', 'dpr', 'boq', 'additional_approve', 'service_vendor', 'member'
 
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
@@ -837,6 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const moduleParam = params.get('module');
   const viewParam = params.get('view');
   const subpageParam = params.get('subpage');
+  const tabParam = params.get('tab');
 
   if (moduleParam === 'master') {
     currentModule = 'master';
@@ -854,10 +859,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } else if (moduleParam === 'projects') {
     currentModule = 'projects';
-    if (subpageParam) {
-      currentProjectsSubpage = subpageParam;
+    if (viewParam === 'details') {
+      currentProjectsView = 'details';
+      currentProjectDetailTab = tabParam || '';
     } else {
-      currentProjectsSubpage = 'projects';
+      currentProjectsView = 'main';
+      if (subpageParam) {
+        currentProjectsSubpage = subpageParam;
+      } else {
+        currentProjectsSubpage = 'projects';
+      }
     }
   } else if (moduleParam) {
     currentModule = moduleParam;
@@ -904,6 +915,7 @@ function switchModule(moduleName) {
     currentWorklistView = 'payment';
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
+    currentProjectsView = 'main';
   }
 
   document.querySelectorAll('.nav-icon-item').forEach(btn => {
@@ -938,18 +950,29 @@ function updateURL() {
   if (currentModule === 'master') {
     url.searchParams.set('subpage', currentMasterSubpage);
     url.searchParams.delete('view');
+    url.searchParams.delete('tab');
   } else if (currentModule === 'indus_towers') {
     url.searchParams.set('subpage', currentIndusSubpage);
     url.searchParams.delete('view');
+    url.searchParams.delete('tab');
   } else if (currentModule === 'projects') {
-    url.searchParams.set('subpage', currentProjectsSubpage);
-    url.searchParams.delete('view');
+    if (currentProjectsView === 'details') {
+      url.searchParams.set('view', 'details');
+      url.searchParams.set('tab', currentProjectDetailTab);
+      url.searchParams.delete('subpage');
+    } else {
+      url.searchParams.set('subpage', currentProjectsSubpage);
+      url.searchParams.delete('view');
+      url.searchParams.delete('tab');
+    }
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
     url.searchParams.delete('subpage');
+    url.searchParams.delete('tab');
   } else {
     url.searchParams.delete('view');
     url.searchParams.delete('subpage');
+    url.searchParams.delete('tab');
   }
 
   window.history.replaceState({}, '', url);
@@ -959,7 +982,16 @@ function updateURL() {
 // 2. MAIN APPLICATION RENDERER & BACK NAVIGATION
 // ==========================================================================
 function goBackSubpage() {
-  if (currentModule === 'indus_towers') {
+  if (currentModule === 'projects') {
+    if (currentProjectsView === 'details') {
+      currentProjectsView = 'main';
+      showToast('Returned to Projects List');
+    } else {
+      currentModule = 'worklist';
+      currentWorklistView = 'payment';
+      showToast('Returned to Worklist');
+    }
+  } else if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'project_type_details') {
       currentIndusSubpage = 'projects';
       showToast('Returned to Projects');
@@ -1116,7 +1148,34 @@ function renderApp() {
     renderWorklistTableHead();
     renderWorklistFooter();
   } else if (currentModule === 'projects') {
-    if (bannerTitle) bannerTitle.textContent = "Projects";
+    if (bannerTitle) {
+      if (currentProjectsView === 'details') {
+        bannerTitle.innerHTML = `
+          <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
+              <span style="text-decoration: underline; font-weight: 700; color: #ffffff; font-size: 1.12rem;">R/RL-234567 / New Build / With DG</span>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('R/RL-234567 / New Build / With DG', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
+              </button>
+            </div>
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
+              <span style="text-decoration: underline; font-weight: 700; color: #ffffff; font-size: 1.12rem;">230510678 / ( 0 - Capex )</span>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('230510678 / ( 0 - Capex )', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
+              </button>
+            </div>
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
+              <span style="text-decoration: underline; font-weight: 700; color: #ffffff; font-size: 1.12rem;">IN-123456 / Guindy</span>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('IN-123456 / Guindy', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        bannerTitle.textContent = "Projects";
+      }
+    }
     loadProjectsDataset();
     renderProjectsToolbar();
     renderProjectsTableHead();
@@ -2194,8 +2253,48 @@ function renderMasterFooter() {
 // ==========================================================================
 // 3B. PROJECTS MODULE RENDERERS
 // ==========================================================================
+window.copyBannerText = function(text, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(`Copied: ${text}`);
+    }).catch(() => {
+      showToast(`Copied: ${text}`);
+    });
+  } else {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      showToast(`Copied: ${text}`);
+    } catch (err) {
+      showToast(`Copied: ${text}`);
+    }
+    document.body.removeChild(textarea);
+  }
+};
+
+window.openProjectDetailPage = function(projId, customerName) {
+  currentModule = 'projects';
+  currentProjectsView = 'details';
+  selectedProjectId = projId || 'proj-1';
+  selectedProjectCustomer = customerName || 'Altis';
+  currentProjectDetailTab = ''; // Landing page is empty until user clicks Expenses or other button
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened Project: ${selectedProjectCustomer}`);
+};
+
 function loadProjectsDataset() {
-  if (currentProjectsSubpage === 'supply') {
+  if (currentProjectsView === 'details') {
+    currentDataset = [];
+  } else if (currentProjectsSubpage === 'supply') {
     currentDataset = [...projectsSupplyData];
   } else {
     currentDataset = [...projectsMainData];
@@ -2205,37 +2304,60 @@ function loadProjectsDataset() {
 function renderProjectsToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
-  toolbar.innerHTML = `
-    <div class="toolbar-left"></div>
-    <div class="toolbar-right"></div>
-  `;
+  if (currentProjectsView === 'details') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left">${universalBackBtnHtml}</div>
+      <div class="toolbar-right"></div>
+    `;
+  } else {
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right"></div>
+    `;
+  }
 }
 
 function renderProjectsTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
 
+  if (currentProjectsView === 'details') {
+    if (!currentProjectDetailTab) {
+      thead.innerHTML = '';
+      return;
+    }
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Item Description</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Category</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Status</th>
+      </tr>
+    `;
+    return;
+  }
+
   const cols = [
-    { key: 'customer', label: 'Customer' },
-    { key: 'projectId', label: 'Project ID' },
-    { key: 'poNo', label: 'PO No' },
+    { key: 'customer', label: 'Customer', width: '25ch' },
+    { key: 'projectId', label: 'Project ID', width: '20ch' },
+    { key: 'poNo', label: 'PO No', width: '10ch' },
     { key: 'poAgeing', label: 'PO Ageing' },
     { key: 'poStatus', label: 'PO Status' },
-    { key: 'siteId', label: 'Site ID' },
-    { key: 'siteName', label: 'Site Name' },
+    { key: 'siteId', label: 'Site ID', width: '12ch' },
+    { key: 'siteName', label: 'Site Name', width: '30ch' },
     { key: 'projectType', label: 'Project Type' },
-    { key: 'subProjectType', label: 'Sub-Project Type' },
+    { key: 'subProjectType', label: 'Sub-Project Type', width: '30ch' },
     { key: 'projectStatus', label: 'Project Status' },
-    { key: 'task', label: 'Task' },
-    { key: 'pendingWith', label: 'Pending With' },
-    { key: 'supportRequired', label: 'Support Required' },
-    { key: 'pendingWith2', label: 'Pending With' }
+    { key: 'task', label: 'Task', width: '35ch' },
+    { key: 'pendingWith', label: 'Pending With', width: '30ch' },
+    { key: 'supportRequired', label: 'Support Required', width: '30ch' },
+    { key: 'pendingWith2', label: 'Pending With', width: '30ch' }
   ];
 
   thead.innerHTML = `
     <tr class="master-view-header projects-view-header">
       ${cols.map(c => `
-        <th>
+        <th style="${c.width ? `width: ${c.width}; min-width: ${c.width}; max-width: ${c.width};` : ''}">
           <div class="th-content-wrap">
             <span>${c.label}</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters[c.key] ? 'has-active-filter' : ''}" data-filter-col="${c.key}" title="Filter ${c.label}">&#9660;</button>
@@ -2250,18 +2372,63 @@ function renderProjectsFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
+  if (currentProjectsView === 'details') {
+    const detailTabs = [
+      { key: 'expenses', label: 'Expenses' },
+      { key: 'materials', label: 'Materials' },
+      { key: 'infra', label: 'Infra' },
+      { key: 'dpr', label: 'DPR' },
+      { key: 'boq', label: 'BOQ' },
+      { key: 'additional_approve', label: 'Additional Approve' },
+      { key: 'service_vendor', label: 'Service vendor' },
+      { key: 'member', label: 'Member' }
+    ];
+
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        ${detailTabs.map((tab, idx) => `
+          <button type="button" class="segmented-btn ${currentProjectDetailTab === tab.key ? 'active' : ''}" data-project-tab="${tab.key}">
+            ${tab.label}
+          </button>
+          ${idx < detailTabs.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+        `).join('')}
+      </div>
+    `;
+
+    footer.querySelectorAll('.segmented-btn[data-project-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabKey = btn.getAttribute('data-project-tab');
+        if (currentProjectDetailTab !== tabKey) {
+          currentProjectDetailTab = tabKey;
+          activeColumnFilters = {};
+          updateURL();
+          renderApp();
+          showToast(`Switched to ${btn.textContent.trim()} Tab`);
+        }
+      });
+    });
+    return;
+  }
+
   footer.style.display = 'flex';
   footer.style.justifyContent = 'flex-start';
   footer.style.alignItems = 'center';
   footer.style.width = '100%';
   footer.style.marginTop = 'auto';
-  footer.style.padding = '24px 24px 32px 24px';
+  footer.style.padding = '24px';
   footer.innerHTML = `
-    <div class="projects-toggle-group">
-      <button type="button" class="btn-projects-tab ${currentProjectsSubpage === 'projects' ? 'active' : ''}" id="btnToggleProjectsSubpage">
+    <div class="segmented-toggle-group">
+      <button type="button" class="segmented-btn ${currentProjectsSubpage === 'projects' ? 'active' : ''}" id="btnToggleProjectsSubpage">
         Projects
       </button>
-      <button type="button" class="btn-projects-tab ${currentProjectsSubpage === 'supply' ? 'active' : ''}" id="btnToggleSupplySubpage">
+      <div class="segmented-divider"></div>
+      <button type="button" class="segmented-btn ${currentProjectsSubpage === 'supply' ? 'active' : ''}" id="btnToggleSupplySubpage">
         Supply
       </button>
     </div>
@@ -2355,8 +2522,11 @@ function renderWorklistToolbar() {
         </div>
       </div>
 
-      <!-- Right Action Icons Group: Only Edit, Tick (Approve), Notes when row is selected -->
+      <!-- Right Action Icons Group: Bank icon static, and when row selected: Edit, Approve, Notes -->
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <button type="button" class="toolbar-icon-btn" title="Bank Details" onclick="openProjectPaymentBankModal()">
+          <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+        </button>
         ${hasSelected ? `
         <button type="button" class="toolbar-icon-btn btn-project-payment-edit" id="btnProjectPaymentEdit" title="${isProjectPaymentEditing ? 'Save Changes' : 'Edit Details'}" onclick="toggleProjectPaymentEditMode()">
           <img src="${isProjectPaymentEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isProjectPaymentEditing ? 'Save' : 'Edit'}" width="28" height="28">
@@ -2392,19 +2562,7 @@ function renderWorklistToolbar() {
         </div>
       </div>
 
-      <!-- Right Side: Only Edit, Tick (Approve), Remarks when row is selected -->
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
-        ${hasSelected ? `
-        <button type="button" class="toolbar-icon-btn btn-subpage-edit" title="${isSubpageEditing ? 'Save Changes' : 'Edit Details'}" onclick="toggleSubpageEditMode()">
-          <img src="${isSubpageEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isSubpageEditing ? 'Save' : 'Edit'}" width="28" height="28">
-        </button>
-        <button type="button" class="toolbar-icon-btn" title="Approve" onclick="approveSelectedSubpageRows()">
-          <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
-        </button>
-        <button type="button" class="toolbar-icon-btn" title="Notes & Remarks" onclick="openProjectPaymentNotesModal()">
-          <img src="icons/Notes _ Remarks 2.svg" alt="Notes" width="28" height="28">
-        </button>
-        ` : ''}
       </div>
     `;
     return;
@@ -2782,12 +2940,12 @@ function renderWorklistTableHead() {
   } else if (currentWorklistView === 'purchase_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Select</th>
         <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">HSN Code</th>
         <th style="width: 200px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
         <th style="width: 65px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Uom</th>
         <th style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">PO Qty</th>
         <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Invoice Qty</th>
+        <th style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GRN Qty</th>
         <th style="width: 80px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Rate</th>
         <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Basic Amount</th>
         <th style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">GST Amount</th>
@@ -2797,92 +2955,63 @@ function renderWorklistTableHead() {
   } else if (currentWorklistView === 'employee_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Select</th>
-        <th rowspan="2" style="width: 320px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
-        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Description</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Amount</th>
       </tr>
       <tr class="project-payment-header-row2">
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Request</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Validated</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Approved</th>
       </tr>
     `;
   } else if (currentWorklistView === 'transport_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Select</th>
-        <th rowspan="2" style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vehicle Type</th>
-        <th rowspan="2" style="width: 260px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
-        <th rowspan="2" style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">From</th>
-        <th rowspan="2" style="width: 90px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">To</th>
-        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Vehicle Type</th>
+        <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Description</th>
+        <th rowspan="2" style="width: 25ch; max-width: 25ch; min-width: 25ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">From</th>
+        <th rowspan="2" style="width: 25ch; max-width: 25ch; min-width: 25ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">To</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Amount</th>
       </tr>
       <tr class="project-payment-header-row2">
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Request</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Validated</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Approved</th>
       </tr>
     `;
-  } else if (currentWorklistView === 'accounts_payment') {
+  } else if (currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Select</th>
-        <th rowspan="2" style="width: 120px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Expense Type</th>
-        <th rowspan="2" style="width: 320px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
-        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Description</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Amount</th>
       </tr>
       <tr class="project-payment-header-row2">
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
-      </tr>
-    `;
-  } else if (currentWorklistView === 'admin_payment') {
-    thead.innerHTML = `
-      <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Select</th>
-        <th rowspan="2" style="width: 120px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Expense Type</th>
-        <th rowspan="2" style="width: 320px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
-        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
-      </tr>
-      <tr class="project-payment-header-row2">
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
-      </tr>
-    `;
-  } else if (currentWorklistView === 'statutory_payment') {
-    thead.innerHTML = `
-      <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Select</th>
-        <th rowspan="2" style="width: 120px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Expense Type</th>
-        <th rowspan="2" style="width: 320px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Description</th>
-        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Amount</th>
-      </tr>
-      <tr class="project-payment-header-row2">
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Request</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Validated</th>
-        <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Approved</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Request</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Validated</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Approved</th>
       </tr>
     `;
   } else if (currentWorklistView === 'po_supplier') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px;">Select</th>
-        <th rowspan="2" style="width: 220px;">Material Description</th>
-        <th rowspan="2" style="width: 80px;">Uom</th>
-        <th colspan="2">Qty</th>
-        <th colspan="2">Rate</th>
-        <th colspan="3">Amount</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Material Description</th>
+        <th rowspan="2" style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Uom</th>
+        <th colspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Qty</th>
+        <th colspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Rate</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Amount</th>
       </tr>
       <tr class="project-payment-header-row2">
-        <th style="width: 90px;">Stock</th>
-        <th style="width: 90px;">PR</th>
-        <th style="width: 100px;">Existing</th>
-        <th style="width: 100px;">New</th>
-        <th style="width: 110px;">Basic</th>
-        <th style="width: 110px;">GST</th>
-        <th style="width: 110px;">Total</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Stock</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">PR</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Existing</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">New</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Basic</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">GST</th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Total</th>
       </tr>
     `;
   } else if (currentWorklistView === 'po_rfq_compare') {
@@ -3433,19 +3562,16 @@ function applyFiltersAndRender() {
         tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
       } else {
         tbody.innerHTML = validItems.map(item => {
-          const isSelected = item.selected;
           return `
-          <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${item.id}">
-            <td class="td-select td-center">
-              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleSubpageRowSelect('${item.id}')" aria-label="Select row"></div>
-            </td>
+          <tr data-row-id="${item.id}">
             <td class="td-center" style="padding: 8px 10px;">${item.hsnCode || ''}</td>
-            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca; text-align: left;">
               ${item.description || ''}
             </td>
             <td class="td-center" style="padding: 8px 10px;">${item.uom || ''}</td>
             <td class="td-center" style="padding: 8px 10px;">${item.poQty || ''}</td>
             <td class="td-center" style="padding: 8px 10px;">${item.invoiceQty || ''}</td>
+            <td class="td-center" style="padding: 8px 10px;">${item.grnQty || ''}</td>
             <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.rate || ''}</td>
             <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.basicAmt || ''}</td>
             <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.gstAmt || ''}</td>
@@ -3466,10 +3592,10 @@ function applyFiltersAndRender() {
             <td class="td-select td-center">
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleSubpageRowSelect('${item.id}')" aria-label="Select row"></div>
             </td>
-            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtRequest || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtValidated || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtApproved || ''}</td>
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca; text-align: left;">${item.description || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtRequest || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtValidated || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtApproved || ''}</td>
           </tr>
         `;
         }).join('');
@@ -3487,75 +3613,32 @@ function applyFiltersAndRender() {
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleSubpageRowSelect('${item.id}')" aria-label="Select row"></div>
             </td>
             <td class="td-center" style="padding: 8px 10px;">${item.vehicleType || ''}</td>
-            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
-            <td class="td-center" style="padding: 8px 10px;">${item.from || ''}</td>
-            <td class="td-center" style="padding: 8px 10px;">${item.to || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtRequest || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtValidated || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtApproved || ''}</td>
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca; text-align: left;">${item.description || ''}</td>
+            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; padding: 8px 10px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.from || ''}</td>
+            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; padding: 8px 10px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.to || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtRequest || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtValidated || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtApproved || ''}</td>
           </tr>
         `;
         }).join('');
       }
-    } else if (currentWorklistView === 'accounts_payment') {
-      const accItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.expenseType && item.expenseType.trim() !== ''));
-      if (accItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+    } else if (currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
+      const subItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.expenseType && item.expenseType.trim() !== ''));
+      if (subItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
       } else {
-        tbody.innerHTML = accItems.map(item => {
+        tbody.innerHTML = subItems.map(item => {
           const isSelected = item.selected;
           return `
           <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${item.id}">
             <td class="td-select td-center">
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleSubpageRowSelect('${item.id}')" aria-label="Select row"></div>
             </td>
-            <td class="td-center" style="padding: 8px 10px;">${item.expenseType || ''}</td>
-            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtRequest || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtValidated || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtApproved || ''}</td>
-          </tr>
-        `;
-        }).join('');
-      }
-    } else if (currentWorklistView === 'admin_payment') {
-      const adminItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.expenseType && item.expenseType.trim() !== ''));
-      if (adminItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
-      } else {
-        tbody.innerHTML = adminItems.map(item => {
-          const isSelected = item.selected;
-          return `
-          <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${item.id}">
-            <td class="td-select td-center">
-              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleSubpageRowSelect('${item.id}')" aria-label="Select row"></div>
-            </td>
-            <td class="td-center" style="padding: 8px 10px;">${item.expenseType || ''}</td>
-            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtRequest || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtValidated || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtApproved || ''}</td>
-          </tr>
-        `;
-        }).join('');
-      }
-    } else if (currentWorklistView === 'statutory_payment') {
-      const statutoryItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.expenseType && item.expenseType.trim() !== ''));
-      if (statutoryItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
-      } else {
-        tbody.innerHTML = statutoryItems.map(item => {
-          const isSelected = item.selected;
-          return `
-          <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${item.id}">
-            <td class="td-select td-center">
-              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleSubpageRowSelect('${item.id}')" aria-label="Select row"></div>
-            </td>
-            <td class="td-center" style="padding: 8px 10px;">${item.expenseType || ''}</td>
-            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca;">${item.description || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtRequest || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtValidated || ''}</td>
-            <td class="td-amount" style="padding: 8px 10px; text-align: right !important;">${item.amtApproved || ''}</td>
+            <td style="padding: 8px 12px; font-weight: 500; color: #4338ca; text-align: left;">${item.description || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtRequest || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtValidated || ''}</td>
+            <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtApproved || ''}</td>
           </tr>
         `;
         }).join('');
@@ -3568,23 +3651,23 @@ function applyFiltersAndRender() {
             <td class="td-select td-center">
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="togglePoSupplierRowSelect('${row.id}')" aria-label="Select row"></div>
             </td>
-            <td style="padding: 8px 12px; font-weight: 500;">${row.materialDescription || ''}</td>
-            <td class="td-center">${row.uom || ''}</td>
-            <td class="td-center">${row.stock || ''}</td>
-            <td class="td-center">
+            <td style="padding: 8px 12px; font-weight: 500; text-align: left !important;">${row.materialDescription || ''}</td>
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">${row.uom || ''}</td>
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">${row.stock || ''}</td>
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">
               ${isPoSupplierEditing ? `
-                <input type="text" class="po-supplier-edit-input" data-row-id="${row.id}" data-field="pr" value="${row.pr || ''}" placeholder="0" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: center; cursor: text;">
+                <input type="text" class="po-supplier-edit-input" data-row-id="${row.id}" data-field="pr" value="${row.pr || ''}" placeholder="0" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
               ` : `${row.pr || ''}`}
             </td>
-            <td class="td-amount">${row.existing || ''}</td>
-            <td class="td-amount">
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">${row.existing || ''}</td>
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">
               ${isPoSupplierEditing ? `
                 <input type="text" class="po-supplier-edit-input" data-row-id="${row.id}" data-field="newRate" value="${row.newRate || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
               ` : `${row.newRate || ''}`}
             </td>
-            <td class="td-amount">${row.basic || ''}</td>
-            <td class="td-amount">${row.gst || ''}</td>
-            <td class="td-amount">${row.total || ''}</td>
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">${row.basic || ''}</td>
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">${row.gst || ''}</td>
+            <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">${row.total || ''}</td>
           </tr>
         `;
       }).join('');
@@ -3671,50 +3754,55 @@ function applyFiltersAndRender() {
       }).join('');
     }
   } else if (currentModule === 'projects') {
-    // Top Summary Metric Count Row
-    const summaryRowHtml = `
-      <tr class="projects-summary-row">
-        <td>
-          <a href="#" class="td-link-blue" onclick="showToast('Customer Total: ${projectsSummaryRow.customer}'); return false;" style="color: #2563eb; font-weight: 600; text-decoration: none;">${projectsSummaryRow.customer}</a>
-        </td>
-        <td>${projectsSummaryRow.projectId}</td>
-        <td>${projectsSummaryRow.poNo}</td>
-        <td>${projectsSummaryRow.poAgeing}</td>
-        <td>${projectsSummaryRow.poStatus}</td>
-        <td>${projectsSummaryRow.siteId}</td>
-        <td>${projectsSummaryRow.siteName}</td>
-        <td>${projectsSummaryRow.projectType}</td>
-        <td>${projectsSummaryRow.subProjectType}</td>
-        <td>${projectsSummaryRow.projectStatus}</td>
-        <td>${projectsSummaryRow.task}</td>
-        <td>${projectsSummaryRow.pendingWith}</td>
-        <td>${projectsSummaryRow.supportRequired}</td>
-        <td>${projectsSummaryRow.pendingWith2}</td>
-      </tr>
-    `;
-
-    const dataRowsHtml = filteredDataset.map(row => `
-      <tr class="projects-data-row" data-row-id="${row.id}">
-        <td>
-          <a href="#" class="td-link-blue" onclick="showToast('Customer: ${row.customer}'); return false;" style="color: #2563eb; font-weight: 500; text-decoration: none;">${row.customer || ''}</a>
-        </td>
-        <td style="line-height: 1.3;">${row.projectId || ''}</td>
-        <td>${row.poNo || ''}</td>
-        <td>${row.poAgeing || ''}</td>
-        <td>${row.poStatus || ''}</td>
-        <td>${row.siteId || ''}</td>
-        <td>${row.siteName || ''}</td>
-        <td>${row.projectType || ''}</td>
-        <td>${row.subProjectType || ''}</td>
-        <td>${row.projectStatus || ''}</td>
-        <td>${row.task || ''}</td>
-        <td>${row.pendingWith || ''}</td>
-        <td>${row.supportRequired || ''}</td>
-        <td>${row.pendingWith2 || ''}</td>
-      </tr>
-    `).join('');
-
-    tbody.innerHTML = summaryRowHtml + dataRowsHtml;
+    if (currentProjectsView === 'details') {
+      if (!currentProjectDetailTab) {
+        tbody.innerHTML = '';
+      } else if (currentProjectDetailTab === 'expenses') {
+        tbody.innerHTML = `
+          <tr>
+            <td style="text-align: left; padding: 10px 14px;">Site Survey & Logistics</td>
+            <td style="text-align: center; padding: 10px 14px;">Travel & Survey</td>
+            <td style="text-align: right; padding: 10px 14px;">₹ 12,500.00</td>
+            <td style="text-align: center; padding: 10px 14px;"><span style="color: #10b981; font-weight: 600;">Approved</span></td>
+          </tr>
+          <tr>
+            <td style="text-align: left; padding: 10px 14px;">DG Installation Support</td>
+            <td style="text-align: center; padding: 10px 14px;">Operations</td>
+            <td style="text-align: right; padding: 10px 14px;">₹ 45,000.00</td>
+            <td style="text-align: center; padding: 10px 14px;"><span style="color: #10b981; font-weight: 600;">Approved</span></td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 48px 16px; color: #64748b; font-size: 0.95rem;">
+              ${currentProjectDetailTab.replace('_', ' ').toUpperCase()} content will be configured here.
+            </td>
+          </tr>
+        `;
+      }
+    } else {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch;">
+            <a href="#" class="td-link-blue" onclick="openProjectDetailPage('${row.id}', '${row.customer}'); return false;" style="color: #2563eb; font-weight: 500; text-decoration: underline;">${row.customer || ''}</a>
+          </td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; line-height: 1.3;">${row.projectId || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch;">${row.poNo || ''}</td>
+          <td>${row.poAgeing || ''}</td>
+          <td>${row.poStatus || ''}</td>
+          <td style="width: 12ch; min-width: 12ch; max-width: 12ch;">${row.siteId || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.siteName || ''}</td>
+          <td>${row.projectType || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.subProjectType || ''}</td>
+          <td>${row.projectStatus || ''}</td>
+          <td style="width: 35ch; min-width: 35ch; max-width: 35ch;">${row.task || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.pendingWith || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.supportRequired || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.pendingWith2 || ''}</td>
+        </tr>
+      `).join('');
+    }
   }
 }
 
@@ -8547,6 +8635,31 @@ window.openWorklistProjectPayment = function(reqCode, rowId) {
 
 let selectedPurchasePayId = 'pay-2';
 
+let purchaseDetailData = {
+  'pay-2': {
+    supplier: 'Supplier Name',
+    poNo: '230510678',
+    invoiceNo: 'INV-98765',
+    totalAmt: '12,00,000.00',
+    paidAmt: '10,00,000.00',
+    payableAmt: '2,00,000.00',
+    lineItems: [
+      { id: 'pur-li-1', selected: false, approved: false, hsnCode: '8544', description: 'Power Cable 4CX16 Sqmm', uom: 'Mtr', poQty: '500', invoiceQty: '500', grnQty: '500', rate: '240.00', basicAmt: '1,20,000.00', gstAmt: '21,600.00', totalAmt: '1,41,600.00' }
+    ]
+  },
+  'pay-9': {
+    supplier: 'Supplier Name',
+    poNo: '',
+    invoiceNo: '',
+    totalAmt: '12,00,000.00',
+    paidAmt: '10,00,000.00',
+    payableAmt: '2,00,000.00',
+    lineItems: [
+      { id: 'pur-li-2', selected: false, approved: false, hsnCode: '', description: 'JCB Charges', uom: '', poQty: '', invoiceQty: '', grnQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' }
+    ]
+  }
+};
+
 let isSubpageEditing = false;
 
 window.openWorklistPurchasePayment = function(payId) {
@@ -8946,10 +9059,10 @@ document.addEventListener('click', (e) => {
 let isProjectPaymentBankEditing = false;
 
 let projectPaymentBankFields = [
-  { id: "bank_acc_name", label: "Account Name", value: "Nexus Infra Pvt Ltd" },
-  { id: "bank_acc_no", label: "Account Number", value: "987654321012" },
-  { id: "bank_ifsc", label: "IFSC Code", value: "HDFC0001234" },
-  { id: "bank_name", label: "Bank Name", value: "HDFC Bank" }
+  { id: "bank_acc_name", label: "Account Name", value: "" },
+  { id: "bank_acc_no", label: "Account Number", value: "" },
+  { id: "bank_ifsc", label: "IFSC Code", value: "" },
+  { id: "bank_name", label: "Bank Name", value: "" }
 ];
 
 function renderProjectPaymentBankFields() {
@@ -9286,32 +9399,6 @@ document.addEventListener('click', (e) => {
 // ========================================================================
 // PURCHASE DETAIL MODAL (from Payment Worklist - Submit By / Purchase)
 // ========================================================================
-
-// Purchase detail data keyed by payment row id
-let purchaseDetailData = {
-  'pay-2': {
-    supplier: 'Supplier Name',
-    poNo: '',
-    invoiceNo: '',
-    totalAmt: '12,00,000.00',
-    paidAmt: '10,00,000.00',
-    payableAmt: '2,00,000.00',
-    lineItems: [
-      { id: 'pur-li-1', selected: false, approved: false, hsnCode: '', description: 'JCB Charges', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' }
-    ]
-  },
-  'pay-9': {
-    supplier: 'Supplier Name',
-    poNo: '',
-    invoiceNo: '',
-    totalAmt: '12,00,000.00',
-    paidAmt: '10,00,000.00',
-    payableAmt: '2,00,000.00',
-    lineItems: [
-      { id: 'pur-li-2', selected: false, approved: false, hsnCode: '', description: 'JCB Charges', uom: '', poQty: '', invoiceQty: '', rate: '', basicAmt: '', gstAmt: '', totalAmt: '' }
-    ]
-  }
-};
 
 // Track which payment row opened the purchase detail (for back-navigation)
 let currentPurchasePaymentId = null;

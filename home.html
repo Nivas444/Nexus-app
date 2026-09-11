@@ -2736,6 +2736,119 @@
           </div>
         </div>
 
+        <!-- Project Info Modal Tab (R/RL-234567 / New Build / With DG) -->
+        <div class="side-form-card project-info-modal-card" id="projectInfoModal"
+          style="display: none;">
+          <!-- Header: Green Title Badge & Red Close Button -->
+          <div class="side-form-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; padding: 2px 2px 0;">
+            <div class="project-info-tab-badge" id="lblProjectInfoTitle" style="background: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 8px 24px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0, 203, 160, 0.25); display: inline-flex; align-items: center;">R/RL-234567 / New Build / With DG</div>
+            <button type="button" class="side-form-close-btn" id="btnCloseProjectInfoModal" onclick="closeProjectInfoModal()"
+              style="color: #ef4444; font-size: 32px; font-weight: 700; border: none; background: transparent; cursor: pointer; line-height: 1; padding: 0 4px; transition: transform 0.15s ease;" aria-label="Close" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">&times;</button>
+          </div>
+
+          <!-- Section 1: District, Town, Upgradation Type, Planning BOQ -->
+          <div class="project-info-card-box">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; column-gap: 36px; align-items: center; margin-bottom: 18px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <label style="min-width: 60px; font-size: 0.95rem; font-weight: 500; color: #1e293b;">District</label>
+                <input type="text" class="project-info-field-input" value="R/RL-234567" style="flex: 1; width: 100%;">
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <label style="min-width: 50px; font-size: 0.95rem; font-weight: 500; color: #1e293b;">Town</label>
+                <input type="text" class="project-info-field-input" value="R/RL-234567" style="flex: 1; width: 100%;">
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <label style="min-width: 135px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Upgradation Type</label>
+                <input type="text" class="project-info-field-input" value="R/RL-234567" style="flex: 1; width: 100%;">
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 18px;">
+              <label style="min-width: 105px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Planning BOQ</label>
+              <input type="text" class="project-info-field-input" value="R/RL-234567" style="flex: 1; width: 100%;">
+            </div>
+          </div>
+
+          <!-- Section 2: Tower specs and Toggle items (4 columns) -->
+          <div class="project-info-card-box" style="margin-top: 18px;">
+            <!-- Row 1: 4 input specs -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 20px; align-items: center; margin-bottom: 22px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Type</span>
+                <input type="text" class="project-info-field-input" style="width: 100px; text-align: center;">
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Height</span>
+                <input type="text" class="project-info-field-input" style="width: 100px; text-align: center;">
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">SBC</span>
+                <input type="text" class="project-info-field-input" style="width: 100px; text-align: center;">
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Wind Speed</span>
+                <input type="text" class="project-info-field-input" style="width: 100px; text-align: center;">
+              </div>
+            </div>
+
+            <!-- Toggles: 3 rows of 4 columns -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 18px; align-items: center;">
+              <!-- Row 2 -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Site Survey</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">STN</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">SRN</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">CAM</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+
+              <!-- Row 3 -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">TSP Materials</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Civil Works</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Electrical Works</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Pole Mounts</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+
+              <!-- Row 4 -->
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Quality Audit</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">PTW</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Additional Approval</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Service Contract</span>
+                <label class="project-info-toggle-switch"><input type="checkbox" checked><span class="project-info-toggle-slider"></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Project Payment Notes & Remarks Popup Tab (Matching Uploaded Mockup) -->
         <div class="side-form-card side-contact-popup" id="projectPaymentNotesModal"
           style="display: none; width: 880px; max-width: 96vw;">
@@ -5103,7 +5216,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=113"></script>
+  <script src="assets/js/home.js?v=115"></script>
 </body>
 
 </html>

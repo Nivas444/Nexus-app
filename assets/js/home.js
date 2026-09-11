@@ -1153,19 +1153,19 @@ function renderApp() {
         bannerTitle.innerHTML = `
           <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <span style="text-decoration: underline; font-weight: 700; color: #ffffff; font-size: 1.12rem;">R/RL-234567 / New Build / With DG</span>
+              <a href="#" onclick="openProjectInfoModal(); return false;" class="banner-clickable-link" style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Details">R/RL-234567 / New Build / With DG</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('R/RL-234567 / New Build / With DG', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <span style="text-decoration: underline; font-weight: 700; color: #ffffff; font-size: 1.12rem;">230510678 / ( 0 - Capex )</span>
+              <span style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem;">230510678 / ( 0 - Capex )</span>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('230510678 / ( 0 - Capex )', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <span style="text-decoration: underline; font-weight: 700; color: #ffffff; font-size: 1.12rem;">IN-123456 / Guindy</span>
+              <span style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem;">IN-123456 / Guindy</span>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('IN-123456 / Guindy', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
@@ -2277,6 +2277,29 @@ window.copyBannerText = function(text, event) {
     }
     document.body.removeChild(textarea);
   }
+};
+
+window.openProjectInfoModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'projectInfoModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('projectInfoModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeProjectInfoModal = function() {
+  const modal = document.getElementById('projectInfoModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
 };
 
 window.openProjectDetailPage = function(projId, customerName) {

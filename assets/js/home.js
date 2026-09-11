@@ -784,38 +784,68 @@ const projectsSupplyData = [
   {
     id: "proj-sup-1",
     customer: "Altis",
-    projectId: "2305 1067 8",
-    poNo: "",
-    poAgeing: "R/RL-234567",
-    poStatus: "",
-    siteId: "IN-123456",
-    siteName: "Guindy",
-    projectType: "Supply",
-    subProjectType: "Materials",
-    projectStatus: "",
-    task: "",
-    pendingWith: "",
-    supportRequired: "",
-    pendingWith2: ""
+    orderId: "2305 1067 8",
+    orderDate: "12/08/2026",
+    orderAmount: "3,50,000.00",
+    invoiceNumber: "INV-2026-4401",
+    invoiceDate: "18/08/2026",
+    invoiceAmount: "3,50,000.00",
+    ageing: "24",
+    paymentStatus: "Pending"
   },
   {
     id: "proj-sup-2",
     customer: "Ascend",
-    projectId: "2305 1067 8",
-    poNo: "",
-    poAgeing: "R/RL-234567",
-    poStatus: "",
-    siteId: "IN-123456",
-    siteName: "Guindy",
-    projectType: "Supply",
-    subProjectType: "Materials",
-    projectStatus: "",
-    task: "",
-    pendingWith: "",
-    supportRequired: "",
-    pendingWith2: ""
+    orderId: "2305 1067 8",
+    orderDate: "15/08/2026",
+    orderAmount: "1,85,000.00",
+    invoiceNumber: "INV-2026-4402",
+    invoiceDate: "20/08/2026",
+    invoiceAmount: "1,85,000.00",
+    ageing: "22",
+    paymentStatus: "Paid"
+  },
+  {
+    id: "proj-sup-3",
+    customer: "Indus Towers",
+    orderId: "2305 1067 9",
+    orderDate: "22/08/2026",
+    orderAmount: "4,20,000.00",
+    invoiceNumber: "INV-2026-4403",
+    invoiceDate: "28/08/2026",
+    invoiceAmount: "4,20,000.00",
+    ageing: "14",
+    paymentStatus: "Partial"
+  },
+  {
+    id: "proj-sup-4",
+    customer: "Reliance Jio",
+    orderId: "2305 1068 0",
+    orderDate: "01/09/2026",
+    orderAmount: "6,75,000.00",
+    invoiceNumber: "INV-2026-4404",
+    invoiceDate: "05/09/2026",
+    invoiceAmount: "6,75,000.00",
+    ageing: "6",
+    paymentStatus: "Pending"
   }
 ];
+
+const supplyCustomerDetailData = {
+  'proj-sup-1': [
+    { id: 'sc-1', itemDescription: 'Optical Fiber Cable 24 Core Armoured', uom: 'MTR', qty: '1,200.00', rate: '250.00', amount: '3,00,000.00' },
+    { id: 'sc-2', itemDescription: 'Outdoor Termination Box 24 Port IP65', uom: 'NOS', qty: '50.00', rate: '4,000.00', amount: '2,00,000.00' },
+    { id: 'sc-3', itemDescription: 'Power Distribution Unit 3-Phase 32A', uom: 'SET', qty: '20.00', rate: '30,000.00', amount: '6,00,000.00' }
+  ],
+  'proj-sup-2': [
+    { id: 'sc-4', itemDescription: 'Cat6 UTP Cable 305M Roll', uom: 'BOX', qty: '15.00', rate: '7,000.00', amount: '1,05,000.00' },
+    { id: 'sc-5', itemDescription: 'Patch Panel 24 Port Loaded Cat6', uom: 'NOS', qty: '16.00', rate: '5,000.00', amount: '80,000.00' }
+  ],
+  'default': [
+    { id: 'sc-def-1', itemDescription: 'Telecom Tower Mast Accessories', uom: 'SET', qty: '10.00', rate: '50,000.00', amount: '5,00,000.00' },
+    { id: 'sc-def-2', itemDescription: 'Heavy Duty Grounding Copper Tape 25x3mm', uom: 'MTR', qty: '400.00', rate: '1,500.00', amount: '6,00,000.00' }
+  ]
+};
 
 // ==========================================================================
 // STATE MANAGEMENT (Default landing page: Worklist -> Payment)
@@ -824,9 +854,11 @@ let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 
 let currentWorklistView = 'payment'; // 'payment' or 'po'
 let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
 let currentProjectsSubpage = 'projects'; // 'projects' or 'supply'
-let currentProjectsView = 'main'; // 'main' or 'details'
+let currentProjectsView = 'main'; // 'main', 'details', or 'supply_details'
 let selectedProjectCustomer = 'Altis';
 let selectedProjectId = 'proj-1';
+let selectedSupplyCustomerId = 'proj-sup-1';
+let selectedSupplyCustomerName = 'Customer Name';
 let currentProjectDetailTab = ''; // 'expenses', 'materials', 'infra', 'dpr', 'boq', 'additional_approve', 'service_vendor', 'member'
 
 let currentDataset = [...poData];
@@ -859,7 +891,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } else if (moduleParam === 'projects') {
     currentModule = 'projects';
-    if (viewParam === 'details') {
+    if (viewParam === 'supply_details') {
+      currentProjectsSubpage = 'supply';
+      currentProjectsView = 'supply_details';
+      selectedSupplyCustomerName = params.get('customer') || 'Customer Name';
+      const foundItem = projectsSupplyData.find(s => s.customer === selectedSupplyCustomerName);
+      if (foundItem) selectedSupplyCustomerId = foundItem.id;
+    } else if (viewParam === 'details') {
       currentProjectsView = 'details';
       currentProjectDetailTab = tabParam || '';
     } else {
@@ -951,28 +989,39 @@ function updateURL() {
     url.searchParams.set('subpage', currentMasterSubpage);
     url.searchParams.delete('view');
     url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
   } else if (currentModule === 'indus_towers') {
     url.searchParams.set('subpage', currentIndusSubpage);
     url.searchParams.delete('view');
     url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
   } else if (currentModule === 'projects') {
-    if (currentProjectsView === 'details') {
+    if (currentProjectsView === 'supply_details') {
+      url.searchParams.set('subpage', 'supply');
+      url.searchParams.set('view', 'supply_details');
+      url.searchParams.set('customer', selectedSupplyCustomerName);
+      url.searchParams.delete('tab');
+    } else if (currentProjectsView === 'details') {
       url.searchParams.set('view', 'details');
       url.searchParams.set('tab', currentProjectDetailTab);
       url.searchParams.delete('subpage');
+      url.searchParams.delete('customer');
     } else {
       url.searchParams.set('subpage', currentProjectsSubpage);
       url.searchParams.delete('view');
       url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
     }
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
     url.searchParams.delete('subpage');
     url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
   } else {
     url.searchParams.delete('view');
     url.searchParams.delete('subpage');
     url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
   }
 
   window.history.replaceState({}, '', url);
@@ -983,8 +1032,13 @@ function updateURL() {
 // ==========================================================================
 function goBackSubpage() {
   if (currentModule === 'projects') {
-    if (currentProjectsView === 'details') {
+    if (currentProjectsView === 'supply_details') {
       currentProjectsView = 'main';
+      currentProjectsSubpage = 'supply';
+      showToast('Returned to Supply Page');
+    } else if (currentProjectsView === 'details') {
+      currentProjectsView = 'main';
+      currentProjectsSubpage = 'projects';
       showToast('Returned to Projects List');
     } else {
       currentModule = 'worklist';
@@ -1149,7 +1203,14 @@ function renderApp() {
     renderWorklistFooter();
   } else if (currentModule === 'projects') {
     if (bannerTitle) {
-      if (currentProjectsView === 'details') {
+      if (currentProjectsView === 'supply_details') {
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <div class="banner-left-title" style="font-weight: 700; color: #ffffff; font-size: 1.15rem;">${selectedSupplyCustomerName || 'Customer Name'}</div>
+            <div class="banner-right-title" style="font-weight: 700; color: #ffffff; font-size: 1.05rem; text-decoration: underline;">Invoice # : 21001</div>
+          </div>
+        `;
+      } else if (currentProjectsView === 'details') {
         bannerTitle.innerHTML = `
           <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
@@ -1159,13 +1220,13 @@ function renderApp() {
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <span style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem;">230510678 / ( 0 - Capex )</span>
+              <a href="#" onclick="openPoCapexModal('PO No - Revision No (Capex)'); return false;" class="banner-clickable-link" style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Capex PO Details">230510678 / ( 0 - Capex )</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('230510678 / ( 0 - Capex )', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <span style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem;">IN-123456 / Guindy</span>
+              <a href="#" onclick="openSiteInfoModal('Site ID / Site Name'); return false;" class="banner-clickable-link" style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Site Details">IN-123456 / Guindy</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('IN-123456 / Guindy', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
@@ -2302,6 +2363,90 @@ window.closeProjectInfoModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+window.openPoCapexModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'poCapexModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblPoCapexTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('poCapexModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closePoCapexModal = function() {
+  const modal = document.getElementById('poCapexModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openSiteInfoModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'siteInfoModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblSiteInfoTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('siteInfoModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeSiteInfoModal = function() {
+  const modal = document.getElementById('siteInfoModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openPaymentReceiptModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'paymentReceiptModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblPaymentReceiptTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('paymentReceiptModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closePaymentReceiptModal = function() {
+  const modal = document.getElementById('paymentReceiptModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
 window.openProjectDetailPage = function(projId, customerName) {
   currentModule = 'projects';
   currentProjectsView = 'details';
@@ -2314,8 +2459,23 @@ window.openProjectDetailPage = function(projId, customerName) {
   showToast(`Opened Project: ${selectedProjectCustomer}`);
 };
 
+window.openSupplyCustomerDetailsPage = function(customerId, customerName) {
+  currentModule = 'projects';
+  currentProjectsSubpage = 'supply';
+  currentProjectsView = 'supply_details';
+  selectedSupplyCustomerId = customerId || 'proj-sup-1';
+  selectedSupplyCustomerName = customerName || 'Customer Name';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened Supply Details for ${selectedSupplyCustomerName}`);
+};
+
 function loadProjectsDataset() {
-  if (currentProjectsView === 'details') {
+  if (currentProjectsView === 'supply_details') {
+    const items = supplyCustomerDetailData[selectedSupplyCustomerId] || supplyCustomerDetailData['default'] || [];
+    currentDataset = [...items];
+  } else if (currentProjectsView === 'details') {
     currentDataset = [];
   } else if (currentProjectsSubpage === 'supply') {
     currentDataset = [...projectsSupplyData];
@@ -2327,22 +2487,89 @@ function loadProjectsDataset() {
 function renderProjectsToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
+  if (currentProjectsView === 'supply_details') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+        <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
+            <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">11,00,000.00</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openPaymentReceiptModal('Payment Receipt'); return false;" title="Open Payment Receipt">
+            <img src="icons/Paid _ Received.svg" alt="Paid / Received" style="width: 28px; height: 28px; display: block; cursor: pointer;">
+            <a href="#" onclick="openPaymentReceiptModal('Payment Receipt'); return false;" class="clickable-green-amount-link" style="color: #008744; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; cursor: pointer;">11,00,000.00</a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="icons/Payable.svg" alt="Payable" style="width: 28px; height: 28px; display: block;">
+            <span style="color: #d62d20; font-weight: 700; font-size: 1.15rem; font-family: inherit;">11,00,000.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar-right"></div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'main';
+      currentProjectsSubpage = 'supply';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Supply page');
+    });
+    return;
+  }
   if (currentProjectsView === 'details') {
     toolbar.innerHTML = `
       <div class="toolbar-left">${universalBackBtnHtml}</div>
-      <div class="toolbar-right"></div>
+      <div class="toolbar-right">
+        <button type="button" class="tool-btn" id="btnProjectsDashboard" title="Dashboard" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+          <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block;">
+        </button>
+      </div>
     `;
   } else {
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
-      <div class="toolbar-right"></div>
+      <div class="toolbar-right">
+        <button type="button" class="tool-btn" id="btnProjectsDashboard" title="Dashboard" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+          <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block;">
+        </button>
+      </div>
     `;
   }
+  document.getElementById('btnProjectsDashboard')?.addEventListener('click', () => {
+    showToast('Dashboard opened');
+  });
 }
 
 function renderProjectsTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
+
+  if (currentProjectsView === 'supply_details') {
+    const detailCols = [
+      { key: 'itemDescription', label: 'Item Description', width: '' },
+      { key: 'uom', label: 'Uom', width: '15ch' },
+      { key: 'qty', label: 'Qty', width: '15ch' },
+      { key: 'rate', label: 'Rate', width: '15ch' },
+      { key: 'amount', label: 'Amount', width: '15ch' }
+    ];
+
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        ${detailCols.map(c => `
+          <th style="${c.width ? `width: ${c.width}; min-width: ${c.width}; max-width: ${c.width};` : ''} text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+            <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>${c.label}</span>
+              ${c.key === 'itemDescription' ? `<button type="button" class="filter-funnel-btn ${activeColumnFilters[c.key] ? 'has-active-filter' : ''}" data-filter-col="${c.key}" title="Filter ${c.label}">&#9660;</button>` : ''}
+            </div>
+          </th>
+        `).join('')}
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
 
   if (currentProjectsView === 'details') {
     if (!currentProjectDetailTab) {
@@ -2357,6 +2584,35 @@ function renderProjectsTableHead() {
         <th style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Status</th>
       </tr>
     `;
+    return;
+  }
+
+  if (currentProjectsSubpage === 'supply') {
+    const supplyCols = [
+      { key: 'customer', label: 'Customer', width: '25ch' },
+      { key: 'orderId', label: 'Order ID', width: '20ch' },
+      { key: 'orderDate', label: 'Order Date', width: '15ch' },
+      { key: 'orderAmount', label: 'Order Amount', width: '15ch' },
+      { key: 'invoiceNumber', label: 'Invoice Number', width: '20ch' },
+      { key: 'invoiceDate', label: 'Invoice Date', width: '15ch' },
+      { key: 'invoiceAmount', label: 'Invoice Amount', width: '15ch' },
+      { key: 'ageing', label: 'Ageing', width: '10ch' },
+      { key: 'paymentStatus', label: 'Payment Status', width: '15ch' }
+    ];
+
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        ${supplyCols.map(c => `
+          <th style="${c.width ? `width: ${c.width}; min-width: ${c.width}; max-width: ${c.width};` : ''} text-align: center; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+            <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span>${c.label}</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters[c.key] ? 'has-active-filter' : ''}" data-filter-col="${c.key}" title="Filter ${c.label}">&#9660;</button>
+            </div>
+          </th>
+        `).join('')}
+      </tr>
+    `;
+    rebindFilterButtons();
     return;
   }
 
@@ -2389,11 +2645,18 @@ function renderProjectsTableHead() {
       `).join('')}
     </tr>
   `;
+  rebindFilterButtons();
 }
 
 function renderProjectsFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
+
+  if (currentProjectsView === 'supply_details') {
+    footer.innerHTML = '';
+    footer.style.display = 'none';
+    return;
+  }
 
   if (currentProjectsView === 'details') {
     const detailTabs = [
@@ -3777,7 +4040,17 @@ function applyFiltersAndRender() {
       }).join('');
     }
   } else if (currentModule === 'projects') {
-    if (currentProjectsView === 'details') {
+    if (currentProjectsView === 'supply_details') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.itemDescription || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.uom || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.qty || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.rate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentProjectsView === 'details') {
       if (!currentProjectDetailTab) {
         tbody.innerHTML = '';
       } else if (currentProjectDetailTab === 'expenses') {
@@ -3804,6 +4077,22 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }
+    } else if (currentProjectsSubpage === 'supply') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center;">
+            <a href="#" class="td-link-blue" onclick="openSupplyCustomerDetailsPage('${row.id}', '${row.customer}'); return false;" style="color: #2563eb; font-weight: 500; text-decoration: underline;">${row.customer || ''}</a>
+          </td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center;">${row.orderId || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center;">${row.orderDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center;">${row.orderAmount || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center;">${row.invoiceNumber || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center;">${row.invoiceDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center;">${row.invoiceAmount || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center;">${row.ageing || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center;">${row.paymentStatus || ''}</td>
+        </tr>
+      `).join('');
     } else {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
@@ -8580,7 +8869,18 @@ function getColumnDisplayName(colKey) {
     task: "Task",
     pendingWith: "Pending With",
     supportRequired: "Support Required",
-    pendingWith2: "Pending With"
+    pendingWith2: "Pending With",
+    orderId: "Order ID",
+    orderDate: "Order Date",
+    orderAmount: "Order Amount",
+    invoiceNumber: "Invoice Number",
+    invoiceDate: "Invoice Date",
+    invoiceAmount: "Invoice Amount",
+    paymentStatus: "Payment Status",
+    itemDescription: "Item Description",
+    qty: "Qty",
+    rate: "Rate",
+    amount: "Amount"
   };
   return map[colKey] || colKey;
 }

@@ -4224,9 +4224,15 @@ a:visited,
   max-width: 95vw !important;
   background: #ffffff !important;
   border-radius: 12px !important;
-  padding: 24px 36px 28px !important;
+  padding: 0 0 24px 0 !important;
+  overflow: hidden !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18) !important;
   box-sizing: border-box !important;
+}
+
+.project-info-modal-body {
+  padding: 20px 32px 8px !important;
+  box-sizing: border-box;
 }
 
 .project-info-card-box {
@@ -4251,9 +4257,17 @@ a:visited,
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.project-info-field-input:focus {
-  border-color: #00cba0;
-  box-shadow: 0 0 0 3px rgba(0, 203, 160, 0.15);
+.project-info-field-input[readonly] {
+  background-color: #ffffff !important;
+  color: #334155 !important;
+  cursor: default !important;
+  user-select: text;
+  outline: none !important;
+}
+
+.project-info-field-input[readonly]:focus {
+  border-color: #cbd5e1 !important;
+  box-shadow: none !important;
 }
 
 .project-info-toggle-switch {
@@ -4272,6 +4286,7 @@ a:visited,
   position: absolute;
 }
 
+/* Deactivated State: Red */
 .project-info-toggle-slider {
   position: absolute;
   cursor: pointer;
@@ -4279,7 +4294,7 @@ a:visited,
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #cbd5e1;
+  background-color: #ff5b5b;
   transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   border-radius: 22px;
 }
@@ -4297,7 +4312,7 @@ a:visited,
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
-/* Active / Checked turns GREEN */
+/* Active State: Green */
 .project-info-toggle-switch input:checked + .project-info-toggle-slider {
   background-color: #00cba0 !important;
 }
@@ -4308,4 +4323,21 @@ a:visited,
 
 .banner-clickable-link:hover {
   opacity: 0.9;
+}
+
+/* Underline for all green amounts in subpages */
+.clickable-green-amount-link,
+.metric-validated span,
+.metric-item.metric-validated span,
+.green-amount-underline {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-thickness: 1.5px !important;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.clickable-green-amount-link:hover,
+.metric-validated span:hover {
+  opacity: 0.85;
 }

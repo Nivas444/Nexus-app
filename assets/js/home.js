@@ -847,6 +847,177 @@ const supplyCustomerDetailData = {
   ]
 };
 
+// Project Details -> Expenses Sub-Page Dataset (2 rows)
+const projectExpensesData = [
+  {
+    id: "exp-1",
+    expenseType: "Material",
+    itemName: "Diesel Generator Set 15kVA Silent Type",
+    uom: "NOS",
+    qty: "1.00",
+    po: "1,50,000.00",
+    budget: "1,60,000.00",
+    used: "1,50,000.00",
+    available: "10,000.00"
+  },
+  {
+    id: "exp-2",
+    expenseType: "Service",
+    itemName: "Site Survey, Soil Testing & Foundation",
+    uom: "LOT",
+    qty: "1.00",
+    po: "45,000.00",
+    budget: "50,000.00",
+    used: "45,000.00",
+    available: "5,000.00"
+  }
+];
+
+// Project Details -> Material Sub-Page Dataset
+const projectMaterialData = [
+  {
+    id: "mat-1",
+    boqName: "Telecom Tower Mast Accessories 30M",
+    uom: "SET",
+    mir: "10.00",
+    min: "10.00",
+    mrr: "0.00",
+    mrn: "0.00",
+    net: "10.00",
+    rate: "50,000.00",
+    amount: "5,00,000.00"
+  },
+  {
+    id: "mat-2",
+    boqName: "4 Core 16 sq mm Armoured Copper Cable",
+    uom: "MTR",
+    mir: "120.00",
+    min: "120.00",
+    mrr: "0.00",
+    mrn: "0.00",
+    net: "120.00",
+    rate: "450.00",
+    amount: "54,000.00"
+  },
+  {
+    id: "mat-3",
+    boqName: "Chemical Earthing Electrode with Compound",
+    uom: "SET",
+    mir: "2.00",
+    min: "2.00",
+    mrr: "0.00",
+    mrn: "0.00",
+    net: "2.00",
+    rate: "8,500.00",
+    amount: "17,000.00"
+  },
+  {
+    id: "mat-4",
+    boqName: "Diesel Generator Set 15kVA Silent Type",
+    uom: "NOS",
+    mir: "1.00",
+    min: "1.00",
+    mrr: "0.00",
+    mrn: "0.00",
+    net: "1.00",
+    rate: "1,50,000.00",
+    amount: "1,50,000.00"
+  },
+  {
+    id: "mat-5",
+    boqName: "Galvanized Steel Fasteners & Clamps",
+    uom: "PKT",
+    mir: "25.00",
+    min: "25.00",
+    mrr: "0.00",
+    mrn: "0.00",
+    net: "25.00",
+    rate: "1,200.00",
+    amount: "30,000.00"
+  }
+];
+
+// Project Details -> Infra Sub-Page Dataset (Matching User Mockup)
+const projectInfraData = [
+  {
+    id: "infra-1",
+    docType: "MIN",
+    boqNo: "BOQ-234567-01",
+    boqDate: "12/08/2026",
+    category: "Tower",
+    infraDescription: "Telecom Tower Mast Accessories 30M Galvanized Structure",
+    qy: "1.00",
+    status: "Active"
+  },
+  {
+    id: "infra-2",
+    docType: "MRN",
+    boqNo: "BOQ-234567-02",
+    boqDate: "15/08/2026",
+    category: "Electrical",
+    infraDescription: "Diesel Generator Set 15kVA Silent Type with AMF Panel",
+    qy: "1.00",
+    status: "Active"
+  },
+  {
+    id: "infra-3",
+    docType: "MIN",
+    boqNo: "BOQ-234567-03",
+    boqDate: "18/08/2026",
+    category: "Civil",
+    infraDescription: "25x6mm Hot Dip Galvanized Earth Strip & Chemical Pit",
+    qy: "50.00",
+    status: "Active"
+  },
+  {
+    id: "infra-4",
+    docType: "MRN",
+    boqNo: "BOQ-234567-04",
+    boqDate: "22/08/2026",
+    category: "Security",
+    infraDescription: "Outdoor CCTV Surveillance & Peripheral Security Fence",
+    qy: "4.00",
+    status: "Active"
+  }
+];
+
+// Project Details -> DPR Sub-Page Dataset (Matching User Mockup)
+const projectDprData = [
+  {
+    id: "dpr-2",
+    date: "14/09/2026",
+    activity: "Civil Foundation & Tower Erection Stage 1",
+    status: "Approved",
+    ptwNo: "PTW-88291",
+    ptwStatus: "Closed",
+    imapCheckIn: "09:15 AM",
+    imapCheckOut: "06:30 PM",
+    updateBy: "Rajesh Kumar (FE)"
+  },
+  {
+    id: "dpr-3",
+    date: "13/09/2026",
+    activity: "DG Set Cabling and Earth Resistance Testing",
+    status: "Completed",
+    ptwNo: "PTW-88285",
+    ptwStatus: "Closed",
+    imapCheckIn: "08:45 AM",
+    imapCheckOut: "05:15 PM",
+    updateBy: "Suresh Prabhu (Lead)"
+  },
+  {
+    id: "dpr-4",
+    date: "12/09/2026",
+    activity: "Battery Bank & Solar Hybrid Controller Setup",
+    status: "In Progress",
+    ptwNo: "PTW-88270",
+    ptwStatus: "Active",
+    imapCheckIn: "09:30 AM",
+    imapCheckOut: "07:00 PM",
+    updateBy: "Manoj Verma (Tech)"
+  }
+];
+
 // ==========================================================================
 // STATE MANAGEMENT (Default landing page: Worklist -> Payment)
 // ==========================================================================
@@ -854,7 +1025,7 @@ let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 
 let currentWorklistView = 'payment'; // 'payment' or 'po'
 let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
 let currentProjectsSubpage = 'projects'; // 'projects' or 'supply'
-let currentProjectsView = 'main'; // 'main', 'details', or 'supply_details'
+let currentProjectsView = 'main'; // 'main', 'details', 'project_expenses', or 'supply_details'
 let selectedProjectCustomer = 'Altis';
 let selectedProjectId = 'proj-1';
 let selectedSupplyCustomerId = 'proj-sup-1';
@@ -891,7 +1062,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } else if (moduleParam === 'projects') {
     currentModule = 'projects';
-    if (viewParam === 'supply_details') {
+    if (viewParam === 'project_expenses') {
+      currentProjectsView = 'project_expenses';
+    } else if (viewParam === 'project_material') {
+      currentProjectsView = 'project_material';
+    } else if (viewParam === 'project_infra') {
+      currentProjectsView = 'project_infra';
+    } else if (viewParam === 'project_dpr') {
+      currentProjectsView = 'project_dpr';
+    } else if (viewParam === 'supply_details') {
       currentProjectsSubpage = 'supply';
       currentProjectsView = 'supply_details';
       selectedSupplyCustomerName = params.get('customer') || 'Customer Name';
@@ -938,17 +1117,23 @@ function initNavEventListeners() {
   document.querySelectorAll('.nav-icon-item[data-module]').forEach(btn => {
     btn.addEventListener('click', () => {
       const targetModule = btn.getAttribute('data-module');
-      switchModule(targetModule);
+      if (targetModule) {
+        switchModule(targetModule);
+      }
     });
   });
 }
 
 function switchModule(moduleName) {
+  if (currentModule === moduleName) return;
+
   currentModule = moduleName;
   activeColumnFilters = {};
 
   if (moduleName === 'master') {
     currentMasterSubpage = 'employee';
+  } else if (moduleName === 'indus_towers') {
+    currentIndusSubpage = 'site';
   } else if (moduleName === 'worklist') {
     currentWorklistView = 'payment';
   } else if (moduleName === 'projects') {
@@ -956,27 +1141,14 @@ function switchModule(moduleName) {
     currentProjectsView = 'main';
   }
 
-  document.querySelectorAll('.nav-icon-item').forEach(btn => {
-    btn.classList.remove('active-nav-tab');
-  });
-  // indus_towers is a sub-section of master — glow the Master icon for both
-  const navModuleSwitch = (moduleName === 'indus_towers') ? 'master' : moduleName;
-  const activeBtn = document.querySelector(`.nav-icon-item[data-module="${navModuleSwitch}"]`);
-  if (activeBtn) activeBtn.classList.add('active-nav-tab');
-
   updateURL();
   renderApp();
 
   const moduleTitles = {
-    master: "Master (Company)",
-    indus_towers: "Telecom",
-    worklist: "Work List",
-    projects: "Projects",
-    accounts: "Accounts",
-    admin: "Admin",
-    purchase: "Purchase",
-    inventory: "Inventory",
-    profile: "Profile Details"
+    master: 'Master',
+    indus_towers: 'Telecom',
+    worklist: 'Worklist',
+    projects: 'Projects'
   };
   showToast(`Navigated to ${moduleTitles[moduleName] || moduleName}`);
 }
@@ -996,7 +1168,27 @@ function updateURL() {
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
   } else if (currentModule === 'projects') {
-    if (currentProjectsView === 'supply_details') {
+    if (currentProjectsView === 'project_expenses') {
+      url.searchParams.set('view', 'project_expenses');
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
+    } else if (currentProjectsView === 'project_material') {
+      url.searchParams.set('view', 'project_material');
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
+    } else if (currentProjectsView === 'project_infra') {
+      url.searchParams.set('view', 'project_infra');
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
+    } else if (currentProjectsView === 'project_dpr') {
+      url.searchParams.set('view', 'project_dpr');
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
+    } else if (currentProjectsView === 'supply_details') {
       url.searchParams.set('subpage', 'supply');
       url.searchParams.set('view', 'supply_details');
       url.searchParams.set('customer', selectedSupplyCustomerName);
@@ -1032,7 +1224,10 @@ function updateURL() {
 // ==========================================================================
 function goBackSubpage() {
   if (currentModule === 'projects') {
-    if (currentProjectsView === 'supply_details') {
+    if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr') {
+      currentProjectsView = 'details';
+      showToast('Returned to Project Details');
+    } else if (currentProjectsView === 'supply_details') {
       currentProjectsView = 'main';
       currentProjectsSubpage = 'supply';
       showToast('Returned to Supply Page');
@@ -1210,23 +1405,23 @@ function renderApp() {
             <div class="banner-right-title" style="font-weight: 700; color: #ffffff; font-size: 1.05rem; text-decoration: underline;">Invoice # : 21001</div>
           </div>
         `;
-      } else if (currentProjectsView === 'details') {
+      } else if (currentProjectsView === 'details' || currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr') {
         bannerTitle.innerHTML = `
           <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openProjectInfoModal(); return false;" class="banner-clickable-link" style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Details">R/RL-234567 / New Build / With DG</a>
+              <a href="#" onclick="openProjectInfoModal(); return false;" class="banner-clickable-link banner-title-underline" style="text-decoration: underline; text-underline-offset: 3px; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Details">R/RL-234567 / New Build / With DG</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('R/RL-234567 / New Build / With DG', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openPoCapexModal('PO No - Revision No (Capex)'); return false;" class="banner-clickable-link" style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Capex PO Details">230510678 / ( 0 - Capex )</a>
+              <a href="#" onclick="openPoCapexModal('PO No - Revision No (Capex)'); return false;" class="banner-clickable-link banner-title-underline" style="text-decoration: underline; text-underline-offset: 3px; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Capex PO Details">230510678 / ( 0 - Capex )</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('230510678 / ( 0 - Capex )', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openSiteInfoModal('Site ID / Site Name'); return false;" class="banner-clickable-link" style="text-decoration: none; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Site Details">IN-123456 / Guindy</a>
+              <a href="#" onclick="openSiteInfoModal('Site ID / Site Name'); return false;" class="banner-clickable-link banner-title-underline" style="text-decoration: underline; text-underline-offset: 3px; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Site Details">IN-123456 / Guindy</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('IN-123456 / Guindy', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
@@ -2419,6 +2614,34 @@ window.closeSiteInfoModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+window.openExpensesSummaryModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'expensesSummaryModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblExpensesSummaryTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('expensesSummaryModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeExpensesSummaryModal = function() {
+  const modal = document.getElementById('expensesSummaryModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
 window.openPaymentReceiptModal = function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -2447,6 +2670,90 @@ window.closePaymentReceiptModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+window.openMinMrnModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'minMrnModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblMinMrnTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('minMrnModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeMinMrnModal = function() {
+  const modal = document.getElementById('minMrnModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openInfraDocModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'infraDocModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblInfraDocTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('infraDocModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeInfraDocModal = function() {
+  const modal = document.getElementById('infraDocModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openBoqMaterialDetailModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'boqMaterialDetailModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblBoqMaterialDetailTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('boqMaterialDetailModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeBoqMaterialDetailModal = function() {
+  const modal = document.getElementById('boqMaterialDetailModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
 window.openProjectDetailPage = function(projId, customerName) {
   currentModule = 'projects';
   currentProjectsView = 'details';
@@ -2457,6 +2764,42 @@ window.openProjectDetailPage = function(projId, customerName) {
   updateURL();
   renderApp();
   showToast(`Opened Project: ${selectedProjectCustomer}`);
+};
+
+window.openProjectExpensesPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_expenses';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Project Expenses Page');
+};
+
+window.openProjectMaterialPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_material';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Project Material Page');
+};
+
+window.openProjectInfraPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_infra';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Project Infra Page');
+};
+
+window.openProjectDprPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_dpr';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Project DPR Page');
 };
 
 window.openSupplyCustomerDetailsPage = function(customerId, customerName) {
@@ -2472,7 +2815,15 @@ window.openSupplyCustomerDetailsPage = function(customerId, customerName) {
 };
 
 function loadProjectsDataset() {
-  if (currentProjectsView === 'supply_details') {
+  if (currentProjectsView === 'project_expenses') {
+    currentDataset = [...projectExpensesData];
+  } else if (currentProjectsView === 'project_material') {
+    currentDataset = [...projectMaterialData];
+  } else if (currentProjectsView === 'project_infra') {
+    currentDataset = [...projectInfraData];
+  } else if (currentProjectsView === 'project_dpr') {
+    currentDataset = [...projectDprData];
+  } else if (currentProjectsView === 'supply_details') {
     const items = supplyCustomerDetailData[selectedSupplyCustomerId] || supplyCustomerDetailData['default'] || [];
     currentDataset = [...items];
   } else if (currentProjectsView === 'details') {
@@ -2485,8 +2836,128 @@ function loadProjectsDataset() {
 }
 
 function renderProjectsToolbar() {
-  const toolbar = document.getElementById('worklistToolbar');
+  const toolbar = document.getElementById('worklistToolbar') || document.getElementById('pageToolbar');
   if (!toolbar) return;
+  if (currentProjectsView === 'project_dpr') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
+        <button type="button" class="tool-btn" id="btnDprContact" title="Contact" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+          <img src="icons/Members.svg" alt="Contact" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnDprAttendance" title="Attendance" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+          <img src="icons/Attendance.svg" alt="Attendance" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnDprDocuments" title="Documents" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+          <img src="icons/Documents.svg" alt="Documents" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'details';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Project Details');
+    });
+    toolbar.querySelector('#btnDprContact')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('Opened Members / Contact');
+    });
+    toolbar.querySelector('#btnDprAttendance')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('Opened Attendance');
+    });
+    toolbar.querySelector('#btnDprDocuments')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('Opened Documents');
+    });
+    return;
+  }
+  if (currentProjectsView === 'project_infra') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center;">
+        <button type="button" class="tool-btn btn-export-pdf" id="btnExportInfraPdf" title="Upload / View PDF" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openInfraDocModal('DOC / STATUS'); return false;">
+          <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'details';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Project Details');
+    });
+    toolbar.querySelector('#btnExportInfraPdf')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openInfraDocModal('STN / SRN / CAM');
+    });
+    return;
+  }
+  if (currentProjectsView === 'project_material') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+        <div style="display: flex; align-items: center; gap: 10px; padding-left: 12px; cursor: pointer;" onclick="" title="Total Material Amount">
+          <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
+          <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+        </div>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center;">
+        <button type="button" class="tool-btn btn-export-pdf" id="btnExportMaterialPdf" title="MIN / MRN" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openMinMrnModal('MIN / MRN'); return false;">
+          <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'details';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Project Details');
+    });
+    toolbar.querySelector('#btnExportMaterialPdf')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openMinMrnModal('MIN / MRN');
+    });
+    return;
+  }
+  if (currentProjectsView === 'project_expenses') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+        <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpensesSummaryModal('Expenses Summarry'); return false;" title="Open Expenses Summary">
+            <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block; cursor: pointer;">
+            <a href="#" onclick="openExpensesSummaryModal('Expenses Summarry'); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="icons/Paid _ Received.svg" alt="Paid / Received" style="width: 28px; height: 28px; display: block;">
+            <span style="color: #008744; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="icons/Payable.svg" alt="Payable" style="width: 28px; height: 28px; display: block;">
+            <span style="color: #d62d20; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar-right"></div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'details';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Project Details');
+    });
+    return;
+  }
   if (currentProjectsView === 'supply_details') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
@@ -2545,6 +3016,168 @@ function renderProjectsToolbar() {
 function renderProjectsTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
+
+  if (currentProjectsView === 'project_dpr') {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Date</span>
+        </th>
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: flex-start; gap: 6px;">
+            <span>Activity</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['activity'] ? 'has-active-filter' : ''}" data-filter-col="activity" title="Filter Activity">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>PTW No</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+          <span>PTW Status</span>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+          <span>I - Map Check In</span>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+          <span>I - Map Check Out</span>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+          <span>Update By</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentProjectsView === 'project_infra') {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Doc Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['docType'] ? 'has-active-filter' : ''}" data-filter-col="docType" title="Filter Doc Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>BOQ No</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>BOQ Date</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: flex-start; gap: 6px;">
+            <span>Category</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['category'] ? 'has-active-filter' : ''}" data-filter-col="category" title="Filter Category">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: flex-start; gap: 6px;">
+            <span>Infra Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraDescription'] ? 'has-active-filter' : ''}" data-filter-col="infraDescription" title="Filter Infra Description">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Qty</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentProjectsView === 'project_material') {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>BOQ Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['boqName'] ? 'has-active-filter' : ''}" data-filter-col="boqName" title="Filter BOQ Name">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Uom</span>
+        </th>
+        <th colspan="5" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>Qty</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle;">
+          <span>Rate</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Amount</span>
+        </th>
+      </tr>
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MIR</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MIN</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MRR</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MRN</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Net</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentProjectsView === 'project_expenses') {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Expense Type</span>
+        </th>
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Item Name</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Uom</span>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Qty</span>
+        </th>
+        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 2px solid #ffffff !important;">
+          <span>Amount</span>
+        </th>
+      </tr>
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>PO</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Budget</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Used</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Available</span>
+        </th>
+      </tr>
+    `;
+    return;
+  }
 
   if (currentProjectsView === 'supply_details') {
     const detailCols = [
@@ -2652,7 +3285,7 @@ function renderProjectsFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
-  if (currentProjectsView === 'supply_details') {
+  if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'supply_details') {
     footer.innerHTML = '';
     footer.style.display = 'none';
     return;
@@ -2661,7 +3294,7 @@ function renderProjectsFooter() {
   if (currentProjectsView === 'details') {
     const detailTabs = [
       { key: 'expenses', label: 'Expenses' },
-      { key: 'materials', label: 'Materials' },
+      { key: 'material', label: 'Material' },
       { key: 'infra', label: 'Infra' },
       { key: 'dpr', label: 'DPR' },
       { key: 'boq', label: 'BOQ' },
@@ -2690,6 +3323,22 @@ function renderProjectsFooter() {
     footer.querySelectorAll('.segmented-btn[data-project-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
         const tabKey = btn.getAttribute('data-project-tab');
+        if (tabKey === 'expenses') {
+          openProjectExpensesPage();
+          return;
+        }
+        if (tabKey === 'material' || tabKey === 'materials') {
+          openProjectMaterialPage();
+          return;
+        }
+        if (tabKey === 'infra') {
+          openProjectInfraPage();
+          return;
+        }
+        if (tabKey === 'dpr') {
+          openProjectDprPage();
+          return;
+        }
         if (currentProjectDetailTab !== tabKey) {
           currentProjectDetailTab = tabKey;
           activeColumnFilters = {};
@@ -4040,7 +4689,65 @@ function applyFiltersAndRender() {
       }).join('');
     }
   } else if (currentModule === 'projects') {
-    if (currentProjectsView === 'supply_details') {
+    if (currentProjectsView === 'project_dpr') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.date || ''}</td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500;">
+            <a href="#" class="req-link td-link-blue" onclick="showToast('Activity: ' + '${(row.activity || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">${row.activity || ''}</a>
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.status || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.ptwNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.ptwStatus || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.imapCheckIn || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.imapCheckOut || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px;">${row.updateBy || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentProjectsView === 'project_infra') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.docType || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.boqNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.boqDate || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px;">${row.category || ''}</td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.infraDescription || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.qy || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">
+            <span class="status-badge status-active">${row.status || 'Active'}</span>
+          </td>
+        </tr>
+      `).join('');
+    } else if (currentProjectsView === 'project_material') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">
+            <a href="#" class="req-link td-link-blue clickable-boq-item-link" onclick="openBoqMaterialDetailModal('${(row.boqName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: none; cursor: pointer; font-weight: 600;">${row.boqName || ''}</a>
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.uom || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mir || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.min || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrr || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrn || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.net || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0;">${row.rate || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentProjectsView === 'project_expenses') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.expenseType || ''}</td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.itemName || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.uom || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.qty || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.po || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.budget || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.used || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.available || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentProjectsView === 'supply_details') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.itemDescription || ''}</td>
@@ -8878,9 +9585,26 @@ function getColumnDisplayName(colKey) {
     invoiceAmount: "Invoice Amount",
     paymentStatus: "Payment Status",
     itemDescription: "Item Description",
+    expenseType: "Expense Type",
+    itemName: "Item Name",
+    po: "PO",
+    budget: "Budget",
+    used: "Used",
+    available: "Available",
+    boqName: "BOQ Name",
+    mir: "MIR",
+    min: "MIN",
+    mrr: "MRR",
+    mrn: "MRN",
+    net: "Net",
     qty: "Qty",
     rate: "Rate",
-    amount: "Amount"
+    amount: "Amount",
+    docType: "Doc Type",
+    boqNo: "BOQ No",
+    boqDate: "BOQ Date",
+    category: "Category",
+    qy: "Qy"
   };
   return map[colKey] || colKey;
 }

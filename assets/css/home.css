@@ -4341,3 +4341,18 @@ a:visited,
 .metric-validated span:hover {
   opacity: 0.85;
 }
+
+/* Underline for blue amount in expenses page */
+.clickable-blue-amount-link {
+  color: #0454e4 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+  text-decoration-thickness: 1px !important;
+  text-decoration-color: #0454e4 !important;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.clickable-blue-amount-link:hover {
+  opacity: 0.85;
+}

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=104">
+  <link rel="stylesheet" href="assets/css/home.css?v=105">
 </head>
 
 <body>
@@ -2737,114 +2737,145 @@
         </div>
 
         <!-- Project Info Modal Tab (R/RL-234567 / New Build / With DG) -->
-        <div class="side-form-card project-info-modal-card" id="projectInfoModal"
-          style="display: none;">
+        <div class="side-form-card project-info-modal-card" id="projectInfoModal" style="display: none;">
           <!-- Header Ribbon: Slanted Green Title Badge & Red Close Button -->
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblProjectInfoTitle">R/RL-234567 / New Build / With DG</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProjectInfoModal" onclick="closeProjectInfoModal()"
-              aria-label="Close">&times;</button>
+            <button type="button" class="side-form-close-btn" id="btnCloseProjectInfoModal"
+              onclick="closeProjectInfoModal()" aria-label="Close">&times;</button>
           </div>
 
           <div class="project-info-modal-body">
             <!-- Section 1: District, Town, Upgradation Type, Planning BOQ (Viewable Only) -->
             <div class="project-info-card-box">
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; column-gap: 36px; align-items: center; margin-bottom: 18px;">
+              <div
+                style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; column-gap: 36px; align-items: center; margin-bottom: 18px;">
                 <div style="display: flex; align-items: center; gap: 14px;">
                   <label style="min-width: 60px; font-size: 0.95rem; font-weight: 500; color: #1e293b;">District</label>
-                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly style="flex: 1; width: 100%;">
+                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
+                    style="flex: 1; width: 100%;">
                 </div>
                 <div style="display: flex; align-items: center; gap: 14px;">
                   <label style="min-width: 50px; font-size: 0.95rem; font-weight: 500; color: #1e293b;">Town</label>
-                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly style="flex: 1; width: 100%;">
+                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
+                    style="flex: 1; width: 100%;">
                 </div>
                 <div style="display: flex; align-items: center; gap: 14px;">
-                  <label style="min-width: 135px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Upgradation Type</label>
-                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly style="flex: 1; width: 100%;">
+                  <label
+                    style="min-width: 135px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Upgradation
+                    Type</label>
+                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
+                    style="flex: 1; width: 100%;">
                 </div>
               </div>
               <div style="display: flex; align-items: center; gap: 18px;">
-                <label style="min-width: 105px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Planning BOQ</label>
-                <input type="text" class="project-info-field-input" value="R/RL-234567" readonly style="flex: 1; width: 100%;">
+                <label
+                  style="min-width: 105px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Planning
+                  BOQ</label>
+                <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
+                  style="flex: 1; width: 100%;">
               </div>
             </div>
 
             <!-- Section 2: Tower specs (Viewable Only) and Toggle items (Deactivated Red State) -->
             <div class="project-info-card-box" style="margin-top: 18px;">
               <!-- Row 1: 4 input specs -->
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 20px; align-items: center; margin-bottom: 22px;">
+              <div
+                style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 20px; align-items: center; margin-bottom: 22px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Type</span>
-                  <input type="text" class="project-info-field-input" readonly style="width: 100px; text-align: center;">
+                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower
+                    Type</span>
+                  <input type="text" class="project-info-field-input" readonly
+                    style="width: 100px; text-align: center;">
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Height</span>
-                  <input type="text" class="project-info-field-input" readonly style="width: 100px; text-align: center;">
+                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower
+                    Height</span>
+                  <input type="text" class="project-info-field-input" readonly
+                    style="width: 100px; text-align: center;">
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">SBC</span>
-                  <input type="text" class="project-info-field-input" readonly style="width: 100px; text-align: center;">
+                  <input type="text" class="project-info-field-input" readonly
+                    style="width: 100px; text-align: center;">
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Wind Speed</span>
-                  <input type="text" class="project-info-field-input" readonly style="width: 100px; text-align: center;">
+                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Wind
+                    Speed</span>
+                  <input type="text" class="project-info-field-input" readonly
+                    style="width: 100px; text-align: center;">
                 </div>
               </div>
 
               <!-- Toggles: 3 rows of 4 columns (Deactivated / Red State) -->
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 18px; align-items: center;">
+              <div
+                style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 18px; align-items: center;">
                 <!-- Row 2 -->
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Site Survey</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">STN</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">SRN</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">CAM</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
 
                 <!-- Row 3 -->
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">TSP Materials</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Civil Works</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Electrical Works</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Pole Mounts</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
 
                 <!-- Row 4 -->
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Quality Audit</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                   <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">PTW</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Additional Approval</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Additional
+                    Approval</span>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Service Contract</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
+                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Service
+                    Contract</span>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span
+                      class="project-info-toggle-slider"></span></label>
                 </div>
               </div>
             </div>
@@ -2863,7 +2894,9 @@
 
           <!-- Toolbar with Blue Sigma Sum Symbol -->
           <div style="padding: 14px 28px 10px; display: flex; align-items: center;">
-            <span style="color: #2563eb; font-size: 1.75rem; font-weight: 700; font-family: sans-serif; cursor: pointer; line-height: 1; user-select: none;" title="Summary">Σ</span>
+            <span
+              style="color: #2563eb; font-size: 1.75rem; font-weight: 700; font-family: sans-serif; cursor: pointer; line-height: 1; user-select: none;"
+              title="Summary">Σ</span>
           </div>
 
           <!-- Table Container with Centered Headers and Exact Content Alignments/Widths -->
@@ -2871,50 +2904,119 @@
             <table class="projects-custom-table" id="tblPoCapexItems" style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <th style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Line No</th>
-                  <th style="text-align: center; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Item Code</th>
-                  <th style="text-align: center; min-width: 35ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Item Description</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Uom</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Qty</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Rate</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Amount</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">GST</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Total</th>
+                  <th
+                    style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Line No</th>
+                  <th
+                    style="text-align: center; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Item Code</th>
+                  <th
+                    style="text-align: center; min-width: 35ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Item Description</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Uom</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Qty</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Rate</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Amount</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    GST</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Total</th>
                 </tr>
               </thead>
               <tbody id="tblPoCapexBody">
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">10</td>
-                  <td style="text-align: left; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">ITEM-DG-001</td>
-                  <td style="text-align: left; min-width: 35ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Diesel Generator Set 15kVA Silent Type</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">NOS</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">1.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">1,50,000.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">1,50,000.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">27,000.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">1,77,000.00</td>
+                  <td
+                    style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    10</td>
+                  <td
+                    style="text-align: left; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    ITEM-DG-001</td>
+                  <td style="text-align: left; min-width: 35ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Diesel Generator Set 15kVA Silent Type</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    NOS</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    1.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    1,50,000.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    1,50,000.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    27,000.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    1,77,000.00</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">20</td>
-                  <td style="text-align: left; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">ITEM-CBL-402</td>
-                  <td style="text-align: left; min-width: 35ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">4 Core 16 sq mm Armoured Copper Cable</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">MTR</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">120.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">450.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">54,000.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">9,720.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">63,720.00</td>
+                  <td
+                    style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    20</td>
+                  <td
+                    style="text-align: left; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    ITEM-CBL-402</td>
+                  <td style="text-align: left; min-width: 35ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    4 Core 16 sq mm Armoured Copper Cable</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    MTR</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    120.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    450.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    54,000.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    9,720.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    63,720.00</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">30</td>
-                  <td style="text-align: left; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">ITEM-EAR-105</td>
-                  <td style="text-align: left; min-width: 35ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Chemical Earthing Electrode with Compound</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">SET</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">2.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">8,500.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">17,000.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">3,060.00</td>
-                  <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">20,060.00</td>
+                  <td
+                    style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    30</td>
+                  <td
+                    style="text-align: left; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    ITEM-EAR-105</td>
+                  <td style="text-align: left; min-width: 35ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Chemical Earthing Electrode with Compound</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    SET</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    2.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    8,500.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    17,000.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    3,060.00</td>
+                  <td
+                    style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    20,060.00</td>
                 </tr>
               </tbody>
             </table>
@@ -2936,34 +3038,74 @@
             <table class="projects-custom-table" id="tblSiteInfoItems" style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <th style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Name</th>
-                  <th style="text-align: center; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Designation</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Contact Number</th>
-                  <th style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">E - Mail</th>
-                  <th style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Status</th>
+                  <th
+                    style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Name</th>
+                  <th
+                    style="text-align: center; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Designation</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Contact Number</th>
+                  <th
+                    style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    E - Mail</th>
+                  <th
+                    style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Status</th>
                 </tr>
               </thead>
               <tbody id="tblSiteInfoBody">
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Rajesh Kumar</td>
-                  <td style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Site Engineer</td>
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">+91 9876543210</td>
-                  <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">rajesh.k@telecom.in</td>
-                  <td style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">Active</td>
+                  <td
+                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Rajesh Kumar</td>
+                  <td
+                    style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Site Engineer</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    +91 9876543210</td>
+                  <td
+                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    rajesh.k@telecom.in</td>
+                  <td
+                    style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">
+                    Active</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Anand Sundaram</td>
-                  <td style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Project Manager</td>
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">+91 9845012345</td>
-                  <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">anand.s@telecom.in</td>
-                  <td style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">Active</td>
+                  <td
+                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Anand Sundaram</td>
+                  <td
+                    style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Project Manager</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    +91 9845012345</td>
+                  <td
+                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    anand.s@telecom.in</td>
+                  <td
+                    style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">
+                    Active</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Vignesh R</td>
-                  <td style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">Safety Officer</td>
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">+91 9712345678</td>
-                  <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">vignesh.r@telecom.in</td>
-                  <td style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">Active</td>
+                  <td
+                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Vignesh R</td>
+                  <td
+                    style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    Safety Officer</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    +91 9712345678</td>
+                  <td
+                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
+                    vignesh.r@telecom.in</td>
+                  <td
+                    style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">
+                    Active</td>
                 </tr>
               </tbody>
             </table>
@@ -2976,30 +3118,49 @@
           <!-- Header Ribbon: Slanted Green Title Badge & Red Close Button -->
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblPaymentReceiptTitle">Payment Receipt</div>
-            <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal" onclick="closePaymentReceiptModal()"
-              aria-label="Close">&times;</button>
+            <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal"
+              onclick="closePaymentReceiptModal()" aria-label="Close">&times;</button>
           </div>
 
           <!-- Table Container with Centered Headers and Centered 15ch Content -->
           <div class="contact-table-wrap" style="padding: 24px 28px 24px; overflow-x: auto;">
-            <table class="projects-custom-table" id="tblPaymentReceiptItems" style="width: 100%; border-collapse: collapse;">
+            <table class="projects-custom-table" id="tblPaymentReceiptItems"
+              style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Payment Date</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Receipt #</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">Received Amount</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Payment Date</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Receipt #</th>
+                  <th
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Received Amount</th>
                 </tr>
               </thead>
               <tbody id="tblPaymentReceiptBody">
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">12/08/2026</td>
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">REC-2026-901</td>
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem; font-weight: 600;">5,00,000.00</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    12/08/2026</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    REC-2026-901</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem; font-weight: 600;">
+                    5,00,000.00</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">25/08/2026</td>
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">REC-2026-902</td>
-                  <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem; font-weight: 600;">6,00,000.00</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    25/08/2026</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+                    REC-2026-902</td>
+                  <td
+                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem; font-weight: 600;">
+                    6,00,000.00</td>
                 </tr>
               </tbody>
             </table>
@@ -3469,90 +3630,205 @@
 
           <!-- Modal Body: Extended Table Container (No slidebar / scrollbar) -->
           <div class="po-rfq-compare-body" style="padding: 20px 24px 28px 24px; overflow-x: hidden;">
-            <table class="data-table po-rfq-compare-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+            <table class="data-table po-rfq-compare-table"
+              style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
               <thead>
                 <tr class="project-payment-header-row1">
-                  <th rowspan="2" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center; padding: 6px 10px; white-space: nowrap;">Material Description</th>
-                  <th rowspan="2" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center; padding: 6px 8px; white-space: nowrap;">Uom</th>
-                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">Vendor 1 Name</th>
-                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">Vendor 2 Name</th>
-                  <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">Vendor 3 Name</th>
+                  <th rowspan="2"
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center; padding: 6px 10px; white-space: nowrap;">
+                    Material Description</th>
+                  <th rowspan="2"
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center; padding: 6px 8px; white-space: nowrap;">
+                    Uom</th>
+                  <th colspan="4"
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">
+                    Vendor 1 Name</th>
+                  <th colspan="4"
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">
+                    Vendor 2 Name</th>
+                  <th colspan="4"
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 10px;">
+                    Vendor 3 Name</th>
                 </tr>
                 <tr class="project-payment-header-row2">
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">Rate</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Amount</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">GST</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Total</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">Rate</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Amount</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">GST</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Total</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">Rate</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Amount</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">GST</th>
-                  <th style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">Total</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">
+                    Rate</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">
+                    Amount</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">
+                    GST</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">
+                    Total</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">
+                    Rate</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">
+                    Amount</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">
+                    GST</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">
+                    Total</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 75px;">
+                    Rate</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">
+                    Amount</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 65px;">
+                    GST</th>
+                  <th
+                    style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff; padding: 6px 8px; width: 85px;">
+                    Total</th>
                 </tr>
               </thead>
               <tbody id="poRfqCompareModalTbody">
                 <tr>
-                  <td style="height: 44px; font-weight: 500; color: #1e293b; padding: 10px 10px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">40M Galvanized Tubular Telecom Tower Mast</td>
-                  <td class="td-center" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">Nos</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">4,50,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">9,00,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,62,000.00</td>
-                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">10,62,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">4,65,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">9,30,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,67,400.00</td>
-                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">10,97,400.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">4,40,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">8,80,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,58,400.00</td>
-                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">10,38,400.00</td>
+                  <td
+                    style="height: 44px; font-weight: 500; color: #1e293b; padding: 10px 10px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    40M Galvanized Tubular Telecom Tower Mast</td>
+                  <td class="td-center"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    Nos</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    4,50,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    9,00,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    1,62,000.00</td>
+                  <td class="td-amount"
+                    style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    10,62,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    4,65,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    9,30,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    1,67,400.00</td>
+                  <td class="td-amount"
+                    style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    10,97,400.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    4,40,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    8,80,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    1,58,400.00</td>
+                  <td class="td-amount"
+                    style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    10,38,400.00</td>
                 </tr>
                 <tr>
-                  <td style="height: 44px; font-weight: 500; color: #1e293b; padding: 10px 10px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">High Tensile Fasteners & Anchor Bolts Kit</td>
-                  <td class="td-center" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">Set</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">45,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">90,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">16,200.00</td>
-                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,06,200.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">48,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">96,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">17,280.00</td>
-                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,13,280.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">44,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">88,000.00</td>
-                  <td class="td-amount" style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">15,840.00</td>
-                  <td class="td-amount" style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">1,03,840.00</td>
+                  <td
+                    style="height: 44px; font-weight: 500; color: #1e293b; padding: 10px 10px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    High Tensile Fasteners & Anchor Bolts Kit</td>
+                  <td class="td-center"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    Set</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    45,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    90,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    16,200.00</td>
+                  <td class="td-amount"
+                    style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    1,06,200.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    48,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    96,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    17,280.00</td>
+                  <td class="td-amount"
+                    style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    1,13,280.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    44,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    88,000.00</td>
+                  <td class="td-amount"
+                    style="padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    15,840.00</td>
+                  <td class="td-amount"
+                    style="font-weight: 600; padding: 10px 6px; border-bottom: 1px solid #e2e8f0; border-top: none; border-left: none; border-right: none;">
+                    1,03,840.00</td>
                 </tr>
               </tbody>
               <tfoot id="poRfqCompareModalTfoot">
                 <tr style="background: #ffffff; height: 44px;">
-                  <td colspan="2" style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">Payment Terms</td>
-                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">100% Advance</td>
-                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">30 Days</td>
-                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">45 Days</td>
+                  <td colspan="2"
+                    style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">
+                    Payment Terms</td>
+                  <td colspan="4"
+                    style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                    100% Advance</td>
+                  <td colspan="4"
+                    style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                    30 Days</td>
+                  <td colspan="4"
+                    style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">
+                    45 Days</td>
                 </tr>
                 <tr style="background: #ffffff; height: 44px;">
-                  <td colspan="2" style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">Transportation Charges</td>
-                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">Including</td>
-                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">Extra at actual</td>
-                  <td colspan="4" style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">Extra at actual</td>
+                  <td colspan="2"
+                    style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">
+                    Transportation Charges</td>
+                  <td colspan="4"
+                    style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                    Including</td>
+                  <td colspan="4"
+                    style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                    Extra at actual</td>
+                  <td colspan="4"
+                    style="text-align: center; font-weight: 500; color: #1e293b; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">
+                    Extra at actual</td>
                 </tr>
                 <tr style="background: #ffffff; height: 44px;">
-                  <td colspan="2" style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">Total Amount</td>
-                  <td colspan="4" style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                  <td colspan="2"
+                    style="font-weight: 500; color: #334155; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; text-align: left;">
+                    Total Amount</td>
+                  <td colspan="4"
+                    style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
                     <!-- Mid Amount: Orange -->
-                    <a href="#" class="rfq-total-link" id="rfqTotalVendor1" style="color: #ea580c; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">11,68,200.00</a>
+                    <a href="#" class="rfq-total-link" id="rfqTotalVendor1"
+                      style="color: #ea580c; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">11,68,200.00</a>
                   </td>
-                  <td colspan="4" style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
+                  <td colspan="4"
+                    style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0;">
                     <!-- High Amount: Red -->
-                    <a href="#" class="rfq-total-link" id="rfqTotalVendor2" style="color: #dc2626; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">12,10,680.00</a>
+                    <a href="#" class="rfq-total-link" id="rfqTotalVendor2"
+                      style="color: #dc2626; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">12,10,680.00</a>
                   </td>
-                  <td colspan="4" style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">
+                  <td colspan="4"
+                    style="text-align: center; padding: 10px; border-bottom: 1px solid #e2e8f0; border-right: none;">
                     <!-- Low Amount: Green -->
-                    <a href="#" class="rfq-total-link" id="rfqTotalVendor3" style="color: #16a34a; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">11,42,240.00</a>
+                    <a href="#" class="rfq-total-link" id="rfqTotalVendor3"
+                      style="color: #16a34a; font-weight: 600; text-decoration: underline; font-size: 0.95rem;">11,42,240.00</a>
                   </td>
                 </tr>
               </tfoot>
@@ -5308,6 +5584,474 @@
           </form>
         </div>
 
+        <!-- Payment Receipt Modal Tab (Triggered by clicking green amount in Supply details toolbar) -->
+        <div class="side-form-card side-contact-popup" id="paymentReceiptModal"
+          style="display: none; width: 680px; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblPaymentReceiptTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              Payment Receipt</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal"
+                onclick="closePaymentReceiptModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="master-custom-table" id="tblPaymentReceiptPopup"
+              style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+                    <span>Payment Date</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+                    <span>Receipt #</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+                    <span>Received Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPaymentReceiptDetails">
+                <tr>
+                  <td
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    12/08/2026</td>
+                  <td
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    REC-2026-901</td>
+                  <td
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 600;">
+                    5,00,000.00</td>
+                </tr>
+                <tr>
+                  <td
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    25/08/2026</td>
+                  <td
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    REC-2026-902</td>
+                  <td
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 600;">
+                    6,00,000.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Expenses Summary Modal Tab (Triggered by clicking blue Summation amount in Project Expenses toolbar) -->
+        <div class="side-form-card side-contact-popup" id="expensesSummaryModal"
+          style="display: none; width: 1080px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblExpensesSummaryTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              Expenses Summarry</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseExpensesSummaryModal"
+                onclick="closeExpensesSummaryModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+            <table class="contact-custom-table" id="tblExpensesSummaryPopup"
+              style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2"
+                    style="width: 10%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 4px;">
+                    <span>Request Date</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 16%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
+                    <span>Request By</span>
+                  </th>
+                  <th colspan="4"
+                    style="width: 42%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 6px;">
+                    <span>Amount</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 16%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
+                    <span>Transferred To</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 16%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
+                    <span>Pending With</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>Request</span>
+                  </th>
+                  <th
+                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>Approved</span>
+                  </th>
+                  <th
+                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>Transferred</span>
+                  </th>
+                  <th
+                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>Payable</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyExpensesSummaryDetails">
+                <tr>
+                  <td style="width: 10%; text-align: center !important; padding: 10px 4px; white-space: nowrap;">
+                    12/08/2026</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Nivas
+                    Kumar</td>
+                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
+                    6,00,000.00</td>
+                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
+                    6,00,000.00</td>
+                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
+                    5,00,000.00</td>
+                  <td
+                    style="width: 10.5%; text-align: right !important; padding: 10px 8px; font-weight: 600; white-space: nowrap;">
+                    1,00,000.00</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">SBI -
+                    4092109281</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Finance
+                    Head</td>
+                </tr>
+                <tr>
+                  <td style="width: 10%; text-align: center !important; padding: 10px 4px; white-space: nowrap;">
+                    25/08/2026</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Praveen
+                    Raj</td>
+                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
+                    6,00,000.00</td>
+                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
+                    6,00,000.00</td>
+                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
+                    5,00,000.00</td>
+                  <td
+                    style="width: 10.5%; text-align: right !important; padding: 10px 8px; font-weight: 600; white-space: nowrap;">
+                    1,00,000.00</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">HDFC -
+                    8920192831</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Accounts
+                    Dept</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MIN / MRN Modal Tab (Triggered by clicking PDF icon in Project Material toolbar) -->
+        <div class="side-form-card side-contact-popup" id="minMrnModal"
+          style="display: none; width: 440px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblMinMrnTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              MIN / MRN</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseMinMrnModal" onclick="closeMinMrnModal()"
+                aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+            <table class="contact-custom-table" id="tblMinMrnPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr>
+                  <th
+                    style="width: 33.33%; text-align: center !important; color: #ffffff !important; font-weight: 700 !important; font-size: 0.95rem !important; padding: 12px 8px !important; white-space: nowrap; background: #8c9399 !important; border: 1px solid #ffffff !important;">
+                    Doc.Type
+                  </th>
+                  <th
+                    style="width: 33.33%; text-align: center !important; color: #ffffff !important; font-weight: 700 !important; font-size: 0.95rem !important; padding: 12px 8px !important; white-space: nowrap; background: #8c9399 !important; border: 1px solid #ffffff !important;">
+                    Doc. No
+                  </th>
+                  <th
+                    style="width: 33.33%; text-align: center !important; color: #ffffff !important; font-weight: 700 !important; font-size: 0.95rem !important; padding: 12px 8px !important; white-space: nowrap; background: #8c9399 !important; border: 1px solid #ffffff !important;">
+                    Doc.Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyMinMrnDetails">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN-234567-01</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    12/08/2026</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN-234567-01</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    16/08/2026</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN-234567-02</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    22/08/2026</td>
+                </tr>
+                <tr>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN-234567-02</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    28/08/2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Infra Doc Modal Tab (Triggered by clicking PDF icon in Project Infra toolbar) -->
+        <div class="side-form-card side-contact-popup" id="infraDocModal"
+          style="display: none; width: 440px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblInfraDocTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              STN / SRN / CAM</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseInfraDocModal"
+                onclick="closeInfraDocModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+            <table class="contact-custom-table" id="tblInfraDocPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr>
+                  <th
+                    style="width: 33.33%; text-align: center !important; color: #ffffff !important; font-weight: 700 !important; font-size: 0.95rem !important; padding: 12px 8px !important; white-space: nowrap; background: #8c9399 !important; border: 1px solid #ffffff !important;">
+                    Doc.Type
+                  </th>
+                  <th
+                    style="width: 33.33%; text-align: center !important; color: #ffffff !important; font-weight: 700 !important; font-size: 0.95rem !important; padding: 12px 8px !important; white-space: nowrap; background: #8c9399 !important; border: 1px solid #ffffff !important;">
+                    Doc. No
+                  </th>
+                  <th
+                    style="width: 33.33%; text-align: center !important; color: #ffffff !important; font-weight: 700 !important; font-size: 0.95rem !important; padding: 12px 8px !important; white-space: nowrap; background: #8c9399 !important; border: 1px solid #ffffff !important;">
+                    Doc.Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyInfraDocDetails">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN-234567-01</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    12/08/2026</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN-234567-01</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    16/08/2026</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MIN-234567-02</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    22/08/2026</td>
+                </tr>
+                <tr>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    MRN-234567-02</td>
+                  <td
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
+                    28/08/2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BOQ Material Detail Modal Tab (Triggered by clicking BOQ Name in Project Material table) -->
+        <div class="side-form-card side-contact-popup" id="boqMaterialDetailModal"
+          style="display: none; width: 1040px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblBoqMaterialDetailTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              25 X 6 GI Earth Strip</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseBoqMaterialDetailModal"
+                onclick="closeBoqMaterialDetailModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 0 16px 12px 18px; display: flex; align-items: center; gap: 10px;">
+            <img src="icons/summation.svg" alt="Summation" style="width: 26px; height: 26px; display: block;">
+            <span
+              style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+            <table class="contact-custom-table" id="tblBoqMaterialDetailPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2"
+                    style="width: 32%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 8px;">
+                    <span>Material Description</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 12%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
+                    <span>Uom</span>
+                  </th>
+                  <th colspan="5"
+                    style="width: 40%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 6px;">
+                    <span>Qty</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 8%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
+                    <span>Rate</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 8%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 8%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>MIR</span>
+                  </th>
+                  <th
+                    style="width: 8%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>MIN</span>
+                  </th>
+                  <th
+                    style="width: 8%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>MRR</span>
+                  </th>
+                  <th
+                    style="width: 8%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>MRN</span>
+                  </th>
+                  <th
+                    style="width: 8%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
+                    <span>Net</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBoqMaterialDetail">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 32%; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">
+                    25x6mm Hot Dip Galvanized Earth Strip - Grade A</td>
+                  <td
+                    style="width: 12%; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #475569;">
+                    MTR</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">50.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">20.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">10.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">5.00</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">15.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">120.00
+                  </td>
+                  <td
+                    style="width: 8%; text-align: right !important; padding: 10px 8px; font-weight: 600; white-space: nowrap;">
+                    1,800.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td
+                    style="width: 32%; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">
+                    Earthing Clamps & Fasteners (SS-304)</td>
+                  <td
+                    style="width: 12%; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #475569;">
+                    NOS</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">100.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">40.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">20.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">10.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">30.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">85.00
+                  </td>
+                  <td
+                    style="width: 8%; text-align: right !important; padding: 10px 8px; font-weight: 600; white-space: nowrap;">
+                    2,550.00</td>
+                </tr>
+                <tr>
+                  <td
+                    style="width: 32%; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">
+                    Chemical Earthing Compound Backfill (25Kg Bag)</td>
+                  <td
+                    style="width: 12%; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #475569;">
+                    BAG</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">10.00
+                  </td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">6.00</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">2.00</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">1.00</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">5.00</td>
+                  <td style="width: 8%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">850.00
+                  </td>
+                  <td
+                    style="width: 8%; text-align: right !important; padding: 10px 8px; font-weight: 600; white-space: nowrap;">
+                    4,250.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -5373,7 +6117,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=123"></script>
+  <script src="assets/js/home.js?v=141"></script>
 </body>
 
 </html>

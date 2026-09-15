@@ -62,7 +62,7 @@
         <!-- 7. Inventory Icon -->
         <button type="button" class="nav-icon-item" id="navBtnInventory" data-module="inventory"
           data-tooltip="Inventory" aria-label="Inventory">
-          <img src="icons/Inventry.svg" alt="Inventory" class="nav-icon-img" width="40" height="40">
+          <img src="icons/Inventry.svg?v=20260915" alt="Inventory" class="nav-icon-img" width="40" height="40">
         </button>
 
         <!-- 8. Profile Icon -->
@@ -5584,13 +5584,13 @@
           </form>
         </div>
 
-        <!-- Payment Receipt Modal Tab (Triggered by clicking green amount in Supply details toolbar) -->
+        <!-- Payment Receipt Modal Tab (Triggered by clicking green amount in Supply & Service Vendor subpages) -->
         <div class="side-form-card side-contact-popup" id="paymentReceiptModal"
-          style="display: none; width: 680px; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 540px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
             <div class="side-form-title-badge" id="lblPaymentReceiptTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
               Payment Receipt</div>
             <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
               <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal"
@@ -5600,44 +5600,44 @@
           </div>
           <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
             <table class="master-custom-table" id="tblPaymentReceiptPopup"
-              style="width: 100%; border-collapse: collapse;">
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
                 <tr class="master-view-header">
                   <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px; white-space: nowrap;">
                     <span>Payment Date</span>
                   </th>
                   <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px; white-space: nowrap;">
                     <span>Receipt #</span>
                   </th>
                   <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
-                    <span>Received Amount</span>
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px; white-space: nowrap;">
+                    <span id="lblPaymentReceiptAmountCol">Paid Amount</span>
                   </th>
                 </tr>
               </thead>
               <tbody id="tbodyPaymentReceiptDetails">
-                <tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
                   <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
                     12/08/2026</td>
                   <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
                     REC-2026-901</td>
                   <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 600;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">
                     5,00,000.00</td>
                 </tr>
-                <tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
                   <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
                     25/08/2026</td>
                   <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
                     REC-2026-902</td>
                   <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 600;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">
                     6,00,000.00</td>
                 </tr>
               </tbody>
@@ -6538,7 +6538,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=160"></script>
+  <script src="assets/js/home.js?v=167"></script>
 </body>
 
 </html>

@@ -2758,19 +2758,20 @@ td.col-master-vendor-status {
 
 /* Add Customer Slanted Ribbon Header Design Matching Uploaded Mockup */
 .side-form-header {
-  display: flex;
-  align-items: stretch;
-  /* Stretches badge to fill 100% full height from top 0 */
-  justify-content: space-between;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   background: #ffffff !important;
-  padding: 0;
+  padding: 0 !important;
   margin: 0 !important;
   border-bottom: none !important;
   box-shadow: none !important;
   outline: none !important;
-  height: 48px;
+  height: 48px !important;
   overflow: hidden !important;
-  position: relative;
+  position: relative !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .side-form-title-badge {
@@ -2783,9 +2784,9 @@ td.col-master-vendor-status {
   letter-spacing: 0.3px;
   display: flex;
   align-items: center;
-  height: calc(100% + 6px) !important;
+  height: 100% !important;
   margin-top: 0 !important;
-  margin-bottom: -6px !important;
+  margin-bottom: 0 !important;
   clip-path: polygon(0 0, 100% 0, calc(100% - 34px) 100%, 0 100%);
   white-space: nowrap;
   user-select: none;
@@ -2794,22 +2795,23 @@ td.col-master-vendor-status {
 }
 
 .side-form-close-btn {
-  background: transparent;
-  border: none;
-  font-size: 1.8rem;
-  line-height: 1;
-  color: #ef4444;
-  cursor: pointer;
-  padding: 0 18px;
+  background: transparent !important;
+  border: none !important;
+  font-size: 1.8rem !important;
+  line-height: 1 !important;
+  color: #ef4444 !important;
+  cursor: pointer !important;
+  padding: 0 18px !important;
+  margin-left: auto !important;
   transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .side-form-close-btn:hover {
   transform: scale(1.2);
-  color: #dc2626;
+  color: #dc2626 !important;
 }
 
 .side-form-top-icons {
@@ -4220,8 +4222,8 @@ a:visited,
    PROJECT INFO MODAL TAB & TOGGLE SWITCHES
    ========================================================================== */
 .project-info-modal-card {
-  width: 1180px !important;
-  max-width: 95vw !important;
+  width: 1380px !important;
+  max-width: 96vw !important;
   background: #ffffff !important;
   border-radius: 12px !important;
   padding: 0 0 24px 0 !important;

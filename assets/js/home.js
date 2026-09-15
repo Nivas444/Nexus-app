@@ -746,7 +746,7 @@ const projectsSummaryRow = {
 const projectsMainData = [
   {
     id: "proj-1",
-    customer: "Altis",
+    customer: "Indus",
     projectId: "2305 1067 8",
     poNo: "",
     poAgeing: "R/RL-234567",
@@ -1173,14 +1173,146 @@ const projectServiceVendorItemsData = [
   }
 ];
 
+// Inventory Dataset
+const inventoryData = [
+  {
+    id: "inv-1",
+    productDescription: "24 Port Patch Panel Loaded Cat 6 with Cable Management",
+    whCode: "WH-DEL-01",
+    productHead: "Passive Networking",
+    productType: "Patch Panel",
+    uom: "NOS",
+    qty: "120.00",
+    stockPrice: "1,250.00",
+    stockValue: "1,50,000.00"
+  },
+  {
+    id: "inv-2",
+    productDescription: "6U Wall Mount Network Rack with Fan and PDU Complete Kit",
+    whCode: "WH-MUM-02",
+    productHead: "Racks & Enclosures",
+    productType: "Rack System",
+    uom: "NOS",
+    qty: "45.00",
+    stockPrice: "4,800.00",
+    stockValue: "2,16,000.00"
+  }
+];
+
+// Inventory Product Details Dataset
+const inventoryProductDetailsData = [
+  {
+    id: "inv-det-1",
+    invoiceNo: "INV-98231",
+    vendorName: "Schneider Electric India Pvt Ltd",
+    docDate: "12 - 08 - 2026",
+    qtyDoc: "50.00",
+    qtyStock: "50.00",
+    qtyTotal: "100.00",
+    purchasePrice: "1,150.00",
+    transportation: "50.00",
+    unloadingOther: "25.00",
+    stockPrice: "1,225.00",
+    newPrice: "1,250.00"
+  },
+  {
+    id: "inv-det-2",
+    invoiceNo: "INV-98232",
+    vendorName: "D-Link India Limited",
+    docDate: "15 - 08 - 2026",
+    qtyDoc: "40.00",
+    qtyStock: "35.00",
+    qtyTotal: "75.00",
+    purchasePrice: "1,180.00",
+    transportation: "40.00",
+    unloadingOther: "20.00",
+    stockPrice: "1,240.00",
+    newPrice: "1,260.00"
+  },
+  {
+    id: "inv-det-3",
+    invoiceNo: "INV-98240",
+    vendorName: "CommScope Solutions India",
+    docDate: "20 - 08 - 2026",
+    qtyDoc: "30.00",
+    qtyStock: "35.00",
+    qtyTotal: "65.00",
+    purchasePrice: "1,200.00",
+    transportation: "30.00",
+    unloadingOther: "15.00",
+    stockPrice: "1,245.00",
+    newPrice: "1,250.00"
+  }
+];
+
+// Inventory Stock Price Details / Stock Ledger Dataset
+const inventoryStockLedgerData = [
+  {
+    id: "stk-1",
+    docDate: "12 - 08 - 2026",
+    docType: "GRN",
+    docNo: "GRN-2026-001",
+    fromTo: "Schneider Electric India Pvt Ltd",
+    uom: "NOS",
+    qtyStock: "50.00",
+    qtyDoc: "50.00",
+    qtyBalance: "50.00",
+    rate: "1,250.00",
+    stockValue: "62,500.00"
+  },
+  {
+    id: "stk-2",
+    docDate: "15 - 08 - 2026",
+    docType: "MIN",
+    docNo: "MIN-2026-042",
+    fromTo: "Project IN-123456 Guindy",
+    uom: "NOS",
+    qtyStock: "20.00",
+    qtyDoc: "20.00",
+    qtyBalance: "30.00",
+    rate: "1,250.00",
+    stockValue: "37,500.00"
+  },
+  {
+    id: "stk-3",
+    docDate: "18 - 08 - 2026",
+    docType: "GRN",
+    docNo: "GRN-2026-008",
+    fromTo: "D-Link India Limited",
+    uom: "NOS",
+    qtyStock: "40.00",
+    qtyDoc: "40.00",
+    qtyBalance: "70.00",
+    rate: "1,250.00",
+    stockValue: "87,500.00"
+  },
+  {
+    id: "stk-4",
+    docDate: "22 - 08 - 2026",
+    docType: "MRN",
+    docNo: "MRN-2026-015",
+    fromTo: "Project R/RL-234567",
+    uom: "NOS",
+    qtyStock: "10.00",
+    qtyDoc: "10.00",
+    qtyBalance: "80.00",
+    rate: "1,250.00",
+    stockValue: "1,00,000.00"
+  }
+];
+
 // ==========================================================================
 // STATE MANAGEMENT (Default landing page: Worklist -> Payment)
 // ==========================================================================
-let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects'
+let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects', 'inventory'
 let currentWorklistView = 'payment'; // 'payment' or 'po'
 let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
 let currentProjectsSubpage = 'projects'; // 'projects' or 'supply'
 let currentProjectsView = 'main'; // 'main', 'details', 'project_expenses', or 'supply_details'
+let currentInventorySubpage = 'inventory';
+let currentInventoryView = 'main';
+let selectedInventoryProductId = 'inv-1';
+let selectedInventoryProductName = 'Product Description';
 let selectedProjectCustomer = 'Altis';
 let selectedProjectId = 'proj-1';
 let selectedSupplyCustomerId = 'proj-sup-1';
@@ -1252,6 +1384,18 @@ document.addEventListener('DOMContentLoaded', () => {
         currentProjectsSubpage = 'projects';
       }
     }
+  } else if (moduleParam === 'inventory') {
+    currentModule = 'inventory';
+    currentInventorySubpage = 'inventory';
+    if (viewParam === 'product_details') {
+      currentInventoryView = 'product_details';
+      selectedInventoryProductName = params.get('product') || 'Product Description';
+    } else if (viewParam === 'stock_price' || viewParam === 'stock_ledger') {
+      currentInventoryView = viewParam;
+      selectedInventoryProductName = params.get('product') || 'Product Description';
+    } else {
+      currentInventoryView = 'main';
+    }
   } else if (moduleParam) {
     currentModule = moduleParam;
     if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
@@ -1304,6 +1448,9 @@ function switchModule(moduleName) {
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
     currentProjectsView = 'main';
+  } else if (moduleName === 'inventory') {
+    currentInventorySubpage = 'inventory';
+    currentInventoryView = 'main';
   }
 
   updateURL();
@@ -1313,7 +1460,8 @@ function switchModule(moduleName) {
     master: 'Master',
     indus_towers: 'Telecom',
     worklist: 'Worklist',
-    projects: 'Projects'
+    projects: 'Projects',
+    inventory: 'Inventory'
   };
   showToast(`Navigated to ${moduleTitles[moduleName] || moduleName}`);
 }
@@ -1391,6 +1539,19 @@ function updateURL() {
       url.searchParams.delete('tab');
       url.searchParams.delete('customer');
     }
+  } else if (currentModule === 'inventory') {
+    if (currentInventoryView === 'product_details' || currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
+      url.searchParams.set('view', currentInventoryView);
+      if (selectedInventoryProductName) {
+        url.searchParams.set('product', selectedInventoryProductName);
+      }
+    } else {
+      url.searchParams.delete('view');
+      url.searchParams.delete('product');
+    }
+    url.searchParams.delete('subpage');
+    url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
     url.searchParams.delete('subpage');
@@ -1403,7 +1564,7 @@ function updateURL() {
     url.searchParams.delete('customer');
   }
 
-  window.history.replaceState({}, '', url);
+  window.history.replaceState({}, '', url.toString());
 }
 
 // ==========================================================================
@@ -1429,6 +1590,19 @@ function goBackSubpage() {
       currentModule = 'worklist';
       currentWorklistView = 'payment';
       showToast('Returned to Worklist');
+    }
+  } else if (currentModule === 'inventory') {
+    if (currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
+      currentInventoryView = 'main';
+      showToast('Returned to Inventory');
+    } else if (currentInventoryView === 'product_details') {
+      currentInventoryView = 'main';
+      showToast('Returned to Inventory');
+    } else {
+      currentModule = 'projects';
+      currentProjectsSubpage = 'projects';
+      currentProjectsView = 'main';
+      showToast('Returned to Projects');
     }
   } else if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'project_type_details') {
@@ -1632,6 +1806,18 @@ function renderApp() {
     renderProjectsToolbar();
     renderProjectsTableHead();
     renderProjectsFooter();
+  } else if (currentModule === 'inventory') {
+    if (bannerTitle) {
+      if (currentInventoryView === 'product_details') {
+        bannerTitle.innerHTML = `<span class="banner-title-underline" style="font-weight: 700; color: #ffffff; font-size: 1.15rem;">${selectedInventoryProductName || 'Product Description'}</span>`;
+      } else {
+        bannerTitle.textContent = "Inventory";
+      }
+    }
+    loadInventoryDataset();
+    renderInventoryToolbar();
+    renderInventoryTableHead();
+    renderInventoryFooter();
   } else {
     if (bannerTitle) bannerTitle.textContent = currentModule.toUpperCase();
     renderPlaceholderModule();
@@ -2982,7 +3168,7 @@ window.openProjectDetailPage = function(projId, customerName) {
   currentModule = 'projects';
   currentProjectsView = 'details';
   selectedProjectId = projId || 'proj-1';
-  selectedProjectCustomer = customerName || 'Altis';
+  selectedProjectCustomer = customerName || 'Indus';
   currentProjectDetailTab = ''; // Landing page is empty until user clicks Expenses or other button
   activeColumnFilters = {};
   updateURL();
@@ -3170,14 +3356,17 @@ function renderProjectsToolbar() {
     return;
   }
   if (currentProjectsView === 'project_approvals') {
+    const hasSelectedRow = projectApprovalsData.some(d => d.selected);
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnApprovalsChart" title="E - Mail Approval" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openEmailApprovalModal('E - Mail Approval'); return false;">
-          <img src="icons/approval.svg" alt="Approval" style="width: 30px; height: 30px; display: block; object-fit: contain;">
-        </button>
+        ${hasSelectedRow ? `
+          <button type="button" class="tool-btn" id="btnApprovalsChart" title="E - Mail Approval" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openEmailApprovalModal('E - Mail Approval'); return false;">
+            <img src="icons/approval.svg?v=${Date.now()}" alt="Approval" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+        ` : ''}
       </div>
     `;
     toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
@@ -3187,10 +3376,12 @@ function renderProjectsToolbar() {
       renderApp();
       showToast('Returned to Project Details');
     });
-    toolbar.querySelector('#btnApprovalsChart')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      openEmailApprovalModal('E - Mail Approval');
-    });
+    if (hasSelectedRow) {
+      toolbar.querySelector('#btnApprovalsChart')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openEmailApprovalModal('E - Mail Approval');
+      });
+    }
     return;
   }
   if (currentProjectsView === 'project_boq') {
@@ -3245,11 +3436,8 @@ function renderProjectsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnDprSurveyReport" title="Survey Report" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
-          <img src="icons/Approval History.svg?v=20260915" alt="Survey Report" style="width: 28px; height: 28px; display: block; object-fit: contain;">
-        </button>
-        <button type="button" class="tool-btn" id="btnDprContact" title="Members" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprMembersModal(); return false;">
-          <img src="icons/Members.svg" alt="Members" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        <button type="button" class="tool-btn" id="btnDprContact" title="Contact" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprMembersModal(); return false;">
+          <img src="icons/Members.svg" alt="Contact" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnDprAttendance" title="Attendance" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprAttendanceModal(); return false;">
           <img src="icons/Attendance.svg" alt="Attendance" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -3265,10 +3453,6 @@ function renderProjectsToolbar() {
       updateURL();
       renderApp();
       showToast('Returned to Project Details');
-    });
-    toolbar.querySelector('#btnDprSurveyReport')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      openDprSurveyReportModal();
     });
     toolbar.querySelector('#btnDprContact')?.addEventListener('click', (e) => {
       e.preventDefault();
@@ -3947,6 +4131,159 @@ function renderProjectsFooter() {
       showToast('Switched to Supply View');
     }
   });
+}
+
+// ==========================================================================
+// 3B. INVENTORY MODULE RENDERERS
+// ==========================================================================
+function loadInventoryDataset() {
+  if (currentInventoryView === 'product_details') {
+    currentDataset = [...inventoryProductDetailsData];
+  } else {
+    currentDataset = [...inventoryData];
+  }
+}
+
+function openInventoryProductDetails(productId, productName) {
+  currentModule = 'inventory';
+  currentInventoryView = 'product_details';
+  selectedInventoryProductId = productId || 'inv-1';
+  selectedInventoryProductName = productName || 'Product Description';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Product Details');
+}
+
+function renderInventoryToolbar() {
+  const toolbar = document.getElementById('worklistToolbar') || document.getElementById('pageToolbar');
+  if (!toolbar) return;
+
+  if (currentInventoryView === 'product_details') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+        <button type="button" class="toolbar-icon-btn" id="btnInventorySigma" title="Summation" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+          <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="display: block; object-fit: contain;">
+        </button>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+      </div>
+    `;
+    return;
+  }
+
+  toolbar.innerHTML = `
+    <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+      <button type="button" class="toolbar-icon-btn" id="btnInventorySigma" title="Summation" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+        <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="display: block; object-fit: contain;">
+      </button>
+    </div>
+    <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+    </div>
+  `;
+}
+
+function renderInventoryTableHead() {
+  const thead = document.getElementById('worklistTableHead');
+  if (!thead) return;
+
+  if (currentInventoryView === 'product_details') {
+    thead.innerHTML = `
+      <tr class="master-view-header inventory-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Invoice No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceNo'] ? 'has-active-filter' : ''}" data-filter-col="invoiceNo" title="Filter Invoice No">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Vendor Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Doc Date</span>
+        </th>
+        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Qty Doc</span>
+        </th>
+        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Qty Stock</span>
+        </th>
+        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Qty Total</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Purchase Price</span>
+        </th>
+        <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Transportation</span>
+        </th>
+        <th style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Unloading & Other</span>
+        </th>
+        <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Stock Price</span>
+        </th>
+        <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>New Price</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  thead.innerHTML = `
+    <tr class="master-view-header inventory-view-header">
+      <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Product Description</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['productDescription'] ? 'has-active-filter' : ''}" data-filter-col="productDescription" title="Filter Product Description">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>WH Code</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['whCode'] ? 'has-active-filter' : ''}" data-filter-col="whCode" title="Filter WH Code">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Product Head</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['productHead'] ? 'has-active-filter' : ''}" data-filter-col="productHead" title="Filter Product Head">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Product Type</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['productType'] ? 'has-active-filter' : ''}" data-filter-col="productType" title="Filter Product Type">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <span>Uom</span>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <span>Qty</span>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <span>Stock Price</span>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <span>Stock Value</span>
+      </th>
+    </tr>
+  `;
+  rebindFilterButtons();
+}
+
+function renderInventoryFooter() {
+  const footer = document.getElementById('worklistFooterBar');
+  if (!footer) return;
+  footer.innerHTML = '';
+  footer.style.display = 'none';
 }
 
 // ==========================================================================
@@ -4684,11 +5021,13 @@ function applyFiltersAndRender() {
   }
 
   if (filteredDataset.length === 0) {
-    const colSpan = currentModule === 'projects'
-      ? 14
-      : (currentModule === 'indus_towers'
-        ? (currentIndusSubpage === 'projects' ? 8 : 10)
-        : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10)));
+    const colSpan = currentModule === 'inventory'
+      ? 8
+      : (currentModule === 'projects'
+        ? 14
+        : (currentModule === 'indus_towers'
+          ? (currentIndusSubpage === 'projects' ? 8 : 10)
+          : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10))));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -5308,7 +5647,9 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.date || ''}</td>
-          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #000000; font-weight: 400;">${row.activity || ''}</td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px;">
+            <a href="#" class="req-link td-link-blue" onclick="showToast('Activity: ${(row.activity || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500;">${row.activity || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.status || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.ptwType || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.ptwNumber || ''}</td>
@@ -5420,7 +5761,11 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch;">
-            <a href="#" class="td-link-blue" onclick="openProjectDetailPage('${row.id}', '${row.customer}'); return false;" style="color: #2563eb; font-weight: 500; text-decoration: underline;">${row.customer || ''}</a>
+            ${row.customer === 'Indus' ? `
+              <a href="#" class="td-link-blue" onclick="openProjectDetailPage('${row.id}', '${row.customer}'); return false;" style="color: #2563eb; font-weight: 500; text-decoration: underline;">${row.customer || ''}</a>
+            ` : `
+              <span style="color: #1e293b; font-weight: 400;">${row.customer || ''}</span>
+            `}
           </td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; line-height: 1.3;">${row.projectId || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch;">${row.poNo || ''}</td>
@@ -5435,6 +5780,39 @@ function applyFiltersAndRender() {
           <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.pendingWith || ''}</td>
           <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.supportRequired || ''}</td>
           <td style="width: 30ch; min-width: 30ch; max-width: 30ch;">${row.pendingWith2 || ''}</td>
+        </tr>
+      `).join('');
+    }
+  } else if (currentModule === 'inventory') {
+    if (currentInventoryView === 'product_details') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="inventory-data-row" data-row-id="${row.id}">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 500;">${row.invoiceNo || ''}</td>
+          <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; padding: 10px 14px;">${row.vendorName || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.docDate || ''}</td>
+          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px;">${row.qtyDoc || ''}</td>
+          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px;">${row.qtyStock || ''}</td>
+          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px;">${row.qtyTotal || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.purchasePrice || ''}</td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.transportation || ''}</td>
+          <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px;">${row.unloadingOther || ''}</td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.stockPrice || ''}</td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.newPrice || ''}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="inventory-data-row" data-row-id="${row.id}">
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">
+            <a href="#" onclick="openInventoryProductDetails('${row.id}', '${(row.productDescription || '').replace(/'/g, "\\'")}'); return false;" style="color: #0d6efd; text-decoration: underline; cursor: pointer; font-weight: 600;">${row.productDescription || ''}</a>
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.whCode || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.productHead || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.productType || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px;">${row.uom || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.qty || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.stockPrice || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.stockValue || ''}</td>
         </tr>
       `).join('');
     }

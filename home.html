@@ -2781,29 +2781,22 @@
             <div class="project-info-card-box" style="margin-top: 18px;">
               <!-- Row 1: 4 input specs -->
               <div
-                style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 20px; align-items: center; margin-bottom: 22px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower
-                    Type</span>
-                  <input type="text" class="project-info-field-input" readonly
-                    style="width: 100px; text-align: center;">
+                style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 36px; row-gap: 20px; align-items: center; margin-bottom: 22px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <span style="min-width: 85px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Type</span>
+                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
                 </div>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower
-                    Height</span>
-                  <input type="text" class="project-info-field-input" readonly
-                    style="width: 100px; text-align: center;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <span style="min-width: 95px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Height</span>
+                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
                 </div>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">SBC</span>
-                  <input type="text" class="project-info-field-input" readonly
-                    style="width: 100px; text-align: center;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <span style="min-width: 45px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">SBC</span>
+                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
                 </div>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Wind
-                    Speed</span>
-                  <input type="text" class="project-info-field-input" readonly
-                    style="width: 100px; text-align: center;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <span style="min-width: 85px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Wind Speed</span>
+                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
                 </div>
               </div>
 
@@ -3136,7 +3129,7 @@
                     Receipt #</th>
                   <th
                     style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
-                    Received Amount</th>
+                    Paid Amount</th>
                 </tr>
               </thead>
               <tbody id="tblPaymentReceiptBody">
@@ -5647,19 +5640,19 @@
 
         <!-- Expenses Summary Modal Tab (Triggered by clicking blue Summation amount in Project Expenses toolbar) -->
         <div class="side-form-card side-contact-popup" id="expensesSummaryModal"
-          style="display: none; width: 1080px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 1360px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <div class="side-form-title-badge" id="lblExpensesSummaryTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
-              Expenses Summarry</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              Expenses Summary</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseExpensesSummaryModal"
                 onclick="closeExpensesSummaryModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+          <div class="contact-table-wrap" style="padding: 16px 28px 24px 28px; overflow-x: auto;">
             <table class="contact-custom-table" id="tblExpensesSummaryPopup"
               style="width: 100%; table-layout: fixed; border-collapse: collapse;">
               <thead>
@@ -6110,15 +6103,17 @@
         <div class="side-form-card side-contact-popup" id="dprAttendanceModal"
           style="display: none; width: 840px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
-            <div class="side-form-title-badge" id="lblDprAttendanceTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
-              Attendance</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px; display: flex; align-items: center; gap: 14px;">
-              <img src="icons/summation.svg" alt="Summation" style="width: 22px; height: 22px; display: block; object-fit: contain;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div class="side-form-title-badge" id="lblDprAttendanceTitle"
+                style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+                Attendance</div>
+              <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Attendance">
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseDprAttendanceModal"
                 onclick="closeDprAttendanceModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
             </div>
           </div>
           <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
@@ -6182,22 +6177,79 @@
           </div>
         </div>
 
-        <!-- DPR Documents Modal Tab (Triggered by clicking Documents icon in DPR toolbar) -->
+        <!-- DPR Documents Modal Tab (Document Type, Document Details, Document Name) -->
         <div class="side-form-card side-contact-popup" id="dprDocumentsModal"
-          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 620px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <div class="side-form-title-badge" id="lblDprDocumentsTitle"
               style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
               Documents</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseDprDocumentsModal"
                 onclick="closeDprDocumentsModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 16px 20px 20px 20px; overflow-x: auto;">
             <table class="contact-custom-table" id="tblDprDocumentsPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Document Type</span>
+                      <span style="opacity: 0.85; font-size: 10px; cursor: pointer;">&#9660;</span>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Document Details</span>
+                  </th>
+                  <th
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Document Name</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDprDocuments">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Site Survey</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Pre-Installation</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">SR_2026_01.pdf</a></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Soil Test</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Geotechnical</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">ST_Report_B.pdf</a></td>
+                </tr>
+                <tr>
+                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Topography</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Elevation Map</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">TOPO_Map.dwg</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DPR Survey Report Modal Tab (Description, Observation, Remarks, Photo) -->
+        <div class="side-form-card side-contact-popup" id="dprSurveyReportModal"
+          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="side-form-title-badge" id="lblDprSurveyReportTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              Survey Report</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseDprSurveyReportModal"
+                onclick="closeDprSurveyReportModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 16px 20px 20px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblDprSurveyReportPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
                 <tr class="master-view-header">
@@ -6232,7 +6284,7 @@
                   </th>
                 </tr>
               </thead>
-              <tbody id="tbodyDprDocuments">
+              <tbody id="tbodyDprSurveyReport">
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                   <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Site Safety Inspection Report</td>
                   <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Yes</td>
@@ -6253,63 +6305,6 @@
                   <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">No</td>
                   <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Pending lab compression test</td>
                   <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">View</a></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- DPR Survey Report Modal Tab (Triggered by clicking Summary Review icon in DPR toolbar) -->
-        <div class="side-form-card side-contact-popup" id="dprSurveyReportModal"
-          style="display: none; width: 560px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
-          <div class="side-form-header"
-            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
-            <div class="side-form-title-badge" id="lblDprSurveyReportTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
-              Survey Report</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
-              <button type="button" class="side-form-close-btn" id="btnCloseDprSurveyReportModal"
-                onclick="closeDprSurveyReportModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
-            </div>
-          </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
-            <table class="contact-custom-table" id="tblDprSurveyReportPopup"
-              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-              <thead>
-                <tr class="master-view-header">
-                  <th
-                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <span>Document Type</span>
-                      <span style="opacity: 0.85; font-size: 10px; cursor: pointer;">&#9660;</span>
-                    </div>
-                  </th>
-                  <th
-                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <span>Document Details</span>
-                  </th>
-                  <th
-                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <span>Document Name</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody id="tbodyDprSurveyReport">
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Site Survey</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Pre-Installation</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">SR_2026_01.pdf</a></td>
-                </tr>
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Soil Test</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Geotechnical</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">ST_Report_B.pdf</a></td>
-                </tr>
-                <tr>
-                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Topography</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Elevation Map</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">TOPO_Map.dwg</a></td>
                 </tr>
               </tbody>
             </table>
@@ -6538,7 +6533,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=167"></script>
+  <script src="assets/js/home.js?v=174"></script>
 </body>
 
 </html>

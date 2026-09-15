@@ -6052,6 +6052,427 @@
           </div>
         </div>
 
+        <!-- DPR Members Modal Tab (Triggered by clicking Contact icon in DPR toolbar) -->
+        <div class="side-form-card side-contact-popup" id="dprMembersModal"
+          style="display: none; width: 620px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblDprMembersTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              Members</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseDprMembersModal"
+                onclick="closeDprMembersModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+            <table class="contact-custom-table" id="tblDprMembersPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Name</span>
+                  </th>
+                  <th
+                    style="width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Designation</span>
+                  </th>
+                  <th
+                    style="width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Status</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDprMembers">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Rajesh Kumar</td>
+                  <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Site Engineer</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Active</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Suresh Prabhu</td>
+                  <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Project Lead</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Active</td>
+                </tr>
+                <tr>
+                  <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Manoj Verma</td>
+                  <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Technician</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Active</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DPR Attendance Modal Tab (Triggered by clicking Attendance icon in DPR toolbar) -->
+        <div class="side-form-card side-contact-popup" id="dprAttendanceModal"
+          style="display: none; width: 840px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblDprAttendanceTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+              Attendance</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px; display: flex; align-items: center; gap: 14px;">
+              <img src="icons/summation.svg" alt="Summation" style="width: 22px; height: 22px; display: block; object-fit: contain;">
+              <button type="button" class="side-form-close-btn" id="btnCloseDprAttendanceModal"
+                onclick="closeDprAttendanceModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+            <table class="contact-custom-table" id="tblDprAttendancePopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 30ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Employee Name</span>
+                  </th>
+                  <th
+                    style="width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Date</span>
+                  </th>
+                  <th
+                    style="width: 9ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Check-IN</span>
+                  </th>
+                  <th
+                    style="width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Check-Out</span>
+                  </th>
+                  <th
+                    style="width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Total Hrs</span>
+                  </th>
+                  <th
+                    style="width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Salary</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDprAttendance">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Rajesh Kumar</td>
+                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">28/08/2026</td>
+                  <td style="width: 9ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">09:00</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">18:00</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">9.0</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">1,200</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Suresh Prabhu</td>
+                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">28/08/2026</td>
+                  <td style="width: 9ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">09:30</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">18:30</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">9.0</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">1,500</td>
+                </tr>
+                <tr>
+                  <td style="width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Manoj Verma</td>
+                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">28/08/2026</td>
+                  <td style="width: 9ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">09:15</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">17:45</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">8.5</td>
+                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">950</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DPR Documents Modal Tab (Triggered by clicking Documents icon in DPR toolbar) -->
+        <div class="side-form-card side-contact-popup" id="dprDocumentsModal"
+          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblDprDocumentsTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              Documents</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseDprDocumentsModal"
+                onclick="closeDprDocumentsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblDprDocumentsPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2"
+                    style="width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Description</span>
+                      <span style="opacity: 0.85; font-size: 10px; cursor: pointer;">&#9660;</span>
+                    </div>
+                  </th>
+                  <th colspan="2"
+                    style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 6px 8px;">
+                    <span>Observation</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Remarks</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Photo</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 6px 8px;">
+                    <span>Yes</span>
+                  </th>
+                  <th
+                    style="width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 6px 8px;">
+                    <span>No</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDprDocuments">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Site Safety Inspection Report</td>
+                  <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Yes</td>
+                  <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">-</td>
+                  <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">All safety parameters verified</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">View</a></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Material Quality Check Sheet</td>
+                  <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Yes</td>
+                  <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">-</td>
+                  <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Inspected by QC lead</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">View</a></td>
+                </tr>
+                <tr>
+                  <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Foundation Concrete Test Report</td>
+                  <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">-</td>
+                  <td style="width: 10ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">No</td>
+                  <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Pending lab compression test</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">View</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DPR Survey Report Modal Tab (Triggered by clicking Summary Review icon in DPR toolbar) -->
+        <div class="side-form-card side-contact-popup" id="dprSurveyReportModal"
+          style="display: none; width: 560px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblDprSurveyReportTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              Survey Report</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseDprSurveyReportModal"
+                onclick="closeDprSurveyReportModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblDprSurveyReportPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Document Type</span>
+                      <span style="opacity: 0.85; font-size: 10px; cursor: pointer;">&#9660;</span>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Document Details</span>
+                  </th>
+                  <th
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Document Name</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDprSurveyReport">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Site Survey</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Pre-Installation</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">SR_2026_01.pdf</a></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Soil Test</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Geotechnical</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">ST_Report_B.pdf</a></td>
+                </tr>
+                <tr>
+                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Topography</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Elevation Map</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">TOPO_Map.dwg</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BOQ WCC Modal Tab (Triggered by clicking WCC icon in BOQ toolbar) -->
+        <div class="side-form-card side-contact-popup" id="boqWccModal"
+          style="display: none; width: 460px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center;">
+            <div class="side-form-title-badge" id="lblBoqWccTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 10px 28px; margin: 0;">
+              WCC</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 24px;">
+              <img src="icons/summation.svg" alt="Summation" style="width: 22px; height: 22px; display: block; object-fit: contain;">
+              <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">11,00,000.00</span>
+            </div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseBoqWccModal"
+                onclick="closeBoqWccModal()" aria-label="Close"
+                style="color: #d62d20; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="wcc-modal-body" style="padding: 20px 20px 24px 20px;">
+            <!-- 1. WCC No -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">WCC No</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">1234567891</div>
+            </div>
+            <!-- 2. Submission Date -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Submission Date</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">15 - 08 - 2026</div>
+            </div>
+            <!-- 3. Approved Date -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Approved Date</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">15 - 08 - 2026</div>
+            </div>
+            <!-- 4. Receipt No -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Receipt No</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">1234567891</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOQ Invoice Modal Tab (Triggered by clicking Invoice icon in BOQ toolbar) -->
+        <div class="side-form-card side-contact-popup" id="boqInvoiceModal"
+          style="display: none; width: 460px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center;">
+            <div class="side-form-title-badge" id="lblBoqInvoiceTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 10px 28px; margin: 0;">
+              Invoice</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 18px;">
+              <img src="icons/summation.svg" alt="Summation" style="width: 22px; height: 22px; display: block; object-fit: contain;">
+              <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">11,00,000.00</span>
+            </div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="tool-btn" id="btnBoqInvoicePdf" title="PDF Upload / View" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Invoice PDF opened'); return false;">
+                <img src="icons/PDF Upload.svg" alt="PDF" style="width: 26px; height: 26px; display: block; object-fit: contain;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseBoqInvoiceModal"
+                onclick="closeBoqInvoiceModal()" aria-label="Close"
+                style="color: #d62d20; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="invoice-modal-body" style="padding: 20px 20px 24px 20px;">
+            <!-- 1. Invoice No -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Invoice No</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">
+                <a href="#" style="color: #0454e4; text-decoration: underline; font-weight: 600;" onclick="showToast('Viewing Invoice details'); return false;">IN-2035 / 26 - 27</a>
+              </div>
+            </div>
+            <!-- 2. Invoice Date -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Invoice Date</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">15 - 08 - 2026</div>
+            </div>
+            <!-- 3. Due Date -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Due Date</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">14 - 09 - 2026</div>
+            </div>
+            <!-- 4. Payment Date -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Payment Date</label>
+              <div style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; display: flex; align-items: center; font-size: 1.05rem; font-weight: 600; color: #334155; font-family: inherit;">14 - 09 - 2026</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- E - Mail Approval Modal Tab (Triggered by clicking Approval icon in Additional Approvals toolbar) -->
+        <div class="side-form-card side-contact-popup" id="emailApprovalModal"
+          style="display: none; width: 920px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblEmailApprovalTitle"
+              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+              E - Mail Approval</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseEmailApprovalModal"
+                onclick="closeEmailApprovalModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblEmailApprovalPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Name</span>
+                  </th>
+                  <th
+                    style="width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Designation</span>
+                  </th>
+                  <th
+                    style="width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Mobile #</span>
+                  </th>
+                  <th
+                    style="width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>E - Mail</span>
+                  </th>
+                  <th
+                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Status</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyEmailApproval">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Rajesh Kumar</td>
+                  <td style="width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Site Engineer</td>
+                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">9876543210</td>
+                  <td style="width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">rajesh.k@nexus.com</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Active</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Suresh Prabhu</td>
+                  <td style="width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Project Lead</td>
+                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">9812345678</td>
+                  <td style="width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">suresh.p@nexus.com</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Active</td>
+                </tr>
+                <tr>
+                  <td style="width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Manoj Verma</td>
+                  <td style="width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Operations Manager</td>
+                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">9765432109</td>
+                  <td style="width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">manoj.v@nexus.com</td>
+                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Active</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -6117,7 +6538,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=141"></script>
+  <script src="assets/js/home.js?v=160"></script>
 </body>
 
 </html>

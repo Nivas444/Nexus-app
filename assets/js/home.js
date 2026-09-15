@@ -984,37 +984,192 @@ const projectInfraData = [
 // Project Details -> DPR Sub-Page Dataset (Matching User Mockup)
 const projectDprData = [
   {
-    id: "dpr-2",
+    id: "dpr-1",
     date: "14/09/2026",
-    activity: "Civil Foundation & Tower Erection Stage 1",
+    activity: "Civil Foundation & Tower",
     status: "Approved",
-    ptwNo: "PTW-88291",
+    ptwType: "Height",
+    ptwNumber: "PTW-88291",
     ptwStatus: "Closed",
-    imapCheckIn: "09:15 AM",
-    imapCheckOut: "06:30 PM",
+    checkIn: "09:15 AM",
+    checkOut: "06:30 PM",
+    photoStart: "IMG_001.jpg",
+    photoEnd: "IMG_002.jpg",
     updateBy: "Rajesh Kumar (FE)"
   },
   {
-    id: "dpr-3",
+    id: "dpr-2",
     date: "13/09/2026",
-    activity: "DG Set Cabling and Earth Resistance Testing",
+    activity: "DG Set Cabling & Earth",
     status: "Completed",
-    ptwNo: "PTW-88285",
+    ptwType: "Electrical",
+    ptwNumber: "PTW-88285",
     ptwStatus: "Closed",
-    imapCheckIn: "08:45 AM",
-    imapCheckOut: "05:15 PM",
+    checkIn: "08:45 AM",
+    checkOut: "05:15 PM",
+    photoStart: "IMG_003.jpg",
+    photoEnd: "IMG_004.jpg",
     updateBy: "Suresh Prabhu (Lead)"
   },
   {
-    id: "dpr-4",
+    id: "dpr-3",
     date: "12/09/2026",
-    activity: "Battery Bank & Solar Hybrid Controller Setup",
+    activity: "Battery Bank & Controller",
     status: "In Progress",
-    ptwNo: "PTW-88270",
+    ptwType: "General",
+    ptwNumber: "PTW-88270",
     ptwStatus: "Active",
-    imapCheckIn: "09:30 AM",
-    imapCheckOut: "07:00 PM",
+    checkIn: "09:30 AM",
+    checkOut: "07:00 PM",
+    photoStart: "IMG_005.jpg",
+    photoEnd: "IMG_006.jpg",
     updateBy: "Manoj Verma (Tech)"
+  }
+];
+
+// Project Details -> BOQ Sub-Page Dataset (Matching User Mockup)
+const projectBoqData = [
+  {
+    id: "boq-1",
+    lineNo: "1",
+    itemCode: "CIV-FND-001",
+    itemDescription: "RCC Foundation Work (M25 Grade)",
+    uom: "Cu.m",
+    qty: "45.00",
+    rate: "6,500.00",
+    amount: "2,92,500.00"
+  },
+  {
+    id: "boq-2",
+    lineNo: "2",
+    itemCode: "CIV-PLT-002",
+    itemDescription: "Plinth & Boundary Wall Construction",
+    uom: "R.mtr",
+    qty: "120.00",
+    rate: "2,100.00",
+    amount: "2,52,000.00"
+  },
+  {
+    id: "boq-3",
+    lineNo: "3",
+    itemCode: "ELE-CBL-003",
+    itemDescription: "Electrical Power Cable Laying 4C x 50 sq.mm",
+    uom: "Mtr",
+    qty: "350.00",
+    rate: "480.00",
+    amount: "1,68,000.00"
+  },
+  {
+    id: "boq-4",
+    lineNo: "4",
+    itemCode: "TWR-MST-004",
+    itemDescription: "40M Galvanized Tubular Tower Erection & Painting",
+    uom: "Set",
+    qty: "1.00",
+    rate: "3,87,500.00",
+    amount: "3,87,500.00"
+  }
+];
+
+// Project Additional Approvals Dataset
+const projectApprovalsData = [
+  {
+    id: "appr-1",
+    selected: false,
+    requestDate: "15 - 08 - 2026",
+    approvedDate: "18 - 08 - 2026",
+    ageing: "3 Days",
+    subject: "Additional DG Capacity Approval",
+    status: "Approved"
+  },
+  {
+    id: "appr-2",
+    selected: false,
+    requestDate: "10 - 08 - 2026",
+    approvedDate: "-",
+    ageing: "5 Days",
+    subject: "Additional Budget for Civil Work",
+    status: "Pending"
+  },
+  {
+    id: "appr-3",
+    selected: false,
+    requestDate: "05 - 08 - 2026",
+    approvedDate: "08 - 08 - 2026",
+    ageing: "3 Days",
+    subject: "Overtime Labour Approval",
+    status: "Approved"
+  },
+  {
+    id: "appr-4",
+    selected: false,
+    requestDate: "01 - 08 - 2026",
+    approvedDate: "-",
+    ageing: "14 Days",
+    subject: "Extra Material Purchase Approval",
+    status: "Pending"
+  }
+];
+
+// Project Service Vendor Dataset
+const projectServiceVendorData = [
+  {
+    id: "sv-1",
+    serviceVendorName: "Sri Balaji Electricals",
+    workType: "Electrical",
+    basic: "2,50,000.00",
+    gst: "45,000.00",
+    totalAmount: "2,95,000.00",
+    tdsDeduction: "5,000.00",
+    paidAmount: "2,90,000.00",
+    paidDate: "25 - 08 - 2026"
+  },
+  {
+    id: "sv-2",
+    serviceVendorName: "Apex Civil Constructions",
+    workType: "Civil",
+    basic: "4,80,000.00",
+    gst: "86,400.00",
+    totalAmount: "5,66,400.00",
+    tdsDeduction: "9,600.00",
+    paidAmount: "5,56,800.00",
+    paidDate: "28 - 08 - 2026"
+  }
+];
+
+// Project Service Vendor Detail Items Dataset
+const projectServiceVendorItemsData = [
+  {
+    id: "sv-item-1",
+    itemDescription: "Supply & Installation of 25kVA DG Set Soundproof Canopy with Base Frame",
+    uom: "Nos",
+    qty: "1.00",
+    rate: "4,50,000.00",
+    amount: "4,50,000.00"
+  },
+  {
+    id: "sv-item-2",
+    itemDescription: "Laying and Termination of 4C x 70 sq.mm Armoured Copper Power Cable",
+    uom: "Mtr",
+    qty: "120.00",
+    rate: "2,500.00",
+    amount: "3,00,000.00"
+  },
+  {
+    id: "sv-item-3",
+    itemDescription: "Chemical Earthing System with Copper Bonded Earth Electrodes & Chamber",
+    uom: "Set",
+    qty: "4.00",
+    rate: "35,000.00",
+    amount: "1,40,000.00"
+  },
+  {
+    id: "sv-item-4",
+    itemDescription: "Automatic Mains Failure (AMF) Control Panel with Auto Changeover Switch",
+    uom: "Nos",
+    qty: "1.00",
+    rate: "2,10,000.00",
+    amount: "2,10,000.00"
   }
 ];
 
@@ -1030,6 +1185,7 @@ let selectedProjectCustomer = 'Altis';
 let selectedProjectId = 'proj-1';
 let selectedSupplyCustomerId = 'proj-sup-1';
 let selectedSupplyCustomerName = 'Customer Name';
+let selectedServiceVendorName = 'Service Vendor Name';
 let currentProjectDetailTab = ''; // 'expenses', 'materials', 'infra', 'dpr', 'boq', 'additional_approve', 'service_vendor', 'member'
 
 let currentDataset = [...poData];
@@ -1070,6 +1226,15 @@ document.addEventListener('DOMContentLoaded', () => {
       currentProjectsView = 'project_infra';
     } else if (viewParam === 'project_dpr') {
       currentProjectsView = 'project_dpr';
+    } else if (viewParam === 'project_boq') {
+      currentProjectsView = 'project_boq';
+    } else if (viewParam === 'project_approvals' || viewParam === 'project_additional_approve') {
+      currentProjectsView = 'project_approvals';
+    } else if (viewParam === 'project_service_vendor' || viewParam === 'service_vendor') {
+      currentProjectsView = 'project_service_vendor';
+    } else if (viewParam === 'project_service_vendor_detail' || viewParam === 'service_vendor_detail') {
+      currentProjectsView = 'project_service_vendor_detail';
+      selectedServiceVendorName = params.get('vendor') || 'Service Vendor Name';
     } else if (viewParam === 'supply_details') {
       currentProjectsSubpage = 'supply';
       currentProjectsView = 'supply_details';
@@ -1188,6 +1353,28 @@ function updateURL() {
       url.searchParams.delete('subpage');
       url.searchParams.delete('tab');
       url.searchParams.delete('customer');
+    } else if (currentProjectsView === 'project_boq') {
+      url.searchParams.set('view', 'project_boq');
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
+    } else if (currentProjectsView === 'project_approvals') {
+      url.searchParams.set('view', 'project_approvals');
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
+    } else if (currentProjectsView === 'project_service_vendor') {
+      url.searchParams.set('view', 'project_service_vendor');
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
+      url.searchParams.delete('vendor');
+    } else if (currentProjectsView === 'project_service_vendor_detail') {
+      url.searchParams.set('view', 'project_service_vendor_detail');
+      url.searchParams.set('vendor', selectedServiceVendorName);
+      url.searchParams.delete('subpage');
+      url.searchParams.delete('tab');
+      url.searchParams.delete('customer');
     } else if (currentProjectsView === 'supply_details') {
       url.searchParams.set('subpage', 'supply');
       url.searchParams.set('view', 'supply_details');
@@ -1224,7 +1411,10 @@ function updateURL() {
 // ==========================================================================
 function goBackSubpage() {
   if (currentModule === 'projects') {
-    if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr') {
+    if (currentProjectsView === 'project_service_vendor_detail') {
+      currentProjectsView = 'project_service_vendor';
+      showToast('Returned to Service Vendor');
+    } else if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor') {
       currentProjectsView = 'details';
       showToast('Returned to Project Details');
     } else if (currentProjectsView === 'supply_details') {
@@ -1405,7 +1595,13 @@ function renderApp() {
             <div class="banner-right-title" style="font-weight: 700; color: #ffffff; font-size: 1.05rem; text-decoration: underline;">Invoice # : 21001</div>
           </div>
         `;
-      } else if (currentProjectsView === 'details' || currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr') {
+      } else if (currentProjectsView === 'project_service_vendor_detail') {
+        bannerTitle.innerHTML = `
+          <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: flex-start; align-items: center; padding: 0 4px;">
+            <div style="font-weight: 700; color: #ffffff; font-size: 1.15rem;">${selectedServiceVendorName || 'Service Vendor Name'}</div>
+          </div>
+        `;
+      } else if (currentProjectsView === 'details' || currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor') {
         bannerTitle.innerHTML = `
           <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
@@ -2754,6 +2950,34 @@ window.closeBoqMaterialDetailModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+window.openEmailApprovalModal = function(titleText) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'emailApprovalModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblEmailApprovalTitle');
+  if (titleBadge && titleText) {
+    titleBadge.textContent = titleText;
+  }
+
+  const modal = document.getElementById('emailApprovalModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeEmailApprovalModal = function() {
+  const modal = document.getElementById('emailApprovalModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
 window.openProjectDetailPage = function(projId, customerName) {
   currentModule = 'projects';
   currentProjectsView = 'details';
@@ -2802,6 +3026,50 @@ window.openProjectDprPage = function() {
   showToast('Opened Project DPR Page');
 };
 
+window.openProjectBoqPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_boq';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Project BOQ Page');
+};
+
+window.openProjectApprovalsPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_approvals';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Additional Approvals Page');
+};
+
+window.openProjectServiceVendorPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_service_vendor';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Service Vendor Page');
+};
+
+window.openServiceVendorItems = function(vendorName) {
+  currentModule = 'projects';
+  currentProjectsView = 'project_service_vendor_detail';
+  selectedServiceVendorName = vendorName || 'Service Vendor Name';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened ${selectedServiceVendorName} Items`);
+};
+
+window.toggleApprovalRowSelect = function(id) {
+  const item = projectApprovalsData.find(d => d.id === id);
+  if (item) {
+    item.selected = !item.selected;
+  }
+};
+
 window.openSupplyCustomerDetailsPage = function(customerId, customerName) {
   currentModule = 'projects';
   currentProjectsSubpage = 'supply';
@@ -2823,6 +3091,12 @@ function loadProjectsDataset() {
     currentDataset = [...projectInfraData];
   } else if (currentProjectsView === 'project_dpr') {
     currentDataset = [...projectDprData];
+  } else if (currentProjectsView === 'project_boq') {
+    currentDataset = [...projectBoqData];
+  } else if (currentProjectsView === 'project_approvals') {
+    currentDataset = [...projectApprovalsData];
+  } else if (currentProjectsView === 'project_service_vendor') {
+    currentDataset = [...projectServiceVendorData];
   } else if (currentProjectsView === 'supply_details') {
     const items = supplyCustomerDetailData[selectedSupplyCustomerId] || supplyCustomerDetailData['default'] || [];
     currentDataset = [...items];
@@ -2838,19 +3112,109 @@ function loadProjectsDataset() {
 function renderProjectsToolbar() {
   const toolbar = document.getElementById('worklistToolbar') || document.getElementById('pageToolbar');
   if (!toolbar) return;
+  if (currentProjectsView === 'project_service_vendor') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'details';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Project Details');
+    });
+    return;
+  }
+  if (currentProjectsView === 'project_approvals') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnApprovalsChart" title="E - Mail Approval" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openEmailApprovalModal('E - Mail Approval'); return false;">
+          <img src="icons/approval.svg" alt="Approval" style="width: 30px; height: 30px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'details';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Project Details');
+    });
+    toolbar.querySelector('#btnApprovalsChart')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openEmailApprovalModal('E - Mail Approval');
+    });
+    return;
+  }
+  if (currentProjectsView === 'project_boq') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <img src="icons/summation.svg" alt="Summation" style="width: 26px; height: 26px; display: block; object-fit: contain;">
+          <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">11,00,000.00</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+          <img src="icons/Payable.svg" alt="Payable" style="width: 26px; height: 26px; display: block; object-fit: contain;">
+          <span style="color: #d62d20; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">11,00,000.00</span>
+        </div>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnBoqWcc" title="WCC / Green Invoice" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openBoqWccModal(); return false;">
+          <img src="icons/wcc.svg" alt="WCC" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnBoqInvoice" title="Invoice / Blue Invoice" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openBoqInvoiceModal(); return false;">
+          <img src="icons/invoice.svg" alt="Invoice" style="width: 32px; height: 32px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnBoqUploadCsv" title="Upload CSV / Excel" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerBoqFileUpload(); return false;">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentProjectsView = 'details';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Project Details');
+    });
+    toolbar.querySelector('#btnBoqWcc')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openBoqWccModal();
+    });
+    toolbar.querySelector('#btnBoqInvoice')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openBoqInvoiceModal();
+    });
+    toolbar.querySelector('#btnBoqUploadCsv')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      triggerBoqFileUpload();
+    });
+    return;
+  }
   if (currentProjectsView === 'project_dpr') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
       </div>
-      <div class="toolbar-right" style="display: flex; align-items: center; gap: 16px;">
-        <button type="button" class="tool-btn" id="btnDprContact" title="Contact" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
-          <img src="icons/Members.svg" alt="Contact" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnDprSurveyReport" title="Survey Report" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
+          <img src="icons/summary review.svg" alt="Survey Report" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
-        <button type="button" class="tool-btn" id="btnDprAttendance" title="Attendance" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+        <button type="button" class="tool-btn" id="btnDprContact" title="Members" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprMembersModal(); return false;">
+          <img src="icons/Members.svg" alt="Members" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnDprAttendance" title="Attendance" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprAttendanceModal(); return false;">
           <img src="icons/Attendance.svg" alt="Attendance" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
-        <button type="button" class="tool-btn" id="btnDprDocuments" title="Documents" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+        <button type="button" class="tool-btn" id="btnDprDocuments" title="Documents" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprDocumentsModal(); return false;">
           <img src="icons/Documents.svg" alt="Documents" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
@@ -2862,17 +3226,21 @@ function renderProjectsToolbar() {
       renderApp();
       showToast('Returned to Project Details');
     });
+    toolbar.querySelector('#btnDprSurveyReport')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openDprSurveyReportModal();
+    });
     toolbar.querySelector('#btnDprContact')?.addEventListener('click', (e) => {
       e.preventDefault();
-      showToast('Opened Members / Contact');
+      openDprMembersModal();
     });
     toolbar.querySelector('#btnDprAttendance')?.addEventListener('click', (e) => {
       e.preventDefault();
-      showToast('Opened Attendance');
+      openDprAttendanceModal();
     });
     toolbar.querySelector('#btnDprDocuments')?.addEventListener('click', (e) => {
       e.preventDefault();
-      showToast('Opened Documents');
+      openDprDocumentsModal();
     });
     return;
   }
@@ -3017,38 +3385,175 @@ function renderProjectsTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
 
-  if (currentProjectsView === 'project_dpr') {
+  if (currentProjectsView === 'project_service_vendor') {
     thead.innerHTML = `
       <tr class="master-view-header projects-view-header">
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
-          <span>Date</span>
-        </th>
-        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: flex-start; gap: 6px;">
-            <span>Activity</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['activity'] ? 'has-active-filter' : ''}" data-filter-col="activity" title="Filter Activity">&#9660;</button>
+        <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Service Vendor Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['serviceVendorName'] ? 'has-active-filter' : ''}" data-filter-col="serviceVendorName" title="Filter Service Vendor Name">&#9660;</button>
           </div>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Work Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['workType'] ? 'has-active-filter' : ''}" data-filter-col="workType" title="Filter Work Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Basic</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>GST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Total Amount</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>TDS Deduction</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Paid Amount</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Paid Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['paidDate'] ? 'has-active-filter' : ''}" data-filter-col="paidDate" title="Filter Paid Date">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentProjectsView === 'project_approvals') {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Select</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Request Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestDate'] ? 'has-active-filter' : ''}" data-filter-col="requestDate" title="Filter Request Date">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Approved Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['approvedDate'] ? 'has-active-filter' : ''}" data-filter-col="approvedDate" title="Filter Approved Date">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Ageing</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+          </div>
+        </th>
+        <th style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Subject</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['subject'] ? 'has-active-filter' : ''}" data-filter-col="subject" title="Filter Subject">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
         </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentProjectsView === 'project_boq') {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Line No</span>
+        </th>
+        <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Item Code</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemCode'] ? 'has-active-filter' : ''}" data-filter-col="itemCode" title="Filter Item Code">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Item Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemDescription'] ? 'has-active-filter' : ''}" data-filter-col="itemDescription" title="Filter Item Description">&#9660;</button>
+          </div>
+        </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
-          <span>PTW No</span>
+          <span>Uom</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
-          <span>PTW Status</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Qty</span>
         </th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
-          <span>I - Map Check In</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Rate</span>
         </th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
-          <span>I - Map Check Out</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Amount</span>
         </th>
-        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding-left: 12px;">
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentProjectsView === 'project_dpr') {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Date</span>
+        </th>
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding-left: 14px !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: flex-start; gap: 6px;">
+            <span>Activity</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['activity'] ? 'has-active-filter' : ''}" data-filter-col="activity" title="Filter Activity">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Status</span>
+        </th>
+        <th colspan="3" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>PTW</span>
+        </th>
+        <th colspan="2" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>I - Map</span>
+        </th>
+        <th colspan="2" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>Photo</span>
+        </th>
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle;">
           <span>Update By</span>
+        </th>
+      </tr>
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Type</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Number</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Status</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Check - In</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Check - Out</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Start</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>End</span>
         </th>
       </tr>
     `;
@@ -3157,7 +3662,7 @@ function renderProjectsTableHead() {
         <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
           <span>Qty</span>
         </th>
-        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 2px solid #ffffff !important;">
+        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
           <span>Amount</span>
         </th>
       </tr>
@@ -3285,7 +3790,7 @@ function renderProjectsFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
-  if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'supply_details') {
+  if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor' || currentProjectsView === 'supply_details') {
     footer.innerHTML = '';
     footer.style.display = 'none';
     return;
@@ -3337,6 +3842,18 @@ function renderProjectsFooter() {
         }
         if (tabKey === 'dpr') {
           openProjectDprPage();
+          return;
+        }
+        if (tabKey === 'boq') {
+          openProjectBoqPage();
+          return;
+        }
+        if (tabKey === 'additional_approve' || tabKey === 'approvals' || tabKey === 'additional_approvals') {
+          openProjectApprovalsPage();
+          return;
+        }
+        if (tabKey === 'service_vendor' || tabKey === 'service_vendors') {
+          openProjectServiceVendorPage();
           return;
         }
         if (currentProjectDetailTab !== tabKey) {
@@ -4689,19 +5206,64 @@ function applyFiltersAndRender() {
       }).join('');
     }
   } else if (currentModule === 'projects') {
-    if (currentProjectsView === 'project_dpr') {
+    if (currentProjectsView === 'project_service_vendor') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.serviceVendorName || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px;">${row.workType || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.basic || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.gst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.totalAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.tdsDeduction || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.paidAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.paidDate || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentProjectsView === 'project_approvals') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        const statusLower = (row.status || '').toLowerCase();
+        const isApproved = statusLower.includes('approved');
+        const isPending = statusLower.includes('pending');
+        const statusStyle = isApproved ? 'color: #008744; font-weight: 600;' : (isPending ? 'color: #d62d20; font-weight: 600;' : 'color: #1e293b; font-weight: 500;');
+        return `
+          <tr class="projects-data-row" data-row-id="${row.id}">
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 14px;">
+              <input type="checkbox" ${row.selected ? 'checked' : ''} onchange="toggleApprovalRowSelect('${row.id}')" style="cursor: pointer; width: 16px; height: 16px; accent-color: #2563eb;">
+            </td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.requestDate || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.approvedDate || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.ageing || ''}</td>
+            <td style="text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.subject || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; ${statusStyle}">${row.status || ''}</td>
+          </tr>
+        `;
+      }).join('');
+    } else if (currentProjectsView === 'project_boq') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="projects-data-row" data-row-id="${row.id}">
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.lineNo || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; padding: 10px 14px;">${row.itemCode || ''}</td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.itemDescription || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.uom || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.qty || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.rate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentProjectsView === 'project_dpr') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.date || ''}</td>
-          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500;">
-            <a href="#" class="req-link td-link-blue" onclick="showToast('Activity: ' + '${(row.activity || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">${row.activity || ''}</a>
-          </td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #000000; font-weight: 400;">${row.activity || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.status || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.ptwNo || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.ptwStatus || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.imapCheckIn || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.imapCheckOut || ''}</td>
-          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px;">${row.updateBy || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.ptwType || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.ptwNumber || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px;">${row.ptwStatus || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.checkIn || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.checkOut || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.photoStart || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.photoEnd || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; border-left: 1px solid #e2e8f0;">${row.updateBy || ''}</td>
         </tr>
       `).join('');
     } else if (currentProjectsView === 'project_infra') {
@@ -12182,6 +12744,172 @@ window.submitTransferDetails = function() {
 
 window.submitPoSupplier = function() {
   showToast('PO Details Submitted Successfully!');
+};
+
+window.openDprMembersModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'dprMembersModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('dprMembersModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeDprMembersModal = function() {
+  const modal = document.getElementById('dprMembersModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openDprAttendanceModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'dprAttendanceModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('dprAttendanceModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeDprAttendanceModal = function() {
+  const modal = document.getElementById('dprAttendanceModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openDprDocumentsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'dprDocumentsModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('dprDocumentsModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeDprDocumentsModal = function() {
+  const modal = document.getElementById('dprDocumentsModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openDprSurveyReportModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'dprSurveyReportModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('dprSurveyReportModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeDprSurveyReportModal = function() {
+  const modal = document.getElementById('dprSurveyReportModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.triggerBoqFileUpload = function() {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv';
+  fileInput.style.display = 'none';
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileName = file.name;
+      const ext = fileName.split('.').pop().toLowerCase();
+      if (ext !== 'csv' && ext !== 'xlsx' && ext !== 'xls') {
+        showToast('Invalid file format. Please select a .csv or .xlsx file');
+        return;
+      }
+      showToast(`File "${fileName}" uploaded successfully!`);
+    }
+  });
+
+  document.body.appendChild(fileInput);
+  fileInput.click();
+  setTimeout(() => {
+    if (document.body.contains(fileInput)) {
+      document.body.removeChild(fileInput);
+    }
+  }, 1000);
+};
+
+window.openBoqWccModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'boqWccModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('boqWccModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeBoqWccModal = function() {
+  const modal = document.getElementById('boqWccModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openBoqInvoiceModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'boqInvoiceModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('boqInvoiceModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeBoqInvoiceModal = function() {
+  const modal = document.getElementById('boqInvoiceModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
 };
 
 

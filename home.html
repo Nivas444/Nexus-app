@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=105">
+  <link rel="stylesheet" href="assets/css/home.css?v=106">
 </head>
 
 <body>
@@ -3129,7 +3129,7 @@
                     Receipt #</th>
                   <th
                     style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
-                    Paid Amount</th>
+                    Received Amount</th>
                 </tr>
               </thead>
               <tbody id="tblPaymentReceiptBody">
@@ -5606,7 +5606,7 @@
                   </th>
                   <th
                     style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px; white-space: nowrap;">
-                    <span id="lblPaymentReceiptAmountCol">Paid Amount</span>
+                    <span id="lblPaymentReceiptAmountCol">Received Amount</span>
                   </th>
                 </tr>
               </thead>
@@ -6468,6 +6468,80 @@
           </div>
         </div>
 
+        <!-- Inventory Stock Price / Stock Ledger Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="inventoryStockLedgerModal"
+          style="display: none; width: 1200px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="side-form-title-badge" id="lblInventoryStockLedgerTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+              Product Description</div>
+            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseInventoryStockLedgerModal"
+                onclick="closeInventoryStockLedgerModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="master-custom-table" id="tblInventoryStockLedgerPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header inventory-stock-header">
+                  <th rowspan="2"
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Doc. Date</span> <span style="opacity: 0.8; font-size: 10px; margin-left: 4px;">&#9660;</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Doc. Type</span> <span style="opacity: 0.8; font-size: 10px; margin-left: 4px;">&#9660;</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Doc.No</span> <span style="opacity: 0.8; font-size: 10px; margin-left: 4px;">&#9660;</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>From / To</span> <span style="opacity: 0.8; font-size: 10px; margin-left: 4px;">&#9660;</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Uom</span>
+                  </th>
+                  <th colspan="3" class="th-qty-group"
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Qty</span>
+                  </th>
+                  <th rowspan="2" class="th-rate-col"
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Rate</span>
+                  </th>
+                  <th rowspan="2"
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Stock Value</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header inventory-stock-header">
+                  <th class="th-sub-qty"
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Stock</span>
+                  </th>
+                  <th class="th-sub-qty"
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Doc</span>
+                  </th>
+                  <th class="th-sub-qty"
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 10px 8px; white-space: nowrap;">
+                    <span>Balance</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyInventoryStockLedger">
+                <!-- Injected by home.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -6533,7 +6607,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=174"></script>
+  <script src="assets/js/home.js?v=180"></script>
 </body>
 
 </html>

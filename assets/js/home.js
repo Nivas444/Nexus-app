@@ -1301,10 +1301,102 @@ const inventoryStockLedgerData = [
   }
 ];
 
+// Purchase Dataset
+const purchaseModuleData = [
+  {
+    id: "pur-1",
+    prNo: "PR-2026-0891",
+    requestBy: "Nivas Kumar",
+    poNo: "PO-2026-1042",
+    supplierName: "Schneider Electric India Pvt Ltd",
+    poValue: "1,50,000.00",
+    invoiceNo: "INV-98231",
+    invoiceValue: "1,50,000.00",
+    paymentStatus: "Paid",
+    gstFilingStatus: "Filed"
+  },
+  {
+    id: "pur-2",
+    prNo: "PR-2026-0892",
+    requestBy: "Praveen Raj",
+    poNo: "PO-2026-1045",
+    supplierName: "D-Link India Limited",
+    poValue: "2,16,000.00",
+    invoiceNo: "INV-98232",
+    invoiceValue: "2,16,000.00",
+    paymentStatus: "Partial",
+    gstFilingStatus: "Pending"
+  },
+  {
+    id: "pur-3",
+    prNo: "PR-2026-0895",
+    requestBy: "Suresh Prabhu",
+    poNo: "PO-2026-1050",
+    supplierName: "CommScope Solutions India",
+    poValue: "3,80,000.00",
+    invoiceNo: "INV-98240",
+    invoiceValue: "3,80,000.00",
+    paymentStatus: "Unpaid",
+    gstFilingStatus: "Filed"
+  },
+  {
+    id: "pur-4",
+    prNo: "PR-2026-0898",
+    requestBy: "Manoj Verma",
+    poNo: "PO-2026-1058",
+    supplierName: "Polycab Wires & Cables Ltd",
+    poValue: "5,40,000.00",
+    invoiceNo: "INV-98255",
+    invoiceValue: "5,40,000.00",
+    paymentStatus: "Paid",
+    gstFilingStatus: "Filed"
+  },
+  {
+    id: "pur-5",
+    prNo: "PR-2026-0902",
+    requestBy: "Deepak Sharma",
+    poNo: "PO-2026-1064",
+    supplierName: "Havells India Enterprise",
+    poValue: "1,85,000.00",
+    invoiceNo: "INV-98261",
+    invoiceValue: "1,85,000.00",
+    paymentStatus: "Paid",
+    gstFilingStatus: "Filed"
+  }
+];
+
+// Purchase Supplier Line Items Dataset (Per PO / Supplier)
+const purchaseSupplierItemsData = {
+  "pur-1": [
+    { id: "psi-1", hsnCode: "8544", description: "Optical Fiber Cable 24 Core Armoured", uom: "Mtr", qty: "1,000", rate: "85.00", gst: "15,300.00", amount: "1,00,300.00" },
+    { id: "psi-2", hsnCode: "8536", description: "Schneider Electric Miniature Circuit Breaker 63A", uom: "Nos", qty: "20", rate: "1,850.00", gst: "6,660.00", amount: "43,660.00" },
+    { id: "psi-3", hsnCode: "8504", description: "Terminal Blocks & DIN Rail Mounts", uom: "Set", qty: "10", rate: "511.86", gst: "921.35", amount: "6,039.95" }
+  ],
+  "pur-2": [
+    { id: "psi-4", hsnCode: "8517", description: "D-Link 24 Port Gigabit Managed Switch", uom: "Nos", qty: "12", rate: "15,000.00", gst: "32,400.00", amount: "2,12,400.00" },
+    { id: "psi-5", hsnCode: "8544", description: "Cat6 UTP Patch Cord 2 Meter", uom: "Nos", qty: "60", rate: "50.85", gst: "549.15", amount: "3,600.00" }
+  ],
+  "pur-3": [
+    { id: "psi-6", hsnCode: "8517", description: "CommScope High Performance Antenna Mounts", uom: "Set", qty: "8", rate: "40,000.00", gst: "57,600.00", amount: "3,77,600.00" },
+    { id: "psi-7", hsnCode: "7326", description: "Galvanized Clamps & Hardware", uom: "Pcs", qty: "40", rate: "50.85", gst: "366.10", amount: "2,400.00" }
+  ],
+  "pur-4": [
+    { id: "psi-8", hsnCode: "8504", description: "Polycab 3-Phase Power Distribution Panel", uom: "Nos", qty: "2", rate: "42,000.00", gst: "15,120.00", amount: "99,120.00" },
+    { id: "psi-9", hsnCode: "8544", description: "Copper Armoured Cable 4CX16 Sqmm", uom: "Mtr", qty: "1,500", rate: "250.00", gst: "67,500.00", amount: "4,42,500.00" }
+  ],
+  "pur-5": [
+    { id: "psi-10", hsnCode: "8536", description: "Havells Industrial Switchgear & Isolator 100A", uom: "Nos", qty: "15", rate: "10,800.00", gst: "29,160.00", amount: "1,91,160.00" }
+  ]
+};
+
 // ==========================================================================
 // STATE MANAGEMENT (Default landing page: Worklist -> Payment)
 // ==========================================================================
-let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects', 'inventory'
+let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects', 'inventory', 'purchase'
+let currentPurchaseView = 'main'; // 'main' or 'supplier_detail'
+let selectedPurchaseSupplierId = 'pur-1';
+let selectedPurchaseSupplierName = 'Schneider Electric India Pvt Ltd';
+let selectedPurchasePoNo = 'PO-2026-1042';
 let currentWorklistView = 'payment'; // 'payment' or 'po'
 let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
 let currentProjectsSubpage = 'projects'; // 'projects' or 'supply'
@@ -1396,6 +1488,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       currentInventoryView = 'main';
     }
+  } else if (moduleParam === 'purchase') {
+    currentModule = 'purchase';
+    if (viewParam === 'supplier_detail' || viewParam === 'supplier_details') {
+      currentPurchaseView = 'supplier_detail';
+      selectedPurchaseSupplierId = params.get('supplier_id') || 'pur-1';
+      selectedPurchaseSupplierName = params.get('supplier') || 'Schneider Electric India Pvt Ltd';
+      selectedPurchasePoNo = params.get('po') || 'PO-2026-1042';
+    } else {
+      currentPurchaseView = 'main';
+    }
   } else if (moduleParam) {
     currentModule = moduleParam;
     if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
@@ -1451,6 +1553,8 @@ function switchModule(moduleName) {
   } else if (moduleName === 'inventory') {
     currentInventorySubpage = 'inventory';
     currentInventoryView = 'main';
+  } else if (moduleName === 'purchase') {
+    currentPurchaseView = 'main';
   }
 
   updateURL();
@@ -1461,7 +1565,8 @@ function switchModule(moduleName) {
     indus_towers: 'Telecom',
     worklist: 'Worklist',
     projects: 'Projects',
-    inventory: 'Inventory'
+    inventory: 'Inventory',
+    purchase: 'Purchase'
   };
   showToast(`Navigated to ${moduleTitles[moduleName] || moduleName}`);
 }
@@ -1552,6 +1657,22 @@ function updateURL() {
     url.searchParams.delete('subpage');
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
+  } else if (currentModule === 'purchase') {
+    if (currentPurchaseView === 'supplier_detail') {
+      url.searchParams.set('view', currentPurchaseView);
+      if (selectedPurchaseSupplierId) url.searchParams.set('supplier_id', selectedPurchaseSupplierId);
+      if (selectedPurchaseSupplierName) url.searchParams.set('supplier', selectedPurchaseSupplierName);
+      if (selectedPurchasePoNo) url.searchParams.set('po', selectedPurchasePoNo);
+    } else {
+      url.searchParams.delete('view');
+      url.searchParams.delete('supplier_id');
+      url.searchParams.delete('supplier');
+      url.searchParams.delete('po');
+    }
+    url.searchParams.delete('subpage');
+    url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
+    url.searchParams.delete('product');
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
     url.searchParams.delete('subpage');
@@ -1571,7 +1692,12 @@ function updateURL() {
 // 2. MAIN APPLICATION RENDERER & BACK NAVIGATION
 // ==========================================================================
 function goBackSubpage() {
-  if (currentModule === 'projects') {
+  if (currentModule === 'purchase') {
+    if (currentPurchaseView === 'supplier_detail') {
+      currentPurchaseView = 'main';
+      showToast('Returned to Purchase');
+    }
+  } else if (currentModule === 'projects') {
     if (currentProjectsView === 'project_service_vendor_detail') {
       currentProjectsView = 'project_service_vendor';
       showToast('Returned to Service Vendor');
@@ -1808,7 +1934,7 @@ function renderApp() {
     renderProjectsFooter();
   } else if (currentModule === 'inventory') {
     if (bannerTitle) {
-      if (currentInventoryView === 'product_details') {
+      if (currentInventoryView === 'product_details' || currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
         bannerTitle.innerHTML = `<span class="banner-title-underline" style="font-weight: 700; color: #ffffff; font-size: 1.15rem;">${selectedInventoryProductName || 'Product Description'}</span>`;
       } else {
         bannerTitle.textContent = "Inventory";
@@ -1818,6 +1944,29 @@ function renderApp() {
     renderInventoryToolbar();
     renderInventoryTableHead();
     renderInventoryFooter();
+  } else if (currentModule === 'purchase') {
+    if (bannerTitle) {
+      if (currentPurchaseView === 'supplier_detail') {
+        bannerTitle.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div style="font-weight: 700; color: #ffffff; font-size: 1.15rem; letter-spacing: 0.3px;">
+              Supplier Name : ${selectedPurchaseSupplierName || ''}
+            </div>
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div style="font-weight: 700; color: #ffffff; font-size: 1.15rem; letter-spacing: 0.3px;">
+                <span style="text-decoration: underline;">PO # :</span> ${selectedPurchasePoNo || ''}
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        bannerTitle.textContent = "Purchase";
+      }
+    }
+    loadPurchaseDataset();
+    renderPurchaseToolbar();
+    renderPurchaseTableHead();
+    renderPurchaseFooter();
   } else {
     if (bannerTitle) bannerTitle.textContent = currentModule.toUpperCase();
     renderPlaceholderModule();
@@ -3024,7 +3173,7 @@ window.closeExpensesSummaryModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.openPaymentReceiptModal = function(titleText) {
+window.openPaymentReceiptModal = function(titleText, amountColLabel = 'Received Amount') {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -3036,6 +3185,11 @@ window.openPaymentReceiptModal = function(titleText) {
   const titleBadge = document.getElementById('lblPaymentReceiptTitle');
   if (titleBadge && titleText) {
     titleBadge.textContent = titleText;
+  }
+
+  const colHeader = document.getElementById('lblPaymentReceiptAmountCol');
+  if (colHeader) {
+    colHeader.textContent = amountColLabel;
   }
 
   const modal = document.getElementById('paymentReceiptModal');
@@ -3161,6 +3315,58 @@ window.closeEmailApprovalModal = function() {
   const modal = document.getElementById('emailApprovalModal');
   const overlay = document.getElementById('sideFormOverlay');
   if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.renderInventoryStockLedgerTable = function() {
+  const tbody = document.getElementById('tbodyInventoryStockLedger');
+  if (!tbody) return;
+
+  tbody.innerHTML = inventoryStockLedgerData.map(row => `
+    <tr style="border-bottom: 1px solid #e2e8f0;">
+      <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.docDate || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.docType || ''}</td>
+      <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.docNo || ''}</td>
+      <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis;" title="${(row.fromTo || '').replace(/"/g, '&quot;')}">${row.fromTo || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.uom || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.qtyStock || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.qtyDoc || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.qtyBalance || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.rate || ''}</td>
+      <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">${row.stockValue || ''}</td>
+    </tr>
+  `).join('');
+};
+
+window.openInventoryStockLedgerModal = function(productId, productName) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'inventoryStockLedgerModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblInventoryStockLedgerTitle');
+  if (titleBadge) {
+    titleBadge.textContent = productName || selectedInventoryProductName || 'Product Description';
+  }
+
+  if (window.renderInventoryStockLedgerTable) {
+    window.renderInventoryStockLedgerTable();
+  }
+
+  const modal = document.getElementById('inventoryStockLedgerModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeInventoryStockLedgerModal = function() {
+  const modal = document.getElementById('inventoryStockLedgerModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
 };
 
@@ -3559,9 +3765,9 @@ function renderProjectsToolbar() {
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
             <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">11,00,000.00</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openPaymentReceiptModal('Payment Receipt'); return false;" title="Open Payment Receipt">
+          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openPaymentReceiptModal('Payment Receipt', 'Received Amount'); return false;" title="Open Payment Receipt">
             <img src="icons/Paid _ Received.svg" alt="Paid / Received" style="width: 28px; height: 28px; display: block; cursor: pointer;">
-            <a href="#" onclick="openPaymentReceiptModal('Payment Receipt'); return false;" class="clickable-green-amount-link" style="color: #008744; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; cursor: pointer;">11,00,000.00</a>
+            <a href="#" onclick="openPaymentReceiptModal('Payment Receipt', 'Received Amount'); return false;" class="clickable-green-amount-link" style="color: #008744; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; cursor: pointer;">11,00,000.00</a>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="icons/Payable.svg" alt="Payable" style="width: 28px; height: 28px; display: block;">
@@ -4137,7 +4343,9 @@ function renderProjectsFooter() {
 // 3B. INVENTORY MODULE RENDERERS
 // ==========================================================================
 function loadInventoryDataset() {
-  if (currentInventoryView === 'product_details') {
+  if (currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
+    currentDataset = [...inventoryStockLedgerData];
+  } else if (currentInventoryView === 'product_details') {
     currentDataset = [...inventoryProductDetailsData];
   } else {
     currentDataset = [...inventoryData];
@@ -4155,11 +4363,23 @@ function openInventoryProductDetails(productId, productName) {
   showToast('Opened Product Details');
 }
 
+function openInventoryStockPricePage(productId, productName) {
+  currentModule = 'inventory';
+  currentInventoryView = 'stock_price';
+  selectedInventoryProductId = productId || 'inv-1';
+  selectedInventoryProductName = productName || 'Product Description';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Stock Price Details');
+}
+window.openInventoryStockPricePage = openInventoryStockPricePage;
+
 function renderInventoryToolbar() {
   const toolbar = document.getElementById('worklistToolbar') || document.getElementById('pageToolbar');
   if (!toolbar) return;
 
-  if (currentInventoryView === 'product_details') {
+  if (currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger' || currentInventoryView === 'product_details') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
@@ -4170,6 +4390,13 @@ function renderInventoryToolbar() {
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
       </div>
     `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentInventoryView = 'main';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Inventory');
+    });
     return;
   }
 
@@ -4187,6 +4414,62 @@ function renderInventoryToolbar() {
 function renderInventoryTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
+
+  if (currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
+    thead.innerHTML = `
+      <tr class="master-view-header inventory-view-header inventory-stock-header">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Doc. Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['docDate'] ? 'has-active-filter' : ''}" data-filter-col="docDate" title="Filter Doc. Date">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Doc. Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['docType'] ? 'has-active-filter' : ''}" data-filter-col="docType" title="Filter Doc. Type">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Doc.No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['docNo'] ? 'has-active-filter' : ''}" data-filter-col="docNo" title="Filter Doc.No">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>From / To</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['fromTo'] ? 'has-active-filter' : ''}" data-filter-col="fromTo" title="Filter From / To">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Uom</span>
+        </th>
+        <th colspan="3" class="th-qty-group" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Qty</span>
+        </th>
+        <th rowspan="2" class="th-rate-col" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Rate</span>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Stock Value</span>
+        </th>
+      </tr>
+      <tr class="master-view-header inventory-view-header inventory-stock-header">
+        <th class="th-sub-qty" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Stock</span>
+        </th>
+        <th class="th-sub-qty" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Doc</span>
+        </th>
+        <th class="th-sub-qty" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Balance</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
 
   if (currentInventoryView === 'product_details') {
     thead.innerHTML = `
@@ -4280,6 +4563,166 @@ function renderInventoryTableHead() {
 }
 
 function renderInventoryFooter() {
+  const footer = document.getElementById('worklistFooterBar');
+  if (!footer) return;
+  footer.innerHTML = '';
+  footer.style.display = 'none';
+}
+
+// ==========================================================================
+// 3C. PURCHASE MODULE RENDERERS
+// ==========================================================================
+function loadPurchaseDataset() {
+  if (currentPurchaseView === 'supplier_detail') {
+    const items = purchaseSupplierItemsData[selectedPurchaseSupplierId] || purchaseSupplierItemsData['pur-1'] || [];
+    currentDataset = [...items];
+  } else {
+    currentDataset = [...purchaseModuleData];
+  }
+}
+
+function openPurchaseSupplierDetails(supplierId, supplierName, poNo) {
+  currentModule = 'purchase';
+  currentPurchaseView = 'supplier_detail';
+  selectedPurchaseSupplierId = supplierId || 'pur-1';
+  selectedPurchaseSupplierName = supplierName || 'Supplier Name';
+  selectedPurchasePoNo = poNo || 'PO-2026-1042';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Opened Supplier Details');
+}
+window.openPurchaseSupplierDetails = openPurchaseSupplierDetails;
+
+function renderPurchaseToolbar() {
+  const toolbar = document.getElementById('worklistToolbar') || document.getElementById('pageToolbar');
+  if (!toolbar) return;
+
+  if (currentPurchaseView === 'supplier_detail') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+        <button type="button" class="toolbar-icon-btn" id="btnPurchaseSigma" title="Summation" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+          <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="display: block; object-fit: contain;">
+        </button>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentPurchaseView = 'main';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Purchase');
+    });
+    return;
+  }
+
+  toolbar.innerHTML = `
+    <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+      <button type="button" class="toolbar-icon-btn" id="btnPurchaseSigma" title="Summation" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+        <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="display: block; object-fit: contain;">
+      </button>
+    </div>
+    <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+    </div>
+  `;
+}
+
+function renderPurchaseTableHead() {
+  const thead = document.getElementById('worklistTableHead');
+  if (!thead) return;
+
+  if (currentPurchaseView === 'supplier_detail') {
+    thead.innerHTML = `
+      <tr class="master-view-header purchase-view-header purchase-supplier-header">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>HSN Code</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnCode'] ? 'has-active-filter' : ''}" data-filter-col="hsnCode" title="Filter HSN Code">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['description'] ? 'has-active-filter' : ''}" data-filter-col="description" title="Filter Description">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Uom</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['uom'] ? 'has-active-filter' : ''}" data-filter-col="uom" title="Filter Uom">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Qty</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Rate</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>GST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Amount</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  thead.innerHTML = `
+    <tr class="master-view-header purchase-view-header">
+      <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <span>PR No</span>
+      </th>
+      <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Request By</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestBy'] ? 'has-active-filter' : ''}" data-filter-col="requestBy" title="Filter Request By">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>PO #</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO #">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Supplier Name</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['supplierName'] ? 'has-active-filter' : ''}" data-filter-col="supplierName" title="Filter Supplier Name">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <span>PO Value</span>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <span>Invoice #</span>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <span>Invoice Value</span>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Payment Status</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['paymentStatus'] ? 'has-active-filter' : ''}" data-filter-col="paymentStatus" title="Filter Payment Status">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>GST Filling Status</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['gstFilingStatus'] ? 'has-active-filter' : ''}" data-filter-col="gstFilingStatus" title="Filter GST Filling Status">&#9660;</button>
+        </div>
+      </th>
+    </tr>
+  `;
+  rebindFilterButtons();
+}
+
+function renderPurchaseFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
   footer.innerHTML = '';
@@ -5023,11 +5466,13 @@ function applyFiltersAndRender() {
   if (filteredDataset.length === 0) {
     const colSpan = currentModule === 'inventory'
       ? 8
-      : (currentModule === 'projects'
-        ? 14
-        : (currentModule === 'indus_towers'
-          ? (currentIndusSubpage === 'projects' ? 8 : 10)
-          : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10))));
+      : (currentModule === 'purchase'
+        ? 9
+        : (currentModule === 'projects'
+          ? 14
+          : (currentModule === 'indus_towers'
+            ? (currentIndusSubpage === 'projects' ? 8 : 10)
+            : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10)))));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -5784,7 +6229,22 @@ function applyFiltersAndRender() {
       `).join('');
     }
   } else if (currentModule === 'inventory') {
-    if (currentInventoryView === 'product_details') {
+    if (currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="inventory-data-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.docDate || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.docType || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.docNo || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; overflow: hidden; text-overflow: ellipsis;" title="${(row.fromTo || '').replace(/"/g, '&quot;')}">${row.fromTo || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.uom || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.qtyStock || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.qtyDoc || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.qtyBalance || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.rate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; font-weight: 600; color: #1e293b;">${row.stockValue || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentInventoryView === 'product_details') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="inventory-data-row" data-row-id="${row.id}">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 500;">${row.invoiceNo || ''}</td>
@@ -5796,7 +6256,9 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.purchasePrice || ''}</td>
           <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.transportation || ''}</td>
           <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px;">${row.unloadingOther || ''}</td>
-          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.stockPrice || ''}</td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">
+            <a href="#" onclick="openInventoryStockPricePage('${row.id}', '${(selectedInventoryProductName || 'Product Description').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.stockPrice || ''}</a>
+          </td>
           <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.newPrice || ''}</td>
         </tr>
       `).join('');
@@ -5804,15 +6266,47 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="inventory-data-row" data-row-id="${row.id}">
           <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">
-            <a href="#" onclick="openInventoryProductDetails('${row.id}', '${(row.productDescription || '').replace(/'/g, "\\'")}'); return false;" style="color: #0d6efd; text-decoration: underline; cursor: pointer; font-weight: 600;">${row.productDescription || ''}</a>
+            <a href="#" onclick="openInventoryProductDetails('${row.id}', '${(row.productDescription || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; cursor: pointer; font-weight: 500;">${row.productDescription || ''}</a>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.whCode || ''}</td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.productHead || ''}</td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.productType || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px;">${row.uom || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.qty || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.stockPrice || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">
+            <a href="#" onclick="openInventoryStockPricePage('${row.id}', '${(row.productDescription || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.stockPrice || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.stockValue || ''}</td>
+        </tr>
+      `).join('');
+    }
+  } else if (currentModule === 'purchase') {
+    if (currentPurchaseView === 'supplier_detail') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="purchase-supplier-item-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.hsnCode || ''}</td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.description || '').replace(/"/g, '&quot;')}">${row.description || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.uom || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.qty || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.rate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.gst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; font-weight: 600; color: #1e293b;">${row.amount || ''}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="purchase-data-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.prNo || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; overflow: hidden; text-overflow: ellipsis;" title="${(row.requestBy || '').replace(/"/g, '&quot;')}">${row.requestBy || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.poNo || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; overflow: hidden; text-overflow: ellipsis;" title="${(row.supplierName || '').replace(/"/g, '&quot;')}">
+            <a href="#" onclick="openPurchaseSupplierDetails('${row.id}', '${(row.supplierName || '').replace(/'/g, "\\'")}', '${(row.poNo || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.supplierName || ''}</a>
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.poValue || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.invoiceNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; font-weight: 600; color: #1e293b;">${row.invoiceValue || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.paymentStatus || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.gstFilingStatus || ''}</td>
         </tr>
       `).join('');
     }
@@ -13344,7 +13838,7 @@ window.closeBoqInvoiceModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.openPaymentReceiptModal = function(title = 'Payment Receipt', amountColLabel = 'Paid Amount') {
+window.openPaymentReceiptModal = function(title = 'Payment Receipt', amountColLabel = 'Received Amount') {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 

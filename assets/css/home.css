@@ -573,6 +573,29 @@ body {
   /* CRISP WHITE LINE BETWEEN AMOUNT/PAYABLE & AGEING */
 }
 
+/* Inventory Stock Multi-Level Headers with White Dividing Lines */
+.inventory-stock-header th,
+.inventory-view-header.inventory-stock-header th {
+  border: 1px solid #ffffff !important;
+  border-right: 1.5px solid #ffffff !important;
+  box-sizing: border-box;
+}
+
+.inventory-stock-header .th-qty-group {
+  border-bottom: 1.5px solid #ffffff !important;
+  border-right: 1.5px solid #ffffff !important;
+}
+
+.inventory-stock-header .th-sub-qty {
+  border-top: 1.5px solid #ffffff !important;
+  border-bottom: 1px solid #ffffff !important;
+  border-right: 1.5px solid #ffffff !important;
+}
+
+.inventory-stock-header .th-rate-col {
+  border-left: 1.5px solid #ffffff !important;
+}
+
 /* Product Details Bottom Segmented Sub-Navigation (Matching Image 2 Mockup) */
 .product-details-segmented-group {
   display: inline-flex;

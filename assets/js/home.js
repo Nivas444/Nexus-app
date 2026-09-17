@@ -4050,6 +4050,201 @@ window.closeExpensesSummaryModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+window.openExpenseRequestDetailModal = function(requestBy, expenseDate) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'expenseRequestDetailModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblExpenseRequestDetailTitle');
+  if (titleBadge) {
+    if (requestBy && expenseDate) {
+      titleBadge.textContent = `${requestBy} - ${expenseDate}`;
+    } else if (requestBy) {
+      titleBadge.textContent = requestBy;
+    } else {
+      titleBadge.textContent = 'Request By - Expense Date';
+    }
+  }
+
+  const tbody = document.getElementById('tbodyExpenseRequestDetail');
+  if (tbody) {
+    let items = [];
+    if (requestBy === 'Praveen Raj') {
+      items = [
+        { desc: 'Tower Erection Structure & Rigging Work', uom: 'Sq.Ft', qty: '150.00', rate: '2,200.00', basic: '3,30,000.00', gst: '50,000.00', total: '3,80,000.00' },
+        { desc: 'Earthing & Lightning Protection Systems', uom: 'Mtr', qty: '320.00', rate: '375.00', basic: '1,20,000.00', gst: '20,000.00', total: '1,40,000.00' },
+        { desc: 'Safety Audit, Testing & Commissioning Fee', uom: 'Nos', qty: '2.00', rate: '34,000.00', basic: '68,000.00', gst: '12,000.00', total: '80,000.00' }
+      ];
+    } else {
+      items = [
+        { desc: 'Civil Foundation Work & Excavation', uom: 'Sq.Ft', qty: '120.00', rate: '2,500.00', basic: '3,00,000.00', gst: '54,000.00', total: '3,54,000.00' },
+        { desc: 'Electrical Cabling & Termination', uom: 'Mtr', qty: '450.00', rate: '350.00', basic: '1,57,500.00', gst: '28,350.00', total: '1,85,850.00' },
+        { desc: 'Site Diesel Generator Fuel & Transport', uom: 'Ltr', qty: '650.00', rate: '92.50', basic: '60,125.00', gst: '0.00', total: '60,150.00' }
+      ];
+    }
+
+    tbody.innerHTML = items.map(item => `
+      <tr>
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
+          <a href="#" onclick="openBoqExpenseDetailModal('${item.desc.replace(/'/g, "\\'")}', '${(requestBy || '').replace(/'/g, "\\'")}'); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">${item.desc}</a>
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.uom}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.qty}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.rate}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.basic}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.gst}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">${item.total}</td>
+      </tr>
+    `).join('');
+  }
+
+  const modal = document.getElementById('expenseRequestDetailModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeExpenseRequestDetailModal = function() {
+  const modal = document.getElementById('expenseRequestDetailModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  const expSummary = document.getElementById('expensesSummaryModal');
+  if (expSummary) {
+    expSummary.style.display = 'block';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+window.openBoqExpenseDetailModal = function(boqName, reqBy) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'boqExpenseDetailModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblBoqExpenseDetailTitle');
+  if (titleBadge) {
+    titleBadge.textContent = boqName || 'BOQ Name';
+  }
+
+  const tbody = document.getElementById('tbodyBoqExpenseDetail');
+  if (tbody) {
+    const rBy = reqBy || 'Nivas Kumar';
+    let items = [];
+    if (boqName && boqName.includes('Electrical')) {
+      items = [
+        { reqDate: '12/08/2026', reqBy: rBy, desc: 'Electrical Cabling & Termination', uom: 'Mtr', qty: '450.00', rate: '350.00', basic: '1,57,500.00', gst: '28,350.00', total: '1,85,850.00', transferTo: 'SBI - 4092109281', txnDate: '14/08/2026' }
+      ];
+    } else if (boqName && boqName.includes('Diesel')) {
+      items = [
+        { reqDate: '12/08/2026', reqBy: rBy, desc: 'Site Diesel Generator Fuel & Transport', uom: 'Ltr', qty: '650.00', rate: '92.50', basic: '60,125.00', gst: '0.00', total: '60,150.00', transferTo: 'SBI - 4092109281', txnDate: '14/08/2026' }
+      ];
+    } else {
+      items = [
+        { reqDate: '12/08/2026', reqBy: rBy, desc: boqName || 'Civil Foundation Work & Excavation', uom: 'Sq.Ft', qty: '120.00', rate: '2,500.00', basic: '3,00,000.00', gst: '54,000.00', total: '3,54,000.00', transferTo: 'SBI - 4092109281', txnDate: '14/08/2026' }
+      ];
+    }
+
+    tbody.innerHTML = items.map(item => `
+      <tr>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.reqDate}</td>
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.reqBy}</td>
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.desc}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.uom}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.qty}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.rate}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.basic}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.gst}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">${item.total}</td>
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.transferTo}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.txnDate}</td>
+      </tr>
+    `).join('');
+  }
+
+  const modal = document.getElementById('boqExpenseDetailModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeBoqExpenseDetailModal = function() {
+  const modal = document.getElementById('boqExpenseDetailModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  const reqDetail = document.getElementById('expenseRequestDetailModal');
+  if (reqDetail) {
+    reqDetail.style.display = 'block';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+window.openExpenseBankDetailsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'expenseBankDetailsModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('expenseBankDetailsModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeExpenseBankDetailsModal = function() {
+  const modal = document.getElementById('expenseBankDetailsModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  const reqDetail = document.getElementById('expenseRequestDetailModal');
+  if (reqDetail) {
+    reqDetail.style.display = 'block';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+window.openExpenseApprovalDetailModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'expenseApprovalDetailModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('expenseApprovalDetailModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeExpenseApprovalDetailModal = function() {
+  const modal = document.getElementById('expenseApprovalDetailModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  const reqDetail = document.getElementById('expenseRequestDetailModal');
+  if (reqDetail) {
+    reqDetail.style.display = 'block';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
 window.openPaymentReceiptModal = function(titleText, amountColLabel = 'Received Amount') {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;

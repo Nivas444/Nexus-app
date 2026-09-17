@@ -5701,8 +5701,9 @@
                 <tr>
                   <td style="width: 10%; text-align: center !important; padding: 10px 4px; white-space: nowrap;">
                     12/08/2026</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Nivas
-                    Kumar</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">
+                    <a href="#" onclick="openExpenseRequestDetailModal('Nivas Kumar', '12/08/2026'); return false;" class="clickable-requestby-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Nivas Kumar</a>
+                  </td>
                   <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
                     6,00,000.00</td>
                   <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
@@ -5720,8 +5721,9 @@
                 <tr>
                   <td style="width: 10%; text-align: center !important; padding: 10px 4px; white-space: nowrap;">
                     25/08/2026</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Praveen
-                    Raj</td>
+                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">
+                    <a href="#" onclick="openExpenseRequestDetailModal('Praveen Raj', '25/08/2026'); return false;" class="clickable-requestby-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Praveen Raj</a>
+                  </td>
                   <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
                     6,00,000.00</td>
                   <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
@@ -5735,6 +5737,297 @@
                     8920192831</td>
                   <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Accounts
                     Dept</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Expense Request Detail Modal Tab (Triggered by clicking Request By in Expenses Summary modal table) -->
+        <div class="side-form-card side-contact-popup" id="expenseRequestDetailModal"
+          style="display: none; width: 1360px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 0px;">
+            <div class="side-form-title-badge" id="lblExpenseRequestDetailTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Request By - Expense Date</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
+              <button type="button" class="tool-btn" id="btnExpenseDetailBank" title="Bank"
+                onclick="openExpenseBankDetailsModal(); return false;"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Bank.svg" alt="Bank" style="width: 32px; height: 32px; display: block;">
+              </button>
+              <button type="button" class="tool-btn" id="btnExpenseDetailApproval" title="Approval"
+                onclick="openExpenseApprovalDetailModal(); return false;"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/approval.svg" alt="Approval" style="width: 32px; height: 32px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseExpenseRequestDetailModal"
+                onclick="closeExpenseRequestDetailModal()" aria-label="Close"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; margin-left: 8px; display: inline-flex; align-items: center;">
+                <img src="icons/Cancel.svg" alt="Close" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+          <div style="padding: 10px 24px 8px 24px; display: flex; align-items: center;">
+            <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblExpenseRequestDetail"
+              style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Expense Description</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Uom</span>
+                  </th>
+                  <th
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Qty</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Rate</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Basic</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>GST</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Total</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyExpenseRequestDetail">
+                <tr>
+                  <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
+                    <a href="#" onclick="openBoqExpenseDetailModal('Civil Foundation Work & Excavation', 'Nivas Kumar'); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Civil Foundation Work & Excavation</a>
+                  </td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Sq.Ft</td>
+                  <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">120.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">2,500.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">3,00,000.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">54,000.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">3,54,000.00</td>
+                </tr>
+                <tr>
+                  <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
+                    <a href="#" onclick="openBoqExpenseDetailModal('Electrical Cabling & Termination', 'Nivas Kumar'); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Electrical Cabling & Termination</a>
+                  </td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Mtr</td>
+                  <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">450.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">350.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">1,57,500.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">28,350.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">1,85,850.00</td>
+                </tr>
+                <tr>
+                  <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
+                    <a href="#" onclick="openBoqExpenseDetailModal('Site Diesel Generator Fuel & Transport', 'Nivas Kumar'); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Site Diesel Generator Fuel & Transport</a>
+                  </td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Ltr</td>
+                  <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">650.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">92.50</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">60,125.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">0.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">60,150.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BOQ Name / Expense Description Detail Modal Tab (Triggered by clicking Expense Description in Expense Request Detail modal table) -->
+        <div class="side-form-card side-contact-popup" id="boqExpenseDetailModal"
+          style="display: none; width: 1520px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblBoqExpenseDetailTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              BOQ Name</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseBoqExpenseDetailModal"
+                onclick="closeBoqExpenseDetailModal()" aria-label="Close"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; margin-left: 8px; display: inline-flex; align-items: center;">
+                <img src="icons/Cancel.svg" alt="Close" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblBoqExpenseDetail"
+              style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Req.Date</span>
+                  </th>
+                  <th
+                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Req.By</span>
+                  </th>
+                  <th
+                    style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Expense Description</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Uom</span>
+                  </th>
+                  <th
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Qty</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Rate</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Basic</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>GST</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Total</span>
+                  </th>
+                  <th
+                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>Transfer To</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 9px 8px; white-space: nowrap;">
+                    <span>TXN Date</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyBoqExpenseDetail">
+                <tr>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">12/08/2026</td>
+                  <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Nivas Kumar</td>
+                  <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Civil Foundation Work & Excavation</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Sq.Ft</td>
+                  <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">120.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">2,500.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">3,00,000.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">54,000.00</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">3,54,000.00</td>
+                  <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">SBI - 4092109281</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">14/08/2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Expense Bank Details Modal Tab (Triggered by clicking Bank Icon in Expense Request Detail modal) -->
+        <div class="side-form-card side-contact-popup" id="expenseBankDetailsModal"
+          style="display: none; width: 480px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblExpenseBankDetailsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Bank Details</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseExpenseBankDetailsModal"
+                onclick="closeExpenseBankDetailsModal()" aria-label="Close"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; margin-left: 8px; display: inline-flex; align-items: center;">
+                <img src="icons/Cancel.svg" alt="Close" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+          <form class="side-form-body" id="frmExpenseBankDetails" onsubmit="event.preventDefault();"
+            style="padding: 24px 28px 32px 28px; display: flex; flex-direction: column; gap: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="color: #475569; font-weight: 600; font-size: 0.95rem; min-width: 140px; margin: 0;">Account Name</label>
+              <input type="text" id="inpExpenseBankAccountName" placeholder="Enter Account Name"
+                style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #1e293b; background: #f8fafc; outline: none;">
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="color: #475569; font-weight: 600; font-size: 0.95rem; min-width: 140px; margin: 0;">Account Number</label>
+              <input type="text" id="inpExpenseBankAccountNumber" placeholder="Enter Account Number"
+                style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #1e293b; background: #f8fafc; outline: none;">
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="color: #475569; font-weight: 600; font-size: 0.95rem; min-width: 140px; margin: 0;">IFSC Code</label>
+              <input type="text" id="inpExpenseBankIfscCode" placeholder="Enter IFSC Code"
+                style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #1e293b; background: #f8fafc; outline: none;">
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="color: #475569; font-weight: 600; font-size: 0.95rem; min-width: 140px; margin: 0;">Bank Name</label>
+              <input type="text" id="inpExpenseBankBankName" placeholder="Enter Bank Name"
+                style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #1e293b; background: #f8fafc; outline: none;">
+            </div>
+          </form>
+        </div>
+
+        <!-- Expense Approval Detail Modal Tab (Triggered by clicking Approval Icon in Expense Request Detail modal) -->
+        <div class="side-form-card side-contact-popup" id="expenseApprovalDetailModal"
+          style="display: none; width: 560px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblExpenseApprovalDetailTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Approval Details</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseExpenseApprovalDetailModal"
+                onclick="closeExpenseApprovalDetailModal()" aria-label="Close"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; margin-left: 8px; display: inline-flex; align-items: center;">
+                <img src="icons/Cancel.svg" alt="Close" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblExpenseApprovalDetail"
+              style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; border-top: none; border-bottom: none; padding: 9px 8px; white-space: nowrap;">
+                    <span>Date</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; border-top: none; border-bottom: none; padding: 9px 8px; white-space: nowrap;">
+                    <span>Name</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; border-top: none; border-bottom: none; padding: 9px 8px; white-space: nowrap;">
+                    <span>Task</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyExpenseApprovalDetail">
+                <tr>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">12/08/2026</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Nivas Kumar</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Requested</td>
+                </tr>
+                <tr>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">13/08/2026</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Project Lead</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Approved</td>
+                </tr>
+                <tr>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">14/08/2026</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Quality Auditor</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Validated</td>
+                </tr>
+                <tr>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">15/08/2026</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Finance Dept</td>
+                  <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; border: none;">Transferred</td>
                 </tr>
               </tbody>
             </table>
@@ -6607,7 +6900,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=191"></script>
+  <script src="assets/js/home.js?v=195"></script>
 </body>
 
 </html>

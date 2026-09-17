@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=106">
+  <link rel="stylesheet" href="assets/css/home.css?v=109">
 </head>
 
 <body>
@@ -38,13 +38,13 @@
         <!-- 3. Accounts Icon -->
         <button type="button" class="nav-icon-item" id="navBtnAccounts" data-module="accounts" data-tooltip="Accounts"
           aria-label="Accounts">
-          <img src="icons/Accounts.svg" alt="Accounts" class="nav-icon-img" width="40" height="40">
+          <img src="icons/Accounts.svg?v=20260917" alt="Accounts" class="nav-icon-img" width="40" height="40">
         </button>
 
         <!-- 4. Admin Icon -->
         <button type="button" class="nav-icon-item" id="navBtnAdmin" data-module="admin" data-tooltip="Admin"
           aria-label="Admin">
-          <img src="icons/Admin.svg" alt="Admin" class="nav-icon-img" width="40" height="40">
+          <img src="icons/ADMIN.svg?v=20260917" alt="Admin" class="nav-icon-img" width="40" height="40">
         </button>
 
         <!-- 5. Worklist (Alert Bell) Icon -->
@@ -5579,19 +5579,19 @@
 
         <!-- Payment Receipt Modal Tab (Triggered by clicking green amount in Supply & Service Vendor subpages) -->
         <div class="side-form-card side-contact-popup" id="paymentReceiptModal"
-          style="display: none; width: 540px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 560px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPaymentReceiptTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Payment Receipt</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal"
                 onclick="closePaymentReceiptModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
             <table class="master-custom-table" id="tblPaymentReceiptPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -5642,9 +5642,9 @@
         <div class="side-form-card side-contact-popup" id="expensesSummaryModal"
           style="display: none; width: 1360px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblExpensesSummaryTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Expenses Summary</div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseExpensesSummaryModal"
@@ -5652,7 +5652,7 @@
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 16px 28px 24px 28px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: auto;">
             <table class="contact-custom-table" id="tblExpensesSummaryPopup"
               style="width: 100%; table-layout: fixed; border-collapse: collapse;">
               <thead>
@@ -5743,19 +5743,19 @@
 
         <!-- MIN / MRN Modal Tab (Triggered by clicking PDF icon in Project Material toolbar) -->
         <div class="side-form-card side-contact-popup" id="minMrnModal"
-          style="display: none; width: 440px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 460px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblMinMrnTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               MIN / MRN</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseMinMrnModal" onclick="closeMinMrnModal()"
                 aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: hidden;">
             <table class="contact-custom-table" id="tblMinMrnPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -5826,19 +5826,19 @@
 
         <!-- Infra Doc Modal Tab (Triggered by clicking PDF icon in Project Infra toolbar) -->
         <div class="side-form-card side-contact-popup" id="infraDocModal"
-          style="display: none; width: 440px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 460px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 12px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblInfraDocTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               STN / SRN / CAM</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseInfraDocModal"
                 onclick="closeInfraDocModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: hidden;">
             <table class="contact-custom-table" id="tblInfraDocPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -5911,22 +5911,22 @@
         <div class="side-form-card side-contact-popup" id="boqMaterialDetailModal"
           style="display: none; width: 1040px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 14px;">
             <div class="side-form-title-badge" id="lblBoqMaterialDetailTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               25 X 6 GI Earth Strip</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseBoqMaterialDetailModal"
                 onclick="closeBoqMaterialDetailModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div style="padding: 0 16px 12px 18px; display: flex; align-items: center; gap: 10px;">
+          <div style="padding: 0 20px 14px 24px; display: flex; align-items: center; gap: 10px;">
             <img src="icons/summation.svg" alt="Summation" style="width: 26px; height: 26px; display: block;">
             <span
               style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: hidden;">
             <table class="contact-custom-table" id="tblBoqMaterialDetailPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -6047,19 +6047,19 @@
 
         <!-- DPR Members Modal Tab (Triggered by clicking Contact icon in DPR toolbar) -->
         <div class="side-form-card side-contact-popup" id="dprMembersModal"
-          style="display: none; width: 620px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 640px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblDprMembersTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Members</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseDprMembersModal"
                 onclick="closeDprMembersModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: hidden;">
             <table class="contact-custom-table" id="tblDprMembersPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -6101,12 +6101,12 @@
 
         <!-- DPR Attendance Modal Tab (Triggered by clicking Attendance icon in DPR toolbar) -->
         <div class="side-form-card side-contact-popup" id="dprAttendanceModal"
-          style="display: none; width: 840px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 860px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 16px;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div style="display: flex; align-items: center; gap: 16px; height: 100%;">
               <div class="side-form-title-badge" id="lblDprAttendanceTitle"
-                style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
                 Attendance</div>
               <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Attendance">
             </div>
@@ -6116,7 +6116,7 @@
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: hidden;">
             <table class="contact-custom-table" id="tblDprAttendancePopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -6179,11 +6179,11 @@
 
         <!-- DPR Documents Modal Tab (Document Type, Document Details, Document Name) -->
         <div class="side-form-card side-contact-popup" id="dprDocumentsModal"
-          style="display: none; width: 620px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 640px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblDprDocumentsTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Documents</div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseDprDocumentsModal"
@@ -6191,7 +6191,7 @@
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 16px 20px 20px 20px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
             <table class="contact-custom-table" id="tblDprDocumentsPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -6238,9 +6238,9 @@
         <div class="side-form-card side-contact-popup" id="dprSurveyReportModal"
           style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblDprSurveyReportTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Survey Report</div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseDprSurveyReportModal"
@@ -6248,7 +6248,7 @@
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 16px 20px 20px 20px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
             <table class="contact-custom-table" id="tblDprSurveyReportPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -6313,11 +6313,11 @@
 
         <!-- BOQ WCC Modal Tab (Triggered by clicking WCC icon in BOQ toolbar) -->
         <div class="side-form-card side-contact-popup" id="boqWccModal"
-          style="display: none; width: 460px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          style="display: none; width: 480px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblBoqWccTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 10px 28px; margin: 0;">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               WCC</div>
             <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 24px;">
               <img src="icons/summation.svg" alt="Summation" style="width: 22px; height: 22px; display: block; object-fit: contain;">
@@ -6329,7 +6329,7 @@
                 style="color: #d62d20; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
             </div>
           </div>
-          <div class="wcc-modal-body" style="padding: 20px 20px 24px 20px;">
+          <div class="wcc-modal-body" style="padding: 0 24px 24px 24px;">
             <!-- 1. WCC No -->
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
               <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">WCC No</label>
@@ -6355,11 +6355,11 @@
 
         <!-- BOQ Invoice Modal Tab (Triggered by clicking Invoice icon in BOQ toolbar) -->
         <div class="side-form-card side-contact-popup" id="boqInvoiceModal"
-          style="display: none; width: 460px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          style="display: none; width: 480px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblBoqInvoiceTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 10px 28px; margin: 0;">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Invoice</div>
             <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 18px;">
               <img src="icons/summation.svg" alt="Summation" style="width: 22px; height: 22px; display: block; object-fit: contain;">
@@ -6374,7 +6374,7 @@
                 style="color: #d62d20; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
             </div>
           </div>
-          <div class="invoice-modal-body" style="padding: 20px 20px 24px 20px;">
+          <div class="invoice-modal-body" style="padding: 0 24px 24px 24px;">
             <!-- 1. Invoice No -->
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
               <label style="width: 150px; flex: 0 0 150px; font-size: 1.05rem; font-weight: 600; color: #0f172a; font-family: inherit;">Invoice No</label>
@@ -6402,19 +6402,19 @@
 
         <!-- E - Mail Approval Modal Tab (Triggered by clicking Approval icon in Additional Approvals toolbar) -->
         <div class="side-form-card side-contact-popup" id="emailApprovalModal"
-          style="display: none; width: 920px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 940px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblEmailApprovalTitle"
-              style="background-color: #00b074; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               E - Mail Approval</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseEmailApprovalModal"
                 onclick="closeEmailApprovalModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
             <table class="contact-custom-table" id="tblEmailApprovalPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -6472,17 +6472,17 @@
         <div class="side-form-card side-contact-popup" id="inventoryStockLedgerModal"
           style="display: none; width: 1200px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 10px 0; border-bottom: none; display: flex; justify-content: space-between; align-items: flex-start;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblInventoryStockLedgerTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.1rem; padding: 8px 32px 8px 18px; clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); margin: 0;">
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Product Description</div>
-            <div class="side-header-top-icons" style="margin-top: 8px; margin-right: 8px;">
+            <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseInventoryStockLedgerModal"
                 onclick="closeInventoryStockLedgerModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
             <table class="master-custom-table" id="tblInventoryStockLedgerPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -6607,7 +6607,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=180"></script>
+  <script src="assets/js/home.js?v=191"></script>
 </body>
 
 </html>

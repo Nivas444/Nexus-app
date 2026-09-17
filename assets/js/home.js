@@ -1389,10 +1389,756 @@ const purchaseSupplierItemsData = {
   ]
 };
 
+// Admin Salary Dataset
+const adminSalaryData = [
+  {
+    id: "adm-sal-1",
+    year: "2026",
+    month: "August",
+    noOfEmployee: "48",
+    salaryPaid: "14,50,000.00",
+    epf: "1,74,000.00",
+    esi: "43,500.00",
+    pt: "9,600.00",
+    lwf: "1,440.00"
+  },
+  {
+    id: "adm-sal-2",
+    year: "2026",
+    month: "July",
+    noOfEmployee: "48",
+    salaryPaid: "14,50,000.00",
+    epf: "1,74,000.00",
+    esi: "43,500.00",
+    pt: "9,600.00",
+    lwf: "1,440.00"
+  },
+  {
+    id: "adm-sal-3",
+    year: "2026",
+    month: "June",
+    noOfEmployee: "46",
+    salaryPaid: "13,90,000.00",
+    epf: "1,66,800.00",
+    esi: "41,700.00",
+    pt: "9,200.00",
+    lwf: "1,380.00"
+  },
+  {
+    id: "adm-sal-4",
+    year: "2026",
+    month: "May",
+    noOfEmployee: "45",
+    salaryPaid: "13,60,000.00",
+    epf: "1,63,200.00",
+    esi: "40,800.00",
+    pt: "9,000.00",
+    lwf: "1,350.00"
+  },
+  {
+    id: "adm-sal-5",
+    year: "2026",
+    month: "April",
+    noOfEmployee: "45",
+    salaryPaid: "13,60,000.00",
+    epf: "1,63,200.00",
+    esi: "40,800.00",
+    pt: "9,000.00",
+    lwf: "1,350.00"
+  }
+];
+
+// Admin Attendance Dataset
+const adminAttendanceData = [
+  { id: "att-1", employeeName: "Aakash Verma", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-2", employeeName: "Deepak Sharma", daysSummary: "", total: "30", worked: "25", lop: "1", holidays: "4", netSalaryDays: "29" },
+  { id: "att-3", employeeName: "Karthik Subramanian", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-4", employeeName: "Meera Nambiar", daysSummary: "", total: "30", worked: "24", lop: "2", holidays: "4", netSalaryDays: "28" },
+  { id: "att-5", employeeName: "Naveen Kumar", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-6", employeeName: "Pooja Hegde", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-7", employeeName: "Rahul Dravid", daysSummary: "", total: "30", worked: "25", lop: "1", holidays: "4", netSalaryDays: "29" },
+  { id: "att-8", employeeName: "Sanjay Singhania", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-9", employeeName: "Sneha Reddy", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-10", employeeName: "Vikram Rathore", daysSummary: "", total: "30", worked: "23", lop: "3", holidays: "4", netSalaryDays: "27" }
+];
+
+// Admin Salary Detail Dataset
+const adminSalaryDetailData = [
+  {
+    id: "asd-1",
+    employeeName: "Aakash Verma",
+    total: "30",
+    worked: "26",
+    lop: "0",
+    holidays: "4",
+    netSalaryDays: "30",
+    gross: "35,000.00",
+    earned: "35,000.00",
+    epf: "3,600.00",
+    esiMi: "900.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "30,270.00",
+    tds: "0.00",
+    advance: "0.00",
+    netSalary: "30,270.00"
+  },
+  {
+    id: "asd-2",
+    employeeName: "Deepak Sharma",
+    total: "30",
+    worked: "25",
+    lop: "1",
+    holidays: "4",
+    netSalaryDays: "29",
+    gross: "32,000.00",
+    earned: "30,933.33",
+    epf: "3,600.00",
+    esiMi: "800.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "26,303.33",
+    tds: "0.00",
+    advance: "0.00",
+    netSalary: "26,303.33"
+  },
+  {
+    id: "asd-3",
+    employeeName: "Karthik Subramanian",
+    total: "30",
+    worked: "26",
+    lop: "0",
+    holidays: "4",
+    netSalaryDays: "30",
+    gross: "45,000.00",
+    earned: "45,000.00",
+    epf: "3,600.00",
+    esiMi: "0.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "41,170.00",
+    tds: "1,500.00",
+    advance: "0.00",
+    netSalary: "39,670.00"
+  },
+  {
+    id: "asd-4",
+    employeeName: "Meera Nambiar",
+    total: "30",
+    worked: "24",
+    lop: "2",
+    holidays: "4",
+    netSalaryDays: "28",
+    gross: "28,000.00",
+    earned: "26,133.33",
+    epf: "3,136.00",
+    esiMi: "653.33",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "22,114.00",
+    tds: "0.00",
+    advance: "2,000.00",
+    netSalary: "20,114.00"
+  },
+  {
+    id: "asd-5",
+    employeeName: "Naveen Kumar",
+    total: "30",
+    worked: "26",
+    lop: "0",
+    holidays: "4",
+    netSalaryDays: "30",
+    gross: "38,000.00",
+    earned: "38,000.00",
+    epf: "3,600.00",
+    esiMi: "950.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "33,220.00",
+    tds: "500.00",
+    advance: "0.00",
+    netSalary: "32,720.00"
+  },
+  {
+    id: "asd-6",
+    employeeName: "Pooja Hegde",
+    total: "30",
+    worked: "26",
+    lop: "0",
+    holidays: "4",
+    netSalaryDays: "30",
+    gross: "30,000.00",
+    earned: "30,000.00",
+    epf: "3,600.00",
+    esiMi: "750.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "25,420.00",
+    tds: "0.00",
+    advance: "0.00",
+    netSalary: "25,420.00"
+  },
+  {
+    id: "asd-7",
+    employeeName: "Rahul Dravid",
+    total: "30",
+    worked: "25",
+    lop: "1",
+    holidays: "4",
+    netSalaryDays: "29",
+    gross: "42,000.00",
+    earned: "40,600.00",
+    epf: "3,600.00",
+    esiMi: "0.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "36,770.00",
+    tds: "1,200.00",
+    advance: "0.00",
+    netSalary: "35,570.00"
+  },
+  {
+    id: "asd-8",
+    employeeName: "Sanjay Singhania",
+    total: "30",
+    worked: "26",
+    lop: "0",
+    holidays: "4",
+    netSalaryDays: "30",
+    gross: "50,000.00",
+    earned: "50,000.00",
+    epf: "3,600.00",
+    esiMi: "0.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "46,170.00",
+    tds: "2,500.00",
+    advance: "0.00",
+    netSalary: "43,670.00"
+  },
+  {
+    id: "asd-9",
+    employeeName: "Sneha Reddy",
+    total: "30",
+    worked: "26",
+    lop: "0",
+    holidays: "4",
+    netSalaryDays: "30",
+    gross: "34,000.00",
+    earned: "34,000.00",
+    epf: "3,600.00",
+    esiMi: "850.00",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "29,320.00",
+    tds: "0.00",
+    advance: "0.00",
+    netSalary: "29,320.00"
+  },
+  {
+    id: "asd-10",
+    employeeName: "Vikram Rathore",
+    total: "30",
+    worked: "23",
+    lop: "3",
+    holidays: "4",
+    netSalaryDays: "27",
+    gross: "25,000.00",
+    earned: "22,500.00",
+    epf: "2,700.00",
+    esiMi: "562.50",
+    pt: "200.00",
+    lwf: "30.00",
+    taxableSalary: "19,007.50",
+    tds: "0.00",
+    advance: "1,500.00",
+    netSalary: "17,507.50"
+  }
+];
+
+// Admin EPF Dataset
+const adminEpfData = [
+  {
+    id: "epf-1",
+    uan: "100982347182",
+    employeeName: "Aakash Verma",
+    grossSalary: "35,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-2",
+    uan: "100874561293",
+    employeeName: "Deepak Sharma",
+    grossSalary: "32,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-3",
+    uan: "100923485612",
+    employeeName: "Karthik Subramanian",
+    grossSalary: "45,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-4",
+    uan: "100781294356",
+    employeeName: "Meera Nambiar",
+    grossSalary: "28,000.00",
+    basicDaSa: "13,066.67",
+    employeeContribution: "1,568.00",
+    epf: "479.00",
+    eps: "1,089.00",
+    edli: "65.33",
+    adminCharges: "65.33",
+    totalAmount: "3,266.66"
+  },
+  {
+    id: "epf-5",
+    uan: "100652398412",
+    employeeName: "Naveen Kumar",
+    grossSalary: "38,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-6",
+    uan: "100945821367",
+    employeeName: "Pooja Hegde",
+    grossSalary: "30,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-7",
+    uan: "100812349856",
+    employeeName: "Rahul Dravid",
+    grossSalary: "42,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-8",
+    uan: "100734561289",
+    employeeName: "Sanjay Singhania",
+    grossSalary: "50,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-9",
+    uan: "100984523167",
+    employeeName: "Sneha Reddy",
+    grossSalary: "34,000.00",
+    basicDaSa: "15,000.00",
+    employeeContribution: "1,800.00",
+    epf: "550.00",
+    eps: "1,250.00",
+    edli: "75.00",
+    adminCharges: "75.00",
+    totalAmount: "3,750.00"
+  },
+  {
+    id: "epf-10",
+    uan: "100612948375",
+    employeeName: "Vikram Rathore",
+    grossSalary: "25,000.00",
+    basicDaSa: "11,250.00",
+    employeeContribution: "1,350.00",
+    epf: "412.50",
+    eps: "937.50",
+    edli: "56.25",
+    adminCharges: "56.25",
+    totalAmount: "2,812.50"
+  }
+];
+
+// Admin ESI Dataset
+const adminEsiData = [
+  {
+    id: "esi-1",
+    ipNumber: "312456789012",
+    employeeName: "Aakash Verma",
+    grossSalary: "21,000.00",
+    noOfDaysWorked: "30",
+    employeeContribution: "157.50",
+    employerContribution: "682.50",
+    totalAmount: "840.00"
+  },
+  {
+    id: "esi-2",
+    ipNumber: "312456789013",
+    employeeName: "Deepak Sharma",
+    grossSalary: "19,500.00",
+    noOfDaysWorked: "28",
+    employeeContribution: "146.25",
+    employerContribution: "633.75",
+    totalAmount: "780.00"
+  },
+  {
+    id: "esi-3",
+    ipNumber: "312456789014",
+    employeeName: "Karthik Subramanian",
+    grossSalary: "20,000.00",
+    noOfDaysWorked: "30",
+    employeeContribution: "150.00",
+    employerContribution: "650.00",
+    totalAmount: "800.00"
+  },
+  {
+    id: "esi-4",
+    ipNumber: "312456789015",
+    employeeName: "Meera Nambiar",
+    grossSalary: "18,000.00",
+    noOfDaysWorked: "27",
+    employeeContribution: "135.00",
+    employerContribution: "585.00",
+    totalAmount: "720.00"
+  },
+  {
+    id: "esi-5",
+    ipNumber: "312456789016",
+    employeeName: "Naveen Kumar",
+    grossSalary: "21,000.00",
+    noOfDaysWorked: "30",
+    employeeContribution: "157.50",
+    employerContribution: "682.50",
+    totalAmount: "840.00"
+  },
+  {
+    id: "esi-6",
+    ipNumber: "312456789017",
+    employeeName: "Pooja Hegde",
+    grossSalary: "19,000.00",
+    noOfDaysWorked: "29",
+    employeeContribution: "142.50",
+    employerContribution: "617.50",
+    totalAmount: "760.00"
+  },
+  {
+    id: "esi-7",
+    ipNumber: "312456789018",
+    employeeName: "Rahul Dravid",
+    grossSalary: "20,500.00",
+    noOfDaysWorked: "30",
+    employeeContribution: "153.75",
+    employerContribution: "666.25",
+    totalAmount: "820.00"
+  },
+  {
+    id: "esi-8",
+    ipNumber: "312456789019",
+    employeeName: "Sanjay Singhania",
+    grossSalary: "21,000.00",
+    noOfDaysWorked: "30",
+    employeeContribution: "157.50",
+    employerContribution: "682.50",
+    totalAmount: "840.00"
+  },
+  {
+    id: "esi-9",
+    ipNumber: "312456789020",
+    employeeName: "Sneha Reddy",
+    grossSalary: "18,500.00",
+    noOfDaysWorked: "26",
+    employeeContribution: "138.75",
+    employerContribution: "601.25",
+    totalAmount: "740.00"
+  },
+  {
+    id: "esi-10",
+    ipNumber: "312456789021",
+    employeeName: "Vikram Rathore",
+    grossSalary: "16,000.00",
+    noOfDaysWorked: "25",
+    employeeContribution: "120.00",
+    employerContribution: "520.00",
+    totalAmount: "640.00"
+  }
+];
+
+// Admin Professional Tax (PT) Dataset
+const adminPtData = [
+  {
+    id: "pt-1",
+    employeeId: "EMP-2026-001",
+    employeeName: "Aakash Verma",
+    basic: "15,000.00",
+    hra: "6,000.00",
+    da: "4,500.00",
+    sa: "3,500.00",
+    grossWages: "29,000.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-2",
+    employeeId: "EMP-2026-002",
+    employeeName: "Deepak Sharma",
+    basic: "14,000.00",
+    hra: "5,500.00",
+    da: "4,000.00",
+    sa: "3,000.00",
+    grossWages: "26,500.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-3",
+    employeeId: "EMP-2026-003",
+    employeeName: "Karthik Subramanian",
+    basic: "18,000.00",
+    hra: "7,000.00",
+    da: "5,000.00",
+    sa: "4,000.00",
+    grossWages: "34,000.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-4",
+    employeeId: "EMP-2026-004",
+    employeeName: "Meera Nambiar",
+    basic: "13,066.67",
+    hra: "5,000.00",
+    da: "3,500.00",
+    sa: "2,500.00",
+    grossWages: "24,066.67",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-5",
+    employeeId: "EMP-2026-005",
+    employeeName: "Naveen Kumar",
+    basic: "16,000.00",
+    hra: "6,500.00",
+    da: "4,500.00",
+    sa: "3,500.00",
+    grossWages: "30,500.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-6",
+    employeeId: "EMP-2026-006",
+    employeeName: "Pooja Hegde",
+    basic: "14,000.00",
+    hra: "5,500.00",
+    da: "4,000.00",
+    sa: "3,000.00",
+    grossWages: "26,500.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-7",
+    employeeId: "EMP-2026-007",
+    employeeName: "Rahul Dravid",
+    basic: "17,000.00",
+    hra: "6,800.00",
+    da: "4,800.00",
+    sa: "3,800.00",
+    grossWages: "32,400.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-8",
+    employeeId: "EMP-2026-008",
+    employeeName: "Sanjay Singhania",
+    basic: "20,000.00",
+    hra: "8,000.00",
+    da: "6,000.00",
+    sa: "5,000.00",
+    grossWages: "39,000.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-9",
+    employeeId: "EMP-2026-009",
+    employeeName: "Sneha Reddy",
+    basic: "15,000.00",
+    hra: "6,000.00",
+    da: "4,200.00",
+    sa: "3,200.00",
+    grossWages: "28,400.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  },
+  {
+    id: "pt-10",
+    employeeId: "EMP-2026-010",
+    employeeName: "Vikram Rathore",
+    basic: "11,250.00",
+    hra: "4,500.00",
+    da: "3,000.00",
+    sa: "2,000.00",
+    grossWages: "20,750.00",
+    payable: "200.00",
+    deductedAmount: "200.00"
+  }
+];
+
+// Admin Labour Welfare Fund (LWF) Dataset
+const adminLwfData = [
+  {
+    id: "lwf-1",
+    employeeId: "EMP-2026-001",
+    employeeName: "Aakash Verma",
+    designation: "Project Manager",
+    grossSalary: "35,000.00",
+    state: "Tamil Nadu",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-2",
+    employeeId: "EMP-2026-002",
+    employeeName: "Deepak Sharma",
+    designation: "Site Engineer",
+    grossSalary: "32,000.00",
+    state: "Karnataka",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-3",
+    employeeId: "EMP-2026-003",
+    employeeName: "Karthik Subramanian",
+    designation: "Telecom Lead",
+    grossSalary: "45,000.00",
+    state: "Tamil Nadu",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-4",
+    employeeId: "EMP-2026-004",
+    employeeName: "Meera Nambiar",
+    designation: "HR Executive",
+    grossSalary: "28,000.00",
+    state: "Kerala",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-5",
+    employeeId: "EMP-2026-005",
+    employeeName: "Naveen Kumar",
+    designation: "Billing Engineer",
+    grossSalary: "38,000.00",
+    state: "Andhra Pradesh",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-6",
+    employeeId: "EMP-2026-006",
+    employeeName: "Pooja Hegde",
+    designation: "Accountant",
+    grossSalary: "30,000.00",
+    state: "Karnataka",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-7",
+    employeeId: "EMP-2026-007",
+    employeeName: "Rahul Dravid",
+    designation: "Operations Lead",
+    grossSalary: "42,000.00",
+    state: "Karnataka",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-8",
+    employeeId: "EMP-2026-008",
+    employeeName: "Sanjay Singhania",
+    designation: "Technical Director",
+    grossSalary: "50,000.00",
+    state: "Maharashtra",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-9",
+    employeeId: "EMP-2026-009",
+    employeeName: "Sneha Reddy",
+    designation: "Quality Inspector",
+    grossSalary: "34,000.00",
+    state: "Telangana",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  },
+  {
+    id: "lwf-10",
+    employeeId: "EMP-2026-010",
+    employeeName: "Vikram Rathore",
+    designation: "Field Technician",
+    grossSalary: "25,000.00",
+    state: "Tamil Nadu",
+    employeeShare: "20.00",
+    employerShare: "40.00",
+    totalAmount: "60.00"
+  }
+];
+
 // ==========================================================================
 // STATE MANAGEMENT (Default landing page: Worklist -> Payment)
 // ==========================================================================
-let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects', 'inventory', 'purchase'
+let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects', 'inventory', 'purchase', 'admin'
+let currentAdminView = 'salary'; // 'salary', 'attendance', 'salary_detail', 'epf', 'esi', 'pt', or 'lwf'
+let selectedAdminMonth = 'April';
+let selectedAdminYear = '2026';
 let currentPurchaseView = 'main'; // 'main' or 'supplier_detail'
 let selectedPurchaseSupplierId = 'pur-1';
 let selectedPurchaseSupplierName = 'Schneider Electric India Pvt Ltd';
@@ -1498,6 +2244,35 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       currentPurchaseView = 'main';
     }
+  } else if (moduleParam === 'admin') {
+    currentModule = 'admin';
+    if (viewParam === 'attendance') {
+      currentAdminView = 'attendance';
+      selectedAdminMonth = params.get('month') || 'April';
+      selectedAdminYear = params.get('year') || '2026';
+    } else if (viewParam === 'salary_detail') {
+      currentAdminView = 'salary_detail';
+      selectedAdminMonth = params.get('month') || 'April';
+      selectedAdminYear = params.get('year') || '2026';
+    } else if (viewParam === 'epf') {
+      currentAdminView = 'epf';
+      selectedAdminMonth = params.get('month') || 'April';
+      selectedAdminYear = params.get('year') || '2026';
+    } else if (viewParam === 'esi') {
+      currentAdminView = 'esi';
+      selectedAdminMonth = params.get('month') || 'April';
+      selectedAdminYear = params.get('year') || '2026';
+    } else if (viewParam === 'pt') {
+      currentAdminView = 'pt';
+      selectedAdminMonth = params.get('month') || 'April';
+      selectedAdminYear = params.get('year') || '2026';
+    } else if (viewParam === 'lwf') {
+      currentAdminView = 'lwf';
+      selectedAdminMonth = params.get('month') || 'April';
+      selectedAdminYear = params.get('year') || '2026';
+    } else {
+      currentAdminView = 'salary';
+    }
   } else if (moduleParam) {
     currentModule = moduleParam;
     if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
@@ -1555,6 +2330,8 @@ function switchModule(moduleName) {
     currentInventoryView = 'main';
   } else if (moduleName === 'purchase') {
     currentPurchaseView = 'main';
+  } else if (moduleName === 'admin') {
+    currentAdminView = 'salary';
   }
 
   updateURL();
@@ -1566,7 +2343,10 @@ function switchModule(moduleName) {
     worklist: 'Worklist',
     projects: 'Projects',
     inventory: 'Inventory',
-    purchase: 'Purchase'
+    purchase: 'Purchase',
+    accounts: 'Accounts',
+    admin: 'Admin',
+    profile: 'Profile'
   };
   showToast(`Navigated to ${moduleTitles[moduleName] || moduleName}`);
 }
@@ -1673,6 +2453,19 @@ function updateURL() {
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
     url.searchParams.delete('product');
+  } else if (currentModule === 'admin') {
+    if (currentAdminView === 'attendance' || currentAdminView === 'salary_detail' || currentAdminView === 'epf' || currentAdminView === 'esi' || currentAdminView === 'pt' || currentAdminView === 'lwf') {
+      url.searchParams.set('view', currentAdminView);
+      url.searchParams.set('month', selectedAdminMonth);
+      url.searchParams.set('year', selectedAdminYear);
+    } else {
+      url.searchParams.delete('view');
+      url.searchParams.delete('month');
+      url.searchParams.delete('year');
+    }
+    url.searchParams.delete('subpage');
+    url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
     url.searchParams.delete('subpage');
@@ -1692,7 +2485,12 @@ function updateURL() {
 // 2. MAIN APPLICATION RENDERER & BACK NAVIGATION
 // ==========================================================================
 function goBackSubpage() {
-  if (currentModule === 'purchase') {
+  if (currentModule === 'admin') {
+    if (currentAdminView === 'attendance' || currentAdminView === 'salary_detail' || currentAdminView === 'epf' || currentAdminView === 'esi' || currentAdminView === 'pt' || currentAdminView === 'lwf') {
+      closeAdminSalaryDetailPage();
+      return;
+    }
+  } else if (currentModule === 'purchase') {
     if (currentPurchaseView === 'supplier_detail') {
       currentPurchaseView = 'main';
       showToast('Returned to Purchase');
@@ -1967,8 +2765,87 @@ function renderApp() {
     renderPurchaseToolbar();
     renderPurchaseTableHead();
     renderPurchaseFooter();
+  } else if (currentModule === 'admin') {
+    if (bannerTitle) {
+      if (currentAdminView === 'attendance') {
+        bannerTitle.textContent = `${selectedAdminMonth} ${selectedAdminYear} - Attendance`;
+      } else if (currentAdminView === 'salary_detail') {
+        bannerTitle.textContent = `${selectedAdminMonth} ${selectedAdminYear} - Salary`;
+      } else if (currentAdminView === 'epf') {
+        const monthNumMap = {
+          'January': '01', 'February': '02', 'March': '03', 'April': '04',
+          'May': '05', 'June': '06', 'July': '07', 'August': '08',
+          'September': '09', 'October': '10', 'November': '11', 'December': '12'
+        };
+        const monthEndDayMap = {
+          'January': '31', 'February': '28', 'March': '31', 'April': '30',
+          'May': '31', 'June': '30', 'July': '31', 'August': '31',
+          'September': '30', 'October': '31', 'November': '30', 'December': '31'
+        };
+        const mm = monthNumMap[selectedAdminMonth] || '04';
+        const endDd = monthEndDayMap[selectedAdminMonth] || '30';
+        const yyyy = selectedAdminYear || '2026';
+        bannerTitle.textContent = `EPF - 01 - ${mm} - ${yyyy} To ${endDd} - ${mm} - ${yyyy}`;
+      } else if (currentAdminView === 'esi') {
+        const monthNumMap = {
+          'January': '01', 'February': '02', 'March': '03', 'April': '04',
+          'May': '05', 'June': '06', 'July': '07', 'August': '08',
+          'September': '09', 'October': '10', 'November': '11', 'December': '12'
+        };
+        const monthEndDayMap = {
+          'January': '31', 'February': '28', 'March': '31', 'April': '30',
+          'May': '31', 'June': '30', 'July': '31', 'August': '31',
+          'September': '30', 'October': '31', 'November': '30', 'December': '31'
+        };
+        const mm = monthNumMap[selectedAdminMonth] || '04';
+        const endDd = monthEndDayMap[selectedAdminMonth] || '30';
+        const yyyy = selectedAdminYear || '2026';
+        bannerTitle.textContent = `ESI Details - 01 - ${mm} - ${yyyy} To ${endDd} - ${mm} - ${yyyy}`;
+      } else if (currentAdminView === 'pt') {
+        const monthNumMap = {
+          'January': '01', 'February': '02', 'March': '03', 'April': '04',
+          'May': '05', 'June': '06', 'July': '07', 'August': '08',
+          'September': '09', 'October': '10', 'November': '11', 'December': '12'
+        };
+        const monthEndDayMap = {
+          'January': '31', 'February': '28', 'March': '31', 'April': '30',
+          'May': '31', 'June': '30', 'July': '31', 'August': '31',
+          'September': '30', 'October': '31', 'November': '30', 'December': '31'
+        };
+        const mm = monthNumMap[selectedAdminMonth] || '04';
+        const endDd = monthEndDayMap[selectedAdminMonth] || '30';
+        const yyyy = selectedAdminYear || '2026';
+        bannerTitle.textContent = `Professional Tax - 01 - ${mm} - ${yyyy} To ${endDd} - ${mm} - ${yyyy}`;
+      } else if (currentAdminView === 'lwf') {
+        const monthNumMap = {
+          'January': '01', 'February': '02', 'March': '03', 'April': '04',
+          'May': '05', 'June': '06', 'July': '07', 'August': '08',
+          'September': '09', 'October': '10', 'November': '11', 'December': '12'
+        };
+        const monthEndDayMap = {
+          'January': '31', 'February': '28', 'March': '31', 'April': '30',
+          'May': '31', 'June': '30', 'July': '31', 'August': '31',
+          'September': '30', 'October': '31', 'November': '30', 'December': '31'
+        };
+        const mm = monthNumMap[selectedAdminMonth] || '04';
+        const endDd = monthEndDayMap[selectedAdminMonth] || '30';
+        const yyyy = selectedAdminYear || '2026';
+        bannerTitle.textContent = `LWF- 01 - ${mm} - ${yyyy} To ${endDd} - ${mm} - ${yyyy}`;
+      } else {
+        bannerTitle.textContent = "Admin";
+      }
+    }
+    loadAdminDataset();
+    renderAdminToolbar();
+    renderAdminTableHead();
+    renderAdminFooter();
   } else {
-    if (bannerTitle) bannerTitle.textContent = currentModule.toUpperCase();
+    const titleMap = {
+      accounts: 'Accounts',
+      admin: 'Admin',
+      profile: 'Profile'
+    };
+    if (bannerTitle) bannerTitle.textContent = titleMap[currentModule] || (currentModule.charAt(0).toUpperCase() + currentModule.slice(1));
     renderPlaceholderModule();
     return;
   }
@@ -4474,43 +5351,51 @@ function renderInventoryTableHead() {
   if (currentInventoryView === 'product_details') {
     thead.innerHTML = `
       <tr class="master-view-header inventory-view-header">
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Invoice No</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceNo'] ? 'has-active-filter' : ''}" data-filter-col="invoiceNo" title="Filter Invoice No">&#9660;</button>
           </div>
         </th>
-        <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th rowspan="2" style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Vendor Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
           </div>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <span>Doc Date</span>
         </th>
-        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Qty Doc</span>
+        <th colspan="3" class="th-qty-group" style="width: 36ch; min-width: 36ch; max-width: 36ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Qty</span>
         </th>
-        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Qty Stock</span>
+        <th colspan="5" class="th-rate-group" style="width: 73ch; min-width: 73ch; max-width: 73ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Rate</span>
         </th>
-        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Qty Total</span>
+      </tr>
+      <tr class="master-view-header inventory-view-header">
+        <th class="th-sub-qty" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Doc</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th class="th-sub-qty" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Stock</span>
+        </th>
+        <th class="th-sub-qty" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
+          <span>Total</span>
+        </th>
+        <th class="th-sub-rate" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <span>Purchase Price</span>
         </th>
-        <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th class="th-sub-rate" style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <span>Transportation</span>
         </th>
-        <th style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th class="th-sub-rate" style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <span>Unloading & Other</span>
         </th>
-        <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th class="th-sub-rate" style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <span>Stock Price</span>
         </th>
-        <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th class="th-sub-rate" style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px; white-space: nowrap;">
           <span>New Price</span>
         </th>
       </tr>
@@ -4723,6 +5608,707 @@ function renderPurchaseTableHead() {
 }
 
 function renderPurchaseFooter() {
+  const footer = document.getElementById('worklistFooterBar');
+  if (!footer) return;
+  footer.innerHTML = '';
+  footer.style.display = 'none';
+}
+
+// ==========================================================================
+// ADMIN MODULE RENDERERS
+// ==========================================================================
+function openAdminAttendancePage(month, year) {
+  currentModule = 'admin';
+  currentAdminView = 'attendance';
+  selectedAdminMonth = month || 'April';
+  selectedAdminYear = year || '2026';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to ${selectedAdminMonth} ${selectedAdminYear} Attendance`);
+}
+
+function closeAdminAttendancePage() {
+  currentModule = 'admin';
+  currentAdminView = 'salary';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Returned to Admin Salary');
+}
+
+function openAdminSalaryDetailPage(month, year) {
+  currentModule = 'admin';
+  currentAdminView = 'salary_detail';
+  selectedAdminMonth = month || 'April';
+  selectedAdminYear = year || '2026';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to ${selectedAdminMonth} ${selectedAdminYear} Salary Details`);
+}
+
+function closeAdminSalaryDetailPage() {
+  currentModule = 'admin';
+  currentAdminView = 'salary';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Returned to Admin Salary');
+}
+
+function openAdminEpfPage(month, year) {
+  currentModule = 'admin';
+  currentAdminView = 'epf';
+  selectedAdminMonth = month || 'April';
+  selectedAdminYear = year || '2026';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to ${selectedAdminMonth} ${selectedAdminYear} EPF Details`);
+}
+window.openAdminEpfPage = openAdminEpfPage;
+
+function closeAdminEpfPage() {
+  currentModule = 'admin';
+  currentAdminView = 'salary';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Returned to Admin Salary');
+}
+window.closeAdminEpfPage = closeAdminEpfPage;
+
+function openAdminEsiPage(month, year) {
+  currentModule = 'admin';
+  currentAdminView = 'esi';
+  selectedAdminMonth = month || 'April';
+  selectedAdminYear = year || '2026';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to ${selectedAdminMonth} ${selectedAdminYear} ESI Details`);
+}
+window.openAdminEsiPage = openAdminEsiPage;
+
+function closeAdminEsiPage() {
+  currentModule = 'admin';
+  currentAdminView = 'salary';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Returned to Admin Salary');
+}
+window.closeAdminEsiPage = closeAdminEsiPage;
+
+function openAdminPtPage(month, year) {
+  currentModule = 'admin';
+  currentAdminView = 'pt';
+  selectedAdminMonth = month || 'April';
+  selectedAdminYear = year || '2026';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to ${selectedAdminMonth} ${selectedAdminYear} Professional Tax Details`);
+}
+window.openAdminPtPage = openAdminPtPage;
+
+function closeAdminPtPage() {
+  currentModule = 'admin';
+  currentAdminView = 'salary';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Returned to Admin Salary');
+}
+window.closeAdminPtPage = closeAdminPtPage;
+
+function openAdminLwfPage(month, year) {
+  currentModule = 'admin';
+  currentAdminView = 'lwf';
+  selectedAdminMonth = month || 'April';
+  selectedAdminYear = year || '2026';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to ${selectedAdminMonth} ${selectedAdminYear} LWF Details`);
+}
+window.openAdminLwfPage = openAdminLwfPage;
+
+function closeAdminLwfPage() {
+  currentModule = 'admin';
+  currentAdminView = 'salary';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Returned to Admin Salary');
+}
+window.closeAdminLwfPage = closeAdminLwfPage;
+
+function loadAdminDataset() {
+  if (currentAdminView === 'attendance') {
+    currentDataset = [...adminAttendanceData];
+  } else if (currentAdminView === 'salary_detail') {
+    currentDataset = [...adminSalaryDetailData];
+  } else if (currentAdminView === 'epf') {
+    currentDataset = [...adminEpfData];
+  } else if (currentAdminView === 'esi') {
+    currentDataset = [...adminEsiData];
+  } else if (currentAdminView === 'pt') {
+    currentDataset = [...adminPtData];
+  } else if (currentAdminView === 'lwf') {
+    currentDataset = [...adminLwfData];
+  } else {
+    currentDataset = [...adminSalaryData];
+  }
+}
+
+function renderAdminToolbar() {
+  const toolbar = document.getElementById('worklistToolbar');
+  if (!toolbar) return;
+
+  if (currentAdminView === 'attendance' || currentAdminView === 'salary_detail' || currentAdminView === 'epf' || currentAdminView === 'esi' || currentAdminView === 'pt' || currentAdminView === 'lwf') {
+    const isSummationSubpage = (currentAdminView === 'salary_detail' || currentAdminView === 'epf' || currentAdminView === 'esi' || currentAdminView === 'pt' || currentAdminView === 'lwf');
+    const toolbarLeftHtml = isSummationSubpage
+      ? `<div class="toolbar-left" style="display: flex; align-items: center; gap: 14px;">
+          ${universalBackBtnHtml}
+          <img src="icons/summation.svg" alt="Summation" style="width: 32px; height: 32px; border-radius: 4px; display: inline-block; vertical-align: middle;">
+        </div>`
+      : `<div class="toolbar-left">${universalBackBtnHtml}</div>`;
+
+    toolbar.innerHTML = `
+      ${toolbarLeftHtml}
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <!-- Hidden File Input for PDF -->
+        <input type="file" id="adminPdfInput" accept=".pdf, application/pdf" style="display: none;">
+        <!-- Hidden File Input for CSV / Excel -->
+        <input type="file" id="adminFileInput" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
+        
+        <!-- PDF Upload Button -->
+        <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnAdminPdf" data-tooltip="Upload PDF" aria-label="Upload PDF">
+          <img src="icons/PDF Upload.svg" alt="Upload PDF" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- CSV / Excel Upload Button -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnAdminCsv" data-tooltip="Upload CSV / Excel" aria-label="Upload CSV / Excel">
+          <img src="icons/CSV upload.svg" alt="Upload CSV / Excel" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Red Close X Button -->
+        <button type="button" class="toolbar-icon-btn btn-cancel-action" id="btnAdminCloseAttendance" data-tooltip="Close" aria-label="Close" style="background: transparent; border: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+          <img src="icons/Cancel.svg" alt="Close" class="toolbar-icon-img" width="28" height="28">
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btnAdminPdf')?.addEventListener('click', () => {
+      const input = document.getElementById('adminPdfInput');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    });
+
+    document.getElementById('adminPdfInput')?.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        showToast(`PDF selected: ${file.name}`);
+      }
+    });
+
+    document.getElementById('btnAdminCsv')?.addEventListener('click', () => {
+      const input = document.getElementById('adminFileInput');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    });
+
+    document.getElementById('adminFileInput')?.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        showToast(`File selected: ${file.name}`);
+      }
+    });
+
+    document.getElementById('btnAdminCloseAttendance')?.addEventListener('click', () => {
+      if (currentAdminView === 'epf') {
+        closeAdminEpfPage();
+      } else if (currentAdminView === 'esi') {
+        closeAdminEsiPage();
+      } else if (currentAdminView === 'pt') {
+        closeAdminPtPage();
+      } else if (currentAdminView === 'lwf') {
+        closeAdminLwfPage();
+      } else {
+        closeAdminSalaryDetailPage();
+      }
+    });
+    return;
+  }
+
+  toolbar.innerHTML = `
+    <div class="toolbar-left"></div>
+    <div class="toolbar-right">
+      <!-- Hidden File Input for CSV / Excel (restricted to csv, xlsx, xls) -->
+      <input type="file" id="adminFileInput" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
+      <!-- CSV / Excel Upload Button -->
+      <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnAdminCsv" data-tooltip="Upload CSV / Excel" aria-label="Upload CSV / Excel">
+        <img src="icons/CSV upload.svg" alt="Upload" class="toolbar-icon-img" width="30" height="30">
+      </button>
+    </div>
+  `;
+
+  const btnAdminCsv = document.getElementById('btnAdminCsv');
+  const adminFileInput = document.getElementById('adminFileInput');
+
+  if (btnAdminCsv && adminFileInput) {
+    btnAdminCsv.addEventListener('click', () => {
+      adminFileInput.value = '';
+      adminFileInput.click();
+    });
+
+    adminFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        showToast(`File selected: ${file.name}`);
+      }
+    });
+  }
+}
+
+function renderAdminTableHead() {
+  const thead = document.getElementById('worklistTableHead');
+  if (!thead) return;
+
+  if (currentAdminView === 'lwf') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee ID</span>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Designation</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Gross Salary</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>State</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Employee Share</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Employer Share</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Total Amount</span>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAdminView === 'pt') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee ID</span>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Basic</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>HRA</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>DA</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>SA</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Gross Wages</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Payable</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Deducted Amount</span>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAdminView === 'esi') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>IP Number</span>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Gross Salary</span>
+          </div>
+        </th>
+        <th style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>No of Days Worked</span>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Employee Contribution</span>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Employer Contribution</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Total Amount</span>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAdminView === 'epf') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>UAN</span>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Gross Salary</span>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>BASIC + DA + SA</span>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Employee Contribution</span>
+          </div>
+        </th>
+        <th colspan="4" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Employer Contribution</span>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Total Amount</span>
+          </div>
+        </th>
+      </tr>
+      <tr class="master-view-header tr-sub-headers">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>EPF</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>EPS</span>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>EDLI</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Admin Charges</span>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAdminView === 'salary_detail') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+          </div>
+        </th>
+        <th colspan="5" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Salary Days</span>
+          </div>
+        </th>
+        <th colspan="2" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Salary</span>
+          </div>
+        </th>
+        <th colspan="4" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Deduction</span>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Taxable Salary</span>
+          </div>
+        </th>
+        <th colspan="2" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Deduction</span>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Net Salary</span>
+          </div>
+        </th>
+      </tr>
+      <tr class="master-view-header tr-sub-headers">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Total</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Worked</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>LOP</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Holidays</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Net Salary Days</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Gross</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Earned</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>EPF</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>ESI / MI</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>PT</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>LWF</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>TDS</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Advance</span>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAdminView === 'attendance') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Employee Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="text-align: center !important; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>1 to 31</span>
+          </div>
+        </th>
+        <th colspan="5" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Salary Days</span>
+          </div>
+        </th>
+      </tr>
+      <tr class="master-view-header tr-sub-headers">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Total</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Worked</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>LOP</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Holidays</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Net Salary Days</span>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  thead.innerHTML = `
+    <tr class="master-view-header">
+      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Year</span>
+        </div>
+      </th>
+      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Month</span>
+          <button type="button" class="filter-funnel-btn ${activeColumnFilters['month'] ? 'has-active-filter' : ''}" data-filter-col="month" title="Filter Month">&#9660;</button>
+        </div>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>No of Employee</span>
+        </div>
+      </th>
+      <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>Salary Paid</span>
+        </div>
+      </th>
+      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>EPF</span>
+        </div>
+      </th>
+      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>ESI</span>
+        </div>
+      </th>
+      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>PT</span>
+        </div>
+      </th>
+      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>LWF</span>
+        </div>
+      </th>
+    </tr>
+  `;
+  rebindFilterButtons();
+}
+
+function renderAdminFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
   footer.innerHTML = '';
@@ -5464,15 +7050,17 @@ function applyFiltersAndRender() {
   }
 
   if (filteredDataset.length === 0) {
-    const colSpan = currentModule === 'inventory'
-      ? 8
-      : (currentModule === 'purchase'
-        ? 9
-        : (currentModule === 'projects'
-          ? 14
-          : (currentModule === 'indus_towers'
-            ? (currentIndusSubpage === 'projects' ? 8 : 10)
-            : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10)))));
+    const colSpan = currentModule === 'admin'
+      ? (currentAdminView === 'salary_detail' ? 16 : (currentAdminView === 'epf' ? 10 : (currentAdminView === 'pt' ? 9 : (currentAdminView === 'lwf' ? 8 : (currentAdminView === 'esi' ? 7 : (currentAdminView === 'attendance' ? 7 : 8))))))
+      : (currentModule === 'inventory'
+        ? 8
+        : (currentModule === 'purchase'
+          ? 9
+          : (currentModule === 'projects'
+            ? 14
+            : (currentModule === 'indus_towers'
+              ? (currentIndusSubpage === 'projects' ? 8 : 10)
+              : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10))))));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -6189,7 +7777,7 @@ function applyFiltersAndRender() {
     } else if (currentProjectsSubpage === 'supply') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
-          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center;">
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px;">
             <a href="#" class="td-link-blue" onclick="openSupplyCustomerDetailsPage('${row.id}', '${row.customer}'); return false;" style="color: #2563eb; font-weight: 500; text-decoration: underline;">${row.customer || ''}</a>
           </td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center;">${row.orderId || ''}</td>
@@ -6256,9 +7844,7 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.purchasePrice || ''}</td>
           <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.transportation || ''}</td>
           <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px;">${row.unloadingOther || ''}</td>
-          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">
-            <a href="#" onclick="openInventoryStockPricePage('${row.id}', '${(selectedInventoryProductName || 'Product Description').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.stockPrice || ''}</a>
-          </td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.stockPrice || ''}</td>
           <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.newPrice || ''}</td>
         </tr>
       `).join('');
@@ -6307,6 +7893,120 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; font-weight: 600; color: #1e293b;">${row.invoiceValue || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.paymentStatus || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b;">${row.gstFilingStatus || ''}</td>
+        </tr>
+      `).join('');
+    }
+  } else if (currentModule === 'admin') {
+    if (currentAdminView === 'lwf') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="admin-lwf-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeId || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.designation || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.state || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeShare || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employerShare || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAdminView === 'pt') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="admin-pt-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeId || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.basic || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.hra || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.da || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.sa || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossWages || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.payable || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedAmount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAdminView === 'esi') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="admin-esi-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.ipNumber || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
+          <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.noOfDaysWorked || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeContribution || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employerContribution || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAdminView === 'epf') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="admin-epf-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.uan || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.basicDaSa || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeContribution || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.eps || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.edli || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.adminCharges || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAdminView === 'salary_detail') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="admin-salary-detail-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.total || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.worked || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.lop || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.holidays || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.netSalaryDays || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gross || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.earned || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.esiMi || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.pt || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.lwf || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.taxableSalary || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.tds || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.advance || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.netSalary || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAdminView === 'attendance') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="admin-attendance-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
+          <td style="text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #64748b; font-weight: 500;">${row.daysSummary || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.total || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.worked || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.lop || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.holidays || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.netSalaryDays || ''}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="admin-data-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.year || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" onclick="openAdminAttendancePage('${(row.month || '').replace(/'/g, "\\'")}', '${(row.year || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.month || ''}</a>
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.noOfEmployee || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" onclick="openAdminSalaryDetailPage('${(row.month || '').replace(/'/g, "\\'")}', '${(row.year || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.salaryPaid || ''}</a>
+          </td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" onclick="openAdminEpfPage('${(row.month || '').replace(/'/g, "\\'")}', '${(row.year || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.epf || ''}</a>
+          </td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" onclick="openAdminEsiPage('${(row.month || '').replace(/'/g, "\\'")}', '${(row.year || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.esi || ''}</a>
+          </td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" onclick="openAdminPtPage('${(row.month || '').replace(/'/g, "\\'")}', '${(row.year || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.pt || ''}</a>
+          </td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" onclick="openAdminLwfPage('${(row.month || '').replace(/'/g, "\\'")}', '${(row.year || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.lwf || ''}</a>
+          </td>
         </tr>
       `).join('');
     }

@@ -1450,16 +1450,16 @@ const adminSalaryData = [
 
 // Admin Attendance Dataset
 const adminAttendanceData = [
-  { id: "att-1", employeeName: "Aakash Verma", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
-  { id: "att-2", employeeName: "Deepak Sharma", daysSummary: "", total: "30", worked: "25", lop: "1", holidays: "4", netSalaryDays: "29" },
-  { id: "att-3", employeeName: "Karthik Subramanian", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
-  { id: "att-4", employeeName: "Meera Nambiar", daysSummary: "", total: "30", worked: "24", lop: "2", holidays: "4", netSalaryDays: "28" },
-  { id: "att-5", employeeName: "Naveen Kumar", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
-  { id: "att-6", employeeName: "Pooja Hegde", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
-  { id: "att-7", employeeName: "Rahul Dravid", daysSummary: "", total: "30", worked: "25", lop: "1", holidays: "4", netSalaryDays: "29" },
-  { id: "att-8", employeeName: "Sanjay Singhania", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
-  { id: "att-9", employeeName: "Sneha Reddy", daysSummary: "", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
-  { id: "att-10", employeeName: "Vikram Rathore", daysSummary: "", total: "30", worked: "23", lop: "3", holidays: "4", netSalaryDays: "27" }
+  { id: "att-1", employeeName: "Aakash Verma", days: ["P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-2", employeeName: "Deepak Sharma", days: ["P","P","P","A","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "25", lop: "1", holidays: "4", netSalaryDays: "29" },
+  { id: "att-3", employeeName: "Karthik Subramanian", days: ["P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-4", employeeName: "Meera Nambiar", days: ["P","P","A","A","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "24", lop: "2", holidays: "4", netSalaryDays: "28" },
+  { id: "att-5", employeeName: "Naveen Kumar", days: ["P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-6", employeeName: "Pooja Hegde", days: ["P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-7", employeeName: "Rahul Dravid", days: ["P","P","P","P","WO","P","P","P","A","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "25", lop: "1", holidays: "4", netSalaryDays: "29" },
+  { id: "att-8", employeeName: "Sanjay Singhania", days: ["P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-9", employeeName: "Sneha Reddy", days: ["P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "26", lop: "0", holidays: "4", netSalaryDays: "30" },
+  { id: "att-10", employeeName: "Vikram Rathore", days: ["P","A","A","A","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P","P","P","P","WO","P","P"], leave: "0", total: "30", worked: "23", lop: "3", holidays: "4", netSalaryDays: "27" }
 ];
 
 // Admin Salary Detail Dataset
@@ -1663,130 +1663,130 @@ const adminEpfData = [
     uan: "100982347182",
     employeeName: "Aakash Verma",
     grossSalary: "35,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-2",
     uan: "100874561293",
     employeeName: "Deepak Sharma",
     grossSalary: "32,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-3",
     uan: "100923485612",
     employeeName: "Karthik Subramanian",
     grossSalary: "45,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-4",
     uan: "100781294356",
     employeeName: "Meera Nambiar",
     grossSalary: "28,000.00",
+    epfWages: "13,066.67",
     basicDaSa: "13,066.67",
     employeeContribution: "1,568.00",
     epf: "479.00",
     eps: "1,089.00",
     edli: "65.33",
-    adminCharges: "65.33",
-    totalAmount: "3,266.66"
+    totalAmount: "3,201.33"
   },
   {
     id: "epf-5",
     uan: "100652398412",
     employeeName: "Naveen Kumar",
     grossSalary: "38,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-6",
     uan: "100945821367",
     employeeName: "Pooja Hegde",
     grossSalary: "30,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-7",
     uan: "100812349856",
     employeeName: "Rahul Dravid",
     grossSalary: "42,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-8",
     uan: "100734561289",
     employeeName: "Sanjay Singhania",
     grossSalary: "50,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-9",
     uan: "100984523167",
     employeeName: "Sneha Reddy",
     grossSalary: "34,000.00",
+    epfWages: "15,000.00",
     basicDaSa: "15,000.00",
     employeeContribution: "1,800.00",
     epf: "550.00",
     eps: "1,250.00",
     edli: "75.00",
-    adminCharges: "75.00",
-    totalAmount: "3,750.00"
+    totalAmount: "3,675.00"
   },
   {
     id: "epf-10",
     uan: "100612948375",
     employeeName: "Vikram Rathore",
     grossSalary: "25,000.00",
+    epfWages: "11,250.00",
     basicDaSa: "11,250.00",
     employeeContribution: "1,350.00",
     epf: "412.50",
     eps: "937.50",
     edli: "56.25",
-    adminCharges: "56.25",
-    totalAmount: "2,812.50"
+    totalAmount: "2,756.25"
   }
 ];
 
@@ -1797,6 +1797,7 @@ const adminEsiData = [
     ipNumber: "312456789012",
     employeeName: "Aakash Verma",
     grossSalary: "21,000.00",
+    esiWages: "21,000.00",
     noOfDaysWorked: "30",
     employeeContribution: "157.50",
     employerContribution: "682.50",
@@ -1807,6 +1808,7 @@ const adminEsiData = [
     ipNumber: "312456789013",
     employeeName: "Deepak Sharma",
     grossSalary: "19,500.00",
+    esiWages: "19,500.00",
     noOfDaysWorked: "28",
     employeeContribution: "146.25",
     employerContribution: "633.75",
@@ -1817,6 +1819,7 @@ const adminEsiData = [
     ipNumber: "312456789014",
     employeeName: "Karthik Subramanian",
     grossSalary: "20,000.00",
+    esiWages: "20,000.00",
     noOfDaysWorked: "30",
     employeeContribution: "150.00",
     employerContribution: "650.00",
@@ -1827,6 +1830,7 @@ const adminEsiData = [
     ipNumber: "312456789015",
     employeeName: "Meera Nambiar",
     grossSalary: "18,000.00",
+    esiWages: "18,000.00",
     noOfDaysWorked: "27",
     employeeContribution: "135.00",
     employerContribution: "585.00",
@@ -1837,6 +1841,7 @@ const adminEsiData = [
     ipNumber: "312456789016",
     employeeName: "Naveen Kumar",
     grossSalary: "21,000.00",
+    esiWages: "21,000.00",
     noOfDaysWorked: "30",
     employeeContribution: "157.50",
     employerContribution: "682.50",
@@ -1847,6 +1852,7 @@ const adminEsiData = [
     ipNumber: "312456789017",
     employeeName: "Pooja Hegde",
     grossSalary: "19,000.00",
+    esiWages: "19,000.00",
     noOfDaysWorked: "29",
     employeeContribution: "142.50",
     employerContribution: "617.50",
@@ -1857,6 +1863,7 @@ const adminEsiData = [
     ipNumber: "312456789018",
     employeeName: "Rahul Dravid",
     grossSalary: "20,500.00",
+    esiWages: "20,500.00",
     noOfDaysWorked: "30",
     employeeContribution: "153.75",
     employerContribution: "666.25",
@@ -1867,6 +1874,7 @@ const adminEsiData = [
     ipNumber: "312456789019",
     employeeName: "Sanjay Singhania",
     grossSalary: "21,000.00",
+    esiWages: "21,000.00",
     noOfDaysWorked: "30",
     employeeContribution: "157.50",
     employerContribution: "682.50",
@@ -1877,6 +1885,7 @@ const adminEsiData = [
     ipNumber: "312456789020",
     employeeName: "Sneha Reddy",
     grossSalary: "18,500.00",
+    esiWages: "18,500.00",
     noOfDaysWorked: "26",
     employeeContribution: "138.75",
     employerContribution: "601.25",
@@ -1887,6 +1896,7 @@ const adminEsiData = [
     ipNumber: "312456789021",
     employeeName: "Vikram Rathore",
     grossSalary: "16,000.00",
+    esiWages: "16,000.00",
     noOfDaysWorked: "25",
     employeeContribution: "120.00",
     employerContribution: "520.00",
@@ -2027,6 +2037,8 @@ const adminLwfData = [
     designation: "Project Manager",
     grossSalary: "35,000.00",
     state: "Tamil Nadu",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2038,6 +2050,8 @@ const adminLwfData = [
     designation: "Site Engineer",
     grossSalary: "32,000.00",
     state: "Karnataka",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2049,6 +2063,8 @@ const adminLwfData = [
     designation: "Telecom Lead",
     grossSalary: "45,000.00",
     state: "Tamil Nadu",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2057,9 +2073,11 @@ const adminLwfData = [
     id: "lwf-4",
     employeeId: "EMP-2026-004",
     employeeName: "Meera Nambiar",
-    designation: "HR Executive",
+    designation: "CAD Designer",
     grossSalary: "28,000.00",
     state: "Kerala",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2068,9 +2086,11 @@ const adminLwfData = [
     id: "lwf-5",
     employeeId: "EMP-2026-005",
     employeeName: "Naveen Kumar",
-    designation: "Billing Engineer",
+    designation: "Site Supervisor",
     grossSalary: "38,000.00",
-    state: "Andhra Pradesh",
+    state: "Telangana",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2079,9 +2099,11 @@ const adminLwfData = [
     id: "lwf-6",
     employeeId: "EMP-2026-006",
     employeeName: "Pooja Hegde",
-    designation: "Accountant",
+    designation: "HR Officer",
     grossSalary: "30,000.00",
-    state: "Karnataka",
+    state: "Maharashtra",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2090,9 +2112,11 @@ const adminLwfData = [
     id: "lwf-7",
     employeeId: "EMP-2026-007",
     employeeName: "Rahul Dravid",
-    designation: "Operations Lead",
+    designation: "Operations Manager",
     grossSalary: "42,000.00",
     state: "Karnataka",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2101,9 +2125,11 @@ const adminLwfData = [
     id: "lwf-8",
     employeeId: "EMP-2026-008",
     employeeName: "Sanjay Singhania",
-    designation: "Technical Director",
+    designation: "Director",
     grossSalary: "50,000.00",
     state: "Maharashtra",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2112,9 +2138,11 @@ const adminLwfData = [
     id: "lwf-9",
     employeeId: "EMP-2026-009",
     employeeName: "Sneha Reddy",
-    designation: "Quality Inspector",
+    designation: "Quality Analyst",
     grossSalary: "34,000.00",
-    state: "Telangana",
+    state: "Andhra Pradesh",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
@@ -2125,17 +2153,539 @@ const adminLwfData = [
     employeeName: "Vikram Rathore",
     designation: "Field Technician",
     grossSalary: "25,000.00",
-    state: "Tamil Nadu",
+    state: "Rajasthan",
+    employeeContribution: "20.00",
+    employerContribution: "40.00",
     employeeShare: "20.00",
     employerShare: "40.00",
     totalAmount: "60.00"
   }
 ];
 
+const accountsSalesData = [
+  {
+    id: "acc-s-1",
+    voucherNo: "VCH-1001",
+    customerName: "Indus Towers Ltd",
+    invoiceNo: "INV-2026-001",
+    invoiceDate: "12 - 08 - 2026",
+    invoiceAmount: "12,50,000.00",
+    deduction: "25,000.00",
+    receivedAmount: "12,25,000.00"
+  },
+  {
+    id: "acc-s-2",
+    voucherNo: "VCH-1002",
+    customerName: "Bharti Airtel Ltd",
+    invoiceNo: "INV-2026-002",
+    invoiceDate: "15 - 08 - 2026",
+    invoiceAmount: "8,20,000.00",
+    deduction: "16,400.00",
+    receivedAmount: "8,03,600.00"
+  },
+  {
+    id: "acc-s-3",
+    voucherNo: "VCH-1003",
+    customerName: "Reliance Jio Infocomm",
+    invoiceNo: "INV-2026-003",
+    invoiceDate: "18 - 08 - 2026",
+    invoiceAmount: "15,40,000.00",
+    deduction: "30,800.00",
+    receivedAmount: "15,09,200.00"
+  },
+  {
+    id: "acc-s-4",
+    voucherNo: "VCH-1004",
+    customerName: "Vodafone Idea Ltd",
+    invoiceNo: "INV-2026-004",
+    invoiceDate: "22 - 08 - 2026",
+    invoiceAmount: "6,75,000.00",
+    deduction: "13,500.00",
+    receivedAmount: "6,61,500.00"
+  },
+  {
+    id: "acc-s-5",
+    voucherNo: "VCH-1005",
+    customerName: "ATC Telecom Infrastructure",
+    invoiceNo: "INV-2026-005",
+    invoiceDate: "25 - 08 - 2026",
+    invoiceAmount: "9,80,000.00",
+    deduction: "19,600.00",
+    receivedAmount: "9,60,400.00"
+  }
+];
+
+const accountsGstData = [
+  {
+    id: "gst-1",
+    month: "April",
+    gstr1aBasic: "15,00,000.00",
+    gstr1aCgst: "1,35,000.00",
+    gstr1aSgst: "1,35,000.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "12,00,000.00",
+    gstr2bCgst: "1,08,000.00",
+    gstr2bSgst: "1,08,000.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "50,000.00",
+    rcmCgst: "4,500.00",
+    rcmSgst: "4,500.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-2",
+    month: "May",
+    gstr1aBasic: "18,50,000.00",
+    gstr1aCgst: "1,66,500.00",
+    gstr1aSgst: "1,66,500.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "14,20,000.00",
+    gstr2bCgst: "1,27,800.00",
+    gstr2bSgst: "1,27,800.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "65,000.00",
+    rcmCgst: "5,850.00",
+    rcmSgst: "5,850.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-3",
+    month: "June",
+    gstr1aBasic: "22,00,000.00",
+    gstr1aCgst: "1,98,000.00",
+    gstr1aSgst: "1,98,000.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "16,80,000.00",
+    gstr2bCgst: "1,51,200.00",
+    gstr2bSgst: "1,51,200.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "45,000.00",
+    rcmCgst: "4,050.00",
+    rcmSgst: "4,050.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-4",
+    month: "July",
+    gstr1aBasic: "19,80,000.00",
+    gstr1aCgst: "1,78,200.00",
+    gstr1aSgst: "1,78,200.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "15,50,000.00",
+    gstr2bCgst: "1,39,500.00",
+    gstr2bSgst: "1,39,500.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "55,000.00",
+    rcmCgst: "4,950.00",
+    rcmSgst: "4,950.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-5",
+    month: "August",
+    gstr1aBasic: "25,40,000.00",
+    gstr1aCgst: "2,28,600.00",
+    gstr1aSgst: "2,28,600.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "20,10,000.00",
+    gstr2bCgst: "1,80,900.00",
+    gstr2bSgst: "1,80,900.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "70,000.00",
+    rcmCgst: "6,300.00",
+    rcmSgst: "6,300.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-6",
+    month: "September",
+    gstr1aBasic: "21,00,000.00",
+    gstr1aCgst: "1,89,000.00",
+    gstr1aSgst: "1,89,000.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "17,30,000.00",
+    gstr2bCgst: "1,55,700.00",
+    gstr2bSgst: "1,55,700.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "40,000.00",
+    rcmCgst: "3,600.00",
+    rcmSgst: "3,600.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-7",
+    month: "October",
+    gstr1aBasic: "24,50,000.00",
+    gstr1aCgst: "2,20,500.00",
+    gstr1aSgst: "2,20,500.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "19,00,000.00",
+    gstr2bCgst: "1,71,000.00",
+    gstr2bSgst: "1,71,000.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "60,000.00",
+    rcmCgst: "5,400.00",
+    rcmSgst: "5,400.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-8",
+    month: "November",
+    gstr1aBasic: "20,20,000.00",
+    gstr1aCgst: "1,81,800.00",
+    gstr1aSgst: "1,81,800.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "16,40,000.00",
+    gstr2bCgst: "1,47,600.00",
+    gstr2bSgst: "1,47,600.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "48,000.00",
+    rcmCgst: "4,320.00",
+    rcmSgst: "4,320.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-9",
+    month: "December",
+    gstr1aBasic: "27,00,000.00",
+    gstr1aCgst: "2,43,000.00",
+    gstr1aSgst: "2,43,000.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "21,50,000.00",
+    gstr2bCgst: "1,93,500.00",
+    gstr2bSgst: "1,93,500.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "75,000.00",
+    rcmCgst: "6,750.00",
+    rcmSgst: "6,750.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-10",
+    month: "January",
+    gstr1aBasic: "23,10,000.00",
+    gstr1aCgst: "2,07,900.00",
+    gstr1aSgst: "2,07,900.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "18,20,000.00",
+    gstr2bCgst: "1,63,800.00",
+    gstr2bSgst: "1,63,800.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "52,000.00",
+    rcmCgst: "4,680.00",
+    rcmSgst: "4,680.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-11",
+    month: "February",
+    gstr1aBasic: "21,80,000.00",
+    gstr1aCgst: "1,96,200.00",
+    gstr1aSgst: "1,96,200.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "17,60,000.00",
+    gstr2bCgst: "1,58,400.00",
+    gstr2bSgst: "1,58,400.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "46,000.00",
+    rcmCgst: "4,140.00",
+    rcmSgst: "4,140.00",
+    rcmIgst: "0.00"
+  },
+  {
+    id: "gst-12",
+    month: "March",
+    gstr1aBasic: "30,00,000.00",
+    gstr1aCgst: "2,70,000.00",
+    gstr1aSgst: "2,70,000.00",
+    gstr1aIgst: "0.00",
+    gstr2bBasic: "24,00,000.00",
+    gstr2bCgst: "2,16,000.00",
+    gstr2bSgst: "2,16,000.00",
+    gstr2bIgst: "0.00",
+    rcmBasic: "80,000.00",
+    rcmCgst: "7,200.00",
+    rcmSgst: "7,200.00",
+    rcmIgst: "0.00"
+  }
+];
+
+const accountsBankData = [
+  {
+    id: "bank-1",
+    date: "12 - 08 - 2026",
+    bankName: "HDFC Bank - 50200012345",
+    particulars: "Payment received from Indus Towers Ltd",
+    refNo: "NEFT/2608123456",
+    withdrawal: "0.00",
+    deposit: "12,25,000.00",
+    balance: "25,40,000.00"
+  },
+  {
+    id: "bank-2",
+    date: "14 - 08 - 2026",
+    bankName: "HDFC Bank - 50200012345",
+    particulars: "Vendor Payment - Steel Infra Supplies",
+    refNo: "RTGS/2608789012",
+    withdrawal: "3,50,000.00",
+    deposit: "0.00",
+    balance: "21,90,000.00"
+  },
+  {
+    id: "bank-3",
+    date: "16 - 08 - 2026",
+    bankName: "ICICI Bank - 00040501234",
+    particulars: "Payment received from Bharti Airtel Ltd",
+    refNo: "NEFT/2608345678",
+    withdrawal: "0.00",
+    deposit: "8,03,600.00",
+    balance: "29,93,600.00"
+  },
+  {
+    id: "bank-4",
+    date: "18 - 08 - 2026",
+    bankName: "HDFC Bank - 50200012345",
+    particulars: "Electricity Bill Payment - Site Operations",
+    refNo: "UPI/623456789012",
+    withdrawal: "45,000.00",
+    deposit: "0.00",
+    balance: "29,48,600.00"
+  },
+  {
+    id: "bank-5",
+    date: "20 - 08 - 2026",
+    bankName: "State Bank of India - 300123456",
+    particulars: "Payment received from Reliance Jio Infocomm",
+    refNo: "RTGS/2608901234",
+    withdrawal: "0.00",
+    deposit: "15,09,200.00",
+    balance: "44,57,800.00"
+  },
+  {
+    id: "bank-6",
+    date: "22 - 08 - 2026",
+    bankName: "State Bank of India - 300123456",
+    particulars: "Office Rent Payment - Chennai Hub",
+    refNo: "CHQ/002341",
+    withdrawal: "85,000.00",
+    deposit: "0.00",
+    balance: "43,72,800.00"
+  }
+];
+
+const accountsReceiptData = [
+  {
+    id: "rec-1",
+    receiptNo: "REC-2026-001",
+    date: "12 - 08 - 2026",
+    customerName: "Indus Towers Ltd",
+    receivedBank: "HDFC Bank - 50200012345",
+    amount: "12,25,000.00",
+    paymentRefNo: "NEFT/2608123456"
+  },
+  {
+    id: "rec-2",
+    receiptNo: "REC-2026-002",
+    date: "15 - 08 - 2026",
+    customerName: "Bharti Airtel Ltd",
+    receivedBank: "ICICI Bank - 00040501234",
+    amount: "8,03,600.00",
+    paymentRefNo: "NEFT/2608345678"
+  },
+  {
+    id: "rec-3",
+    receiptNo: "REC-2026-003",
+    date: "18 - 08 - 2026",
+    customerName: "Reliance Jio Infocomm",
+    receivedBank: "State Bank of India - 300123456",
+    amount: "15,09,200.00",
+    paymentRefNo: "RTGS/2608901234"
+  },
+  {
+    id: "rec-4",
+    receiptNo: "REC-2026-004",
+    date: "20 - 08 - 2026",
+    customerName: "Vodafone Idea Ltd",
+    receivedBank: "HDFC Bank - 50200012345",
+    amount: "6,61,500.00",
+    paymentRefNo: "UPI/623456789012"
+  },
+  {
+    id: "rec-5",
+    receiptNo: "REC-2026-005",
+    date: "25 - 08 - 2026",
+    customerName: "ATC Telecom Infrastructure",
+    receivedBank: "State Bank of India - 300123456",
+    amount: "9,60,400.00",
+    paymentRefNo: "RTGS/2608789012"
+  }
+];
+
+const accountsPaymentData = [
+  {
+    id: "acc-pay-1",
+    transferredTo: "Schneider Electric India Pvt Ltd",
+    requestNo: "REQ-2026-101",
+    expenseHead: "Supply of Electrical Components",
+    transferredFrom: "HDFC Bank - 50200012345",
+    requested: "12,50,000.00",
+    approved: "12,00,000.00",
+    transferred: "10,00,000.00",
+    payable: "2,00,000.00"
+  },
+  {
+    id: "acc-pay-2",
+    transferredTo: "Larsen & Toubro Ltd",
+    requestNo: "REQ-2026-102",
+    expenseHead: "Civil Site Construction Services",
+    transferredFrom: "State Bank of India - 300123456",
+    requested: "8,20,000.00",
+    approved: "8,00,000.00",
+    transferred: "6,50,000.00",
+    payable: "1,50,000.00"
+  },
+  {
+    id: "acc-pay-3",
+    transferredTo: "Indus Towers Ltd",
+    requestNo: "REQ-2026-103",
+    expenseHead: "Project Capex Telecom Infra",
+    transferredFrom: "ICICI Bank - 00040501234",
+    requested: "15,00,000.00",
+    approved: "14,50,000.00",
+    transferred: "14,50,000.00",
+    payable: "0.00"
+  },
+  {
+    id: "acc-pay-4",
+    transferredTo: "Vijay Transport Logistics",
+    requestNo: "REQ-2026-104",
+    expenseHead: "Material Logistics & Freight",
+    transferredFrom: "HDFC Bank - 50200012345",
+    requested: "4,50,000.00",
+    approved: "4,20,000.00",
+    transferred: "3,80,000.00",
+    payable: "40,000.00"
+  },
+  {
+    id: "acc-pay-5",
+    transferredTo: "Tata Communications Ltd",
+    requestNo: "REQ-2026-105",
+    expenseHead: "Fiber Optic Line Maintenance",
+    transferredFrom: "State Bank of India - 300123456",
+    requested: "9,80,000.00",
+    approved: "9,50,000.00",
+    transferred: "7,00,000.00",
+    payable: "2,50,000.00"
+  }
+];
+
+const accountsPurchaseData = [
+  {
+    id: "acc-pur-1",
+    voucherNo: "PUR-2026-001",
+    voucherDate: "10 - 08 - 2026",
+    vendorName: "Schneider Electric India Pvt Ltd",
+    invoiceNo: "INV-2026-8812",
+    invoiceDate: "08 - 08 - 2026",
+    invoiceAmount: "12,50,000.00",
+    paidAmount: "10,00,000.00",
+    payableAmount: "2,50,000.00"
+  },
+  {
+    id: "acc-pur-2",
+    voucherNo: "PUR-2026-002",
+    voucherDate: "14 - 08 - 2026",
+    vendorName: "Larsen & Toubro Ltd",
+    invoiceNo: "INV-2026-9041",
+    invoiceDate: "12 - 08 - 2026",
+    invoiceAmount: "8,20,000.00",
+    paidAmount: "6,50,000.00",
+    payableAmount: "1,70,000.00"
+  },
+  {
+    id: "acc-pur-3",
+    voucherNo: "PUR-2026-003",
+    voucherDate: "18 - 08 - 2026",
+    vendorName: "Vijay Transport Logistics",
+    invoiceNo: "INV-2026-9215",
+    invoiceDate: "16 - 08 - 2026",
+    invoiceAmount: "4,50,000.00",
+    paidAmount: "3,80,000.00",
+    payableAmount: "70,000.00"
+  },
+  {
+    id: "acc-pur-4",
+    voucherNo: "PUR-2026-004",
+    voucherDate: "21 - 08 - 2026",
+    vendorName: "Tata Communications Ltd",
+    invoiceNo: "INV-2026-9530",
+    invoiceDate: "19 - 08 - 2026",
+    invoiceAmount: "9,80,000.00",
+    paidAmount: "7,00,000.00",
+    payableAmount: "2,80,000.00"
+  },
+  {
+    id: "acc-pur-5",
+    voucherNo: "PUR-2026-005",
+    voucherDate: "25 - 08 - 2026",
+    vendorName: "Steel Infra Supplies Ltd",
+    invoiceNo: "INV-2026-9764",
+    invoiceDate: "23 - 08 - 2026",
+    invoiceAmount: "15,00,000.00",
+    paidAmount: "15,00,000.00",
+    payableAmount: "0.00"
+  }
+];
+
+const accountsTdsData = [
+  {
+    id: "acc-tds-1",
+    month: "April",
+    deductedBasic: "15,40,000.00",
+    deductedTds: "1,54,000.00",
+    collectedBasic: "22,80,000.00",
+    collectedTds: "2,28,000.00"
+  },
+  {
+    id: "acc-tds-2",
+    month: "May",
+    deductedBasic: "18,20,000.00",
+    deductedTds: "1,82,000.00",
+    collectedBasic: "25,50,000.00",
+    collectedTds: "2,55,000.00"
+  },
+  {
+    id: "acc-tds-3",
+    month: "June",
+    deductedBasic: "12,90,000.00",
+    deductedTds: "1,29,000.00",
+    collectedBasic: "19,40,000.00",
+    collectedTds: "1,94,000.00"
+  },
+  {
+    id: "acc-tds-4",
+    month: "July",
+    deductedBasic: "21,60,000.00",
+    deductedTds: "2,16,000.00",
+    collectedBasic: "30,10,000.00",
+    collectedTds: "3,01,000.00"
+  },
+  {
+    id: "acc-tds-5",
+    month: "August",
+    deductedBasic: "16,75,000.00",
+    deductedTds: "1,67,500.00",
+    collectedBasic: "24,30,000.00",
+    collectedTds: "2,43,000.00"
+  }
+];
+
 // ==========================================================================
 // STATE MANAGEMENT (Default landing page: Worklist -> Payment)
 // ==========================================================================
-let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects', 'inventory', 'purchase', 'admin'
+let currentModule = 'worklist'; // 'worklist' as default on login, or 'master', 'projects', 'inventory', 'purchase', 'accounts', 'admin'
+let currentAccountsView = 'main'; // 'main', 'gst', 'bank', 'receipt', 'payment', 'purchase', or 'tds'
+let currentAccountsSubpage = 'sales'; // 'sales', 'purchase', 'payment', 'receipt', 'bank', 'tds', 'gst'
 let currentAdminView = 'salary'; // 'salary', 'attendance', 'salary_detail', 'epf', 'esi', 'pt', or 'lwf'
 let selectedAdminMonth = 'April';
 let selectedAdminYear = '2026';
@@ -2273,6 +2823,24 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       currentAdminView = 'salary';
     }
+  } else if (moduleParam === 'accounts') {
+    currentModule = 'accounts';
+    if (viewParam === 'gst') {
+      currentAccountsView = 'gst';
+    } else if (viewParam === 'bank') {
+      currentAccountsView = 'bank';
+    } else if (viewParam === 'receipt') {
+      currentAccountsView = 'receipt';
+    } else if (viewParam === 'payment') {
+      currentAccountsView = 'payment';
+    } else if (viewParam === 'purchase') {
+      currentAccountsView = 'purchase';
+    } else if (viewParam === 'tds') {
+      currentAccountsView = 'tds';
+    } else {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = subpageParam || 'sales';
+    }
   } else if (moduleParam) {
     currentModule = moduleParam;
     if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
@@ -2330,6 +2898,9 @@ function switchModule(moduleName) {
     currentInventoryView = 'main';
   } else if (moduleName === 'purchase') {
     currentPurchaseView = 'main';
+  } else if (moduleName === 'accounts') {
+    currentAccountsView = 'main';
+    currentAccountsSubpage = 'sales';
   } else if (moduleName === 'admin') {
     currentAdminView = 'salary';
   }
@@ -2466,6 +3037,17 @@ function updateURL() {
     url.searchParams.delete('subpage');
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
+  } else if (currentModule === 'accounts') {
+    if (currentAccountsView === 'gst' || currentAccountsView === 'bank' || currentAccountsView === 'receipt' || currentAccountsView === 'payment' || currentAccountsView === 'purchase' || currentAccountsView === 'tds') {
+      url.searchParams.set('view', currentAccountsView);
+      url.searchParams.delete('subpage');
+    } else {
+      url.searchParams.delete('view');
+      url.searchParams.set('subpage', currentAccountsSubpage);
+    }
+    url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
+    url.searchParams.delete('product');
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
     url.searchParams.delete('subpage');
@@ -2489,6 +3071,16 @@ function goBackSubpage() {
     if (currentAdminView === 'attendance' || currentAdminView === 'salary_detail' || currentAdminView === 'epf' || currentAdminView === 'esi' || currentAdminView === 'pt' || currentAdminView === 'lwf') {
       closeAdminSalaryDetailPage();
       return;
+    }
+  } else if (currentModule === 'accounts') {
+    if (currentAccountsView === 'gst' || currentAccountsView === 'bank' || currentAccountsView === 'receipt' || currentAccountsView === 'payment' || currentAccountsView === 'purchase' || currentAccountsView === 'tds') {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = 'sales';
+      showToast('Returned to Accounts');
+    } else {
+      currentModule = 'worklist';
+      currentWorklistView = 'payment';
+      showToast('Returned to Worklist');
     }
   } else if (currentModule === 'purchase') {
     if (currentPurchaseView === 'supplier_detail') {
@@ -2839,6 +3431,35 @@ function renderApp() {
     renderAdminToolbar();
     renderAdminTableHead();
     renderAdminFooter();
+  } else if (currentModule === 'accounts') {
+    if (currentAccountsView === 'gst') {
+      if (bannerTitle) bannerTitle.textContent = 'GST';
+    } else if (currentAccountsView === 'bank') {
+      if (bannerTitle) bannerTitle.textContent = 'Bank';
+    } else if (currentAccountsView === 'receipt') {
+      if (bannerTitle) bannerTitle.textContent = 'Receipt';
+    } else if (currentAccountsView === 'payment') {
+      if (bannerTitle) bannerTitle.textContent = 'Payment';
+    } else if (currentAccountsView === 'purchase') {
+      if (bannerTitle) bannerTitle.textContent = 'Purchase';
+    } else if (currentAccountsView === 'tds') {
+      if (bannerTitle) bannerTitle.textContent = 'TDS';
+    } else {
+      const accountsTitles = {
+        sales: 'Sales',
+        purchase: 'Purchase',
+        payment: 'Payment',
+        receipt: 'Receipt',
+        bank: 'Bank',
+        tds: 'TDS',
+        gst: 'GST'
+      };
+      if (bannerTitle) bannerTitle.textContent = accountsTitles[currentAccountsSubpage] || 'Sales';
+    }
+    loadAccountsDataset();
+    renderAccountsToolbar();
+    renderAccountsTableHead();
+    renderAccountsFooter();
   } else {
     const titleMap = {
       accounts: 'Accounts',
@@ -4714,8 +5335,11 @@ function renderProjectsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnDprContact" title="Contact" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprMembersModal(); return false;">
-          <img src="icons/Members.svg" alt="Contact" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        <button type="button" class="tool-btn" id="btnDprApprovalHistory" title="Approval History" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
+          <img src="icons/Approval History.svg" alt="Approval History" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnDprContact" title="Members" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprMembersModal(); return false;">
+          <img src="icons/Members.svg" alt="Members" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnDprAttendance" title="Attendance" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprAttendanceModal(); return false;">
           <img src="icons/Attendance.svg" alt="Attendance" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -4731,6 +5355,10 @@ function renderProjectsToolbar() {
       updateURL();
       renderApp();
       showToast('Returned to Project Details');
+    });
+    toolbar.querySelector('#btnDprApprovalHistory')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openDprSurveyReportModal();
     });
     toolbar.querySelector('#btnDprContact')?.addEventListener('click', (e) => {
       e.preventDefault();
@@ -6088,32 +6716,34 @@ function renderAdminTableHead() {
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
           </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Designation</span>
           </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Gross Salary</span>
           </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>State</span>
           </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>Employee Share</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;">
+            <span>Employee</span>
+            <span>Contribution</span>
           </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>Employer Share</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;">
+            <span>Employer</span>
+            <span>Contribution</span>
           </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Total Amount</span>
           </div>
@@ -6198,6 +6828,11 @@ function renderAdminTableHead() {
             <span>Gross Salary</span>
           </div>
         </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>ESI Wages</span>
+          </div>
+        </th>
         <th style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>No of Days Worked</span>
@@ -6245,7 +6880,7 @@ function renderAdminTableHead() {
         </th>
         <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>BASIC + DA + SA</span>
+            <span>EPF Wages</span>
           </div>
         </th>
         <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle;">
@@ -6253,7 +6888,7 @@ function renderAdminTableHead() {
             <span>Employee Contribution</span>
           </div>
         </th>
-        <th colspan="4" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+        <th colspan="3" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Employer Contribution</span>
           </div>
@@ -6278,11 +6913,6 @@ function renderAdminTableHead() {
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>EDLI</span>
-          </div>
-        </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>Admin Charges</span>
           </div>
         </th>
       </tr>
@@ -6404,6 +7034,10 @@ function renderAdminTableHead() {
   }
 
   if (currentAdminView === 'attendance') {
+    let daysTh = '';
+    for (let d = 1; d <= 31; d++) {
+      daysTh += `<th style="width: 3ch; min-width: 3ch; max-width: 3ch; text-align: center !important; padding: 6px 2px;"><div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;"><span>${d}</span></div></th>`;
+    }
     thead.innerHTML = `
       <tr class="master-view-header">
         <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle;">
@@ -6412,18 +7046,19 @@ function renderAdminTableHead() {
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="text-align: center !important; vertical-align: middle;">
+        <th colspan="31" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>1 to 31</span>
           </div>
         </th>
-        <th colspan="5" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+        <th colspan="6" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Salary Days</span>
           </div>
         </th>
       </tr>
       <tr class="master-view-header tr-sub-headers">
+        ${daysTh}
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Total</span>
@@ -6432,6 +7067,11 @@ function renderAdminTableHead() {
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Worked</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Leave</span>
           </div>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
@@ -6508,6 +7148,642 @@ function renderAdminFooter() {
   if (!footer) return;
   footer.innerHTML = '';
   footer.style.display = 'none';
+}
+
+// ==========================================================================
+// ACCOUNTS MODULE RENDERERS
+// ==========================================================================
+function openAccountsPage(subpage) {
+  currentModule = 'accounts';
+  currentAccountsView = 'main';
+  currentAccountsSubpage = subpage || 'sales';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Navigated to Accounts`);
+}
+
+function openAccountsGstPage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'gst';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to GST Page');
+}
+
+function openAccountsBankPage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'bank';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to Bank Page');
+}
+
+function openAccountsReceiptPage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'receipt';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to Receipt Page');
+}
+
+function openAccountsPaymentPage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'payment';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to Payment Page');
+}
+
+function openAccountsPurchasePage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'purchase';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to Purchase Page');
+}
+
+function openAccountsTdsPage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'tds';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to TDS Page');
+}
+
+function loadAccountsDataset() {
+  if (currentAccountsView === 'gst') {
+    currentDataset = [...accountsGstData];
+  } else if (currentAccountsView === 'bank') {
+    currentDataset = [...accountsBankData];
+  } else if (currentAccountsView === 'receipt') {
+    currentDataset = [...accountsReceiptData];
+  } else if (currentAccountsView === 'payment') {
+    currentDataset = [...accountsPaymentData];
+  } else if (currentAccountsView === 'purchase') {
+    currentDataset = [...accountsPurchaseData];
+  } else if (currentAccountsView === 'tds') {
+    currentDataset = [...accountsTdsData];
+  } else if (currentAccountsSubpage === 'sales') {
+    currentDataset = [...accountsSalesData];
+  } else {
+    currentDataset = [];
+  }
+}
+
+function renderAccountsToolbar() {
+  const toolbar = document.getElementById('worklistToolbar');
+  if (!toolbar) return;
+
+  if (currentAccountsView === 'tds') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = 'sales';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Accounts');
+    });
+    return;
+  }
+
+  if (currentAccountsView === 'purchase') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAccountsPurchaseSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Summary opened'); return false;">
+          <img src="icons/Summarry.svg" alt="Summary" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsPurchasePayable" title="Payable" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Payable opened'); return false;">
+          <img src="icons/Payable.svg" alt="Payable" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsPurchaseCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = 'sales';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Accounts');
+    });
+    return;
+  }
+
+  if (currentAccountsView === 'payment') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = 'sales';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Accounts');
+    });
+    return;
+  }
+
+  if (currentAccountsView === 'gst') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAccountsGstPdfUpload" title="PDF Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('PDF Upload opened'); return false;">
+          <img src="icons/PDF Upload.svg" alt="PDF Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsGstCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = 'sales';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Accounts');
+    });
+    return;
+  }
+
+  if (currentAccountsView === 'bank') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAccountsBankCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = 'sales';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Accounts');
+    });
+    return;
+  }
+
+  if (currentAccountsView === 'receipt') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAccountsReceiptCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentAccountsView = 'main';
+      currentAccountsSubpage = 'sales';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Accounts');
+    });
+    return;
+  }
+
+  toolbar.innerHTML = `
+    <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+    <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+      <button type="button" class="tool-btn" id="btnAccountsSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Summary opened'); return false;">
+        <img src="icons/Summarry.svg" alt="Summary" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+      </button>
+      <button type="button" class="tool-btn" id="btnAccountsReceivable" title="Receivable" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Receivable opened'); return false;">
+        <img src="icons/Receivable.svg" alt="Receivable" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+      </button>
+      <button type="button" class="tool-btn" id="btnAccountsCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+        <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+      </button>
+    </div>
+  `;
+}
+
+function renderAccountsTableHead() {
+  const thead = document.getElementById('worklistTableHead');
+  if (!thead) return;
+
+  if (currentAccountsView === 'tds') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; vertical-align: middle;">
+          <span>Month</span>
+        </th>
+        <th colspan="2" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Deducted</span>
+        </th>
+        <th colspan="2" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Collected</span>
+        </th>
+      </tr>
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Basic</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>TDS</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Basic</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>TDS</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAccountsView === 'purchase') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Voucher No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['voucherNo'] ? 'has-active-filter' : ''}" data-filter-col="voucherNo" title="Filter Voucher No">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Voucher Date</span>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Vendor Name</span>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Invoice No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceNo'] ? 'has-active-filter' : ''}" data-filter-col="invoiceNo" title="Filter Invoice No">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Invoice Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceDate'] ? 'has-active-filter' : ''}" data-filter-col="invoiceDate" title="Filter Invoice Date">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Invoice Amount</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceAmount'] ? 'has-active-filter' : ''}" data-filter-col="invoiceAmount" title="Filter Invoice Amount">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Paid Amount</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Payable Amount</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAccountsView === 'payment') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Transferred To</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferredTo'] ? 'has-active-filter' : ''}" data-filter-col="transferredTo" title="Filter Transferred To">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Request No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestNo'] ? 'has-active-filter' : ''}" data-filter-col="requestNo" title="Filter Request No">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Expense Head</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; vertical-align: middle;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Transferred From</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferredFrom'] ? 'has-active-filter' : ''}" data-filter-col="transferredFrom" title="Filter Transferred From">&#9660;</button>
+          </div>
+        </th>
+        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Amount</span>
+        </th>
+      </tr>
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Requested</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Approved</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Transferred</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+          <span>Payable</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAccountsView === 'receipt') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Receipt No</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['date'] ? 'has-active-filter' : ''}" data-filter-col="date" title="Filter Date">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Customer Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Received Bank</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Amount</span>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Payment Reference No</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAccountsView === 'bank') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['date'] ? 'has-active-filter' : ''}" data-filter-col="date" title="Filter Date">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Bank Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['bankName'] ? 'has-active-filter' : ''}" data-filter-col="bankName" title="Filter Bank Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Particulars</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['particulars'] ? 'has-active-filter' : ''}" data-filter-col="particulars" title="Filter Particulars">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Ref.No</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Withdrawal (Dr)</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Deposit (Cr)</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Balance</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAccountsView === 'gst') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th rowspan="2" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Select</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Month</span>
+        </th>
+        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>GSTR 1A</span>
+        </th>
+        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>GSTR 2B</span>
+        </th>
+        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>RCM</span>
+        </th>
+      </tr>
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Basic</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>CGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>SGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>IGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Basic</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>CGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>SGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>IGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>Basic</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>CGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>SGST</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important;">
+          <span>IGST</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAccountsSubpage === 'sales') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Voucher No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['voucherNo'] ? 'has-active-filter' : ''}" data-filter-col="voucherNo" title="Filter Voucher No">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Customer Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Invoice No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceNo'] ? 'has-active-filter' : ''}" data-filter-col="invoiceNo" title="Filter Invoice No">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Invoice Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceDate'] ? 'has-active-filter' : ''}" data-filter-col="invoiceDate" title="Filter Invoice Date">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Invoice Amount</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceAmount'] ? 'has-active-filter' : ''}" data-filter-col="invoiceAmount" title="Filter Invoice Amount">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Deduction</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Received Amount</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  thead.innerHTML = `
+    <tr class="master-view-header accounts-view-header">
+      <th style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <span>${currentAccountsSubpage.toUpperCase()} Details</span>
+      </th>
+    </tr>
+  `;
+}
+
+function renderAccountsFooter() {
+  const footer = document.getElementById('worklistFooterBar');
+  if (!footer) return;
+
+  if (currentAccountsView === 'gst' || currentAccountsView === 'bank' || currentAccountsView === 'receipt' || currentAccountsView === 'payment' || currentAccountsView === 'purchase' || currentAccountsView === 'tds') {
+    footer.innerHTML = '';
+    footer.style.display = 'none';
+    return;
+  }
+
+  const subpages = [
+    { key: 'sales', label: 'Sales' },
+    { key: 'purchase', label: 'Purchase' },
+    { key: 'payment', label: 'Payment' },
+    { key: 'receipt', label: 'Receipt' },
+    { key: 'bank', label: 'Bank' },
+    { key: 'tds', label: 'TDS' },
+    { key: 'gst', label: 'GST' }
+  ];
+
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'flex-start';
+  footer.style.alignItems = 'center';
+  footer.style.width = '100%';
+  footer.style.marginTop = 'auto';
+  footer.style.padding = '24px';
+  footer.innerHTML = `
+    <div class="segmented-toggle-group accounts-segmented-group">
+      ${subpages.map((sp, idx) => `
+        <button type="button" class="segmented-btn ${currentAccountsView === 'main' && currentAccountsSubpage === sp.key ? 'active' : ''}" data-accounts-subpage="${sp.key}">
+          ${sp.label}
+        </button>
+        ${idx < subpages.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+      `).join('')}
+    </div>
+  `;
+
+  footer.querySelectorAll('.segmented-btn[data-accounts-subpage]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const spKey = btn.getAttribute('data-accounts-subpage');
+      if (spKey === 'tds') {
+        openAccountsTdsPage();
+        return;
+      }
+      if (spKey === 'purchase') {
+        openAccountsPurchasePage();
+        return;
+      }
+      if (spKey === 'payment') {
+        openAccountsPaymentPage();
+        return;
+      }
+      if (spKey === 'gst') {
+        openAccountsGstPage();
+        return;
+      }
+      if (spKey === 'bank') {
+        openAccountsBankPage();
+        return;
+      }
+      if (spKey === 'receipt') {
+        openAccountsReceiptPage();
+        return;
+      }
+      if (currentAccountsSubpage !== spKey) {
+        currentAccountsSubpage = spKey;
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast(`Switched to Accounts &bull; ${btn.textContent.trim()} Page`);
+      }
+    });
+  });
 }
 
 // ==========================================================================
@@ -7246,16 +8522,18 @@ function applyFiltersAndRender() {
 
   if (filteredDataset.length === 0) {
     const colSpan = currentModule === 'admin'
-      ? (currentAdminView === 'salary_detail' ? 16 : (currentAdminView === 'epf' ? 10 : (currentAdminView === 'pt' ? 9 : (currentAdminView === 'lwf' ? 8 : (currentAdminView === 'esi' ? 7 : (currentAdminView === 'attendance' ? 7 : 8))))))
-      : (currentModule === 'inventory'
-        ? 8
-        : (currentModule === 'purchase'
-          ? 9
-          : (currentModule === 'projects'
-            ? 14
-            : (currentModule === 'indus_towers'
-              ? (currentIndusSubpage === 'projects' ? 8 : 10)
-              : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10))))));
+      ? (currentAdminView === 'salary_detail' ? 16 : (currentAdminView === 'epf' ? 9 : (currentAdminView === 'pt' ? 9 : (currentAdminView === 'lwf' ? 8 : (currentAdminView === 'esi' ? 8 : (currentAdminView === 'attendance' ? 38 : 8))))))
+      : (currentModule === 'accounts'
+        ? (currentAccountsView === 'gst' ? 14 : (currentAccountsView === 'tds' ? 5 : (currentAccountsView === 'purchase' ? 8 : (currentAccountsView === 'payment' ? 8 : (currentAccountsView === 'receipt' ? 6 : (currentAccountsView === 'bank' ? 7 : 7))))))
+        : (currentModule === 'inventory'
+          ? 8
+          : (currentModule === 'purchase'
+            ? 9
+            : (currentModule === 'projects'
+              ? 14
+              : (currentModule === 'indus_towers'
+                ? (currentIndusSubpage === 'projects' ? 8 : 10)
+                : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10)))))));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -8097,12 +9375,12 @@ function applyFiltersAndRender() {
         <tr class="admin-lwf-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeId || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.designation || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.state || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeShare || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employerShare || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.designation || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.state || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeContribution || row.employeeShare || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employerContribution || row.employerShare || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
         </tr>
       `).join('');
     } else if (currentAdminView === 'pt') {
@@ -8125,6 +9403,7 @@ function applyFiltersAndRender() {
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.ipNumber || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.esiWages || row.grossSalary || ''}</td>
           <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.noOfDaysWorked || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeContribution || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employerContribution || ''}</td>
@@ -8137,12 +9416,11 @@ function applyFiltersAndRender() {
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.uan || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.basicDaSa || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epfWages || row.basicDaSa || ''}</td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeContribution || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.eps || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.edli || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.adminCharges || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
         </tr>
       `).join('');
@@ -8168,17 +9446,26 @@ function applyFiltersAndRender() {
         </tr>
       `).join('');
     } else if (currentAdminView === 'attendance') {
-      tbody.innerHTML = filteredDataset.map(row => `
-        <tr class="admin-attendance-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
-          <td style="text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #64748b; font-weight: 500;">${row.daysSummary || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.total || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.worked || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.lop || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.holidays || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">${row.netSalaryDays || ''}</td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = filteredDataset.map(row => {
+        let daysTd = '';
+        const dayVals = Array.isArray(row.days) ? row.days : Array(31).fill('P');
+        for (let i = 0; i < 31; i++) {
+          const val = dayVals[i] !== undefined ? dayVals[i] : 'P';
+          daysTd += `<td style="width: 3ch; min-width: 3ch; max-width: 3ch; text-align: center !important; padding: 10px 2px; white-space: nowrap; color: #1e293b; font-weight: 500;">${val}</td>`;
+        }
+        return `
+          <tr class="admin-attendance-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeName || ''}</td>
+            ${daysTd}
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.total || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.worked || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.leave || '0'}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.lop || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.holidays || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.netSalaryDays || ''}</td>
+          </tr>
+        `;
+      }).join('');
     } else {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="admin-data-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
@@ -8204,6 +9491,106 @@ function applyFiltersAndRender() {
           </td>
         </tr>
       `).join('');
+    }
+  } else if (currentModule === 'accounts') {
+    if (currentAccountsView === 'tds') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="accounts-tds-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.month || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedBasic || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedTds || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.collectedBasic || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.collectedTds || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAccountsView === 'purchase') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="accounts-purchase-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherDate || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.vendorName || '').replace(/"/g, '&quot;')}">${row.vendorName || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.paidAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.payableAmount || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAccountsView === 'payment') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="accounts-payment-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.transferredTo || '').replace(/"/g, '&quot;')}">${row.transferredTo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.requestNo || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">${row.expenseHead || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.transferredFrom || '').replace(/"/g, '&quot;')}">${row.transferredFrom || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.requested || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.approved || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.transferred || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.payable || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAccountsView === 'receipt') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="accounts-receipt-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.receiptNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.date || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.customerName || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.receivedBank || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.amount || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.paymentRefNo || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAccountsView === 'bank') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="accounts-bank-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.date || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.bankName || ''}</td>
+          <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.particulars || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.refNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.withdrawal || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deposit || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.balance || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAccountsView === 'gst') {
+      tbody.innerHTML = filteredDataset.map((row, idx) => `
+        <tr class="accounts-gst-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 14px; vertical-align: middle;">
+            <input type="radio" name="gstSelectRow" value="${row.id}" ${idx === 0 ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #008744;">
+          </td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.month || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr1aBasic || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr1aCgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr1aSgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr1aIgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr2bBasic || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr2bCgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr2bSgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr2bIgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.rcmBasic || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.rcmCgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.rcmSgst || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.rcmIgst || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentAccountsSubpage === 'sales') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="accounts-sales-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.customerName || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deduction || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.receivedAmount || ''}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="empty-data-row" style="text-align: center; padding: 32px; color: #64748b;">No records available for ${currentAccountsSubpage.toUpperCase()}.</td>
+        </tr>
+      `;
     }
   }
 }

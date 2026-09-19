@@ -4385,3 +4385,19 @@ a:visited,
 .clickable-blue-amount-link:hover {
   opacity: 0.85;
 }
+
+/* Active Excel Filter Funnel Button State */
+.filter-funnel-btn.has-active-filter,
+.contact-th-filter-btn.has-active-filter,
+button.has-active-filter {
+  color: #00cba0 !important;
+  background: rgba(0, 203, 160, 0.18) !important;
+  border: 1px solid #00cba0 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 6px rgba(0, 203, 160, 0.4) !important;
+}
+
+.filter-funnel-btn.has-active-filter svg,
+.contact-th-filter-btn.has-active-filter svg {
+  stroke: #00cba0 !important;
+}

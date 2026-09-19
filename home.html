@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=109">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260919_2321">
 </head>
 
 <body>
@@ -44,7 +44,7 @@
         <!-- 4. Admin Icon -->
         <button type="button" class="nav-icon-item" id="navBtnAdmin" data-module="admin" data-tooltip="Admin"
           aria-label="Admin">
-          <img src="icons/ADMIN.svg?v=20260917" alt="Admin" class="nav-icon-img" width="40" height="40">
+          <img src="icons/ADMIN.svg?v=20260919" alt="Admin" class="nav-icon-img" width="40" height="40">
         </button>
 
         <!-- 5. Worklist (Alert Bell) Icon -->
@@ -7038,7 +7038,7 @@
 
         <!-- Accounts TDS Summary Report Modal Tab (Triggered by clicking Month in Accounts TDS page) -->
         <div class="side-form-card side-contact-popup" id="accountsTdsSummaryModal"
-          style="display: none; width: 900px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          style="display: none; width: 1250px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
@@ -7059,16 +7059,32 @@
               <thead>
                 <tr class="master-view-header">
                   <th
-                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>TDS Type</span>
-                  </th>
-                  <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>PAN Number</span>
-                  </th>
-                  <th
                     style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>PAN Name</span>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>TDS Type</span>
+                      <button type="button" class="filter-funnel-btn" data-filter-col="tdsType" title="Filter TDS Type">&#9660;</button>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>TDS Code</span>
+                      <button type="button" class="filter-funnel-btn" data-filter-col="tdsCode" title="Filter TDS Code">&#9660;</button>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>PAN Number</span>
+                      <button type="button" class="filter-funnel-btn" data-filter-col="panNumber" title="Filter PAN Number">&#9660;</button>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>PAN Name</span>
+                      <button type="button" class="filter-funnel-btn" data-filter-col="panName" title="Filter PAN Name">&#9660;</button>
+                    </div>
                   </th>
                   <th
                     style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
@@ -7514,7 +7530,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=220"></script>
+  <script src="assets/js/home.js?v=20260919_2321"></script>
 </body>
 
 </html>

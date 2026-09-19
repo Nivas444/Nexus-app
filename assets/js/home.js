@@ -2552,6 +2552,7 @@ const accountsReceiptData = [
     customerName: "Indus Towers Ltd",
     receivedBank: "HDFC Bank - 50200012345",
     amount: "12,25,000.00",
+    particulars: "Payment towards Invoice INV-2026-001",
     paymentRefNo: "NEFT/2608123456"
   },
   {
@@ -2561,6 +2562,7 @@ const accountsReceiptData = [
     customerName: "Bharti Airtel Ltd",
     receivedBank: "ICICI Bank - 00040501234",
     amount: "8,03,600.00",
+    particulars: "Payment towards Invoice INV-2026-002",
     paymentRefNo: "NEFT/2608345678"
   },
   {
@@ -2570,6 +2572,7 @@ const accountsReceiptData = [
     customerName: "Reliance Jio Infocomm",
     receivedBank: "State Bank of India - 300123456",
     amount: "15,09,200.00",
+    particulars: "Payment towards Invoice INV-2026-003",
     paymentRefNo: "RTGS/2608901234"
   },
   {
@@ -2579,6 +2582,7 @@ const accountsReceiptData = [
     customerName: "Vodafone Idea Ltd",
     receivedBank: "HDFC Bank - 50200012345",
     amount: "6,61,500.00",
+    particulars: "Payment towards Invoice INV-2026-004",
     paymentRefNo: "UPI/623456789012"
   },
   {
@@ -2588,6 +2592,7 @@ const accountsReceiptData = [
     customerName: "ATC Telecom Infrastructure",
     receivedBank: "State Bank of India - 300123456",
     amount: "9,60,400.00",
+    particulars: "Payment towards Invoice INV-2026-005",
     paymentRefNo: "RTGS/2608789012"
   }
 ];
@@ -2865,6 +2870,7 @@ const accountsTdsData = [
     items: [
       {
         tdsType: "194C",
+        tdsCode: "94C - Contractor (10%)",
         panNumber: "AAACB1234D",
         panName: "Schneider Electric India Pvt Ltd",
         taxable: "6,50,000.00",
@@ -2876,6 +2882,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194J",
+        tdsCode: "94J - Professional (10%)",
         panNumber: "BBBCB5678E",
         panName: "Larsen & Toubro Ltd",
         taxable: "4,20,000.00",
@@ -2886,6 +2893,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194I",
+        tdsCode: "94I - Plant & Machinery (10%)",
         panNumber: "CCCCD9012F",
         panName: "Indus Towers Ltd",
         taxable: "3,10,000.00",
@@ -2896,6 +2904,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194Q",
+        tdsCode: "94Q - Purchase of Goods (10%)",
         panNumber: "DDDDD3456G",
         panName: "Vijay Transport Logistics",
         taxable: "1,60,000.00",
@@ -2916,6 +2925,7 @@ const accountsTdsData = [
     items: [
       {
         tdsType: "194C",
+        tdsCode: "94C - Contractor (10%)",
         panNumber: "AAACB1234D",
         panName: "Schneider Electric India Pvt Ltd",
         taxable: "7,80,000.00",
@@ -2926,6 +2936,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194J",
+        tdsCode: "94J - Professional (10%)",
         panNumber: "BBBCB5678E",
         panName: "Larsen & Toubro Ltd",
         taxable: "5,40,000.00",
@@ -2936,6 +2947,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194I",
+        tdsCode: "94I - Plant & Machinery (10%)",
         panNumber: "EEEEF7890H",
         panName: "Tata Communications Ltd",
         taxable: "5,00,000.00",
@@ -2956,6 +2968,7 @@ const accountsTdsData = [
     items: [
       {
         tdsType: "194C",
+        tdsCode: "94C - Contractor (10%)",
         panNumber: "AAACB1234D",
         panName: "Schneider Electric India Pvt Ltd",
         taxable: "5,20,000.00",
@@ -2966,6 +2979,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194J",
+        tdsCode: "94J - Professional (10%)",
         panNumber: "BBBCB5678E",
         panName: "Larsen & Toubro Ltd",
         taxable: "4,10,000.00",
@@ -2976,6 +2990,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194Q",
+        tdsCode: "94Q - Purchase of Goods (10%)",
         panNumber: "DDDDD3456G",
         panName: "Vijay Transport Logistics",
         taxable: "3,60,000.00",
@@ -2996,6 +3011,7 @@ const accountsTdsData = [
     items: [
       {
         tdsType: "194C",
+        tdsCode: "94C - Contractor (10%)",
         panNumber: "AAACB1234D",
         panName: "Schneider Electric India Pvt Ltd",
         taxable: "9,50,000.00",
@@ -3006,6 +3022,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194J",
+        tdsCode: "94J - Professional (10%)",
         panNumber: "BBBCB5678E",
         panName: "Larsen & Toubro Ltd",
         taxable: "6,80,000.00",
@@ -3016,6 +3033,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194I",
+        tdsCode: "94I - Plant & Machinery (10%)",
         panNumber: "CCCCD9012F",
         panName: "Indus Towers Ltd",
         taxable: "5,30,000.00",
@@ -3036,6 +3054,7 @@ const accountsTdsData = [
     items: [
       {
         tdsType: "194C",
+        tdsCode: "94C - Contractor (10%)",
         panNumber: "AAACB1234D",
         panName: "Schneider Electric India Pvt Ltd",
         taxable: "6,90,000.00",
@@ -3046,6 +3065,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194J",
+        tdsCode: "94J - Professional (10%)",
         panNumber: "BBBCB5678E",
         panName: "Larsen & Toubro Ltd",
         taxable: "4,85,000.00",
@@ -3056,6 +3076,7 @@ const accountsTdsData = [
       },
       {
         tdsType: "194Q",
+        tdsCode: "94Q - Purchase of Goods (10%)",
         panNumber: "DDDDD3456G",
         panName: "Vijay Transport Logistics",
         taxable: "5,00,000.00",
@@ -7003,10 +7024,6 @@ function renderAdminToolbar() {
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnAdminCsv" data-tooltip="Upload CSV / Excel" aria-label="Upload CSV / Excel">
           <img src="icons/CSV upload.svg" alt="Upload CSV / Excel" class="toolbar-icon-img" width="30" height="30">
         </button>
-        <!-- Red Close X Button -->
-        <button type="button" class="toolbar-icon-btn btn-cancel-action" id="btnAdminCloseAttendance" data-tooltip="Close" aria-label="Close" style="background: transparent; border: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
-          <img src="icons/Cancel.svg" alt="Close" class="toolbar-icon-img" width="28" height="28">
-        </button>
       </div>
     `;
 
@@ -7037,20 +7054,6 @@ function renderAdminToolbar() {
       const file = e.target.files && e.target.files[0];
       if (file) {
         showToast(`File selected: ${file.name}`);
-      }
-    });
-
-    document.getElementById('btnAdminCloseAttendance')?.addEventListener('click', () => {
-      if (currentAdminView === 'epf') {
-        closeAdminEpfPage();
-      } else if (currentAdminView === 'esi') {
-        closeAdminEsiPage();
-      } else if (currentAdminView === 'pt') {
-        closeAdminPtPage();
-      } else if (currentAdminView === 'lwf') {
-        closeAdminLwfPage();
-      } else {
-        closeAdminSalaryDetailPage();
       }
     });
     return;
@@ -7119,16 +7122,14 @@ function renderAdminTableHead() {
             <span>State</span>
           </div>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
-          <div class="th-content-wrap" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;">
-            <span>Employee</span>
-            <span>Contribution</span>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; white-space: nowrap;">
+            <span>Employee Share</span>
           </div>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
-          <div class="th-content-wrap" style="display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;">
-            <span>Employer</span>
-            <span>Contribution</span>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; white-space: nowrap;">
+            <span>Employer Share</span>
           </div>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
@@ -7320,7 +7321,7 @@ function renderAdminTableHead() {
         </th>
         <th colspan="5" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>Salary Days</span>
+            <span>Days</span>
           </div>
         </th>
         <th colspan="2" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
@@ -7328,22 +7329,12 @@ function renderAdminTableHead() {
             <span>Salary</span>
           </div>
         </th>
-        <th colspan="4" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
+        <th colspan="6" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Deduction</span>
           </div>
         </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>Taxable Salary</span>
-          </div>
-        </th>
-        <th colspan="2" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>Deduction</span>
-          </div>
-        </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; border-left: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Net Salary</span>
           </div>
@@ -7424,7 +7415,7 @@ function renderAdminTableHead() {
   if (currentAdminView === 'attendance') {
     let daysTh = '';
     for (let d = 1; d <= 31; d++) {
-      daysTh += `<th style="width: 3ch; min-width: 3ch; max-width: 3ch; text-align: center !important; padding: 6px 2px;"><div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;"><span>${d}</span></div></th>`;
+      daysTh += `<th style="width: 4ch; min-width: 4ch; max-width: 4ch; text-align: center !important; padding: 6px 2px;"><div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;"><span>${d}</span></div></th>`;
     }
     thead.innerHTML = `
       <tr class="master-view-header">
@@ -7654,12 +7645,6 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsPurchaseSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAccountsPurchaseSummaryModal(); return false;">
-          <img src="icons/Summarry.svg" alt="Summary" style="width: 28px; height: 28px; display: block; object-fit: contain;">
-        </button>
-        <button type="button" class="tool-btn" id="btnAccountsPurchasePayable" title="Payable" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Payable opened'); return false;">
-          <img src="icons/Payable.svg" alt="Payable" style="width: 28px; height: 28px; display: block; object-fit: contain;">
-        </button>
         <button type="button" class="tool-btn" id="btnAccountsPurchaseCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
@@ -7701,7 +7686,7 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsGstPdfUpload" title="PDF Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
+        <button type="button" class="tool-btn" id="btnAccountsGstPdfUpload" title="PDF Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: none; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
           <img src="icons/PDF Upload.svg" alt="PDF Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsGstCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
@@ -7767,11 +7752,8 @@ function renderAccountsToolbar() {
   toolbar.innerHTML = `
     <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
     <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-      <button type="button" class="tool-btn" id="btnAccountsSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAccountsSalesSummaryModal(); return false;">
-        <img src="icons/Summarry.svg" alt="Summary" style="width: 28px; height: 28px; display: block; object-fit: contain;">
-      </button>
-      <button type="button" class="tool-btn" id="btnAccountsReceivable" title="Receivable" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Receivable opened'); return false;">
-        <img src="icons/Receivable.svg" alt="Receivable" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+      <button type="button" class="tool-btn" id="btnAccountsDashboard" title="Dashboard" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Dashboard opened'); return false;">
+        <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block; object-fit: contain;">
       </button>
       <button type="button" class="tool-btn" id="btnAccountsCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
         <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -7829,7 +7811,10 @@ function renderAccountsTableHead() {
           <span>Voucher Date</span>
         </th>
         <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Vendor Name</span>
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Vendor Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
+          </div>
         </th>
         <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
@@ -7851,9 +7836,6 @@ function renderAccountsTableHead() {
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Paid Amount</span>
-        </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Payable Amount</span>
         </th>
       </tr>
     `;
@@ -7888,7 +7870,7 @@ function renderAccountsTableHead() {
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferredFrom'] ? 'has-active-filter' : ''}" data-filter-col="transferredFrom" title="Filter Transferred From">&#9660;</button>
           </div>
         </th>
-        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+        <th colspan="3" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
           <span>Amount</span>
         </th>
       </tr>
@@ -7901,9 +7883,6 @@ function renderAccountsTableHead() {
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
           <span>Transferred</span>
-        </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
-          <span>Payable</span>
         </th>
       </tr>
     `;
@@ -7934,6 +7913,9 @@ function renderAccountsTableHead() {
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Amount</span>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Particulars</span>
         </th>
         <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Payment Reference No</span>
@@ -8045,7 +8027,7 @@ function renderAccountsTableHead() {
     return;
   }
 
-  if (currentAccountsSubpage === 'sales') {
+  if (currentAccountsSubpage === 'sales' || currentAccountsView === 'main') {
     thead.innerHTML = `
       <tr class="master-view-header accounts-view-header">
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
@@ -8082,6 +8064,9 @@ function renderAccountsTableHead() {
           <span>Deduction</span>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Receivable Amount</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Received Amount</span>
         </th>
       </tr>
@@ -8103,12 +8088,6 @@ function renderAccountsFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
-  if (currentAccountsView === 'gst' || currentAccountsView === 'bank' || currentAccountsView === 'receipt' || currentAccountsView === 'payment' || currentAccountsView === 'purchase' || currentAccountsView === 'tds') {
-    footer.innerHTML = '';
-    footer.style.display = 'none';
-    return;
-  }
-
   const subpages = [
     { key: 'sales', label: 'Sales' },
     { key: 'purchase', label: 'Purchase' },
@@ -8119,6 +8098,8 @@ function renderAccountsFooter() {
     { key: 'gst', label: 'GST' }
   ];
 
+  const currentActiveKey = (currentAccountsView === 'main' ? (currentAccountsSubpage || 'sales') : currentAccountsView);
+
   footer.style.display = 'flex';
   footer.style.justifyContent = 'flex-start';
   footer.style.alignItems = 'center';
@@ -8128,7 +8109,7 @@ function renderAccountsFooter() {
   footer.innerHTML = `
     <div class="segmented-toggle-group accounts-segmented-group">
       ${subpages.map((sp, idx) => `
-        <button type="button" class="segmented-btn ${currentAccountsView === 'main' && currentAccountsSubpage === sp.key ? 'active' : ''}" data-accounts-subpage="${sp.key}">
+        <button type="button" class="segmented-btn ${currentActiveKey === sp.key ? 'active' : ''}" data-accounts-subpage="${sp.key}">
           ${sp.label}
         </button>
         ${idx < subpages.length - 1 ? '<div class="segmented-divider"></div>' : ''}
@@ -8139,6 +8120,16 @@ function renderAccountsFooter() {
   footer.querySelectorAll('.segmented-btn[data-accounts-subpage]').forEach(btn => {
     btn.addEventListener('click', () => {
       const spKey = btn.getAttribute('data-accounts-subpage');
+      if (spKey === 'sales') {
+        currentModule = 'accounts';
+        currentAccountsView = 'main';
+        currentAccountsSubpage = 'sales';
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast('Switched to Accounts • Sales Page');
+        return;
+      }
       if (spKey === 'tds') {
         openAccountsTdsPage();
         return;
@@ -9766,8 +9757,8 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.designation || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.grossSalary || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.state || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeContribution || row.employeeShare || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employerContribution || row.employerShare || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeContribution || row.employeeShare || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employerContribution || row.employerShare || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
         </tr>
       `).join('');
@@ -9827,7 +9818,6 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.esiMi || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.pt || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.lwf || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.taxableSalary || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.tds || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.advance || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.netSalary || ''}</td>
@@ -9839,7 +9829,7 @@ function applyFiltersAndRender() {
         const dayVals = Array.isArray(row.days) ? row.days : Array(31).fill('P');
         for (let i = 0; i < 31; i++) {
           const val = dayVals[i] !== undefined ? dayVals[i] : 'P';
-          daysTd += `<td style="width: 3ch; min-width: 3ch; max-width: 3ch; text-align: center !important; padding: 10px 2px; white-space: nowrap; color: #1e293b; font-weight: 500;">${val}</td>`;
+          daysTd += `<td style="width: 4ch; min-width: 4ch; max-width: 4ch; text-align: center !important; padding: 10px 2px; white-space: nowrap; color: #1e293b; font-weight: 500;">${val}</td>`;
         }
         return `
           <tr class="admin-attendance-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
@@ -9899,15 +9889,16 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherDate || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.vendorName || '').replace(/"/g, '&quot;')}">${row.vendorName || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
-            <a href="#" class="td-link-blue" onclick="openAccountsPurchaseInvoiceModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.invoiceNo || ''}</a>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+            <span style="text-decoration: underline; text-underline-offset: 3px; font-weight: 500; color: #1e293b;">${row.invoiceNo || ''}</span>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsPurchaseInvoiceModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.invoiceAmount || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
             <a href="#" class="td-link-blue" onclick="openAccountsPurchasePaymentDetailsModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.paidAmount || ''}</a>
           </td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.payableAmount || ''}</td>
         </tr>
       `).join('');
     } else if (currentAccountsView === 'payment') {
@@ -9922,7 +9913,6 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.requested || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.approved || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.transferred || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.payable || ''}</td>
         </tr>
       `).join('');
     } else if (currentAccountsView === 'receipt') {
@@ -9933,6 +9923,7 @@ function applyFiltersAndRender() {
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.customerName || ''}</td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.receivedBank || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.amount || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.particulars || 'Payment towards Invoice').replace(/"/g, '&quot;')}">${row.particulars || 'Payment towards Invoice'}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.paymentRefNo || ''}</td>
         </tr>
       `).join('');
@@ -9949,10 +9940,10 @@ function applyFiltersAndRender() {
         </tr>
       `).join('');
     } else if (currentAccountsView === 'gst') {
-      tbody.innerHTML = filteredDataset.map((row, idx) => `
+      tbody.innerHTML = filteredDataset.map((row) => `
         <tr class="accounts-gst-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
           <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 14px; vertical-align: middle;">
-            <input type="radio" name="gstSelectRow" value="${row.id}" ${idx === 0 ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: #008744;">
+            <input type="radio" name="gstSelectRow" value="${row.id}" onchange="handleGstRowSelection(this)" style="cursor: pointer; width: 16px; height: 16px; accent-color: #008744;">
           </td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.month || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstr1aBasic || ''}</td>
@@ -9969,19 +9960,22 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.rcmIgst || ''}</td>
         </tr>
       `).join('');
-    } else if (currentAccountsSubpage === 'sales') {
+    } else if (currentAccountsSubpage === 'sales' || currentAccountsView === 'main') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="accounts-sales-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.customerName || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
-            <a href="#" class="td-link-blue" onclick="openAccountsSalesInvoiceModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.invoiceNo || ''}</a>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+            <span style="text-decoration: underline; text-underline-offset: 3px; font-weight: 500; color: #1e293b;">${row.invoiceNo || ''}</span>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsSalesInvoiceModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.invoiceAmount || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
             <a href="#" class="td-link-blue" onclick="openAccountsSalesDeductionModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.deduction || ''}</a>
           </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.receivableAmount || '₹ 0.00'}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
             <a href="#" class="td-link-blue" onclick="openAccountsSalesPaymentModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.receivedAmount || ''}</a>
           </td>
@@ -13402,6 +13396,15 @@ function initExcelFilterSystem() {
         showToast('Scope filter cleared');
         return;
       }
+      if (dropdown.dataset.filterContext === 'tdsSummary') {
+        if (currentTdsSummaryFilterCol) {
+          delete activeTdsSummaryFilters[currentTdsSummaryFilterCol];
+          renderAccountsTdsSummaryTable();
+        }
+        closeExcelFilter();
+        showToast('TDS filter cleared');
+        return;
+      }
       closeExcelFilter();
     });
   }
@@ -13570,6 +13573,23 @@ function initExcelFilterSystem() {
         renderVendorServiceOthersScopeTable();
         closeExcelFilter();
         showToast('Other Service filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'tdsSummary') {
+        if (!currentTdsSummaryFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeTdsSummaryFilters[currentTdsSummaryFilterCol];
+        } else {
+          activeTdsSummaryFilters[currentTdsSummaryFilterCol] = new Set(checkedItems);
+        }
+        renderAccountsTdsSummaryTable();
+        closeExcelFilter();
+        showToast('TDS filter applied');
         return;
       }
 
@@ -17965,12 +17985,136 @@ window.closeAccountsPaymentBankDetailsModal = function() {
 };
 
 let currentTdsSummaryRowId = 'acc-tds-1';
+let activeTdsSummaryFilters = {};
+let currentTdsSummaryFilterCol = null;
+
+function renderAccountsTdsSummaryTable() {
+  const tbody = document.getElementById('tbodyAccountsTdsSummary');
+  if (!tbody) return;
+
+  const row = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === currentTdsSummaryRowId)) || 
+              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || {
+                month: "April",
+                items: [
+                  { tdsType: "194C", tdsCode: "94C - Contractor (10%)", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", taxable: "6,50,000.00", tds: "65,000.00" }
+                ]
+              };
+
+  const list = (row.items && row.items.length > 0) ? row.items : [];
+
+  let filtered = list.filter(item => {
+    for (const [colKey, allowedSet] of Object.entries(activeTdsSummaryFilters)) {
+      const cellVal = String(item[colKey] !== undefined ? item[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching TDS records found.</td></tr>`;
+    updateTdsSummaryFilterBtnStates();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((item, idx) => `
+    <tr style="${idx !== filtered.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+      <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tdsType || ''}</td>
+      <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(item.tdsCode || '').replace(/"/g, '&quot;')}">${item.tdsCode || ''}</td>
+      <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${item.panNumber || ''}</td>
+      <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(item.panName || '').replace(/"/g, '&quot;')}">
+        <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('${row.id}', '${(item.panNumber || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${item.panName || ''}</a>
+      </td>
+      <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.taxable || ''}</td>
+      <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tds || ''}</td>
+    </tr>
+  `).join('');
+
+  updateTdsSummaryFilterBtnStates();
+}
+
+function updateTdsSummaryFilterBtnStates() {
+  document.querySelectorAll('#tblAccountsTdsSummaryPopup .filter-funnel-btn, #tblAccountsTdsSummaryPopup .contact-th-filter-btn').forEach(btn => {
+    const col = btn.getAttribute('data-filter-col');
+    if (activeTdsSummaryFilters[col]) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  });
+}
+
+function initTdsSummaryTableFilters() {
+  document.querySelectorAll('#tblAccountsTdsSummaryPopup .filter-funnel-btn, #tblAccountsTdsSummaryPopup .contact-th-filter-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const colKey = btn.getAttribute('data-filter-col');
+      openTdsSummaryFilter(colKey, btn);
+    };
+  });
+}
+
+function openTdsSummaryFilter(colKey, triggerBtn) {
+  currentTdsSummaryFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const row = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === currentTdsSummaryRowId)) || 
+              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || { items: [] };
+  const items = row.items || [];
+
+  const uniqueValues = Array.from(new Set(items.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeTdsSummaryFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const rect = triggerBtn.getBoundingClientRect();
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'tdsSummary';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+}
+
+window.handleGstRowSelection = function(radio) {
+  const pdfBtn = document.getElementById('btnAccountsGstPdfUpload');
+  if (pdfBtn) {
+    pdfBtn.style.display = (radio && radio.checked) ? 'inline-flex' : 'none';
+  }
+};
 
 window.openAccountsTdsSummaryModal = function(rowId) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
   currentTdsSummaryRowId = rowId || 'acc-tds-1';
+  activeTdsSummaryFilters = {};
 
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
@@ -17978,39 +18122,15 @@ window.openAccountsTdsSummaryModal = function(rowId) {
   });
 
   const row = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === currentTdsSummaryRowId)) || 
-              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || {
-                month: "April",
-                items: [
-                  { tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", taxable: "6,50,000.00", tds: "65,000.00" },
-                  { tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", taxable: "4,20,000.00", tds: "42,000.00" },
-                  { tdsType: "194I", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", taxable: "3,10,000.00", tds: "31,000.00" },
-                  { tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", taxable: "1,60,000.00", tds: "16,000.00" }
-                ]
-              };
+              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || { month: "April" };
 
   const titleBadge = document.getElementById('lblAccountsTdsSummaryTitle');
   if (titleBadge) {
-    titleBadge.innerText = `TDS Summary Report for the Month of 2026`;
+    titleBadge.innerText = `TDS Summary Report for the Month of ${row.month || 'April'} 2026`;
   }
 
-  const tbody = document.getElementById('tbodyAccountsTdsSummary');
-  if (tbody) {
-    const list = (row.items && row.items.length > 0) ? row.items : [
-      { tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", taxable: row.deductedBasic || "15,40,000.00", tds: row.deductedTds || "1,54,000.00" }
-    ];
-
-    tbody.innerHTML = list.map((item, idx) => `
-      <tr style="${idx !== list.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tdsType || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${item.panNumber || ''}</td>
-        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(item.panName || '').replace(/"/g, '&quot;')}">
-          <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('${row.id}', '${(item.panNumber || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${item.panName || ''}</a>
-        </td>
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.taxable || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tds || ''}</td>
-      </tr>
-    `).join('');
-  }
+  renderAccountsTdsSummaryTable();
+  initTdsSummaryTableFilters();
 
   const modal = document.getElementById('accountsTdsSummaryModal');
   if (modal) {

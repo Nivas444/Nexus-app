@@ -2170,8 +2170,23 @@ const accountsSalesData = [
     invoiceNo: "INV-2026-001",
     invoiceDate: "12 - 08 - 2026",
     invoiceAmount: "12,50,000.00",
+    basicAmount: "10,59,322.03",
+    cgst: "95,338.98",
+    sgst: "95,338.98",
+    igst: "0.00",
     deduction: "25,000.00",
-    receivedAmount: "12,25,000.00"
+    tds: "25,000.00",
+    dn: "0.00",
+    dnDetails: "N/A",
+    tredsDiscountAmount: "0.00",
+    tredsProcessingFee: "0.00",
+    tredsGst: "0.00",
+    receivedAmount: "12,25,000.00",
+    paymentRecords: [
+      { date: "13-09-2026", amount: "5,00,000.00", refNo: "UTR2026091301", receiptNo: "RCP-2026-101" },
+      { date: "18-09-2026", amount: "4,00,000.00", refNo: "UTR2026091802", receiptNo: "RCP-2026-102" },
+      { date: "24-09-2026", amount: "3,25,000.00", refNo: "UTR2026092403", receiptNo: "RCP-2026-103" }
+    ]
   },
   {
     id: "acc-s-2",
@@ -2180,8 +2195,22 @@ const accountsSalesData = [
     invoiceNo: "INV-2026-002",
     invoiceDate: "15 - 08 - 2026",
     invoiceAmount: "8,20,000.00",
+    basicAmount: "6,94,915.25",
+    cgst: "62,542.37",
+    sgst: "62,542.37",
+    igst: "0.00",
     deduction: "16,400.00",
-    receivedAmount: "8,03,600.00"
+    tds: "16,400.00",
+    dn: "0.00",
+    dnDetails: "N/A",
+    tredsDiscountAmount: "0.00",
+    tredsProcessingFee: "0.00",
+    tredsGst: "0.00",
+    receivedAmount: "8,03,600.00",
+    paymentRecords: [
+      { date: "15-09-2026", amount: "4,00,000.00", refNo: "NEFT202609151", receiptNo: "RCP-2026-104" },
+      { date: "22-09-2026", amount: "4,03,600.00", refNo: "NEFT202609222", receiptNo: "RCP-2026-105" }
+    ]
   },
   {
     id: "acc-s-3",
@@ -2190,8 +2219,22 @@ const accountsSalesData = [
     invoiceNo: "INV-2026-003",
     invoiceDate: "18 - 08 - 2026",
     invoiceAmount: "15,40,000.00",
+    basicAmount: "13,05,084.75",
+    cgst: "0.00",
+    sgst: "0.00",
+    igst: "2,34,915.25",
     deduction: "30,800.00",
-    receivedAmount: "15,09,200.00"
+    tds: "30,800.00",
+    dn: "0.00",
+    dnDetails: "N/A",
+    tredsDiscountAmount: "0.00",
+    tredsProcessingFee: "0.00",
+    tredsGst: "0.00",
+    receivedAmount: "15,09,200.00",
+    paymentRecords: [
+      { date: "20-09-2026", amount: "10,00,000.00", refNo: "RTGS202609201", receiptNo: "RCP-2026-106" },
+      { date: "26-09-2026", amount: "5,09,200.00", refNo: "RTGS202609262", receiptNo: "RCP-2026-107" }
+    ]
   },
   {
     id: "acc-s-4",
@@ -2200,8 +2243,22 @@ const accountsSalesData = [
     invoiceNo: "INV-2026-004",
     invoiceDate: "22 - 08 - 2026",
     invoiceAmount: "6,75,000.00",
+    basicAmount: "5,72,033.90",
+    cgst: "51,483.05",
+    sgst: "51,483.05",
+    igst: "0.00",
     deduction: "13,500.00",
-    receivedAmount: "6,61,500.00"
+    tds: "10,000.00",
+    dn: "2,500.00",
+    dnDetails: "DN-2026-088",
+    tredsDiscountAmount: "800.00",
+    tredsProcessingFee: "169.49",
+    tredsGst: "30.51",
+    receivedAmount: "6,61,500.00",
+    paymentRecords: [
+      { date: "25-09-2026", amount: "3,30,750.00", refNo: "UTR2026092501", receiptNo: "RCP-2026-108" },
+      { date: "28-09-2026", amount: "3,30,750.00", refNo: "UTR2026092802", receiptNo: "RCP-2026-109" }
+    ]
   },
   {
     id: "acc-s-5",
@@ -2210,8 +2267,22 @@ const accountsSalesData = [
     invoiceNo: "INV-2026-005",
     invoiceDate: "25 - 08 - 2026",
     invoiceAmount: "9,80,000.00",
+    basicAmount: "8,30,508.47",
+    cgst: "74,745.76",
+    sgst: "74,745.76",
+    igst: "0.00",
     deduction: "19,600.00",
-    receivedAmount: "9,60,400.00"
+    tds: "19,600.00",
+    dn: "0.00",
+    dnDetails: "N/A",
+    tredsDiscountAmount: "0.00",
+    tredsProcessingFee: "0.00",
+    tredsGst: "0.00",
+    receivedAmount: "9,60,400.00",
+    paymentRecords: [
+      { date: "27-09-2026", amount: "5,00,000.00", refNo: "NEFT202609270", receiptNo: "RCP-2026-110" },
+      { date: "30-09-2026", amount: "4,60,400.00", refNo: "NEFT202609301", receiptNo: "RCP-2026-111" }
+    ]
   }
 ];
 
@@ -2531,7 +2602,37 @@ const accountsPaymentData = [
     requested: "12,50,000.00",
     approved: "12,00,000.00",
     transferred: "10,00,000.00",
-    payable: "2,00,000.00"
+    payable: "2,00,000.00",
+    bankDetails: {
+      accountName: "Schneider Electric India Pvt Ltd",
+      accountNumber: "50200012345678",
+      ifscCode: "HDFC0000123",
+      bankName: "HDFC Bank"
+    },
+    items: [
+      {
+        requestDate: "10-08-2026",
+        requestBy: "Rajesh Kumar",
+        expenseCategory: "Electrical Equipment",
+        expenseName: "33KV Transformer Unit",
+        uom: "Nos",
+        qty: "2",
+        rate: "4,00,000.00",
+        gst: "18%",
+        amount: "9,44,000.00"
+      },
+      {
+        requestDate: "11-08-2026",
+        requestBy: "Rajesh Kumar",
+        expenseCategory: "Electrical Cables",
+        expenseName: "Armoured Power Cable 240sqmm",
+        uom: "Mtr",
+        qty: "500",
+        rate: "434.00",
+        gst: "18%",
+        amount: "2,56,000.00"
+      }
+    ]
   },
   {
     id: "acc-pay-2",
@@ -2542,7 +2643,26 @@ const accountsPaymentData = [
     requested: "8,20,000.00",
     approved: "8,00,000.00",
     transferred: "6,50,000.00",
-    payable: "1,50,000.00"
+    payable: "1,50,000.00",
+    bankDetails: {
+      accountName: "Larsen & Toubro Ltd",
+      accountNumber: "30012345678901",
+      ifscCode: "SBIN0001234",
+      bankName: "State Bank of India"
+    },
+    items: [
+      {
+        requestDate: "12-08-2026",
+        requestBy: "Suresh Raina",
+        expenseCategory: "Civil Construction",
+        expenseName: "Foundation Concrete Pouring",
+        uom: "Cu.M",
+        qty: "120",
+        rate: "5,650.00",
+        gst: "18%",
+        amount: "8,00,000.00"
+      }
+    ]
   },
   {
     id: "acc-pay-3",
@@ -2553,7 +2673,26 @@ const accountsPaymentData = [
     requested: "15,00,000.00",
     approved: "14,50,000.00",
     transferred: "14,50,000.00",
-    payable: "0.00"
+    payable: "0.00",
+    bankDetails: {
+      accountName: "Indus Towers Ltd",
+      accountNumber: "00040501234567",
+      ifscCode: "ICIC0000004",
+      bankName: "ICICI Bank"
+    },
+    items: [
+      {
+        requestDate: "14-08-2026",
+        requestBy: "Anil Sharma",
+        expenseCategory: "Tower Infrastructure",
+        expenseName: "Galvanized Lattice Mast 30M",
+        uom: "Nos",
+        qty: "3",
+        rate: "4,10,000.00",
+        gst: "18%",
+        amount: "14,50,000.00"
+      }
+    ]
   },
   {
     id: "acc-pay-4",
@@ -2564,7 +2703,26 @@ const accountsPaymentData = [
     requested: "4,50,000.00",
     approved: "4,20,000.00",
     transferred: "3,80,000.00",
-    payable: "40,000.00"
+    payable: "40,000.00",
+    bankDetails: {
+      accountName: "Vijay Transport Logistics",
+      accountNumber: "50200098765432",
+      ifscCode: "HDFC0000123",
+      bankName: "HDFC Bank"
+    },
+    items: [
+      {
+        requestDate: "16-08-2026",
+        requestBy: "Karthik Raja",
+        expenseCategory: "Logistics & Freight",
+        expenseName: "Heavy Equipment Transport",
+        uom: "Trips",
+        qty: "4",
+        rate: "89,000.00",
+        gst: "18%",
+        amount: "4,20,000.00"
+      }
+    ]
   },
   {
     id: "acc-pay-5",
@@ -2575,7 +2733,26 @@ const accountsPaymentData = [
     requested: "9,80,000.00",
     approved: "9,50,000.00",
     transferred: "7,00,000.00",
-    payable: "2,50,000.00"
+    payable: "2,50,000.00",
+    bankDetails: {
+      accountName: "Tata Communications Ltd",
+      accountNumber: "30012398765432",
+      ifscCode: "SBIN0001234",
+      bankName: "State Bank of India"
+    },
+    items: [
+      {
+        requestDate: "18-08-2026",
+        requestBy: "Manoj Verma",
+        expenseCategory: "Fiber Optics",
+        expenseName: "Optical Ground Wire & Splicing",
+        uom: "Km",
+        qty: "15",
+        rate: "53,672.00",
+        gst: "18%",
+        amount: "9,50,000.00"
+      }
+    ]
   }
 ];
 
@@ -2589,7 +2766,16 @@ const accountsPurchaseData = [
     invoiceDate: "08 - 08 - 2026",
     invoiceAmount: "12,50,000.00",
     paidAmount: "10,00,000.00",
-    payableAmount: "2,50,000.00"
+    payableAmount: "2,50,000.00",
+    basicAmount: "10,59,322.03",
+    cgst: "95,338.98",
+    sgst: "95,338.98",
+    igst: "0.00",
+    payments: [
+      { paymentDate: "13-09-2026", amount: "5,00,000.00", paymentRefNo: "", receiptNumber: "" },
+      { paymentDate: "13-09-2026", amount: "3,00,000.00", paymentRefNo: "", receiptNumber: "" },
+      { paymentDate: "13-09-2026", amount: "2,00,000.00", paymentRefNo: "", receiptNumber: "" }
+    ]
   },
   {
     id: "acc-pur-2",
@@ -2600,7 +2786,15 @@ const accountsPurchaseData = [
     invoiceDate: "12 - 08 - 2026",
     invoiceAmount: "8,20,000.00",
     paidAmount: "6,50,000.00",
-    payableAmount: "1,70,000.00"
+    payableAmount: "1,70,000.00",
+    basicAmount: "6,94,915.25",
+    cgst: "62,542.37",
+    sgst: "62,542.37",
+    igst: "0.00",
+    payments: [
+      { paymentDate: "13-09-2026", amount: "4,00,000.00", paymentRefNo: "", receiptNumber: "" },
+      { paymentDate: "13-09-2026", amount: "2,50,000.00", paymentRefNo: "", receiptNumber: "" }
+    ]
   },
   {
     id: "acc-pur-3",
@@ -2611,7 +2805,14 @@ const accountsPurchaseData = [
     invoiceDate: "16 - 08 - 2026",
     invoiceAmount: "4,50,000.00",
     paidAmount: "3,80,000.00",
-    payableAmount: "70,000.00"
+    payableAmount: "70,000.00",
+    basicAmount: "3,81,355.93",
+    cgst: "34,322.03",
+    sgst: "34,322.03",
+    igst: "0.00",
+    payments: [
+      { paymentDate: "13-09-2026", amount: "3,80,000.00", paymentRefNo: "", receiptNumber: "" }
+    ]
   },
   {
     id: "acc-pur-4",
@@ -2622,7 +2823,14 @@ const accountsPurchaseData = [
     invoiceDate: "19 - 08 - 2026",
     invoiceAmount: "9,80,000.00",
     paidAmount: "7,00,000.00",
-    payableAmount: "2,80,000.00"
+    payableAmount: "2,80,000.00",
+    basicAmount: "8,30,508.47",
+    cgst: "74,745.76",
+    sgst: "74,745.76",
+    igst: "0.00",
+    payments: [
+      { paymentDate: "13-09-2026", amount: "7,00,000.00", paymentRefNo: "", receiptNumber: "" }
+    ]
   },
   {
     id: "acc-pur-5",
@@ -2633,7 +2841,16 @@ const accountsPurchaseData = [
     invoiceDate: "23 - 08 - 2026",
     invoiceAmount: "15,00,000.00",
     paidAmount: "15,00,000.00",
-    payableAmount: "0.00"
+    payableAmount: "0.00",
+    basicAmount: "12,71,186.44",
+    cgst: "0.00",
+    sgst: "0.00",
+    igst: "2,28,813.56",
+    payments: [
+      { paymentDate: "13-09-2026", amount: "5,00,000.00", paymentRefNo: "", receiptNumber: "" },
+      { paymentDate: "13-09-2026", amount: "5,00,000.00", paymentRefNo: "", receiptNumber: "" },
+      { paymentDate: "13-09-2026", amount: "5,00,000.00", paymentRefNo: "", receiptNumber: "" }
+    ]
   }
 ];
 
@@ -2644,7 +2861,50 @@ const accountsTdsData = [
     deductedBasic: "15,40,000.00",
     deductedTds: "1,54,000.00",
     collectedBasic: "22,80,000.00",
-    collectedTds: "2,28,000.00"
+    collectedTds: "2,28,000.00",
+    items: [
+      {
+        tdsType: "194C",
+        panNumber: "AAACB1234D",
+        panName: "Schneider Electric India Pvt Ltd",
+        taxable: "6,50,000.00",
+        tds: "65,000.00",
+        details: [
+          { paymentDate: "12-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8812", invoiceDate: "08-04-2026", taxableAmount: "3,50,000.00", tdsCode: "10%", taxAmount: "35,000.00" },
+          { paymentDate: "24-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8845", invoiceDate: "20-04-2026", taxableAmount: "3,00,000.00", tdsCode: "10%", taxAmount: "30,000.00" }
+        ]
+      },
+      {
+        tdsType: "194J",
+        panNumber: "BBBCB5678E",
+        panName: "Larsen & Toubro Ltd",
+        taxable: "4,20,000.00",
+        tds: "42,000.00",
+        details: [
+          { paymentDate: "15-04-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9041", invoiceDate: "11-04-2026", taxableAmount: "4,20,000.00", tdsCode: "10%", taxAmount: "42,000.00" }
+        ]
+      },
+      {
+        tdsType: "194I",
+        panNumber: "CCCCD9012F",
+        panName: "Indus Towers Ltd",
+        taxable: "3,10,000.00",
+        tds: "31,000.00",
+        details: [
+          { paymentDate: "18-04-2026", tdsType: "194I", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", invoiceNumber: "INV-2026-9210", invoiceDate: "14-04-2026", taxableAmount: "3,10,000.00", tdsCode: "10%", taxAmount: "31,000.00" }
+        ]
+      },
+      {
+        tdsType: "194Q",
+        panNumber: "DDDDD3456G",
+        panName: "Vijay Transport Logistics",
+        taxable: "1,60,000.00",
+        tds: "16,000.00",
+        details: [
+          { paymentDate: "28-04-2026", tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-9502", invoiceDate: "25-04-2026", taxableAmount: "1,60,000.00", tdsCode: "10%", taxAmount: "16,000.00" }
+        ]
+      }
+    ]
   },
   {
     id: "acc-tds-2",
@@ -2652,7 +2912,39 @@ const accountsTdsData = [
     deductedBasic: "18,20,000.00",
     deductedTds: "1,82,000.00",
     collectedBasic: "25,50,000.00",
-    collectedTds: "2,55,000.00"
+    collectedTds: "2,55,000.00",
+    items: [
+      {
+        tdsType: "194C",
+        panNumber: "AAACB1234D",
+        panName: "Schneider Electric India Pvt Ltd",
+        taxable: "7,80,000.00",
+        tds: "78,000.00",
+        details: [
+          { paymentDate: "10-05-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-9601", invoiceDate: "05-05-2026", taxableAmount: "7,80,000.00", tdsCode: "10%", taxAmount: "78,000.00" }
+        ]
+      },
+      {
+        tdsType: "194J",
+        panNumber: "BBBCB5678E",
+        panName: "Larsen & Toubro Ltd",
+        taxable: "5,40,000.00",
+        tds: "54,000.00",
+        details: [
+          { paymentDate: "16-05-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9720", invoiceDate: "12-05-2026", taxableAmount: "5,40,000.00", tdsCode: "10%", taxAmount: "54,000.00" }
+        ]
+      },
+      {
+        tdsType: "194I",
+        panNumber: "EEEEF7890H",
+        panName: "Tata Communications Ltd",
+        taxable: "5,00,000.00",
+        tds: "50,000.00",
+        details: [
+          { paymentDate: "22-05-2026", tdsType: "194I", panNumber: "EEEEF7890H", panName: "Tata Communications Ltd", invoiceNumber: "INV-2026-9811", invoiceDate: "19-05-2026", taxableAmount: "5,00,000.00", tdsCode: "10%", taxAmount: "50,000.00" }
+        ]
+      }
+    ]
   },
   {
     id: "acc-tds-3",
@@ -2660,7 +2952,39 @@ const accountsTdsData = [
     deductedBasic: "12,90,000.00",
     deductedTds: "1,29,000.00",
     collectedBasic: "19,40,000.00",
-    collectedTds: "1,94,000.00"
+    collectedTds: "1,94,000.00",
+    items: [
+      {
+        tdsType: "194C",
+        panNumber: "AAACB1234D",
+        panName: "Schneider Electric India Pvt Ltd",
+        taxable: "5,20,000.00",
+        tds: "52,000.00",
+        details: [
+          { paymentDate: "12-06-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-9901", invoiceDate: "08-06-2026", taxableAmount: "5,20,000.00", tdsCode: "10%", taxAmount: "52,000.00" }
+        ]
+      },
+      {
+        tdsType: "194J",
+        panNumber: "BBBCB5678E",
+        panName: "Larsen & Toubro Ltd",
+        taxable: "4,10,000.00",
+        tds: "41,000.00",
+        details: [
+          { paymentDate: "19-06-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9945", invoiceDate: "15-06-2026", taxableAmount: "4,10,000.00", tdsCode: "10%", taxAmount: "41,000.00" }
+        ]
+      },
+      {
+        tdsType: "194Q",
+        panNumber: "DDDDD3456G",
+        panName: "Vijay Transport Logistics",
+        taxable: "3,60,000.00",
+        tds: "36,000.00",
+        details: [
+          { paymentDate: "26-06-2026", tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-9988", invoiceDate: "22-06-2026", taxableAmount: "3,60,000.00", tdsCode: "10%", taxAmount: "36,000.00" }
+        ]
+      }
+    ]
   },
   {
     id: "acc-tds-4",
@@ -2668,7 +2992,39 @@ const accountsTdsData = [
     deductedBasic: "21,60,000.00",
     deductedTds: "2,16,000.00",
     collectedBasic: "30,10,000.00",
-    collectedTds: "3,01,000.00"
+    collectedTds: "3,01,000.00",
+    items: [
+      {
+        tdsType: "194C",
+        panNumber: "AAACB1234D",
+        panName: "Schneider Electric India Pvt Ltd",
+        taxable: "9,50,000.00",
+        tds: "95,000.00",
+        details: [
+          { paymentDate: "11-07-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-1011", invoiceDate: "07-07-2026", taxableAmount: "9,50,000.00", tdsCode: "10%", taxAmount: "95,000.00" }
+        ]
+      },
+      {
+        tdsType: "194J",
+        panNumber: "BBBCB5678E",
+        panName: "Larsen & Toubro Ltd",
+        taxable: "6,80,000.00",
+        tds: "68,000.00",
+        details: [
+          { paymentDate: "17-07-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-1025", invoiceDate: "13-07-2026", taxableAmount: "6,80,000.00", tdsCode: "10%", taxAmount: "68,000.00" }
+        ]
+      },
+      {
+        tdsType: "194I",
+        panNumber: "CCCCD9012F",
+        panName: "Indus Towers Ltd",
+        taxable: "5,30,000.00",
+        tds: "53,000.00",
+        details: [
+          { paymentDate: "24-07-2026", tdsType: "194I", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", invoiceNumber: "INV-2026-1050", invoiceDate: "20-07-2026", taxableAmount: "5,30,000.00", tdsCode: "10%", taxAmount: "53,000.00" }
+        ]
+      }
+    ]
   },
   {
     id: "acc-tds-5",
@@ -2676,7 +3032,39 @@ const accountsTdsData = [
     deductedBasic: "16,75,000.00",
     deductedTds: "1,67,500.00",
     collectedBasic: "24,30,000.00",
-    collectedTds: "2,43,000.00"
+    collectedTds: "2,43,000.00",
+    items: [
+      {
+        tdsType: "194C",
+        panNumber: "AAACB1234D",
+        panName: "Schneider Electric India Pvt Ltd",
+        taxable: "6,90,000.00",
+        tds: "69,000.00",
+        details: [
+          { paymentDate: "09-08-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-1102", invoiceDate: "05-08-2026", taxableAmount: "6,90,000.00", tdsCode: "10%", taxAmount: "69,000.00" }
+        ]
+      },
+      {
+        tdsType: "194J",
+        panNumber: "BBBCB5678E",
+        panName: "Larsen & Toubro Ltd",
+        taxable: "4,85,000.00",
+        tds: "48,500.00",
+        details: [
+          { paymentDate: "16-08-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-1120", invoiceDate: "12-08-2026", taxableAmount: "4,85,000.00", tdsCode: "10%", taxAmount: "48,500.00" }
+        ]
+      },
+      {
+        tdsType: "194Q",
+        panNumber: "DDDDD3456G",
+        panName: "Vijay Transport Logistics",
+        taxable: "5,00,000.00",
+        tds: "50,000.00",
+        details: [
+          { paymentDate: "23-08-2026", tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-1145", invoiceDate: "19-08-2026", taxableAmount: "5,00,000.00", tdsCode: "10%", taxAmount: "50,000.00" }
+        ]
+      }
+    ]
   }
 ];
 
@@ -7266,13 +7654,13 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsPurchaseSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Summary opened'); return false;">
+        <button type="button" class="tool-btn" id="btnAccountsPurchaseSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAccountsPurchaseSummaryModal(); return false;">
           <img src="icons/Summarry.svg" alt="Summary" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsPurchasePayable" title="Payable" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Payable opened'); return false;">
           <img src="icons/Payable.svg" alt="Payable" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
-        <button type="button" class="tool-btn" id="btnAccountsPurchaseCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+        <button type="button" class="tool-btn" id="btnAccountsPurchaseCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
@@ -7313,10 +7701,10 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsGstPdfUpload" title="PDF Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('PDF Upload opened'); return false;">
+        <button type="button" class="tool-btn" id="btnAccountsGstPdfUpload" title="PDF Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
           <img src="icons/PDF Upload.svg" alt="PDF Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
-        <button type="button" class="tool-btn" id="btnAccountsGstCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+        <button type="button" class="tool-btn" id="btnAccountsGstCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
@@ -7338,7 +7726,7 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsBankCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+        <button type="button" class="tool-btn" id="btnAccountsBankCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
@@ -7360,7 +7748,7 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsReceiptCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+        <button type="button" class="tool-btn" id="btnAccountsReceiptCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
@@ -7379,13 +7767,13 @@ function renderAccountsToolbar() {
   toolbar.innerHTML = `
     <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
     <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-      <button type="button" class="tool-btn" id="btnAccountsSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Summary opened'); return false;">
+      <button type="button" class="tool-btn" id="btnAccountsSummary" title="Summary" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAccountsSalesSummaryModal(); return false;">
         <img src="icons/Summarry.svg" alt="Summary" style="width: 28px; height: 28px; display: block; object-fit: contain;">
       </button>
       <button type="button" class="tool-btn" id="btnAccountsReceivable" title="Receivable" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('Receivable opened'); return false;">
         <img src="icons/Receivable.svg" alt="Receivable" style="width: 28px; height: 28px; display: block; object-fit: contain;">
       </button>
-      <button type="button" class="tool-btn" id="btnAccountsCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('CSV Upload opened'); return false;">
+      <button type="button" class="tool-btn" id="btnAccountsCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
         <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
       </button>
     </div>
@@ -9496,7 +9884,9 @@ function applyFiltersAndRender() {
     if (currentAccountsView === 'tds') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="accounts-tds-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.month || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsTdsSummaryModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.month || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedBasic || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedTds || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.collectedBasic || ''}</td>
@@ -9509,17 +9899,23 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherDate || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.vendorName || '').replace(/"/g, '&quot;')}">${row.vendorName || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceNo || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsPurchaseInvoiceModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.invoiceNo || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceAmount || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.paidAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsPurchasePaymentDetailsModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.paidAmount || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.payableAmount || ''}</td>
         </tr>
       `).join('');
     } else if (currentAccountsView === 'payment') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="accounts-payment-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.transferredTo || '').replace(/"/g, '&quot;')}">${row.transferredTo || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.transferredTo || '').replace(/"/g, '&quot;')}">
+            <a href="#" class="td-link-blue" onclick="openAccountsPaymentTransferToModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.transferredTo || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.requestNo || ''}</td>
           <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">${row.expenseHead || ''}</td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.transferredFrom || '').replace(/"/g, '&quot;')}">${row.transferredFrom || ''}</td>
@@ -9578,11 +9974,17 @@ function applyFiltersAndRender() {
         <tr class="accounts-sales-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.customerName || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceNo || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsSalesInvoiceModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.invoiceNo || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceAmount || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deduction || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.receivedAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsSalesDeductionModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.deduction || ''}</a>
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsSalesPaymentModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.receivedAmount || ''}</a>
+          </td>
         </tr>
       `).join('');
     } else {
@@ -17148,6 +17550,739 @@ window.closePaymentReceiptModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
 };
+
+window.openAccountsSalesInvoiceModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsSalesInvoiceModal') card.style.display = 'none';
+  });
+
+  const row = (typeof accountsSalesData !== 'undefined' && accountsSalesData.find(r => r.id === rowId)) || 
+              (typeof accountsSalesData !== 'undefined' && accountsSalesData[0]) || {
+                customerName: 'Indus Towers Ltd',
+                invoiceNo: 'INV-2026-001',
+                basicAmount: '10,59,322.03',
+                cgst: '95,338.98',
+                sgst: '95,338.98',
+                igst: '0.00'
+              };
+
+  const lblTitle = document.getElementById('lblAccountsSalesInvoiceTitle');
+  if (lblTitle) {
+    lblTitle.innerText = `${row.customerName || 'Customer'} - ${row.invoiceNo || 'Invoice'}`;
+  }
+
+  const lblSumVal = document.getElementById('lblAccountsSalesInvoiceSumVal');
+  if (lblSumVal) {
+    lblSumVal.innerText = row.invoiceAmount || '12,50,000.00';
+  }
+
+  const inpBasic = document.getElementById('inpSalesInvoiceBasic');
+  if (inpBasic) inpBasic.value = row.basicAmount || '10,59,322.03';
+
+  const inpCgst = document.getElementById('inpSalesInvoiceCgst');
+  if (inpCgst) inpCgst.value = row.cgst || '95,338.98';
+
+  const inpSgst = document.getElementById('inpSalesInvoiceSgst');
+  if (inpSgst) inpSgst.value = row.sgst || '95,338.98';
+
+  const inpIgst = document.getElementById('inpSalesInvoiceIgst');
+  if (inpIgst) inpIgst.value = row.igst || '0.00';
+
+  const modal = document.getElementById('accountsSalesInvoiceModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsSalesInvoiceModal = function() {
+  const modal = document.getElementById('accountsSalesInvoiceModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAccountsSalesDeductionModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsSalesDeductionModal') card.style.display = 'none';
+  });
+
+  const row = (typeof accountsSalesData !== 'undefined' && accountsSalesData.find(r => r.id === rowId)) || 
+              (typeof accountsSalesData !== 'undefined' && accountsSalesData[0]) || {
+                invoiceNo: 'INV-2026-001',
+                deduction: '25,000.00',
+                tds: '25,000.00',
+                dn: '0.00',
+                dnDetails: 'N/A',
+                tredsDiscountAmount: '0.00',
+                tredsProcessingFee: '0.00',
+                tredsGst: '0.00'
+              };
+
+  const lblTitle = document.getElementById('lblAccountsSalesDeductionTitle');
+  if (lblTitle) {
+    lblTitle.innerText = `Deduction Details - ${row.invoiceNo || 'Invoice'}`;
+  }
+
+  const lblSumVal = document.getElementById('lblAccountsSalesDeductionSumVal');
+  if (lblSumVal) {
+    lblSumVal.innerText = row.deduction || '10,00,000.00';
+  }
+
+  const inpTds = document.getElementById('inpSalesDeductionTds');
+  if (inpTds) inpTds.value = row.tds || row.deduction || '25,000.00';
+
+  const inpDn = document.getElementById('inpSalesDeductionDn');
+  if (inpDn) inpDn.value = row.dn || '0.00';
+
+  const inpDnDetails = document.getElementById('inpSalesDeductionDnDetails');
+  if (inpDnDetails) inpDnDetails.value = row.dnDetails || 'N/A';
+
+  const inpTredsDiscount = document.getElementById('inpSalesDeductionTredsDiscount');
+  if (inpTredsDiscount) inpTredsDiscount.value = row.tredsDiscountAmount || '0.00';
+
+  const inpTredsFee = document.getElementById('inpSalesDeductionTredsFee');
+  if (inpTredsFee) inpTredsFee.value = row.tredsProcessingFee || '0.00';
+
+  const inpTredsGst = document.getElementById('inpSalesDeductionTredsGst');
+  if (inpTredsGst) inpTredsGst.value = row.tredsGst || '0.00';
+
+  const modal = document.getElementById('accountsSalesDeductionModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsSalesDeductionModal = function() {
+  const modal = document.getElementById('accountsSalesDeductionModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAccountsSalesPaymentModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsSalesPaymentModal') card.style.display = 'none';
+  });
+
+  const row = (typeof accountsSalesData !== 'undefined' && accountsSalesData.find(r => r.id === rowId)) || 
+              (typeof accountsSalesData !== 'undefined' && accountsSalesData[0]) || {
+                invoiceNo: 'INV-2026-001',
+                receivedAmount: '12,25,000.00',
+                paymentRecords: [
+                  { date: "13-09-2026", amount: "12,25,000.00", refNo: "UTR2026091301", receiptNo: "RCP-2026-101" }
+                ]
+              };
+
+  const lblTitle = document.getElementById('lblAccountsSalesPaymentTitle');
+  if (lblTitle) {
+    lblTitle.innerText = `Payment Details - ${row.invoiceNo || 'Invoice'}`;
+  }
+
+  const tbody = document.getElementById('tbodyAccountsSalesPayment');
+  if (tbody) {
+    const list = (row.paymentRecords && row.paymentRecords.length > 0) ? row.paymentRecords : [
+      { date: "13-09-2026", amount: row.receivedAmount || "12,25,000.00", refNo: "UTR2026091301", receiptNo: "RCP-2026-101" }
+    ];
+    tbody.innerHTML = list.map((item, idx) => `
+      <tr style="${idx !== list.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+        <td style="width: 18ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.date || ''}</td>
+        <td style="width: 20ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.amount || ''}</td>
+        <td style="width: 22ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">${item.refNo || ''}</td>
+        <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">${item.receiptNo || ''}</td>
+      </tr>
+    `).join('');
+  }
+
+  const modal = document.getElementById('accountsSalesPaymentModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsSalesPaymentModal = function() {
+  const modal = document.getElementById('accountsSalesPaymentModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAccountsSalesSummaryModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsSalesSummaryModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblAccountsSalesSummaryTitle');
+  if (titleBadge) {
+    titleBadge.innerText = 'Sales From 12 - 08 - 2026 To 25 - 08 - 2026';
+  }
+
+  // Populate dynamic summary values
+  let totalInv = 0;
+  let totalRec = 0;
+  let totalGst = 0;
+
+  if (typeof accountsSalesData !== 'undefined' && Array.isArray(accountsSalesData)) {
+    accountsSalesData.forEach(r => {
+      const invAmt = parseFloat(String(r.invoiceAmount || '0').replace(/,/g, '')) || 0;
+      const recAmt = parseFloat(String(r.receivedAmount || '0').replace(/,/g, '')) || 0;
+      const cgst = parseFloat(String(r.cgst || '0').replace(/,/g, '')) || 0;
+      const sgst = parseFloat(String(r.sgst || '0').replace(/,/g, '')) || 0;
+      const igst = parseFloat(String(r.igst || '0').replace(/,/g, '')) || 0;
+      totalInv += invAmt;
+      totalRec += recAmt;
+      totalGst += (cgst + sgst + igst);
+    });
+  }
+
+  if (totalInv === 0) {
+    totalInv = 5265000;
+    totalRec = 5159700;
+    totalGst = 803135.57;
+  }
+
+  const receivableInv = Math.max(0, totalInv - totalRec);
+  const recRatio = totalInv > 0 ? (totalRec / totalInv) : 1;
+  const receivedGst = totalGst * recRatio;
+  const receivableGst = Math.max(0, totalGst - receivedGst);
+
+  const formatCurrency = (num) => num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const elTotalInv = document.getElementById('valSalesSummaryTotalInvoice');
+  if (elTotalInv) elTotalInv.innerText = formatCurrency(totalInv);
+
+  const elTotalGst = document.getElementById('valSalesSummaryTotalGst');
+  if (elTotalGst) elTotalGst.innerText = formatCurrency(totalGst);
+
+  const elRecInv = document.getElementById('valSalesSummaryReceivedInvoice');
+  if (elRecInv) elRecInv.innerText = formatCurrency(totalRec);
+
+  const elRecGst = document.getElementById('valSalesSummaryReceivedGst');
+  if (elRecGst) elRecGst.innerText = formatCurrency(receivedGst);
+
+  const elRecvbleInv = document.getElementById('valSalesSummaryReceivableInvoice');
+  if (elRecvbleInv) elRecvbleInv.innerText = formatCurrency(receivableInv);
+
+  const elRecvbleGst = document.getElementById('valSalesSummaryReceivableGst');
+  if (elRecvbleGst) elRecvbleGst.innerText = formatCurrency(receivableGst);
+
+  const modal = document.getElementById('accountsSalesSummaryModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsSalesSummaryModal = function() {
+  const modal = document.getElementById('accountsSalesSummaryModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+let currentPaymentModalRowId = 'acc-pay-1';
+
+window.openAccountsPaymentTransferToModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  currentPaymentModalRowId = rowId || 'acc-pay-1';
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsPaymentTransferToModal') card.style.display = 'none';
+  });
+
+  const row = (typeof accountsPaymentData !== 'undefined' && accountsPaymentData.find(r => r.id === currentPaymentModalRowId)) || 
+              (typeof accountsPaymentData !== 'undefined' && accountsPaymentData[0]) || {
+                transferredTo: "Schneider Electric India Pvt Ltd",
+                approved: "12,00,000.00",
+                transferred: "10,00,000.00",
+                payable: "2,00,000.00",
+                items: [
+                  {
+                    requestDate: "10-08-2026",
+                    requestBy: "Rajesh Kumar",
+                    expenseCategory: "Electrical Equipment",
+                    expenseName: "33KV Transformer Unit",
+                    uom: "Nos",
+                    qty: "2",
+                    rate: "4,00,000.00",
+                    gst: "18%",
+                    amount: "9,44,000.00"
+                  },
+                  {
+                    requestDate: "11-08-2026",
+                    requestBy: "Rajesh Kumar",
+                    expenseCategory: "Electrical Cables",
+                    expenseName: "Armoured Power Cable 240sqmm",
+                    uom: "Mtr",
+                    qty: "500",
+                    rate: "434.00",
+                    gst: "18%",
+                    amount: "2,56,000.00"
+                  }
+                ]
+              };
+
+  const titleBadge = document.getElementById('lblAccountsPaymentTransferToTitle');
+  if (titleBadge) {
+    titleBadge.innerText = `Transfer To`;
+  }
+
+  const elSum = document.getElementById('valPaymentTransferToSummation');
+  if (elSum) elSum.innerText = row.approved || '12,00,000.00';
+
+  const elPaid = document.getElementById('valPaymentTransferToPaid');
+  if (elPaid) elPaid.innerText = row.transferred || '10,00,000.00';
+
+  const elPayable = document.getElementById('valPaymentTransferToPayable');
+  if (elPayable) elPayable.innerText = row.payable || '2,00,000.00';
+
+  const tbody = document.getElementById('tbodyAccountsPaymentTransferTo');
+  if (tbody) {
+    const list = (row.items && row.items.length > 0) ? row.items : [
+      {
+        requestDate: "10-08-2026",
+        requestBy: "Rajesh Kumar",
+        expenseCategory: "Electrical Equipment",
+        expenseName: "33KV Transformer Unit",
+        uom: "Nos",
+        qty: "2",
+        rate: "4,00,000.00",
+        gst: "18%",
+        amount: row.approved || "12,00,000.00"
+      }
+    ];
+
+    tbody.innerHTML = list.map((item, idx) => `
+      <tr style="${idx !== list.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.requestDate || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.requestBy || ''}</td>
+        <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis;" title="${(item.expenseCategory || '').replace(/"/g, '&quot;')}">${item.expenseCategory || ''}</td>
+        <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis;" title="${(item.expenseName || '').replace(/"/g, '&quot;')}">${item.expenseName || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.uom || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.qty || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.rate || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.gst || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.amount || ''}</td>
+      </tr>
+    `).join('');
+  }
+
+  const modal = document.getElementById('accountsPaymentTransferToModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsPaymentTransferToModal = function() {
+  const modal = document.getElementById('accountsPaymentTransferToModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAccountsPaymentBankDetailsModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const targetId = rowId || currentPaymentModalRowId || 'acc-pay-1';
+  const row = (typeof accountsPaymentData !== 'undefined' && accountsPaymentData.find(r => r.id === targetId)) || 
+              (typeof accountsPaymentData !== 'undefined' && accountsPaymentData[0]) || {
+                transferredTo: "Schneider Electric India Pvt Ltd",
+                bankDetails: {
+                  accountName: "Schneider Electric India Pvt Ltd",
+                  accountNumber: "50200012345678",
+                  ifscCode: "HDFC0000123",
+                  bankName: "HDFC Bank"
+                }
+              };
+
+  const bank = row.bankDetails || {
+    accountName: row.transferredTo || "Schneider Electric India Pvt Ltd",
+    accountNumber: "50200012345678",
+    ifscCode: "HDFC0000123",
+    bankName: "HDFC Bank"
+  };
+
+  const inpAccName = document.getElementById('inpBankDetailsAccountName');
+  if (inpAccName) inpAccName.value = bank.accountName || row.transferredTo || '';
+
+  const inpAccNo = document.getElementById('inpBankDetailsAccountNumber');
+  if (inpAccNo) inpAccNo.value = bank.accountNumber || '';
+
+  const inpIfsc = document.getElementById('inpBankDetailsIfscCode');
+  if (inpIfsc) inpIfsc.value = bank.ifscCode || '';
+
+  const inpBankName = document.getElementById('inpBankDetailsBankName');
+  if (inpBankName) inpBankName.value = bank.bankName || '';
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsPaymentBankDetailsModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('accountsPaymentBankDetailsModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsPaymentBankDetailsModal = function() {
+  const bankModal = document.getElementById('accountsPaymentBankDetailsModal');
+  if (bankModal) bankModal.style.display = 'none';
+
+  // Return smoothly to Transfer To modal
+  const transferModal = document.getElementById('accountsPaymentTransferToModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (transferModal && currentPaymentModalRowId) {
+    transferModal.style.display = 'block';
+    if (overlay) overlay.style.display = 'flex';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+let currentTdsSummaryRowId = 'acc-tds-1';
+
+window.openAccountsTdsSummaryModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  currentTdsSummaryRowId = rowId || 'acc-tds-1';
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsTdsSummaryModal') card.style.display = 'none';
+  });
+
+  const row = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === currentTdsSummaryRowId)) || 
+              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || {
+                month: "April",
+                items: [
+                  { tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", taxable: "6,50,000.00", tds: "65,000.00" },
+                  { tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", taxable: "4,20,000.00", tds: "42,000.00" },
+                  { tdsType: "194I", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", taxable: "3,10,000.00", tds: "31,000.00" },
+                  { tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", taxable: "1,60,000.00", tds: "16,000.00" }
+                ]
+              };
+
+  const titleBadge = document.getElementById('lblAccountsTdsSummaryTitle');
+  if (titleBadge) {
+    titleBadge.innerText = `TDS Summary Report for the Month of 2026`;
+  }
+
+  const tbody = document.getElementById('tbodyAccountsTdsSummary');
+  if (tbody) {
+    const list = (row.items && row.items.length > 0) ? row.items : [
+      { tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", taxable: row.deductedBasic || "15,40,000.00", tds: row.deductedTds || "1,54,000.00" }
+    ];
+
+    tbody.innerHTML = list.map((item, idx) => `
+      <tr style="${idx !== list.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tdsType || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${item.panNumber || ''}</td>
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(item.panName || '').replace(/"/g, '&quot;')}">
+          <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('${row.id}', '${(item.panNumber || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${item.panName || ''}</a>
+        </td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.taxable || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tds || ''}</td>
+      </tr>
+    `).join('');
+  }
+
+  const modal = document.getElementById('accountsTdsSummaryModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsTdsSummaryModal = function() {
+  const modal = document.getElementById('accountsTdsSummaryModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAccountsTdsDetailsModal = function(rowId, panNumber) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const targetRowId = rowId || currentTdsSummaryRowId || 'acc-tds-1';
+  const monthRow = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === targetRowId)) ||
+                   (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]);
+
+  let detailList = [];
+  if (monthRow && monthRow.items) {
+    if (panNumber) {
+      const matchItem = monthRow.items.find(it => it.panNumber === panNumber || it.panName === panNumber);
+      if (matchItem && matchItem.details) {
+        detailList = matchItem.details;
+      }
+    }
+    if (detailList.length === 0) {
+      monthRow.items.forEach(it => {
+        if (it.details) detailList.push(...it.details);
+      });
+    }
+  }
+
+  if (detailList.length === 0) {
+    detailList = [
+      { paymentDate: "12-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8812", invoiceDate: "08-04-2026", taxableAmount: "3,50,000.00", tdsCode: "10%", taxAmount: "35,000.00" },
+      { paymentDate: "24-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8845", invoiceDate: "20-04-2026", taxableAmount: "3,00,000.00", tdsCode: "10%", taxAmount: "30,000.00" }
+    ];
+  }
+
+  const tbody = document.getElementById('tbodyAccountsTdsDetails');
+  if (tbody) {
+    tbody.innerHTML = detailList.map((d, idx) => `
+      <tr style="${idx !== detailList.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.paymentDate || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.tdsType || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${d.panNumber || ''}</td>
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(d.panName || '').replace(/"/g, '&quot;')}">${d.panName || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.invoiceNumber || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.invoiceDate || ''}</td>
+        <td style="width: 12ch; min-width: 10ch; max-width: 14ch; text-align: right !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxableAmount || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.tdsCode || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 12ch; text-align: right !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxAmount || ''}</td>
+      </tr>
+    `).join('');
+  }
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsTdsDetailsModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('accountsTdsDetailsModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsTdsDetailsModal = function() {
+  const detailsModal = document.getElementById('accountsTdsDetailsModal');
+  if (detailsModal) detailsModal.style.display = 'none';
+
+  // Return smoothly to TDS Summary modal
+  const summaryModal = document.getElementById('accountsTdsSummaryModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (summaryModal && currentTdsSummaryRowId) {
+    summaryModal.style.display = 'block';
+    if (overlay) overlay.style.display = 'flex';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+window.openAccountsPurchaseInvoiceModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const row = (typeof accountsPurchaseData !== 'undefined' && accountsPurchaseData.find(r => r.id === rowId)) || 
+              (typeof accountsPurchaseData !== 'undefined' && accountsPurchaseData[0]) || {
+                vendorName: "Schneider Electric India Pvt Ltd",
+                invoiceNo: "INV-2026-8812",
+                basicAmount: "10,59,322.03",
+                cgst: "95,338.98",
+                sgst: "95,338.98",
+                igst: "0.00"
+              };
+
+  const titleBadge = document.getElementById('lblAccountsPurchaseInvoiceTitle');
+  if (titleBadge) {
+    titleBadge.innerText = `${row.vendorName || ''} – ${row.invoiceNo || ''}`;
+  }
+
+  const lblSumVal = document.getElementById('lblPurchaseInvoiceSumVal');
+  if (lblSumVal) {
+    lblSumVal.innerText = row.invoiceAmount || '12,50,000.00';
+  }
+
+  const inpBasic = document.getElementById('inpPurchaseModalBasic');
+  if (inpBasic) inpBasic.value = row.basicAmount || '10,59,322.03';
+
+  const inpCgst = document.getElementById('inpPurchaseModalCgst');
+  if (inpCgst) inpCgst.value = row.cgst || '95,338.98';
+
+  const inpSgst = document.getElementById('inpPurchaseModalSgst');
+  if (inpSgst) inpSgst.value = row.sgst || '95,338.98';
+
+  const inpIgst = document.getElementById('inpPurchaseModalIgst');
+  if (inpIgst) inpIgst.value = row.igst || '0.00';
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsPurchaseInvoiceModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('accountsPurchaseInvoiceModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsPurchaseInvoiceModal = function() {
+  const modal = document.getElementById('accountsPurchaseInvoiceModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAccountsPurchasePaymentDetailsModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const row = (typeof accountsPurchaseData !== 'undefined' && accountsPurchaseData.find(r => r.id === rowId)) || 
+              (typeof accountsPurchaseData !== 'undefined' && accountsPurchaseData[0]) || {
+                vendorName: "Schneider Electric India Pvt Ltd",
+                invoiceNo: "INV-2026-8812",
+                paidAmount: "10,00,000.00",
+                payments: [
+                  { paymentDate: "13-09-2026", amount: "5,00,000.00", paymentRefNo: "", receiptNumber: "" },
+                  { paymentDate: "13-09-2026", amount: "3,00,000.00", paymentRefNo: "", receiptNumber: "" },
+                  { paymentDate: "13-09-2026", amount: "2,00,000.00", paymentRefNo: "", receiptNumber: "" }
+                ]
+              };
+
+  const titleBadge = document.getElementById('lblAccountsPurchasePaymentDetailsTitle');
+  if (titleBadge) {
+    titleBadge.innerText = `Payment Details - ${row.invoiceNo || ''}`;
+  }
+
+  const tbody = document.getElementById('tbodyAccountsPurchasePaymentDetails');
+  if (tbody) {
+    const list = (row.payments && row.payments.length > 0) ? row.payments : [
+      { paymentDate: "13-09-2026", amount: row.paidAmount || "10,00,000.00", paymentRefNo: "", receiptNumber: "" }
+    ];
+
+    tbody.innerHTML = list.map((p, idx) => `
+      <tr style="${idx !== list.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${p.paymentDate || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${p.amount || ''}</td>
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${p.paymentRefNo || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${p.receiptNumber || ''}</td>
+      </tr>
+    `).join('');
+  }
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsPurchasePaymentDetailsModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('accountsPurchasePaymentDetailsModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsPurchasePaymentDetailsModal = function() {
+  const modal = document.getElementById('accountsPurchasePaymentDetailsModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAccountsPurchaseSummaryModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const titleBadge = document.getElementById('lblAccountsPurchaseSummaryTitle');
+  if (titleBadge) {
+    titleBadge.innerText = 'Purchase From DD - MM - YYYY To DD - MM - YYYY';
+  }
+
+  const cTotalBasic = document.getElementById('cellPurchaseSummaryTotalBasic');
+  const cTotalGst = document.getElementById('cellPurchaseSummaryTotalGst');
+  const cPaidBasic = document.getElementById('cellPurchaseSummaryPaidBasic');
+  const cPaidGst = document.getElementById('cellPurchaseSummaryPaidGst');
+  const cPayableBasic = document.getElementById('cellPurchaseSummaryPayableBasic');
+  const cPayableGst = document.getElementById('cellPurchaseSummaryPayableGst');
+
+  if (cTotalBasic) cTotalBasic.innerText = '150000000.00';
+  if (cTotalGst) cTotalGst.innerText = '150000000.00';
+  if (cPaidBasic) cPaidBasic.innerText = '150000000.00';
+  if (cPaidGst) cPaidGst.innerText = '150000000.00';
+  if (cPayableBasic) cPayableBasic.innerText = '150000000.00';
+  if (cPayableGst) cPayableGst.innerText = '150000000.00';
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsPurchaseSummaryModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('accountsPurchaseSummaryModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsPurchaseSummaryModal = function() {
+  const modal = document.getElementById('accountsPurchaseSummaryModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.triggerAccountsCsvUpload = function() {
+  const fileInput = document.getElementById('accountsCsvFileInput');
+  if (fileInput) {
+    fileInput.value = '';
+    fileInput.click();
+  } else {
+    showToast('CSV / Excel file upload triggered');
+  }
+};
+
+window.triggerAccountsPdfUpload = function() {
+  const fileInput = document.getElementById('accountsPdfFileInput');
+  if (fileInput) {
+    fileInput.value = '';
+    fileInput.click();
+  } else {
+    showToast('PDF file upload triggered');
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 

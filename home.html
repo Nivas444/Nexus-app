@@ -6693,6 +6693,616 @@
           </div>
         </div>
 
+        <!-- Accounts Sales Invoice Modal Tab (Customer Name - Invoice Number Breakdown) -->
+        <div class="side-form-card side-contact-popup" id="accountsSalesInvoiceModal"
+          style="display: none; width: 620px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsSalesInvoiceTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Customer Name - Invoice Number</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Invoice Summation">
+                <span id="lblAccountsSalesInvoiceSumVal" style="color: #0454e4; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">12,50,000.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsSalesInvoiceModal"
+                onclick="closeAccountsSalesInvoiceModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="sales-invoice-modal-body" style="padding: 0 24px 24px 24px;">
+            <!-- 1. Basic Amount -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">Basic Amount</label>
+              <input type="text" id="inpSalesInvoiceBasic" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 2. CGST -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">CGST</label>
+              <input type="text" id="inpSalesInvoiceCgst" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 3. SGST -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">SGST</label>
+              <input type="text" id="inpSalesInvoiceSgst" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 4. IGST -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">IGST</label>
+              <input type="text" id="inpSalesInvoiceIgst" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+          </div>
+        </div>
+
+        <!-- Accounts Sales Deduction Modal Tab (Deduction Details - Invoice Number Breakdown) -->
+        <div class="side-form-card side-contact-popup" id="accountsSalesDeductionModal"
+          style="display: none; width: 640px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsSalesDeductionTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Deduction Details - Invoice Number</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Deduction Summation">
+                <span id="lblAccountsSalesDeductionSumVal" style="color: #0454e4; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">10,00,000.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsSalesDeductionModal"
+                onclick="closeAccountsSalesDeductionModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="sales-deduction-modal-body" style="padding: 0 24px 24px 24px;">
+            <!-- 1. TDS -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 190px; flex: 0 0 190px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">TDS</label>
+              <input type="text" id="inpSalesDeductionTds" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 2. DN -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 190px; flex: 0 0 190px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">DN</label>
+              <input type="text" id="inpSalesDeductionDn" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 3. DN Details -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 190px; flex: 0 0 190px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">DN Details</label>
+              <input type="text" id="inpSalesDeductionDnDetails" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 4. TREDS Discount Amount -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 190px; flex: 0 0 190px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">TREDS Discount Amount</label>
+              <input type="text" id="inpSalesDeductionTredsDiscount" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 5. TREDS Processing Fee -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label style="width: 190px; flex: 0 0 190px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">TREDS Processing Fee</label>
+              <input type="text" id="inpSalesDeductionTredsFee" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+            <!-- 6. TREDS GST -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label style="width: 190px; flex: 0 0 190px; font-size: 1.02rem; font-weight: 600; color: #64748b; font-family: inherit;">TREDS GST</label>
+              <input type="text" id="inpSalesDeductionTredsGst" readonly class="form-control" style="flex: 1; height: 40px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 1rem; font-weight: 600; color: #1e293b; font-family: inherit; outline: none;" value="">
+            </div>
+          </div>
+        </div>
+
+        <!-- Accounts Sales Payment Details Modal Tab (Payment Details - Invoice Number) -->
+        <div class="side-form-card side-contact-popup" id="accountsSalesPaymentModal"
+          style="display: none; width: 780px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsSalesPaymentTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Payment Details - Invoice Number</div>
+              <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Payment Summation">
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsSalesPaymentModal"
+                onclick="closeAccountsSalesPaymentModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsSalesPaymentPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 18ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Payment Date</span>
+                  </th>
+                  <th
+                    style="width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Amount</span>
+                  </th>
+                  <th
+                    style="width: 22ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Payment Ref.No</span>
+                  </th>
+                  <th
+                    style="width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Receipt Number</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsSalesPayment">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 18ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">13-09-2026</td>
+                  <td style="width: 20ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">12,25,000.00</td>
+                  <td style="width: 22ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">UTR2026091301</td>
+                  <td style="width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">RCP-2026-101</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accounts Sales Summary Modal Tab (Triggered by clicking Summary icon in Sales toolbar) -->
+        <div class="side-form-card side-contact-popup" id="accountsSalesSummaryModal"
+          style="display: none; width: 760px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsSalesSummaryTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Sales From DD - MM - YYYY To DD - MM - YYYY</div>
+              <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Sales Summary">
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsSalesSummaryModal"
+                onclick="closeAccountsSalesSummaryModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsSalesSummaryPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 22ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Payment Date</span>
+                  </th>
+                  <th
+                    style="width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Invoice</span>
+                  </th>
+                  <th
+                    style="width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>GST</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsSalesSummary">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 22ch; text-align: left !important; padding: 12px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 600;">Total Amount</td>
+                  <td id="valSalesSummaryTotalInvoice" style="width: 25ch; text-align: right !important; padding: 12px 16px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 600;">52,65,000.00</td>
+                  <td id="valSalesSummaryTotalGst" style="width: 25ch; text-align: right !important; padding: 12px 16px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 600;">8,03,135.57</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 22ch; text-align: left !important; padding: 12px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 600;">Received Amount</td>
+                  <td id="valSalesSummaryReceivedInvoice" style="width: 25ch; text-align: right !important; padding: 12px 16px; white-space: nowrap; color: #16a34a; font-size: 0.95rem; font-weight: 600;">51,59,700.00</td>
+                  <td id="valSalesSummaryReceivedGst" style="width: 25ch; text-align: right !important; padding: 12px 16px; white-space: nowrap; color: #16a34a; font-size: 0.95rem; font-weight: 600;">7,87,072.86</td>
+                </tr>
+                <tr>
+                  <td style="width: 22ch; text-align: left !important; padding: 12px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 600;">Receivable Amount</td>
+                  <td id="valSalesSummaryReceivableInvoice" style="width: 25ch; text-align: right !important; padding: 12px 16px; white-space: nowrap; color: #ef4444; font-size: 0.95rem; font-weight: 600;">1,05,300.00</td>
+                  <td id="valSalesSummaryReceivableGst" style="width: 25ch; text-align: right !important; padding: 12px 16px; white-space: nowrap; color: #ef4444; font-size: 0.95rem; font-weight: 600;">16,062.71</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accounts Payment Transfer To Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="accountsPaymentTransferToModal"
+          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 0;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsPaymentTransferToTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Transfer To</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsPaymentTransferToModal"
+                onclick="closeAccountsPaymentTransferToModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <!-- Summary/Metric Row -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; background: #ffffff; border-bottom: 1px solid #f1f5f9;">
+            <div style="display: flex; align-items: center; gap: 36px;">
+              <!-- Summation Total -->
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain;">
+                <span id="valPaymentTransferToSummation" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">12,00,000.00</span>
+              </div>
+              <!-- Green Pay (Paid / Transferred) -->
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="icons/Paid _ Received.svg" alt="Paid" style="width: 24px; height: 24px; display: block; object-fit: contain;">
+                <span id="valPaymentTransferToPaid" style="color: #16a34a; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">10,00,000.00</span>
+              </div>
+              <!-- Red Pay (Payable) -->
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="icons/Payable.svg" alt="Payable" style="width: 24px; height: 24px; display: block; object-fit: contain;">
+                <span id="valPaymentTransferToPayable" style="color: #ef4444; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">2,00,000.00</span>
+              </div>
+            </div>
+            <!-- Bank Icon on right -->
+            <div style="display: flex; align-items: center;">
+              <img src="icons/Bank.svg" alt="Bank" style="width: 32px; height: 32px; display: block; object-fit: contain; cursor: pointer;" title="Bank Details" id="btnPaymentTransferToBankIcon" onclick="openAccountsPaymentBankDetailsModal()">
+            </div>
+          </div>
+          <!-- Table -->
+          <div class="contact-table-wrap" style="padding: 16px 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsPaymentTransferToPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Request Date</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Request By</span>
+                  </th>
+                  <th
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Expense Category</span>
+                      <span style="font-size: 10px; opacity: 0.85;">▼</span>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Expense Name</span>
+                      <span style="font-size: 10px; opacity: 0.85;">▼</span>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Uom</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Qty</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Rate</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>GST</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsPaymentTransferTo">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accounts Payment Bank Details Modal Tab (Triggered by clicking Bank icon in Transfer To modal) -->
+        <div class="side-form-card side-contact-popup" id="accountsPaymentBankDetailsModal"
+          style="display: none; width: 480px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsPaymentBankDetailsTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Bank Details</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsPaymentBankDetailsModal"
+                onclick="closeAccountsPaymentBankDetailsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="bank-details-modal-body" style="padding: 0 24px 24px 24px;">
+            <!-- 1. Account Name -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">Account Name</label>
+              <input type="text" id="inpBankDetailsAccountName" class="form-control" placeholder="Enter Account Name" style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+            <!-- 2. Account Number -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">Account Number</label>
+              <input type="text" id="inpBankDetailsAccountNumber" class="form-control" placeholder="Enter Account Number" style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+            <!-- 3. IFSC Code -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">IFSC Code</label>
+              <input type="text" id="inpBankDetailsIfscCode" class="form-control" placeholder="Enter IFSC Code" style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+            <!-- 4. Bank Name -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label style="width: 150px; flex: 0 0 150px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">Bank Name</label>
+              <input type="text" id="inpBankDetailsBankName" class="form-control" placeholder="Enter Bank Name" style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Accounts TDS Summary Report Modal Tab (Triggered by clicking Month in Accounts TDS page) -->
+        <div class="side-form-card side-contact-popup" id="accountsTdsSummaryModal"
+          style="display: none; width: 900px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsTdsSummaryTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                TDS Summary Report for the Month of 2026</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <img src="icons/CSV upload.svg" alt="CSV" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export CSV" onclick="triggerAccountsCsvUpload()">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsTdsSummaryModal"
+                onclick="closeAccountsTdsSummaryModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsTdsSummaryPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>TDS Type</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>PAN Number</span>
+                  </th>
+                  <th
+                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>PAN Name</span>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Taxable</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>TDS</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsTdsSummary">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accounts TDS Details Modal Tab (Triggered by clicking PAN Name in TDS Summary Report modal) -->
+        <div class="side-form-card side-contact-popup" id="accountsTdsDetailsModal"
+          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsTdsDetailsTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                TDS Details</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export PDF" onclick="triggerAccountsPdfUpload()">
+              <img src="icons/CSV upload.svg" alt="CSV" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export CSV" onclick="triggerAccountsCsvUpload()">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsTdsDetailsModal"
+                onclick="closeAccountsTdsDetailsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsTdsDetailsPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Payment Date</span>
+                  </th>
+                  <th
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>TDS Type</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>PAN Number</span>
+                  </th>
+                  <th
+                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>PAN Name</span>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Invoice Number</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Invoice Date</span>
+                  </th>
+                  <th
+                    style="width: 12ch; min-width: 10ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Taxable Amount</span>
+                  </th>
+                  <th
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>TDS Code</span>
+                  </th>
+                  <th
+                    style="width: 10ch; min-width: 10ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Tax Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsTdsDetails">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accounts Purchase Invoice Modal Tab (Triggered by clicking Invoice No in Purchase page of Accounts) -->
+        <div class="side-form-card side-contact-popup" id="accountsPurchaseInvoiceModal"
+          style="display: none; width: 780px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%; min-width: 0;">
+              <div class="side-form-title-badge" id="lblAccountsPurchaseInvoiceTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Indus Towers Ltd - INV-2026-001</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+              <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Summary">
+                <span id="lblPurchaseInvoiceSumVal" style="color: #0454e4; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">12,50,000.00</span>
+              </div>
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsPurchaseInvoiceModal"
+                onclick="closeAccountsPurchaseInvoiceModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+          <div class="invoice-breakdown-modal-body" style="padding: 0 24px 24px 24px;">
+            <!-- 1. Basic Amount -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">Basic Amount</label>
+              <input type="text" id="inpPurchaseModalBasic" class="form-control" readonly style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+            <!-- 2. CGST -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">CGST</label>
+              <input type="text" id="inpPurchaseModalCgst" class="form-control" readonly style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+            <!-- 3. SGST -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">SGST</label>
+              <input type="text" id="inpPurchaseModalSgst" class="form-control" readonly style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+            <!-- 4. IGST -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label style="width: 140px; flex: 0 0 140px; font-size: 1rem; font-weight: 600; color: #64748b; font-family: inherit;">IGST</label>
+              <input type="text" id="inpPurchaseModalIgst" class="form-control" readonly style="flex: 1; height: 42px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; font-family: inherit; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Accounts Purchase Payment Details Modal Tab (Triggered by clicking Paid Amount in Purchase page of Accounts) -->
+        <div class="side-form-card side-contact-popup" id="accountsPurchasePaymentDetailsModal"
+          style="display: none; width: 780px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsPurchasePaymentDetailsTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Payment Details - Invoice Number</div>
+              <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Summary">
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsPurchasePaymentDetailsModal"
+                onclick="closeAccountsPurchasePaymentDetailsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsPurchasePaymentDetailsPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Payment Date</span>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Amount</span>
+                  </th>
+                  <th
+                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Payment Ref.No</span>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Receipt Number</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsPurchasePaymentDetails">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Accounts Purchase Summary Modal Tab (Triggered by clicking Summary icon in Purchase toolbar) -->
+        <div class="side-form-card side-contact-popup" id="accountsPurchaseSummaryModal"
+          style="display: none; width: 820px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsPurchaseSummaryTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.02rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Purchase From DD - MM - YYYY To DD - MM - YYYY</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Summary">
+                <span id="lblPurchaseSummarySumVal" style="color: #0454e4; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">150000000.00</span>
+              </div>
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsPurchaseSummaryModal"
+                onclick="closeAccountsPurchaseSummaryModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsPurchaseSummaryPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 34%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+                    <span>Description</span>
+                  </th>
+                  <th
+                    style="width: 33%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+                    <span>Basic</span>
+                  </th>
+                  <th
+                    style="width: 33%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+                    <span>GST</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsPurchaseSummary">
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 34%; text-align: left !important; padding: 12px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">Total Amount</td>
+                  <td id="cellPurchaseSummaryTotalBasic" style="width: 33%; text-align: right !important; padding: 12px 14px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 600;">150000000.00</td>
+                  <td id="cellPurchaseSummaryTotalGst" style="width: 33%; text-align: right !important; padding: 12px 14px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 600;">150000000.00</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="width: 34%; text-align: left !important; padding: 12px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">Paid Amount</td>
+                  <td id="cellPurchaseSummaryPaidBasic" style="width: 33%; text-align: right !important; padding: 12px 14px; white-space: nowrap; color: #16a34a; font-size: 0.95rem; font-weight: 600;">150000000.00</td>
+                  <td id="cellPurchaseSummaryPaidGst" style="width: 33%; text-align: right !important; padding: 12px 14px; white-space: nowrap; color: #16a34a; font-size: 0.95rem; font-weight: 600;">150000000.00</td>
+                </tr>
+                <tr>
+                  <td style="width: 34%; text-align: left !important; padding: 12px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">Payable</td>
+                  <td id="cellPurchaseSummaryPayableBasic" style="width: 33%; text-align: right !important; padding: 12px 14px; white-space: nowrap; color: #dc2626; font-size: 0.95rem; font-weight: 600;">150000000.00</td>
+                  <td id="cellPurchaseSummaryPayableGst" style="width: 33%; text-align: right !important; padding: 12px 14px; white-space: nowrap; color: #dc2626; font-size: 0.95rem; font-weight: 600;">150000000.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- E - Mail Approval Modal Tab (Triggered by clicking Approval icon in Additional Approvals toolbar) -->
         <div class="side-form-card side-contact-popup" id="emailApprovalModal"
           style="display: none; width: 940px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
@@ -6897,10 +7507,14 @@
     </div>
   </div>
 
+  <!-- Hidden File Pickers for Accounts Uploads -->
+  <input type="file" id="accountsCsvFileInput" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv" style="display: none;" onchange="if(this.files[0]) showToast('File selected: ' + this.files[0].name);">
+  <input type="file" id="accountsPdfFileInput" accept=".pdf, application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF selected: ' + this.files[0].name);">
+
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=207"></script>
+  <script src="assets/js/home.js?v=220"></script>
 </body>
 
 </html>

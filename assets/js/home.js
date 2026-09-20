@@ -2859,233 +2859,373 @@ const accountsPurchaseData = [
   }
 ];
 
+let currentTdsBottomTab = 'receivable'; // 'payable' or 'receivable'
+
 const accountsTdsData = [
   {
-    id: "acc-tds-1",
-    month: "April",
-    deductedBasic: "15,40,000.00",
-    deductedTds: "1,54,000.00",
-    collectedBasic: "22,80,000.00",
-    collectedTds: "2,28,000.00",
-    items: [
+    id: "tds-q1-2026",
+    year: "2026",
+    quarter: "Q1",
+    tdsReceivable: "9,78,000.00",
+    tdsCreditAvailable: "8,50,000.00",
+    months: [
       {
-        tdsType: "194C",
-        tdsCode: "94C - Contractor (10%)",
-        panNumber: "AAACB1234D",
-        panName: "Schneider Electric India Pvt Ltd",
-        taxable: "6,50,000.00",
-        tds: "65,000.00",
-        details: [
-          { paymentDate: "12-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8812", invoiceDate: "08-04-2026", taxableAmount: "3,50,000.00", tdsCode: "10%", taxAmount: "35,000.00" },
-          { paymentDate: "24-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8845", invoiceDate: "20-04-2026", taxableAmount: "3,00,000.00", tdsCode: "10%", taxAmount: "30,000.00" }
+        id: "acc-tds-1",
+        year: "2026",
+        quarter: "Q1",
+        month: "April",
+        taxableAmountReceivable: "22,80,000.00",
+        tdsAmountReceivable: "2,28,000.00",
+        taxableAmountPayable: "15,40,000.00",
+        deductedAmount: "1,54,000.00",
+        paidAmount: "1,54,000.00",
+        items: [
+          {
+            tdsType: "Collected",
+            tdsCode: "94C - Contractor (10%)",
+            panNumber: "AAACB1234D",
+            panName: "Schneider Electric India Pvt Ltd",
+            taxable: "6,50,000.00",
+            tds: "65,000.00",
+            details: [
+              { paymentDate: "12-04-2026", tdsType: "Collected", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8812", invoiceDate: "08-04-2026", taxableAmount: "3,50,000.00", tdsCode: "10%", taxAmount: "35,000.00" },
+              { paymentDate: "24-04-2026", tdsType: "Collected", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8845", invoiceDate: "20-04-2026", taxableAmount: "3,00,000.00", tdsCode: "10%", taxAmount: "30,000.00" }
+            ]
+          },
+          {
+            tdsType: "Debited",
+            tdsCode: "94J - Professional (10%)",
+            panNumber: "BBBCB5678E",
+            panName: "Larsen & Toubro Ltd",
+            taxable: "4,20,000.00",
+            tds: "42,000.00",
+            details: [
+              { paymentDate: "15-04-2026", tdsType: "Debited", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9041", invoiceDate: "11-04-2026", taxableAmount: "4,20,000.00", tdsCode: "10%", taxAmount: "42,000.00" }
+            ]
+          },
+          {
+            tdsType: "Collected",
+            tdsCode: "94I - Plant & Machinery (10%)",
+            panNumber: "CCCCD9012F",
+            panName: "Indus Towers Ltd",
+            taxable: "3,10,000.00",
+            tds: "31,000.00",
+            details: [
+              { paymentDate: "18-04-2026", tdsType: "Collected", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", invoiceNumber: "INV-2026-9210", invoiceDate: "14-04-2026", taxableAmount: "3,10,000.00", tdsCode: "10%", taxAmount: "31,000.00" }
+            ]
+          },
+          {
+            tdsType: "Debited",
+            tdsCode: "94Q - Purchase of Goods (10%)",
+            panNumber: "DDDDD3456G",
+            panName: "Vijay Transport Logistics",
+            taxable: "1,60,000.00",
+            tds: "16,000.00",
+            details: [
+              { paymentDate: "28-04-2026", tdsType: "Debited", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-9502", invoiceDate: "25-04-2026", taxableAmount: "1,60,000.00", tdsCode: "10%", taxAmount: "16,000.00" }
+            ]
+          }
         ]
       },
       {
-        tdsType: "194J",
-        tdsCode: "94J - Professional (10%)",
-        panNumber: "BBBCB5678E",
-        panName: "Larsen & Toubro Ltd",
-        taxable: "4,20,000.00",
-        tds: "42,000.00",
-        details: [
-          { paymentDate: "15-04-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9041", invoiceDate: "11-04-2026", taxableAmount: "4,20,000.00", tdsCode: "10%", taxAmount: "42,000.00" }
+        id: "acc-tds-2",
+        year: "2026",
+        quarter: "Q1",
+        month: "May",
+        taxableAmountReceivable: "25,50,000.00",
+        tdsAmountReceivable: "2,55,000.00",
+        taxableAmountPayable: "18,20,000.00",
+        deductedAmount: "1,82,000.00",
+        paidAmount: "1,82,000.00",
+        items: [
+          {
+            tdsType: "Collected",
+            tdsCode: "94C - Contractor (10%)",
+            panNumber: "AAACB1234D",
+            panName: "Schneider Electric India Pvt Ltd",
+            taxable: "7,80,000.00",
+            tds: "78,000.00",
+            details: [
+              { paymentDate: "10-05-2026", tdsType: "Collected", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-9601", invoiceDate: "05-05-2026", taxableAmount: "7,80,000.00", tdsCode: "10%", taxAmount: "78,000.00" }
+            ]
+          },
+          {
+            tdsType: "Debited",
+            tdsCode: "94J - Professional (10%)",
+            panNumber: "BBBCB5678E",
+            panName: "Larsen & Toubro Ltd",
+            taxable: "5,40,000.00",
+            tds: "54,000.00",
+            details: [
+              { paymentDate: "16-05-2026", tdsType: "Debited", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9720", invoiceDate: "12-05-2026", taxableAmount: "5,40,000.00", tdsCode: "10%", taxAmount: "54,000.00" }
+            ]
+          },
+          {
+            tdsType: "Collected",
+            tdsCode: "94I - Plant & Machinery (10%)",
+            panNumber: "EEEEF7890H",
+            panName: "Tata Communications Ltd",
+            taxable: "5,00,000.00",
+            tds: "50,000.00",
+            details: [
+              { paymentDate: "22-05-2026", tdsType: "Collected", panNumber: "EEEEF7890H", panName: "Tata Communications Ltd", invoiceNumber: "INV-2026-9811", invoiceDate: "19-05-2026", taxableAmount: "5,00,000.00", tdsCode: "10%", taxAmount: "50,000.00" }
+            ]
+          }
         ]
       },
       {
-        tdsType: "194I",
-        tdsCode: "94I - Plant & Machinery (10%)",
-        panNumber: "CCCCD9012F",
-        panName: "Indus Towers Ltd",
-        taxable: "3,10,000.00",
-        tds: "31,000.00",
-        details: [
-          { paymentDate: "18-04-2026", tdsType: "194I", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", invoiceNumber: "INV-2026-9210", invoiceDate: "14-04-2026", taxableAmount: "3,10,000.00", tdsCode: "10%", taxAmount: "31,000.00" }
+        id: "acc-tds-3",
+        year: "2026",
+        quarter: "Q1",
+        month: "June",
+        taxableAmountReceivable: "19,40,000.00",
+        tdsAmountReceivable: "1,94,000.00",
+        taxableAmountPayable: "12,90,000.00",
+        deductedAmount: "1,29,000.00",
+        paidAmount: "1,29,000.00",
+        items: [
+          {
+            tdsType: "Collected",
+            tdsCode: "94C - Contractor (10%)",
+            panNumber: "AAACB1234D",
+            panName: "Schneider Electric India Pvt Ltd",
+            taxable: "5,20,000.00",
+            tds: "52,000.00",
+            details: [
+              { paymentDate: "12-06-2026", tdsType: "Collected", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-9901", invoiceDate: "08-06-2026", taxableAmount: "5,20,000.00", tdsCode: "10%", taxAmount: "52,000.00" }
+            ]
+          },
+          {
+            tdsType: "Debited",
+            tdsCode: "94J - Professional (10%)",
+            panNumber: "BBBCB5678E",
+            panName: "Larsen & Toubro Ltd",
+            taxable: "4,10,000.00",
+            tds: "41,000.00",
+            details: [
+              { paymentDate: "19-06-2026", tdsType: "Debited", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9945", invoiceDate: "15-06-2026", taxableAmount: "4,10,000.00", tdsCode: "10%", taxAmount: "41,000.00" }
+            ]
+          },
+          {
+            tdsType: "Collected",
+            tdsCode: "94Q - Purchase of Goods (10%)",
+            panNumber: "DDDDD3456G",
+            panName: "Vijay Transport Logistics",
+            taxable: "3,60,000.00",
+            tds: "36,000.00",
+            details: [
+              { paymentDate: "26-06-2026", tdsType: "Collected", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-9988", invoiceDate: "22-06-2026", taxableAmount: "3,60,000.00", tdsCode: "10%", taxAmount: "36,000.00" }
+            ]
+          }
         ]
       },
       {
-        tdsType: "194Q",
-        tdsCode: "94Q - Purchase of Goods (10%)",
-        panNumber: "DDDDD3456G",
-        panName: "Vijay Transport Logistics",
-        taxable: "1,60,000.00",
-        tds: "16,000.00",
-        details: [
-          { paymentDate: "28-04-2026", tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-9502", invoiceDate: "25-04-2026", taxableAmount: "1,60,000.00", tdsCode: "10%", taxAmount: "16,000.00" }
+        id: "acc-tds-4",
+        year: "2026",
+        quarter: "Q1",
+        month: "July",
+        taxableAmountReceivable: "30,10,000.00",
+        tdsAmountReceivable: "3,01,000.00",
+        taxableAmountPayable: "21,60,000.00",
+        deductedAmount: "2,16,000.00",
+        paidAmount: "2,16,000.00",
+        items: [
+          {
+            tdsType: "Collected",
+            tdsCode: "94C - Contractor (10%)",
+            panNumber: "AAACB1234D",
+            panName: "Schneider Electric India Pvt Ltd",
+            taxable: "9,50,000.00",
+            tds: "95,000.00",
+            details: [
+              { paymentDate: "11-07-2026", tdsType: "Collected", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-1011", invoiceDate: "07-07-2026", taxableAmount: "9,50,000.00", tdsCode: "10%", taxAmount: "95,000.00" }
+            ]
+          },
+          {
+            tdsType: "Debited",
+            tdsCode: "94J - Professional (10%)",
+            panNumber: "BBBCB5678E",
+            panName: "Larsen & Toubro Ltd",
+            taxable: "6,80,000.00",
+            tds: "68,000.00",
+            details: [
+              { paymentDate: "17-07-2026", tdsType: "Debited", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-1025", invoiceDate: "13-07-2026", taxableAmount: "6,80,000.00", tdsCode: "10%", taxAmount: "68,000.00" }
+            ]
+          },
+          {
+            tdsType: "Collected",
+            tdsCode: "94I - Plant & Machinery (10%)",
+            panNumber: "CCCCD9012F",
+            panName: "Indus Towers Ltd",
+            taxable: "5,30,000.00",
+            tds: "53,000.00",
+            details: [
+              { paymentDate: "24-07-2026", tdsType: "Collected", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", invoiceNumber: "INV-2026-1050", invoiceDate: "20-07-2026", taxableAmount: "5,30,000.00", tdsCode: "10%", taxAmount: "53,000.00" }
+            ]
+          }
         ]
       }
     ]
+  }
+];
+
+const accountsTdsPayableData = [
+  {
+    id: "tds-pay-1",
+    year: "2026",
+    quarter: "Q1",
+    panName: "Schneider Electric India Pvt Ltd",
+    panNumber: "AAACB1234D",
+    tdsCode: "94C - Payment to Contractors and Sub-contractors (10%)",
+    taxableAmount: "6,50,000.00",
+    tdsRate: "10%",
+    deductedAmount: "65,000.00",
+    paidAmount: "65,000.00"
   },
   {
-    id: "acc-tds-2",
-    month: "May",
-    deductedBasic: "18,20,000.00",
-    deductedTds: "1,82,000.00",
-    collectedBasic: "25,50,000.00",
-    collectedTds: "2,55,000.00",
-    items: [
-      {
-        tdsType: "194C",
-        tdsCode: "94C - Contractor (10%)",
-        panNumber: "AAACB1234D",
-        panName: "Schneider Electric India Pvt Ltd",
-        taxable: "7,80,000.00",
-        tds: "78,000.00",
-        details: [
-          { paymentDate: "10-05-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-9601", invoiceDate: "05-05-2026", taxableAmount: "7,80,000.00", tdsCode: "10%", taxAmount: "78,000.00" }
-        ]
-      },
-      {
-        tdsType: "194J",
-        tdsCode: "94J - Professional (10%)",
-        panNumber: "BBBCB5678E",
-        panName: "Larsen & Toubro Ltd",
-        taxable: "5,40,000.00",
-        tds: "54,000.00",
-        details: [
-          { paymentDate: "16-05-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9720", invoiceDate: "12-05-2026", taxableAmount: "5,40,000.00", tdsCode: "10%", taxAmount: "54,000.00" }
-        ]
-      },
-      {
-        tdsType: "194I",
-        tdsCode: "94I - Plant & Machinery (10%)",
-        panNumber: "EEEEF7890H",
-        panName: "Tata Communications Ltd",
-        taxable: "5,00,000.00",
-        tds: "50,000.00",
-        details: [
-          { paymentDate: "22-05-2026", tdsType: "194I", panNumber: "EEEEF7890H", panName: "Tata Communications Ltd", invoiceNumber: "INV-2026-9811", invoiceDate: "19-05-2026", taxableAmount: "5,00,000.00", tdsCode: "10%", taxAmount: "50,000.00" }
-        ]
-      }
-    ]
+    id: "tds-pay-2",
+    year: "2026",
+    quarter: "Q1",
+    panName: "Larsen & Toubro Ltd",
+    panNumber: "BBBCB5678E",
+    tdsCode: "94J - Fees for Professional or Technical Services (10%)",
+    taxableAmount: "4,20,000.00",
+    tdsRate: "10%",
+    deductedAmount: "42,000.00",
+    paidAmount: "42,000.00"
   },
   {
-    id: "acc-tds-3",
-    month: "June",
-    deductedBasic: "12,90,000.00",
-    deductedTds: "1,29,000.00",
-    collectedBasic: "19,40,000.00",
-    collectedTds: "1,94,000.00",
-    items: [
-      {
-        tdsType: "194C",
-        tdsCode: "94C - Contractor (10%)",
-        panNumber: "AAACB1234D",
-        panName: "Schneider Electric India Pvt Ltd",
-        taxable: "5,20,000.00",
-        tds: "52,000.00",
-        details: [
-          { paymentDate: "12-06-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-9901", invoiceDate: "08-06-2026", taxableAmount: "5,20,000.00", tdsCode: "10%", taxAmount: "52,000.00" }
-        ]
-      },
-      {
-        tdsType: "194J",
-        tdsCode: "94J - Professional (10%)",
-        panNumber: "BBBCB5678E",
-        panName: "Larsen & Toubro Ltd",
-        taxable: "4,10,000.00",
-        tds: "41,000.00",
-        details: [
-          { paymentDate: "19-06-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-9945", invoiceDate: "15-06-2026", taxableAmount: "4,10,000.00", tdsCode: "10%", taxAmount: "41,000.00" }
-        ]
-      },
-      {
-        tdsType: "194Q",
-        tdsCode: "94Q - Purchase of Goods (10%)",
-        panNumber: "DDDDD3456G",
-        panName: "Vijay Transport Logistics",
-        taxable: "3,60,000.00",
-        tds: "36,000.00",
-        details: [
-          { paymentDate: "26-06-2026", tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-9988", invoiceDate: "22-06-2026", taxableAmount: "3,60,000.00", tdsCode: "10%", taxAmount: "36,000.00" }
-        ]
-      }
-    ]
+    id: "tds-pay-3",
+    year: "2026",
+    quarter: "Q1",
+    panName: "Indus Towers Ltd",
+    panNumber: "CCCCD9012F",
+    tdsCode: "94I - Rent for Plant, Machinery or Equipment (10%)",
+    taxableAmount: "3,10,000.00",
+    tdsRate: "10%",
+    deductedAmount: "31,000.00",
+    paidAmount: "31,000.00"
   },
   {
-    id: "acc-tds-4",
-    month: "July",
-    deductedBasic: "21,60,000.00",
-    deductedTds: "2,16,000.00",
-    collectedBasic: "30,10,000.00",
-    collectedTds: "3,01,000.00",
-    items: [
-      {
-        tdsType: "194C",
-        tdsCode: "94C - Contractor (10%)",
-        panNumber: "AAACB1234D",
-        panName: "Schneider Electric India Pvt Ltd",
-        taxable: "9,50,000.00",
-        tds: "95,000.00",
-        details: [
-          { paymentDate: "11-07-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-1011", invoiceDate: "07-07-2026", taxableAmount: "9,50,000.00", tdsCode: "10%", taxAmount: "95,000.00" }
-        ]
-      },
-      {
-        tdsType: "194J",
-        tdsCode: "94J - Professional (10%)",
-        panNumber: "BBBCB5678E",
-        panName: "Larsen & Toubro Ltd",
-        taxable: "6,80,000.00",
-        tds: "68,000.00",
-        details: [
-          { paymentDate: "17-07-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-1025", invoiceDate: "13-07-2026", taxableAmount: "6,80,000.00", tdsCode: "10%", taxAmount: "68,000.00" }
-        ]
-      },
-      {
-        tdsType: "194I",
-        tdsCode: "94I - Plant & Machinery (10%)",
-        panNumber: "CCCCD9012F",
-        panName: "Indus Towers Ltd",
-        taxable: "5,30,000.00",
-        tds: "53,000.00",
-        details: [
-          { paymentDate: "24-07-2026", tdsType: "194I", panNumber: "CCCCD9012F", panName: "Indus Towers Ltd", invoiceNumber: "INV-2026-1050", invoiceDate: "20-07-2026", taxableAmount: "5,30,000.00", tdsCode: "10%", taxAmount: "53,000.00" }
-        ]
-      }
-    ]
+    id: "tds-pay-4",
+    year: "2026",
+    quarter: "Q1",
+    panName: "Vijay Transport Logistics",
+    panNumber: "DDDDD3456G",
+    tdsCode: "94Q - Purchase of Goods exceeding 50 Lakhs (10%)",
+    taxableAmount: "1,60,000.00",
+    tdsRate: "10%",
+    deductedAmount: "16,000.00",
+    paidAmount: "16,000.00"
   },
   {
-    id: "acc-tds-5",
-    month: "August",
-    deductedBasic: "16,75,000.00",
-    deductedTds: "1,67,500.00",
-    collectedBasic: "24,30,000.00",
-    collectedTds: "2,43,000.00",
-    items: [
-      {
-        tdsType: "194C",
-        tdsCode: "94C - Contractor (10%)",
-        panNumber: "AAACB1234D",
-        panName: "Schneider Electric India Pvt Ltd",
-        taxable: "6,90,000.00",
-        tds: "69,000.00",
-        details: [
-          { paymentDate: "09-08-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-1102", invoiceDate: "05-08-2026", taxableAmount: "6,90,000.00", tdsCode: "10%", taxAmount: "69,000.00" }
-        ]
-      },
-      {
-        tdsType: "194J",
-        tdsCode: "94J - Professional (10%)",
-        panNumber: "BBBCB5678E",
-        panName: "Larsen & Toubro Ltd",
-        taxable: "4,85,000.00",
-        tds: "48,500.00",
-        details: [
-          { paymentDate: "16-08-2026", tdsType: "194J", panNumber: "BBBCB5678E", panName: "Larsen & Toubro Ltd", invoiceNumber: "INV-2026-1120", invoiceDate: "12-08-2026", taxableAmount: "4,85,000.00", tdsCode: "10%", taxAmount: "48,500.00" }
-        ]
-      },
-      {
-        tdsType: "194Q",
-        tdsCode: "94Q - Purchase of Goods (10%)",
-        panNumber: "DDDDD3456G",
-        panName: "Vijay Transport Logistics",
-        taxable: "5,00,000.00",
-        tds: "50,000.00",
-        details: [
-          { paymentDate: "23-08-2026", tdsType: "194Q", panNumber: "DDDDD3456G", panName: "Vijay Transport Logistics", invoiceNumber: "INV-2026-1145", invoiceDate: "19-08-2026", taxableAmount: "5,00,000.00", tdsCode: "10%", taxAmount: "50,000.00" }
-        ]
-      }
-    ]
+    id: "tds-pay-5",
+    year: "2026",
+    quarter: "Q1",
+    panName: "Tata Communications Ltd",
+    panNumber: "EEEEF7890H",
+    tdsCode: "94J - Fees for Professional or Technical Services (10%)",
+    taxableAmount: "5,00,000.00",
+    tdsRate: "10%",
+    deductedAmount: "50,000.00",
+    paidAmount: "50,000.00"
+  },
+  {
+    id: "tds-pay-6",
+    year: "2026",
+    quarter: "Q1",
+    panName: "ABB India Ltd",
+    panNumber: "FFFFG1234I",
+    tdsCode: "94C - Payment to Contractors and Sub-contractors (10%)",
+    taxableAmount: "3,80,000.00",
+    tdsRate: "10%",
+    deductedAmount: "38,000.00",
+    paidAmount: "38,000.00"
+  },
+  {
+    id: "tds-pay-7",
+    year: "2026",
+    quarter: "Q1",
+    panName: "Siemens Healthcare Pvt Ltd",
+    panNumber: "GGGGH5678J",
+    tdsCode: "94I - Rent for Land, Building or Furniture (10%)",
+    taxableAmount: "2,40,000.00",
+    tdsRate: "10%",
+    deductedAmount: "24,000.00",
+    paidAmount: "24,000.00"
+  }
+];
+
+const accountsTdsReceivableData = [
+  {
+    id: "tds-rec-1",
+    paymentDate: "12-04-2026",
+    panName: "Reliance Jio Infocomm Ltd",
+    panNumber: "AAACR1234K",
+    tdsCode: "194C - Payment to Contractors and Sub-contractors (2%)",
+    taxableAmount: "12,50,000.00",
+    tdsRate: "2%",
+    tdsAmount: "25,000.00"
+  },
+  {
+    id: "tds-rec-2",
+    paymentDate: "18-04-2026",
+    panName: "Bharti Airtel Ltd",
+    panNumber: "BBBCB5678L",
+    tdsCode: "194J - Fees for Professional or Technical Services (10%)",
+    taxableAmount: "8,20,000.00",
+    tdsRate: "10%",
+    tdsAmount: "82,000.00"
+  },
+  {
+    id: "tds-rec-3",
+    paymentDate: "24-04-2026",
+    panName: "Vodafone Idea Ltd",
+    panNumber: "CCCCD9012M",
+    tdsCode: "194I - Rent for Plant, Machinery or Equipment (2%)",
+    taxableAmount: "5,40,000.00",
+    tdsRate: "2%",
+    tdsAmount: "10,800.00"
+  },
+  {
+    id: "tds-rec-4",
+    paymentDate: "05-05-2026",
+    panName: "Sterlite Technologies Ltd",
+    panNumber: "DDDDD3456N",
+    tdsCode: "194Q - Purchase of Goods exceeding 50 Lakhs (0.1%)",
+    taxableAmount: "15,00,000.00",
+    tdsRate: "0.1%",
+    tdsAmount: "1,500.00"
+  },
+  {
+    id: "tds-rec-5",
+    paymentDate: "14-05-2026",
+    panName: "Indus Towers Ltd",
+    panNumber: "EEEEF7890P",
+    tdsCode: "194C - Payment to Contractors and Sub-contractors (2%)",
+    taxableAmount: "9,60,000.00",
+    tdsRate: "2%",
+    tdsAmount: "19,200.00"
+  },
+  {
+    id: "tds-rec-6",
+    paymentDate: "22-05-2026",
+    panName: "Tata Communications Ltd",
+    panNumber: "FFFFG1234Q",
+    tdsCode: "194J - Fees for Professional or Technical Services (10%)",
+    taxableAmount: "7,80,000.00",
+    tdsRate: "10%",
+    tdsAmount: "78,000.00"
+  },
+  {
+    id: "tds-rec-7",
+    paymentDate: "08-06-2026",
+    panName: "Schneider Electric India Pvt Ltd",
+    panNumber: "GGGGH5678R",
+    tdsCode: "194I - Rent for Land, Building or Furniture (10%)",
+    taxableAmount: "4,50,000.00",
+    tdsRate: "10%",
+    tdsAmount: "45,000.00"
   }
 ];
 
@@ -3246,6 +3386,10 @@ document.addEventListener('DOMContentLoaded', () => {
       currentAccountsView = 'purchase';
     } else if (viewParam === 'tds') {
       currentAccountsView = 'tds';
+    } else if (viewParam === 'tds_payable') {
+      currentAccountsView = 'tds_payable';
+    } else if (viewParam === 'tds_receivable') {
+      currentAccountsView = 'tds_receivable';
     } else {
       currentAccountsView = 'main';
       currentAccountsSubpage = subpageParam || 'sales';
@@ -3447,7 +3591,7 @@ function updateURL() {
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
   } else if (currentModule === 'accounts') {
-    if (currentAccountsView === 'gst' || currentAccountsView === 'bank' || currentAccountsView === 'receipt' || currentAccountsView === 'payment' || currentAccountsView === 'purchase' || currentAccountsView === 'tds') {
+    if (currentAccountsView === 'gst' || currentAccountsView === 'bank' || currentAccountsView === 'receipt' || currentAccountsView === 'payment' || currentAccountsView === 'purchase' || currentAccountsView === 'tds' || currentAccountsView === 'tds_payable' || currentAccountsView === 'tds_receivable') {
       url.searchParams.set('view', currentAccountsView);
       url.searchParams.delete('subpage');
     } else {
@@ -3482,6 +3626,10 @@ function goBackSubpage() {
       return;
     }
   } else if (currentModule === 'accounts') {
+    if (currentAccountsView === 'tds_payable' || currentAccountsView === 'tds_receivable') {
+      openAccountsTdsPage();
+      return;
+    }
     if (currentAccountsView === 'gst' || currentAccountsView === 'bank' || currentAccountsView === 'receipt' || currentAccountsView === 'payment' || currentAccountsView === 'purchase' || currentAccountsView === 'tds') {
       currentAccountsView = 'main';
       currentAccountsSubpage = 'sales';
@@ -3851,7 +3999,7 @@ function renderApp() {
       if (bannerTitle) bannerTitle.textContent = 'Payment';
     } else if (currentAccountsView === 'purchase') {
       if (bannerTitle) bannerTitle.textContent = 'Purchase';
-    } else if (currentAccountsView === 'tds') {
+    } else if (currentAccountsView === 'tds' || currentAccountsView === 'tds_payable' || currentAccountsView === 'tds_receivable') {
       if (bannerTitle) bannerTitle.textContent = 'TDS';
     } else {
       const accountsTitles = {
@@ -7027,6 +7175,14 @@ function renderAdminToolbar() {
       </div>
     `;
 
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      currentAdminView = 'salary';
+      activeColumnFilters = {};
+      updateURL();
+      renderApp();
+      showToast('Returned to Admin Overview');
+    });
+
     document.getElementById('btnAdminPdf')?.addEventListener('click', () => {
       const input = document.getElementById('adminPdfInput');
       if (input) {
@@ -7427,7 +7583,7 @@ function renderAdminTableHead() {
         </th>
         <th colspan="31" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
-            <span>1 to 31</span>
+            <span>Date</span>
           </div>
         </th>
         <th colspan="6" style="text-align: center !important; border-bottom: 1px solid #ffffff !important;">
@@ -7590,11 +7746,35 @@ function openAccountsPurchasePage() {
 function openAccountsTdsPage() {
   currentModule = 'accounts';
   currentAccountsView = 'tds';
+  currentTdsBottomTab = 'receivable';
   activeColumnFilters = {};
   updateURL();
   renderApp();
   showToast('Navigated to TDS Page');
 }
+window.openAccountsTdsPage = openAccountsTdsPage;
+
+function openAccountsTdsPayablePage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'tds_payable';
+  currentTdsBottomTab = 'payable';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to TDS Payable Page');
+}
+window.openAccountsTdsPayablePage = openAccountsTdsPayablePage;
+
+function openAccountsTdsReceivablePage() {
+  currentModule = 'accounts';
+  currentAccountsView = 'tds_receivable';
+  currentTdsBottomTab = 'receivable';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Navigated to TDS Receivable Page');
+}
+window.openAccountsTdsReceivablePage = openAccountsTdsReceivablePage;
 
 function loadAccountsDataset() {
   if (currentAccountsView === 'gst') {
@@ -7609,6 +7789,10 @@ function loadAccountsDataset() {
     currentDataset = [...accountsPurchaseData];
   } else if (currentAccountsView === 'tds') {
     currentDataset = [...accountsTdsData];
+  } else if (currentAccountsView === 'tds_payable') {
+    currentDataset = [...accountsTdsPayableData];
+  } else if (currentAccountsView === 'tds_receivable') {
+    currentDataset = [...accountsTdsReceivableData];
   } else if (currentAccountsSubpage === 'sales') {
     currentDataset = [...accountsSalesData];
   } else {
@@ -7620,71 +7804,90 @@ function renderAccountsToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
-  if (currentAccountsView === 'tds') {
+  if (currentAccountsView === 'tds_receivable') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAccountsTdsReceivablePdf" title="PDF Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
+          <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/PDF Upload.svg';">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsTdsReceivableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
+          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV upload.svg';">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsTdsReceivableClose" title="Close" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAccountsTdsPage(); return false;">
+          <img src="icons/Cancel.svg" alt="Close" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
       </div>
     `;
     toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentAccountsView = 'main';
-      currentAccountsSubpage = 'sales';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Accounts');
+      openAccountsTdsPage();
     });
+    return;
+  }
+
+  if (currentAccountsView === 'tds_payable') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAccountsTdsPayablePdf" title="PDF Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
+          <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/PDF Upload.svg';">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsTdsPayableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
+          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV upload.svg';">
+        </button>
+      </div>
+    `;
+    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+      openAccountsTdsPage();
+    });
+    return;
+  }
+
+  if (currentAccountsView === 'tds') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAccountsTdsDashboard" title="Dashboard" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('TDS Dashboard opened'); return false;">
+          <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsTdsPdfUpload" title="PDF Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
+          <img src="icons/PDF Upload.svg" alt="PDF Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnAccountsTdsCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
+    `;
     return;
   }
 
   if (currentAccountsView === 'purchase') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsPurchaseCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentAccountsView = 'main';
-      currentAccountsSubpage = 'sales';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Accounts');
-    });
     return;
   }
 
   if (currentAccountsView === 'payment') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
-      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;"></div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentAccountsView = 'main';
-      currentAccountsSubpage = 'sales';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Accounts');
-    });
     return;
   }
 
   if (currentAccountsView === 'gst') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsGstPdfUpload" title="PDF Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: none; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
           <img src="icons/PDF Upload.svg" alt="PDF Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -7694,58 +7897,30 @@ function renderAccountsToolbar() {
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentAccountsView = 'main';
-      currentAccountsSubpage = 'sales';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Accounts');
-    });
     return;
   }
 
   if (currentAccountsView === 'bank') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsBankCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentAccountsView = 'main';
-      currentAccountsSubpage = 'sales';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Accounts');
-    });
     return;
   }
 
   if (currentAccountsView === 'receipt') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsReceiptCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
           <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentAccountsView = 'main';
-      currentAccountsSubpage = 'sales';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Accounts');
-    });
     return;
   }
 
@@ -7766,31 +7941,133 @@ function renderAccountsTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
 
+  if (currentAccountsView === 'tds_receivable') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Payment Date</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['paymentDate'] ? 'has-active-filter' : ''}" data-filter-col="paymentDate" title="Filter Payment Date">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>PAN Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['panName'] ? 'has-active-filter' : ''}" data-filter-col="panName" title="Filter PAN Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>PAN Number</span>
+        </th>
+        <th style="width: 52ch; min-width: 52ch; max-width: 52ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>TDS Code</span>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>Taxable Amount</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>TDS Rate (%)</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>TDS Amount</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
+  if (currentAccountsView === 'tds_payable') {
+    thead.innerHTML = `
+      <tr class="master-view-header accounts-view-header">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Year</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['year'] ? 'has-active-filter' : ''}" data-filter-col="year" title="Filter Year">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Quater</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['quarter'] ? 'has-active-filter' : ''}" data-filter-col="quarter" title="Filter Quarter">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>PAN Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['panName'] ? 'has-active-filter' : ''}" data-filter-col="panName" title="Filter PAN Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>PAN Number</span>
+        </th>
+        <th style="width: 52ch; min-width: 52ch; max-width: 52ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>TDS Code</span>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>Taxable Amount</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>TDS Rate (%)</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>Deducted Amount</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+          <span>Paid Amount</span>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
+
   if (currentAccountsView === 'tds') {
     thead.innerHTML = `
       <tr class="master-view-header accounts-view-header">
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; vertical-align: middle;">
-          <span>Month</span>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+          <span>Year</span>
         </th>
-        <th colspan="2" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
-          <span>Deducted</span>
+        <th rowspan="2" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Quater</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['quarter'] ? 'has-active-filter' : ''}" data-filter-col="quarter" title="Filter Quarter">&#9660;</button>
+          </div>
         </th>
-        <th colspan="2" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
-          <span>Collected</span>
+        <th rowspan="2" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Month</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['month'] ? 'has-active-filter' : ''}" data-filter-col="month" title="Filter Month">&#9660;</button>
+          </div>
+        </th>
+        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>TDS Receivable</span>
+        </th>
+        <th colspan="3" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>TDS Payable</span>
         </th>
       </tr>
-      <tr class="master-view-header accounts-view-header">
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
-          <span>Basic</span>
+      <tr class="master-view-header accounts-view-header tr-sub-headers">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>Taxable Amount</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
-          <span>TDS</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>TDS Amount</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
-          <span>Basic</span>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>TDS Receivable</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
-          <span>TDS</span>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>TDS Credit Available</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>Taxable Amount</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>Deducted Amount</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+          <span>Paid Amount</span>
         </th>
       </tr>
     `;
@@ -8087,6 +8364,43 @@ function renderAccountsTableHead() {
 function renderAccountsFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
+
+  if (currentAccountsView === 'tds_payable' || currentAccountsView === 'tds_receivable') {
+    footer.style.display = 'none';
+    return;
+  }
+
+  if (currentAccountsView === 'tds') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+    footer.innerHTML = `
+      <div class="segmented-toggle-group accounts-segmented-group" style="display: inline-flex;">
+        <button type="button" class="segmented-btn" data-tds-bottom-tab="payable">
+          Payable
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn" data-tds-bottom-tab="receivable">
+          Receivable
+        </button>
+      </div>
+    `;
+
+    footer.querySelectorAll('.segmented-btn[data-tds-bottom-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tds-bottom-tab');
+        if (tab === 'payable') {
+          openAccountsTdsPayablePage();
+        } else {
+          openAccountsTdsReceivablePage();
+        }
+      });
+    });
+    return;
+  }
 
   const subpages = [
     { key: 'sales', label: 'Sales' },
@@ -8903,7 +9217,7 @@ function applyFiltersAndRender() {
     const colSpan = currentModule === 'admin'
       ? (currentAdminView === 'salary_detail' ? 16 : (currentAdminView === 'epf' ? 9 : (currentAdminView === 'pt' ? 9 : (currentAdminView === 'lwf' ? 8 : (currentAdminView === 'esi' ? 8 : (currentAdminView === 'attendance' ? 38 : 8))))))
       : (currentModule === 'accounts'
-        ? (currentAccountsView === 'gst' ? 14 : (currentAccountsView === 'tds' ? 5 : (currentAccountsView === 'purchase' ? 8 : (currentAccountsView === 'payment' ? 8 : (currentAccountsView === 'receipt' ? 6 : (currentAccountsView === 'bank' ? 7 : 7))))))
+        ? (currentAccountsView === 'gst' ? 14 : (currentAccountsView === 'tds_payable' ? 9 : (currentAccountsView === 'tds_receivable' ? 7 : (currentAccountsView === 'tds' ? 10 : (currentAccountsView === 'purchase' ? 8 : (currentAccountsView === 'payment' ? 8 : (currentAccountsView === 'receipt' ? 7 : (currentAccountsView === 'bank' ? 7 : 8))))))))
         : (currentModule === 'inventory'
           ? 8
           : (currentModule === 'purchase'
@@ -9872,15 +10186,67 @@ function applyFiltersAndRender() {
     }
   } else if (currentModule === 'accounts') {
     if (currentAccountsView === 'tds') {
+      let rowsHtml = '';
+      accountsTdsData.forEach(q => {
+        const rowCount = q.months ? q.months.length : 1;
+        (q.months || []).forEach((m, idx) => {
+          rowsHtml += `
+            <tr class="accounts-tds-row" data-row-id="${m.id}" style="border-bottom: 1px solid #e2e8f0;">
+              ${idx === 0 ? `
+                <td rowspan="${rowCount}" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.year}</td>
+                <td rowspan="${rowCount}" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.quarter}</td>
+              ` : ''}
+              <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.month}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.taxableAmountReceivable || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.tdsAmountReceivable || ''}</td>
+              ${idx === 0 ? `
+                <td rowspan="${rowCount}" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.tdsReceivable || ''}</td>
+                <td rowspan="${rowCount}" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500; border-right: 1px solid #e2e8f0;">
+                  <a href="#" class="td-link-blue" onclick="openAccountsTdsSummaryModal('${m.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${q.tdsCreditAvailable || ''}</a>
+                </td>
+              ` : ''}
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.taxableAmountPayable || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.deductedAmount || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+                <a href="#" class="td-link-blue" onclick="openAccountsTdsSummaryModal('${m.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${m.paidAmount || ''}</a>
+              </td>
+            </tr>
+          `;
+        });
+      });
+      tbody.innerHTML = rowsHtml;
+    } else if (currentAccountsView === 'tds_receivable') {
       tbody.innerHTML = filteredDataset.map(row => `
-        <tr class="accounts-tds-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
-            <a href="#" class="td-link-blue" onclick="openAccountsTdsSummaryModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.month || ''}</a>
+        <tr class="accounts-tds-receivable-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.paymentDate || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.panName || '').replace(/"/g, '&quot;')}">
+            <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('acc-tds-rec', '${(row.panNumber || '').replace(/'/g, "\\'")}', '${(row.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.panName || ''}</a>
           </td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedBasic || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedTds || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.collectedBasic || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.collectedTds || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.panNumber || ''}</td>
+          <td style="width: 52ch; min-width: 52ch; max-width: 52ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.tdsCode || '').replace(/"/g, '&quot;')}">${row.tdsCode || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.taxableAmount || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.tdsRate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('acc-tds-rec', '${(row.panNumber || '').replace(/'/g, "\\'")}', '${(row.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.tdsAmount || ''}</a>
+          </td>
+        </tr>
+      `).join('');
+    } else if (currentAccountsView === 'tds_payable') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="accounts-tds-payable-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.year || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.quarter || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.panName || '').replace(/"/g, '&quot;')}">
+            <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('acc-tds-1', '${(row.panNumber || '').replace(/'/g, "\\'")}', '${(row.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.panName || ''}</a>
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.panNumber || ''}</td>
+          <td style="width: 52ch; min-width: 52ch; max-width: 52ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.tdsCode || '').replace(/"/g, '&quot;')}">${row.tdsCode || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.taxableAmount || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.tdsRate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('acc-tds-1', '${(row.panNumber || '').replace(/'/g, "\\'")}', '${(row.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.paidAmount || ''}</a>
+          </td>
         </tr>
       `).join('');
     } else if (currentAccountsView === 'purchase') {
@@ -17988,18 +18354,25 @@ let currentTdsSummaryRowId = 'acc-tds-1';
 let activeTdsSummaryFilters = {};
 let currentTdsSummaryFilterCol = null;
 
+function getTdsMonthRow(rowId) {
+  if (typeof accountsTdsData === 'undefined') return { month: "April", items: [] };
+  let found = null;
+  accountsTdsData.forEach(q => {
+    (q.months || []).forEach(m => {
+      if (m.id === rowId || m.month === rowId) found = m;
+    });
+  });
+  if (!found && accountsTdsData[0] && accountsTdsData[0].months && accountsTdsData[0].months[0]) {
+    found = accountsTdsData[0].months[0];
+  }
+  return found || { month: "April", items: [] };
+}
+
 function renderAccountsTdsSummaryTable() {
   const tbody = document.getElementById('tbodyAccountsTdsSummary');
   if (!tbody) return;
 
-  const row = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === currentTdsSummaryRowId)) || 
-              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || {
-                month: "April",
-                items: [
-                  { tdsType: "194C", tdsCode: "94C - Contractor (10%)", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", taxable: "6,50,000.00", tds: "65,000.00" }
-                ]
-              };
-
+  const row = getTdsMonthRow(currentTdsSummaryRowId);
   const list = (row.items && row.items.length > 0) ? row.items : [];
 
   let filtered = list.filter(item => {
@@ -18011,18 +18384,17 @@ function renderAccountsTdsSummaryTable() {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching TDS records found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 18px;">No matching TDS records found.</td></tr>`;
     updateTdsSummaryFilterBtnStates();
     return;
   }
 
   tbody.innerHTML = filtered.map((item, idx) => `
     <tr style="${idx !== filtered.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
-      <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tdsType || ''}</td>
-      <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(item.tdsCode || '').replace(/"/g, '&quot;')}">${item.tdsCode || ''}</td>
+      <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tdsType || ''}</td>
       <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${item.panNumber || ''}</td>
       <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(item.panName || '').replace(/"/g, '&quot;')}">
-        <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('${row.id}', '${(item.panNumber || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${item.panName || ''}</a>
+        <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('${row.id}', '${(item.panNumber || '').replace(/'/g, "\\'")}', '${(item.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${item.panName || ''}</a>
       </td>
       <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.taxable || ''}</td>
       <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tds || ''}</td>
@@ -18063,8 +18435,7 @@ function openTdsSummaryFilter(colKey, triggerBtn) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const row = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === currentTdsSummaryRowId)) || 
-              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || { items: [] };
+  const row = getTdsMonthRow(currentTdsSummaryRowId);
   const items = row.items || [];
 
   const uniqueValues = Array.from(new Set(items.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
@@ -18121,8 +18492,7 @@ window.openAccountsTdsSummaryModal = function(rowId) {
     if (card.id !== 'accountsTdsSummaryModal') card.style.display = 'none';
   });
 
-  const row = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === currentTdsSummaryRowId)) || 
-              (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]) || { month: "April" };
+  const row = getTdsMonthRow(currentTdsSummaryRowId);
 
   const titleBadge = document.getElementById('lblAccountsTdsSummaryTitle');
   if (titleBadge) {
@@ -18146,49 +18516,65 @@ window.closeAccountsTdsSummaryModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.openAccountsTdsDetailsModal = function(rowId, panNumber) {
+window.openAccountsTdsDetailsModal = function(rowId, panNumber, panName) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
   const targetRowId = rowId || currentTdsSummaryRowId || 'acc-tds-1';
-  const monthRow = (typeof accountsTdsData !== 'undefined' && accountsTdsData.find(r => r.id === targetRowId)) ||
-                   (typeof accountsTdsData !== 'undefined' && accountsTdsData[0]);
+  const monthRow = getTdsMonthRow(targetRowId);
 
   let detailList = [];
+  let resolvedPanName = panName || '';
+  let resolvedPanNumber = panNumber || '';
+
   if (monthRow && monthRow.items) {
-    if (panNumber) {
-      const matchItem = monthRow.items.find(it => it.panNumber === panNumber || it.panName === panNumber);
-      if (matchItem && matchItem.details) {
-        detailList = matchItem.details;
+    if (panNumber || panName) {
+      const matchItem = monthRow.items.find(it => (panNumber && it.panNumber === panNumber) || (panName && it.panName === panName));
+      if (matchItem) {
+        if (matchItem.details) detailList = matchItem.details;
+        resolvedPanName = matchItem.panName || resolvedPanName;
+        resolvedPanNumber = matchItem.panNumber || resolvedPanNumber;
       }
     }
     if (detailList.length === 0) {
       monthRow.items.forEach(it => {
         if (it.details) detailList.push(...it.details);
       });
+      if (!resolvedPanName && monthRow.items[0]) {
+        resolvedPanName = monthRow.items[0].panName;
+        resolvedPanNumber = monthRow.items[0].panNumber;
+      }
     }
   }
 
   if (detailList.length === 0) {
+    resolvedPanName = resolvedPanName || "Schneider Electric India Pvt Ltd";
+    resolvedPanNumber = resolvedPanNumber || "AAACB1234D";
     detailList = [
-      { paymentDate: "12-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8812", invoiceDate: "08-04-2026", taxableAmount: "3,50,000.00", tdsCode: "10%", taxAmount: "35,000.00" },
-      { paymentDate: "24-04-2026", tdsType: "194C", panNumber: "AAACB1234D", panName: "Schneider Electric India Pvt Ltd", invoiceNumber: "INV-2026-8845", invoiceDate: "20-04-2026", taxableAmount: "3,00,000.00", tdsCode: "10%", taxAmount: "30,000.00" }
+      { paymentDate: "12-04-2026", tdsType: "Collected", panNumber: resolvedPanNumber, panName: resolvedPanName, invoiceNumber: "INV-2026-8812", invoiceDate: "08-04-2026", taxableAmount: "3,50,000.00", tdsCode: "10%", taxAmount: "35,000.00" },
+      { paymentDate: "24-04-2026", tdsType: "Collected", panNumber: resolvedPanNumber, panName: resolvedPanName, invoiceNumber: "INV-2026-8845", invoiceDate: "20-04-2026", taxableAmount: "3,00,000.00", tdsCode: "10%", taxAmount: "30,000.00" }
     ];
+  }
+
+  const titleBadge = document.getElementById('lblAccountsTdsDetailsTitle');
+  if (titleBadge) {
+    if (resolvedPanName && resolvedPanNumber) {
+      titleBadge.innerText = `${resolvedPanName} - ${resolvedPanNumber}`;
+    } else {
+      titleBadge.innerText = resolvedPanName || resolvedPanNumber || 'PAN Name - PAN Number';
+    }
   }
 
   const tbody = document.getElementById('tbodyAccountsTdsDetails');
   if (tbody) {
     tbody.innerHTML = detailList.map((d, idx) => `
       <tr style="${idx !== detailList.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.paymentDate || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.tdsType || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${d.panNumber || ''}</td>
-        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(d.panName || '').replace(/"/g, '&quot;')}">${d.panName || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.paymentDate || ''}</td>
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.invoiceNumber || ''}</td>
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.invoiceDate || ''}</td>
-        <td style="width: 12ch; min-width: 10ch; max-width: 14ch; text-align: right !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxableAmount || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.tdsCode || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 12ch; text-align: right !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxAmount || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxableAmount || ''}</td>
+        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.tdsCode || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxAmount || ''}</td>
       </tr>
     `).join('');
   }

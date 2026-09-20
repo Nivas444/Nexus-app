@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260919_2321">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260920_1405">
 </head>
 
 <body>
@@ -44,7 +44,8 @@
         <!-- 4. Admin Icon -->
         <button type="button" class="nav-icon-item" id="navBtnAdmin" data-module="admin" data-tooltip="Admin"
           aria-label="Admin">
-          <img src="icons/ADMIN.svg?v=20260919" alt="Admin" class="nav-icon-img" width="40" height="40">
+          <img src="icons/Admin.svg?v=20260920" alt="Admin" class="nav-icon-img" width="40" height="40"
+            onerror="if(!this.dataset.retry){this.dataset.retry='1';this.src='icons/admin.svg';}">
         </button>
 
         <!-- 5. Worklist (Alert Bell) Icon -->
@@ -7036,17 +7037,18 @@
           </div>
         </div>
 
-        <!-- Accounts TDS Summary Report Modal Tab (Triggered by clicking Month in Accounts TDS page) -->
+        <!-- Accounts TDS Summary Report Modal Tab (Triggered by clicking Month in TDS subpage table) -->
         <div class="side-form-card side-contact-popup" id="accountsTdsSummaryModal"
-          style="display: none; width: 1250px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
               <div class="side-form-title-badge" id="lblAccountsTdsSummaryTitle"
                 style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
-                TDS Summary Report for the Month of 2026</div>
+                TDS Summary Report</div>
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export PDF" onclick="triggerAccountsPdfUpload()">
               <img src="icons/CSV upload.svg" alt="CSV" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export CSV" onclick="triggerAccountsCsvUpload()">
               <button type="button" class="side-form-close-btn" id="btnCloseAccountsTdsSummaryModal"
                 onclick="closeAccountsTdsSummaryModal()" aria-label="Close"
@@ -7059,17 +7061,10 @@
               <thead>
                 <tr class="master-view-header">
                   <th
-                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
                       <span>TDS Type</span>
                       <button type="button" class="filter-funnel-btn" data-filter-col="tdsType" title="Filter TDS Type">&#9660;</button>
-                    </div>
-                  </th>
-                  <th
-                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <span>TDS Code</span>
-                      <button type="button" class="filter-funnel-btn" data-filter-col="tdsCode" title="Filter TDS Code">&#9660;</button>
                     </div>
                   </th>
                   <th
@@ -7104,13 +7099,13 @@
 
         <!-- Accounts TDS Details Modal Tab (Triggered by clicking PAN Name in TDS Summary Report modal) -->
         <div class="side-form-card side-contact-popup" id="accountsTdsDetailsModal"
-          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          style="display: none; width: 950px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
               <div class="side-form-title-badge" id="lblAccountsTdsDetailsTitle"
                 style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
-                TDS Details</div>
+                PAN Name - PAN Number</div>
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
               <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export PDF" onclick="triggerAccountsPdfUpload()">
@@ -7126,20 +7121,8 @@
               <thead>
                 <tr class="master-view-header">
                   <th
-                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-                    <span>Payment Date</span>
-                  </th>
-                  <th
-                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-                    <span>TDS Type</span>
-                  </th>
-                  <th
                     style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>PAN Number</span>
-                  </th>
-                  <th
-                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>PAN Name</span>
+                    <span>Payment Date</span>
                   </th>
                   <th
                     style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
@@ -7150,15 +7133,15 @@
                     <span>Invoice Date</span>
                   </th>
                   <th
-                    style="width: 12ch; min-width: 10ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
                     <span>Taxable Amount</span>
                   </th>
                   <th
-                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
                     <span>TDS Code</span>
                   </th>
                   <th
-                    style="width: 10ch; min-width: 10ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
                     <span>Tax Amount</span>
                   </th>
                 </tr>
@@ -7530,7 +7513,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260919_2321"></script>
+  <script src="assets/js/home.js?v=20260920_1449"></script>
 </body>
 
 </html>

@@ -1591,6 +1591,8 @@ tr.tr-sub-headers th,
   justify-content: space-between !important;
   background: #ffffff !important;
   border-bottom: none !important;
+  position: relative !important;
+  padding: 0 16px 0 0 !important;
 }
 
 #addIndusTowerCard .side-form-title-badge {
@@ -1612,6 +1614,22 @@ tr.tr-sub-headers th,
   gap: 12px !important;
   padding-right: 16px !important;
   height: 100% !important;
+  margin-left: auto !important;
+}
+
+#addIndusTowerCard #btnCloseIndusTowerForm {
+  color: #ef4444 !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  background: transparent !important;
+  border: none !important;
+  margin-left: 14px !important;
+  padding: 0 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 #addIndusTowerCard .emp-form-grid {
@@ -4400,4 +4418,27 @@ button.has-active-filter {
 .filter-funnel-btn.has-active-filter svg,
 .contact-th-filter-btn.has-active-filter svg {
   stroke: #00cba0 !important;
+}
+
+/* Company HR Policies Table Styles */
+.company-hr-header th {
+  background-color: #8c9399 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 1px solid #ffffff !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.02em;
+}
+
+/* Icon Color Helpers */
+.icon-green,
+.green-icon {
+  filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(130deg) brightness(95%) contrast(101%) !important;
+}
+
+.icon-blue,
+.blue-icon {
+  filter: invert(32%) sepia(90%) saturate(2800%) hue-rotate(212deg) brightness(98%) contrast(96%) !important;
 }

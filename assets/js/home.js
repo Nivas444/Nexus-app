@@ -67,51 +67,105 @@ const masterCustomerData = [
 const masterVendorData = [
   {
     id: "vend-1",
-    vendorType: "Service",
+    vendorName: "Apex Telecom Infrastructure",
+    businessType: "Telecom",
     serviceType: "Project",
+    vendorType: "Telecom",
     vendorId: "230510678",
-    vendorName: "R/RL-234567",
+    gstNumber: "33ASMPM8643F1Z5",
+    panNumber: "ASMPM8643F",
+    gstType: "SGST",
+    status: "Active",
     tdsDeduction: true,
     tdsCode: "1027",
     tdsRate: "1%",
-    gstType: "SGST",
-    gstNumber: "33ASMPM8643F1Z5",
     address: "123 Telecom Tower Complex, Chennai",
-    panNumber: "ASMPM8643F",
-    tcsDeduction: false,
-    status: "Active"
+    tcsDeduction: false
   },
   {
     id: "vend-2",
-    vendorType: "Supply",
-    serviceType: "Project",
-    vendorId: "230510679",
     vendorName: "Steel Infra Supplies Ltd",
+    businessType: "Supply",
+    serviceType: "Civil",
+    vendorType: "Supply",
+    vendorId: "230510679",
+    gstNumber: "29AABCU9603R1ZM",
+    panNumber: "AABCU9603R",
+    gstType: "IGST",
+    status: "In - Active",
     tdsDeduction: false,
     tdsCode: "1031",
     tdsRate: "2%",
-    gstType: "IGST",
-    gstNumber: "29AABCU9603R1ZM",
     address: "45 Industrial Area, Bengaluru",
-    panNumber: "AABCU9603R",
-    tcsDeduction: true,
-    status: "In - Active"
+    tcsDeduction: true
   },
   {
     id: "vend-3",
-    vendorType: "Service",
-    serviceType: "Transport",
-    vendorId: "230510680",
     vendorName: "Express Logistics Services",
+    businessType: "Logistics",
+    serviceType: "Transport",
+    vendorType: "Logistics",
+    vendorId: "230510680",
+    gstNumber: "36BKMPM4321K1Z3",
+    panNumber: "BKMPM4321K",
+    gstType: "SGST",
+    status: "Active",
     tdsDeduction: true,
     tdsCode: "1023",
     tdsRate: "1%",
-    gstType: "NA",
-    gstNumber: "NA",
     address: "78 Transport Nagar, Hyderabad",
-    panNumber: "BKMPM4321K",
-    tcsDeduction: false,
-    status: "Active"
+    tcsDeduction: false
+  },
+  {
+    id: "vend-4",
+    vendorName: "Schneider Electric India Pvt Ltd",
+    businessType: "Electrical",
+    serviceType: "Supply",
+    vendorType: "Electrical",
+    vendorId: "230510681",
+    gstNumber: "27AAACS1234A1Z5",
+    panNumber: "AAACS1234A",
+    gstType: "IGST",
+    status: "Active",
+    tdsDeduction: true,
+    tdsCode: "1027",
+    tdsRate: "2%",
+    address: "88 Andheri East, Mumbai",
+    tcsDeduction: false
+  },
+  {
+    id: "vend-5",
+    vendorName: "Kirloskar Power Systems",
+    businessType: "Power",
+    serviceType: "O&M",
+    vendorType: "Power",
+    vendorId: "230510682",
+    gstNumber: "27AAACK4321B1Z2",
+    panNumber: "AAACK4321B",
+    gstType: "IGST",
+    status: "Active",
+    tdsDeduction: true,
+    tdsCode: "1028",
+    tdsRate: "2%",
+    address: "12 Kirloskar Road, Pune",
+    tcsDeduction: false
+  },
+  {
+    id: "vend-6",
+    vendorName: "Larsen & Toubro Ltd",
+    businessType: "Infra",
+    serviceType: "Construction",
+    vendorType: "Infra",
+    vendorId: "230510683",
+    gstNumber: "33AAACL9876E1Z3",
+    panNumber: "AAACL9876E",
+    gstType: "SGST",
+    status: "In - Active",
+    tdsDeduction: true,
+    tdsCode: "1030",
+    tdsRate: "1%",
+    address: "Mount Poonamallee Road, Manapakkam, Chennai",
+    tcsDeduction: true
   }
 ];
 
@@ -119,48 +173,117 @@ const masterVendorData = [
 const masterProductsData = [
   {
     id: "prod-1",
+    productName: "Telecom Tower Mast",
     productHead: "Telecom Tower Mast",
+    productCategory: "Tower Infrastructure",
     productCode: "PRD-TTM-001",
     hsnCode: "73082019",
+    gst: "18%",
+    gstRate: "18%",
+    price: "4,50,000.00",
+    stockPrices: "4,50,000.00",
     productDescription: "40M Galvanized Tubular Telecom Tower Mast Structure",
     uom: "Nos",
     msq: "10",
     moq: "2",
-    stockPrices: "4,50,000.00",
     oh: "2%",
     margin: "10%",
-    gstRate: "18%",
     status: "Active"
   },
   {
     id: "prod-2",
+    productName: "Optical Fiber Cable",
     productHead: "Optical Fiber Cable",
+    productCategory: "Optical Cables",
     productCode: "PRD-OFC-002",
     hsnCode: "85447090",
+    gst: "18%",
+    gstRate: "18%",
+    price: "85.00",
+    stockPrices: "85.00",
     productDescription: "24-Core Armored Outdoor Single-Mode Fiber Cable",
     uom: "Mtr",
     msq: "5000",
     moq: "500",
-    stockPrices: "85.00",
     oh: "1%",
     margin: "5%",
-    gstRate: "18%",
     status: "Active"
   },
   {
     id: "prod-3",
+    productName: "Power Distribution Unit",
     productHead: "Power Distribution Unit",
+    productCategory: "Electrical Equipment",
     productCode: "PRD-PDU-003",
     hsnCode: "85371000",
+    gst: "18%",
+    gstRate: "18%",
+    price: "32,000.00",
+    stockPrices: "32,000.00",
     productDescription: "AC/DC Dual Power Distribution Panel with Surge Protection",
     uom: "Pcs",
     msq: "25",
     moq: "5",
-    stockPrices: "32,000.00",
     oh: "2%",
     margin: "8%",
-    gstRate: "18%",
     status: "In - Active"
+  },
+  {
+    id: "prod-4",
+    productName: "Diesel Generator 15kVA",
+    productHead: "Diesel Generator 15kVA",
+    productCategory: "Power Backup",
+    productCode: "PRD-GEN-004",
+    hsnCode: "85021100",
+    gst: "28%",
+    gstRate: "28%",
+    price: "2,80,000.00",
+    stockPrices: "2,80,000.00",
+    productDescription: "15kVA Soundproof Silent Diesel Generator Set",
+    uom: "Nos",
+    msq: "5",
+    moq: "1",
+    oh: "2%",
+    margin: "8%",
+    status: "Active"
+  },
+  {
+    id: "prod-5",
+    productName: "Lithium-Ion Battery 48V",
+    productHead: "Lithium-Ion Battery 48V",
+    productCategory: "Energy Storage",
+    productCode: "PRD-BAT-005",
+    hsnCode: "85076000",
+    gst: "18%",
+    gstRate: "18%",
+    price: "1,20,000.00",
+    stockPrices: "1,20,000.00",
+    productDescription: "48V 100Ah Telecom Grade LiFePO4 Battery Bank",
+    uom: "Nos",
+    msq: "12",
+    moq: "2",
+    oh: "1.5%",
+    margin: "7%",
+    status: "Active"
+  },
+  {
+    id: "prod-6",
+    productName: "Earthing Copper Strip",
+    productHead: "Earthing Copper Strip",
+    productCategory: "Earthing & Protection",
+    productCode: "PRD-ETH-006",
+    hsnCode: "74071010",
+    gst: "18%",
+    gstRate: "18%",
+    price: "650.00",
+    stockPrices: "650.00",
+    productDescription: "25x3mm Pure Copper Earthing Flat Strip",
+    uom: "Mtr",
+    msq: "200",
+    moq: "25",
+    oh: "1%",
+    margin: "6%",
+    status: "Active"
   }
 ];
 
@@ -168,86 +291,272 @@ const masterProductsData = [
 const masterExpensesData = [
   {
     id: "exp-1",
-    expenseHead: "Project",
+    expenseName: "Site Infrastructure & Telecom Tower Installation",
+    expenseCategory: "Direct Operations",
+    expenseSubCategory: "Civil Works",
+    expenseHead: "Capex",
     expenseCode: "EXP-PRJ-001",
     sacCode: "998313",
     expenseDescription: "Site Infrastructure & Telecom Tower Installation",
     tdsRate: "2%",
     gstRate: "18%",
+    gst: "18%",
+    depreciation: "15%",
     uom: "Pcs",
     rcm: "No",
     status: "Active"
   },
   {
     id: "exp-2",
-    expenseHead: "Purchase",
+    expenseName: "Procurement of Cables, Hardware & Consumables",
+    expenseCategory: "Material Procurement",
+    expenseSubCategory: "Hardware Consumables",
+    expenseHead: "Capex",
     expenseCode: "EXP-PUR-002",
     sacCode: "998719",
     expenseDescription: "Procurement of Cables, Hardware & Consumables",
     tdsRate: "1%",
     gstRate: "18%",
+    gst: "18%",
+    depreciation: "10%",
     uom: "Nos",
     rcm: "No",
     status: "Active"
   },
   {
     id: "exp-3",
-    expenseHead: "Employee",
+    expenseName: "Field Staff Allowances, Travel & Reimbursements",
+    expenseCategory: "Human Resources",
+    expenseSubCategory: "Travel Allowances",
+    expenseHead: "Opex",
     expenseCode: "EXP-EMP-003",
     sacCode: "998519",
     expenseDescription: "Field Staff Allowances, Travel & Reimbursements",
     tdsRate: "10%",
     gstRate: "0%",
+    gst: "0%",
+    depreciation: "0%",
     uom: "Month",
     rcm: "No",
     status: "Active"
   },
   {
     id: "exp-4",
-    expenseHead: "Transport",
+    expenseName: "Logistics, Vehicle Freight & Heavy Cargo Dispatch",
+    expenseCategory: "Logistics & Transport",
+    expenseSubCategory: "Fuel & Freight",
+    expenseHead: "Opex",
     expenseCode: "EXP-TRN-004",
     sacCode: "996511",
     expenseDescription: "Logistics, Vehicle Freight & Heavy Cargo Dispatch",
     tdsRate: "2%",
     gstRate: "5%",
+    gst: "5%",
+    depreciation: "25%",
     uom: "Nos",
     rcm: "Yes",
     status: "Active"
   },
   {
     id: "exp-5",
-    expenseHead: "Admin",
+    expenseName: "Office Maintenance, Utilities & Facility Operations",
+    expenseCategory: "Administrative Support",
+    expenseSubCategory: "Office Utilities",
+    expenseHead: "Opex",
     expenseCode: "EXP-ADM-005",
     sacCode: "998599",
     expenseDescription: "Office Maintenance, Utilities & Facility Operations",
     tdsRate: "10%",
     gstRate: "18%",
+    gst: "18%",
+    depreciation: "10%",
     uom: "Month",
     rcm: "No",
     status: "Active"
   },
   {
     id: "exp-6",
-    expenseHead: "Accounts",
+    expenseName: "Statutory Audit, Legal & Financial Consultancy",
+    expenseCategory: "Professional Services",
+    expenseSubCategory: "Audit & Legal",
+    expenseHead: "Opex",
     expenseCode: "EXP-ACC-006",
     sacCode: "998222",
     expenseDescription: "Statutory Audit, Legal & Financial Consultancy",
     tdsRate: "10%",
     gstRate: "18%",
+    gst: "18%",
+    depreciation: "0%",
     uom: "Nos",
     rcm: "No",
     status: "Active"
   },
   {
     id: "exp-7",
-    expenseHead: "Statutory",
+    expenseName: "Government Licensing, Spectrum & Municipal Filings",
+    expenseCategory: "Regulatory Compliance",
+    expenseSubCategory: "Licensing",
+    expenseHead: "Opex",
     expenseCode: "EXP-STA-007",
     sacCode: "999112",
     expenseDescription: "Government Licensing, Spectrum & Municipal Filings",
     tdsRate: "0%",
     gstRate: "0%",
+    gst: "0%",
+    depreciation: "0%",
     uom: "Nos",
     rcm: "No",
+    status: "Active"
+  }
+];
+
+// Company HR Policies Datasets
+const companyHrEpfData = [
+  {
+    id: "hr-epf-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Monthly",
+    fillingDueDate: "15th of Every Month",
+    sealingAmount: "15,000.00",
+    employee: "12%",
+    epf: "3.67%",
+    eps: "8.33%",
+    edli: "0.50%",
+    adminCharges: "0.50%",
+    status: "Active"
+  },
+  {
+    id: "hr-epf-2",
+    from: "01 - 04 - 2025",
+    to: "31 - 03 - 2026",
+    fillingFrequency: "Monthly",
+    fillingDueDate: "15th of Every Month",
+    sealingAmount: "15,000.00",
+    employee: "12%",
+    epf: "3.67%",
+    eps: "8.33%",
+    edli: "0.50%",
+    adminCharges: "0.50%",
+    status: "In - Active"
+  }
+];
+
+const companyHrEsiData = [
+  {
+    id: "hr-esi-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Monthly",
+    fillingDueDate: "15th of Every Month",
+    sealingAmount: "21,000.00",
+    employee: "0.75%",
+    epf: "3.25%",
+    eps: "0.00%",
+    edli: "0.00%",
+    adminCharges: "0.00%",
+    status: "Active"
+  }
+];
+
+const companyHrPtData = [
+  {
+    id: "hr-pt-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Half Yearly",
+    fillingDueDate: "30th Sept / 31st Mar",
+    sealingAmount: "30,000.00",
+    employee: "200.00",
+    epf: "0.00",
+    eps: "0.00",
+    edli: "0.00",
+    adminCharges: "0.00",
+    status: "Active"
+  }
+];
+
+const companyHrLwfData = [
+  {
+    id: "hr-lwf-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Annually",
+    fillingDueDate: "31st Dec",
+    sealingAmount: "NA",
+    employee: "20.00",
+    epf: "40.00",
+    eps: "0.00",
+    edli: "0.00",
+    adminCharges: "0.00",
+    status: "Active"
+  }
+];
+
+const companyHrTdsData = [
+  {
+    id: "hr-tds-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Quarterly",
+    fillingDueDate: "31st of Following Month",
+    sealingAmount: "50,000.00",
+    employee: "10%",
+    epf: "10%",
+    eps: "0.00%",
+    edli: "0.00%",
+    adminCharges: "0.00%",
+    status: "Active"
+  }
+];
+
+const companyHrLeaveData = [
+  {
+    id: "hr-leave-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Yearly",
+    fillingDueDate: "31st Dec",
+    sealingAmount: "18 Days",
+    employee: "1.5 / Mo",
+    epf: "Earned",
+    eps: "Sick",
+    edli: "Casual",
+    adminCharges: "0.00",
+    status: "Active"
+  }
+];
+
+const companyHrBonusData = [
+  {
+    id: "hr-bonus-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Annually",
+    fillingDueDate: "30th Nov",
+    sealingAmount: "21,000.00",
+    employee: "8.33%",
+    epf: "8.33%",
+    eps: "20.00%",
+    edli: "0.00%",
+    adminCharges: "0.00%",
+    status: "Active"
+  }
+];
+
+const companyHrMedicalInsuranceData = [
+  {
+    id: "hr-med-1",
+    from: "01 - 04 - 2026",
+    to: "31 - 03 - 2027",
+    fillingFrequency: "Annually",
+    fillingDueDate: "31st March",
+    sealingAmount: "5,00,000.00",
+    employee: "0.00",
+    epf: "100%",
+    eps: "0.00",
+    edli: "0.00",
+    adminCharges: "0.00",
     status: "Active"
   }
 ];
@@ -2602,6 +2911,7 @@ const accountsPaymentData = [
     id: "acc-pay-1",
     transferredTo: "Schneider Electric India Pvt Ltd",
     requestNo: "REQ-2026-101",
+    invoiceNo: "INV-2026-8812",
     expenseHead: "Supply of Electrical Components",
     transferredFrom: "HDFC Bank - 50200012345",
     requested: "12,50,000.00",
@@ -2614,6 +2924,20 @@ const accountsPaymentData = [
       ifscCode: "HDFC0000123",
       bankName: "HDFC Bank"
     },
+    paymentDetailsList: [
+      {
+        paymentDate: "12-08-2026",
+        amount: "6,00,000.00",
+        paymentRefNo: "NEFT/2608123456",
+        receiptNumber: "REC-2026-001"
+      },
+      {
+        paymentDate: "18-08-2026",
+        amount: "4,00,000.00",
+        paymentRefNo: "RTGS/2608901234",
+        receiptNumber: "REC-2026-003"
+      }
+    ],
     items: [
       {
         requestDate: "10-08-2026",
@@ -2643,6 +2967,7 @@ const accountsPaymentData = [
     id: "acc-pay-2",
     transferredTo: "Larsen & Toubro Ltd",
     requestNo: "REQ-2026-102",
+    invoiceNo: "INV-2026-7734",
     expenseHead: "Civil Site Construction Services",
     transferredFrom: "State Bank of India - 300123456",
     requested: "8,20,000.00",
@@ -2655,6 +2980,20 @@ const accountsPaymentData = [
       ifscCode: "SBIN0001234",
       bankName: "State Bank of India"
     },
+    paymentDetailsList: [
+      {
+        paymentDate: "14-08-2026",
+        amount: "3,50,000.00",
+        paymentRefNo: "NEFT/2608456789",
+        receiptNumber: "REC-2026-012"
+      },
+      {
+        paymentDate: "20-08-2026",
+        amount: "3,00,000.00",
+        paymentRefNo: "RTGS/2608567890",
+        receiptNumber: "REC-2026-015"
+      }
+    ],
     items: [
       {
         requestDate: "12-08-2026",
@@ -2673,6 +3012,7 @@ const accountsPaymentData = [
     id: "acc-pay-3",
     transferredTo: "Indus Towers Ltd",
     requestNo: "REQ-2026-103",
+    invoiceNo: "INV-2026-5512",
     expenseHead: "Project Capex Telecom Infra",
     transferredFrom: "ICICI Bank - 00040501234",
     requested: "15,00,000.00",
@@ -2685,6 +3025,20 @@ const accountsPaymentData = [
       ifscCode: "ICIC0000004",
       bankName: "ICICI Bank"
     },
+    paymentDetailsList: [
+      {
+        paymentDate: "15-08-2026",
+        amount: "8,50,000.00",
+        paymentRefNo: "RTGS/2608678901",
+        receiptNumber: "REC-2026-021"
+      },
+      {
+        paymentDate: "22-08-2026",
+        amount: "6,00,000.00",
+        paymentRefNo: "NEFT/2608789012",
+        receiptNumber: "REC-2026-024"
+      }
+    ],
     items: [
       {
         requestDate: "14-08-2026",
@@ -2703,6 +3057,7 @@ const accountsPaymentData = [
     id: "acc-pay-4",
     transferredTo: "Vijay Transport Logistics",
     requestNo: "REQ-2026-104",
+    invoiceNo: "INV-2026-3390",
     expenseHead: "Material Logistics & Freight",
     transferredFrom: "HDFC Bank - 50200012345",
     requested: "4,50,000.00",
@@ -2715,6 +3070,14 @@ const accountsPaymentData = [
       ifscCode: "HDFC0000123",
       bankName: "HDFC Bank"
     },
+    paymentDetailsList: [
+      {
+        paymentDate: "17-08-2026",
+        amount: "3,80,000.00",
+        paymentRefNo: "UPI/623456789012",
+        receiptNumber: "REC-2026-031"
+      }
+    ],
     items: [
       {
         requestDate: "16-08-2026",
@@ -2733,6 +3096,7 @@ const accountsPaymentData = [
     id: "acc-pay-5",
     transferredTo: "Tata Communications Ltd",
     requestNo: "REQ-2026-105",
+    invoiceNo: "INV-2026-2219",
     expenseHead: "Fiber Optic Line Maintenance",
     transferredFrom: "State Bank of India - 300123456",
     requested: "9,80,000.00",
@@ -2745,6 +3109,20 @@ const accountsPaymentData = [
       ifscCode: "SBIN0001234",
       bankName: "State Bank of India"
     },
+    paymentDetailsList: [
+      {
+        paymentDate: "19-08-2026",
+        amount: "4,00,000.00",
+        paymentRefNo: "NEFT/2608890123",
+        receiptNumber: "REC-2026-041"
+      },
+      {
+        paymentDate: "25-08-2026",
+        amount: "3,00,000.00",
+        paymentRefNo: "RTGS/2608901234",
+        receiptNumber: "REC-2026-045"
+      }
+    ],
     items: [
       {
         requestDate: "18-08-2026",
@@ -3257,6 +3635,9 @@ let selectedSupplyCustomerName = 'Customer Name';
 let selectedServiceVendorName = 'Service Vendor Name';
 let currentProjectDetailTab = ''; // 'expenses', 'materials', 'infra', 'dpr', 'boq', 'additional_approve', 'service_vendor', 'member'
 
+let currentMasterView = 'main'; // 'main' | 'hr_policies'
+let currentCompanyHrTab = 'epf'; // 'epf' | 'esi' | 'pt' | 'lwf' | 'tds' | 'leave' | 'bonus' | 'medical_insurance'
+
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
 
@@ -3273,10 +3654,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (moduleParam === 'master') {
     currentModule = 'master';
-    if (subpageParam) {
-      currentMasterSubpage = subpageParam;
+    if (viewParam === 'hr_policies') {
+      currentMasterView = 'hr_policies';
+      currentCompanyHrTab = subpageParam || 'epf';
     } else {
-      currentMasterSubpage = 'employee';
+      currentMasterView = 'main';
+      currentMasterSubpage = subpageParam || 'employee';
     }
   } else if (moduleParam === 'indus_towers') {
     currentModule = 'indus_towers';
@@ -3438,6 +3821,7 @@ function switchModule(moduleName) {
   activeColumnFilters = {};
 
   if (moduleName === 'master') {
+    currentMasterView = 'main';
     currentMasterSubpage = 'employee';
   } else if (moduleName === 'indus_towers') {
     currentIndusSubpage = 'site';
@@ -3480,8 +3864,13 @@ function updateURL() {
   url.searchParams.set('module', currentModule);
 
   if (currentModule === 'master') {
-    url.searchParams.set('subpage', currentMasterSubpage);
-    url.searchParams.delete('view');
+    if (currentMasterView === 'hr_policies') {
+      url.searchParams.set('view', 'hr_policies');
+      url.searchParams.set('subpage', currentCompanyHrTab);
+    } else {
+      url.searchParams.set('subpage', currentMasterSubpage);
+      url.searchParams.delete('view');
+    }
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
   } else if (currentModule === 'indus_towers') {
@@ -3744,11 +4133,19 @@ function renderApp() {
   if (activeNavBtn) activeNavBtn.classList.add('active-nav-tab');
 
   if (currentModule === 'master') {
-    if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openIndusTowerPageCard(); return false;" title="View Company Name">Company Name</a>`;
-    loadMasterDataset();
-    renderMasterToolbar();
-    renderMasterTableHead();
-    renderMasterFooter();
+    if (currentMasterView === 'hr_policies') {
+      if (bannerTitle) bannerTitle.innerHTML = `<span>Company Name</span>`;
+      loadCompanyHrDataset();
+      renderCompanyHrToolbar();
+      renderCompanyHrTableHead();
+      renderCompanyHrFooter();
+    } else {
+      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openIndusTowerPageCard(); return false;" title="View Company Name">Company Name</a>`;
+      loadMasterDataset();
+      renderMasterToolbar();
+      renderMasterTableHead();
+      renderMasterFooter();
+    }
   } else if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'product_details') {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProductName || 'Product Name'}</span>`;
@@ -4632,6 +5029,13 @@ function renderIndusFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'flex-start';
+  footer.style.alignItems = 'center';
+  footer.style.width = '100%';
+  footer.style.marginTop = 'auto';
+  footer.style.padding = '24px';
+
   if (currentIndusSubpage === 'project_type_details') {
     const projTypeSubpages = [
       { key: 'survey', label: 'Survey' },
@@ -4872,127 +5276,111 @@ function renderMasterTableHead() {
       </tr>
     `;
   } else if (currentMasterSubpage === 'vendor') {
-    // Vendor Table Headers (Matching Mockup: Vendor Type, Vendor ID, Vendor Name, GST Number, PAN Number, GST Type, Status)
+    // Vendor Table Headers: Vendor Name (30ch), Business Type (15ch), Service Type (15ch), GST Number (20ch), PAN Number (15ch), GST Type (10ch), Status (10ch) - all headers centered
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th class="col-master-vendor-type">
-          <div class="th-content-wrap">
-            <span>Vendor Type</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorType'] ? 'has-active-filter' : ''}" data-filter-col="vendorType" title="Filter Vendor Type">&#9660;</button>
-          </div>
-        </th>
-        <th class="col-master-vendor-id">
-          <div class="th-content-wrap">
-            <span>Vendor ID</span>
-          </div>
-        </th>
-        <th class="col-master-vendor-name">
-          <div class="th-content-wrap">
+        <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Vendor Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
           </div>
         </th>
-        <th class="col-master-vendor-gst-num">
-          <div class="th-content-wrap">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Business Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['businessType'] ? 'has-active-filter' : ''}" data-filter-col="businessType" title="Filter Business Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Service Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['serviceType'] ? 'has-active-filter' : ''}" data-filter-col="serviceType" title="Filter Service Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>GST Number</span>
           </div>
         </th>
-        <th class="col-master-vendor-pan">
-          <div class="th-content-wrap">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>PAN Number</span>
           </div>
         </th>
-        <th class="col-master-vendor-gst-type">
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>GST Type</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['gstType'] ? 'has-active-filter' : ''}" data-filter-col="gstType" title="Filter GST Type">&#9660;</button>
           </div>
         </th>
-        <th class="col-master-vendor-status">
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
         </th>
       </tr>
     `;
+    rebindFilterButtons();
+    return;
   } else if (currentMasterSubpage === 'products') {
-    // Products Table Headers (Matching Mockup: Product Head, Product Code, HSN Code, Product Description, GST Rate, Status)
+    // Products Table Headers (Product Name 40ch, Product Category 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch)
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
-          <div class="th-content-wrap">
-            <span>Product Head</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productHead'] ? 'has-active-filter' : ''}" data-filter-col="productHead" title="Filter Product Head">&#9660;</button>
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Product Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productName'] ? 'has-active-filter' : ''}" data-filter-col="productName" title="Filter Product Name">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Product Code</span>
-          </div>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Product Category</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>HSN Code</span>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Product Code</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Product Description</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productDescription'] ? 'has-active-filter' : ''}" data-filter-col="productDescription" title="Filter Product Description">&#9660;</button>
-          </div>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>HSN Code</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>GST Rate</span>
-          </div>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>GST</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Status</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Price</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['price'] ? 'has-active-filter' : ''}" data-filter-col="price" title="Filter Price">&#9660;</button>
           </div>
         </th>
       </tr>
     `;
   } else if (currentMasterSubpage === 'expenses') {
-    // Expenses Table Headers (Matching Mockup: Expense Head, Expense Code, SAC Code, Expense Description, TDS Rate, GST Rate, Uom, Status)
+    // Expenses Table Headers: Expense Name 40ch, Expense Category 20ch, Expense Head 20ch, GST 10ch, Status 10ch (All headers centered)
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Expense Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseName'] ? 'has-active-filter' : ''}" data-filter-col="expenseName" title="Filter Expense Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Expense Category</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseCategory'] ? 'has-active-filter' : ''}" data-filter-col="expenseCategory" title="Filter Expense Category">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Expense Head</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Expense Code</span>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>GST</span>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>SAC Code</span>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Expense Description</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>GST Rate</span>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Uom</span>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
@@ -5059,6 +5447,13 @@ function renderMasterFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'flex-start';
+  footer.style.alignItems = 'center';
+  footer.style.width = '100%';
+  footer.style.marginTop = 'auto';
+  footer.style.padding = '24px';
+
   const subpages = [
     { key: 'employee', label: 'Employee' },
     { key: 'customer', label: 'Customer' },
@@ -5091,6 +5486,294 @@ function renderMasterFooter() {
     });
   });
 }
+
+function loadCompanyHrDataset() {
+  if (currentCompanyHrTab === 'epf') {
+    currentDataset = [...companyHrEpfData];
+  } else if (currentCompanyHrTab === 'esi') {
+    currentDataset = [...companyHrEsiData];
+  } else if (currentCompanyHrTab === 'pt') {
+    currentDataset = [...companyHrPtData];
+  } else if (currentCompanyHrTab === 'lwf') {
+    currentDataset = [...companyHrLwfData];
+  } else if (currentCompanyHrTab === 'tds') {
+    currentDataset = [...companyHrTdsData];
+  } else if (currentCompanyHrTab === 'leave') {
+    currentDataset = [...companyHrLeaveData];
+  } else if (currentCompanyHrTab === 'bonus') {
+    currentDataset = [...companyHrBonusData];
+  } else if (currentCompanyHrTab === 'medical_insurance') {
+    currentDataset = [...companyHrMedicalInsuranceData];
+  } else {
+    currentDataset = [...companyHrEpfData];
+  }
+}
+
+function renderCompanyHrToolbar() {
+  const toolbar = document.getElementById('worklistToolbar');
+  if (!toolbar) return;
+
+  toolbar.innerHTML = `
+    <div class="toolbar-left">
+      <button type="button" class="toolbar-icon-btn btn-back-action" id="btnCompanyHrBack" title="Back to Master">
+        <img src="icons/Backward.svg" alt="Back" class="toolbar-icon-img" width="30" height="30">
+      </button>
+    </div>
+    <div class="toolbar-right">
+      <button type="button" class="toolbar-icon-btn btn-add-action" id="btnCompanyHrAdd" data-tooltip="Add Record" aria-label="Add Record">
+        <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+      </button>
+    </div>
+  `;
+
+  document.getElementById('btnCompanyHrBack')?.addEventListener('click', () => {
+    currentMasterView = 'main';
+    activeColumnFilters = {};
+    updateURL();
+    renderApp();
+    showToast('Returned to Master');
+  });
+
+  document.getElementById('btnCompanyHrAdd')?.addEventListener('click', () => {
+    if (currentCompanyHrTab === 'epf') {
+      openCompanyHrEpfModal();
+    } else {
+      showToast(`Add New ${(currentCompanyHrTab || 'epf').toUpperCase()} Record`);
+    }
+  });
+}
+
+function renderCompanyHrTableHead() {
+  const thead = document.getElementById('worklistTableHead');
+  if (!thead) return;
+
+  if (currentCompanyHrTab === 'epf') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>From</span>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>To</span>
+        </th>
+        <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>Filling Frequency</span>
+        </th>
+        <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>Filling Due Date</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>Sealing Amount</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>Employee</span>
+        </th>
+        <th colspan="4" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>Employer</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>Status</span>
+        </th>
+      </tr>
+      <tr class="master-view-header company-hr-header tr-sub-headers">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>EPF</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>EPS</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>EDLI</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>Admin Charges</span>
+        </th>
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">From</th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">To</th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Filling Frequency</th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Filling Due Date</th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Sealing Amount</th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Employee</th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">EPF</th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">EPS</th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">EDLI</th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Admin Charges</th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Status</th>
+      </tr>
+    `;
+  }
+}
+
+function renderCompanyHrFooter() {
+  const footer = document.getElementById('worklistFooterBar');
+  if (!footer) return;
+
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'flex-start';
+  footer.style.alignItems = 'center';
+  footer.style.width = '100%';
+  footer.style.marginTop = 'auto';
+  footer.style.padding = '24px';
+
+  const hrSubpages = [
+    { key: 'epf', label: 'EPF' },
+    { key: 'esi', label: 'ESI' },
+    { key: 'pt', label: 'PT' },
+    { key: 'lwf', label: 'LWF' },
+    { key: 'tds', label: 'TDS' },
+    { key: 'leave', label: 'Leave' },
+    { key: 'bonus', label: 'Bonus' },
+    { key: 'medical_insurance', label: 'Medical Insurance' }
+  ];
+
+  footer.innerHTML = `
+    <div class="segmented-toggle-group master-segmented-group">
+      ${hrSubpages.map((sp, idx) => `
+        <button type="button" class="segmented-btn ${currentCompanyHrTab === sp.key ? 'active' : ''}" data-hr-tab="${sp.key}">
+          ${sp.label}
+        </button>
+        ${idx < hrSubpages.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+      `).join('')}
+    </div>
+  `;
+
+  footer.querySelectorAll('.segmented-btn[data-hr-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabKey = btn.getAttribute('data-hr-tab');
+      if (currentCompanyHrTab !== tabKey) {
+        currentCompanyHrTab = tabKey;
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast(`Switched to Company HR Policies • ${btn.textContent.trim()}`);
+      }
+    });
+  });
+}
+
+window.openCompanyHrPoliciesPage = function(tab) {
+  closeSideForm();
+  currentModule = 'master';
+  currentMasterView = 'hr_policies';
+  currentCompanyHrTab = tab || 'epf';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened Company HR Policies • ${(currentCompanyHrTab || 'epf').toUpperCase()}`);
+};
+
+let isCompanyHrEpfEditing = false;
+
+function setCompanyHrEpfReadOnly(isReadOnly) {
+  const form = document.getElementById('frmCompanyHrEpf');
+  if (!form) return;
+
+  const inputs = form.querySelectorAll('input:not([type="checkbox"])');
+  inputs.forEach(inp => {
+    inp.readOnly = isReadOnly;
+    inp.style.backgroundColor = '#ffffff';
+    inp.style.cursor = isReadOnly ? 'default' : 'text';
+  });
+
+  const calTriggers = form.querySelectorAll('.btn-calendar-trigger');
+  calTriggers.forEach(b => {
+    b.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+    b.style.opacity = isReadOnly ? '0.65' : '1';
+    b.style.cursor = isReadOnly ? 'default' : 'pointer';
+  });
+
+  const toggle = document.getElementById('inpEpfStatusToggle');
+  if (toggle) {
+    toggle.disabled = isReadOnly;
+    const parentSwitch = toggle.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  }
+}
+
+window.openCompanyHrEpfModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'companyHrEpfCard') card.style.display = 'none';
+  });
+
+  const row = (rowId && (typeof companyHrEpfData !== 'undefined') && companyHrEpfData.find(r => r.id === rowId)) || 
+              ((typeof companyHrEpfData !== 'undefined') && companyHrEpfData[0]) || {
+                from: "01 - 04 - 2026",
+                to: "31 - 03 - 2027",
+                fillingDueDate: "15 - 05 - 2026",
+                sealingAmount: "15,000.00",
+                employee: "12%",
+                epf: "3.67%",
+                eps: "8.33%",
+                edli: "0.50%",
+                adminCharges: "0.50%",
+                status: "Active"
+              };
+
+  const inpFrom = document.getElementById('inpEpfFromDate');
+  if (inpFrom) inpFrom.value = row.from || '';
+
+  const inpTo = document.getElementById('inpEpfToDate');
+  if (inpTo) inpTo.value = row.to || '';
+
+  const inpDue = document.getElementById('inpEpfFillingDueDate');
+  if (inpDue) inpDue.value = row.fillingDueDate || '';
+
+  const inpSealing = document.getElementById('inpEpfSealingAmount');
+  if (inpSealing) inpSealing.value = String(row.sealingAmount || '').replace('₹', '').trim();
+
+  const inpEmp = document.getElementById('inpEpfEmpContribution');
+  if (inpEmp) inpEmp.value = String(row.employee || '').replace('%', '').trim();
+
+  const inpEpf = document.getElementById('inpEpfEmployerContribution');
+  if (inpEpf) inpEpf.value = String(row.epf || '').replace('%', '').trim();
+
+  const inpEps = document.getElementById('inpEpsEmployerContribution');
+  if (inpEps) inpEps.value = String(row.eps || '').replace('%', '').trim();
+
+  const inpEdli = document.getElementById('inpEdliEmployerContribution');
+  if (inpEdli) inpEdli.value = String(row.edli || '').replace('%', '').trim();
+
+  const inpAdmin = document.getElementById('inpEpfAdminCharges');
+  if (inpAdmin) inpAdmin.value = String(row.adminCharges || '').replace('%', '').trim();
+
+  const inpStatus = document.getElementById('inpEpfStatusToggle');
+  if (inpStatus) inpStatus.checked = !((row.status || '').toLowerCase().includes('in'));
+
+  isCompanyHrEpfEditing = true;
+  setCompanyHrEpfReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrEpfEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+
+  const modal = document.getElementById('companyHrEpfCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrEpfModal = function() {
+  const modal = document.getElementById('companyHrEpfCard');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
 
 // ==========================================================================
 // 3B. PROJECTS MODULE RENDERERS
@@ -7438,7 +8121,7 @@ function renderAdminTableHead() {
             <span>Employer Contribution</span>
           </div>
         </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; border-left: 1px solid #ffffff !important;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Total Amount</span>
           </div>
@@ -7849,7 +8532,9 @@ function renderAccountsToolbar() {
 
   if (currentAccountsView === 'tds') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsTdsDashboard" title="Dashboard" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="showToast('TDS Dashboard opened'); return false;">
           <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -9226,7 +9911,7 @@ function applyFiltersAndRender() {
               ? 14
               : (currentModule === 'indus_towers'
                 ? (currentIndusSubpage === 'projects' ? 8 : 10)
-                : (currentModule === 'master' ? (currentMasterSubpage === 'customer' ? 7 : 6) : (currentWorklistView === 'po' ? 6 : 10)))))));
+                : (currentModule === 'master' ? (currentMasterView === 'hr_policies' ? 11 : (currentMasterSubpage === 'customer' ? 7 : 6)) : (currentWorklistView === 'po' ? 6 : 10)))))));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -9427,6 +10112,53 @@ function applyFiltersAndRender() {
       }).join('');
     }
   } else if (currentModule === 'master') {
+    if (currentMasterView === 'hr_policies') {
+      if (currentCompanyHrTab === 'epf') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrEpfModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.from || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.to || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingFrequency || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingDueDate || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.sealingAmount || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employee || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.eps || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.edli || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.adminCharges || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.from || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.to || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingFrequency || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingDueDate || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.sealingAmount || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employee || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.eps || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.edli || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.adminCharges || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        return;
+      }
+    }
     if (currentMasterSubpage === 'customer') {
       // Render Customer Rows with Clean Text Status Badge & Indus Hyperlink
       tbody.innerHTML = filteredDataset.map(row => {
@@ -9448,60 +10180,59 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentMasterSubpage === 'vendor') {
-      // Render Vendor Rows (Matching Mockup: Vendor Type, Vendor ID, Vendor Name, GST Number, PAN Number, GST Type, Status)
+      // Render Vendor Rows: Vendor Name (30ch&left), Business Type (15ch&center), Service Type (15ch&center), GST Number (20ch&center), PAN Number (15ch&center), GST Type (10ch&center), Status (10ch&center)
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
+        const vName = row.vendorName || '';
         return `
-          <tr data-row-id="${row.id}">
-            <td class="col-master-vendor-type">${row.vendorType}</td>
-            <td class="col-master-vendor-id td-center">${row.vendorId}</td>
-            <td class="col-master-vendor-name">
-              <a href="#" class="req-link td-link-blue" onclick="openViewVendorCard('${row.id}'); return false;">${row.vendorName}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${vName.replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="openViewVendorCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${vName}</a>
             </td>
-            <td class="col-master-vendor-gst-num td-center">${row.gstNumber}</td>
-            <td class="col-master-vendor-pan td-center">${row.panNumber}</td>
-            <td class="col-master-vendor-gst-type td-center">${row.gstType}</td>
-            <td class="col-master-vendor-status td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.businessType || row.vendorType || '').replace(/"/g, '&quot;')}">${row.businessType || row.vendorType || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.serviceType || '').replace(/"/g, '&quot;')}">${row.serviceType || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.gstNumber || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.panNumber || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstType || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
           </tr>
         `;
       }).join('');
     } else if (currentMasterSubpage === 'products') {
-      // Render Products Rows (Matching Mockup: Product Head, Product Code, HSN Code, Product Description, GST Rate, Status)
+      // Render Products Rows: Product Name 40ch, Product Category 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch
       tbody.innerHTML = filteredDataset.map(row => {
-        const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
-          <tr data-row-id="${row.id}">
-            <td>
-              <a href="#" class="req-link td-link-blue" onclick="openViewProductCard('${row.id}'); return false;">${row.productHead}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productName || row.productHead || '').replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="openViewProductCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.productName || row.productHead || ''}</a>
             </td>
-            <td>${row.productCode || ''}</td>
-            <td>${row.hsnCode || ''}</td>
-            <td>${row.productDescription || ''}</td>
-            <td>${row.gstRate || ''}</td>
-            <td class="td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productCategory || row.category || 'Telecom').replace(/"/g, '&quot;')}">${row.productCategory || row.category || 'Telecom'}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.productCode || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.hsnCode || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gst || row.gstRate || '18%'}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+              <a href="#" class="req-link td-link-blue" onclick="openProductPriceTab('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.price || row.stockPrices || ''}</a>
             </td>
           </tr>
         `;
       }).join('');
     } else if (currentMasterSubpage === 'expenses') {
-      // Render Expenses Rows (Matching Mockup: Expense Head, Expense Code, SAC Code, Expense Description, GST Rate, Uom, Status)
+      // Render Expenses Rows: Expense Name 40ch&left, Expense Category 20ch&center, Expense Head 20ch&center, GST 10ch&center, Status 10ch&center
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
+        const expTitle = row.expenseName || row.expenseDescription || row.expenseHead || '';
         return `
-          <tr data-row-id="${row.id}">
-            <td>
-              <a href="#" class="req-link td-link-blue" onclick="openViewExpenseCard('${row.id}'); return false;">${row.expenseHead}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${expTitle.replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="openViewExpenseCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${expTitle}</a>
             </td>
-            <td>${row.expenseCode || ''}</td>
-            <td>${row.sacCode || ''}</td>
-            <td>${row.expenseDescription || ''}</td>
-            <td>${row.gstRate || ''}</td>
-            <td>${row.uom || ''}</td>
-            <td class="td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseCategory || 'Direct Operations').replace(/"/g, '&quot;')}">${row.expenseCategory || 'Direct Operations'}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">${row.expenseHead || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gst || row.gstRate || '18%'}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
           </tr>
         `;
@@ -10114,7 +10845,7 @@ function applyFiltersAndRender() {
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.eps || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.edli || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.totalAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; border-left: 1px solid #e2e8f0;">${row.totalAmount || ''}</td>
         </tr>
       `).join('');
     } else if (currentAdminView === 'salary_detail') {
@@ -10202,13 +10933,13 @@ function applyFiltersAndRender() {
               ${idx === 0 ? `
                 <td rowspan="${rowCount}" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.tdsReceivable || ''}</td>
                 <td rowspan="${rowCount}" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500; border-right: 1px solid #e2e8f0;">
-                  <a href="#" class="td-link-blue" onclick="openAccountsTdsSummaryModal('${m.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${q.tdsCreditAvailable || ''}</a>
+                  <span style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600;">${q.tdsCreditAvailable || ''}</span>
                 </td>
               ` : ''}
               <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.taxableAmountPayable || ''}</td>
               <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.deductedAmount || ''}</td>
               <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500;">
-                <a href="#" class="td-link-blue" onclick="openAccountsTdsSummaryModal('${m.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${m.paidAmount || ''}</a>
+                <span style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600;">${m.paidAmount || ''}</span>
               </td>
             </tr>
           `;
@@ -10226,9 +10957,7 @@ function applyFiltersAndRender() {
           <td style="width: 52ch; min-width: 52ch; max-width: 52ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.tdsCode || '').replace(/"/g, '&quot;')}">${row.tdsCode || ''}</td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.taxableAmount || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.tdsRate || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #0454e4; font-weight: 500;">
-            <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('acc-tds-rec', '${(row.panNumber || '').replace(/'/g, "\\'")}', '${(row.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.tdsAmount || ''}</a>
-          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.tdsAmount || ''}</td>
         </tr>
       `).join('');
     } else if (currentAccountsView === 'tds_payable') {
@@ -10245,7 +10974,7 @@ function applyFiltersAndRender() {
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.tdsRate || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.deductedAmount || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #0454e4; font-weight: 500;">
-            <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('acc-tds-1', '${(row.panNumber || '').replace(/'/g, "\\'")}', '${(row.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.paidAmount || ''}</a>
+            <span style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600;">${row.paidAmount || ''}</span>
           </td>
         </tr>
       `).join('');
@@ -10255,8 +10984,8 @@ function applyFiltersAndRender() {
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherDate || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.vendorName || '').replace(/"/g, '&quot;')}">${row.vendorName || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
-            <span style="text-decoration: underline; text-underline-offset: 3px; font-weight: 500; color: #1e293b;">${row.invoiceNo || ''}</span>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <span style="text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 500; color: #0454e4;">${row.invoiceNo || ''}</span>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
@@ -10331,8 +11060,8 @@ function applyFiltersAndRender() {
         <tr class="accounts-sales-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.voucherNo || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.customerName || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
-            <span style="text-decoration: underline; text-underline-offset: 3px; font-weight: 500; color: #1e293b;">${row.invoiceNo || ''}</span>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <span style="text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 500; color: #0454e4;">${row.invoiceNo || ''}</span>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceDate || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
@@ -11629,13 +12358,12 @@ function initSideFormEvents() {
     }
 
     if (currentModule === 'master' && currentMasterSubpage === 'expenses') {
-      const expenseHead = document.getElementById('inpExpenseHead')?.value || "Project";
-      const expenseCode = document.getElementById('inpExpenseCode')?.value || "";
-      const sacCode = document.getElementById('inpExpenseSac')?.value || "";
-      const expenseDescription = document.getElementById('inpExpenseDesc')?.value || "";
-      const uom = document.getElementById('inpExpenseUom')?.value || "Pcs";
-      const gstRate = document.getElementById('inpExpenseGstRate')?.value || "18%";
-      const tdsRate = document.getElementById('inpExpenseTdsRate')?.value || "1%";
+      const expenseName = document.getElementById('inpExpenseName')?.value || "Office Supplies & Maintenance";
+      const expenseCategory = document.getElementById('inpExpenseCategory')?.value || "Administrative Support";
+      const expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value || "Office Utilities";
+      const expenseHead = document.getElementById('inpExpenseHead')?.value || "Opex";
+      const gst = document.getElementById('inpExpenseGst')?.value || "18%";
+      const depreciation = document.getElementById('inpExpenseDepreciation')?.value || "10%";
       const expenseRcmToggle = document.getElementById('inpExpenseRcmToggle');
       const rcm = (expenseRcmToggle && expenseRcmToggle.checked) ? "Yes" : "No";
       const expenseStatusToggle = document.getElementById('inpExpenseStatusToggle');
@@ -11643,13 +12371,13 @@ function initSideFormEvents() {
 
       const newRecord = {
         id: `exp-${Date.now()}`,
+        expenseName,
+        expenseCategory,
+        expenseSubCategory,
         expenseHead,
-        expenseCode,
-        sacCode,
-        expenseDescription,
-        uom,
-        gstRate,
-        tdsRate,
+        gst,
+        gstRate: gst,
+        depreciation,
         rcm,
         status
       };
@@ -11658,38 +12386,46 @@ function initSideFormEvents() {
       currentDataset = [...masterExpensesData];
       applyFiltersAndRender();
       closeSideForm();
-      showToast(`Expense ${expenseHead} successfully saved & added to table!`);
+      showToast(`Expense ${expenseName} successfully saved & added to table!`);
       return;
     }
 
     if (currentModule === 'master' && currentMasterSubpage === 'products') {
-      const productHead = document.getElementById('inpProductHead')?.value || "230510678";
-      const productCode = document.getElementById('inpProductCode')?.value || "";
-      const hsnCode = document.getElementById('inpProductHsn')?.value || "";
-      const productDescription = document.getElementById('inpProductDesc')?.value || "";
-      const uom = document.getElementById('inpProductUom')?.value || "Pcs";
+      const productName = document.getElementById('inpProductName')?.value || document.getElementById('inpProductHead')?.value || "Telecom Tower Mast";
+      const productCategory = document.getElementById('inpProductCategory')?.value || "Tower Infrastructure";
+      const productCode = document.getElementById('inpProductCode')?.value || `PRD-${Date.now().toString().slice(-4)}`;
+      const hsnCode = document.getElementById('inpProductHsn')?.value || "73082019";
+      const uom = document.getElementById('inpProductUom')?.value || "Nos";
+      const saleUom = document.getElementById('inpProductSaleUom')?.value || "Nos";
+      const ucf = document.getElementById('inpProductUcf')?.value || "";
+      const gstRate = document.getElementById('inpProductGstRate')?.value || "18%";
       const msq = document.getElementById('inpProductMsq')?.value || "";
       const moq = document.getElementById('inpProductMoq')?.value || "";
-      const stockPrices = document.getElementById('inpProductStockPrices')?.value || "";
-      const oh = document.getElementById('inpProductOh')?.value || "1%";
-      const margin = document.getElementById('inpProductMargin')?.value || "1%";
-      const gstRate = document.getElementById('inpProductGstRate')?.value || "18%";
+      const inflation = document.getElementById('inpProductInflation')?.value || "";
+      const margin = document.getElementById('inpProductMargin')?.value || "5%";
+      const oh = document.getElementById('inpProductOh')?.value || "2%";
       const productStatusToggle = document.getElementById('inpProductStatusToggle');
       const status = (productStatusToggle && productStatusToggle.checked) ? "Active" : "In - Active";
 
       const newRecord = {
         id: `prod-${Date.now()}`,
-        productHead,
+        productName,
+        productHead: productName,
+        productCategory,
         productCode,
         hsnCode,
-        productDescription,
         uom,
+        saleUom,
+        ucf,
+        gst: gstRate,
+        gstRate,
         msq,
         moq,
-        stockPrices,
-        oh,
+        inflation,
         margin,
-        gstRate,
+        oh,
+        price: "1,50,000.00",
+        stockPrices: "1,50,000.00",
         status
       };
 
@@ -11697,7 +12433,7 @@ function initSideFormEvents() {
       currentDataset = [...masterProductsData];
       applyFiltersAndRender();
       closeSideForm();
-      showToast(`Product ${productHead} successfully saved & added to table!`);
+      showToast(`Product ${productName} successfully saved & added to table!`);
       return;
     }
 
@@ -12614,7 +13350,39 @@ function initSideFormEvents() {
   attachNexusCalendar('inpVehicleRateFrom', 'btnVehicleRateFromCalendar');
   attachNexusCalendar('inpVehicleRateTo', 'btnVehicleRateToCalendar');
   attachNexusCalendar('inpOtherServiceRateFrom', 'btnOtherServiceRateFromCalendar');
-  attachNexusCalendar('inpOtherServiceRateTo', 'btnOtherServiceRateToCalendar');
+  window.openNexusCalendar = openNexusCalendar;
+
+  // Attach to Company HR Policies EPF calendar inputs
+  attachNexusCalendar('inpEpfFromDate', 'btnEpfFromDateCalendar');
+  attachNexusCalendar('inpEpfToDate', 'btnEpfToDateCalendar');
+  attachNexusCalendar('inpEpfFillingDueDate', 'btnEpfFillingDueDateCalendar');
+
+  const btnCompanyHrEpfEditToggle = document.getElementById('btnCompanyHrEpfEditToggle');
+  if (btnCompanyHrEpfEditToggle) {
+    btnCompanyHrEpfEditToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const imgIcon = document.getElementById('imgCompanyHrEpfEditIcon');
+      if (!isCompanyHrEpfEditing) {
+        isCompanyHrEpfEditing = true;
+        setCompanyHrEpfReadOnly(false);
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.className = 'icon-green';
+          imgIcon.title = 'Save';
+        }
+        showToast('EPF form is now editable');
+      } else {
+        isCompanyHrEpfEditing = false;
+        setCompanyHrEpfReadOnly(true);
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.className = 'icon-blue';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('EPF details saved successfully!');
+      }
+    });
+  }
 
   const btnSalaryAddRow = document.getElementById('btnSalaryAddRow');
   const addSalaryCard = document.getElementById('addSalaryCard');
@@ -12837,6 +13605,7 @@ function openSideForm() {
   if (addProjectTransportCard) addProjectTransportCard.style.display = 'none';
   if (addVendorCard) addVendorCard.style.display = 'none';
   if (addProductCard) addProductCard.style.display = 'none';
+  if (document.getElementById('productPriceCard')) document.getElementById('productPriceCard').style.display = 'none';
   if (addExpenseCard) addExpenseCard.style.display = 'none';
   if (addGbpaCard) addGbpaCard.style.display = 'none';
   if (addIndusTowerCard) addIndusTowerCard.style.display = 'none';
@@ -12963,6 +13732,10 @@ function openSideForm() {
       setProductFormReadOnly(false);
       currentViewedProductId = null;
       isProductFormEditing = false;
+      const frm = document.getElementById('frmAddProduct');
+      if (frm) frm.reset();
+      const statusToggle = document.getElementById('inpProductStatusToggle');
+      if (statusToggle) statusToggle.checked = true;
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'expenses') {
     if (addExpenseCard) {
@@ -12973,6 +13746,8 @@ function openSideForm() {
       if (lblTitle) lblTitle.innerText = 'Add Expense';
       if (btnEditToggle) btnEditToggle.style.display = 'none';
       if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+      const frm = document.getElementById('frmAddExpense');
+      if (frm) frm.reset();
       setExpenseFormReadOnly(false);
       currentViewedExpenseId = null;
       isExpenseFormEditing = false;
@@ -12985,6 +13760,12 @@ function openSideForm() {
   document.querySelectorAll('#sideFormOverlay input[type="checkbox"]').forEach(cb => {
     cb.checked = false;
   });
+
+  // Default active toggles for Add Product & Add Expense
+  const prodStatus = document.getElementById('inpProductStatusToggle');
+  if (prodStatus && currentMasterSubpage === 'products') prodStatus.checked = true;
+  const expStatus = document.getElementById('inpExpenseStatusToggle');
+  if (expStatus && currentMasterSubpage === 'expenses') expStatus.checked = true;
 
   overlay.style.display = 'flex';
 }
@@ -13619,6 +14400,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         showToast('Company details saved & updated successfully!');
       }
+    });
+  }
+
+  const btnHrPolicies = document.getElementById('btnIndusTowerHrPolicies');
+  if (btnHrPolicies) {
+    btnHrPolicies.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openCompanyHrPoliciesPage('epf');
     });
   }
 
@@ -15108,10 +15897,16 @@ function getColumnDisplayName(colKey) {
     contactNumber: "Contact Number",
     email: "E-Mail",
     productHead: "Product Head",
+    productName: "Product Name",
+    productCategory: "Product Category",
     productCode: "Product Code",
     hsnCode: "HSN Code",
     productDescription: "Product Description",
+    gst: "GST",
     gstRate: "GST Rate",
+    price: "Price",
+    expenseName: "Expense Name",
+    expenseCategory: "Expense Category",
     expenseHead: "Expense Head",
     expenseCode: "Expense Code",
     sacCode: "SAC Code",
@@ -16451,32 +17246,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const imgIcon = document.getElementById('imgProductCardEditIcon');
 
       if (!isProductFormEditing) {
-        // ENTER EDIT MODE
+        // ENTER EDIT MODE (Only HSN Code, GST Rate, MSQ, MOQ, Inflation, Margin, OH, Status editable)
         isProductFormEditing = true;
-        setProductFormReadOnly(false);
+        setProductFormReadOnly(false, true);
         if (lblTitle) lblTitle.innerText = 'Edit Product';
         if (imgIcon) {
           imgIcon.src = 'icons/Save.svg';
           imgIcon.title = 'Save Changes';
         }
-        showToast('Product form is now editable');
+        showToast('HSN Code, GST Rate, MSQ, MOQ, Inflation, Margin, OH, Status are now editable');
       } else {
         // SAVE EDITS
         isProductFormEditing = false;
         if (currentViewedProductId) {
           const prod = masterProductsData.find(p => p.id === currentViewedProductId);
           if (prod) {
-            prod.productHead = document.getElementById('inpProductHead')?.value || prod.productHead;
+            prod.productName = document.getElementById('inpProductName')?.value || prod.productName;
+            prod.productHead = prod.productName;
+            prod.productCategory = document.getElementById('inpProductCategory')?.value || prod.productCategory;
             prod.productCode = document.getElementById('inpProductCode')?.value || prod.productCode;
             prod.hsnCode = document.getElementById('inpProductHsn')?.value || prod.hsnCode;
-            prod.productDescription = document.getElementById('inpProductDesc')?.value || prod.productDescription;
             prod.uom = document.getElementById('inpProductUom')?.value || prod.uom;
+            prod.saleUom = document.getElementById('inpProductSaleUom')?.value || prod.saleUom;
+            prod.ucf = document.getElementById('inpProductUcf')?.value || prod.ucf;
+            prod.gstRate = document.getElementById('inpProductGstRate')?.value || prod.gstRate;
+            prod.gst = prod.gstRate;
             prod.msq = document.getElementById('inpProductMsq')?.value || prod.msq;
             prod.moq = document.getElementById('inpProductMoq')?.value || prod.moq;
-            prod.stockPrices = document.getElementById('inpProductStockPrices')?.value || prod.stockPrices;
-            prod.oh = document.getElementById('inpProductOh')?.value || prod.oh;
+            prod.inflation = document.getElementById('inpProductInflation')?.value || prod.inflation;
             prod.margin = document.getElementById('inpProductMargin')?.value || prod.margin;
-            prod.gstRate = document.getElementById('inpProductGstRate')?.value || prod.gstRate;
+            prod.oh = document.getElementById('inpProductOh')?.value || prod.oh;
             const statusToggle = document.getElementById('inpProductStatusToggle');
             prod.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
           }
@@ -16504,7 +17303,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isExpenseFormEditing) {
         // ENTER EDIT MODE
         isExpenseFormEditing = true;
-        setExpenseFormReadOnly(false);
+        setExpenseFormReadOnly(false, true);
         if (lblTitle) lblTitle.innerText = 'Edit Expense';
         if (imgIcon) {
           imgIcon.src = 'icons/Save.svg';
@@ -16517,13 +17316,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentViewedExpenseId) {
           const exp = masterExpensesData.find(e => e.id === currentViewedExpenseId);
           if (exp) {
+            exp.expenseName = document.getElementById('inpExpenseName')?.value || exp.expenseName || exp.expenseDescription;
+            exp.expenseCategory = document.getElementById('inpExpenseCategory')?.value || exp.expenseCategory;
+            exp.expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value || exp.expenseSubCategory;
             exp.expenseHead = document.getElementById('inpExpenseHead')?.value || exp.expenseHead;
-            exp.expenseCode = document.getElementById('inpExpenseCode')?.value || exp.expenseCode;
-            exp.sacCode = document.getElementById('inpExpenseSac')?.value || exp.sacCode;
-            exp.expenseDescription = document.getElementById('inpExpenseDesc')?.value || exp.expenseDescription;
-            exp.uom = document.getElementById('inpExpenseUom')?.value || exp.uom;
-            exp.gstRate = document.getElementById('inpExpenseGstRate')?.value || exp.gstRate;
-            exp.tdsRate = document.getElementById('inpExpenseTdsRate')?.value || exp.tdsRate;
+            exp.gst = document.getElementById('inpExpenseGst')?.value || exp.gst || exp.gstRate;
+            exp.gstRate = exp.gst;
+            exp.depreciation = document.getElementById('inpExpenseDepreciation')?.value || exp.depreciation;
             const rcmToggle = document.getElementById('inpExpenseRcmToggle');
             exp.rcm = (rcmToggle && rcmToggle.checked) ? "Yes" : "No";
             const statusToggle = document.getElementById('inpExpenseStatusToggle');
@@ -17109,9 +17908,20 @@ window.openViewVendorCard = function(vendorId) {
 let currentViewedProductId = null;
 let isProductFormEditing = false;
 
-function setProductFormReadOnly(isReadOnly) {
+function setProductFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const form = document.getElementById('frmAddProduct');
   if (!form) return;
+
+  const editableInEditModeIds = [
+    'inpProductHsn',
+    'inpProductGstRate',
+    'inpProductMsq',
+    'inpProductMoq',
+    'inpProductInflation',
+    'inpProductMargin',
+    'inpProductOh'
+  ];
+
   const inputs = form.querySelectorAll('input, select');
   inputs.forEach(input => {
     if (input.type === 'checkbox') return;
@@ -17120,11 +17930,24 @@ function setProductFormReadOnly(isReadOnly) {
       else input.setAttribute('readonly', 'true');
       input.style.backgroundColor = '#f8fafc';
     } else {
-      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
-      else input.removeAttribute('readonly');
-      input.style.backgroundColor = '#ffffff';
+      if (isEditModeOnly) {
+        if (editableInEditModeIds.includes(input.id)) {
+          if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+          else input.removeAttribute('readonly');
+          input.style.backgroundColor = '#ffffff';
+        } else {
+          if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+          else input.setAttribute('readonly', 'true');
+          input.style.backgroundColor = '#f8fafc';
+        }
+      } else {
+        if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+        else input.removeAttribute('readonly');
+        input.style.backgroundColor = '#ffffff';
+      }
     }
   });
+
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
     t.disabled = isReadOnly;
@@ -17158,7 +17981,9 @@ window.openViewProductCard = function(productId) {
 
   currentViewedProductId = prod.id;
   isProductFormEditing = false;
-  openSideForm();
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 
   const cards = document.querySelectorAll('.side-form-card');
   cards.forEach(c => c.style.display = 'none');
@@ -17180,17 +18005,20 @@ window.openViewProductCard = function(productId) {
   const btnSaveWrap = document.querySelector('#frmAddProduct .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpProductHead')) document.getElementById('inpProductHead').value = prod.productHead || '';
+  if (document.getElementById('inpProductName')) document.getElementById('inpProductName').value = prod.productName || prod.productHead || '';
+  if (document.getElementById('inpProductHead')) document.getElementById('inpProductHead').value = prod.productName || prod.productHead || '';
+  if (document.getElementById('inpProductCategory')) document.getElementById('inpProductCategory').value = prod.productCategory || 'Tower Infrastructure';
   if (document.getElementById('inpProductCode')) document.getElementById('inpProductCode').value = prod.productCode || '';
   if (document.getElementById('inpProductHsn')) document.getElementById('inpProductHsn').value = prod.hsnCode || '';
-  if (document.getElementById('inpProductDesc')) document.getElementById('inpProductDesc').value = prod.productDescription || '';
-  if (document.getElementById('inpProductUom')) document.getElementById('inpProductUom').value = prod.uom || 'Pcs';
+  if (document.getElementById('inpProductUom')) document.getElementById('inpProductUom').value = prod.uom || 'Nos';
+  if (document.getElementById('inpProductSaleUom')) document.getElementById('inpProductSaleUom').value = prod.saleUom || prod.uom || 'Nos';
+  if (document.getElementById('inpProductUcf')) document.getElementById('inpProductUcf').value = prod.ucf || '';
+  if (document.getElementById('inpProductGstRate')) document.getElementById('inpProductGstRate').value = prod.gstRate || prod.gst || '18%';
   if (document.getElementById('inpProductMsq')) document.getElementById('inpProductMsq').value = prod.msq || '';
   if (document.getElementById('inpProductMoq')) document.getElementById('inpProductMoq').value = prod.moq || '';
-  if (document.getElementById('inpProductStockPrices')) document.getElementById('inpProductStockPrices').value = prod.stockPrices || '';
-  if (document.getElementById('inpProductOh')) document.getElementById('inpProductOh').value = prod.oh || '1%';
-  if (document.getElementById('inpProductMargin')) document.getElementById('inpProductMargin').value = prod.margin || '1%';
-  if (document.getElementById('inpProductGstRate')) document.getElementById('inpProductGstRate').value = prod.gstRate || '18%';
+  if (document.getElementById('inpProductInflation')) document.getElementById('inpProductInflation').value = prod.inflation || '';
+  if (document.getElementById('inpProductMargin')) document.getElementById('inpProductMargin').value = prod.margin || '5%';
+  if (document.getElementById('inpProductOh')) document.getElementById('inpProductOh').value = prod.oh || '2%';
 
   const statusToggle = document.getElementById('inpProductStatusToggle');
   if (statusToggle) {
@@ -17201,12 +18029,87 @@ window.openViewProductCard = function(productId) {
   showToast(`Viewing product details: ${prod.productHead}`);
 };
 
+const defaultProductPriceHistory = {
+  'prod-1': [
+    { date: '12-08-2026', vendorName: 'Apex Telecom Ltd', rate: '4,50,000.00' },
+    { date: '18-07-2026', vendorName: 'Indus Steel Fab', rate: '4,45,000.00' },
+    { date: '05-06-2026', vendorName: 'Bharat Infra Works', rate: '4,60,000.00' },
+    { date: '22-04-2026', vendorName: 'Zenith Towers Ltd', rate: '4,52,000.00' },
+    { date: '10-02-2026', vendorName: 'Apex Telecom Ltd', rate: '4,48,000.00' }
+  ],
+  'prod-2': [
+    { date: '14-08-2026', vendorName: 'Sterlite Tech Ltd', rate: '1,25,000.00' },
+    { date: '02-07-2026', vendorName: 'Optic Fiber Corp', rate: '1,22,000.00' },
+    { date: '19-05-2026', vendorName: 'Bharat Fiber Line', rate: '1,28,000.00' }
+  ],
+  'prod-3': [
+    { date: '20-08-2026', vendorName: 'Kirloskar Power', rate: '8,75,000.00' },
+    { date: '11-06-2026', vendorName: 'Cummins India', rate: '8,60,000.00' },
+    { date: '15-03-2026', vendorName: 'Mahindra Powerol', rate: '8,80,000.00' }
+  ],
+  'prod-4': [
+    { date: '25-08-2026', vendorName: 'Exide Industries', rate: '3,20,000.00' },
+    { date: '09-07-2026', vendorName: 'Amara Raja Energy', rate: '3,15,000.00' },
+    { date: '14-04-2026', vendorName: 'HBL Power Systems', rate: '3,25,000.00' }
+  ],
+  'prod-5': [
+    { date: '05-09-2026', vendorName: 'Delta Electronics', rate: '2,80,000.00' },
+    { date: '18-07-2026', vendorName: 'Vertiv Energy Ltd', rate: '2,75,000.00' },
+    { date: '29-05-2026', vendorName: 'Eltek Power Ltd', rate: '2,85,000.00' }
+  ]
+};
+
+window.openProductPriceTab = function(productId) {
+  let prod = masterProductsData.find(p => p.id === productId || p.productName === productId || p.productHead === productId);
+  if (!prod && productId && typeof productId === 'string' && productId.startsWith('prod-')) {
+    prod = masterProductsData[0];
+  }
+  const productName = prod ? (prod.productName || prod.productHead || 'Product Name') : 'Product Name';
+  const priceVal = prod ? (prod.price || prod.stockPrices || '4,50,000.00') : '4,50,000.00';
+
+  const lblTitle = document.getElementById('lblProductPriceCardTitle');
+  if (lblTitle) lblTitle.innerText = productName;
+
+  const history = (defaultProductPriceHistory[productId] && defaultProductPriceHistory[productId].length > 0)
+    ? defaultProductPriceHistory[productId]
+    : defaultProductPriceHistory['prod-1'];
+
+  const tbody = document.getElementById('tbodyProductPriceHistory');
+  if (tbody) {
+    tbody.innerHTML = history.map((item, idx) => `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 10px; color: #475569; font-weight: normal; font-size: 13px;">${item.date}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; color: #1e293b; font-weight: 500; font-size: 13px;">${item.vendorName}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; color: #1e293b; font-weight: 500; font-size: 13px;">${item.rate}</td>
+      </tr>
+    `).join('');
+  }
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('productPriceCard');
+  if (card) card.style.display = 'block';
+
+  showToast(`Viewing price history: ${productName}`);
+};
+
 let currentViewedExpenseId = null;
 let isExpenseFormEditing = false;
 
-function setExpenseFormReadOnly(isReadOnly) {
+function setExpenseFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const form = document.getElementById('frmAddExpense');
   if (!form) return;
+  const editableInEditModeIds = [
+    'inpExpenseCategory',
+    'inpExpenseSubCategory',
+    'inpExpenseHead',
+    'inpExpenseGst',
+    'inpExpenseDepreciation'
+  ];
   const inputs = form.querySelectorAll('input, select');
   inputs.forEach(input => {
     if (input.type === 'checkbox') return;
@@ -17215,9 +18118,21 @@ function setExpenseFormReadOnly(isReadOnly) {
       else input.setAttribute('readonly', 'true');
       input.style.backgroundColor = '#f8fafc';
     } else {
-      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
-      else input.removeAttribute('readonly');
-      input.style.backgroundColor = '#ffffff';
+      if (isEditModeOnly) {
+        if (editableInEditModeIds.includes(input.id)) {
+          if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+          else input.removeAttribute('readonly');
+          input.style.backgroundColor = '#ffffff';
+        } else {
+          if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
+          else input.setAttribute('readonly', 'true');
+          input.style.backgroundColor = '#f8fafc';
+        }
+      } else {
+        if (input.tagName === 'SELECT') input.removeAttribute('disabled');
+        else input.removeAttribute('readonly');
+        input.style.backgroundColor = '#ffffff';
+      }
     }
   });
   const toggles = form.querySelectorAll('input[type="checkbox"]');
@@ -17232,17 +18147,16 @@ function setExpenseFormReadOnly(isReadOnly) {
 }
 
 window.openViewExpenseCard = function(expenseId) {
-  let exp = masterExpensesData.find(e => e.id === expenseId || e.expenseHead === expenseId);
+  let exp = masterExpensesData.find(e => e.id === expenseId || e.expenseHead === expenseId || e.expenseName === expenseId);
   if (!exp) {
-    exp = {
+    exp = masterExpensesData[0] || {
       id: expenseId || 'exp-1',
-      expenseHead: "Project",
-      expenseCode: "EXP-PRJ-001",
-      sacCode: "998313",
-      expenseDescription: "Site Infrastructure & Telecom Tower Installation",
-      uom: "Pcs",
-      gstRate: "18%",
-      tdsRate: "1%",
+      expenseName: "Site Infrastructure & Telecom Tower Installation",
+      expenseCategory: "Direct Operations",
+      expenseSubCategory: "Civil Works",
+      expenseHead: "Capex",
+      gst: "18%",
+      depreciation: "15%",
       rcm: "No",
       status: "Active"
     };
@@ -17250,7 +18164,9 @@ window.openViewExpenseCard = function(expenseId) {
 
   currentViewedExpenseId = exp.id;
   isExpenseFormEditing = false;
-  openSideForm();
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 
   const cards = document.querySelectorAll('.side-form-card');
   cards.forEach(c => c.style.display = 'none');
@@ -17272,13 +18188,12 @@ window.openViewExpenseCard = function(expenseId) {
   const btnSaveWrap = document.querySelector('#frmAddExpense .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpExpenseHead')) document.getElementById('inpExpenseHead').value = exp.expenseHead || 'Project';
-  if (document.getElementById('inpExpenseCode')) document.getElementById('inpExpenseCode').value = exp.expenseCode || '';
-  if (document.getElementById('inpExpenseSac')) document.getElementById('inpExpenseSac').value = exp.sacCode || '';
-  if (document.getElementById('inpExpenseDesc')) document.getElementById('inpExpenseDesc').value = exp.expenseDescription || '';
-  if (document.getElementById('inpExpenseUom')) document.getElementById('inpExpenseUom').value = exp.uom || 'Pcs';
-  if (document.getElementById('inpExpenseGstRate')) document.getElementById('inpExpenseGstRate').value = exp.gstRate || '18%';
-  if (document.getElementById('inpExpenseTdsRate')) document.getElementById('inpExpenseTdsRate').value = exp.tdsRate || '1%';
+  if (document.getElementById('inpExpenseName')) document.getElementById('inpExpenseName').value = exp.expenseName || exp.expenseDescription || exp.expenseHead || '';
+  if (document.getElementById('inpExpenseCategory')) document.getElementById('inpExpenseCategory').value = exp.expenseCategory || 'Direct Operations';
+  if (document.getElementById('inpExpenseSubCategory')) document.getElementById('inpExpenseSubCategory').value = exp.expenseSubCategory || 'Civil Works';
+  if (document.getElementById('inpExpenseHead')) document.getElementById('inpExpenseHead').value = exp.expenseHead || 'Capex';
+  if (document.getElementById('inpExpenseGst')) document.getElementById('inpExpenseGst').value = exp.gst || exp.gstRate || '18%';
+  if (document.getElementById('inpExpenseDepreciation')) document.getElementById('inpExpenseDepreciation').value = exp.depreciation || '10%';
 
   const rcmToggle = document.getElementById('inpExpenseRcmToggle');
   if (rcmToggle) {
@@ -17291,7 +18206,7 @@ window.openViewExpenseCard = function(expenseId) {
   }
 
   setExpenseFormReadOnly(true);
-  showToast(`Viewing expense details: ${exp.expenseHead}`);
+  showToast(`Viewing expense details: ${exp.expenseName || exp.expenseHead}`);
 };
 
 function exportToCsv() {
@@ -17314,8 +18229,8 @@ function exportToCsv() {
       headers = ["Business Type", "Customer ID", "Customer Name", "GST Number", "GST Type", "Invoice Type", "Status"];
       rows = filteredDataset.map(r => [r.businessType, r.customerId, r.customerName, r.gstNumber, r.gstType, r.invoiceType, r.status]);
     } else if (currentMasterSubpage === 'vendor') {
-      headers = ["Vendor Type", "Vendor ID", "Vendor Name", "GST Number", "PAN Number", "GST Type", "Status"];
-      rows = filteredDataset.map(r => [r.vendorType, r.vendorId, r.vendorName, r.gstNumber, r.panNumber, r.gstType, r.status]);
+      headers = ["Vendor Name", "Business Type", "Service Type", "GST Number", "PAN Number", "GST Type", "Status"];
+      rows = filteredDataset.map(r => [r.vendorName, r.businessType || r.vendorType, r.serviceType, r.gstNumber, r.panNumber, r.gstType, r.status]);
     } else if (currentMasterSubpage === 'products') {
       headers = ["Product Head", "Product Code", "HSN Code", "Product Description", "GST Rate", "Status"];
       rows = filteredDataset.map(r => [r.productHead, r.productCode, r.hsnCode, r.productDescription, r.gstRate, r.status]);
@@ -18350,6 +19265,79 @@ window.closeAccountsPaymentBankDetailsModal = function() {
   }
 };
 
+window.openAccountsPaymentDetailsModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const targetId = rowId || currentPaymentModalRowId || 'acc-pay-1';
+  const row = (typeof accountsPaymentData !== 'undefined' && accountsPaymentData.find(r => r.id === targetId)) || 
+              (typeof accountsPaymentData !== 'undefined' && accountsPaymentData[0]) || {
+                transferredTo: "Schneider Electric India Pvt Ltd",
+                requestNo: "REQ-2026-101",
+                invoiceNo: "INV-2026-8812",
+                transferred: "10,00,000.00"
+              };
+
+  const titleBadge = document.getElementById('lblAccountsPaymentDetailsTitle');
+  if (titleBadge) {
+    const invLabel = row.invoiceNo || row.requestNo || 'Invoice Number';
+    titleBadge.innerText = `Payment Details - ${invLabel}`;
+  }
+
+  const tbody = document.getElementById('tbodyAccountsPaymentDetails');
+  if (tbody) {
+    const list = (row.paymentDetailsList && row.paymentDetailsList.length > 0) ? row.paymentDetailsList : [
+      {
+        paymentDate: "12-08-2026",
+        amount: "6,00,000.00",
+        paymentRefNo: "NEFT/2608123456",
+        receiptNumber: "REC-2026-001"
+      },
+      {
+        paymentDate: "18-08-2026",
+        amount: "4,00,000.00",
+        paymentRefNo: "RTGS/2608901234",
+        receiptNumber: "REC-2026-003"
+      }
+    ];
+
+    tbody.innerHTML = list.map((item, idx) => `
+      <tr style="${idx !== list.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.paymentDate || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.amount || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.paymentRefNo || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.receiptNumber || ''}</td>
+      </tr>
+    `).join('');
+  }
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'accountsPaymentDetailsModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('accountsPaymentDetailsModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAccountsPaymentDetailsModal = function() {
+  const detailsModal = document.getElementById('accountsPaymentDetailsModal');
+  if (detailsModal) detailsModal.style.display = 'none';
+
+  // Return smoothly to Transfer To modal
+  const transferModal = document.getElementById('accountsPaymentTransferToModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (transferModal && currentPaymentModalRowId) {
+    transferModal.style.display = 'block';
+    if (overlay) overlay.style.display = 'flex';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
 let currentTdsSummaryRowId = 'acc-tds-1';
 let activeTdsSummaryFilters = {};
 let currentTdsSummaryFilterCol = null;
@@ -18551,8 +19539,8 @@ window.openAccountsTdsDetailsModal = function(rowId, panNumber, panName) {
     resolvedPanName = resolvedPanName || "Schneider Electric India Pvt Ltd";
     resolvedPanNumber = resolvedPanNumber || "AAACB1234D";
     detailList = [
-      { paymentDate: "12-04-2026", tdsType: "Collected", panNumber: resolvedPanNumber, panName: resolvedPanName, invoiceNumber: "INV-2026-8812", invoiceDate: "08-04-2026", taxableAmount: "3,50,000.00", tdsCode: "10%", taxAmount: "35,000.00" },
-      { paymentDate: "24-04-2026", tdsType: "Collected", panNumber: resolvedPanNumber, panName: resolvedPanName, invoiceNumber: "INV-2026-8845", invoiceDate: "20-04-2026", taxableAmount: "3,00,000.00", tdsCode: "10%", taxAmount: "30,000.00" }
+      { paymentDate: "12-04-2026", particulars: "Supply of Telecom Electrical Parts", taxableAmount: "3,50,000.00", tdsRate: "10%", deductedAmount: "35,000.00" },
+      { paymentDate: "24-04-2026", particulars: "Maintenance & AMC Services", taxableAmount: "3,00,000.00", tdsRate: "10%", deductedAmount: "30,000.00" }
     ];
   }
 
@@ -18570,11 +19558,10 @@ window.openAccountsTdsDetailsModal = function(rowId, panNumber, panName) {
     tbody.innerHTML = detailList.map((d, idx) => `
       <tr style="${idx !== detailList.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.paymentDate || ''}</td>
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.invoiceNumber || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${d.invoiceDate || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxableAmount || ''}</td>
-        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.tdsCode || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxAmount || ''}</td>
+        <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis;" title="${(d.particulars || 'Payment towards Services').replace(/"/g, '&quot;')}">${d.particulars || 'Payment towards Services'}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.taxableAmount || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.tdsRate || d.tdsCode || '10%'}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${d.deductedAmount || d.taxAmount || ''}</td>
       </tr>
     `).join('');
   }
@@ -18594,16 +19581,8 @@ window.openAccountsTdsDetailsModal = function(rowId, panNumber, panName) {
 window.closeAccountsTdsDetailsModal = function() {
   const detailsModal = document.getElementById('accountsTdsDetailsModal');
   if (detailsModal) detailsModal.style.display = 'none';
-
-  // Return smoothly to TDS Summary modal
-  const summaryModal = document.getElementById('accountsTdsSummaryModal');
   const overlay = document.getElementById('sideFormOverlay');
-  if (summaryModal && currentTdsSummaryRowId) {
-    summaryModal.style.display = 'block';
-    if (overlay) overlay.style.display = 'flex';
-  } else if (overlay) {
-    overlay.style.display = 'none';
-  }
+  if (overlay) overlay.style.display = 'none';
 };
 
 window.openAccountsPurchaseInvoiceModal = function(rowId) {

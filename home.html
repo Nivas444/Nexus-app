@@ -709,6 +709,7 @@
 
 
         <!-- 1D. Master -> Add Product Form Card (Matching Uploaded Mockup) -->
+        <!-- 1D. Master -> Add Product Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addProductCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
@@ -719,7 +720,7 @@
                 <img src="icons/Edit.svg" id="imgProductCardEditIcon" alt="Edit" width="28" height="28">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseProductForm"
-                aria-label="Close form">&times;</button>
+                onclick="closeSideForm()" aria-label="Close form">&times;</button>
             </div>
           </div>
 
@@ -728,15 +729,35 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProduct" onsubmit="event.preventDefault();">
-            <!-- 1. Product Head -->
+            <!-- 1. Product Name -->
             <div class="form-row-group">
-              <label class="form-label" for="inpProductHead">Product Head</label>
+              <label class="form-label" for="inpProductName">Product Name</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProductHead" placeholder="">
+                <input type="text" class="form-input-control" id="inpProductName" placeholder="">
               </div>
             </div>
 
-            <!-- 2. Product Code -->
+            <!-- 2. Product Category -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductCategory">Product Category</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductCategory">
+                  <option value="" selected></option>
+                  <option value="Tower Infrastructure">Tower Infrastructure</option>
+                  <option value="Optical Cables">Optical Cables</option>
+                  <option value="Electrical Equipment">Electrical Equipment</option>
+                  <option value="Power Backup">Power Backup</option>
+                  <option value="Energy Storage">Energy Storage</option>
+                  <option value="Earthing & Protection">Earthing & Protection</option>
+                  <option value="Telecom Equipment">Telecom Equipment</option>
+                  <option value="Civil Works">Civil Works</option>
+                  <option value="Hardware & Fasteners">Hardware & Fasteners</option>
+                  <option value="Consumables">Consumables</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Product Code -->
             <div class="form-row-group">
               <label class="form-label" for="inpProductCode">Product Code</label>
               <div class="form-input-wrap">
@@ -744,19 +765,11 @@
               </div>
             </div>
 
-            <!-- 3. HSN Code -->
+            <!-- 4. HSN Code -->
             <div class="form-row-group">
               <label class="form-label" for="inpProductHsn">HSN Code</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpProductHsn" placeholder="">
-              </div>
-            </div>
-
-            <!-- 4. Product Description -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProductDesc">Product Description</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProductDesc" placeholder="">
               </div>
             </div>
 
@@ -766,15 +779,59 @@
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpProductUom">
                   <option value="" selected></option>
+                  <option value="Nos">Nos</option>
                   <option value="Pcs">Pcs</option>
                   <option value="Mtr">Mtr</option>
                   <option value="Kg">Kg</option>
-                  <option value="Nos">Nos</option>
+                  <option value="Set">Set</option>
+                  <option value="Box">Box</option>
+                  <option value="Ltr">Ltr</option>
+                  <option value="Roll">Roll</option>
                 </select>
               </div>
             </div>
 
-            <!-- 6. MSQ -->
+            <!-- 6. Sale UOM -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductSaleUom">Sale UOM</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductSaleUom">
+                  <option value="" selected></option>
+                  <option value="Nos">Nos</option>
+                  <option value="Pcs">Pcs</option>
+                  <option value="Mtr">Mtr</option>
+                  <option value="Kg">Kg</option>
+                  <option value="Set">Set</option>
+                  <option value="Box">Box</option>
+                  <option value="Ltr">Ltr</option>
+                  <option value="Roll">Roll</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 7. UCF -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductUcf">UCF</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProductUcf" placeholder="">
+              </div>
+            </div>
+
+            <!-- 8. GST Rate (0% / 5% / 18% / 40%) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductGstRate">GST Rate</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductGstRate">
+                  <option value="" selected></option>
+                  <option value="0%">0%</option>
+                  <option value="5%">5%</option>
+                  <option value="18%">18%</option>
+                  <option value="40%">40%</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 9. MSQ -->
             <div class="form-row-group">
               <label class="form-label" for="inpProductMsq">MSQ</label>
               <div class="form-input-wrap">
@@ -782,7 +839,7 @@
               </div>
             </div>
 
-            <!-- 7. MOQ -->
+            <!-- 10. MOQ -->
             <div class="form-row-group">
               <label class="form-label" for="inpProductMoq">MOQ</label>
               <div class="form-input-wrap">
@@ -790,72 +847,95 @@
               </div>
             </div>
 
-            <!-- Stock Prices -->
+            <!-- 11. Inflation -->
             <div class="form-row-group">
-              <label class="form-label" for="inpProductStockPrices">Stock Prices</label>
+              <label class="form-label" for="inpProductInflation">Inflation</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProductStockPrices"
-                  placeholder="Enter Stock Prices">
+                <input type="text" class="form-input-control" id="inpProductInflation" placeholder="">
               </div>
             </div>
 
-            <!-- OH -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProductOh">OH</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProductOh">
-                  <option value="1%" selected>1%</option>
-                  <option value="2%">2%</option>
-                  <option value="10%">10%</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Margin -->
+            <!-- 12. Margin (1% / 2% / 3% / 4% / 5% / 10%) -->
             <div class="form-row-group">
               <label class="form-label" for="inpProductMargin">Margin</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpProductMargin">
-                  <option value="1%" selected>1%</option>
+                  <option value="" selected></option>
+                  <option value="1%">1%</option>
                   <option value="2%">2%</option>
+                  <option value="3%">3%</option>
+                  <option value="4%">4%</option>
+                  <option value="5%">5%</option>
                   <option value="10%">10%</option>
                 </select>
               </div>
             </div>
 
-            <!-- 8. GST Rate -->
+            <!-- 13. OH (1% / 2% / 3% / 4% / 5% / 10%) -->
             <div class="form-row-group">
-              <label class="form-label" for="inpProductGstRate">GST Rate</label>
+              <label class="form-label" for="inpProductOh">OH</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProductGstRate">
-                  <option value="18%" selected>18%</option>
+                <select class="form-select-control" id="inpProductOh">
+                  <option value="" selected></option>
+                  <option value="1%">1%</option>
+                  <option value="2%">2%</option>
+                  <option value="3%">3%</option>
+                  <option value="4%">4%</option>
                   <option value="5%">5%</option>
-                  <option value="12%">12%</option>
-                  <option value="28%">28%</option>
+                  <option value="10%">10%</option>
                 </select>
               </div>
             </div>
 
-            <!-- 9. Status -->
+            <!-- 14. Status -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProductStatusToggle">
+                  <input type="checkbox" id="inpProductStatusToggle" checked>
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
             <!-- Submit Save Button Inside Tab Centered -->
-            <div class="form-submit-inside-wrap">
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; align-items: center; padding: 16px 0 10px 0;">
               <button type="button" class="btn-card-submit-inside" id="btnSubmitProduct" title="Save"
-                aria-label="Submit">
-                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+                aria-label="Submit" style="background: transparent; border: none; cursor: pointer; padding: 0;">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34" style="display: block;">
               </button>
             </div>
 
           </form>
+        </div>
+
+        <!-- 1D-2. Master -> Product Price History Side Card -->
+        <div class="side-form-card side-contact-popup" id="productPriceCard" style="display: none; width: 500px; max-width: 95vw;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblProductPriceCardTitle">Product Name</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProductPriceRange" title="Price Range" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/range.svg" alt="Price Range" width="26" height="26">
+              </button>
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Body Content -->
+          <div class="side-form-body" style="padding: 0; overflow-y: auto; max-height: calc(100vh - 120px);">
+            <table class="data-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #8f8f8f; color: #ffffff; height: 38px; border-bottom: 1px solid #7a7a7a;">
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; color: #ffffff; font-weight: 600; font-size: 13px; border-right: 1px solid #ffffff; padding: 8px 6px;">Date</th>
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; color: #ffffff; font-weight: 600; font-size: 13px; border-right: 1px solid #ffffff; padding: 8px 10px;">Vendor Name</th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; color: #ffffff; font-weight: 600; font-size: 13px; padding: 8px 10px;">Rate</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyProductPriceHistory">
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- 1E. Master -> Add Expense Form Card (Matching Uploaded Mockup) -->
@@ -878,88 +958,93 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddExpense" onsubmit="event.preventDefault();">
-            <!-- 1. Expense Head -->
+            <!-- 1. ExpenseName -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseName">ExpenseName</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpExpenseName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 2. Expense Category -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseCategory">Expense Category</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpExpenseCategory">
+                  <option value="" disabled selected hidden></option>
+                  <option value="Direct Operations">Direct Operations</option>
+                  <option value="Material Procurement">Material Procurement</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="Logistics & Transport">Logistics & Transport</option>
+                  <option value="Administrative Support">Administrative Support</option>
+                  <option value="Professional Services">Professional Services</option>
+                  <option value="Regulatory Compliance">Regulatory Compliance</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Expense Sub-Category -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseSubCategory">Expense Sub-Category</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpExpenseSubCategory">
+                  <option value="" disabled selected hidden></option>
+                  <option value="Civil Works">Civil Works</option>
+                  <option value="Electrical Works">Electrical Works</option>
+                  <option value="Hardware Consumables">Hardware Consumables</option>
+                  <option value="Travel Allowances">Travel Allowances</option>
+                  <option value="Fuel & Freight">Fuel & Freight</option>
+                  <option value="Office Utilities">Office Utilities</option>
+                  <option value="Audit & Legal">Audit & Legal</option>
+                  <option value="Licensing">Licensing</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Expense Head (Capex / Opex) -->
             <div class="form-row-group">
               <label class="form-label" for="inpExpenseHead">Expense Head</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpExpenseHead">
-                  <option value="Project" selected>Project</option>
-                  <option value="Purchase">Purchase</option>
-                  <option value="Employee">Employee</option>
-                  <option value="Transport">Transport</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Accounts">Accounts</option>
-                  <option value="Statutory">Statutory</option>
+                  <option value="" disabled selected hidden></option>
+                  <option value="Capex">Capex</option>
+                  <option value="Opex">Opex</option>
                 </select>
               </div>
             </div>
 
-            <!-- 2. Expense Code -->
+            <!-- 5. GST (0% / 5% / 18% / 40%) -->
             <div class="form-row-group">
-              <label class="form-label" for="inpExpenseCode">Expense Code</label>
+              <label class="form-label" for="inpExpenseGst">GST</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpExpenseCode" placeholder="">
-              </div>
-            </div>
-
-            <!-- 3. SAC Code -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpExpenseSac">SAC Code</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpExpenseSac" placeholder="">
-              </div>
-            </div>
-
-            <!-- 4. Expense Description -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpExpenseDesc">Expense Description</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpExpenseDesc" placeholder="">
-              </div>
-            </div>
-
-            <!-- 5. Uom -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpExpenseUom">Uom</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpExpenseUom">
-                  <option value="" selected></option>
-                  <option value="Pcs">Pcs</option>
-                  <option value="Mtr">Mtr</option>
-                  <option value="Kg">Kg</option>
-                  <option value="Nos">Nos</option>
-                  <option value="Month">Month</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 6. GST Rate -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpExpenseGstRate">GST Rate</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpExpenseGstRate">
-                  <option value="18%" selected>18%</option>
+                <select class="form-select-control" id="inpExpenseGst">
+                  <option value="" disabled selected hidden></option>
                   <option value="0%">0%</option>
                   <option value="5%">5%</option>
-                  <option value="12%">12%</option>
-                  <option value="28%">28%</option>
+                  <option value="18%">18%</option>
+                  <option value="40%">40%</option>
                 </select>
               </div>
             </div>
 
-            <!-- 7. TDS Rate -->
+            <!-- 6. Depreciation (0% / 5% / 10% / 15% / 25% / 30% / 40%) -->
             <div class="form-row-group">
-              <label class="form-label" for="inpExpenseTdsRate">TDS Rate</label>
+              <label class="form-label" for="inpExpenseDepreciation">Depreciation</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpExpenseTdsRate">
-                  <option value="1%" selected>1%</option>
-                  <option value="2%">2%</option>
+                <select class="form-select-control" id="inpExpenseDepreciation">
+                  <option value="" disabled selected hidden></option>
+                  <option value="0%">0%</option>
+                  <option value="5%">5%</option>
                   <option value="10%">10%</option>
+                  <option value="15%">15%</option>
+                  <option value="25%">25%</option>
+                  <option value="30%">30%</option>
+                  <option value="40%">40%</option>
                 </select>
               </div>
             </div>
 
-            <!-- 8. RCM Slidebar (Deactive Stage) -->
+            <!-- 7. RCM Slidebar (Deactive Stage) -->
             <div class="form-row-group">
               <label class="form-label">RCM</label>
               <div class="form-input-wrap slider-wrap">
@@ -970,21 +1055,21 @@
               </div>
             </div>
 
-            <!-- 9. Status -->
+            <!-- 8. Status Slidebar -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpExpenseStatusToggle">
+                  <input type="checkbox" id="inpExpenseStatusToggle" checked>
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
 
             <!-- Submit Save Button Inside Tab Centered -->
-            <div class="form-submit-inside-wrap">
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; margin-top: 20px; margin-bottom: 10px;">
               <button type="button" class="btn-card-submit-inside" id="btnSubmitExpense" title="Save"
-                aria-label="Submit">
+                aria-label="Submit" style="background: none; border: none; cursor: pointer; padding: 0;">
                 <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
             </div>
@@ -1237,6 +1322,9 @@
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblIndusTowerCardTitle">View Company Name</div>
             <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" title="HR Policies" id="btnIndusTowerHrPolicies">
+                <img src="icons/HR Policies.svg" alt="HR Policies" width="26" height="26">
+              </button>
               <button type="button" class="side-top-icon-btn" title="Bank Details" id="btnIndusTowerBank">
                 <img src="icons/Bank.svg" alt="Bank Details" width="26" height="26">
               </button>
@@ -6903,46 +6991,42 @@
 
         <!-- Accounts Payment Transfer To Modal Tab -->
         <div class="side-form-card side-contact-popup" id="accountsPaymentTransferToModal"
-          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          style="display: none; width: 1450px !important; max-width: 98vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 0;">
-            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 0;">
+            <div style="display: flex; align-items: center; gap: 24px; height: 100%;">
               <div class="side-form-title-badge" id="lblAccountsPaymentTransferToTitle"
                 style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
                 Transfer To</div>
+              
+              <!-- Metrics right near header design -->
+              <div style="display: flex; align-items: center; gap: 24px;">
+                <!-- Summation / Total -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain;">
+                  <span id="valPaymentTransferToSummation" style="color: #0454e4; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">12,00,000.00</span>
+                </div>
+                <!-- Payable -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img src="icons/Payable.svg" alt="Payable" style="width: 24px; height: 24px; display: block; object-fit: contain;">
+                  <span id="valPaymentTransferToPayable" style="color: #ef4444; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">2,00,000.00</span>
+                </div>
+                <!-- Receivable / Transferred -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img src="icons/Receivable.svg" alt="Receivable" style="width: 24px; height: 24px; display: block; object-fit: contain;" onerror="this.src='icons/Paid _ Received.svg';">
+                  <span id="valPaymentTransferToPaid" onclick="openAccountsPaymentDetailsModal()" style="color: #16a34a; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1; cursor: pointer; text-decoration: underline; text-decoration-color: #16a34a; text-underline-offset: 3px;" title="Click to view Payment Details">10,00,000.00</span>
+                </div>
+              </div>
             </div>
-            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
+              <img src="icons/Bank.svg" alt="Bank" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Bank Details" id="btnPaymentTransferToBankIcon" onclick="openAccountsPaymentBankDetailsModal()">
               <button type="button" class="side-form-close-btn" id="btnCloseAccountsPaymentTransferToModal"
                 onclick="closeAccountsPaymentTransferToModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
             </div>
           </div>
-          <!-- Summary/Metric Row -->
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; background: #ffffff; border-bottom: 1px solid #f1f5f9;">
-            <div style="display: flex; align-items: center; gap: 36px;">
-              <!-- Summation Total -->
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain;">
-                <span id="valPaymentTransferToSummation" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">12,00,000.00</span>
-              </div>
-              <!-- Green Pay (Paid / Transferred) -->
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="icons/Paid _ Received.svg" alt="Paid" style="width: 24px; height: 24px; display: block; object-fit: contain;">
-                <span id="valPaymentTransferToPaid" style="color: #16a34a; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">10,00,000.00</span>
-              </div>
-              <!-- Red Pay (Payable) -->
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="icons/Payable.svg" alt="Payable" style="width: 24px; height: 24px; display: block; object-fit: contain;">
-                <span id="valPaymentTransferToPayable" style="color: #ef4444; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">2,00,000.00</span>
-              </div>
-            </div>
-            <!-- Bank Icon on right -->
-            <div style="display: flex; align-items: center;">
-              <img src="icons/Bank.svg" alt="Bank" style="width: 32px; height: 32px; display: block; object-fit: contain; cursor: pointer;" title="Bank Details" id="btnPaymentTransferToBankIcon" onclick="openAccountsPaymentBankDetailsModal()">
-            </div>
-          </div>
           <!-- Table -->
-          <div class="contact-table-wrap" style="padding: 16px 20px 24px 20px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px; overflow-x: auto;">
             <table class="contact-custom-table" id="tblAccountsPaymentTransferToPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
@@ -7037,69 +7121,54 @@
           </div>
         </div>
 
-        <!-- Accounts TDS Summary Report Modal Tab (Triggered by clicking Month in TDS subpage table) -->
-        <div class="side-form-card side-contact-popup" id="accountsTdsSummaryModal"
-          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+        <!-- Accounts Payment Details Modal Tab (Triggered by clicking green number near Payable/Transferred icon in Transfer To modal) -->
+        <div class="side-form-card side-contact-popup" id="accountsPaymentDetailsModal"
+          style="display: none; width: 780px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 0;">
             <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
-              <div class="side-form-title-badge" id="lblAccountsTdsSummaryTitle"
+              <div class="side-form-title-badge" id="lblAccountsPaymentDetailsTitle"
                 style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
-                TDS Summary Report</div>
+                Payment Details - Invoice Number</div>
             </div>
-            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
-              <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export PDF" onclick="triggerAccountsPdfUpload()">
-              <img src="icons/CSV upload.svg" alt="CSV" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export CSV" onclick="triggerAccountsCsvUpload()">
-              <button type="button" class="side-form-close-btn" id="btnCloseAccountsTdsSummaryModal"
-                onclick="closeAccountsTdsSummaryModal()" aria-label="Close"
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsPaymentDetailsModal"
+                onclick="closeAccountsPaymentDetailsModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
-            <table class="contact-custom-table" id="tblAccountsTdsSummaryPopup"
+          <div class="contact-table-wrap" style="padding: 12px 16px 16px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsPaymentDetailsPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
                 <tr class="master-view-header">
                   <th
-                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <span>TDS Type</span>
-                      <button type="button" class="filter-funnel-btn" data-filter-col="tdsType" title="Filter TDS Type">&#9660;</button>
-                    </div>
-                  </th>
-                  <th
-                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <span>PAN Number</span>
-                      <button type="button" class="filter-funnel-btn" data-filter-col="panNumber" title="Filter PAN Number">&#9660;</button>
-                    </div>
-                  </th>
-                  <th
-                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <span>PAN Name</span>
-                      <button type="button" class="filter-funnel-btn" data-filter-col="panName" title="Filter PAN Name">&#9660;</button>
-                    </div>
-                  </th>
-                  <th
-                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>Taxable</span>
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Payment Date</span>
                   </th>
                   <th
                     style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>TDS</span>
+                    <span>Amount</span>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Payment Ref.No</span>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Receipt Number</span>
                   </th>
                 </tr>
               </thead>
-              <tbody id="tbodyAccountsTdsSummary">
+              <tbody id="tbodyAccountsPaymentDetails">
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Accounts TDS Details Modal Tab (Triggered by clicking PAN Name in TDS Summary Report modal) -->
+        <!-- Accounts TDS Details Modal Tab (Triggered by clicking PAN Name) -->
         <div class="side-form-card side-contact-popup" id="accountsTdsDetailsModal"
-          style="display: none; width: 950px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          style="display: none; width: 900px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
@@ -7125,24 +7194,20 @@
                     <span>Payment Date</span>
                   </th>
                   <th
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Particulars</span>
+                  </th>
+                  <th
                     style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>Invoice Number</span>
-                  </th>
-                  <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>Invoice Date</span>
-                  </th>
-                  <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
                     <span>Taxable Amount</span>
                   </th>
                   <th
-                    style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-                    <span>TDS Code</span>
+                    style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>TDS Rate (%)</span>
                   </th>
                   <th
                     style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-                    <span>Tax Amount</span>
+                    <span>Deducted Amount</span>
                   </th>
                 </tr>
               </thead>
@@ -7444,6 +7509,125 @@
           </div>
         </div>
 
+        <!-- Master -> Company HR Policies EPF Form Tab Card (Matching Mockup) -->
+        <div class="side-form-card" id="companyHrEpfCard" style="display: none; width: 440px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; padding: 0;">
+          <!-- Header -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblCompanyHrEpfCardTitle" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              EPF
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnCompanyHrEpfEditToggle" title="Save" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Save.svg" id="imgCompanyHrEpfEditIcon" class="icon-green" alt="Save" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseCompanyHrEpfCard" onclick="closeCompanyHrEpfModal()" aria-label="Close" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmCompanyHrEpf" onsubmit="event.preventDefault();" style="padding: 12px 24px 24px 24px; display: flex; flex-direction: column; gap: 12px;">
+            
+            <!-- 1. From Date -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpfFromDate" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">From Date</label>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control nexus-cal-input" id="inpEpfFromDate" placeholder="" readonly style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 36px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; cursor: pointer;">
+                <span class="input-pdf-badge btn-calendar-trigger" id="btnEpfFromDateCalendar" title="Select Date" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </span>
+              </div>
+            </div>
+
+            <!-- 2. To Date -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpfToDate" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">To Date</label>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control nexus-cal-input" id="inpEpfToDate" placeholder="" readonly style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 36px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; cursor: pointer;">
+                <span class="input-pdf-badge btn-calendar-trigger" id="btnEpfToDateCalendar" title="Select Date" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </span>
+              </div>
+            </div>
+
+            <!-- 3. Filling Due Date -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpfFillingDueDate" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Filling Due Date</label>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control nexus-cal-input" id="inpEpfFillingDueDate" placeholder="" readonly style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 36px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; cursor: pointer;">
+                <span class="input-pdf-badge btn-calendar-trigger" id="btnEpfFillingDueDateCalendar" title="Select Date" style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </span>
+              </div>
+            </div>
+
+            <!-- 4. Sealing Amount (Basic + DA + SA) -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpfSealingAmount" style="width: 170px; min-width: 170px; font-size: 0.84rem; font-weight: 600; color: #64748b; margin: 0; line-height: 1.2;">Sealing Amount (Basic + DA + SA)</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">₹</span>
+                <input type="text" class="form-input-control" id="inpEpfSealingAmount" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px 6px 26px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
+              </div>
+            </div>
+
+            <!-- 5. EPF - Employee Contribution -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpfEmpContribution" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">EPF - Employee Contribution</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpEpfEmpContribution" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 26px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; text-align: right;">
+                <span style="position: absolute; right: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">%</span>
+              </div>
+            </div>
+
+            <!-- 6. EPF - Employer Contribution -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpfEmployerContribution" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">EPF - Employer Contribution</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpEpfEmployerContribution" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 26px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; text-align: right;">
+                <span style="position: absolute; right: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">%</span>
+              </div>
+            </div>
+
+            <!-- 7. EPS - Employer Contribution -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpsEmployerContribution" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">EPS - Employer Contribution</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpEpsEmployerContribution" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 26px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; text-align: right;">
+                <span style="position: absolute; right: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">%</span>
+              </div>
+            </div>
+
+            <!-- 8. EDLI - Employer Contribution -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEdliEmployerContribution" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">EDLI - Employer Contribution</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpEdliEmployerContribution" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 26px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; text-align: right;">
+                <span style="position: absolute; right: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">%</span>
+              </div>
+            </div>
+
+            <!-- 9. Admin Charges -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpEpfAdminCharges" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Admin Charges</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpEpfAdminCharges" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 26px 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff; text-align: right;">
+                <span style="position: absolute; right: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">%</span>
+              </div>
+            </div>
+
+            <!-- 10. Status Toggle Switch (Green when activated, Red when deactivated) -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px;">
+              <label class="form-label" style="width: 170px; min-width: 170px; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Status</label>
+              <div class="form-input-wrap slider-wrap" style="display: flex; justify-content: flex-end;">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpEpfStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
       </div>
 
     </div>
@@ -7513,7 +7697,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260920_1449"></script>
+  <script src="assets/js/home.js?v=20260921_0122"></script>
 </body>
 
 </html>

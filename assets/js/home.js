@@ -13520,10 +13520,120 @@ function initSideFormEvents() {
     });
   }
 
-  const btnVendorEdit = document.getElementById('btnVendorCardEdit');
-  if (btnVendorEdit) {
-    btnVendorEdit.addEventListener('click', () => {
-      showToast('Vendor edit info mode activated');
+  // Vendor Form Event Listeners
+  document.getElementById('inpVendorType')?.addEventListener('change', updateVendorConditionalFields);
+  document.getElementById('inpServiceType')?.addEventListener('change', updateVendorConditionalFields);
+  document.getElementById('inpVendorGstToggle')?.addEventListener('change', updateVendorConditionalFields);
+
+  const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
+  if (btnVendorCardEditToggle) {
+    btnVendorCardEditToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const imgIcon = document.getElementById('imgVendorCardEditIcon');
+      if (!isVendorFormEditing) {
+        isVendorFormEditing = true;
+        setVendorFormReadOnly(false, true);
+        if (imgIcon) {
+          imgIcon.src = 'icons/Save.svg';
+          imgIcon.className = 'icon-green';
+          imgIcon.title = 'Save';
+        }
+        showToast('Vendor form is now editable');
+      } else {
+        isVendorFormEditing = false;
+        // Save changes to current viewed vendor
+        if (currentViewedVendorId) {
+          const vIndex = masterVendorData.findIndex(v => v.id === currentViewedVendorId || v.vendorId === currentViewedVendorId);
+          if (vIndex !== -1) {
+            const isGstOn = document.getElementById('inpVendorGstToggle')?.checked || false;
+            masterVendorData[vIndex].address = document.getElementById('inpVendorAddress')?.value.trim() || '';
+            masterVendorData[vIndex].gstEnabled = isGstOn;
+            masterVendorData[vIndex].gstType = isGstOn ? (document.getElementById('inpVendorGstType')?.value || 'SGST') : 'NA';
+            masterVendorData[vIndex].gstNumber = isGstOn ? (document.getElementById('inpVendorGstNumber')?.value.trim() || '') : 'NA';
+            masterVendorData[vIndex].tdsDeduction = document.getElementById('inpTdsDeductionToggle')?.checked || false;
+            masterVendorData[vIndex].tdsCode = document.getElementById('inpTdsCode')?.value || '';
+            masterVendorData[vIndex].tdsRate = document.getElementById('inpTdsRate')?.value || '1%';
+            masterVendorData[vIndex].status = document.getElementById('inpVendorStatusToggle')?.checked ? 'Active' : 'In - Active';
+          }
+          if (currentMasterSubpage === 'vendor') {
+            loadMasterDataset();
+            applyFiltersAndRender();
+          }
+        }
+        setVendorFormReadOnly(true);
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.className = 'icon-blue';
+          imgIcon.title = 'Edit Info';
+        }
+        showToast('Vendor details saved successfully!');
+      }
+    });
+  }
+
+  const btnSubmitVendorCustomEl = document.getElementById('btnSubmitVendor');
+  if (btnSubmitVendorCustomEl) {
+    btnSubmitVendorCustomEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      const vName = document.getElementById('inpVendorName')?.value.trim();
+      if (!vName) {
+        showToast('Please enter a Vendor Name');
+        return;
+      }
+      const entityType = document.getElementById('inpVendorEntityType')?.value || 'Proprietorship';
+      const bType = document.getElementById('inpVendorType')?.value || 'Supply';
+      const sType = document.getElementById('inpServiceType')?.value || 'Project';
+      const contractType = document.getElementById('inpVendorContractType')?.value || 'B2B';
+      const address = document.getElementById('inpVendorAddress')?.value.trim() || '';
+      const pan = document.getElementById('inpVendorPanNumber')?.value.trim() || '';
+      const isGstOn = document.getElementById('inpVendorGstToggle')?.checked || false;
+      const gstType = document.getElementById('inpVendorGstType')?.value || 'SGST';
+      const gstNumber = isGstOn ? (document.getElementById('inpVendorGstNumber')?.value.trim() || '') : 'NA';
+      const isTdsOn = document.getElementById('inpTdsDeductionToggle')?.checked || false;
+      const tdsCode = document.getElementById('inpTdsCode')?.value || '';
+      const tdsRate = document.getElementById('inpTdsRate')?.value || '1%';
+      const status = document.getElementById('inpVendorStatusToggle')?.checked ? 'Active' : 'In - Active';
+
+      const newVendor = {
+        id: `vend-${Date.now()}`,
+        vendorName: vName,
+        entityType: entityType,
+        businessType: bType,
+        vendorType: bType,
+        serviceType: sType,
+        contractType: contractType,
+        vendorId: String(Math.floor(100000000 + Math.random() * 900000000)),
+        address: address,
+        panNumber: pan,
+        gstEnabled: isGstOn,
+        gstType: isGstOn ? gstType : 'NA',
+        gstNumber: gstNumber,
+        tdsDeduction: isTdsOn,
+        tdsCode: tdsCode,
+        tdsRate: tdsRate,
+        status: status
+      };
+
+      masterVendorData.unshift(newVendor);
+      if (currentMasterSubpage === 'vendor') {
+        loadMasterDataset();
+        applyFiltersAndRender();
+      }
+      closeSideForm();
+      showToast(`Vendor ${vName} added successfully!`);
+    });
+  }
+
+  const btnVendorGstProcess = document.getElementById('btnVendorGstProcess');
+  if (btnVendorGstProcess) {
+    btnVendorGstProcess.addEventListener('click', (e) => {
+      e.preventDefault();
+      const gstVal = document.getElementById('inpVendorGstNumber')?.value.trim();
+      if (!gstVal) {
+        showToast('Please enter a GST Number to process');
+        return;
+      }
+      showToast(`Processing GST: ${gstVal}...`);
     });
   }
 
@@ -13718,7 +13828,13 @@ function openSideForm() {
       setVendorFormReadOnly(false);
       currentViewedVendorId = null;
       isVendorFormEditing = false;
-      if (typeof updateVendorBusinessTypeFields === 'function') updateVendorBusinessTypeFields();
+      const frm = document.getElementById('frmAddVendor');
+      if (frm) frm.reset();
+      const statusToggle = document.getElementById('inpVendorStatusToggle');
+      if (statusToggle) statusToggle.checked = true;
+      const gstToggle = document.getElementById('inpVendorGstToggle');
+      if (gstToggle) gstToggle.checked = false;
+      updateVendorConditionalFields();
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
     if (addProductCard) {
@@ -17342,58 +17458,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Wire btnVendorCardEditToggle
-  const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
-  if (btnVendorCardEditToggle) {
-    btnVendorCardEditToggle.addEventListener('click', () => {
-      const lblTitle = document.getElementById('lblVendorCardTitle');
-      const imgIcon = document.getElementById('imgVendorCardEditIcon');
 
-      if (!isVendorFormEditing) {
-        // ENTER EDIT MODE
-        isVendorFormEditing = true;
-        setVendorFormReadOnly(false);
-        if (lblTitle) lblTitle.innerText = 'Edit Vendor';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Save.svg';
-          imgIcon.title = 'Save Changes';
-        }
-        showToast('Vendor form is now editable');
-      } else {
-        // SAVE EDITS
-        isVendorFormEditing = false;
-        if (currentViewedVendorId) {
-          const vend = masterVendorData.find(v => v.id === currentViewedVendorId);
-          if (vend) {
-            vend.vendorName = document.getElementById('inpVendorName')?.value || vend.vendorName;
-            vend.vendorType = document.getElementById('inpVendorType')?.value || vend.vendorType;
-            vend.serviceType = document.getElementById('inpServiceType')?.value || vend.serviceType;
-            const chkTds = document.getElementById('inpTdsDeductionToggle');
-            vend.tdsDeduction = chkTds ? chkTds.checked : vend.tdsDeduction;
-            vend.tdsCode = document.getElementById('inpTdsCode')?.value || vend.tdsCode;
-            vend.tdsRate = document.getElementById('inpTdsRate')?.value || vend.tdsRate;
-            vend.gstType = document.getElementById('inpVendorGstType')?.value || vend.gstType;
-            vend.gstNumber = document.getElementById('inpVendorGstNumber')?.value || vend.gstNumber;
-            vend.address = document.getElementById('inpVendorAddress')?.value || vend.address;
-            vend.panNumber = document.getElementById('inpVendorPanNumber')?.value || vend.panNumber;
-            const chkTcs = document.getElementById('inpTcsDeductionToggle');
-            vend.tcsDeduction = chkTcs ? chkTcs.checked : vend.tcsDeduction;
-            const statusToggle = document.getElementById('inpVendorStatusToggle');
-            vend.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
-          }
-          currentDataset = [...masterVendorData];
-          applyFiltersAndRender();
-        }
-        setVendorFormReadOnly(true);
-        if (lblTitle) lblTitle.innerText = 'View Vendor';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Vendor details saved & updated successfully!');
-      }
-    });
-  }
 
   const btnProjectTransportIcon = document.getElementById('btnProjectTransportIcon');
   if (btnProjectTransportIcon) {
@@ -17795,52 +17860,259 @@ window.handleProjectClick = function(projectId, projectType) {
 let currentViewedVendorId = null;
 let isVendorFormEditing = false;
 
-function setVendorFormReadOnly(isReadOnly) {
+function setVendorFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const form = document.getElementById('frmAddVendor');
   if (!form) return;
-  const inputs = form.querySelectorAll('input, select');
-  inputs.forEach(input => {
-    if (input.type === 'checkbox') return;
-    if (isReadOnly) {
-      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
-      else input.setAttribute('readonly', 'true');
-      input.style.backgroundColor = '#f8fafc';
-    } else {
-      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
-      else input.removeAttribute('readonly');
-      input.style.backgroundColor = '#ffffff';
+
+  const isEdit = !isReadOnly && (isEditModeOnly || isVendorFormEditing);
+
+  // 1. Text Inputs
+  const inpAddress = document.getElementById('inpVendorAddress');
+  const inpGstNum = document.getElementById('inpVendorGstNumber');
+  const otherInputs = form.querySelectorAll('#inpVendorName, #inpVendorPanNumber');
+
+  if (isReadOnly) {
+    if (inpAddress) { inpAddress.setAttribute('readonly', 'true'); inpAddress.style.backgroundColor = '#f8fafc'; }
+    if (inpGstNum) { inpGstNum.setAttribute('readonly', 'true'); inpGstNum.style.backgroundColor = '#f8fafc'; }
+    otherInputs.forEach(inp => { inp.setAttribute('readonly', 'true'); inp.style.backgroundColor = '#f8fafc'; });
+  } else if (isEdit) {
+    // Address is always editable
+    if (inpAddress) { inpAddress.removeAttribute('readonly'); inpAddress.style.backgroundColor = '#ffffff'; }
+    // GST Number editable only if GST toggle is active
+    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked === true;
+    if (inpGstNum) {
+      if (isGstOn) {
+        inpGstNum.removeAttribute('readonly');
+        inpGstNum.style.backgroundColor = '#ffffff';
+      } else {
+        inpGstNum.setAttribute('readonly', 'true');
+        inpGstNum.style.backgroundColor = '#f8fafc';
+      }
     }
-  });
+    // Other inputs remain read-only
+    otherInputs.forEach(inp => { inp.setAttribute('readonly', 'true'); inp.style.backgroundColor = '#f8fafc'; });
+  } else {
+    // Full Add mode
+    if (inpAddress) { inpAddress.removeAttribute('readonly'); inpAddress.style.backgroundColor = '#ffffff'; }
+    if (inpGstNum) { inpGstNum.removeAttribute('readonly'); inpGstNum.style.backgroundColor = '#ffffff'; }
+    otherInputs.forEach(inp => { inp.removeAttribute('readonly'); inp.style.backgroundColor = '#ffffff'; });
+  }
+
+  // 2. Select Dropdowns
+  const inpTdsCode = document.getElementById('inpTdsCode');
+  const inpTdsRate = document.getElementById('inpTdsRate');
+  const inpGstType = document.getElementById('inpVendorGstType');
+  const otherSelects = form.querySelectorAll('#inpVendorEntityType, #inpVendorType, #inpServiceType, #inpVendorContractType');
+
+  if (isReadOnly) {
+    if (inpTdsCode) { inpTdsCode.setAttribute('disabled', 'true'); inpTdsCode.style.backgroundColor = '#f8fafc'; }
+    if (inpTdsRate) { inpTdsRate.setAttribute('disabled', 'true'); inpTdsRate.style.backgroundColor = '#f8fafc'; }
+    if (inpGstType) { inpGstType.setAttribute('disabled', 'true'); inpGstType.style.backgroundColor = '#f8fafc'; }
+    otherSelects.forEach(sel => { sel.setAttribute('disabled', 'true'); sel.style.backgroundColor = '#f8fafc'; });
+  } else if (isEdit) {
+    // TDS Code and TDS Rate are editable
+    if (inpTdsCode) { inpTdsCode.removeAttribute('disabled'); inpTdsCode.style.backgroundColor = '#ffffff'; }
+    if (inpTdsRate) { inpTdsRate.removeAttribute('disabled'); inpTdsRate.style.backgroundColor = '#ffffff'; }
+    // GST Type is editable if GST toggle is active
+    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked === true;
+    if (inpGstType) {
+      if (isGstOn) {
+        inpGstType.removeAttribute('disabled');
+        inpGstType.style.backgroundColor = '#ffffff';
+      } else {
+        inpGstType.setAttribute('disabled', 'true');
+        inpGstType.style.backgroundColor = '#f8fafc';
+      }
+    }
+    // Other selects remain disabled
+    otherSelects.forEach(sel => { sel.setAttribute('disabled', 'true'); sel.style.backgroundColor = '#f8fafc'; });
+  } else {
+    // Full Add mode
+    if (inpTdsCode) { inpTdsCode.removeAttribute('disabled'); inpTdsCode.style.backgroundColor = '#ffffff'; }
+    if (inpTdsRate) { inpTdsRate.removeAttribute('disabled'); inpTdsRate.style.backgroundColor = '#ffffff'; }
+    if (inpGstType) { inpGstType.removeAttribute('disabled'); inpGstType.style.backgroundColor = '#ffffff'; }
+    otherSelects.forEach(sel => { sel.removeAttribute('disabled'); sel.style.backgroundColor = '#ffffff'; });
+  }
+
+  // 3. Slidebar Toggles
+  const editableToggleIds = ['inpVendorGstToggle', 'inpTdsDeductionToggle', 'inpVendorStatusToggle'];
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
-    t.disabled = isReadOnly;
     const parentSwitch = t.closest('.toggle-slide-switch');
-    if (parentSwitch) {
-      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    if (isReadOnly) {
+      t.disabled = true;
+      if (parentSwitch) {
+        parentSwitch.style.pointerEvents = 'none';
+        parentSwitch.style.opacity = '0.65';
+      }
+    } else if (isEdit) {
+      if (editableToggleIds.includes(t.id)) {
+        t.disabled = false;
+        if (parentSwitch) {
+          parentSwitch.style.pointerEvents = 'auto';
+          parentSwitch.style.opacity = '1';
+        }
+      } else {
+        t.disabled = true;
+        if (parentSwitch) {
+          parentSwitch.style.pointerEvents = 'none';
+          parentSwitch.style.opacity = '0.65';
+        }
+      }
+    } else {
+      // Full Add mode
+      t.disabled = false;
+      if (parentSwitch) {
+        parentSwitch.style.pointerEvents = 'auto';
+        parentSwitch.style.opacity = '1';
+      }
     }
   });
+
+  // 4. Action / Upload Badges
+  const gstProcessBadge = document.querySelector('#rowVendorGstNumber .input-process-badge, #rowVendorGstNumber .input-pdf-badge');
+  const panPdfBadge = document.querySelector('#rowVendorPanNumber .input-pdf-badge');
+
+  if (isReadOnly) {
+    if (gstProcessBadge) {
+      gstProcessBadge.style.pointerEvents = 'none';
+      gstProcessBadge.style.opacity = '0.5';
+      gstProcessBadge.style.cursor = 'default';
+    }
+    if (panPdfBadge) {
+      panPdfBadge.style.pointerEvents = 'none';
+      panPdfBadge.style.opacity = '0.5';
+      panPdfBadge.style.cursor = 'default';
+    }
+  } else if (isEdit) {
+    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked === true;
+    if (gstProcessBadge) {
+      gstProcessBadge.style.pointerEvents = isGstOn ? 'auto' : 'none';
+      gstProcessBadge.style.opacity = isGstOn ? '1' : '0.5';
+      gstProcessBadge.style.cursor = isGstOn ? 'pointer' : 'default';
+    }
+    if (panPdfBadge) {
+      panPdfBadge.style.pointerEvents = 'none';
+      panPdfBadge.style.opacity = '0.5';
+      panPdfBadge.style.cursor = 'default';
+    }
+  } else {
+    if (gstProcessBadge) {
+      gstProcessBadge.style.pointerEvents = 'auto';
+      gstProcessBadge.style.opacity = '1';
+      gstProcessBadge.style.cursor = 'pointer';
+    }
+    if (panPdfBadge) {
+      panPdfBadge.style.pointerEvents = 'auto';
+      panPdfBadge.style.opacity = '1';
+      panPdfBadge.style.cursor = 'pointer';
+    }
+  }
 }
 
 window.setVendorFormReadOnly = setVendorFormReadOnly;
+
+function updateVendorConditionalFields() {
+  const inpVendorType = document.getElementById('inpVendorType');
+  const inpServiceType = document.getElementById('inpServiceType');
+  const inpGstToggle = document.getElementById('inpVendorGstToggle');
+
+  const rowServiceType = document.getElementById('rowVendorServiceType');
+  const rowContractType = document.getElementById('rowVendorContractType');
+  const rowGstType = document.getElementById('rowVendorGstType');
+  const rowGstNumber = document.getElementById('rowVendorGstNumber');
+
+  const bType = (inpVendorType?.value || 'Supply').trim();
+  const sType = (inpServiceType?.value || 'Project').trim();
+  const isGstOn = inpGstToggle ? inpGstToggle.checked : false;
+
+  // 1. Business Type logic:
+  // When business type is Supply -> hide Service Type and Contract Type
+  // When business type is Service -> show Service Type
+  if (bType.toLowerCase() === 'service') {
+    if (rowServiceType) rowServiceType.style.setProperty('display', 'flex', 'important');
+    // When service type is Project -> show Contract Type, otherwise hide
+    if (sType.toLowerCase() === 'project') {
+      if (rowContractType) rowContractType.style.setProperty('display', 'flex', 'important');
+    } else {
+      if (rowContractType) rowContractType.style.setProperty('display', 'none', 'important');
+    }
+  } else {
+    // Supply
+    if (rowServiceType) rowServiceType.style.setProperty('display', 'none', 'important');
+    if (rowContractType) rowContractType.style.setProperty('display', 'none', 'important');
+  }
+
+  // 2. GST Slidebar logic:
+  // When user enables GST -> show GST Number and GST Type
+  // When GST is disabled -> hide GST Number and GST Type
+  if (isGstOn) {
+    if (rowGstType) rowGstType.style.setProperty('display', 'flex', 'important');
+    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'flex', 'important');
+  } else {
+    if (rowGstType) rowGstType.style.setProperty('display', 'none', 'important');
+    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'none', 'important');
+  }
+
+  // In edit mode, also update editable state of GST Number and GST Process badge
+  if (isVendorFormEditing) {
+    const inpGstNum = document.getElementById('inpVendorGstNumber');
+    const inpGstTypeSel = document.getElementById('inpVendorGstType');
+    const gstProcessBadge = document.querySelector('#rowVendorGstNumber .input-process-badge, #rowVendorGstNumber .input-pdf-badge');
+    if (isGstOn) {
+      if (inpGstNum) {
+        inpGstNum.removeAttribute('readonly');
+        inpGstNum.style.backgroundColor = '#ffffff';
+      }
+      if (inpGstTypeSel) {
+        inpGstTypeSel.removeAttribute('disabled');
+        inpGstTypeSel.style.backgroundColor = '#ffffff';
+      }
+      if (gstProcessBadge) {
+        gstProcessBadge.style.pointerEvents = 'auto';
+        gstProcessBadge.style.opacity = '1';
+        gstProcessBadge.style.cursor = 'pointer';
+      }
+    } else {
+      if (inpGstNum) {
+        inpGstNum.setAttribute('readonly', 'true');
+        inpGstNum.style.backgroundColor = '#f8fafc';
+      }
+      if (inpGstTypeSel) {
+        inpGstTypeSel.setAttribute('disabled', 'true');
+        inpGstTypeSel.style.backgroundColor = '#f8fafc';
+      }
+      if (gstProcessBadge) {
+        gstProcessBadge.style.pointerEvents = 'none';
+        gstProcessBadge.style.opacity = '0.5';
+        gstProcessBadge.style.cursor = 'default';
+      }
+    }
+  }
+}
+window.updateVendorConditionalFields = updateVendorConditionalFields;
+window.updateVendorBusinessTypeFields = updateVendorConditionalFields;
 
 window.openViewVendorCard = function(vendorId) {
   let vend = masterVendorData.find(v => v.id === vendorId || v.vendorName === vendorId || v.vendorId === vendorId);
   if (!vend) {
     vend = {
       id: vendorId || 'vend-1',
+      vendorName: "Apex Telecom Infrastructure",
+      entityType: "Private Limited",
+      businessType: "Service",
       vendorType: "Service",
       serviceType: "Project",
+      contractType: "B2B",
       vendorId: "230510678",
-      vendorName: "R/RL-234567",
-      tdsDeduction: true,
-      tdsCode: "1027",
-      tdsRate: "1%",
+      gstEnabled: true,
       gstType: "SGST",
       gstNumber: "33ASMPM8643F1Z5",
       address: "123 Telecom Tower Complex, Chennai",
       panNumber: "ASMPM8643F",
-      tcsDeduction: false,
+      tdsDeduction: true,
+      tdsCode: "1027",
+      tdsRate: "1%",
       status: "Active"
     };
   }
@@ -17863,6 +18135,7 @@ window.openViewVendorCard = function(vendorId) {
   if (btnEditToggle) btnEditToggle.style.display = 'flex';
   if (imgEditIcon) {
     imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.className = 'icon-blue';
     imgEditIcon.title = 'Edit Info';
   }
 
@@ -17877,29 +18150,33 @@ window.openViewVendorCard = function(vendorId) {
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
   if (document.getElementById('inpVendorName')) document.getElementById('inpVendorName').value = vend.vendorName || '';
-  if (document.getElementById('inpVendorType')) document.getElementById('inpVendorType').value = vend.vendorType || 'Supply';
+  if (document.getElementById('inpVendorEntityType')) document.getElementById('inpVendorEntityType').value = vend.entityType || 'Proprietorship';
+  if (document.getElementById('inpVendorType')) document.getElementById('inpVendorType').value = (vend.businessType || vend.vendorType || 'Supply');
   if (document.getElementById('inpServiceType')) document.getElementById('inpServiceType').value = vend.serviceType || 'Project';
-  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = vend.tdsCode || '';
-  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = vend.tdsRate || '1%';
-  if (document.getElementById('inpVendorGstType')) document.getElementById('inpVendorGstType').value = vend.gstType || 'NA';
-  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = vend.gstNumber || '';
+  if (document.getElementById('inpVendorContractType')) document.getElementById('inpVendorContractType').value = vend.contractType || 'B2B';
   if (document.getElementById('inpVendorAddress')) document.getElementById('inpVendorAddress').value = vend.address || '';
   if (document.getElementById('inpVendorPanNumber')) document.getElementById('inpVendorPanNumber').value = vend.panNumber || '';
+
+  const chkGst = document.getElementById('inpVendorGstToggle');
+  if (chkGst) {
+    chkGst.checked = (vend.gstEnabled !== undefined) ? vend.gstEnabled : (vend.gstNumber && vend.gstNumber !== 'NA' && vend.gstNumber !== '');
+  }
+
+  if (document.getElementById('inpVendorGstType')) document.getElementById('inpVendorGstType').value = vend.gstType || 'SGST';
+  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = vend.gstNumber || '';
 
   const chkTds = document.getElementById('inpTdsDeductionToggle');
   if (chkTds) chkTds.checked = vend.tdsDeduction === true;
 
-  const chkTcs = document.getElementById('inpTcsDeductionToggle');
-  if (chkTcs) chkTcs.checked = vend.tcsDeduction === true;
+  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = vend.tdsCode || '';
+  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = vend.tdsRate || '1%';
 
   const statusToggle = document.getElementById('inpVendorStatusToggle');
   if (statusToggle) {
     statusToggle.checked = (vend.status || '').toLowerCase() === 'active';
   }
 
-  if (typeof updateVendorBusinessTypeFields === 'function') {
-    updateVendorBusinessTypeFields();
-  }
+  updateVendorConditionalFields();
 
   setVendorFormReadOnly(true);
   showToast(`Viewing vendor details: ${vend.vendorName}`);

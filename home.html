@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260920_1405">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260923_1508">
 </head>
 
 <body>
@@ -526,7 +526,7 @@
           </form>
         </div>
 
-        <!-- 1C. Master -> Add Vendor Form Card (Matching Uploaded Mockup) -->
+        <!-- 1C. Master -> Add Vendor Form Card (7x7 Two-Column Layout) -->
         <div class="side-form-card" id="addVendorCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
@@ -551,153 +551,187 @@
             </div>
           </div>
 
-          <!-- Decorative Action Icons on Top Right -->
-          <div class="side-form-top-icons"></div>
-
-          <!-- Form Body -->
+          <!-- Form Body (7x7 Split) -->
           <form class="side-form-body" id="frmAddVendor" onsubmit="event.preventDefault();">
-            <!-- 1. Vendor Name -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVendorName">Vendor Name</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpVendorName" placeholder="">
+            <div class="vendor-form-grid-2col">
+              
+              <!-- Left Column: GST Group & Primary Business Info -->
+              <div class="vendor-form-col">
+                <!-- 1. GST Slidebar Toggle -->
+                <div class="form-row-group" id="rowVendorGstToggle">
+                  <label class="form-label">GST</label>
+                  <div class="form-input-wrap slider-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpVendorGstToggle">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 2. GST Type Dropdown (Shown when GST is enabled) -->
+                <div class="form-row-group" id="rowVendorGstType" style="display: none;">
+                  <label class="form-label" for="inpVendorGstType">GST Type</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpVendorGstType">
+                      <option value="NA">NA</option>
+                      <option value="SGST" selected>SGST</option>
+                      <option value="IGST">IGST</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 3. GST Number (Shown when GST is enabled, with Process icon) -->
+                <div class="form-row-group" id="rowVendorGstNumber" style="display: none;">
+                  <label class="form-label" for="inpVendorGstNumber">GST Number</label>
+                  <div class="form-input-wrap with-action-badge">
+                    <input type="text" class="form-input-control form-input-highlight" id="inpVendorGstNumber"
+                      placeholder="Enter GST Number">
+                    <span class="input-process-badge" id="btnVendorGstProcess" title="Process">
+                      <img src="icons/Process .svg" alt="Process" class="input-process-icon" width="22" height="22">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 4. Vendor Name -->
+                <div class="form-row-group" id="rowVendorName">
+                  <label class="form-label" for="inpVendorName">Vendor Name</label>
+                  <div class="form-input-wrap">
+                    <input type="text" class="form-input-control" id="inpVendorName" placeholder="">
+                  </div>
+                </div>
+
+                <!-- 5. Entity Type Dropdown -->
+                <div class="form-row-group" id="rowVendorEntityType">
+                  <label class="form-label" for="inpVendorEntityType">Entity Type</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpVendorEntityType">
+                      <option value="Proprietorship" selected>Proprietorship</option>
+                      <option value="Partnership">Partnership</option>
+                      <option value="LLP">LLP</option>
+                      <option value="Private Limited">Private Limited</option>
+                      <option value="Public Limited">Public Limited</option>
+                      <option value="Trust / Society">Trust / Society</option>
+                      <option value="Individual">Individual</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 6. Business Type Dropdown -->
+                <div class="form-row-group" id="rowVendorType">
+                  <label class="form-label" for="inpVendorType">Business Type</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpVendorType">
+                      <option value="Supply" selected>Supply</option>
+                      <option value="Service">Service</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 7. Service Type Dropdown (Shown when Business Type is Service) -->
+                <div class="form-row-group" id="rowVendorServiceType" style="display: none;">
+                  <label class="form-label" for="inpServiceType">Service Type</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpServiceType">
+                      <option value="Project" selected>Project</option>
+                      <option value="Transport">Transport</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 8. Contract Type Dropdown (Shown when Business Type is Service & Service Type is Project) -->
+                <div class="form-row-group" id="rowVendorContractType" style="display: none;">
+                  <label class="form-label" for="inpVendorContractType">Contract Type</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpVendorContractType">
+                      <option value="B2B" selected>B2B</option>
+                      <option value="Labour">Labour</option>
+                    </select>
+                  </div>
+                </div>
               </div>
+
+              <!-- Right Column: Identification, Tax & Status -->
+              <div class="vendor-form-col">
+                <!-- 1. PAN Number (with PDF upload badge) -->
+                <div class="form-row-group" id="rowVendorPanNumber">
+                  <label class="form-label" for="inpVendorPanNumber">PAN Number</label>
+                  <div class="form-input-wrap with-action-badge">
+                    <input type="text" class="form-input-control form-input-highlight" id="inpVendorPanNumber"
+                      placeholder="Enter PAN Number">
+                    <span class="input-pdf-badge" title="Upload PDF">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 2. Address -->
+                <div class="form-row-group" id="rowVendorAddress">
+                  <label class="form-label" for="inpVendorAddress">Address</label>
+                  <div class="form-input-wrap">
+                    <input type="text" class="form-input-control" id="inpVendorAddress" placeholder="Enter Address">
+                  </div>
+                </div>
+
+                <!-- 3. TDS Deduction Toggle Switch -->
+                <div class="form-row-group" id="rowVendorTdsDeduction">
+                  <label class="form-label">TDS Deduction</label>
+                  <div class="form-input-wrap slider-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpTdsDeductionToggle">
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- 4. TDS Code Dropdown -->
+                <div class="form-row-group" id="rowVendorTdsCode">
+                  <label class="form-label" for="inpTdsCode">TDS Code</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpTdsCode">
+                      <option value="" disabled selected>Select TDS Code</option>
+                      <option value="1002">1002 ( Private Sector Employee Salary )</option>
+                      <option value="1023">1023 ( Contractor Payment Individual / Hub )</option>
+                      <option value="1024">1024 ( Contractor Payment Non-Individual / HUF )</option>
+                      <option value="1027">1027 (Professional Fees)</option>
+                      <option value="1009_land">1009 (Rent on Land/Building)</option>
+                      <option value="1009_machinery">1009 (Rent on Plant & Machinery)</option>
+                      <option value="1006">1006 (Commission or Brokerage)</option>
+                      <option value="1026">1026 (Technical Services)</option>
+                      <option value="1031">1031 (Purchase of Goods)</option>
+                      <option value="1058">1058 (Lottery / Online Gaming)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 5. TDS Rate Dropdown -->
+                <div class="form-row-group" id="rowVendorTdsRate">
+                  <label class="form-label" for="inpTdsRate">TDS Rate</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpTdsRate">
+                      <option value="1%" selected>1%</option>
+                      <option value="2%">2%</option>
+                      <option value="10%">10%</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 6. Status Toggle Switch -->
+                <div class="form-row-group" id="rowVendorStatus">
+                  <label class="form-label">Status</label>
+                  <div class="form-input-wrap slider-wrap">
+                    <label class="toggle-slide-switch">
+                      <input type="checkbox" id="inpVendorStatusToggle" checked>
+                      <span class="toggle-slide-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
-            <!-- 2. Business Type -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVendorType">Business Type</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpVendorType">
-                  <option value="Supply" selected>Supply</option>
-                  <option value="Service">Service</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Service Type Dropdown -->
-            <div class="form-row-group" id="rowVendorServiceType" style="display: none;">
-              <label class="form-label" for="inpServiceType">Service Type</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpServiceType">
-                  <option value="Project" selected>Project</option>
-                  <option value="Transport">Transport</option>
-                  <option value="Others">Others</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- TDS Deduction Toggle Switch -->
-            <div class="form-row-group" id="rowVendorTdsDeduction">
-              <label class="form-label">TDS Deduction</label>
-              <div class="form-input-wrap slider-wrap">
-                <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpTdsDeductionToggle">
-                  <span class="toggle-slide-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- TDS Code Dropdown -->
-            <div class="form-row-group" id="rowVendorTdsCode">
-              <label class="form-label" for="inpTdsCode">TDS Code</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpTdsCode">
-                  <option value="" disabled selected>Select TDS Code</option>
-                  <option value="1002">1002 ( Private Sector Employee Salary )</option>
-                  <option value="1023">1023 ( Contractor Payment Individual / Hub )</option>
-                  <option value="1024">1024 ( Contractor Payment Non-Individual / HUF )</option>
-                  <option value="1027">1027 (Professional Fees)</option>
-                  <option value="1009_land">1009 (Rent on Land/Building)</option>
-                  <option value="1009_machinery">1009 (Rent on Plant & Machinery)</option>
-                  <option value="1006">1006 (Commission or Brokerage)</option>
-                  <option value="1026">1026 (Technical Services)</option>
-                  <option value="1031">1031 (Purchase of Goods)</option>
-                  <option value="1058">1058 (Lottery / Online Gaming)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- TDS Rate Dropdown -->
-            <div class="form-row-group" id="rowVendorTdsRate">
-              <label class="form-label" for="inpTdsRate">TDS Rate</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpTdsRate">
-                  <option value="1%" selected>1%</option>
-                  <option value="2%">2%</option>
-                  <option value="10%">10%</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 3. GST Type -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVendorGstType">GST Type</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpVendorGstType">
-                  <option value="NA">NA</option>
-                  <option value="SGST">SGST</option>
-                  <option value="IGST">IGST</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 4. GST Number (with PDF upload badge) -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVendorGstNumber">GST Number</label>
-              <div class="form-input-wrap with-action-badge">
-                <input type="text" class="form-input-control form-input-highlight" id="inpVendorGstNumber"
-                  placeholder="Enter GST Number">
-                <span class="input-pdf-badge" title="Upload PDF">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                </span>
-              </div>
-            </div>
-
-            <!-- 5. Address -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVendorAddress">Address</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpVendorAddress" placeholder="Enter Address">
-              </div>
-            </div>
-
-            <!-- 6. PAN Number (with PDF upload badge) -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVendorPanNumber">PAN Number</label>
-              <div class="form-input-wrap with-action-badge">
-                <input type="text" class="form-input-control form-input-highlight" id="inpVendorPanNumber"
-                  placeholder="Enter PAN Number">
-                <span class="input-pdf-badge" title="Upload PDF">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                </span>
-              </div>
-            </div>
-
-            <!-- TCS Deduction Toggle Switch (deactivated by default) -->
-            <div class="form-row-group" id="rowVendorTcsDeduction">
-              <label class="form-label">TCS Deduction</label>
-              <div class="form-input-wrap slider-wrap">
-                <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpTcsDeductionToggle">
-                  <span class="toggle-slide-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- 7. Status -->
-            <div class="form-row-group">
-              <label class="form-label">Status</label>
-              <div class="form-input-wrap slider-wrap">
-                <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpVendorStatusToggle">
-                  <span class="toggle-slide-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Submit Save Button Inside Tab -->
-            <div class="form-submit-inside-wrap">
+            <!-- Submit Save Button Inside Tab (Centered at Bottom) -->
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; align-items: center; margin-top: 18px; width: 100%;">
               <button type="button" class="btn-card-submit-inside" id="btnSubmitVendor" title="Save"
                 aria-label="Submit">
                 <img src="icons/Save.svg" alt="Save" width="34" height="34">
@@ -7697,7 +7731,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260921_0122"></script>
+  <script src="assets/js/home.js?v=20260923_1447"></script>
 </body>
 
 </html>

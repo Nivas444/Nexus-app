@@ -1167,13 +1167,13 @@ tr.tr-sub-headers th,
 }
 
 #addVendorCard {
-  width: 520px !important;
-  max-width: 95vw !important;
+  width: 960px !important;
+  max-width: 96vw !important;
   box-sizing: border-box !important;
 }
 
 #addVendorCard .side-form-body {
-  padding: 22px 28px 24px 28px !important;
+  padding: 22px 32px 24px 32px !important;
   width: 100% !important;
   box-sizing: border-box !important;
   display: flex !important;
@@ -1181,21 +1181,38 @@ tr.tr-sub-headers th,
   gap: 16px !important;
 }
 
+.vendor-form-grid-2col {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 36px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.vendor-form-col {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 #addVendorCard .form-row-group {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 18px !important;
+  gap: 14px !important;
   width: 100% !important;
+  min-height: 38px !important;
   margin: 0 !important;
   box-sizing: border-box !important;
 }
 
 #addVendorCard .form-label {
-  width: 150px !important;
-  min-width: 150px !important;
-  flex: 0 0 150px !important;
-  font-size: 0.92rem !important;
+  width: 135px !important;
+  min-width: 135px !important;
+  flex: 0 0 135px !important;
+  font-size: 0.88rem !important;
   font-weight: 500 !important;
   color: #475569 !important;
   white-space: nowrap !important;
@@ -3017,6 +3034,33 @@ td.col-master-vendor-status {
   border-color: #ef4444;
 }
 
+.input-process-badge {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 2px;
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.input-process-badge:hover {
+  transform: translateY(-50%) scale(1.15);
+  opacity: 0.85;
+}
+
+.input-process-badge .input-process-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
 .pdf-up-arrow {
   color: #dc2626;
   font-weight: bold;
@@ -4441,4 +4485,35 @@ button.has-active-filter {
 .icon-blue,
 .blue-icon {
   filter: invert(32%) sepia(90%) saturate(2800%) hue-rotate(212deg) brightness(98%) contrast(96%) !important;
+}
+
+/* Master Add Vendor & View Vendor Spacing - 50% Reduced Gap between Header & Fields */
+#addVendorCard .side-form-header {
+  margin: 0 0 4px 0 !important;
+  height: 46px !important;
+  min-height: 46px !important;
+}
+
+#addVendorCard .side-form-top-icons {
+  display: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#addVendorCard .side-form-body {
+  padding: 4px 20px 16px 20px !important;
+  gap: 8px !important;
+}
+
+#addVendorCard .vendor-form-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 0 !important;
+}
+
+#addVendorCard .vendor-form-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

@@ -12544,20 +12544,70 @@ function initSideFormEvents() {
     });
   }
 
-  // Qualification / PAN / Aadhar PDF Upload Handlers
-  document.querySelectorAll('.btn-emp-pdf-trigger').forEach(trigger => {
-    trigger.addEventListener('click', () => {
-      const pdfInput = document.createElement('input');
+  // Universal PDF Upload Handlers for all tabs and modals
+  document.addEventListener('click', (e) => {
+    const pdfBadge = e.target.closest('.input-pdf-badge, .btn-emp-pdf-trigger, [title*="PDF" i], .btn-pdf-upload');
+    if (!pdfBadge) return;
+
+    // Ensure it is a PDF trigger and NOT a calendar or photo trigger
+    const img = pdfBadge.querySelector('img');
+    const title = (pdfBadge.getAttribute('title') || '').toLowerCase();
+    const alt = (img?.getAttribute('alt') || '').toLowerCase();
+    const src = (img?.getAttribute('src') || '').toLowerCase();
+
+    const isPdfTrigger = title.includes('pdf') || alt.includes('pdf') || src.includes('pdf') || pdfBadge.classList.contains('btn-emp-pdf-trigger');
+    const isCalendarOrPhoto = title.includes('date') || title.includes('dob') || title.includes('doj') || title.includes('calendar') || title.includes('photo') || alt.includes('calendar') || alt.includes('photo') || src.includes('calendar') || src.includes('image') || src.includes('process');
+
+    if (!isPdfTrigger || isCalendarOrPhoto) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Find the associated text input field
+    const container = pdfBadge.closest('.form-input-wrap, .slide-dynamic-wrap, .with-action-badge, .form-row-group, .doc-item-row') || pdfBadge.parentElement;
+    const targetInput = container?.querySelector('input[type="text"], input:not([type="file"]):not([type="checkbox"]):not([type="radio"])');
+
+    // Check for nearby file input or create a dynamic one
+    let pdfInput = container?.querySelector('input[type="file"]');
+    if (!pdfInput) {
+      pdfInput = document.createElement('input');
       pdfInput.type = 'file';
       pdfInput.accept = '.pdf,application/pdf';
-      pdfInput.addEventListener('change', (e) => {
-        const files = e.target.files;
-        if (files && files.length > 0) {
-          showToast(`Uploaded PDF: ${files[0].name}`);
+      pdfInput.style.display = 'none';
+      document.body.appendChild(pdfInput);
+    }
+
+    const onPdfFileSelected = (event) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        const fileName = files[0].name;
+        if (targetInput) {
+          targetInput.value = fileName;
+          targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+          targetInput.dispatchEvent(new Event('change', { bubbles: true }));
         }
-      });
-      pdfInput.click();
-    });
+        // Hide the PDF upload icon
+        pdfBadge.style.setProperty('display', 'none', 'important');
+        showToast(`Uploaded PDF: ${fileName}`);
+      }
+      pdfInput.removeEventListener('change', onPdfFileSelected);
+    };
+
+    pdfInput.addEventListener('change', onPdfFileSelected, { once: true });
+    pdfInput.click();
+  });
+
+  // Restore PDF upload badge when user clears the text field
+  document.addEventListener('input', (e) => {
+    if (e.target && e.target.tagName === 'INPUT' && (e.target.type === 'text' || !e.target.type)) {
+      if (e.target.value.trim() === '') {
+        const container = e.target.closest('.form-input-wrap, .slide-dynamic-wrap, .with-action-badge, .form-row-group, .doc-item-row');
+        const pdfBadge = container?.querySelector('.input-pdf-badge, .btn-emp-pdf-trigger');
+        if (pdfBadge) {
+          pdfBadge.style.removeProperty('display');
+        }
+      }
+    }
   });
 
   // Calendar Trigger Handlers (Opens date/month/year picker)
@@ -12879,6 +12929,24 @@ function initSideFormEvents() {
       openVendorBankSidePanel();
     });
   }
+
+
+
+  const btnSubmitVendorBank = document.getElementById('btnSubmitVendorBank');
+  if (btnSubmitVendorBank) {
+    btnSubmitVendorBank.addEventListener('click', (e) => {
+      e.preventDefault();
+      const vb = document.getElementById('vendorBankSideCard');
+      if (vb) vb.style.display = 'none';
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      showToast('Vendor bank details saved successfully!');
+    });
+  }
+
+
 
   const btnEmpBank = document.getElementById('btnEmpBankDetails');
   if (btnEmpBank && bankPanel) {
@@ -13524,6 +13592,7 @@ function initSideFormEvents() {
   document.getElementById('inpVendorType')?.addEventListener('change', updateVendorConditionalFields);
   document.getElementById('inpServiceType')?.addEventListener('change', updateVendorConditionalFields);
   document.getElementById('inpVendorGstToggle')?.addEventListener('change', updateVendorConditionalFields);
+  document.getElementById('inpTdsDeductionToggle')?.addEventListener('change', updateVendorConditionalFields);
 
   const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
   if (btnVendorCardEditToggle) {
@@ -13834,6 +13903,9 @@ function openSideForm() {
       if (statusToggle) statusToggle.checked = true;
       const gstToggle = document.getElementById('inpVendorGstToggle');
       if (gstToggle) gstToggle.checked = false;
+      const tdsToggle = document.getElementById('inpTdsDeductionToggle');
+      if (tdsToggle) tdsToggle.checked = false;
+      document.querySelectorAll('#addVendorCard .input-pdf-badge').forEach(b => b.style.removeProperty('display'));
       updateVendorConditionalFields();
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
@@ -17548,41 +17620,23 @@ function setVendorBankEditingState(isEditing) {
 
   const textInputs = form.querySelectorAll('input[type="text"]');
   textInputs.forEach(inp => {
-    if (isEditing) {
-      inp.removeAttribute('readonly');
-      inp.style.backgroundColor = '#ffffff';
-    } else {
-      inp.setAttribute('readonly', 'true');
-      inp.style.backgroundColor = '#f8fafc';
-    }
+    inp.removeAttribute('readonly');
+    inp.style.backgroundColor = '#ffffff';
   });
 
   const selects = form.querySelectorAll('select');
   selects.forEach(sel => {
-    if (isEditing) {
-      sel.removeAttribute('disabled');
-      sel.style.backgroundColor = '#ffffff';
-    } else {
-      sel.setAttribute('disabled', 'true');
-      sel.style.backgroundColor = '#f8fafc';
-    }
+    sel.removeAttribute('disabled');
+    sel.style.backgroundColor = '#ffffff';
   });
 
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
-    t.disabled = !isEditing;
+    t.disabled = false;
   });
 
-  const imgEditIcon = document.getElementById('imgVendorBankEditIcon');
-  if (imgEditIcon) {
-    if (isEditing) {
-      imgEditIcon.src = 'icons/Save.svg';
-      imgEditIcon.title = 'Save Changes';
-    } else {
-      imgEditIcon.src = 'icons/Edit.svg';
-      imgEditIcon.title = 'Edit Info';
-    }
-  }
+  const btnEditToggle = document.getElementById('btnVendorBankEditToggle');
+  if (btnEditToggle) btnEditToggle.style.display = 'none';
 }
 
 // --- SITE, INFRA, PROJECT VIEW HANDLERS ---
@@ -18054,6 +18108,22 @@ function updateVendorConditionalFields() {
     if (rowGstNumber) rowGstNumber.style.setProperty('display', 'none', 'important');
   }
 
+  // 3. TDS Deduction Slidebar logic:
+  // When user enables TDS Deduction -> show TDS Code and TDS Rate
+  // When TDS is disabled -> hide TDS Code and TDS Rate
+  const inpTdsToggle = document.getElementById('inpTdsDeductionToggle');
+  const rowTdsCode = document.getElementById('rowVendorTdsCode');
+  const rowTdsRate = document.getElementById('rowVendorTdsRate');
+  const isTdsOn = inpTdsToggle ? inpTdsToggle.checked : false;
+
+  if (isTdsOn) {
+    if (rowTdsCode) rowTdsCode.style.setProperty('display', 'flex', 'important');
+    if (rowTdsRate) rowTdsRate.style.setProperty('display', 'flex', 'important');
+  } else {
+    if (rowTdsCode) rowTdsCode.style.setProperty('display', 'none', 'important');
+    if (rowTdsRate) rowTdsRate.style.setProperty('display', 'none', 'important');
+  }
+
   // In edit mode, also update editable state of GST Number and GST Process badge
   if (isVendorFormEditing) {
     const inpGstNum = document.getElementById('inpVendorGstNumber');
@@ -18086,6 +18156,28 @@ function updateVendorConditionalFields() {
         gstProcessBadge.style.pointerEvents = 'none';
         gstProcessBadge.style.opacity = '0.5';
         gstProcessBadge.style.cursor = 'default';
+      }
+    }
+
+    const inpTdsCodeSel = document.getElementById('inpTdsCode');
+    const inpTdsRateSel = document.getElementById('inpTdsRate');
+    if (isTdsOn) {
+      if (inpTdsCodeSel) {
+        inpTdsCodeSel.removeAttribute('disabled');
+        inpTdsCodeSel.style.backgroundColor = '#ffffff';
+      }
+      if (inpTdsRateSel) {
+        inpTdsRateSel.removeAttribute('disabled');
+        inpTdsRateSel.style.backgroundColor = '#ffffff';
+      }
+    } else {
+      if (inpTdsCodeSel) {
+        inpTdsCodeSel.setAttribute('disabled', 'true');
+        inpTdsCodeSel.style.backgroundColor = '#f8fafc';
+      }
+      if (inpTdsRateSel) {
+        inpTdsRateSel.setAttribute('disabled', 'true');
+        inpTdsRateSel.style.backgroundColor = '#f8fafc';
       }
     }
   }
@@ -18142,8 +18234,8 @@ window.openViewVendorCard = function(vendorId) {
   const btnBank = document.getElementById('btnVendorCardBank');
   const btnMessage = document.getElementById('btnVendorCardMessage');
   const btnScope = document.getElementById('btnVendorCardScope');
-  if (btnBank) btnBank.style.display = 'none';
-  if (btnMessage) btnMessage.style.display = 'none';
+  if (btnBank) btnBank.style.display = 'inline-flex';
+  if (btnMessage) btnMessage.style.display = 'inline-flex';
   if (btnScope) btnScope.style.display = 'none';
 
   const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');

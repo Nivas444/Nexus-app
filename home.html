@@ -684,8 +684,8 @@
                   </div>
                 </div>
 
-                <!-- 4. TDS Code Dropdown -->
-                <div class="form-row-group" id="rowVendorTdsCode">
+                <!-- 4. TDS Code Dropdown (Shown when TDS is enabled) -->
+                <div class="form-row-group" id="rowVendorTdsCode" style="display: none;">
                   <label class="form-label" for="inpTdsCode">TDS Code</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpTdsCode">
@@ -704,8 +704,8 @@
                   </div>
                 </div>
 
-                <!-- 5. TDS Rate Dropdown -->
-                <div class="form-row-group" id="rowVendorTdsRate">
+                <!-- 5. TDS Rate Dropdown (Shown when TDS is enabled) -->
+                <div class="form-row-group" id="rowVendorTdsRate" style="display: none;">
                   <label class="form-label" for="inpTdsRate">TDS Rate</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpTdsRate">
@@ -4615,9 +4615,9 @@
         <div class="side-form-card side-contact-popup" id="vendorBankSideCard" style="display: none; width: 460px;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblVendorBankCardTitle">Vendor Name</div>
+            <div class="side-form-title-badge" id="lblVendorBankCardTitle">Vendor Bank Details</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-top-icon-btn" id="btnVendorBankEditToggle" title="Edit Info">
+              <button type="button" class="side-top-icon-btn" id="btnVendorBankEditToggle" title="Edit Info" style="display: none;">
                 <img src="icons/Edit.svg" id="imgVendorBankEditIcon" alt="Edit" width="26" height="26">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseVendorBankCard"
@@ -4633,7 +4633,7 @@
               <label class="form-label" for="inpVendorBankAccountName">Account Name</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankAccountName"
-                  placeholder="" readonly>
+                  placeholder="" style="background-color: #ffffff;">
               </div>
             </div>
 
@@ -4642,7 +4642,7 @@
               <label class="form-label" for="inpVendorBankAccountNumber">Account Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankAccountNumber"
-                  placeholder="" readonly>
+                  placeholder="" style="background-color: #ffffff;">
                 <input type="file" id="fileVendorBankDoc" accept="application/pdf" style="display: none;"
                   onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
                 <span class="input-pdf-badge" title="Upload PDF"
@@ -4657,7 +4657,7 @@
               <label class="form-label" for="inpVendorBankIfsc">IFSC Code</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankIfsc" placeholder=""
-                  readonly>
+                  style="background-color: #ffffff;">
               </div>
             </div>
 
@@ -4665,7 +4665,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpVendorBankName">Bank Name</label>
               <div class="form-input-wrap">
-                <select class="form-select-control vendor-bank-field" id="inpVendorBankName" disabled>
+                <select class="form-select-control vendor-bank-field" id="inpVendorBankName" style="background-color: #ffffff;">
                   <option value="" selected></option>
                   <option value="State Bank of India">State Bank of India</option>
                   <option value="HDFC Bank">HDFC Bank</option>
@@ -4686,10 +4686,18 @@
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpVendorBankStatusToggle" checked disabled>
+                  <input type="checkbox" id="inpVendorBankStatusToggle" checked>
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap" style="margin-top: 14px; display: flex; justify-content: center;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVendorBank" title="Save"
+                aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
             </div>
           </form>
         </div>
@@ -7731,7 +7739,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260923_1447"></script>
+  <script src="assets/js/home.js?v=20260923_2328"></script>
 </body>
 
 </html>

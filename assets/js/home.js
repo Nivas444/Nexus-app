@@ -33,31 +33,35 @@ const masterEmployeeData = [
 const masterCustomerData = [
   {
     id: "cust-1",
-    businessType: "Telecom",
+    customerName: "Indus Towers Ltd",
     customerId: "230510678",
-    customerName: "",
-    gstNumber: "R/RL-234567",
+    businessType: "Projects",
+    panNumber: "33ASMPM8643F",
+    poDigits: "450",
+    gstNumber: "33ASMPM8643F1Z5",
     gstType: "SGST",
     invoiceType: "B2B",
-    status: "Active"
+    address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
+    status: "Active",
+    gstEnabled: true
   },
   {
     id: "cust-2",
+    customerName: "Bharti Hexacom",
+    customerId: "230510679",
     businessType: "Supply",
-    customerId: "230510678",
-    customerName: "",
-    gstNumber: "R/RL-234567",
+    gstNumber: "29AABCU9603R1ZM",
     gstType: "IGST",
     invoiceType: "B2C",
     status: "In - Active"
   },
   {
     id: "cust-3",
-    businessType: "Infra",
-    customerId: "230510678",
-    customerName: "",
-    gstNumber: "NA",
-    gstType: "NA",
+    customerName: "ATC India Infrastructure",
+    customerId: "230510680",
+    businessType: "Projects",
+    gstNumber: "36BKMPM4321K1Z3",
+    gstType: "SGST",
     invoiceType: "Cash",
     status: "Active"
   }
@@ -4152,7 +4156,7 @@ function renderApp() {
     } else if (currentIndusSubpage === 'project_type_details') {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProjectType || 'Project Type'} / Sub - Project Type</span>`;
     } else {
-      if (bannerTitle) bannerTitle.textContent = "Telecom";
+      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openTelecomDetailsModal(); return false;" title="Telecom Details" style="cursor: pointer; text-decoration: underline; text-underline-offset: 4px;">Telecom</a>`;
     }
     loadIndusDataset();
     renderIndusToolbar();
@@ -5071,8 +5075,7 @@ function renderIndusFooter() {
     const prodSubpages = [
       { key: 'materials', label: 'Materials' },
       { key: 'expenses', label: 'Expenses' },
-      { key: 'infra', label: 'Infra' },
-      { key: 'rate', label: 'Rate' }
+      { key: 'infra', label: 'Infra' }
     ];
 
     footer.innerHTML = `
@@ -5238,37 +5241,37 @@ function renderMasterTableHead() {
   if (!thead) return;
 
   if (currentMasterSubpage === 'customer') {
-    // Customer Table Headers
+    // Customer Table Headers: Customer Name (25ch), Customer ID (15ch), Business Type (15ch), GST Number (20ch), GST Type (15ch), Invoice Type (15ch), Status (10ch) - all headers centered
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
-          <div class="th-content-wrap">
-            <span>Business Type</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['businessType'] ? 'has-active-filter' : ''}" data-filter-col="businessType" title="Filter Business Type">&#9660;</button>
-          </div>
-        </th>
-        <th>Customer ID</th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="justify-content: center;">
             <span>Customer Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>GST Number</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['gstNumber'] ? 'has-active-filter' : ''}" data-filter-col="gstNumber" title="Filter GST Number">&#9660;</button>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">Customer ID</th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="justify-content: center;">
+            <span>Business Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['businessType'] ? 'has-active-filter' : ''}" data-filter-col="businessType" title="Filter Business Type">&#9660;</button>
           </div>
         </th>
-        <th>GST Type</th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">GST Number</th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="justify-content: center;">
+            <span>GST Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['gstType'] ? 'has-active-filter' : ''}" data-filter-col="gstType" title="Filter GST Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="justify-content: center;">
             <span>Invoice Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceType'] ? 'has-active-filter' : ''}" data-filter-col="invoiceType" title="Filter Invoice Type">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="justify-content: center;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
@@ -5773,6 +5776,242 @@ window.closeCompanyHrEpfModal = function() {
   if (modal) modal.style.display = 'none';
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
+};
+
+// ==========================================================================
+// TELECOM DETAILS MODAL (Green Banner Title Link & Customer Details with Edit/Save)
+// ==========================================================================
+let isTelecomDetailsEditing = false;
+
+window.setTelecomDetailsReadOnly = function(isReadOnly) {
+  const form = document.getElementById('frmTelecomDetails');
+  if (!form) return;
+
+  // 1. Business Type, Customer Legal Name, PO Starting Digits, PAN Number are always strictly read-only
+  const alwaysReadOnlyIds = ['inpTelecomBusinessType', 'inpTelecomCustomerName', 'inpTelecomPoDigits', 'inpTelecomPanNumber'];
+  alwaysReadOnlyIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.readOnly = true;
+      el.disabled = true;
+      el.style.background = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
+      el.style.borderColor = '#cbd5e1';
+    }
+  });
+
+  // 2. GST Slidebar Toggle
+  const gstToggle = document.getElementById('inpTelecomGstToggle');
+  if (gstToggle) {
+    gstToggle.disabled = isReadOnly;
+    const parentSwitch = gstToggle.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  }
+
+  // 3. GST Type & GST Number
+  const isGstOn = gstToggle ? gstToggle.checked : true;
+  const rowGstType = document.getElementById('rowTelecomGstType');
+  const rowGstNumber = document.getElementById('rowTelecomGstNumber');
+  const inpGstType = document.getElementById('inpTelecomGstType');
+  const inpGstNumber = document.getElementById('inpTelecomGstNumber');
+
+  if (rowGstType) rowGstType.style.display = isGstOn ? 'flex' : 'none';
+  if (rowGstNumber) rowGstNumber.style.display = isGstOn ? 'flex' : 'none';
+
+  if (inpGstType) {
+    inpGstType.disabled = isReadOnly || !isGstOn;
+    inpGstType.style.background = (isReadOnly || !isGstOn) ? '#f8fafc' : '#ffffff';
+    inpGstType.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#1e293b';
+    inpGstType.style.cursor = (isReadOnly || !isGstOn) ? 'not-allowed' : 'pointer';
+    inpGstType.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
+  }
+
+  if (inpGstNumber) {
+    inpGstNumber.readOnly = isReadOnly || !isGstOn;
+    inpGstNumber.disabled = isReadOnly || !isGstOn;
+    inpGstNumber.style.background = (isReadOnly || !isGstOn) ? '#f8fafc' : '#ffffff';
+    inpGstNumber.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#1e293b';
+    inpGstNumber.style.cursor = (isReadOnly || !isGstOn) ? 'not-allowed' : 'text';
+    inpGstNumber.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
+  }
+
+  // 4. Address (Editable when edit mode active)
+  const inpAddress = document.getElementById('inpTelecomAddress');
+  if (inpAddress) {
+    inpAddress.readOnly = isReadOnly;
+    inpAddress.disabled = isReadOnly;
+    inpAddress.style.background = isReadOnly ? '#f8fafc' : '#ffffff';
+    inpAddress.style.color = isReadOnly ? '#64748b' : '#1e293b';
+    inpAddress.style.cursor = isReadOnly ? 'not-allowed' : 'text';
+    inpAddress.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
+  }
+
+  // 5. Status Slidebar Toggle (Editable when edit mode active)
+  const statusToggle = document.getElementById('inpTelecomStatusToggle');
+  if (statusToggle) {
+    statusToggle.disabled = isReadOnly;
+    const parentSwitch = statusToggle.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  }
+
+  // 6. Edit/Save Icon update
+  const imgIcon = document.getElementById('imgTelecomDetailsEditIcon');
+  const btnToggle = document.getElementById('btnTelecomDetailsEditToggle');
+  if (imgIcon && btnToggle) {
+    if (isReadOnly) {
+      imgIcon.src = 'icons/Edit.svg';
+      imgIcon.alt = 'Edit';
+      btnToggle.title = 'Edit Info';
+    } else {
+      imgIcon.src = 'icons/Save.svg';
+      imgIcon.alt = 'Save';
+      btnToggle.title = 'Save Changes';
+    }
+  }
+};
+
+window.handleTelecomGstToggleChange = function() {
+  const gstToggle = document.getElementById('inpTelecomGstToggle');
+  const isGstOn = gstToggle ? gstToggle.checked : true;
+  const rowGstType = document.getElementById('rowTelecomGstType');
+  const rowGstNumber = document.getElementById('rowTelecomGstNumber');
+  const inpGstType = document.getElementById('inpTelecomGstType');
+  const inpGstNumber = document.getElementById('inpTelecomGstNumber');
+
+  if (rowGstType) rowGstType.style.display = isGstOn ? 'flex' : 'none';
+  if (rowGstNumber) rowGstNumber.style.display = isGstOn ? 'flex' : 'none';
+
+  if (inpGstType) {
+    inpGstType.disabled = !isTelecomDetailsEditing || !isGstOn;
+    inpGstType.style.background = (!isTelecomDetailsEditing || !isGstOn) ? '#f8fafc' : '#ffffff';
+    inpGstType.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#1e293b';
+    inpGstType.style.cursor = (!isTelecomDetailsEditing || !isGstOn) ? 'not-allowed' : 'pointer';
+    inpGstType.style.borderColor = !isTelecomDetailsEditing ? '#cbd5e1' : '#00cba0';
+  }
+
+  if (inpGstNumber) {
+    inpGstNumber.readOnly = !isTelecomDetailsEditing || !isGstOn;
+    inpGstNumber.disabled = !isTelecomDetailsEditing || !isGstOn;
+    inpGstNumber.style.background = (!isTelecomDetailsEditing || !isGstOn) ? '#f8fafc' : '#ffffff';
+    inpGstNumber.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#1e293b';
+    inpGstNumber.style.cursor = (!isTelecomDetailsEditing || !isGstOn) ? 'not-allowed' : 'text';
+    inpGstNumber.style.borderColor = !isTelecomDetailsEditing ? '#cbd5e1' : '#00cba0';
+  }
+};
+
+window.openTelecomDetailsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'telecomDetailsCard') card.style.display = 'none';
+  });
+
+  const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => (c.customerName || '').toLowerCase().includes('indus tower'))) || 
+               (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]) || {
+                 customerName: "Indus Towers Ltd",
+                 customerId: "230510678",
+                 businessType: "Projects",
+                 panNumber: "33ASMPM8643F",
+                 poDigits: "450",
+                 gstNumber: "33ASMPM8643F1Z5",
+                 gstType: "SGST",
+                 address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
+                 status: "Active",
+                 gstEnabled: true
+               };
+
+  const inpType = document.getElementById('inpTelecomBusinessType');
+  if (inpType) inpType.value = cust.businessType || 'Projects';
+
+  const inpName = document.getElementById('inpTelecomCustomerName');
+  if (inpName) inpName.value = cust.customerName || 'Indus Towers Ltd';
+
+  const inpDigits = document.getElementById('inpTelecomPoDigits');
+  if (inpDigits) inpDigits.value = cust.poDigits || '450';
+
+  const inpPan = document.getElementById('inpTelecomPanNumber');
+  if (inpPan) inpPan.value = cust.panNumber || '33ASMPM8643F';
+
+  const inpGstToggle = document.getElementById('inpTelecomGstToggle');
+  if (inpGstToggle) {
+    inpGstToggle.checked = (cust.gstEnabled !== false && cust.gstNumber && cust.gstNumber !== 'NA');
+  }
+
+  const inpGstType = document.getElementById('inpTelecomGstType');
+  if (inpGstType) inpGstType.value = cust.gstType || 'SGST';
+
+  const inpGstNumber = document.getElementById('inpTelecomGstNumber');
+  if (inpGstNumber) inpGstNumber.value = (cust.gstNumber && cust.gstNumber !== 'NA') ? cust.gstNumber : '33ASMPM8643F1Z5';
+
+  const inpAddress = document.getElementById('inpTelecomAddress');
+  if (inpAddress) inpAddress.value = cust.address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
+
+  const inpStatus = document.getElementById('inpTelecomStatusToggle');
+  if (inpStatus) inpStatus.checked = !((cust.status || '').toLowerCase().includes('in'));
+
+  // Initial mode is view-only (read-only) with Edit icon
+  isTelecomDetailsEditing = false;
+  setTelecomDetailsReadOnly(true);
+
+  const modal = document.getElementById('telecomDetailsCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+  showToast('Opened Telecom Details');
+};
+
+window.closeTelecomDetailsModal = function() {
+  const modal = document.getElementById('telecomDetailsCard');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.toggleTelecomDetailsEdit = function() {
+  if (!isTelecomDetailsEditing) {
+    // Switch to edit mode
+    isTelecomDetailsEditing = true;
+    setTelecomDetailsReadOnly(false);
+    showToast('Edit mode enabled for GST, Address, and Status');
+  } else {
+    // Save changes
+    const gstToggle = document.getElementById('inpTelecomGstToggle');
+    const isGstOn = gstToggle ? gstToggle.checked : true;
+    const gstType = isGstOn ? (document.getElementById('inpTelecomGstType')?.value || 'SGST') : 'NA';
+    const gstNumber = isGstOn ? (document.getElementById('inpTelecomGstNumber')?.value?.trim() || 'NA') : 'NA';
+    const address = document.getElementById('inpTelecomAddress')?.value?.trim() || '';
+    const statusToggle = document.getElementById('inpTelecomStatusToggle');
+    const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
+
+    const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => (c.customerName || '').toLowerCase().includes('indus tower'))) || 
+                 (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]);
+    if (cust) {
+      cust.gstEnabled = isGstOn;
+      cust.gstType = gstType;
+      cust.gstNumber = gstNumber;
+      cust.address = address;
+      cust.status = status;
+    }
+
+    if (currentModule === 'master' && currentMasterSubpage === 'customer') {
+      currentDataset = [...masterCustomerData];
+      applyFiltersAndRender();
+    }
+
+    isTelecomDetailsEditing = false;
+    setTelecomDetailsReadOnly(true);
+    showToast('Telecom Details saved successfully!');
+  }
 };
 
 // ==========================================================================
@@ -10160,21 +10399,26 @@ function applyFiltersAndRender() {
       }
     }
     if (currentMasterSubpage === 'customer') {
-      // Render Customer Rows with Clean Text Status Badge & Indus Hyperlink
+      // Render Customer Rows: Customer Name (25ch&left), Customer ID (15ch&center), Business Type (15ch&left), GST Number (20ch&center), GST Type (15ch&center), Invoice Type (15ch&center), Status (10ch&center)
       tbody.innerHTML = filteredDataset.map(row => {
-        const isInactive = row.status.toLowerCase().includes('in');
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        const cName = row.customerName || (row.businessType === 'Telecom' ? 'Indus Towers Ltd' : 'Customer Name');
+        const isIndus = cName.toLowerCase().includes('indus tower');
+        const nameCellHtml = isIndus
+          ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Indus Towers details" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${cName}</a>`
+          : `<span style="color: #1e293b; font-weight: 500;">${cName}</span>`;
         return `
-          <tr data-row-id="${row.id}">
-            <td>
-              ${row.businessType === 'Telecom' ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Telecom details">${row.businessType}</a>` : row.businessType}
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cName.replace(/"/g, '&quot;')}">
+              ${nameCellHtml}
             </td>
-            <td class="td-center">${row.customerId}</td>
-            <td>${row.customerName}</td>
-            <td>${row.gstNumber}</td>
-            <td class="td-center">${row.gstType}</td>
-            <td class="td-center">${row.invoiceType}</td>
-            <td class="td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.customerId || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.businessType || '').replace(/"/g, '&quot;')}">${row.businessType || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.gstNumber || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstType || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceType || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
           </tr>
         `;
@@ -12437,62 +12681,43 @@ function initSideFormEvents() {
       return;
     }
 
-    if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
-      const vendorName = document.getElementById('inpVendorName').value || "R/RL-234567";
-      const vendorType = document.getElementById('inpVendorType').value || "Supply / Service";
-      const gstType = document.getElementById('inpVendorGstType').value || "SGST";
-      const gstNumber = document.getElementById('inpVendorGstNumber').value || "33ASMPM8643F";
-      const panNumber = document.getElementById('inpVendorPanNumber').value || "ASMPM8643F";
-      const vendorStatusToggle = document.getElementById('inpVendorStatusToggle');
-      const status = (vendorStatusToggle && vendorStatusToggle.checked) ? "Active" : "In - Active";
-      const vendorId = `23051068${masterVendorData.length + 1}`;
-
-      const newRecord = {
-        id: `vend-${Date.now()}`,
-        vendorType,
-        vendorId,
-        vendorName,
-        gstNumber,
-        panNumber,
-        gstType,
-        status
-      };
-
-      masterVendorData.push(newRecord);
-      currentDataset = [...masterVendorData];
-      applyFiltersAndRender();
-      closeSideForm();
-      showToast(`Vendor ${vendorId} successfully saved & added to table!`);
-      return;
-    }
-
-    const businessType = document.getElementById('inpBusinessType').value;
-    const customerId = document.getElementById('inpCustomerId').value || `23051068${masterCustomerData.length + 1}`;
-    const customerName = document.getElementById('inpCustomerName').value || "";
-    const gstType = document.getElementById('inpGstType').value;
-    const gstNumber = document.getElementById('inpGstNumber').value || "33ASMPM8643F";
-    const invoiceType = document.getElementById('inpInvoiceType').value;
-    const status = statusToggle.checked ? "Active" : "In - Active";
+    const businessType = document.getElementById('inpBusinessType')?.value || "Projects";
+    const customerId = `23051068${masterCustomerData.length + 1}`;
+    const rawName = document.getElementById('inpCustomerName')?.value.trim();
+    const customerName = businessType === 'Projects' ? (rawName || "Indus Towers Ltd") : (rawName || "Supply Customer");
+    const isGstOn = document.getElementById('inpCustomerGstToggle')?.checked || false;
+    const gstType = isGstOn ? (document.getElementById('inpGstType')?.value || "SGST") : "NA";
+    const gstNumber = isGstOn ? (document.getElementById('inpGstNumber')?.value.trim() || "33ASMPM8643F") : "NA";
+    const panNumber = businessType === 'Projects' ? (document.getElementById('inpPanNumber')?.value.trim() || "") : "";
+    const address = document.getElementById('inpAddress')?.value.trim() || "";
+    const poDigits = (businessType === 'Projects' && customerName.toLowerCase().includes('indus tower')) ? (document.getElementById('inpCustomerPoDigits')?.value.trim() || "") : "";
+    const statusToggleEl = document.getElementById('inpStatusToggle');
+    const status = (statusToggleEl && statusToggleEl.checked) ? "Active" : "In - Active";
+    const invoiceType = "B2B";
 
     const newRecord = {
       id: `cust-${Date.now()}`,
-      businessType,
-      customerId,
       customerName,
+      customerId,
+      businessType,
       gstNumber,
       gstType,
       invoiceType,
+      panNumber,
+      address,
+      poDigits,
       status
     };
 
-    masterCustomerData.push(newRecord);
+    masterCustomerData.unshift(newRecord);
     if (currentModule === 'master' && currentMasterSubpage === 'customer') {
       currentDataset = [...masterCustomerData];
       applyFiltersAndRender();
     }
 
     closeSideForm();
-    showToast(`Customer ${customerId} successfully saved & added to table!`);
+    showToast(`Customer ${customerName} successfully saved & added to table!`);
+    return;
   }
 
   const btnSubmitCustomer = document.getElementById('btnSubmitCustomer');
@@ -12505,7 +12730,6 @@ function initSideFormEvents() {
   const btnSubmitProductRate = document.getElementById('btnSubmitProductRate');
   const btnSubmitProjectType = document.getElementById('btnSubmitProjectType');
   const btnSubmitProjectTransport = document.getElementById('btnSubmitProjectTransport');
-  const btnSubmitVendor = document.getElementById('btnSubmitVendor');
   const btnSubmitProduct = document.getElementById('btnSubmitProduct');
   const btnSubmitExpense = document.getElementById('btnSubmitExpense');
   if (btnSubmitCustomer) btnSubmitCustomer.addEventListener('click', handleFormSave);
@@ -12518,7 +12742,6 @@ function initSideFormEvents() {
   if (btnSubmitProductRate) btnSubmitProductRate.addEventListener('click', handleFormSave);
   if (btnSubmitProjectType) btnSubmitProjectType.addEventListener('click', handleFormSave);
   if (btnSubmitProjectTransport) btnSubmitProjectTransport.addEventListener('click', handleFormSave);
-  if (btnSubmitVendor) btnSubmitVendor.addEventListener('click', handleFormSave);
   if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
   if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
 
@@ -13594,6 +13817,104 @@ function initSideFormEvents() {
   document.getElementById('inpVendorGstToggle')?.addEventListener('change', updateVendorConditionalFields);
   document.getElementById('inpTdsDeductionToggle')?.addEventListener('change', updateVendorConditionalFields);
 
+  function saveVendorForm(isFormSubmit = true) {
+    const vName = document.getElementById('inpVendorName')?.value.trim();
+    if (!vName) {
+      showToast('Please enter a Vendor Name');
+      return false;
+    }
+
+    const entityType = document.getElementById('inpVendorEntityType')?.value || 'Proprietorship';
+    const bType = document.getElementById('inpVendorType')?.value || 'Supply';
+    const sType = document.getElementById('inpServiceType')?.value || 'Project';
+    const contractType = document.getElementById('inpVendorContractType')?.value || 'B2B';
+    const address = document.getElementById('inpVendorAddress')?.value.trim() || '';
+    const pan = document.getElementById('inpVendorPanNumber')?.value.trim() || '';
+    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked || false;
+    const gstType = document.getElementById('inpVendorGstType')?.value || 'SGST';
+    const gstNumber = isGstOn ? (document.getElementById('inpVendorGstNumber')?.value.trim() || '') : 'NA';
+    const isTdsOn = document.getElementById('inpTdsDeductionToggle')?.checked || false;
+    const tdsCode = document.getElementById('inpTdsCode')?.value || '';
+    const tdsRate = document.getElementById('inpTdsRate')?.value || '1%';
+    const status = document.getElementById('inpVendorStatusToggle')?.checked ? 'Active' : 'In - Active';
+
+    if (currentViewedVendorId) {
+      // Update existing vendor
+      const vIndex = masterVendorData.findIndex(v => v.id === currentViewedVendorId || v.vendorId === currentViewedVendorId || v.vendorName === currentViewedVendorId);
+      if (vIndex !== -1) {
+        masterVendorData[vIndex].vendorName = vName;
+        masterVendorData[vIndex].entityType = entityType;
+        masterVendorData[vIndex].businessType = bType;
+        masterVendorData[vIndex].vendorType = bType;
+        masterVendorData[vIndex].serviceType = (bType.toLowerCase() === 'service') ? sType : '';
+        masterVendorData[vIndex].contractType = (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '';
+        masterVendorData[vIndex].address = address;
+        masterVendorData[vIndex].panNumber = pan;
+        masterVendorData[vIndex].gstEnabled = isGstOn;
+        masterVendorData[vIndex].gstType = isGstOn ? gstType : 'NA';
+        masterVendorData[vIndex].gstNumber = gstNumber;
+        masterVendorData[vIndex].tdsDeduction = isTdsOn;
+        masterVendorData[vIndex].tdsCode = isTdsOn ? tdsCode : '';
+        masterVendorData[vIndex].tdsRate = isTdsOn ? tdsRate : '';
+        masterVendorData[vIndex].status = status;
+      }
+
+      const lblTitle = document.getElementById('lblVendorCardTitle');
+      if (lblTitle) lblTitle.innerText = vName;
+
+      isVendorFormEditing = false;
+      setVendorFormReadOnly(true);
+
+      const imgIcon = document.getElementById('imgVendorCardEditIcon');
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.className = 'icon-blue';
+        imgIcon.title = 'Edit Info';
+      }
+
+      if (currentMasterSubpage === 'vendor') {
+        loadMasterDataset();
+        applyFiltersAndRender();
+      }
+
+      if (isFormSubmit) {
+        closeSideForm();
+      }
+      showToast(`Vendor ${vName} updated successfully!`);
+      return true;
+    } else {
+      // Add new vendor
+      const newVendor = {
+        id: `vend-${Date.now()}`,
+        vendorName: vName,
+        entityType: entityType,
+        businessType: bType,
+        vendorType: bType,
+        serviceType: (bType.toLowerCase() === 'service') ? sType : '',
+        contractType: (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '',
+        vendorId: String(Math.floor(100000000 + Math.random() * 900000000)),
+        address: address,
+        panNumber: pan,
+        gstEnabled: isGstOn,
+        gstType: isGstOn ? gstType : 'NA',
+        gstNumber: gstNumber,
+        tdsDeduction: isTdsOn,
+        tdsCode: isTdsOn ? tdsCode : '',
+        tdsRate: isTdsOn ? tdsRate : '',
+        status: status
+      };
+
+      masterVendorData.unshift(newVendor);
+      if (currentMasterSubpage === 'vendor') {
+        loadMasterDataset();
+        applyFiltersAndRender();
+      }
+      closeSideForm();
+      showToast(`Vendor ${vName} added successfully!`);
+      return true;
+    }
+  }
+
   const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
   if (btnVendorCardEditToggle) {
     btnVendorCardEditToggle.addEventListener('click', (e) => {
@@ -13607,89 +13928,20 @@ function initSideFormEvents() {
           imgIcon.className = 'icon-green';
           imgIcon.title = 'Save';
         }
+        const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
+        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
         showToast('Vendor form is now editable');
       } else {
-        isVendorFormEditing = false;
-        // Save changes to current viewed vendor
-        if (currentViewedVendorId) {
-          const vIndex = masterVendorData.findIndex(v => v.id === currentViewedVendorId || v.vendorId === currentViewedVendorId);
-          if (vIndex !== -1) {
-            const isGstOn = document.getElementById('inpVendorGstToggle')?.checked || false;
-            masterVendorData[vIndex].address = document.getElementById('inpVendorAddress')?.value.trim() || '';
-            masterVendorData[vIndex].gstEnabled = isGstOn;
-            masterVendorData[vIndex].gstType = isGstOn ? (document.getElementById('inpVendorGstType')?.value || 'SGST') : 'NA';
-            masterVendorData[vIndex].gstNumber = isGstOn ? (document.getElementById('inpVendorGstNumber')?.value.trim() || '') : 'NA';
-            masterVendorData[vIndex].tdsDeduction = document.getElementById('inpTdsDeductionToggle')?.checked || false;
-            masterVendorData[vIndex].tdsCode = document.getElementById('inpTdsCode')?.value || '';
-            masterVendorData[vIndex].tdsRate = document.getElementById('inpTdsRate')?.value || '1%';
-            masterVendorData[vIndex].status = document.getElementById('inpVendorStatusToggle')?.checked ? 'Active' : 'In - Active';
-          }
-          if (currentMasterSubpage === 'vendor') {
-            loadMasterDataset();
-            applyFiltersAndRender();
-          }
-        }
-        setVendorFormReadOnly(true);
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.className = 'icon-blue';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Vendor details saved successfully!');
+        saveVendorForm(false);
       }
     });
   }
 
-  const btnSubmitVendorCustomEl = document.getElementById('btnSubmitVendor');
-  if (btnSubmitVendorCustomEl) {
-    btnSubmitVendorCustomEl.addEventListener('click', (e) => {
+  const btnSubmitVendor = document.getElementById('btnSubmitVendor');
+  if (btnSubmitVendor) {
+    btnSubmitVendor.addEventListener('click', (e) => {
       e.preventDefault();
-      const vName = document.getElementById('inpVendorName')?.value.trim();
-      if (!vName) {
-        showToast('Please enter a Vendor Name');
-        return;
-      }
-      const entityType = document.getElementById('inpVendorEntityType')?.value || 'Proprietorship';
-      const bType = document.getElementById('inpVendorType')?.value || 'Supply';
-      const sType = document.getElementById('inpServiceType')?.value || 'Project';
-      const contractType = document.getElementById('inpVendorContractType')?.value || 'B2B';
-      const address = document.getElementById('inpVendorAddress')?.value.trim() || '';
-      const pan = document.getElementById('inpVendorPanNumber')?.value.trim() || '';
-      const isGstOn = document.getElementById('inpVendorGstToggle')?.checked || false;
-      const gstType = document.getElementById('inpVendorGstType')?.value || 'SGST';
-      const gstNumber = isGstOn ? (document.getElementById('inpVendorGstNumber')?.value.trim() || '') : 'NA';
-      const isTdsOn = document.getElementById('inpTdsDeductionToggle')?.checked || false;
-      const tdsCode = document.getElementById('inpTdsCode')?.value || '';
-      const tdsRate = document.getElementById('inpTdsRate')?.value || '1%';
-      const status = document.getElementById('inpVendorStatusToggle')?.checked ? 'Active' : 'In - Active';
-
-      const newVendor = {
-        id: `vend-${Date.now()}`,
-        vendorName: vName,
-        entityType: entityType,
-        businessType: bType,
-        vendorType: bType,
-        serviceType: sType,
-        contractType: contractType,
-        vendorId: String(Math.floor(100000000 + Math.random() * 900000000)),
-        address: address,
-        panNumber: pan,
-        gstEnabled: isGstOn,
-        gstType: isGstOn ? gstType : 'NA',
-        gstNumber: gstNumber,
-        tdsDeduction: isTdsOn,
-        tdsCode: tdsCode,
-        tdsRate: tdsRate,
-        status: status
-      };
-
-      masterVendorData.unshift(newVendor);
-      if (currentMasterSubpage === 'vendor') {
-        loadMasterDataset();
-        applyFiltersAndRender();
-      }
-      closeSideForm();
-      showToast(`Vendor ${vName} added successfully!`);
+      saveVendorForm(true);
     });
   }
 
@@ -13941,19 +14193,38 @@ function openSideForm() {
       isExpenseFormEditing = false;
     }
   } else {
-    if (addCustomerCard) addCustomerCard.style.display = 'block';
+    if (addCustomerCard) {
+      addCustomerCard.style.display = 'block';
+      const lblTitle = document.getElementById('lblCustomerCardTitle');
+      if (lblTitle) lblTitle.innerText = 'Add Customer';
+      const frm = document.getElementById('frmAddCustomer');
+      if (frm) frm.reset();
+      const bTypeSelect = document.getElementById('inpBusinessType');
+      if (bTypeSelect) bTypeSelect.value = 'Projects';
+      const statusToggle = document.getElementById('inpStatusToggle');
+      if (statusToggle) statusToggle.checked = true;
+      const gstToggle = document.getElementById('inpCustomerGstToggle');
+      if (gstToggle) gstToggle.checked = false;
+      if (typeof updateCustomerConditionalFields === 'function') {
+        updateCustomerConditionalFields();
+      }
+    }
   }
 
-  // Reset all slidebar toggles to deactive stage (unchecked / OFF red) initially
-  document.querySelectorAll('#sideFormOverlay input[type="checkbox"]').forEach(cb => {
-    cb.checked = false;
-  });
+  // Reset any other unhandled slidebar toggles if not products/expenses/customer
+  if (currentMasterSubpage !== 'customer' && currentMasterSubpage !== 'products' && currentMasterSubpage !== 'expenses') {
+    document.querySelectorAll('#sideFormOverlay input[type="checkbox"]').forEach(cb => {
+      cb.checked = false;
+    });
+  }
 
-  // Default active toggles for Add Product & Add Expense
+  // Default active toggles for Add Product & Add Expense & Add Customer
   const prodStatus = document.getElementById('inpProductStatusToggle');
   if (prodStatus && currentMasterSubpage === 'products') prodStatus.checked = true;
   const expStatus = document.getElementById('inpExpenseStatusToggle');
   if (expStatus && currentMasterSubpage === 'expenses') expStatus.checked = true;
+  const custStatus = document.getElementById('inpStatusToggle');
+  if (custStatus && currentMasterSubpage === 'customer') custStatus.checked = true;
 
   overlay.style.display = 'flex';
 }
@@ -14333,18 +14604,16 @@ window.openVendorBankSidePanel = function() {
     vendorBankCard.style.display = 'block';
   }
 
-  // Set title to current vendor name if filled, else default
-  const vendorNameInput = document.getElementById('inpVendorName');
+  // Set title to Bank Details
   const vendorBankTitle = document.getElementById('lblVendorBankCardTitle');
   if (vendorBankTitle) {
-    const vName = vendorNameInput ? vendorNameInput.value.trim() : '';
-    vendorBankTitle.textContent = vName ? vName : 'Vendor Name';
+    vendorBankTitle.textContent = 'Bank Details';
   }
 
   // Reset to non-editing mode
   setVendorBankEditingState(false);
   overlay.style.display = 'flex';
-  showToast('Vendor Bank details opened');
+  showToast('Bank details opened');
 };
 
 // Opens Company Bank Details panel as a child tab next to View Company card
@@ -14748,6 +15017,24 @@ function initExcelFilterSystem() {
         showToast('TDS filter cleared');
         return;
       }
+      if (dropdown.dataset.filterContext === 'customerLoc') {
+        if (currentCustomerLocFilterCol) {
+          delete activeCustomerLocFilters[currentCustomerLocFilterCol];
+          renderCustomerLocationTable();
+        }
+        closeExcelFilter();
+        showToast('Location filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'customerContact') {
+        if (currentCustomerContactFilterCol) {
+          delete activeCustomerContactFilters[currentCustomerContactFilterCol];
+          renderCustomerContactTable();
+        }
+        closeExcelFilter();
+        showToast('Contact filter cleared');
+        return;
+      }
       closeExcelFilter();
     });
   }
@@ -14933,6 +15220,40 @@ function initExcelFilterSystem() {
         renderAccountsTdsSummaryTable();
         closeExcelFilter();
         showToast('TDS filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'customerLoc') {
+        if (!currentCustomerLocFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeCustomerLocFilters[currentCustomerLocFilterCol];
+        } else {
+          activeCustomerLocFilters[currentCustomerLocFilterCol] = new Set(checkedItems);
+        }
+        renderCustomerLocationTable();
+        closeExcelFilter();
+        showToast('Location filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'customerContact') {
+        if (!currentCustomerContactFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeCustomerContactFilters[currentCustomerContactFilterCol];
+        } else {
+          activeCustomerContactFilters[currentCustomerContactFilterCol] = new Set(checkedItems);
+        }
+        renderCustomerContactTable();
+        closeExcelFilter();
+        showToast('Contact filter applied');
         return;
       }
 
@@ -17921,105 +18242,37 @@ function setVendorFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const isEdit = !isReadOnly && (isEditModeOnly || isVendorFormEditing);
 
   // 1. Text Inputs
-  const inpAddress = document.getElementById('inpVendorAddress');
-  const inpGstNum = document.getElementById('inpVendorGstNumber');
-  const otherInputs = form.querySelectorAll('#inpVendorName, #inpVendorPanNumber');
-
-  if (isReadOnly) {
-    if (inpAddress) { inpAddress.setAttribute('readonly', 'true'); inpAddress.style.backgroundColor = '#f8fafc'; }
-    if (inpGstNum) { inpGstNum.setAttribute('readonly', 'true'); inpGstNum.style.backgroundColor = '#f8fafc'; }
-    otherInputs.forEach(inp => { inp.setAttribute('readonly', 'true'); inp.style.backgroundColor = '#f8fafc'; });
-  } else if (isEdit) {
-    // Address is always editable
-    if (inpAddress) { inpAddress.removeAttribute('readonly'); inpAddress.style.backgroundColor = '#ffffff'; }
-    // GST Number editable only if GST toggle is active
-    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked === true;
-    if (inpGstNum) {
-      if (isGstOn) {
-        inpGstNum.removeAttribute('readonly');
-        inpGstNum.style.backgroundColor = '#ffffff';
-      } else {
-        inpGstNum.setAttribute('readonly', 'true');
-        inpGstNum.style.backgroundColor = '#f8fafc';
-      }
+  const inputs = form.querySelectorAll('input[type="text"], input[type="number"]');
+  inputs.forEach(inp => {
+    if (isReadOnly) {
+      inp.setAttribute('readonly', 'true');
+      inp.style.backgroundColor = '#f8fafc';
+    } else {
+      inp.removeAttribute('readonly');
+      inp.style.backgroundColor = '#ffffff';
     }
-    // Other inputs remain read-only
-    otherInputs.forEach(inp => { inp.setAttribute('readonly', 'true'); inp.style.backgroundColor = '#f8fafc'; });
-  } else {
-    // Full Add mode
-    if (inpAddress) { inpAddress.removeAttribute('readonly'); inpAddress.style.backgroundColor = '#ffffff'; }
-    if (inpGstNum) { inpGstNum.removeAttribute('readonly'); inpGstNum.style.backgroundColor = '#ffffff'; }
-    otherInputs.forEach(inp => { inp.removeAttribute('readonly'); inp.style.backgroundColor = '#ffffff'; });
-  }
+  });
 
   // 2. Select Dropdowns
-  const inpTdsCode = document.getElementById('inpTdsCode');
-  const inpTdsRate = document.getElementById('inpTdsRate');
-  const inpGstType = document.getElementById('inpVendorGstType');
-  const otherSelects = form.querySelectorAll('#inpVendorEntityType, #inpVendorType, #inpServiceType, #inpVendorContractType');
-
-  if (isReadOnly) {
-    if (inpTdsCode) { inpTdsCode.setAttribute('disabled', 'true'); inpTdsCode.style.backgroundColor = '#f8fafc'; }
-    if (inpTdsRate) { inpTdsRate.setAttribute('disabled', 'true'); inpTdsRate.style.backgroundColor = '#f8fafc'; }
-    if (inpGstType) { inpGstType.setAttribute('disabled', 'true'); inpGstType.style.backgroundColor = '#f8fafc'; }
-    otherSelects.forEach(sel => { sel.setAttribute('disabled', 'true'); sel.style.backgroundColor = '#f8fafc'; });
-  } else if (isEdit) {
-    // TDS Code and TDS Rate are editable
-    if (inpTdsCode) { inpTdsCode.removeAttribute('disabled'); inpTdsCode.style.backgroundColor = '#ffffff'; }
-    if (inpTdsRate) { inpTdsRate.removeAttribute('disabled'); inpTdsRate.style.backgroundColor = '#ffffff'; }
-    // GST Type is editable if GST toggle is active
-    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked === true;
-    if (inpGstType) {
-      if (isGstOn) {
-        inpGstType.removeAttribute('disabled');
-        inpGstType.style.backgroundColor = '#ffffff';
-      } else {
-        inpGstType.setAttribute('disabled', 'true');
-        inpGstType.style.backgroundColor = '#f8fafc';
-      }
+  const selects = form.querySelectorAll('select');
+  selects.forEach(sel => {
+    if (isReadOnly) {
+      sel.setAttribute('disabled', 'true');
+      sel.style.backgroundColor = '#f8fafc';
+    } else {
+      sel.removeAttribute('disabled');
+      sel.style.backgroundColor = '#ffffff';
     }
-    // Other selects remain disabled
-    otherSelects.forEach(sel => { sel.setAttribute('disabled', 'true'); sel.style.backgroundColor = '#f8fafc'; });
-  } else {
-    // Full Add mode
-    if (inpTdsCode) { inpTdsCode.removeAttribute('disabled'); inpTdsCode.style.backgroundColor = '#ffffff'; }
-    if (inpTdsRate) { inpTdsRate.removeAttribute('disabled'); inpTdsRate.style.backgroundColor = '#ffffff'; }
-    if (inpGstType) { inpGstType.removeAttribute('disabled'); inpGstType.style.backgroundColor = '#ffffff'; }
-    otherSelects.forEach(sel => { sel.removeAttribute('disabled'); sel.style.backgroundColor = '#ffffff'; });
-  }
+  });
 
   // 3. Slidebar Toggles
-  const editableToggleIds = ['inpVendorGstToggle', 'inpTdsDeductionToggle', 'inpVendorStatusToggle'];
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
     const parentSwitch = t.closest('.toggle-slide-switch');
-    if (isReadOnly) {
-      t.disabled = true;
-      if (parentSwitch) {
-        parentSwitch.style.pointerEvents = 'none';
-        parentSwitch.style.opacity = '0.65';
-      }
-    } else if (isEdit) {
-      if (editableToggleIds.includes(t.id)) {
-        t.disabled = false;
-        if (parentSwitch) {
-          parentSwitch.style.pointerEvents = 'auto';
-          parentSwitch.style.opacity = '1';
-        }
-      } else {
-        t.disabled = true;
-        if (parentSwitch) {
-          parentSwitch.style.pointerEvents = 'none';
-          parentSwitch.style.opacity = '0.65';
-        }
-      }
-    } else {
-      // Full Add mode
-      t.disabled = false;
-      if (parentSwitch) {
-        parentSwitch.style.pointerEvents = 'auto';
-        parentSwitch.style.opacity = '1';
-      }
+    t.disabled = isReadOnly;
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
     }
   });
 
@@ -18032,18 +18285,6 @@ function setVendorFormReadOnly(isReadOnly, isEditModeOnly = false) {
       gstProcessBadge.style.pointerEvents = 'none';
       gstProcessBadge.style.opacity = '0.5';
       gstProcessBadge.style.cursor = 'default';
-    }
-    if (panPdfBadge) {
-      panPdfBadge.style.pointerEvents = 'none';
-      panPdfBadge.style.opacity = '0.5';
-      panPdfBadge.style.cursor = 'default';
-    }
-  } else if (isEdit) {
-    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked === true;
-    if (gstProcessBadge) {
-      gstProcessBadge.style.pointerEvents = isGstOn ? 'auto' : 'none';
-      gstProcessBadge.style.opacity = isGstOn ? '1' : '0.5';
-      gstProcessBadge.style.cursor = isGstOn ? 'pointer' : 'default';
     }
     if (panPdfBadge) {
       panPdfBadge.style.pointerEvents = 'none';
@@ -18081,25 +18322,19 @@ function updateVendorConditionalFields() {
   const isGstOn = inpGstToggle ? inpGstToggle.checked : false;
 
   // 1. Business Type logic:
-  // When business type is Supply -> hide Service Type and Contract Type
-  // When business type is Service -> show Service Type
   if (bType.toLowerCase() === 'service') {
     if (rowServiceType) rowServiceType.style.setProperty('display', 'flex', 'important');
-    // When service type is Project -> show Contract Type, otherwise hide
     if (sType.toLowerCase() === 'project') {
       if (rowContractType) rowContractType.style.setProperty('display', 'flex', 'important');
     } else {
       if (rowContractType) rowContractType.style.setProperty('display', 'none', 'important');
     }
   } else {
-    // Supply
     if (rowServiceType) rowServiceType.style.setProperty('display', 'none', 'important');
     if (rowContractType) rowContractType.style.setProperty('display', 'none', 'important');
   }
 
   // 2. GST Slidebar logic:
-  // When user enables GST -> show GST Number and GST Type
-  // When GST is disabled -> hide GST Number and GST Type
   if (isGstOn) {
     if (rowGstType) rowGstType.style.setProperty('display', 'flex', 'important');
     if (rowGstNumber) rowGstNumber.style.setProperty('display', 'flex', 'important');
@@ -18109,8 +18344,6 @@ function updateVendorConditionalFields() {
   }
 
   // 3. TDS Deduction Slidebar logic:
-  // When user enables TDS Deduction -> show TDS Code and TDS Rate
-  // When TDS is disabled -> hide TDS Code and TDS Rate
   const inpTdsToggle = document.getElementById('inpTdsDeductionToggle');
   const rowTdsCode = document.getElementById('rowVendorTdsCode');
   const rowTdsRate = document.getElementById('rowVendorTdsRate');
@@ -18123,67 +18356,71 @@ function updateVendorConditionalFields() {
     if (rowTdsCode) rowTdsCode.style.setProperty('display', 'none', 'important');
     if (rowTdsRate) rowTdsRate.style.setProperty('display', 'none', 'important');
   }
-
-  // In edit mode, also update editable state of GST Number and GST Process badge
-  if (isVendorFormEditing) {
-    const inpGstNum = document.getElementById('inpVendorGstNumber');
-    const inpGstTypeSel = document.getElementById('inpVendorGstType');
-    const gstProcessBadge = document.querySelector('#rowVendorGstNumber .input-process-badge, #rowVendorGstNumber .input-pdf-badge');
-    if (isGstOn) {
-      if (inpGstNum) {
-        inpGstNum.removeAttribute('readonly');
-        inpGstNum.style.backgroundColor = '#ffffff';
-      }
-      if (inpGstTypeSel) {
-        inpGstTypeSel.removeAttribute('disabled');
-        inpGstTypeSel.style.backgroundColor = '#ffffff';
-      }
-      if (gstProcessBadge) {
-        gstProcessBadge.style.pointerEvents = 'auto';
-        gstProcessBadge.style.opacity = '1';
-        gstProcessBadge.style.cursor = 'pointer';
-      }
-    } else {
-      if (inpGstNum) {
-        inpGstNum.setAttribute('readonly', 'true');
-        inpGstNum.style.backgroundColor = '#f8fafc';
-      }
-      if (inpGstTypeSel) {
-        inpGstTypeSel.setAttribute('disabled', 'true');
-        inpGstTypeSel.style.backgroundColor = '#f8fafc';
-      }
-      if (gstProcessBadge) {
-        gstProcessBadge.style.pointerEvents = 'none';
-        gstProcessBadge.style.opacity = '0.5';
-        gstProcessBadge.style.cursor = 'default';
-      }
-    }
-
-    const inpTdsCodeSel = document.getElementById('inpTdsCode');
-    const inpTdsRateSel = document.getElementById('inpTdsRate');
-    if (isTdsOn) {
-      if (inpTdsCodeSel) {
-        inpTdsCodeSel.removeAttribute('disabled');
-        inpTdsCodeSel.style.backgroundColor = '#ffffff';
-      }
-      if (inpTdsRateSel) {
-        inpTdsRateSel.removeAttribute('disabled');
-        inpTdsRateSel.style.backgroundColor = '#ffffff';
-      }
-    } else {
-      if (inpTdsCodeSel) {
-        inpTdsCodeSel.setAttribute('disabled', 'true');
-        inpTdsCodeSel.style.backgroundColor = '#f8fafc';
-      }
-      if (inpTdsRateSel) {
-        inpTdsRateSel.setAttribute('disabled', 'true');
-        inpTdsRateSel.style.backgroundColor = '#f8fafc';
-      }
-    }
-  }
 }
 window.updateVendorConditionalFields = updateVendorConditionalFields;
 window.updateVendorBusinessTypeFields = updateVendorConditionalFields;
+
+function updateCustomerConditionalFields() {
+  const inpBusinessType = document.getElementById('inpBusinessType');
+  const inpCustomerName = document.getElementById('inpCustomerName');
+  const inpGstToggle = document.getElementById('inpCustomerGstToggle');
+
+  const rowName = document.getElementById('rowCustomerName');
+  const rowPan = document.getElementById('rowCustomerPanNumber');
+  const rowPoDigits = document.getElementById('rowCustomerPoDigits');
+  const rowGstType = document.getElementById('rowCustomerGstType');
+  const rowGstNumber = document.getElementById('rowCustomerGstNumber');
+
+  const bType = (inpBusinessType?.value || 'Projects').trim();
+  const cName = (inpCustomerName?.value || '').trim().toLowerCase();
+  const isGstOn = inpGstToggle ? inpGstToggle.checked : false;
+
+  // 1. Business Type logic:
+  // When Supply: Customer Name and PAN Number should NOT appear.
+  // When Projects: Customer Name and PAN Number appear.
+  if (bType.toLowerCase() === 'supply') {
+    if (rowName) rowName.style.setProperty('display', 'none', 'important');
+    if (rowPan) rowPan.style.setProperty('display', 'none', 'important');
+    if (rowPoDigits) rowPoDigits.style.setProperty('display', 'none', 'important');
+  } else {
+    // Projects
+    if (rowName) rowName.style.setProperty('display', 'flex', 'important');
+    if (rowPan) rowPan.style.setProperty('display', 'flex', 'important');
+
+    // 2. Customer Legal Name logic:
+    // When user enters "indus tower" (or "indus towers ltd") -> show PO Starting Digits field, else hide
+    if (cName.includes('indus tower')) {
+      if (rowPoDigits) rowPoDigits.style.setProperty('display', 'flex', 'important');
+    } else {
+      if (rowPoDigits) rowPoDigits.style.setProperty('display', 'none', 'important');
+    }
+  }
+
+  // 3. GST Slidebar logic:
+  // When enabled -> show GST Number and GST Type
+  // When disabled -> hide GST Number and GST Type
+  if (isGstOn) {
+    if (rowGstType) rowGstType.style.setProperty('display', 'flex', 'important');
+    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'flex', 'important');
+  } else {
+    if (rowGstType) rowGstType.style.setProperty('display', 'none', 'important');
+    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'none', 'important');
+  }
+}
+window.updateCustomerConditionalFields = updateCustomerConditionalFields;
+
+// Attach Customer Form listeners
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('inpBusinessType')?.addEventListener('change', updateCustomerConditionalFields);
+  document.getElementById('inpCustomerGstToggle')?.addEventListener('change', updateCustomerConditionalFields);
+  document.getElementById('inpCustomerName')?.addEventListener('input', updateCustomerConditionalFields);
+  document.getElementById('inpCustomerName')?.addEventListener('change', updateCustomerConditionalFields);
+});
+document.getElementById('inpBusinessType')?.addEventListener('change', updateCustomerConditionalFields);
+document.getElementById('inpCustomerGstToggle')?.addEventListener('change', updateCustomerConditionalFields);
+document.getElementById('inpCustomerName')?.addEventListener('input', updateCustomerConditionalFields);
+document.getElementById('inpCustomerName')?.addEventListener('change', updateCustomerConditionalFields);
+
 
 window.openViewVendorCard = function(vendorId) {
   let vend = masterVendorData.find(v => v.id === vendorId || v.vendorName === vendorId || v.vendorId === vendorId);
@@ -18220,7 +18457,7 @@ window.openViewVendorCard = function(vendorId) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblVendorCardTitle');
-  if (lblTitle) lblTitle.innerText = 'View Vendor';
+  if (lblTitle) lblTitle.innerText = vend.vendorName || 'View Vendor';
 
   const btnEditToggle = document.getElementById('btnVendorCardEditToggle');
   const imgEditIcon = document.getElementById('imgVendorCardEditIcon');
@@ -18236,7 +18473,7 @@ window.openViewVendorCard = function(vendorId) {
   const btnScope = document.getElementById('btnVendorCardScope');
   if (btnBank) btnBank.style.display = 'inline-flex';
   if (btnMessage) btnMessage.style.display = 'inline-flex';
-  if (btnScope) btnScope.style.display = 'none';
+  if (btnScope) btnScope.style.display = 'inline-flex';
 
   const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
@@ -18255,7 +18492,7 @@ window.openViewVendorCard = function(vendorId) {
   }
 
   if (document.getElementById('inpVendorGstType')) document.getElementById('inpVendorGstType').value = vend.gstType || 'SGST';
-  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = vend.gstNumber || '';
+  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = (vend.gstNumber && vend.gstNumber !== 'NA') ? vend.gstNumber : '';
 
   const chkTds = document.getElementById('inpTdsDeductionToggle');
   if (chkTds) chkTds.checked = vend.tdsDeduction === true;
@@ -18269,7 +18506,6 @@ window.openViewVendorCard = function(vendorId) {
   }
 
   updateVendorConditionalFields();
-
   setVendorFormReadOnly(true);
   showToast(`Viewing vendor details: ${vend.vendorName}`);
 };
@@ -20125,6 +20361,466 @@ window.triggerAccountsPdfUpload = function() {
   } else {
     showToast('PDF file upload triggered');
   }
+};
+
+// ==========================================================================
+// MASTER -> CUSTOMER LOCATION & CONTACT MODALS
+// ==========================================================================
+let customerLocationData = [
+  { id: "CL-01", officeName: "Corporate Head Office", latitude: "28.4595", longitude: "77.0266", status: "Active" },
+  { id: "CL-02", officeName: "Regional Operations Hub", latitude: "19.0760", longitude: "72.8777", status: "Active" },
+  { id: "CL-03", officeName: "Southern Regional Office", latitude: "13.0827", longitude: "80.2707", status: "Active" },
+  { id: "CL-04", officeName: "Western Regional Office", latitude: "23.0225", longitude: "72.5714", status: "In - Active" }
+];
+
+let activeCustomerLocFilters = {};
+let currentCustomerLocFilterCol = null;
+
+let customerContactData = [
+  { id: "CC-01", name: "Vikram Malhotra", designation: "Chief Procurement Officer", contact: "+91 98101 23456", email: "vikram.m@indus.com", status: "Active" },
+  { id: "CC-02", name: "Ananya Deshmukh", designation: "Project Director", contact: "+91 98202 34567", email: "ananya.d@indus.com", status: "Active" },
+  { id: "CC-03", name: "Rajesh Kannan", designation: "Regional Ops Manager", contact: "+91 98403 45678", email: "rajesh.k@indus.com", status: "Active" },
+  { id: "CC-04", name: "Sunil Sharma", designation: "Commercial Lead", contact: "+91 98114 56789", email: "sunil.s@indus.com", status: "In - Active" }
+];
+
+let activeCustomerContactFilters = {};
+let currentCustomerContactFilterCol = null;
+
+// --- CUSTOMER LOCATION MODAL HANDLERS ---
+window.openCustomerLocationModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'customerLocationSidePanel') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('customerLocationSidePanel');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+  renderCustomerLocationTable();
+  showToast('Opened Office Locations');
+};
+
+window.closeCustomerLocationModal = function() {
+  const modal = document.getElementById('customerLocationSidePanel');
+  if (modal) modal.style.display = 'none';
+  const customerCard = document.getElementById('addCustomerCard');
+  if (customerCard && currentModule === 'master' && currentMasterSubpage === 'customer') {
+    customerCard.style.display = 'block';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.renderCustomerLocationTable = function() {
+  const tbody = document.getElementById('tbodyCustomerLocationDetails');
+  if (!tbody) return;
+
+  let filtered = [...customerLocationData];
+
+  for (const [colKey, allowedSet] of Object.entries(activeCustomerLocFilters)) {
+    if (allowedSet && allowedSet instanceof Set) {
+      filtered = filtered.filter(item => {
+        const val = String(item[colKey] !== undefined ? item[colKey] : '');
+        return allowedSet.has(val);
+      });
+    }
+  }
+
+  tbody.innerHTML = filtered.map(row => {
+    const isInactive = (row.status || '').toLowerCase().includes('in');
+    return `
+      <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.officeName || '').replace(/"/g, '&quot;')}">${row.officeName || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.latitude || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.longitude || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update filter button active states
+  const btnOffice = document.getElementById('btnCustomerLocOfficeFilter');
+  if (btnOffice) {
+    if (activeCustomerLocFilters['officeName']) btnOffice.classList.add('has-active-filter');
+    else btnOffice.classList.remove('has-active-filter');
+  }
+  const btnStatus = document.getElementById('btnCustomerLocStatusFilter');
+  if (btnStatus) {
+    if (activeCustomerLocFilters['status']) btnStatus.classList.add('has-active-filter');
+    else btnStatus.classList.remove('has-active-filter');
+  }
+};
+
+window.openCustomerLocationAddForm = function() {
+  const panel = document.getElementById('customerLocationSidePanel');
+  if (panel) panel.style.display = 'none';
+
+  const formCard = document.getElementById('addCustomerLocationCard');
+  if (formCard) {
+    formCard.style.display = 'block';
+    const frm = document.getElementById('frmAddCustomerLocation');
+    if (frm) frm.reset();
+    const stToggle = document.getElementById('inpCustLocStatusToggle');
+    if (stToggle) stToggle.checked = true;
+  }
+};
+
+window.closeAddCustomerLocationForm = function() {
+  const formCard = document.getElementById('addCustomerLocationCard');
+  if (formCard) formCard.style.display = 'none';
+
+  const panel = document.getElementById('customerLocationSidePanel');
+  if (panel) panel.style.display = 'block';
+};
+
+window.saveCustomerLocation = function() {
+  const name = document.getElementById('inpCustLocOfficeName')?.value?.trim();
+  const lat = document.getElementById('inpCustLocLatitude')?.value?.trim() || '';
+  const lng = document.getElementById('inpCustLocLongitude')?.value?.trim() || '';
+  const isChecked = document.getElementById('inpCustLocStatusToggle')?.checked;
+  const status = isChecked ? 'Active' : 'In - Active';
+
+  if (!name) {
+    showToast('Please enter Office Name');
+    return;
+  }
+
+  const newLoc = {
+    id: `CL-${String(customerLocationData.length + 1).padStart(2, '0')}`,
+    officeName: name,
+    latitude: lat,
+    longitude: lng,
+    status: status
+  };
+
+  customerLocationData.unshift(newLoc);
+  renderCustomerLocationTable();
+  closeAddCustomerLocationForm();
+  showToast('Office Location added successfully!');
+};
+
+window.openCustomerLocFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  currentCustomerLocFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(customerLocationData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeCustomerLocFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById(colKey === 'officeName' ? 'btnCustomerLocOfficeFilter' : 'btnCustomerLocStatusFilter');
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'customerLoc';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
+
+// --- CUSTOMER CONTACT MODAL HANDLERS ---
+window.openCustomerContactModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'customerContactSidePanel') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('customerContactSidePanel');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+  renderCustomerContactTable();
+  showToast('Opened Contact Details');
+};
+
+window.closeCustomerContactModal = function() {
+  const modal = document.getElementById('customerContactSidePanel');
+  if (modal) modal.style.display = 'none';
+  const customerCard = document.getElementById('addCustomerCard');
+  if (customerCard && currentModule === 'master' && currentMasterSubpage === 'customer') {
+    customerCard.style.display = 'block';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.renderCustomerContactTable = function() {
+  const tbody = document.getElementById('tbodyCustomerContactDetails');
+  if (!tbody) return;
+
+  let filtered = [...customerContactData];
+
+  for (const [colKey, allowedSet] of Object.entries(activeCustomerContactFilters)) {
+    if (allowedSet && allowedSet instanceof Set) {
+      filtered = filtered.filter(item => {
+        const val = String(item[colKey] !== undefined ? item[colKey] : '');
+        return allowedSet.has(val);
+      });
+    }
+  }
+
+  tbody.innerHTML = filtered.map(row => {
+    const isInactive = (row.status || '').toLowerCase().includes('in');
+    return `
+      <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+        <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${(row.name || '').replace(/"/g, '&quot;')}">${row.name || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.contact || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update filter button active states
+  const btnName = document.getElementById('btnCustomerContactNameFilter');
+  if (btnName) {
+    if (activeCustomerContactFilters['name']) btnName.classList.add('has-active-filter');
+    else btnName.classList.remove('has-active-filter');
+  }
+  const btnDesig = document.getElementById('btnCustomerContactDesigFilter');
+  if (btnDesig) {
+    if (activeCustomerContactFilters['designation']) btnDesig.classList.add('has-active-filter');
+    else btnDesig.classList.remove('has-active-filter');
+  }
+  const btnStatus = document.getElementById('btnCustomerContactStatusFilter');
+  if (btnStatus) {
+    if (activeCustomerContactFilters['status']) btnStatus.classList.add('has-active-filter');
+    else btnStatus.classList.remove('has-active-filter');
+  }
+};
+
+window.openCustomerContactAddForm = function() {
+  const panel = document.getElementById('customerContactSidePanel');
+  if (panel) panel.style.display = 'none';
+
+  const formCard = document.getElementById('addCustomerContactCard');
+  if (formCard) {
+    formCard.style.display = 'block';
+    const frm = document.getElementById('frmAddCustomerContact');
+    if (frm) frm.reset();
+    const stToggle = document.getElementById('inpCustContactStatusToggle');
+    if (stToggle) stToggle.checked = true;
+  }
+};
+
+window.closeAddCustomerContactForm = function() {
+  const formCard = document.getElementById('addCustomerContactCard');
+  if (formCard) formCard.style.display = 'none';
+
+  const panel = document.getElementById('customerContactSidePanel');
+  if (panel) panel.style.display = 'block';
+};
+
+window.saveCustomerContact = function() {
+  const name = document.getElementById('inpCustContactName')?.value?.trim();
+  const desig = document.getElementById('inpCustContactDesignation')?.value?.trim() || '';
+  const phone = document.getElementById('inpCustContactPhone')?.value?.trim() || '';
+  const email = document.getElementById('inpCustContactEmail')?.value?.trim() || '';
+  const isChecked = document.getElementById('inpCustContactStatusToggle')?.checked;
+  const status = isChecked ? 'Active' : 'In - Active';
+
+  if (!name) {
+    showToast('Please enter Name');
+    return;
+  }
+
+  const newContact = {
+    id: `CC-${String(customerContactData.length + 1).padStart(2, '0')}`,
+    name: name,
+    designation: desig,
+    contact: phone,
+    email: email,
+    status: status
+  };
+
+  customerContactData.unshift(newContact);
+  renderCustomerContactTable();
+  closeAddCustomerContactForm();
+  showToast('Contact added successfully!');
+};
+
+window.triggerCustomerContactCsvUpload = function() {
+  document.getElementById('inpCustContactCsvFile')?.click();
+};
+
+window.handleCustomerContactCsvFile = function(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const newItems = [
+      { id: `CC-${String(customerContactData.length + 1).padStart(2, '0')}`, name: "Suresh Narayanan", designation: "Regional Procurement Head", contact: "+91 98401 11223", email: "suresh.n@indus.com", status: "Active" },
+      { id: `CC-${String(customerContactData.length + 2).padStart(2, '0')}`, name: "Meera Krishnan", designation: "Site Coordinator", contact: "+91 98402 33445", email: "meera.k@indus.com", status: "Active" }
+    ];
+    customerContactData.unshift(...newItems);
+    renderCustomerContactTable();
+    showToast(`CSV uploaded successfully: ${file.name}`);
+    input.value = '';
+  }
+};
+
+window.triggerCustomerContactBulkUpload = function() {
+  document.getElementById('inpCustContactFolderFile')?.click();
+};
+
+window.handleCustomerContactFolderFile = function(input) {
+  if (input.files && input.files.length > 0) {
+    const count = input.files.length;
+    const folderPath = input.files[0].webkitRelativePath || '';
+    const folderName = folderPath.split('/')[0] || 'Selected Folder';
+    const newItems = [
+      { id: `CC-${String(customerContactData.length + 1).padStart(2, '0')}`, name: "Pooja Banerjee", designation: "Commercial Executive", contact: "+91 98305 66778", email: "pooja.b@indus.com", status: "Active" },
+      { id: `CC-${String(customerContactData.length + 2).padStart(2, '0')}`, name: "Ramesh Verma", designation: "Operations Lead", contact: "+91 98306 77889", email: "ramesh.v@indus.com", status: "Active" }
+    ];
+    customerContactData.unshift(...newItems);
+    renderCustomerContactTable();
+    showToast(`Bulk upload completed: ${count} documents imported from folder "${folderName}"`);
+    input.value = '';
+  }
+};
+
+window.openCustomerContactFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  currentCustomerContactFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(customerContactData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeCustomerContactFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById(`btnCustomerContact${colKey.charAt(0).toUpperCase() + colKey.slice(1)}Filter`);
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'customerContact';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
+
+window.openViewCustomerCard = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'addCustomerCard') card.style.display = 'none';
+  });
+
+  const row = (rowId && (typeof masterCustomerData !== 'undefined') && masterCustomerData.find(r => r.id === rowId)) || 
+              ((typeof masterCustomerData !== 'undefined') && masterCustomerData[0]);
+  if (!row) return;
+
+  const addCustomerCard = document.getElementById('addCustomerCard');
+  if (addCustomerCard) {
+    addCustomerCard.style.display = 'block';
+    const lblTitle = document.getElementById('lblCustomerCardTitle');
+    if (lblTitle) lblTitle.innerText = 'View Customer';
+
+    const bTypeSelect = document.getElementById('inpBusinessType');
+    if (bTypeSelect) bTypeSelect.value = row.businessType || 'Projects';
+
+    const inpName = document.getElementById('inpCustomerName');
+    if (inpName) inpName.value = row.customerName || '';
+
+    const inpDigits = document.getElementById('inpCustomerPoDigits');
+    if (inpDigits) inpDigits.value = row.poDigits || '450';
+
+    const gstToggle = document.getElementById('inpCustomerGstToggle');
+    if (gstToggle) gstToggle.checked = (row.gstNumber && row.gstNumber !== 'NA');
+
+    const inpGstType = document.getElementById('inpGstType');
+    if (inpGstType) inpGstType.value = row.gstType || 'SGST';
+
+    const inpGstNumber = document.getElementById('inpGstNumber');
+    if (inpGstNumber) inpGstNumber.value = (row.gstNumber && row.gstNumber !== 'NA') ? row.gstNumber : '';
+
+    const inpPan = document.getElementById('inpPanNumber');
+    if (inpPan) inpPan.value = row.panNumber || '33ASMPM8643F';
+
+    const inpAddress = document.getElementById('inpAddress');
+    if (inpAddress) inpAddress.value = row.address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
+
+    const statusToggle = document.getElementById('inpStatusToggle');
+    if (statusToggle) statusToggle.checked = !((row.status || '').toLowerCase().includes('in'));
+
+    if (typeof updateCustomerConditionalFields === 'function') {
+      updateCustomerConditionalFields();
+    }
+  }
+
+  overlay.style.display = 'flex';
+  showToast('Opened View Customer');
 };
 
 

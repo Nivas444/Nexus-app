@@ -387,47 +387,48 @@
         <!-- 1B. Main Add Customer Form Card -->
         <div class="side-form-card" id="addCustomerCard">
           <!-- Header -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge">Add Customer</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseSideForm"
-              aria-label="Close form">&times;</button>
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblCustomerCardTitle" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Customer
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnCustomerCardEditToggle" title="Edit Info" style="display: none; background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Edit.svg" id="imgCustomerCardEditIcon" alt="Edit" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnCustomerLocation" onclick="openCustomerLocationModal()" title="Office Locations" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Location.svg" alt="Location" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnCustomerContact" onclick="openCustomerContactModal()" title="Contact Details" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseSideForm" aria-label="Close form" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+            </div>
           </div>
 
           <!-- Form Rows Grid -->
           <form class="side-form-body" id="frmAddCustomer" onsubmit="event.preventDefault();">
 
             <!-- 1. Business Type -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowCustomerBusinessType">
               <label class="form-label" for="inpBusinessType">Business Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpBusinessType">
-                  <option value="Telecom" selected>Telecom</option>
-                  <option value="Infra">Infra</option>
+                  <option value="Projects" selected>Projects</option>
                   <option value="Supply">Supply</option>
-                  <option value="Audit">Audit</option>
                 </select>
               </div>
             </div>
 
-            <!-- 2. Customer ID -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpCustomerId">Customer ID</label>
+            <!-- 2. Customer Legal Name -->
+            <div class="form-row-group" id="rowCustomerName">
+              <label class="form-label" for="inpCustomerName">Customer Legal Name</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpCustomerId" value="230510679"
-                  placeholder="Enter Customer ID">
+                <input type="text" class="form-input-control" id="inpCustomerName" placeholder="Enter Customer Legal Name">
               </div>
             </div>
 
-            <!-- 3. Customer Name -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpCustomerName">Customer Name</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpCustomerName" placeholder="Enter Customer Name">
-              </div>
-            </div>
-
-            <!-- PO Starting Digits (Max 3 Digits Only) -->
-            <div class="form-row-group">
+            <!-- PO Starting Digits (Max 3 Digits Only, shown only when Indus Towers Ltd is entered) -->
+            <div class="form-row-group" id="rowCustomerPoDigits" style="display: none;">
               <label class="form-label" for="inpCustomerPoDigits">PO Starting Digits</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpCustomerPoDigits" maxlength="3"
@@ -435,81 +436,67 @@
               </div>
             </div>
 
-            <!-- 4. GST Type -->
-            <div class="form-row-group">
+            <!-- 3. GST Slidebar Toggle -->
+            <div class="form-row-group" id="rowCustomerGstToggle">
+              <label class="form-label">GST</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpCustomerGstToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 4. GST Type (Shown when GST is enabled) -->
+            <div class="form-row-group" id="rowCustomerGstType" style="display: none;">
               <label class="form-label" for="inpGstType">GST Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpGstType">
-                  <option value="SGST">SGST</option>
+                  <option value="SGST" selected>SGST</option>
                   <option value="IGST">IGST</option>
                   <option value="NA">NA</option>
                 </select>
               </div>
             </div>
 
-            <!-- 5. GST Number with PDF badge -->
-            <div class="form-row-group">
+            <!-- 5. GST Number with PDF badge (Shown when GST is enabled) -->
+            <div class="form-row-group" id="rowCustomerGstNumber" style="display: none;">
               <label class="form-label" for="inpGstNumber">GST Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpGstNumber"
-                  value="33ASMPM8643F">
+                  placeholder="Enter GST Number">
                 <span class="input-pdf-badge" title="Upload PDF">
                   <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>
 
-            <!-- 6. PAN Number with PDF badge -->
-            <div class="form-row-group">
+            <!-- 6. PAN Number with PDF badge (Shown when Business Type is Projects) -->
+            <div class="form-row-group" id="rowCustomerPanNumber">
               <label class="form-label" for="inpPanNumber">PAN Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpPanNumber"
-                  value="33ASMPM8643F">
+                  placeholder="Enter PAN Number">
                 <span class="input-pdf-badge" title="Upload PDF">
                   <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>
             </div>
 
-            <!-- 7. Invoice Type -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpInvoiceType">Invoice Type</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpInvoiceType">
-                  <option value="B2B">B2B</option>
-                  <option value="B2C">B2C</option>
-                  <option value="Cash">Cash</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 8. Address -->
-            <div class="form-row-group">
+            <!-- 7. Address -->
+            <div class="form-row-group" id="rowCustomerAddress">
               <label class="form-label" for="inpAddress">Address</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpAddress" placeholder="Enter Company Address">
               </div>
             </div>
 
-            <!-- 9. Circle Dropdown -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpCircle">Circle</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpCircle">
-                  <option value="KTN" selected>KTN</option>
-                  <option value="KK">KK</option>
-                  <option value="AP">AP</option>
-                  <option value="MP">MP</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 10. Status (Real Slide Toggle Switch: Green ON, Red OFF - No wording) -->
-            <div class="form-row-group">
+            <!-- 8. Status (Real Slide Toggle Switch: Green ON, Red OFF - No wording) -->
+            <div class="form-row-group" id="rowCustomerStatus">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
                 <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpStatusToggle">
+                  <input type="checkbox" id="inpStatusToggle" checked>
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
@@ -4615,7 +4602,7 @@
         <div class="side-form-card side-contact-popup" id="vendorBankSideCard" style="display: none; width: 460px;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblVendorBankCardTitle">Vendor Bank Details</div>
+            <div class="side-form-title-badge" id="lblVendorBankCardTitle">Bank Details</div>
             <div class="side-header-top-icons">
               <button type="button" class="side-top-icon-btn" id="btnVendorBankEditToggle" title="Edit Info" style="display: none;">
                 <img src="icons/Edit.svg" id="imgVendorBankEditIcon" alt="Edit" width="26" height="26">
@@ -7670,6 +7657,339 @@
           </form>
         </div>
 
+        <!-- Telecom -> Telecom Details Form Tab Card (Matching Add Customer Fields) -->
+        <div class="side-form-card" id="telecomDetailsCard" style="display: none; width: 440px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; padding: 0;">
+          <!-- Header -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblTelecomDetailsCardTitle" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Telecom Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnTelecomDetailsEditToggle" onclick="toggleTelecomDetailsEdit()" title="Edit Info" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Edit.svg" id="imgTelecomDetailsEditIcon" alt="Edit" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseTelecomDetailsCard" onclick="closeTelecomDetailsModal()" aria-label="Close" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmTelecomDetails" onsubmit="event.preventDefault();" style="padding: 12px 24px 24px 24px; display: flex; flex-direction: column; gap: 12px;">
+            
+            <!-- 1. Business Type (Read-only) -->
+            <div class="form-row-group" id="rowTelecomBusinessType">
+              <label class="form-label" for="inpTelecomBusinessType">Business Type</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpTelecomBusinessType" value="Projects" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+
+            <!-- 2. Customer Legal Name (Read-only) -->
+            <div class="form-row-group" id="rowTelecomCustomerName">
+              <label class="form-label" for="inpTelecomCustomerName">Customer Legal Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpTelecomCustomerName" value="Indus Towers Ltd" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+
+            <!-- 3. PO Starting Digits (Read-only) -->
+            <div class="form-row-group" id="rowTelecomPoDigits">
+              <label class="form-label" for="inpTelecomPoDigits">PO Starting Digits</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpTelecomPoDigits" value="450" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+
+            <!-- 4. GST Slidebar Toggle -->
+            <div class="form-row-group" id="rowTelecomGstToggle">
+              <label class="form-label">GST</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpTelecomGstToggle" checked disabled onchange="handleTelecomGstToggleChange()">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 5. GST Type (Shown when GST is enabled) -->
+            <div class="form-row-group" id="rowTelecomGstType">
+              <label class="form-label" for="inpTelecomGstType">GST Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpTelecomGstType" disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+                  <option value="SGST" selected>SGST</option>
+                  <option value="IGST">IGST</option>
+                  <option value="NA">NA</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. GST Number with PDF badge (Shown when GST is enabled) -->
+            <div class="form-row-group" id="rowTelecomGstNumber">
+              <label class="form-label" for="inpTelecomGstNumber">GST Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control form-input-highlight" id="inpTelecomGstNumber" value="33ASMPM8643F1Z5" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                </span>
+              </div>
+            </div>
+
+            <!-- 7. PAN Number with PDF badge -->
+            <div class="form-row-group" id="rowTelecomPanNumber">
+              <label class="form-label" for="inpTelecomPanNumber">PAN Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control form-input-highlight" id="inpTelecomPanNumber" value="33ASMPM8643F" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+                <span class="input-pdf-badge" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                </span>
+              </div>
+            </div>
+
+            <!-- 8. Address -->
+            <div class="form-row-group" id="rowTelecomAddress">
+              <label class="form-label" for="inpTelecomAddress">Address</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpTelecomAddress" value="Building 10, DLF Cyber City, Gurugram, Haryana - 122002" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+
+            <!-- 9. Status (Real Slide Toggle Switch: Green ON, Red OFF) -->
+            <div class="form-row-group" id="rowTelecomStatus">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpTelecomStatusToggle" checked disabled>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Customer -> Office Location Table Popup -->
+        <div class="side-form-card side-contact-popup" id="customerLocationSidePanel"
+          style="display: none; width: 680px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblCustomerLocationCardTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Office Location
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnCustomerLocationAddRow" onclick="openCustomerLocationAddForm()" title="Add Office Location"
+                style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseCustomerLocationPanel"
+                onclick="closeCustomerLocationModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblCustomerLocationPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
+                      <span>Office Name</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnCustomerLocOfficeFilter" data-filter-col="officeName" onclick="openCustomerLocFilter('officeName', event)" title="Filter Office Name">▼</button>
+                    </div>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Latitude</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Longitude</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
+                      <span>Status</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnCustomerLocStatusFilter" data-filter-col="status" onclick="openCustomerLocFilter('status', event)" title="Filter Status">▼</button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyCustomerLocationDetails">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Customer -> Add Office Location Form Card -->
+        <div class="side-form-card" id="addCustomerLocationCard"
+          style="display: none; width: 440px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; padding: 0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblAddCustomerLocationTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Office Location
+            </div>
+            <button type="button" class="side-form-close-btn" id="btnCloseAddCustomerLocationCard"
+              onclick="closeAddCustomerLocationForm()" aria-label="Close"
+              style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+          </div>
+          <form class="side-form-body" id="frmAddCustomerLocation" onsubmit="event.preventDefault();"
+            style="padding: 12px 24px 24px 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustLocOfficeName">Office Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustLocOfficeName" placeholder="Enter Office Name">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustLocLatitude">Latitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustLocLatitude" placeholder="e.g. 28.4595">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustLocLongitude">Longitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustLocLongitude" placeholder="e.g. 77.0266">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpCustLocStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitCustomerLocation" onclick="saveCustomerLocation()" title="Save Location"
+                aria-label="Submit" style="background: none; border: none; cursor: pointer; padding: 0;">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Customer -> Contact Details Table Popup -->
+        <div class="side-form-card side-contact-popup" id="customerContactSidePanel"
+          style="display: none; width: 1050px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblCustomerContactCardTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Contact Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnCustomerContactAddRow" onclick="openCustomerContactAddForm()" title="Add Contact"
+                style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnCustomerContactCsvUpload" onclick="triggerCustomerContactCsvUpload()" title="CSV / Excel Upload"
+                style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/CSV upload.svg" alt="CSV Upload" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnCustomerContactBulkUpload" onclick="triggerCustomerContactBulkUpload()" title="Bulk Upload Folder"
+                style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Bulk Upload.svg" alt="Bulk Upload" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseCustomerContactPanel"
+                onclick="closeCustomerContactModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblCustomerContactPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
+                      <span>Name</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnCustomerContactNameFilter" data-filter-col="name" onclick="openCustomerContactFilter('name', event)" title="Filter Name">▼</button>
+                    </div>
+                  </th>
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
+                      <span>Designation</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnCustomerContactDesigFilter" data-filter-col="designation" onclick="openCustomerContactFilter('designation', event)" title="Filter Designation">▼</button>
+                    </div>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Contact</span>
+                  </th>
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Email</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
+                      <span>Status</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnCustomerContactStatusFilter" data-filter-col="status" onclick="openCustomerContactFilter('status', event)" title="Filter Status">▼</button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyCustomerContactDetails">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Customer -> Add Contact Form Card -->
+        <div class="side-form-card" id="addCustomerContactCard"
+          style="display: none; width: 460px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; padding: 0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblAddCustomerContactTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Contact
+            </div>
+            <button type="button" class="side-form-close-btn" id="btnCloseAddCustomerContactCard"
+              onclick="closeAddCustomerContactForm()" aria-label="Close"
+              style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+          </div>
+          <form class="side-form-body" id="frmAddCustomerContact" onsubmit="event.preventDefault();"
+            style="padding: 12px 24px 24px 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustContactName">Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustContactName" placeholder="Enter Full Name">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustContactDesignation">Designation</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustContactDesignation" placeholder="Enter Designation">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustContactPhone">Contact</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustContactPhone" placeholder="Enter Contact Number">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpCustContactEmail">Email</label>
+              <div class="form-input-wrap">
+                <input type="email" class="form-input-control" id="inpCustContactEmail" placeholder="Enter Email Address">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpCustContactStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitCustomerContact" onclick="saveCustomerContact()" title="Save Contact"
+                aria-label="Submit" style="background: none; border: none; cursor: pointer; padding: 0;">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
       </div>
 
     </div>
@@ -7732,14 +8052,16 @@
     </div>
   </div>
 
-  <!-- Hidden File Pickers for Accounts Uploads -->
+  <!-- Hidden File Pickers for Accounts & Customer Uploads -->
   <input type="file" id="accountsCsvFileInput" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv" style="display: none;" onchange="if(this.files[0]) showToast('File selected: ' + this.files[0].name);">
   <input type="file" id="accountsPdfFileInput" accept=".pdf, application/pdf" style="display: none;" onchange="if(this.files[0]) showToast('PDF selected: ' + this.files[0].name);">
+  <input type="file" id="inpCustContactCsvFile" accept=".csv, .xlsx, .xls, text/csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display: none;" onchange="handleCustomerContactCsvFile(this)">
+  <input type="file" id="inpCustContactFolderFile" webkitdirectory directory multiple style="display: none;" onchange="handleCustomerContactFolderFile(this)">
 
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260923_2328"></script>
+  <script src="assets/js/home.js?v=20260924_1545"></script>
 </body>
 
 </html>

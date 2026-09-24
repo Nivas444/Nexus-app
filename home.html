@@ -2265,20 +2265,21 @@
         <!-- 1H. Indus / Site Form Card (Add Sites Modal matching uploaded mockup) -->
         <div class="side-form-card" id="addSiteCard" style="display: none;">
           <!-- Header -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblSiteCardTitle">Add Sites</div>
-            <div class="side-header-top-icons">
-              <button type="button" class="side-top-icon-btn" id="btnSiteCardMessageIcon" title="Contact Details"
-                style="display: none;">
-                <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="28"
-                  height="28">
-              </button>
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblSiteCardTitle" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Sites
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
               <button type="button" class="side-top-icon-btn" id="btnSiteCardEditToggle" title="Edit Info"
-                style="display: none;">
-                <img src="icons/Edit.svg" id="imgSiteCardEditIcon" alt="Edit" width="28" height="28">
+                style="display: none; background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Edit.svg" id="imgSiteCardEditIcon" alt="Edit" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnSiteCardMessageIcon" onclick="openSiteContactModal()" title="Contact Details"
+                style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="24" height="24">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseSiteForm"
-                aria-label="Close form">&times;</button>
+                aria-label="Close form" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
             </div>
           </div>
 
@@ -2287,29 +2288,15 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddSite" onsubmit="event.preventDefault();">
-            <!-- 1. Circle -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpSiteCircle">Circle</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpSiteCircle">
-                  <option value="" selected></option>
-                  <option value="Chennai">Chennai</option>
-                  <option value="TN">TN</option>
-                  <option value="Bangalore">Bangalore</option>
-                  <option value="Mumbai">Mumbai</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 2. Site ID -->
+            <!-- 1. Site ID -->
             <div class="form-row-group">
               <label class="form-label" for="inpSiteId">Site ID</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpSiteId" placeholder="">
+                <input type="text" class="form-input-control" id="inpSiteId" placeholder="Enter Site ID">
               </div>
             </div>
 
-            <!-- 3. WH ID -->
+            <!-- 2. WH ID -->
             <div class="form-row-group">
               <label class="form-label" for="inpSiteWhId">WH ID</label>
               <div class="form-input-wrap">
@@ -2322,11 +2309,22 @@
               </div>
             </div>
 
-            <!-- 4. Site Name -->
+            <!-- 3. Site Name -->
             <div class="form-row-group">
               <label class="form-label" for="inpSiteName">Site Name</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpSiteName" placeholder="">
+                <input type="text" class="form-input-control" id="inpSiteName" placeholder="Enter Site Name">
+              </div>
+            </div>
+
+            <!-- 4. Tower Type (GBT / RTT) -->
+            <div class="form-row-group" id="rowSiteTowerType">
+              <label class="form-label" for="inpSiteTowerType">Tower Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpSiteTowerType">
+                  <option value="GBT" selected>GBT</option>
+                  <option value="RTT">RTT</option>
+                </select>
               </div>
             </div>
 
@@ -7990,6 +7988,174 @@
           </form>
         </div>
 
+        <!-- Site -> Site Contact Details Table Popup (Triggered from Add Site / Site Details) -->
+        <div class="side-form-card side-contact-popup" id="siteContactSidePanel"
+          style="display: none; width: 920px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblSiteContactCardTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Site Contact Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnSiteContactAddRow" onclick="openSiteContactAddForm()" title="Add Contact"
+                style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseSiteContactPanel"
+                onclick="closeSiteContactModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblSiteContactPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
+                      <span>Name</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnSiteContactNameFilter" data-filter-col="name" onclick="openSiteContactFilter('name', event)" title="Filter Name">▼</button>
+                    </div>
+                  </th>
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Designation</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Mobile</span>
+                  </th>
+                  <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Email</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
+                      <span>Status</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnSiteContactStatusFilter" data-filter-col="status" onclick="openSiteContactFilter('status', event)" title="Filter Status">▼</button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodySiteContactDetails">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Site -> Add Site Contact Form Card -->
+        <div class="side-form-card" id="addSiteContactCard"
+          style="display: none; width: 460px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; padding: 0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblAddSiteContactTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Contact
+            </div>
+            <button type="button" class="side-form-close-btn" id="btnCloseAddSiteContactCard"
+              onclick="closeAddSiteContactForm()" aria-label="Close"
+              style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+          </div>
+          <form class="side-form-body" id="frmAddSiteContact" onsubmit="event.preventDefault();"
+            style="padding: 12px 24px 24px 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-row-group">
+              <label class="form-label" for="inpSiteContactName">Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteContactName" placeholder="Enter Name">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpSiteContactDesig">Designation</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteContactDesig" placeholder="Enter Designation">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpSiteContactMobile">Mobile</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpSiteContactMobile" placeholder="Enter Mobile Number">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpSiteContactEmail">Email</label>
+              <div class="form-input-wrap">
+                <input type="email" class="form-input-control" id="inpSiteContactEmail" placeholder="Enter Email Address">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpSiteContactStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitSiteContact" onclick="saveSiteContact()" title="Save Contact"
+                aria-label="Submit" style="background: none; border: none; cursor: pointer; padding: 0;">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Site -> View Site Contact Details Form Card (Triggered from View Site tab) -->
+        <div class="side-form-card" id="viewSiteContactCard"
+          style="display: none; width: 480px !important; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; padding: 0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblViewSiteContactCardTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Site Contact Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnViewSiteContactEditToggle" onclick="toggleViewSiteContactEdit()" title="Edit Contact"
+                style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Edit.svg" id="imgViewSiteContactEditIcon" alt="Edit" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseViewSiteContactCard"
+                onclick="closeViewSiteContactModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
+            </div>
+          </div>
+          <form class="side-form-body" id="frmViewSiteContact" onsubmit="event.preventDefault();"
+            style="padding: 12px 24px 24px 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewSiteContactName">Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewSiteContactName" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewSiteContactDesig">Designation</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewSiteContactDesig" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewSiteContactMobile">Mobile</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewSiteContactMobile" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewSiteContactEmail">Email</label>
+              <div class="form-input-wrap">
+                <input type="email" class="form-input-control" id="inpViewSiteContactEmail" readonly disabled style="background: #f8fafc; color: #64748b; cursor: not-allowed;">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpViewSiteContactStatusToggle" checked disabled>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+
       </div>
 
     </div>
@@ -8061,7 +8227,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260924_1545"></script>
+  <script src="assets/js/home.js?v=20260924_site_update"></script>
 </body>
 
 </html>

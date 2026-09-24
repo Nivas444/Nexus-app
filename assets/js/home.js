@@ -715,42 +715,55 @@ let currentIndusSubpage = 'site'; // 'site', 'products', 'infra', 'projects'
 const indusSiteData = [
   {
     id: "indus-1",
-    circle: "KTN",
     siteId: "230510678",
-    whId: "KTN",
+    whId: "WH-101",
     siteName: "R/RL-234567",
-    district: "R/RL-234567",
-    town: "",
-    latitude: "SGST",
-    longitude: "B2B",
-    transportZone: "",
-    status: "Active"
+    towerType: "GBT",
+    district: "Chennai",
+    town: "Ambattur",
+    address: "123 Industrial Area, Sector 4",
+    latitude: "13.0827",
+    longitude: "80.2707",
+    transportZone: "Zone-A",
+    status: "Active",
+    contacts: [
+      { id: "SC-101", name: "Suresh Narayanan", designation: "Site Engineer", mobile: "+91 98401 12345", email: "suresh.n@indus.com", status: "Active" },
+      { id: "SC-102", name: "Kavitha Raman", designation: "Operations Officer", mobile: "+91 98402 23456", email: "kavitha.r@indus.com", status: "Active" }
+    ]
   },
   {
     id: "indus-2",
-    circle: "KK",
-    siteId: "230510678",
-    whId: "KK",
-    siteName: "R/RL-234567",
-    district: "R/RL-234567",
-    town: "",
-    latitude: "IGST",
-    longitude: "B2C",
-    transportZone: "",
-    status: "In - Active"
+    siteId: "230510679",
+    whId: "WH-102",
+    siteName: "R/RL-234568",
+    towerType: "RTT",
+    district: "Kanchipuram",
+    town: "Sriperumbudur",
+    address: "Plot 45, SIPCOT Industrial Park",
+    latitude: "12.9675",
+    longitude: "79.9404",
+    transportZone: "Zone-B",
+    status: "Active",
+    contacts: [
+      { id: "SC-103", name: "Rajesh Kannan", designation: "Field Supervisor", mobile: "+91 98403 34567", email: "rajesh.k@indus.com", status: "Active" }
+    ]
   },
   {
     id: "indus-3",
-    circle: "AP",
-    siteId: "230510678",
-    whId: "AP",
-    siteName: "R/RL-234567",
-    district: "R/RL-234567",
-    town: "",
-    latitude: "NA",
-    longitude: "Cash",
-    transportZone: "",
-    status: "Active"
+    siteId: "230510680",
+    whId: "WH-103",
+    siteName: "R/RL-234569",
+    towerType: "GBT",
+    district: "Tiruvallur",
+    town: "Gummidipoondi",
+    address: "Highway Cross 12, GNT Road",
+    latitude: "13.4072",
+    longitude: "80.1292",
+    transportZone: "Zone-C",
+    status: "In - Active",
+    contacts: [
+      { id: "SC-104", name: "Dinesh Kumar", designation: "Technical Lead", mobile: "+91 98404 45678", email: "dinesh.k@indus.com", status: "In - Active" }
+    ]
   }
 ];
 
@@ -4979,50 +4992,35 @@ function renderIndusTableHead() {
   } else {
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th class="col-site-circle">
-          <div class="th-content-wrap">
-            <span>Circle</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['circle'] ? 'has-active-filter' : ''}" data-filter-col="circle" title="Filter Circle">&#9660;</button>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>Site ID</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>WH ID</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['whId'] ? 'has-active-filter' : ''}" data-filter-col="whId" title="Filter WH ID">&#9660;</button>
           </div>
         </th>
-        <th class="col-site-id">
-          <div class="th-content-wrap">
-            <span>Site ID</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
-          </div>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Site Name</span>
         </th>
-        <th class="col-site-wh">WH ID</th>
-        <th class="col-site-name">
-          <div class="th-content-wrap">
-            <span>Site Name</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>District</span>
         </th>
-        <th class="col-site-district">
-          <div class="th-content-wrap">
-            <span>District</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['district'] ? 'has-active-filter' : ''}" data-filter-col="district" title="Filter District">&#9660;</button>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Town</span>
         </th>
-        <th class="col-site-town">
-          <div class="th-content-wrap">
-            <span>Town</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['town'] ? 'has-active-filter' : ''}" data-filter-col="town" title="Filter Town">&#9660;</button>
-          </div>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>Latitude</span>
         </th>
-        <th class="col-site-lat">Lattitude</th>
-        <th class="col-site-lng">Longtitude</th>
-        <th class="col-site-transport-zone">
-          <div class="th-content-wrap">
-            <span>Transport Zone</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportZone'] ? 'has-active-filter' : ''}" data-filter-col="transportZone" title="Filter Transport Zone">&#9660;</button>
-          </div>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>Longitude</span>
         </th>
-        <th class="col-site-status">
-          <div class="th-content-wrap">
-            <span>Status</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Transport Zone</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>Status</span>
         </th>
       </tr>
     `;
@@ -10327,24 +10325,23 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else {
-      // Render Indus Towers Site Rows (Matching Mockup)
+      // Render Indus Towers Site Rows
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
-          <tr data-row-id="${row.id}">
-            <td class="col-site-circle">${row.circle}</td>
-            <td class="col-site-id">${row.siteId}</td>
-            <td class="col-site-wh">${row.whId}</td>
-            <td class="col-site-name">
-              <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${row.id}', '${row.siteName}'); return false;">${row.siteName}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+              <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${row.id}', '${row.siteName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;" title="View Site Details">${row.siteId || ''}</a>
             </td>
-            <td class="col-site-district">${row.district}</td>
-            <td class="col-site-town">${row.town || ''}</td>
-            <td class="col-site-lat">${row.latitude}</td>
-            <td class="col-site-lng">${row.longitude}</td>
-            <td class="col-site-transport-zone td-center">${row.transportZone || ''}</td>
-            <td class="col-site-status td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.whId || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">${row.siteName || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.district || '').replace(/"/g, '&quot;')}">${row.district || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.town || '').replace(/"/g, '&quot;')}">${row.town || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.latitude || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.longitude || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${row.transportZone || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
           </tr>
         `;
@@ -12564,36 +12561,36 @@ function initSideFormEvents() {
         return;
       }
 
-      const circle = document.getElementById('inpSiteCircle')?.value || document.getElementById('inpInfraCircle')?.value || "KTN";
-      const siteId = document.getElementById('inpSiteId')?.value || document.getElementById('inpInfraSiteId')?.value || `23051068${currentDataset.length + 1}`;
-      const whId = document.getElementById('inpSiteWhId')?.value || document.getElementById('inpInfraWhId')?.value || "KTN";
-      const siteName = document.getElementById('inpSiteName')?.value || document.getElementById('inpInfraSiteName')?.value || "New Site";
-      const district = document.getElementById('inpSiteDistrict')?.value || document.getElementById('inpInfraDistrict')?.value || "Chennai";
-      const town = document.getElementById('inpSiteTown')?.value || document.getElementById('inpInfraTown')?.value || "";
-      const latitude = document.getElementById('inpSiteLattitude')?.value || document.getElementById('inpInfraLatitude')?.value || "13.0000° N";
-      const longitude = document.getElementById('inpSiteLongtitude')?.value || document.getElementById('inpInfraLongitude')?.value || "80.0000° E";
-      const transportZone = document.getElementById('inpSiteTransportZone')?.value || document.getElementById('inpInfraTransportZone')?.value || "";
-      const siteStatusToggle = document.getElementById('inpSiteStatusToggle') || document.getElementById('inpInfraStatusToggle');
+      const siteId = document.getElementById('inpSiteId')?.value?.trim() || `23051068${indusSiteData.length + 1}`;
+      const whId = document.getElementById('inpSiteWhId')?.value?.trim() || "WH-101";
+      const siteName = document.getElementById('inpSiteName')?.value?.trim() || "New Site";
+      const towerType = document.getElementById('inpSiteTowerType')?.value?.trim() || "GBT";
+      const district = document.getElementById('inpSiteDistrict')?.value?.trim() || "Chennai";
+      const town = document.getElementById('inpSiteTown')?.value?.trim() || "Ambattur";
+      const address = document.getElementById('inpSiteAddress')?.value?.trim() || "";
+      const latitude = document.getElementById('inpSiteLattitude')?.value?.trim() || "13.0827";
+      const longitude = document.getElementById('inpSiteLongtitude')?.value?.trim() || "80.2707";
+      const transportZone = document.getElementById('inpSiteTransportZone')?.value?.trim() || "Zone-A";
+      const siteStatusToggle = document.getElementById('inpSiteStatusToggle');
       const status = (siteStatusToggle && siteStatusToggle.checked) ? "Active" : "In - Active";
 
       const newRecord = {
         id: `indus-${Date.now()}`,
-        circle,
         siteId,
         whId,
         siteName,
+        towerType,
         district,
         town,
+        address,
         latitude,
         longitude,
         transportZone,
-        status
+        status,
+        contacts: (typeof siteDefaultContacts !== 'undefined' && siteDefaultContacts.length > 0) ? [...siteDefaultContacts] : []
       };
 
-      if (currentIndusSubpage === 'site') indusSiteData.push(newRecord);
-      else if (currentIndusSubpage === 'products') indusProductsData.push(newRecord);
-      else if (currentIndusSubpage === 'projects') indusProjectsData.push(newRecord);
-
+      indusSiteData.unshift(newRecord);
       loadIndusDataset();
       applyFiltersAndRender();
       closeSideForm();
@@ -14099,9 +14096,21 @@ function openSideForm() {
         const btnSaveWrap = document.querySelector('#frmAddSite .form-submit-inside-wrap');
         if (lblTitle) lblTitle.innerText = 'Add Sites';
         if (btnEditToggle) btnEditToggle.style.display = 'none';
-        if (btnSiteMsg) btnSiteMsg.style.display = 'none';
+        if (btnSiteMsg) btnSiteMsg.style.display = 'inline-flex';
         if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
-        setSiteFormReadOnly(false);
+        
+        const frm = document.getElementById('frmAddSite');
+        if (frm) frm.reset();
+        const towerType = document.getElementById('inpSiteTowerType');
+        if (towerType) towerType.value = 'GBT';
+        const stToggle = document.getElementById('inpSiteStatusToggle');
+        if (stToggle) stToggle.checked = true;
+
+        if (typeof setSiteFormFullEditable === 'function') {
+          setSiteFormFullEditable();
+        } else {
+          setSiteFormReadOnly(false);
+        }
         currentViewedSiteId = null;
         isSiteFormEditing = false;
       }
@@ -15035,6 +15044,15 @@ function initExcelFilterSystem() {
         showToast('Contact filter cleared');
         return;
       }
+      if (dropdown.dataset.filterContext === 'siteContact') {
+        if (currentSiteContactFilterCol) {
+          delete activeSiteContactFilters[currentSiteContactFilterCol];
+          renderSiteContactTable();
+        }
+        closeExcelFilter();
+        showToast('Site contact filter cleared');
+        return;
+      }
       closeExcelFilter();
     });
   }
@@ -15254,6 +15272,23 @@ function initExcelFilterSystem() {
         renderCustomerContactTable();
         closeExcelFilter();
         showToast('Contact filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'siteContact') {
+        if (!currentSiteContactFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeSiteContactFilters[currentSiteContactFilterCol];
+        } else {
+          activeSiteContactFilters[currentSiteContactFilterCol] = new Set(checkedItems);
+        }
+        renderSiteContactTable();
+        closeExcelFilter();
+        showToast('Site contact filter applied');
         return;
       }
 
@@ -17631,28 +17666,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!isSiteFormEditing) {
         isSiteFormEditing = true;
-        setSiteFormReadOnly(false);
+        setSiteFormReadOnly(false); // Only WH ID, District, Latitude, Longitude, Transport Zone, Status editable
         if (lblTitle) lblTitle.innerText = 'Edit Site';
         if (imgIcon) {
           imgIcon.src = 'icons/Save.svg';
           imgIcon.title = 'Save Changes';
         }
-        showToast('Site form is now editable');
+        showToast('Site form is now editable (WH ID, District, Latitude, Longitude, Transport Zone, Status)');
       } else {
         isSiteFormEditing = false;
         if (currentViewedSiteId) {
           const site = indusSiteData.find(s => s.id === currentViewedSiteId);
           if (site) {
-            site.circle = document.getElementById('inpSiteCircle')?.value || site.circle;
-            site.siteId = document.getElementById('inpSiteId')?.value || site.siteId;
             site.whId = document.getElementById('inpSiteWhId')?.value || site.whId;
-            site.siteName = document.getElementById('inpSiteName')?.value || site.siteName;
             site.district = document.getElementById('inpSiteDistrict')?.value || site.district;
-            site.town = document.getElementById('inpSiteTown')?.value || site.town;
-            site.address = document.getElementById('inpSiteAddress')?.value || site.address;
             site.latitude = document.getElementById('inpSiteLattitude')?.value || site.latitude;
             site.longitude = document.getElementById('inpSiteLongtitude')?.value || site.longitude;
             site.transportZone = document.getElementById('inpSiteTransportZone')?.value || site.transportZone;
+            const stToggle = document.getElementById('inpSiteStatusToggle');
+            if (stToggle) {
+              site.status = stToggle.checked ? 'Active' : 'In - Active';
+            }
           }
           renderTable();
         }
@@ -17967,23 +18001,41 @@ let isSiteFormEditing = false;
 function setSiteFormReadOnly(isReadOnly) {
   const form = document.getElementById('frmAddSite');
   if (!form) return;
-  const inputs = form.querySelectorAll('input, select');
-  inputs.forEach(input => {
-    if (input.type === 'checkbox') return;
+
+  // Fields strictly allowed to be edited during View Site Edit:
+  // ONLY wh id, district, latitude, longitude, transport zone, status
+  const editableFieldIds = ['inpSiteWhId', 'inpSiteDistrict', 'inpSiteLattitude', 'inpSiteLongtitude', 'inpSiteTransportZone'];
+  const allFieldIds = ['inpSiteId', 'inpSiteWhId', 'inpSiteName', 'inpSiteTowerType', 'inpSiteDistrict', 'inpSiteTown', 'inpSiteAddress', 'inpSiteLattitude', 'inpSiteLongtitude', 'inpSiteTransportZone'];
+
+  allFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
     if (isReadOnly) {
-      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
-      else input.setAttribute('readonly', 'true');
-      input.style.backgroundColor = '#f8fafc';
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
     } else {
-      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
-      else input.removeAttribute('readonly');
-      input.style.backgroundColor = '#ffffff';
+      if (editableFieldIds.includes(id)) {
+        if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+        else el.removeAttribute('readonly');
+        el.style.backgroundColor = '#ffffff';
+        el.style.color = '#1e293b';
+        el.style.cursor = 'auto';
+      } else {
+        if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+        else el.setAttribute('readonly', 'true');
+        el.style.backgroundColor = '#f8fafc';
+        el.style.color = '#64748b';
+        el.style.cursor = 'not-allowed';
+      }
     }
   });
+
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
     t.disabled = isReadOnly;
-    if (isReadOnly) t.checked = false;
     const parentSwitch = t.closest('.toggle-slide-switch');
     if (parentSwitch) {
       parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
@@ -17992,21 +18044,43 @@ function setSiteFormReadOnly(isReadOnly) {
   });
 }
 
+function setSiteFormFullEditable() {
+  const form = document.getElementById('frmAddSite');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(el => {
+    if (el.type === 'checkbox') {
+      el.disabled = false;
+      const parentSwitch = el.closest('.toggle-slide-switch');
+      if (parentSwitch) {
+        parentSwitch.style.pointerEvents = 'auto';
+        parentSwitch.style.opacity = '1';
+      }
+      return;
+    }
+    if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+    else el.removeAttribute('readonly');
+    el.style.backgroundColor = '#ffffff';
+    el.style.color = '#1e293b';
+    el.style.cursor = 'auto';
+  });
+}
+
 window.handleSiteClick = function(siteId, siteName) {
   let site = indusSiteData.find(s => s.id === siteId || s.siteName === siteName || s.siteId === siteId);
   if (!site) {
     site = {
       id: siteId || 'site-1',
-      circle: "Chennai",
       siteId: "230510678",
       whId: "WH-101",
       siteName: siteName || "R/RL-234567",
+      towerType: "GBT",
       district: "Chennai",
       town: "Ambattur",
       address: "123 Industrial Area",
       latitude: "13.0827",
       longitude: "80.2707",
-      transportZone: "A",
+      transportZone: "Zone-A",
       status: "Active"
     };
   }
@@ -18015,7 +18089,7 @@ window.handleSiteClick = function(siteId, siteName) {
   isSiteFormEditing = false;
   openSideForm();
 
-  const cards = document.querySelectorAll('.side-form-card');
+  const cards = document.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(c => c.style.display = 'none');
 
   const card = document.getElementById('addSiteCard');
@@ -18027,8 +18101,8 @@ window.handleSiteClick = function(siteId, siteName) {
   const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
   const btnSiteMsg = document.getElementById('btnSiteCardMessageIcon');
   const imgEditIcon = document.getElementById('imgSiteCardEditIcon');
-  if (btnEditToggle) btnEditToggle.style.display = 'flex';
-  if (btnSiteMsg) btnSiteMsg.style.display = 'flex';
+  if (btnEditToggle) btnEditToggle.style.display = 'inline-flex';
+  if (btnSiteMsg) btnSiteMsg.style.display = 'inline-flex';
   if (imgEditIcon) {
     imgEditIcon.src = 'icons/Edit.svg';
     imgEditIcon.title = 'Edit Info';
@@ -18037,19 +18111,20 @@ window.handleSiteClick = function(siteId, siteName) {
   const btnSaveWrap = document.querySelector('#frmAddSite .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpSiteCircle')) document.getElementById('inpSiteCircle').value = site.circle || 'Chennai';
   if (document.getElementById('inpSiteId')) document.getElementById('inpSiteId').value = site.siteId || '230510678';
   if (document.getElementById('inpSiteWhId')) document.getElementById('inpSiteWhId').value = site.whId || 'WH-101';
   if (document.getElementById('inpSiteName')) document.getElementById('inpSiteName').value = site.siteName || 'R/RL-234567';
+  if (document.getElementById('inpSiteTowerType')) document.getElementById('inpSiteTowerType').value = site.towerType || 'GBT';
   if (document.getElementById('inpSiteDistrict')) document.getElementById('inpSiteDistrict').value = site.district || 'Chennai';
   if (document.getElementById('inpSiteTown')) document.getElementById('inpSiteTown').value = site.town || 'Ambattur';
   if (document.getElementById('inpSiteAddress')) document.getElementById('inpSiteAddress').value = site.address || '123 Industrial Area';
   if (document.getElementById('inpSiteLattitude')) document.getElementById('inpSiteLattitude').value = site.latitude || '13.0827';
   if (document.getElementById('inpSiteLongtitude')) document.getElementById('inpSiteLongtitude').value = site.longitude || '80.2707';
-  if (document.getElementById('inpSiteTransportZone')) document.getElementById('inpSiteTransportZone').value = site.transportZone || 'A';
+  if (document.getElementById('inpSiteTransportZone')) document.getElementById('inpSiteTransportZone').value = site.transportZone || 'Zone-A';
   
-  // Keep slidebars in DEACTIVE state (unchecked / Red OFF) when viewing
-  if (document.getElementById('inpSiteStatusToggle')) document.getElementById('inpSiteStatusToggle').checked = false;
+  if (document.getElementById('inpSiteStatusToggle')) {
+    document.getElementById('inpSiteStatusToggle').checked = !((site.status || '').toLowerCase().includes('in'));
+  }
 
   setSiteFormReadOnly(true);
   showToast(`Viewing site details: ${site.siteName}`);
@@ -20821,6 +20896,302 @@ window.openViewCustomerCard = function(rowId) {
 
   overlay.style.display = 'flex';
   showToast('Opened View Customer');
+};
+
+// ==========================================================================
+// SITE CONTACT DETAILS POPUP & ADD FORM
+// ==========================================================================
+let siteDefaultContacts = [
+  { id: "SC-01", name: "Suresh Narayanan", designation: "Site Engineer", mobile: "+91 98401 12345", email: "suresh.n@indus.com", status: "Active" },
+  { id: "SC-02", name: "Kavitha Raman", designation: "Operations Officer", mobile: "+91 98402 23456", email: "kavitha.r@indus.com", status: "Active" },
+  { id: "SC-03", name: "Rajesh Kannan", designation: "Field Supervisor", mobile: "+91 98403 34567", email: "rajesh.k@indus.com", status: "Active" },
+  { id: "SC-04", name: "Dinesh Kumar", designation: "Technical Lead", mobile: "+91 98404 45678", email: "dinesh.k@indus.com", status: "In - Active" }
+];
+
+let activeSiteContactFilters = {};
+let currentSiteContactFilterCol = null;
+let isViewSiteContactEditing = false;
+
+window.openSiteContactModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  if (currentViewedSiteId) {
+    // In View Site Mode: Open View Site Contact Card (with Edit icon)
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => {
+      if (c.id !== 'viewSiteContactCard') c.style.display = 'none';
+    });
+
+    const site = indusSiteData.find(s => s.id === currentViewedSiteId) || indusSiteData[0];
+    const contact = (site && site.contacts && site.contacts.length > 0) ? site.contacts[0] : siteDefaultContacts[0];
+
+    const viewCard = document.getElementById('viewSiteContactCard');
+    if (viewCard) {
+      viewCard.style.display = 'block';
+      
+      const inpName = document.getElementById('inpViewSiteContactName');
+      const inpDesig = document.getElementById('inpViewSiteContactDesig');
+      const inpMob = document.getElementById('inpViewSiteContactMobile');
+      const inpEmail = document.getElementById('inpViewSiteContactEmail');
+      const stToggle = document.getElementById('inpViewSiteContactStatusToggle');
+      const imgEdit = document.getElementById('imgViewSiteContactEditIcon');
+
+      if (inpName) { inpName.value = contact.name || ''; inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
+      if (inpDesig) { inpDesig.value = contact.designation || ''; inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
+      if (inpMob) { inpMob.value = contact.mobile || contact.contact || ''; inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
+      if (inpEmail) { inpEmail.value = contact.email || ''; inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
+      if (stToggle) { stToggle.checked = !((contact.status || '').toLowerCase().includes('in')); stToggle.disabled = true; }
+
+      isViewSiteContactEditing = false;
+      if (imgEdit) {
+        imgEdit.src = 'icons/Edit.svg';
+        imgEdit.title = 'Edit Contact';
+      }
+    }
+    overlay.style.display = 'flex';
+    showToast('Opened Site Contact Details');
+  } else {
+    // In Add Site Mode: Open Site Contact Details Table Popup
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => {
+      if (c.id !== 'siteContactSidePanel') c.style.display = 'none';
+    });
+
+    const modal = document.getElementById('siteContactSidePanel');
+    if (modal) {
+      modal.style.display = 'block';
+      overlay.style.display = 'flex';
+    }
+    renderSiteContactTable();
+    showToast('Opened Site Contacts');
+  }
+};
+
+window.closeSiteContactModal = function() {
+  const modal = document.getElementById('siteContactSidePanel');
+  if (modal) modal.style.display = 'none';
+  const siteCard = document.getElementById('addSiteCard');
+  if (siteCard) {
+    siteCard.style.display = 'block';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.closeViewSiteContactModal = function() {
+  const viewCard = document.getElementById('viewSiteContactCard');
+  if (viewCard) viewCard.style.display = 'none';
+  const siteCard = document.getElementById('addSiteCard');
+  if (siteCard) {
+    siteCard.style.display = 'block';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.toggleViewSiteContactEdit = function() {
+  const imgIcon = document.getElementById('imgViewSiteContactEditIcon');
+  const inpName = document.getElementById('inpViewSiteContactName');
+  const inpDesig = document.getElementById('inpViewSiteContactDesig');
+  const inpMob = document.getElementById('inpViewSiteContactMobile');
+  const inpEmail = document.getElementById('inpViewSiteContactEmail');
+  const stToggle = document.getElementById('inpViewSiteContactStatusToggle');
+
+  if (!isViewSiteContactEditing) {
+    isViewSiteContactEditing = true;
+    if (inpName) { inpName.removeAttribute('readonly'); inpName.removeAttribute('disabled'); inpName.style.background = '#ffffff'; inpName.style.cursor = 'auto'; }
+    if (inpDesig) { inpDesig.removeAttribute('readonly'); inpDesig.removeAttribute('disabled'); inpDesig.style.background = '#ffffff'; inpDesig.style.cursor = 'auto'; }
+    if (inpMob) { inpMob.removeAttribute('readonly'); inpMob.removeAttribute('disabled'); inpMob.style.background = '#ffffff'; inpMob.style.cursor = 'auto'; }
+    if (inpEmail) { inpEmail.removeAttribute('readonly'); inpEmail.removeAttribute('disabled'); inpEmail.style.background = '#ffffff'; inpEmail.style.cursor = 'auto'; }
+    if (stToggle) { stToggle.disabled = false; }
+    if (imgIcon) {
+      imgIcon.src = 'icons/Save.svg';
+      imgIcon.title = 'Save Changes';
+    }
+    showToast('Contact details are now editable');
+  } else {
+    isViewSiteContactEditing = false;
+    const nameVal = inpName?.value?.trim() || '';
+    const desigVal = inpDesig?.value?.trim() || '';
+    const mobVal = inpMob?.value?.trim() || '';
+    const emailVal = inpEmail?.value?.trim() || '';
+    const statusVal = (stToggle && stToggle.checked) ? 'Active' : 'In - Active';
+
+    if (currentViewedSiteId) {
+      const site = indusSiteData.find(s => s.id === currentViewedSiteId);
+      if (site) {
+        if (!site.contacts || site.contacts.length === 0) site.contacts = [{ id: 'SC-01' }];
+        site.contacts[0].name = nameVal;
+        site.contacts[0].designation = desigVal;
+        site.contacts[0].mobile = mobVal;
+        site.contacts[0].email = emailVal;
+        site.contacts[0].status = statusVal;
+      }
+    }
+    
+    // Also update default contacts if present
+    if (siteDefaultContacts.length > 0) {
+      siteDefaultContacts[0].name = nameVal;
+      siteDefaultContacts[0].designation = desigVal;
+      siteDefaultContacts[0].mobile = mobVal;
+      siteDefaultContacts[0].email = emailVal;
+      siteDefaultContacts[0].status = statusVal;
+    }
+
+    if (inpName) { inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
+    if (inpDesig) { inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
+    if (inpMob) { inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
+    if (inpEmail) { inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
+    if (stToggle) { stToggle.disabled = true; }
+    if (imgIcon) {
+      imgIcon.src = 'icons/Edit.svg';
+      imgIcon.title = 'Edit Contact';
+    }
+    showToast('Site contact details saved & updated successfully!');
+  }
+};
+
+window.renderSiteContactTable = function() {
+  const tbody = document.getElementById('tbodySiteContactDetails');
+  if (!tbody) return;
+
+  let filtered = [...siteDefaultContacts];
+
+  for (const [colKey, allowedSet] of Object.entries(activeSiteContactFilters)) {
+    if (allowedSet && allowedSet instanceof Set) {
+      filtered = filtered.filter(item => {
+        const val = String(item[colKey] !== undefined ? item[colKey] : '');
+        return allowedSet.has(val);
+      });
+    }
+  }
+
+  tbody.innerHTML = filtered.map(row => {
+    const isInactive = (row.status || '').toLowerCase().includes('in');
+    return `
+      <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${(row.name || '').replace(/"/g, '&quot;')}">${row.name || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.mobile || row.contact || ''}</td>
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update filter button active states
+  const btnName = document.getElementById('btnSiteContactNameFilter');
+  if (btnName) {
+    if (activeSiteContactFilters['name']) btnName.classList.add('has-active-filter');
+    else btnName.classList.remove('has-active-filter');
+  }
+  const btnStatus = document.getElementById('btnSiteContactStatusFilter');
+  if (btnStatus) {
+    if (activeSiteContactFilters['status']) btnStatus.classList.add('has-active-filter');
+    else btnStatus.classList.remove('has-active-filter');
+  }
+};
+
+window.openSiteContactAddForm = function() {
+  const panel = document.getElementById('siteContactSidePanel');
+  if (panel) panel.style.display = 'none';
+
+  const formCard = document.getElementById('addSiteContactCard');
+  if (formCard) {
+    formCard.style.display = 'block';
+    const frm = document.getElementById('frmAddSiteContact');
+    if (frm) frm.reset();
+    const stToggle = document.getElementById('inpSiteContactStatusToggle');
+    if (stToggle) stToggle.checked = true;
+  }
+};
+
+window.closeAddSiteContactForm = function() {
+  const formCard = document.getElementById('addSiteContactCard');
+  if (formCard) formCard.style.display = 'none';
+
+  const panel = document.getElementById('siteContactSidePanel');
+  if (panel) panel.style.display = 'block';
+};
+
+window.saveSiteContact = function() {
+  const name = document.getElementById('inpSiteContactName')?.value?.trim();
+  const desig = document.getElementById('inpSiteContactDesig')?.value?.trim() || '';
+  const mobile = document.getElementById('inpSiteContactMobile')?.value?.trim() || '';
+  const email = document.getElementById('inpSiteContactEmail')?.value?.trim() || '';
+  const isChecked = document.getElementById('inpSiteContactStatusToggle')?.checked;
+  const status = isChecked ? 'Active' : 'In - Active';
+
+  if (!name) {
+    showToast('Please enter Name');
+    return;
+  }
+
+  const newContact = {
+    id: `SC-${String(siteDefaultContacts.length + 1).padStart(2, '0')}`,
+    name: name,
+    designation: desig,
+    mobile: mobile,
+    email: email,
+    status: status
+  };
+
+  siteDefaultContacts.unshift(newContact);
+  renderSiteContactTable();
+  closeAddSiteContactForm();
+  showToast('Contact added successfully!');
+};
+
+window.openSiteContactFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  currentSiteContactFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(siteDefaultContacts.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeSiteContactFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById(`btnSiteContact${colKey.charAt(0).toUpperCase() + colKey.slice(1)}Filter`);
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'siteContact';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
 };
 
 

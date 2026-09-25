@@ -3926,7 +3926,7 @@ function switchModule(moduleName) {
 
   const moduleTitles = {
     master: 'Master',
-    indus_towers: 'Telecom',
+    indus_towers: 'Indus Towers Ltd',
     worklist: 'Worklist',
     projects: 'Projects',
     inventory: 'Inventory',
@@ -4231,7 +4231,7 @@ function renderApp() {
     } else if (currentIndusSubpage === 'project_type_details') {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProjectType || 'Project Type'} / Sub - Project Type</span>`;
     } else {
-      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openTelecomDetailsModal(); return false;" title="Telecom Details" style="cursor: pointer; text-decoration: underline; text-underline-offset: 4px;">Telecom</a>`;
+      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openTelecomDetailsModal(); return false;" title="Indus Towers Details" style="cursor: pointer; text-decoration: underline; text-underline-offset: 4px;">Indus Towers Ltd</a>`;
     }
     loadIndusDataset();
     renderIndusToolbar();
@@ -4517,7 +4517,7 @@ function openIndusTowersPage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
-  showToast('Navigated to Telecom Details');
+  showToast('Navigated to Indus Towers Ltd');
 }
 
 function loadIndusDataset() {
@@ -5167,7 +5167,7 @@ function renderIndusFooter() {
         activeColumnFilters = {};
         updateURL();
         renderApp();
-        showToast(`Switched to Telecom &bull; ${btn.textContent.trim()}`);
+        showToast(`Switched to Indus Towers Ltd &bull; ${btn.textContent.trim()}`);
       }
     });
   });
@@ -10369,7 +10369,7 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}" id="gbpa-row-${row.id}" class="${isSelected ? 'row-selected-highlight' : ''}" style="border-bottom: 1px solid #e2e8f0; ${isSelected ? 'background-color: rgba(0, 203, 160, 0.12) !important;' : ''}">
             <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; padding: 10px 6px; vertical-align: middle;">
-              <input type="radio" name="gbpaRowSelect" class="gbpa-row-radio" value="${row.id}" ${isSelected ? 'checked' : ''} onclick="handleGbpaRadioClick(event, '${row.id}')" style="accent-color: #00cba0; width: 18px; height: 18px; cursor: pointer;">
+              <input type="radio" name="gbpaRowSelect" class="gbpa-row-radio" value="${row.id}" ${isSelected ? 'checked' : ''} onclick="handleGbpaRadioClick(event, '${row.id}')">
             </td>
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${dispItemName.replace(/"/g, '&quot;')}">
               <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${dispItemName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${dispItemName}</a>
@@ -17849,8 +17849,13 @@ document.addEventListener('DOMContentLoaded', () => {
             emp.totalExp = document.getElementById('inpEmpTotalExp')?.value || emp.totalExp;
             emp.doj = document.getElementById('inpEmpDoj')?.value || emp.doj;
             emp.designation = document.getElementById('inpEmpDesignation')?.value || emp.designation;
+            const statusToggle = document.getElementById('inpEmpStatusToggle');
+            if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
           }
-          renderTable();
+          if (typeof masterEmployeeData !== 'undefined' && currentModule === 'master' && currentMasterSubpage === 'employee') {
+            currentDataset = [...masterEmployeeData];
+          }
+          applyFiltersAndRender();
         }
 
         setEmployeeFormReadOnly(true);
@@ -18282,11 +18287,17 @@ document.addEventListener('DOMContentLoaded', () => {
       setSiteFormReadOnly(true);
       const lblTitle = document.getElementById('lblSiteCardTitle');
       if (lblTitle && site) lblTitle.innerText = site.siteId || '230510678';
-      renderTable();
+      loadIndusDataset();
+      applyFiltersAndRender();
       showToast('Site details updated successfully!');
     }
   });
 });
+
+window.renderTable = function() {
+  if (typeof loadIndusDataset === 'function') loadIndusDataset();
+  if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+};
 
 let currentViewedInfraId = null;
 let isInfraFormEditing = false;
@@ -18435,7 +18446,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setInfraFormReadOnly(true);
       const lblTitle = document.getElementById('lblInfraCardTitle');
       if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
-      renderTable();
+      loadIndusDataset();
+      applyFiltersAndRender();
       showToast('Infra details updated successfully!');
     }
   });
@@ -18604,7 +18616,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setProjectFormReadOnly(true);
       const lblTitle = document.getElementById('lblProjectCardTitle');
       if (lblTitle && proj) lblTitle.innerText = proj.projectType || 'KTN';
-      renderTable();
+      loadIndusDataset();
+      applyFiltersAndRender();
       showToast('Project details updated successfully!');
     }
   });
@@ -18622,7 +18635,7 @@ window.handleGbpaRadioClick = function(e, rowId) {
     const editBtn = document.getElementById('btnIndusGbpaEditRow');
     if (editBtn) editBtn.style.display = 'none';
     if (e && e.target) e.target.checked = false;
-    document.querySelectorAll('#tbodyMain tr').forEach(tr => {
+    document.querySelectorAll('#tbodyMain tr, #worklistTableBody tr').forEach(tr => {
       tr.classList.remove('row-selected-highlight');
       tr.style.backgroundColor = '';
       const r = tr.querySelector('.gbpa-row-radio');
@@ -18639,7 +18652,7 @@ window.handleGbpaRowSelection = function(rowId) {
   if (editBtn) editBtn.style.display = 'inline-flex';
 
   // Highlight selected row in table
-  document.querySelectorAll('#tbodyMain tr').forEach(tr => {
+  document.querySelectorAll('#tbodyMain tr, #worklistTableBody tr').forEach(tr => {
     if (tr.getAttribute('data-row-id') === String(rowId)) {
       tr.classList.add('row-selected-highlight');
       tr.style.backgroundColor = 'rgba(0, 203, 160, 0.12)';
@@ -18826,7 +18839,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const dispTitle = item?.itemName || item?.productName || 'GBPA Item';
       const lblTitle = document.getElementById('lblGbpaCardTitle');
       if (lblTitle) lblTitle.innerText = dispTitle;
-      renderTable();
+      loadIndusDataset();
+      applyFiltersAndRender();
       showToast('GBPA item details updated successfully!');
     }
   });
@@ -18998,7 +19012,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setMaterialFormReadOnly(true);
       const lblTitle = document.getElementById('lblMaterialsCardTitle');
       if (lblTitle && mat) lblTitle.innerText = mat.materialHead || 'Material Head';
-      renderTable();
+      loadIndusDataset();
+      applyFiltersAndRender();
       showToast('Material details updated successfully!');
     }
   });
@@ -19126,7 +19141,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setProductExpenseFormReadOnly(true);
       const lblTitle = document.getElementById('lblProductExpenseCardTitle');
       if (lblTitle && exp) lblTitle.innerText = exp.expenseHead || 'Expense Head';
-      renderTable();
+      loadIndusDataset();
+      applyFiltersAndRender();
       showToast('Expense details updated successfully!');
     }
   });
@@ -19205,7 +19221,7 @@ window.openViewGbpaProductInfraCard = function(prodInfraId) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblProductInfraCardTitle');
-  if (lblTitle) lblTitle.innerText = infra.infraDescription || infra.infraCode || 'Infra Details';
+  if (lblTitle) lblTitle.innerText = infra.infraCategory || 'Infra Category';
 
   const btnEditToggle = document.getElementById('btnProductInfraCardEditToggle');
   const imgEditIcon = document.getElementById('imgProductInfraCardEditIcon');
@@ -19228,7 +19244,7 @@ window.openViewGbpaProductInfraCard = function(prodInfraId) {
   }
 
   setProductInfraFormReadOnly(true);
-  showToast(`Viewing product infra details: ${infra.infraDescription || infra.infraCode}`);
+  showToast(`Viewing product infra details: ${infra.infraCategory || infra.infraDescription}`);
 };
 
 // Product Infra Card Edit / Save Toggle Listener
@@ -19247,7 +19263,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setProductInfraFormReadOnly(false, true);
       const lblTitle = document.getElementById('lblProductInfraCardTitle');
-      if (lblTitle && infra) lblTitle.innerText = infra.infraDescription || infra.infraCode || 'Infra Details';
+      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
       showToast('Edit mode enabled for product infra');
     } else {
       // Save Mode
@@ -19264,8 +19280,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setProductInfraFormReadOnly(true);
       const lblTitle = document.getElementById('lblProductInfraCardTitle');
-      if (lblTitle && infra) lblTitle.innerText = infra.infraDescription || infra.infraCode || 'Infra Details';
-      renderTable();
+      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
+      loadIndusDataset();
+      applyFiltersAndRender();
       showToast('Product Infra details updated successfully!');
     }
   });

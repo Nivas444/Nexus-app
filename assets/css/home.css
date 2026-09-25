@@ -806,6 +806,43 @@ tr.tr-sub-headers th,
   display: block;
 }
 
+/* Custom GBPA Row Radio button - clean green circle without black border */
+input[type="radio"].gbpa-row-radio {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  border: 2px solid #cbd5e1 !important;
+  outline: none !important;
+  cursor: pointer !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+input[type="radio"].gbpa-row-radio:hover {
+  border-color: #00cba0 !important;
+}
+
+input[type="radio"].gbpa-row-radio:checked {
+  border-color: #00cba0 !important;
+  background: #00cba0 !important;
+  box-shadow: inset 0 0 0 3.5px #ffffff !important;
+}
+
+input[type="radio"].gbpa-row-radio:focus,
+input[type="radio"].gbpa-row-radio:focus-visible {
+  outline: none !important;
+  box-shadow: inset 0 0 0 3.5px #ffffff !important;
+}
+
 .req-link {
   color: #2563eb;
   font-weight: 600;

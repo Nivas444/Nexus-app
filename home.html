@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260923_1508">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260925_1120">
 </head>
 
 <body>
@@ -459,14 +459,14 @@
               </div>
             </div>
 
-            <!-- 5. GST Number with PDF badge (Shown when GST is enabled) -->
+            <!-- 5. GST Number with Process badge (Shown when GST is enabled) -->
             <div class="form-row-group" id="rowCustomerGstNumber" style="display: none;">
               <label class="form-label" for="inpGstNumber">GST Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpGstNumber"
                   placeholder="Enter GST Number">
-                <span class="input-pdf-badge" title="Upload PDF">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                <span class="input-process-badge" id="btnCustomerGstProcess" title="Process" style="cursor: pointer;" onclick="handleCustomerGstProcess()">
+                  <img src="icons/Process .svg" alt="Process" class="input-process-icon" width="22" height="22">
                 </span>
               </div>
             </div>
@@ -868,9 +868,9 @@
               </div>
             </div>
 
-            <!-- 11. Inflation -->
+            <!-- 11. Market Price -->
             <div class="form-row-group">
-              <label class="form-label" for="inpProductInflation">Inflation</label>
+              <label class="form-label" for="inpProductInflation">Market Price</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpProductInflation" placeholder="">
               </div>
@@ -1202,16 +1202,19 @@
         </div>
 
         <!-- 1F. Indus / Project Type Form Card (Matching Uploaded Mockup) -->
-        <div class="side-form-card" id="addProjectCard" style="display: none;">
+        <div class="side-form-card" id="addProjectCard" style="display: none; width: 480px; max-width: 95vw;">
           <!-- Header -->
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblProjectCardTitle">Add Project Type</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-top-icon-btn" id="btnProjectTransportIcon" style="display: none;">
+              <button type="button" class="side-top-icon-btn" id="btnProjectActivityIcon" title="Activity" style="display: none;">
+                <img src="icons/activity.svg" alt="Activity" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnProjectTransportIcon" title="Transport" style="display: none;">
                 <img src="icons/Vehicle.svg" alt="Transport" width="28" height="28">
               </button>
-              <button type="button" class="side-top-icon-btn" id="btnProjectSurveyIcon" style="display: none;">
-                <img src="icons/PDF Upload.svg" alt="Survey" width="28" height="28">
+              <button type="button" class="side-top-icon-btn" id="btnProjectSurveyIcon" title="Approval History" style="display: none;">
+                <img src="icons/Approval History.svg" alt="Approval History" width="28" height="28">
               </button>
               <button type="button" class="side-top-icon-btn" id="btnProjectCardEditToggle" title="Edit Info"
                 style="display: none;">
@@ -1249,6 +1252,17 @@
                   <option value="KTN">KTN</option>
                   <option value="KK">KK</option>
                   <option value="AP">AP</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2B. Upgradation Type (Major / Minor) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProjectUpgradationType">Upgradation Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProjectUpgradationType">
+                  <option value="Major" selected>Major</option>
+                  <option value="Minor">Minor</option>
                 </select>
               </div>
             </div>
@@ -1757,25 +1771,29 @@
               </div>
             </div>
 
-            <!-- 2. Product Name -->
+            <!-- 2. Item Name -->
             <div class="form-row-group">
-              <label class="form-label" for="inpGbpaProductName">Product Name</label>
+              <label class="form-label" for="inpGbpaProductName">Item Name</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpGbpaProductName" placeholder="">
               </div>
             </div>
 
-            <!-- 3. Product Type -->
+            <!-- 3. Item Type -->
             <div class="form-row-group">
-              <label class="form-label" for="inpGbpaProductType">Product Type</label>
+              <label class="form-label" for="inpGbpaProductType">Item Type</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpGbpaProductType" placeholder="">
+                <select class="form-select-control" id="inpGbpaProductType">
+                  <option value="" selected></option>
+                  <option value="Capex">Capex</option>
+                  <option value="Opex">Opex</option>
+                </select>
               </div>
             </div>
 
-            <!-- 4. Product Description -->
+            <!-- 4. Item Description -->
             <div class="form-row-group">
-              <label class="form-label" for="inpGbpaProductDescription">Product Description</label>
+              <label class="form-label" for="inpGbpaProductDescription">Item Description</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpGbpaProductDescription" placeholder="">
               </div>
@@ -1796,7 +1814,15 @@
               </div>
             </div>
 
-            <!-- 6. HSN / SAC -->
+            <!-- 6. Rate (₹) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaRate">Rate (₹)</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaRate" placeholder="">
+              </div>
+            </div>
+
+            <!-- 7. HSN / SAC -->
             <div class="form-row-group">
               <label class="form-label" for="inpGbpaHsnSac">HSN / SAC</label>
               <div class="form-input-wrap">
@@ -1808,7 +1834,7 @@
               </div>
             </div>
 
-            <!-- 7. HSN / SAC Code -->
+            <!-- 8. HSN / SAC Code -->
             <div class="form-row-group">
               <label class="form-label" for="inpGbpaHsnSacCode">HSN / SAC Code</label>
               <div class="form-input-wrap">
@@ -1816,7 +1842,7 @@
               </div>
             </div>
 
-            <!-- 8. Budget (%) -->
+            <!-- 9. Budget (%) -->
             <div class="form-row-group">
               <label class="form-label" for="inpGbpaBudgetPercent">Budget (%)</label>
               <div class="form-input-wrap">
@@ -1824,7 +1850,15 @@
               </div>
             </div>
 
-            <!-- 9. Status -->
+            <!-- 10. Budget (₹) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpGbpaBudgetAmount">Budget (₹)</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpGbpaBudgetAmount" placeholder="">
+              </div>
+            </div>
+
+            <!-- 11. Status -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -2156,109 +2190,190 @@
         </div>
 
         <!-- 1K. Indus / Project Type Details Add Project Type Form Card (Matching Uploaded Mockup) -->
-        <div class="side-form-card" id="addProjectTypeCard" style="display: none;">
+        <div class="side-form-card side-contact-popup" id="addProjectTypeCard"
+          style="display: none; width: 440px; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <!-- Header -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge">Add Survey</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProjectTypeForm"
-              aria-label="Close form">&times;</button>
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">Add Survey</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnSubmitProjectTypeHeader" title="Save" onclick="saveSurveyDescription()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectTypeForm" onclick="closeAddSurveyForm()"
+                aria-label="Close form" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
           </div>
 
-          <!-- Decorative Action Icons on Top Right -->
-          <div class="side-form-top-icons"></div>
-
           <!-- Form Body -->
-          <form class="side-form-body" id="frmAddProjectType" onsubmit="event.preventDefault();">
+          <form class="side-form-body" id="frmAddProjectType" onsubmit="event.preventDefault(); saveSurveyDescription();"
+            style="padding: 16px 24px 24px 24px;">
             <!-- 1. Description -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProjectTypeDescription">Description</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProjectTypeDescription" placeholder="">
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label class="form-label" for="inpProjectTypeDescription" style="width: 100px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Description</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpProjectTypeDescription" placeholder=""
+                  style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
               </div>
             </div>
-
-            <!-- Submit Save Button Inside Tab Centered -->
-            <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectType" title="Save"
-                aria-label="Submit">
-                <img src="icons/Save.svg" alt="Save" width="34" height="34">
-              </button>
-            </div>
-
           </form>
         </div>
 
         <!-- 1L. Indus / Project Type Details Add Transport Form Card (Matching Uploaded Mockup) -->
-        <div class="side-form-card" id="addProjectTransportCard" style="display: none;">
+        <div class="side-form-card side-contact-popup" id="addProjectTransportCard"
+          style="display: none; width: 440px; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <!-- Header -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge">Add Transport</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProjectTransportForm"
-              aria-label="Close form">&times;</button>
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblProjectTransportCardTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">Add Additional Transport</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnSubmitProjectTransportHeader" title="Save" onclick="handleProjectTransportHeaderAction()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                <img src="icons/Save.svg" id="imgSubmitProjectTransport" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectTransportForm" onclick="closeAddProjectTransportForm()"
+                aria-label="Close form" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
           </div>
 
-          <!-- Decorative Action Icons on Top Right -->
-          <div class="side-form-top-icons"></div>
-
           <!-- Form Body -->
-          <form class="side-form-body" id="frmAddProjectTransport" onsubmit="event.preventDefault();">
+          <form class="side-form-body" id="frmAddProjectTransport" onsubmit="event.preventDefault(); saveProjectTransportRecord();"
+            style="padding: 16px 24px 24px 24px;">
             <!-- 1. Item Code -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProjectTransItemCode">Item Code</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProjectTransItemCode"
-                  placeholder="Enter Item Code">
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label class="form-label" for="inpProjectTransItemCode" style="width: 120px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Item Code</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpProjectTransItemCode" placeholder=""
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
               </div>
             </div>
 
-            <!-- 2. Item Description -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProjectTransItemDesc">Item Description</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProjectTransItemDesc"
-                  placeholder="Enter Description">
+            <!-- 2. Item Name -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label class="form-label" for="inpProjectTransItemDesc" style="width: 120px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Item Name</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpProjectTransItemDesc" placeholder=""
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
               </div>
             </div>
 
-            <!-- 3. Transport Zone -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProjectTransZone">Transport Zone</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProjectTransZone">
-                  <option value="Zone 1" selected>Zone 1</option>
-                  <option value="Zone 2">Zone 2</option>
-                  <option value="Zone 3">Zone 3</option>
+            <!-- 3. Transport Zone (A-Z) -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label class="form-label" for="inpProjectTransZone" style="width: 120px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Transport Zone</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <select class="form-select-control" id="inpProjectTransZone"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
+                  <option value="" selected disabled></option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                  <option value="F">F</option>
+                  <option value="G">G</option>
+                  <option value="H">H</option>
+                  <option value="I">I</option>
+                  <option value="J">J</option>
+                  <option value="K">K</option>
+                  <option value="L">L</option>
+                  <option value="M">M</option>
+                  <option value="N">N</option>
+                  <option value="O">O</option>
+                  <option value="P">P</option>
+                  <option value="Q">Q</option>
+                  <option value="R">R</option>
+                  <option value="S">S</option>
+                  <option value="T">T</option>
+                  <option value="U">U</option>
+                  <option value="V">V</option>
+                  <option value="W">W</option>
+                  <option value="X">X</option>
+                  <option value="Y">Y</option>
+                  <option value="Z">Z</option>
                 </select>
               </div>
             </div>
 
             <!-- 4. Qty -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProjectTransQty">Qty</label>
-              <div class="form-input-wrap">
-                <input type="number" class="form-input-control" id="inpProjectTransQty" placeholder="Enter Qty">
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label class="form-label" for="inpProjectTransQty" style="width: 120px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Qty</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="number" class="form-input-control" id="inpProjectTransQty" placeholder=""
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
               </div>
             </div>
 
             <!-- 5. Status -->
-            <div class="form-row-group">
-              <label class="form-label">Status</label>
-              <div class="form-input-wrap slider-wrap">
-                <label class="toggle-slide-switch">
-                  <input type="checkbox" id="inpProjectTransStatusToggle">
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label class="form-label" style="width: 120px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Status</label>
+              <div class="form-input-wrap slider-wrap" style="flex: 1; display: flex; justify-content: center;">
+                <label class="toggle-slide-switch" style="margin: 0;">
+                  <input type="checkbox" id="inpProjectTransStatusToggle" checked>
                   <span class="toggle-slide-slider"></span>
                 </label>
               </div>
             </div>
+          </form>
+        </div>
 
-            <!-- Submit Save Button Inside Tab Centered -->
-            <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitProjectTransport" title="Save"
-                aria-label="Submit">
-                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+        <!-- 1M. Indus / Project Type Details Add Activity Form Card (Matching Uploaded Mockup) -->
+        <div class="side-form-card side-contact-popup" id="addProjectActivityCard"
+          style="display: none; width: 440px; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <!-- Header -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblProjectActivityCardTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">Add Activity</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnSubmitProjectActivityHeader" title="Save" onclick="saveProjectActivityRecord()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
               </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectActivityForm" onclick="closeAddProjectActivityForm()"
+                aria-label="Close form" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProjectActivity" onsubmit="event.preventDefault(); saveProjectActivityRecord();"
+            style="padding: 16px 24px 24px 24px;">
+            <!-- 1. Stage (Dropdown C1/C2/C3/C4/T1/E1) -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label class="form-label" for="inpProjectActivityStage" style="width: 100px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Stage</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative;">
+                <select class="form-select-control" id="inpProjectActivityStage"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 36px 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 12px center; background-size: 14px 14px; -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer;">
+                  <option value="" selected disabled>Select Stage</option>
+                  <option value="C1">C1</option>
+                  <option value="C2">C2</option>
+                  <option value="C3">C3</option>
+                  <option value="C4">C4</option>
+                  <option value="T1">T1</option>
+                  <option value="E1">E1</option>
+                </select>
+              </div>
             </div>
 
+            <!-- 2. Activity -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px;">
+              <label class="form-label" for="inpProjectActivityName" style="width: 100px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Activity</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpProjectActivityName" placeholder="Enter Activity"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
+              </div>
+            </div>
+
+            <!-- 3. Days -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0;">
+              <label class="form-label" for="inpProjectActivityDays" style="width: 100px; font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Days</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="number" class="form-input-control" id="inpProjectActivityDays" placeholder="Enter Days"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
+              </div>
+            </div>
           </form>
         </div>
 
@@ -4494,9 +4609,9 @@
           <div class="side-form-header">
             <div class="side-form-title-badge">Transport Details</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-top-icon-btn" id="btnTransportAddRow" title="Add Transport Record"
-                aria-label="Add Transport">
-                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
+              <button type="button" class="btn-contact-tool" id="btnTransportAddRow" title="Add Additional Transport" onclick="openAddProjectTransportForm()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0;">
+                <img src="icons/Add.svg" alt="Add" width="36" height="36">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseTransportPanel"
                 aria-label="Close transport details">&times;</button>
@@ -4504,93 +4619,107 @@
           </div>
 
           <!-- Transport Table -->
-          <div class="contact-table-wrap" style="padding: 0;">
+          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
             <table class="contact-custom-table" id="tblTransportDetails">
               <thead>
                 <tr>
-                  <th>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: left; padding: 10px 14px; width: 20ch; min-width: 20ch; max-width: 20ch;">
                     <span>Item Code</span>
-                    <button type="button" class="contact-th-filter-btn" title="Filter Item Code">▼</button>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectTransItemCodeFilter" onclick="openProjectTransportFilter('itemCode', event)" title="Filter Item Code">▼</button>
                   </th>
-                  <th>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: left; padding: 10px 14px; width: 35ch; min-width: 35ch; max-width: 35ch;">
                     <span>Item Description</span>
-                    <button type="button" class="contact-th-filter-btn" title="Filter Item Description">▼</button>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectTransItemDescriptionFilter" onclick="openProjectTransportFilter('itemDescription', event)" title="Filter Item Description">▼</button>
                   </th>
-                  <th>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: center; padding: 10px 8px; width: 18ch; min-width: 18ch; max-width: 18ch;">
                     <span>Transport Zone</span>
-                    <button type="button" class="contact-th-filter-btn" title="Filter Transport Zone">▼</button>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectTransTransportZoneFilter" onclick="openProjectTransportFilter('transportZone', event)" title="Filter Transport Zone">▼</button>
                   </th>
-                  <th>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: center; padding: 10px 8px; width: 12ch; min-width: 12ch; max-width: 12ch;">
                     <span>Qty</span>
                   </th>
-                  <th>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: center; padding: 10px 8px; width: 15ch; min-width: 15ch; max-width: 15ch;">
                     <span>Status</span>
-                    <button type="button" class="contact-th-filter-btn" title="Filter Status">▼</button>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectTransStatusFilter" onclick="openProjectTransportFilter('status', event)" title="Filter Status">▼</button>
                   </th>
                 </tr>
               </thead>
               <tbody id="tbodyTransportDetails">
-                <tr>
-                  <td class="td-link-blue">ITM-001</td>
-                  <td>Tower Component – KTN Type A</td>
-                  <td>A</td>
-                  <td>12</td>
-                  <td><span class="status-badge status-active">Active</span></td>
-                </tr>
-                <tr>
-                  <td class="td-link-blue">ITM-002</td>
-                  <td>Cable Harness Set – KK Grade</td>
-                  <td>B</td>
-                  <td>8</td>
-                  <td><span class="status-badge status-active">Active</span></td>
-                </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- 11. Project Type / Sub - Project Type Details Side Panel (View Project → PDF Upload Icon) -->
-        <div class="side-form-card side-contact-popup" id="projectTypeDocSidePanel"
-          style="display: none; width: 620px;">
+        <!-- 9B. Project Type / Sub - Project Type Activity Side Panel (View Project → Activity Icon) -->
+        <div class="side-form-card side-contact-popup" id="projectActivitySidePanel"
+          style="display: none; width: 750px;">
           <!-- Header -->
           <div class="side-form-header">
             <div class="side-form-title-badge">Project Type / Sub - Project Type</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-form-close-btn" id="btnCloseProjectDocPanel"
-                aria-label="Close project type details">&times;</button>
+              <button type="button" class="btn-contact-tool" id="btnProjectActivityAddRow" title="Add Activity" onclick="openAddProjectActivityForm()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0;">
+                <img src="icons/Add.svg" alt="Add" width="36" height="36">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectActivityPanel"
+                aria-label="Close activity details">&times;</button>
             </div>
           </div>
 
-          <!-- Top Toolbar: Plus Icon on Right Side matching Mockup -->
-          <div class="contact-popup-toolbar"
-            style="display: flex; justify-content: flex-end; padding: 10px 20px 6px 20px;">
-            <button type="button" class="btn-contact-tool" id="btnProjectDocAddRow" title="Add Project Type"
-              style="background: transparent; border: none; cursor: pointer; padding: 0;">
-              <img src="icons/Add.svg" alt="Add" width="36" height="36">
-            </button>
+          <!-- Activity Table -->
+          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblProjectActivityDetails">
+              <thead>
+                <tr>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: left; padding: 10px 14px; width: 22ch; min-width: 22ch; max-width: 22ch;">
+                    <span>Stage</span>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectActivityStageFilter" onclick="openProjectActivityFilter('stage', event)" title="Filter Stage">▼</button>
+                  </th>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: left; padding: 10px 14px; width: 45ch; min-width: 45ch; max-width: 45ch;">
+                    <span>Activity</span>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectActivityNameFilter" onclick="openProjectActivityFilter('activity', event)" title="Filter Activity">▼</button>
+                  </th>
+                  <th style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: center; padding: 10px 8px; width: 15ch; min-width: 15ch; max-width: 15ch;">
+                    <span>Days</span>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectActivityDaysFilter" onclick="openProjectActivityFilter('days', event)" title="Filter Days">▼</button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyProjectActivityDetails">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 11. Project Type / Sub - Project Type Details Side Panel (View Project → Approval History Icon) -->
+        <div class="side-form-card side-contact-popup" id="projectTypeDocSidePanel"
+          style="display: none; width: 620px;">
+          <!-- Header -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 4px;">
+            <div class="side-form-title-badge">Approval History</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+              <button type="button" class="btn-contact-tool" id="btnProjectDocAddRow" title="Add Approval" onclick="openAddProjectApprovalForm()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectDocPanel"
+                aria-label="Close approval history">&times;</button>
+            </div>
           </div>
 
           <!-- Project Type Description Table -->
-          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
+          <div class="contact-table-wrap" style="padding: 4px 16px 16px 16px;">
             <table class="contact-custom-table" id="tblProjectDocDetails">
               <thead>
                 <tr>
                   <th
-                    style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: center;">
+                    style="border-left: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; text-align: center; padding: 10px 14px;">
                     <span>Description</span>
-                    <button type="button" class="contact-th-filter-btn" title="Filter Description">▼</button>
+                    <button type="button" class="contact-th-filter-btn" id="btnProjectDocDescFilter" onclick="openProjectDocFilter('description', event)" title="Filter Description">▼</button>
                   </th>
                 </tr>
               </thead>
               <tbody id="tbodyProjectDocDetails">
-                <tr>
-                  <td class="td-link-blue" style="text-align: left !important; padding-left: 20px; font-weight: 500;">
-                    KTN</td>
-                </tr>
-                <tr>
-                  <td class="td-link-blue" style="text-align: left !important; padding-left: 20px; font-weight: 500;">KK
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -8227,7 +8356,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260924_site_update"></script>
+  <script src="assets/js/home.js?v=20260925_1128_fixed"></script>
 </body>
 
 </html>

@@ -11,21 +11,53 @@
 const masterEmployeeData = [
   {
     id: "emp-1",
+    employeeName: "Aakash Verma",
     employeeId: "230510678",
-    employeeName: "R/RL-234567",
-    designation: "R/RL-234567",
-    contactNumber: "R/RL-234567",
-    email: "R/RL-234567",
+    employeeType: "Permanent",
+    designation: "Project Manager",
+    contactNumber: "+91 98401 12345",
+    email: "aakash.v@nexus.com",
     status: "Active"
   },
   {
     id: "emp-2",
-    employeeId: "230510678",
-    employeeName: "R/RL-234567",
-    designation: "R/RL-234567",
-    contactNumber: "R/RL-234567",
-    email: "R/RL-234567",
+    employeeName: "Deepak Sharma",
+    employeeId: "230510679",
+    employeeType: "Contract",
+    designation: "Site Engineer",
+    contactNumber: "+91 98402 23456",
+    email: "deepak.s@nexus.com",
     status: "In - Active"
+  },
+  {
+    id: "emp-3",
+    employeeName: "Karthik Subramanian",
+    employeeId: "230510680",
+    employeeType: "Permanent",
+    designation: "Telecom Lead",
+    contactNumber: "+91 98403 34567",
+    email: "karthik.s@nexus.com",
+    status: "Active"
+  },
+  {
+    id: "emp-4",
+    employeeName: "Meera Nambiar",
+    employeeId: "230510681",
+    employeeType: "Permanent",
+    designation: "CAD Designer",
+    contactNumber: "+91 98404 45678",
+    email: "meera.n@nexus.com",
+    status: "Active"
+  },
+  {
+    id: "emp-5",
+    employeeName: "Pooja Hegde",
+    employeeId: "230510682",
+    employeeType: "Contract",
+    designation: "HR Officer",
+    contactNumber: "+91 98405 56789",
+    email: "pooja.h@nexus.com",
+    status: "Active"
   }
 ];
 
@@ -770,62 +802,87 @@ const indusSiteData = [
 const indusProductsData = [
   {
     id: "indus-prod-1",
-    itemCode: "KTN",
-    productName: "230510678",
+    itemCode: "ITM-1001",
+    productName: "Fiber Optic Cable 24 Core",
+    itemName: "Fiber Optic Cable 24 Core",
     productType: "Capex",
-    productDescription: "KTN",
+    itemType: "Capex",
+    productDescription: "Armored single mode 24 core outdoor cable",
+    itemDescription: "Armored single mode 24 core outdoor cable",
+    uom: "Mtr",
+    rate: "125.00",
+    activeRate: "125.00",
     hsnSacType: "HSN",
-    hsnSacCode: "R/RL-234567",
-    activeRate: "11000.00",
+    hsnSacCode: "854470",
     budgetPercent: "95",
-    budgetAmount: "11000.00",
+    budgetAmount: "125000.00",
     status: "Active"
   },
   {
     id: "indus-prod-2",
-    itemCode: "KK",
-    productName: "230510678",
+    itemCode: "ITM-1002",
+    productName: "DG Set Maintenance Kit",
+    itemName: "DG Set Maintenance Kit",
     productType: "Opex",
-    productDescription: "KK",
+    itemType: "Opex",
+    productDescription: "Quarterly preventative maintenance service pack",
+    itemDescription: "Quarterly preventative maintenance service pack",
+    uom: "Set",
+    rate: "15400.00",
+    activeRate: "15400.00",
     hsnSacType: "SAC",
-    hsnSacCode: "R/RL-234567",
-    activeRate: "11000.00",
+    hsnSacCode: "998719",
     budgetPercent: "90",
-    budgetAmount: "11000.00",
-    status: "In - Active"
+    budgetAmount: "45000.00",
+    status: "Active"
   },
   {
     id: "indus-prod-3",
-    itemCode: "AP",
-    productName: "230510678",
-    productType: "",
-    productDescription: "AP",
+    itemCode: "ITM-1003",
+    productName: "Tower Grounding Copper Strip",
+    itemName: "Tower Grounding Copper Strip",
+    productType: "Capex",
+    itemType: "Capex",
+    productDescription: "25x3mm pure copper grounding tape",
+    itemDescription: "25x3mm pure copper grounding tape",
+    uom: "Kg",
+    rate: "850.00",
+    activeRate: "850.00",
     hsnSacType: "HSN",
-    hsnSacCode: "R/RL-234567",
-    activeRate: "11000.00",
+    hsnSacCode: "740710",
     budgetPercent: "85",
-    budgetAmount: "11000.00",
-    status: "Active"
+    budgetAmount: "25000.00",
+    status: "In - Active"
   }
 ];
 
 const indusInfraData = [
   {
     id: "indus-infra-1",
-    infraCategory: "KTN",
-    infraDescription: "KTN",
-    uom: "R/RL-234567",
-    make: "R/RL-234567",
+    infraCategory: "Tower Structure",
+    infraDescription: "40M Ground Based Lattice Tower Structure GBT-40",
+    uom: "Nos",
+    make: "Skipper Ltd",
     commissioning: "Yes",
     iMap: "Yes",
     status: "Active"
   },
   {
     id: "indus-infra-2",
-    infraCategory: "KK",
-    infraDescription: "KK",
-    uom: "R/RL-234567",
-    make: "R/RL-234567",
+    infraCategory: "Diesel Generator",
+    infraDescription: "15 KVA Silent Diesel Generator Set CPCB-II",
+    uom: "Set",
+    make: "Kirloskar",
+    commissioning: "Yes",
+    iMap: "Yes",
+    status: "Active"
+  },
+  {
+    id: "indus-infra-3",
+    infraCategory: "SMPS Power Plant",
+    infraDescription: "48V 100A Modular DC Power Plant with 4 Rectifiers",
+    uom: "Nos",
+    make: "Delta Electronics",
     commissioning: "No",
     iMap: "No",
     status: "In - Active"
@@ -835,55 +892,33 @@ const indusInfraData = [
 const indusProjectsData = [
   {
     id: "indus-proj-1",
-    projectType: "KTN",
-    subProjectType: "KTN",
-    tat: "45",
-    indusPm: "R/RL-234567",
-    indusScm: "R/RL-234567",
-    pm: "R/RL-234567",
-    mis: "R/RL-234567",
-    survey: "Yes",
-    additionalTransport: "Yes",
+    projectType: "New Site Build",
+    subProjectType: "GBT 40M With DG",
+    tat: "45 Days",
+    indusPm: "Rajesh Sharma",
+    indusScm: "Anand Verma",
+    pm: "Suresh Narayanan",
     status: "Active"
   },
   {
     id: "indus-proj-2",
-    projectType: "KK",
-    subProjectType: "KK",
-    tat: "45",
-    indusPm: "R/RL-234567",
-    indusScm: "R/RL-234567",
-    pm: "R/RL-234567",
-    mis: "R/RL-234567",
-    survey: "No",
-    additionalTransport: "No",
-    status: "In - Active"
+    projectType: "Tower Sharing / Tenancy",
+    subProjectType: "Rooftop RTT 15M",
+    tat: "30 Days",
+    indusPm: "Vikram Malhotra",
+    indusScm: "Siddharth Sen",
+    pm: "Manoj Swaminathan",
+    status: "Active"
   },
   {
     id: "indus-proj-3",
-    projectType: "KTN",
-    subProjectType: "KTN",
-    tat: "45",
-    indusPm: "R/RL-234567",
-    indusScm: "R/RL-234567",
-    pm: "R/RL-234567",
-    mis: "R/RL-234567",
-    survey: "Yes",
-    additionalTransport: "No",
-    status: "Active"
-  },
-  {
-    id: "indus-proj-4",
-    projectType: "KTN",
-    subProjectType: "KTN",
-    tat: "45",
-    indusPm: "R/RL-234567",
-    indusScm: "R/RL-234567",
-    pm: "R/RL-234567",
-    mis: "R/RL-234567",
-    survey: "No",
-    additionalTransport: "Yes",
-    status: "Active"
+    projectType: "Power Upgrade",
+    subProjectType: "Solar Hybrid 5KW",
+    tat: "20 Days",
+    indusPm: "Pooja Reddy",
+    indusScm: "Kavita Rao",
+    pm: "Venkatesh Iyer",
+    status: "In - Active"
   }
 ];
 
@@ -893,20 +928,32 @@ let selectedProductName = 'Product Name';
 const indusProductMaterialsData = [
   {
     id: "mat-1",
-    materialCode: "230510678",
-    materialHead: "230510678",
-    materialCategory: "230510678",
-    materialDescription: "230510678",
+    materialHead: "Civil Structure",
+    materialCategory: "Tower Steel",
+    materialDescription: "Galvanized Steel Angular Members Grade E250",
+    make: "Tata Steel",
     type: "Parent",
+    ucf: "1.05",
     status: "Active"
   },
   {
     id: "mat-2",
-    materialCode: "230510678",
-    materialHead: "230510678",
-    materialCategory: "230510678",
-    materialDescription: "230510678",
+    materialHead: "Electrical & Power",
+    materialCategory: "Power Cable",
+    materialDescription: "4 Core 50 sq mm Armored Aluminium Cable",
+    make: "Polycab",
     type: "Child",
+    ucf: "1.00",
+    status: "Active"
+  },
+  {
+    id: "mat-3",
+    materialHead: "Civil Structure",
+    materialCategory: "Foundation Bolts",
+    materialDescription: "High Tensile Foundation Anchor Bolts M36 Grade 8.8",
+    make: "Unbrako",
+    type: "Child",
+    ucf: "1.02",
     status: "In - Active"
   }
 ];
@@ -914,19 +961,25 @@ const indusProductMaterialsData = [
 const indusProductExpensesData = [
   {
     id: "prod-exp-1",
-    expenseCode: "230510678",
-    expenseHead: "230510678",
-    expenseCategory: "230510678",
-    expenseDescription: "230510678",
+    expenseHead: "Site Survey & Soil Test",
+    expenseCategory: "Geotechnical Survey",
+    expenseDescription: "Comprehensive soil boring and SBC testing report",
     type: "Parent",
     status: "Active"
   },
   {
     id: "prod-exp-2",
-    expenseCode: "230510678",
-    expenseHead: "230510678",
-    expenseCategory: "230510678",
-    expenseDescription: "230510678",
+    expenseHead: "Logistics & Mobilization",
+    expenseCategory: "Crane & Lifting",
+    expenseDescription: "Hydraulic crane rental for tower erection",
+    type: "Child",
+    status: "Active"
+  },
+  {
+    id: "prod-exp-3",
+    expenseHead: "Statutory & Liasoning",
+    expenseCategory: "Local Approvals",
+    expenseDescription: "Municipal clearance and NOC documentation fees",
     type: "Child",
     status: "In - Active"
   }
@@ -935,17 +988,25 @@ const indusProductExpensesData = [
 const indusProductInfraData = [
   {
     id: "prod-infra-1",
-    infraCode: "230510678",
-    infraCategory: "230510678",
-    infraDescription: "230510678",
+    infraCode: "INF-2026-IND-01",
+    infraCategory: "Ground Based Tower",
+    infraDescription: "40M Ground Based Galvanized Lattice Tower Structure",
     type: "Parent",
     status: "Active"
   },
   {
     id: "prod-infra-2",
-    infraCode: "230510678",
-    infraCategory: "230510678",
-    infraDescription: "230510678",
+    infraCode: "INF-2026-IND-02",
+    infraCategory: "DG Power Backup",
+    infraDescription: "15 KVA Silent Diesel Generator with Auto AMF Panel",
+    type: "Child",
+    status: "Active"
+  },
+  {
+    id: "prod-infra-3",
+    infraCode: "INF-2026-IND-03",
+    infraCategory: "Solar Hybrid System",
+    infraDescription: "5KW Rooftop/Ground Solar Photovoltaic Array with MPPT",
     type: "Child",
     status: "In - Active"
   }
@@ -973,27 +1034,28 @@ const indusProductRateData = [
 let selectedProjectType = "Project Type";
 let currentIndusProjectTypeSubpage = "survey"; // 'survey' | 'transport'
 
-const indusProjectSurveyData = [
+let indusProjectSurveyData = [
   { id: "survey-1", description: "KTN" },
-  { id: "survey-2", description: "KK" }
+  { id: "survey-2", description: "KK" },
+  { id: "survey-3", description: "AP" }
 ];
 
-const indusProjectTransportData = [
+let indusProjectTransportData = [
   {
     id: "transport-1",
-    itemCode: "KTN",
-    itemDescription: "KTN",
-    transportZone: "Zone 1",
-    qty: "1",
+    itemCode: "ITM-001",
+    itemDescription: "Tower Component – KTN Type A",
+    transportZone: "A",
+    qty: "12",
     status: "Active"
   },
   {
     id: "transport-2",
-    itemCode: "KK",
-    itemDescription: "KK",
-    transportZone: "Zone 2",
-    qty: "2",
-    status: "In - Active"
+    itemCode: "ITM-002",
+    itemDescription: "Cable Harness Set – KK Grade",
+    transportZone: "B",
+    qty: "8",
+    status: "Active"
   }
 ];
 
@@ -4631,39 +4693,37 @@ function renderIndusTableHead() {
 
   if (currentIndusSubpage === 'product_details') {
     if (currentIndusProductSubpage === 'materials') {
-      // 6 Columns Matching Image 1: Material Code, Material Head, Material Category, Material Description, Type, Status
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th class="col-gbpa-mat-code">
-            <div class="th-content-wrap">
-              <span>Material Code</span>
-            </div>
-          </th>
-          <th class="col-gbpa-mat-head">
-            <div class="th-content-wrap">
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Material Head</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialHead'] ? 'has-active-filter' : ''}" data-filter-col="materialHead" title="Filter Material Head">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-mat-cat">
-            <div class="th-content-wrap">
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Material Category</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialCategory'] ? 'has-active-filter' : ''}" data-filter-col="materialCategory" title="Filter Material Category">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-mat-desc">
-            <div class="th-content-wrap">
+          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Material Description</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialDescription'] ? 'has-active-filter' : ''}" data-filter-col="materialDescription" title="Filter Material Description">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-mat-type">
-            <div class="th-content-wrap">
-              <span>Type</span>
-            </div>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Make</span>
           </th>
-          <th class="col-gbpa-mat-status">
-            <div class="th-content-wrap">
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Type</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>UCF</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
             </div>
@@ -4671,39 +4731,34 @@ function renderIndusTableHead() {
         </tr>
       `;
     } else if (currentIndusProductSubpage === 'expenses') {
-      // 6 Columns Matching Uploaded Mockup: Expense Code, Expense Head, Expense Category, Expense Description, Type, Status
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th class="col-gbpa-exp-code">
-            <div class="th-content-wrap">
-              <span>Expense Code</span>
-            </div>
-          </th>
-          <th class="col-gbpa-exp-head">
-            <div class="th-content-wrap">
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Expense Head</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-exp-cat">
-            <div class="th-content-wrap">
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Expense Category</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseCategory'] ? 'has-active-filter' : ''}" data-filter-col="expenseCategory" title="Filter Expense Category">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-exp-desc">
-            <div class="th-content-wrap">
+          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Expense Description</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-exp-type">
-            <div class="th-content-wrap">
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['type'] ? 'has-active-filter' : ''}" data-filter-col="type" title="Filter Type">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-exp-status">
-            <div class="th-content-wrap">
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
             </div>
@@ -4711,34 +4766,34 @@ function renderIndusTableHead() {
         </tr>
       `;
     } else if (currentIndusProductSubpage === 'infra') {
-      // 5 Columns Matching Uploaded Mockup: Infra Code, Infra Category, Infra Description, Type, Status
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th class="col-gbpa-infra-code">
-            <div class="th-content-wrap">
+          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Infra Code</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCode'] ? 'has-active-filter' : ''}" data-filter-col="infraCode" title="Filter Infra Code">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-infra-cat">
-            <div class="th-content-wrap">
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Infra Category</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-infra-desc">
-            <div class="th-content-wrap">
+          <th style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Infra Description</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraDescription'] ? 'has-active-filter' : ''}" data-filter-col="infraDescription" title="Filter Infra Description">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-infra-type">
-            <div class="th-content-wrap">
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['type'] ? 'has-active-filter' : ''}" data-filter-col="type" title="Filter Type">&#9660;</button>
             </div>
           </th>
-          <th class="col-gbpa-infra-status">
-            <div class="th-content-wrap">
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
             </div>
@@ -4841,49 +4896,32 @@ function renderIndusTableHead() {
   if (currentIndusSubpage === 'projects') {
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Project Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Sub - Project Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub - Project Type">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>TAT</span>
-          </div>
+        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>TAT</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Indus PM</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['indusPm'] ? 'has-active-filter' : ''}" data-filter-col="indusPm" title="Filter Indus PM">&#9660;</button>
-          </div>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Indus PM</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>Indus SCM</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['indusScm'] ? 'has-active-filter' : ''}" data-filter-col="indusScm" title="Filter Indus SCM">&#9660;</button>
-          </div>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Indus SCM</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>PM</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['pm'] ? 'has-active-filter' : ''}" data-filter-col="pm" title="Filter PM">&#9660;</button>
-          </div>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>PM</span>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>MIS</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['mis'] ? 'has-active-filter' : ''}" data-filter-col="mis" title="Filter MIS">&#9660;</button>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
@@ -4891,43 +4929,34 @@ function renderIndusTableHead() {
       </tr>
     `;
   } else if (currentIndusSubpage === 'infra') {
-    // Indus Towers Infra Table Headers (Infra Category 25char, Infra Description 50char, Uom, Make, Commissioning, I - Map, Status)
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th class="col-telecom-infra-category">
-          <div class="th-content-wrap">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Infra Category</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
           </div>
         </th>
-        <th class="col-telecom-infra-desc">
-          <div class="th-content-wrap">
+        <th style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Infra Description</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraDescription'] ? 'has-active-filter' : ''}" data-filter-col="infraDescription" title="Filter Infra Description">&#9660;</button>
           </div>
         </th>
-        <th class="col-telecom-infra-uom">
-          <div class="th-content-wrap">
-            <span>Uom</span>
-          </div>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>UOM</span>
         </th>
-        <th class="col-telecom-infra-make">
-          <div class="th-content-wrap">
-            <span>Make</span>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Make</span>
         </th>
-        <th class="col-telecom-infra-commissioning">
-          <div class="th-content-wrap">
-            <span>Commissioning</span>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Commissioning</span>
         </th>
-        <th class="col-telecom-infra-imap">
-          <div class="th-content-wrap">
-            <span>I - Map</span>
-          </div>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>I - Map</span>
         </th>
-        <th class="col-telecom-infra-status">
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
@@ -4937,55 +4966,41 @@ function renderIndusTableHead() {
   } else if (currentIndusSubpage === 'products') {
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th class="col-gbpa-item-code">
-          <div class="th-content-wrap">
-            <span>Item Code</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemCode'] ? 'has-active-filter' : ''}" data-filter-col="itemCode" title="Filter Item Code">&#9660;</button>
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Item Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productName'] ? 'has-active-filter' : ''}" data-filter-col="productName" title="Filter Item Name">&#9660;</button>
           </div>
         </th>
-        <th class="col-gbpa-product-name">
-          <div class="th-content-wrap">
-            <span>Product Name</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productName'] ? 'has-active-filter' : ''}" data-filter-col="productName" title="Filter Product Name">&#9660;</button>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Item Code</span>
         </th>
-        <th class="col-gbpa-product-type">
-          <div class="th-content-wrap">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Product Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productType'] ? 'has-active-filter' : ''}" data-filter-col="productType" title="Filter Product Type">&#9660;</button>
           </div>
         </th>
-        <th class="col-gbpa-product-desc">
-          <div class="th-content-wrap">
-            <span>Product Description</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productDescription'] ? 'has-active-filter' : ''}" data-filter-col="productDescription" title="Filter Product Description">&#9660;</button>
-          </div>
-        </th>
-        <th class="col-gbpa-hsn-sac">
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>HSN/SAC</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['hsnSacType'] ? 'has-active-filter' : ''}" data-filter-col="hsnSacType" title="Filter HSN/SAC">&#9660;</button>
           </div>
         </th>
-        <th class="col-gbpa-hsn-code">
-          <div class="th-content-wrap">
-            <span>HSN/SAC Code</span>
-          </div>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>HSN/SAC Code</span>
         </th>
-        <th class="col-gbpa-active-rate">
-          <div class="th-content-wrap">
-            <span>Active Rate (₹)</span>
-          </div>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>UOM</span>
         </th>
-        <th class="col-gbpa-budget">
-          <div class="th-content-wrap">
-            <span>Budget (₹)</span>
-          </div>
-        </th>
-        <th class="col-gbpa-status">
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Rate (₹)</span>
         </th>
       </tr>
     `;
@@ -4993,7 +5008,10 @@ function renderIndusTableHead() {
     thead.innerHTML = `
       <tr class="master-view-header">
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-          <span>Site ID</span>
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Site ID</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+          </div>
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
@@ -5002,13 +5020,22 @@ function renderIndusTableHead() {
           </div>
         </th>
         <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-          <span>Site Name</span>
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Site Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+          </div>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-          <span>District</span>
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>District</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['district'] ? 'has-active-filter' : ''}" data-filter-col="district" title="Filter District">&#9660;</button>
+          </div>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-          <span>Town</span>
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Town</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['town'] ? 'has-active-filter' : ''}" data-filter-col="town" title="Filter Town">&#9660;</button>
+          </div>
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
           <span>Latitude</span>
@@ -5017,10 +5044,16 @@ function renderIndusTableHead() {
           <span>Longitude</span>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-          <span>Transport Zone</span>
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Transport Zone</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportZone'] ? 'has-active-filter' : ''}" data-filter-col="transportZone" title="Filter Transport Zone">&#9660;</button>
+          </div>
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-          <span>Status</span>
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
         </th>
       </tr>
     `;
@@ -5389,41 +5422,45 @@ function renderMasterTableHead() {
       </tr>
     `;
   } else if (currentMasterSubpage === 'employee') {
-    // Employee Table Headers
+    // Employee Table Headers: All Centered
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th>
-          <div class="th-content-wrap">
-            <span>Employee ID</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeId'] ? 'has-active-filter' : ''}" data-filter-col="employeeId" title="Filter Employee ID">&#9660;</button>
-          </div>
-        </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Employee Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Employee ID</span>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Employee Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeType'] ? 'has-active-filter' : ''}" data-filter-col="employeeType" title="Filter Employee Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Designation</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['designation'] ? 'has-active-filter' : ''}" data-filter-col="designation" title="Filter Designation">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
             <span>Contact Number</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['contactNumber'] ? 'has-active-filter' : ''}" data-filter-col="contactNumber" title="Filter Contact Number">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
-            <span>E-Mail</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['email'] ? 'has-active-filter' : ''}" data-filter-col="email" title="Filter E-Mail">&#9660;</button>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Email</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['email'] ? 'has-active-filter' : ''}" data-filter-col="email" title="Filter Email">&#9660;</button>
           </div>
         </th>
-        <th>
-          <div class="th-content-wrap">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
@@ -10164,14 +10201,15 @@ function applyFiltersAndRender() {
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
-            <tr data-row-id="${row.id}">
-              <td class="col-gbpa-mat-code">${row.materialCode || ''}</td>
-              <td class="col-gbpa-mat-head">${row.materialHead || ''}</td>
-              <td class="col-gbpa-mat-cat">${row.materialCategory || ''}</td>
-              <td class="col-gbpa-mat-desc">${row.materialDescription || ''}</td>
-              <td class="col-gbpa-mat-type td-center">${row.type || ''}</td>
-              <td class="col-gbpa-mat-status td-center">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialHead || '').replace(/"/g, '&quot;')}">${row.materialHead || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialCategory || '').replace(/"/g, '&quot;')}">${row.materialCategory || ''}</td>
+              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">${row.materialDescription || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">${row.make || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.ucf || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
               </td>
             </tr>
           `;
@@ -10181,14 +10219,13 @@ function applyFiltersAndRender() {
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
-            <tr data-row-id="${row.id}">
-              <td class="col-gbpa-exp-code">${row.expenseCode || ''}</td>
-              <td class="col-gbpa-exp-head">${row.expenseHead || ''}</td>
-              <td class="col-gbpa-exp-cat">${row.expenseCategory || ''}</td>
-              <td class="col-gbpa-exp-desc">${row.expenseDescription || ''}</td>
-              <td class="col-gbpa-exp-type td-center">${row.type || ''}</td>
-              <td class="col-gbpa-exp-status td-center">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">${row.expenseHead || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseCategory || '').replace(/"/g, '&quot;')}">${row.expenseCategory || ''}</td>
+              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseDescription || '').replace(/"/g, '&quot;')}">${row.expenseDescription || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
               </td>
             </tr>
           `;
@@ -10198,13 +10235,13 @@ function applyFiltersAndRender() {
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
-            <tr data-row-id="${row.id}">
-              <td class="col-gbpa-infra-code">${row.infraCode || ''}</td>
-              <td class="col-gbpa-infra-cat">${row.infraCategory || ''}</td>
-              <td class="col-gbpa-infra-desc">${row.infraDescription || ''}</td>
-              <td class="col-gbpa-infra-type td-center">${row.type || ''}</td>
-              <td class="col-gbpa-infra-status td-center">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCode || '').replace(/"/g, '&quot;')}">${row.infraCode || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
+              <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraDescription || '').replace(/"/g, '&quot;')}">${row.infraDescription || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
               </td>
             </tr>
           `;
@@ -10262,22 +10299,21 @@ function applyFiltersAndRender() {
     }
 
     if (currentIndusSubpage === 'projects') {
-      // Render Indus Towers -> Projects Rows (Survey & Additional Transport columns removed)
+      // Render Indus Towers -> Projects Rows (MIS column removed, left aligned fields)
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
-          <tr data-row-id="${row.id}">
-            <td>
-              <a href="#" class="req-link td-link-blue" onclick="handleProjectClick('${row.id}', '${row.projectType}'); return false;">${row.projectType || ''}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.projectType || '').replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="handleProjectClick('${row.id}', '${row.projectType}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.projectType || ''}</a>
             </td>
-            <td>${row.subProjectType || ''}</td>
-            <td>${row.tat || ''}</td>
-            <td>${row.indusPm || ''}</td>
-            <td>${row.indusScm || ''}</td>
-            <td>${row.pm || ''}</td>
-            <td>${row.mis || ''}</td>
-            <td class="td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.subProjectType || '').replace(/"/g, '&quot;')}">${row.subProjectType || ''}</td>
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.tat || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.indusPm || '').replace(/"/g, '&quot;')}">${row.indusPm || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.indusScm || '').replace(/"/g, '&quot;')}">${row.indusScm || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.pm || '').replace(/"/g, '&quot;')}">${row.pm || ''}</td>
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
           </tr>
         `;
@@ -10287,40 +10323,46 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
-          <tr data-row-id="${row.id}">
-            <td class="col-telecom-infra-category">${row.infraCategory || ''}</td>
-            <td class="col-telecom-infra-desc">
-              <a href="#" class="req-link td-link-blue" onclick="handleInfraClick('${row.id}', '${row.infraCategory}'); return false;">${row.infraDescription || ''}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
+            <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraDescription || '').replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="handleInfraClick('${row.id}', '${row.infraCategory}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.infraDescription || ''}</a>
             </td>
-            <td class="col-telecom-infra-uom td-center">${row.uom || ''}</td>
-            <td class="col-telecom-infra-make">${row.make || ''}</td>
-            <td class="col-telecom-infra-commissioning">${row.commissioning || ''}</td>
-            <td class="col-telecom-infra-imap td-center">${row.iMap || ''}</td>
-            <td class="col-telecom-infra-status td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.uom || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">${row.make || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${row.commissioning || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.iMap || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
           </tr>
         `;
       }).join('');
     } else if (currentIndusSubpage === 'products') {
-      // Render Indus Towers -> Products Rows (Matching Uploaded Mockup)
+      // Render Indus Towers -> Products (GBPA) Rows
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
+        const dispItemName = row.itemName || row.productName || '';
+        const dispItemCode = row.itemCode || '';
+        const dispProductType = row.productType || row.itemType || '';
+        const dispHsnSacType = row.hsnSacType || '';
+        const dispHsnSacCode = row.hsnSacCode || '';
+        const dispUom = row.uom || 'Pcs';
+        const dispRate = row.rate || row.activeRate || '0.00';
         return `
-          <tr data-row-id="${row.id}">
-            <td class="col-gbpa-item-code">${row.itemCode || ''}</td>
-            <td class="col-gbpa-product-name">
-              <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${row.productName}'); return false;">${row.productName || ''}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${dispItemName.replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${dispItemName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${dispItemName}</a>
             </td>
-            <td class="col-gbpa-product-type">${row.productType || ''}</td>
-            <td class="col-gbpa-product-desc">${row.productDescription || ''}</td>
-            <td class="col-gbpa-hsn-sac td-center">${row.hsnSacType || ''}</td>
-            <td class="col-gbpa-hsn-code">${row.hsnSacCode || ''}</td>
-            <td class="col-gbpa-active-rate td-amount">${row.activeRate || ''}</td>
-            <td class="col-gbpa-budget td-amount">${row.budgetAmount || ''}</td>
-            <td class="col-gbpa-status td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${dispItemCode.replace(/"/g, '&quot;')}">${dispItemCode}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${dispProductType}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${dispHsnSacType}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${dispHsnSacCode}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${dispUom}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 600;">${dispRate}</td>
           </tr>
         `;
       }).join('');
@@ -10333,12 +10375,12 @@ function applyFiltersAndRender() {
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${row.id}', '${row.siteName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;" title="View Site Details">${row.siteId || ''}</a>
             </td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.whId || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.whId || ''}</td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">${row.siteName || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.district || '').replace(/"/g, '&quot;')}">${row.district || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.town || '').replace(/"/g, '&quot;')}">${row.town || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.latitude || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.longitude || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.latitude || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.longitude || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${row.transportZone || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
@@ -10479,20 +10521,21 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentMasterSubpage === 'employee') {
-      // Render Employee Rows with Clean Text Status Badge
+      // Render Employee Rows rearranged: Employee Name 25ch&left, Employee ID 15ch&center, Employee Type 15ch&center, Designation 20ch&left, Contact Number 15ch&center, Email 25ch&left, Status 10ch&center
       tbody.innerHTML = filteredDataset.map(row => {
-        const isInactive = row.status.toLowerCase().includes('in');
+        const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
-          <tr data-row-id="${row.id}">
-            <td>${row.employeeId}</td>
-            <td>
-              <a href="#" class="req-link td-link-blue" onclick="handleEmpClick('${row.id}', '${row.employeeName}'); return false;">${row.employeeName}</a>
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              <a href="#" class="req-link td-link-blue" onclick="handleEmpClick('${row.id}', '${row.employeeName}'); return false;" style="color: #0454e4; font-weight: 500;">${row.employeeName || ''}</a>
             </td>
-            <td>${row.designation}</td>
-            <td>${row.contactNumber}</td>
-            <td>${row.email}</td>
-            <td class="td-center">
-              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status}</span>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeId || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeType || 'Permanent'}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;">${row.designation || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.contactNumber || ''}</td>
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;">${row.email || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
           </tr>
         `;
@@ -11392,21 +11435,6 @@ function initSideFormEvents() {
   // Toggle Contact & Mail Side Message Popup Next to Add Infra Card
   if (btnInfraMessage && contactPanel) {
     btnInfraMessage.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (locationPanel) locationPanel.style.display = 'none';
-      const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
-      contactPanel.style.display = isHidden ? 'flex' : 'none';
-      if (isHidden) {
-        showToast('Contact & Communication popup opened');
-      } else {
-        showToast('Contact popup closed');
-      }
-    });
-  }
-
-  // Toggle Contact & Mail Side Message Popup Next to Add Site Card
-  if (btnSiteMessage && contactPanel) {
-    btnSiteMessage.addEventListener('click', (e) => {
       e.stopPropagation();
       if (locationPanel) locationPanel.style.display = 'none';
       const isHidden = contactPanel.style.display === 'none' || contactPanel.style.display === '';
@@ -12350,6 +12378,43 @@ function initSideFormEvents() {
   // Submit / Save Actions
   function handleFormSave() {
     if (currentModule === 'indus_towers') {
+      if (currentIndusSubpage === 'projects') {
+        const projectType = document.getElementById('inpProjectType')?.value || "New Site Build";
+        const subProjectType = document.getElementById('inpSubProjectType')?.value || "GBT 40M";
+        const upgradationType = document.getElementById('inpProjectUpgradationType')?.value || "Major";
+        const tat = document.getElementById('inpProjectTat')?.value || "30 Days";
+        const indusPm = document.getElementById('inpIndusPm')?.value || "Rajesh Sharma";
+        const indusScm = document.getElementById('inpIndusScm')?.value || "Anand Verma";
+        const pm = document.getElementById('inpProjectPm')?.value || "Suresh Narayanan";
+        const surveyToggle = document.getElementById('inpProjectSurveyToggle');
+        const survey = (surveyToggle && surveyToggle.checked) ? "Yes" : "No";
+        const transportToggle = document.getElementById('inpProjectTransportToggle');
+        const additionalTransport = (transportToggle && transportToggle.checked) ? "Yes" : "No";
+        const statusToggle = document.getElementById('inpProjectStatusToggle');
+        const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+
+        const newRecord = {
+          id: `indus-proj-${Date.now()}`,
+          projectType,
+          subProjectType,
+          upgradationType,
+          tat,
+          indusPm,
+          indusScm,
+          pm,
+          survey,
+          additionalTransport,
+          status
+        };
+
+        indusProjectsData.unshift(newRecord);
+        loadIndusDataset();
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`Project ${projectType} successfully saved & added to table!`);
+        return;
+      }
+
       if (currentIndusSubpage === 'project_type_details') {
         if (currentIndusProjectTypeSubpage === 'transport') {
           const itemCode = document.getElementById('inpProjectTransItemCode')?.value || "KTN";
@@ -12528,14 +12593,16 @@ function initSideFormEvents() {
       }
 
       if (currentIndusSubpage === 'products') {
-        const itemCode = document.getElementById('inpGbpaItemCode')?.value || "KTN";
-        const productName = document.getElementById('inpGbpaProductName')?.value || "230510678";
-        const productType = document.getElementById('inpGbpaProductType')?.value || "Capex";
-        const productDescription = document.getElementById('inpGbpaProductDescription')?.value || "KTN";
-        const uom = document.getElementById('inpGbpaUom')?.value || "Pcs";
-        const hsnSacType = document.getElementById('inpGbpaHsnSac')?.value || "HSN";
-        const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value || "R/RL-234567";
-        const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value || "95";
+        const itemCode = document.getElementById('inpGbpaItemCode')?.value?.trim() || `ITM-${1000 + indusProductsData.length + 1}`;
+        const productName = document.getElementById('inpGbpaProductName')?.value?.trim() || "New GBPA Item";
+        const productType = document.getElementById('inpGbpaProductType')?.value?.trim() || "Capex";
+        const productDescription = document.getElementById('inpGbpaProductDescription')?.value?.trim() || "";
+        const uom = document.getElementById('inpGbpaUom')?.value?.trim() || "Pcs";
+        const rate = document.getElementById('inpGbpaRate')?.value?.trim() || "0.00";
+        const hsnSacType = document.getElementById('inpGbpaHsnSac')?.value?.trim() || "HSN";
+        const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value?.trim() || "";
+        const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value?.trim() || "90";
+        const budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value?.trim() || rate;
         const statusToggle = document.getElementById('inpGbpaStatusToggle');
         const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
 
@@ -12543,21 +12610,26 @@ function initSideFormEvents() {
           id: `gbpa-${Date.now()}`,
           itemCode,
           productName,
+          itemName: productName,
           productType,
+          itemType: productType,
           productDescription,
+          itemDescription: productDescription,
+          uom,
+          rate,
+          activeRate: rate,
           hsnSacType,
           hsnSacCode,
-          activeRate: "11000.00",
           budgetPercent,
-          budgetAmount: "11000.00",
+          budgetAmount,
           status
         };
 
-        indusProductsData.push(newRecord);
+        indusProductsData.unshift(newRecord);
         loadIndusDataset();
         applyFiltersAndRender();
         closeSideForm();
-        showToast(`GBPA item ${itemCode} successfully saved & added to table!`);
+        showToast(`GBPA item ${productName} successfully saved & added to table!`);
         return;
       }
 
@@ -14056,20 +14128,36 @@ function openSideForm() {
         if (addMaterialsCard) addMaterialsCard.style.display = 'block';
       }
     } else if (currentIndusSubpage === 'products') {
-      if (addGbpaCard) addGbpaCard.style.display = 'block';
+      if (addGbpaCard) {
+        addGbpaCard.style.display = 'block';
+        const frm = document.getElementById('frmAddGbpa');
+        if (frm) frm.reset();
+        const typeSelect = document.getElementById('inpGbpaProductType');
+        if (typeSelect) typeSelect.value = 'Capex';
+        const uomSelect = document.getElementById('inpGbpaUom');
+        if (uomSelect) uomSelect.value = 'Pcs';
+        const hsnSelect = document.getElementById('inpGbpaHsnSac');
+        if (hsnSelect) hsnSelect.value = 'HSN';
+        const stToggle = document.getElementById('inpGbpaStatusToggle');
+        if (stToggle) stToggle.checked = true;
+      }
     } else if (currentIndusSubpage === 'projects') {
       if (addProjectCard) {
         addProjectCard.style.display = 'block';
         const lblTitle = document.getElementById('lblProjectCardTitle');
         const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
+        const btnActivity = document.getElementById('btnProjectActivityIcon');
         const btnTransport = document.getElementById('btnProjectTransportIcon');
         const btnSurvey = document.getElementById('btnProjectSurveyIcon');
         const btnSaveWrap = document.querySelector('#frmAddProject .form-submit-inside-wrap');
         if (lblTitle) lblTitle.innerText = 'Add Project Type';
         if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnActivity) btnActivity.style.display = 'none';
         if (btnTransport) btnTransport.style.display = 'none';
         if (btnSurvey) btnSurvey.style.display = 'none';
         if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+        const inpUpgrad = document.getElementById('inpProjectUpgradationType');
+        if (inpUpgrad) inpUpgrad.value = 'Major';
         setProjectFormReadOnly(false);
         currentViewedProjectId = null;
         isProjectFormEditing = false;
@@ -14582,7 +14670,12 @@ window.openProjectDocSidePanel = function() {
   });
 
   const projectDocPanel = document.getElementById('projectTypeDocSidePanel');
-  if (projectDocPanel) projectDocPanel.style.display = 'block';
+  if (projectDocPanel) {
+    projectDocPanel.style.display = 'block';
+    if (typeof renderProjectDocTable === 'function') {
+      renderProjectDocTable();
+    }
+  }
 
   overlay.style.display = 'flex';
 };
@@ -15053,6 +15146,33 @@ function initExcelFilterSystem() {
         showToast('Site contact filter cleared');
         return;
       }
+      if (dropdown.dataset.filterContext === 'projectDoc') {
+        if (currentProjectDocFilterCol) {
+          delete activeProjectDocFilters[currentProjectDocFilterCol];
+          if (typeof renderProjectDocTable === 'function') renderProjectDocTable();
+        }
+        closeExcelFilter();
+        showToast('Description filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'projectTransport') {
+        if (currentProjectTransportFilterCol) {
+          delete activeProjectTransportFilters[currentProjectTransportFilterCol];
+          if (typeof renderProjectTransportTable === 'function') renderProjectTransportTable();
+        }
+        closeExcelFilter();
+        showToast('Transport filter cleared');
+        return;
+      }
+      if (dropdown.dataset.filterContext === 'projectActivity') {
+        if (currentProjectActivityFilterCol) {
+          delete activeProjectActivityFilters[currentProjectActivityFilterCol];
+          if (typeof renderProjectActivityTable === 'function') renderProjectActivityTable();
+        }
+        closeExcelFilter();
+        showToast('Activity filter cleared');
+        return;
+      }
       closeExcelFilter();
     });
   }
@@ -15289,6 +15409,57 @@ function initExcelFilterSystem() {
         renderSiteContactTable();
         closeExcelFilter();
         showToast('Site contact filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'projectDoc') {
+        if (!currentProjectDocFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeProjectDocFilters[currentProjectDocFilterCol];
+        } else {
+          activeProjectDocFilters[currentProjectDocFilterCol] = new Set(checkedItems);
+        }
+        if (typeof renderProjectDocTable === 'function') renderProjectDocTable();
+        closeExcelFilter();
+        showToast('Description filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'projectTransport') {
+        if (!currentProjectTransportFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeProjectTransportFilters[currentProjectTransportFilterCol];
+        } else {
+          activeProjectTransportFilters[currentProjectTransportFilterCol] = new Set(checkedItems);
+        }
+        if (typeof renderProjectTransportTable === 'function') renderProjectTransportTable();
+        closeExcelFilter();
+        showToast('Transport filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'projectActivity') {
+        if (!currentProjectActivityFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeProjectActivityFilters[currentProjectActivityFilterCol];
+        } else {
+          activeProjectActivityFilters[currentProjectActivityFilterCol] = new Set(checkedItems);
+        }
+        if (typeof renderProjectActivityTable === 'function') renderProjectActivityTable();
+        closeExcelFilter();
+        showToast('Activity filter applied');
         return;
       }
 
@@ -16413,6 +16584,22 @@ function getColumnDisplayName(colKey) {
     infraDescription: "Infra Description",
     make: "Make",
     commissioning: "Commissioning",
+    materialHead: "Material Head",
+    materialCategory: "Material Category",
+    materialDescription: "Material Description",
+    expenseHead: "Expense Head",
+    expenseCategory: "Expense Category",
+    expenseDescription: "Expense Description",
+    infraCode: "Infra Code",
+    type: "Type",
+    ucf: "UCF",
+    tat: "TAT",
+    projectType: "Project Type",
+    subProjectType: "Sub - Project Type",
+    indusPm: "Indus PM",
+    indusScm: "Indus SCM",
+    pm: "PM",
+    mis: "MIS",
     iMap: "I - Map",
     itemCode: "Item Code",
     productName: "Product Name",
@@ -17767,6 +17954,7 @@ document.addEventListener('DOMContentLoaded', () => {
             proj.indusPm = document.getElementById('inpIndusPm')?.value || proj.indusPm;
             proj.indusScm = document.getElementById('inpIndusScm')?.value || proj.indusScm;
             proj.pm = document.getElementById('inpProjectPm')?.value || proj.pm;
+            proj.upgradationType = document.getElementById('inpProjectUpgradationType')?.value || proj.upgradationType || 'Major';
           }
           renderTable();
         }
@@ -17789,7 +17977,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const imgIcon = document.getElementById('imgProductCardEditIcon');
 
       if (!isProductFormEditing) {
-        // ENTER EDIT MODE (Only HSN Code, GST Rate, MSQ, MOQ, Inflation, Margin, OH, Status editable)
+        // ENTER EDIT MODE (Only HSN Code, GST Rate, MSQ, MOQ, Market Price, Margin, OH, Status editable)
         isProductFormEditing = true;
         setProductFormReadOnly(false, true);
         if (lblTitle) lblTitle.innerText = 'Edit Product';
@@ -17797,7 +17985,7 @@ document.addEventListener('DOMContentLoaded', () => {
           imgIcon.src = 'icons/Save.svg';
           imgIcon.title = 'Save Changes';
         }
-        showToast('HSN Code, GST Rate, MSQ, MOQ, Inflation, Margin, OH, Status are now editable');
+        showToast('HSN Code, GST Rate, MSQ, MOQ, Market Price, Margin, OH, Status are now editable');
       } else {
         // SAVE EDITS
         isProductFormEditing = false;
@@ -17886,6 +18074,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
+
+  const btnProjectActivityIcon = document.getElementById('btnProjectActivityIcon');
+  if (btnProjectActivityIcon) {
+    btnProjectActivityIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openProjectActivitySidePanel();
+    });
+  }
+
+  // Close button for activity panel
+  const btnCloseActivity = document.getElementById('btnCloseProjectActivityPanel');
+  if (btnCloseActivity) {
+    btnCloseActivity.addEventListener('click', () => {
+      const panel = document.getElementById('projectActivitySidePanel');
+      if (panel) panel.style.display = 'none';
+      // Restore project card visibility
+      const projectCard = document.getElementById('addProjectCard');
+      if (projectCard) projectCard.classList.remove('card-dimmed-blurred');
+      // Remove has-dimmed-card from row
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+    });
+  }
 
   const btnProjectTransportIcon = document.getElementById('btnProjectTransportIcon');
   if (btnProjectTransportIcon) {
@@ -18277,10 +18488,12 @@ window.handleProjectClick = function(projectId, projectType) {
   if (lblTitle) lblTitle.innerText = 'View Project';
 
   const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
+  const btnActivity = document.getElementById('btnProjectActivityIcon');
   const btnTransport = document.getElementById('btnProjectTransportIcon');
   const btnSurvey = document.getElementById('btnProjectSurveyIcon');
   const imgEditIcon = document.getElementById('imgProjectCardEditIcon');
   if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (btnActivity) btnActivity.style.display = 'flex';
   if (btnTransport) btnTransport.style.display = 'flex';
   if (btnSurvey) btnSurvey.style.display = 'flex';
   if (imgEditIcon) {
@@ -18293,6 +18506,7 @@ window.handleProjectClick = function(projectId, projectType) {
 
   if (document.getElementById('inpProjectType')) document.getElementById('inpProjectType').value = proj.projectType || 'KTN';
   if (document.getElementById('inpSubProjectType')) document.getElementById('inpSubProjectType').value = proj.subProjectType || 'KTN';
+  if (document.getElementById('inpProjectUpgradationType')) document.getElementById('inpProjectUpgradationType').value = proj.upgradationType || 'Major';
   if (document.getElementById('inpProjectTat')) document.getElementById('inpProjectTat').value = proj.tat || '15 Days';
   if (document.getElementById('inpIndusPm')) document.getElementById('inpIndusPm').value = proj.indusPm || 'R/RL-234567';
   if (document.getElementById('inpIndusScm')) document.getElementById('inpIndusScm').value = proj.indusScm || 'R/RL-234567';
@@ -20916,6 +21130,12 @@ window.openSiteContactModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
+  // Ensure legacy customer side panels are hidden
+  const legacyContact = document.getElementById('contactDetailsSidePanel');
+  if (legacyContact) legacyContact.style.display = 'none';
+  const legacyLocation = document.getElementById('locationDetailsSidePanel');
+  if (legacyLocation) legacyLocation.style.display = 'none';
+
   if (currentViewedSiteId) {
     // In View Site Mode: Open View Site Contact Card (with Edit icon)
     const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
@@ -21194,17 +21414,648 @@ window.openSiteContactFilter = function(colKey, event) {
   if (searchInput) searchInput.focus();
 };
 
+window.handleCustomerGstProcess = function() {
+  const gstVal = document.getElementById('inpGstNumber')?.value?.trim();
+  if (gstVal) {
+    showToast(`Processing GST verification for ${gstVal}... Verified!`);
+  } else {
+    showToast('Please enter a GST number to process verification');
+  }
+};
 
+let activeProjectTransportFilters = {};
+let currentProjectTransportFilterCol = null;
+let currentEditingTransportId = null;
 
+window.openTransportDetailsSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
 
+  const projectCard = document.getElementById('addProjectCard');
+  if (projectCard) projectCard.classList.add('card-dimmed-blurred');
 
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
 
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'projectTypeDocSidePanel',
+   'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
 
+  const tp = document.getElementById('transportDetailsSidePanel');
+  if (tp) {
+    tp.style.display = 'block';
+    renderProjectTransportTable();
+  }
 
+  overlay.style.display = 'flex';
+};
 
+window.renderProjectTransportTable = function() {
+  const tbody = document.getElementById('tbodyTransportDetails');
+  if (!tbody) return;
 
+  let filtered = indusProjectTransportData.filter(row => {
+    for (const [colKey, selectedValues] of Object.entries(activeProjectTransportFilters)) {
+      if (!selectedValues || selectedValues.size === 0) continue;
+      const val = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!selectedValues.has(val)) return false;
+    }
+    return true;
+  });
 
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 24px;">No records found</td></tr>`;
+  } else {
+    tbody.innerHTML = filtered.map(row => {
+      const isInactive = String(row.status || '').toLowerCase().includes('in');
+      return `
+        <tr data-id="${row.id}">
+          <td class="td-link-blue" style="text-align: left !important; padding: 10px 14px; font-weight: 500; cursor: pointer; color: #0454e4;" onclick="openEditProjectTransportForm('${row.id}')">${row.itemCode || ''}</td>
+          <td style="text-align: left !important; padding: 10px 14px; color: #1e293b;">${row.itemDescription || ''}</td>
+          <td style="text-align: center !important; padding: 10px 8px; color: #1e293b; font-weight: 600;">${row.transportZone || ''}</td>
+          <td style="text-align: center !important; padding: 10px 8px; color: #1e293b;">${row.qty || ''}</td>
+          <td style="text-align: center !important; padding: 10px 8px;">
+            <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
 
+  ['itemCode', 'itemDescription', 'transportZone', 'status'].forEach(col => {
+    const btn = document.getElementById(`btnProjectTrans${col.charAt(0).toUpperCase() + col.slice(1)}Filter`);
+    if (btn) {
+      if (activeProjectTransportFilters[col] && activeProjectTransportFilters[col].size > 0) {
+        btn.classList.add('has-active-filter');
+      } else {
+        btn.classList.remove('has-active-filter');
+      }
+    }
+  });
+};
+
+window.openAddProjectTransportForm = function() {
+  currentEditingTransportId = null;
+  isTransportInEditMode = true;
+  const tp = document.getElementById('transportDetailsSidePanel');
+  if (tp) tp.style.display = 'none';
+
+  const addCard = document.getElementById('addProjectTransportCard');
+  if (addCard) {
+    addCard.style.display = 'block';
+    const titleEl = document.getElementById('lblProjectTransportCardTitle');
+    if (titleEl) titleEl.innerText = 'Add Additional Transport';
+    const imgIcon = document.getElementById('imgSubmitProjectTransport');
+    if (imgIcon) {
+      imgIcon.src = 'icons/Save.svg';
+      imgIcon.title = 'Save';
+    }
+    const btnHeader = document.getElementById('btnSubmitProjectTransportHeader');
+    if (btnHeader) btnHeader.title = 'Save';
+
+    const inpCode = document.getElementById('inpProjectTransItemCode');
+    if (inpCode) inpCode.disabled = false;
+    const inpDesc = document.getElementById('inpProjectTransItemDesc');
+    if (inpDesc) inpDesc.disabled = false;
+    const inpZone = document.getElementById('inpProjectTransZone');
+    if (inpZone) inpZone.disabled = false;
+    const inpQty = document.getElementById('inpProjectTransQty');
+    if (inpQty) inpQty.disabled = false;
+    const stToggle = document.getElementById('inpProjectTransStatusToggle');
+    if (stToggle) {
+      stToggle.disabled = false;
+      stToggle.checked = true;
+    }
+
+    const frm = document.getElementById('frmAddProjectTransport');
+    if (frm) frm.reset();
+    if (inpCode) setTimeout(() => inpCode.focus(), 50);
+  }
+};
+
+window.openEditProjectTransportForm = function(id) {
+  const item = indusProjectTransportData.find(t => t.id === id);
+  if (!item) return;
+  currentEditingTransportId = id;
+  isTransportInEditMode = false;
+
+  const tp = document.getElementById('transportDetailsSidePanel');
+  if (tp) tp.style.display = 'none';
+
+  const addCard = document.getElementById('addProjectTransportCard');
+  if (addCard) {
+    addCard.style.display = 'block';
+    const titleEl = document.getElementById('lblProjectTransportCardTitle');
+    if (titleEl) titleEl.innerText = 'Edit Additional Transport';
+
+    const imgIcon = document.getElementById('imgSubmitProjectTransport');
+    if (imgIcon) {
+      imgIcon.src = 'icons/Edit.svg';
+      imgIcon.title = 'Edit Info';
+    }
+    const btnHeader = document.getElementById('btnSubmitProjectTransportHeader');
+    if (btnHeader) btnHeader.title = 'Edit Info';
+
+    const inpCode = document.getElementById('inpProjectTransItemCode');
+    if (inpCode) {
+      inpCode.value = item.itemCode || '';
+      inpCode.disabled = true;
+    }
+    const inpDesc = document.getElementById('inpProjectTransItemDesc');
+    if (inpDesc) {
+      inpDesc.value = item.itemDescription || '';
+      inpDesc.disabled = true;
+    }
+    const inpZone = document.getElementById('inpProjectTransZone');
+    if (inpZone) {
+      inpZone.value = item.transportZone || '';
+      inpZone.disabled = true;
+    }
+    const inpQty = document.getElementById('inpProjectTransQty');
+    if (inpQty) {
+      inpQty.value = item.qty || '';
+      inpQty.disabled = true;
+    }
+    const stToggle = document.getElementById('inpProjectTransStatusToggle');
+    if (stToggle) {
+      stToggle.checked = !String(item.status || '').toLowerCase().includes('in');
+      stToggle.disabled = true;
+    }
+  }
+};
+
+window.handleProjectTransportHeaderAction = function() {
+  if (currentEditingTransportId && !isTransportInEditMode) {
+    // Switch to edit mode: only transport zone, qty, status alone become editable
+    isTransportInEditMode = true;
+    const inpCode = document.getElementById('inpProjectTransItemCode');
+    if (inpCode) inpCode.disabled = true;
+    const inpDesc = document.getElementById('inpProjectTransItemDesc');
+    if (inpDesc) inpDesc.disabled = true;
+    const inpZone = document.getElementById('inpProjectTransZone');
+    if (inpZone) inpZone.disabled = false;
+    const inpQty = document.getElementById('inpProjectTransQty');
+    if (inpQty) inpQty.disabled = false;
+    const stToggle = document.getElementById('inpProjectTransStatusToggle');
+    if (stToggle) stToggle.disabled = false;
+
+    const imgIcon = document.getElementById('imgSubmitProjectTransport');
+    if (imgIcon) {
+      imgIcon.src = 'icons/Save.svg';
+      imgIcon.title = 'Save';
+    }
+    const btnHeader = document.getElementById('btnSubmitProjectTransportHeader');
+    if (btnHeader) btnHeader.title = 'Save';
+
+    if (inpZone) inpZone.focus();
+    return;
+  }
+
+  saveProjectTransportRecord();
+};
+
+window.closeAddProjectTransportForm = function() {
+  currentEditingTransportId = null;
+  isTransportInEditMode = false;
+  const addCard = document.getElementById('addProjectTransportCard');
+  if (addCard) addCard.style.display = 'none';
+
+  const tp = document.getElementById('transportDetailsSidePanel');
+  if (tp) tp.style.display = 'block';
+};
+
+window.saveProjectTransportRecord = function() {
+  const codeVal = document.getElementById('inpProjectTransItemCode')?.value?.trim();
+  const descVal = document.getElementById('inpProjectTransItemDesc')?.value?.trim();
+  const zoneVal = document.getElementById('inpProjectTransZone')?.value?.trim();
+  const qtyVal = document.getElementById('inpProjectTransQty')?.value?.trim();
+  const isActive = document.getElementById('inpProjectTransStatusToggle')?.checked ?? true;
+  const statusVal = isActive ? 'Active' : 'In - Active';
+
+  if (!codeVal) {
+    showToast('Please enter Item Code');
+    return;
+  }
+
+  if (currentEditingTransportId) {
+    const item = indusProjectTransportData.find(t => t.id === currentEditingTransportId);
+    if (item) {
+      item.itemCode = codeVal;
+      item.itemDescription = descVal || codeVal;
+      item.transportZone = zoneVal || 'A';
+      item.qty = qtyVal || '1';
+      item.status = statusVal;
+    }
+    showToast(`Transport item "${codeVal}" updated successfully!`);
+  } else {
+    const newRecord = {
+      id: `transport-${Date.now()}`,
+      itemCode: codeVal,
+      itemDescription: descVal || codeVal,
+      transportZone: zoneVal || 'A',
+      qty: qtyVal || '1',
+      status: statusVal
+    };
+    indusProjectTransportData.unshift(newRecord);
+    showToast(`Additional Transport "${codeVal}" added successfully!`);
+  }
+
+  currentEditingTransportId = null;
+  isTransportInEditMode = false;
+  renderProjectTransportTable();
+  closeAddProjectTransportForm();
+};
+
+window.openProjectTransportFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  currentProjectTransportFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(indusProjectTransportData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeProjectTransportFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById(`btnProjectTrans${colKey.charAt(0).toUpperCase() + colKey.slice(1)}Filter`);
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'projectTransport';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
+
+let indusProjectActivityData = [
+  { id: "act-1", stage: "KTN", activity: "Site Survey & Soil Analysis", days: "2" },
+  { id: "act-2", stage: "KK", activity: "Civil Foundation & Tower Assembly", days: "5" }
+];
+let activeProjectActivityFilters = {};
+let currentProjectActivityFilterCol = null;
+let currentEditingActivityId = null;
+
+window.openProjectActivitySidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const projectCard = document.getElementById('addProjectCard');
+  if (projectCard) projectCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'projectTypeDocSidePanel',
+   'transportDetailsSidePanel', 'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard', 'addProjectActivityCard'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const ap = document.getElementById('projectActivitySidePanel');
+  if (ap) {
+    ap.style.display = 'block';
+    renderProjectActivityTable();
+  }
+
+  overlay.style.display = 'flex';
+};
+
+window.renderProjectActivityTable = function() {
+  const tbody = document.getElementById('tbodyProjectActivityDetails');
+  if (!tbody) return;
+
+  let filtered = indusProjectActivityData.filter(row => {
+    for (const [colKey, selectedValues] of Object.entries(activeProjectActivityFilters)) {
+      if (!selectedValues || selectedValues.size === 0) continue;
+      const val = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!selectedValues.has(val)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 24px;">No records found</td></tr>`;
+  } else {
+    tbody.innerHTML = filtered.map(row => {
+      return `
+        <tr data-id="${row.id}">
+          <td class="td-link-blue" style="text-align: left !important; padding: 10px 14px; font-weight: 500; cursor: pointer; color: #0454e4;" onclick="openEditProjectActivityForm('${row.id}')">${row.stage || ''}</td>
+          <td style="text-align: left !important; padding: 10px 14px; color: #1e293b;">${row.activity || ''}</td>
+          <td style="text-align: center !important; padding: 10px 8px; color: #1e293b; font-weight: 600;">${row.days || ''}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  ['stage', 'activity', 'days'].forEach(col => {
+    const btn = document.getElementById(`btnProjectActivity${col.charAt(0).toUpperCase() + col.slice(1)}Filter`);
+    if (btn) {
+      if (activeProjectActivityFilters[col] && activeProjectActivityFilters[col].size > 0) {
+        btn.classList.add('has-active-filter');
+      } else {
+        btn.classList.remove('has-active-filter');
+      }
+    }
+  });
+};
+
+window.openAddProjectActivityForm = function() {
+  currentEditingActivityId = null;
+  const ap = document.getElementById('projectActivitySidePanel');
+  if (ap) ap.style.display = 'none';
+
+  const addCard = document.getElementById('addProjectActivityCard');
+  if (addCard) {
+    addCard.style.display = 'block';
+    const titleEl = document.getElementById('lblProjectActivityCardTitle');
+    if (titleEl) titleEl.innerText = 'Add Activity';
+    const frm = document.getElementById('frmAddProjectActivity');
+    if (frm) frm.reset();
+    const stSelect = document.getElementById('inpProjectActivityStage');
+    if (stSelect) setTimeout(() => stSelect.focus(), 50);
+  }
+};
+
+window.openEditProjectActivityForm = function(id) {
+  const item = indusProjectActivityData.find(t => t.id === id);
+  if (!item) return;
+  currentEditingActivityId = id;
+
+  const ap = document.getElementById('projectActivitySidePanel');
+  if (ap) ap.style.display = 'none';
+
+  const addCard = document.getElementById('addProjectActivityCard');
+  if (addCard) {
+    addCard.style.display = 'block';
+    const titleEl = document.getElementById('lblProjectActivityCardTitle');
+    if (titleEl) titleEl.innerText = 'Edit Activity';
+
+    const stSelect = document.getElementById('inpProjectActivityStage');
+    if (stSelect) stSelect.value = item.stage || '';
+    const inpName = document.getElementById('inpProjectActivityName');
+    if (inpName) inpName.value = item.activity || '';
+    const inpDays = document.getElementById('inpProjectActivityDays');
+    if (inpDays) inpDays.value = item.days || '';
+
+    if (inpName) setTimeout(() => inpName.focus(), 50);
+  }
+};
+
+window.closeAddProjectActivityForm = function() {
+  currentEditingActivityId = null;
+  const addCard = document.getElementById('addProjectActivityCard');
+  if (addCard) addCard.style.display = 'none';
+
+  const ap = document.getElementById('projectActivitySidePanel');
+  if (ap) ap.style.display = 'block';
+};
+
+window.saveProjectActivityRecord = function() {
+  const stageVal = document.getElementById('inpProjectActivityStage')?.value?.trim();
+  const actVal = document.getElementById('inpProjectActivityName')?.value?.trim();
+  const daysVal = document.getElementById('inpProjectActivityDays')?.value?.trim();
+
+  if (!stageVal) {
+    showToast('Please select a Stage');
+    return;
+  }
+  if (!actVal) {
+    showToast('Please enter Activity description');
+    return;
+  }
+
+  if (currentEditingActivityId) {
+    const item = indusProjectActivityData.find(t => t.id === currentEditingActivityId);
+    if (item) {
+      item.stage = stageVal;
+      item.activity = actVal;
+      item.days = daysVal || '0';
+    }
+    showToast(`Activity "${actVal}" updated successfully!`);
+  } else {
+    const newRecord = {
+      id: `act-${Date.now()}`,
+      stage: stageVal,
+      activity: actVal,
+      days: daysVal || '0'
+    };
+    indusProjectActivityData.unshift(newRecord);
+    showToast(`Activity "${actVal}" added successfully!`);
+  }
+
+  currentEditingActivityId = null;
+  renderProjectActivityTable();
+  closeAddProjectActivityForm();
+};
+
+window.openProjectActivityFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  currentProjectActivityFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(indusProjectActivityData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeProjectActivityFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById(`btnProjectActivity${colKey.charAt(0).toUpperCase() + colKey.slice(1)}Filter`);
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'projectActivity';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
+
+// ==========================================================================
+// APPROVAL HISTORY DATASET & HANDLERS
+// ==========================================================================
+let indusProjectDocData = [
+  { id: "doc-1", description: "Soil Test & Structural Clearance Report approved by Chief Engineer." },
+  { id: "doc-2", description: "Environmental Compliance & Green Tribunal clearance granted." },
+  { id: "doc-3", description: "Municipal Tower Erection & Foundation NOC issued." }
+];
+let activeProjectDocFilters = {};
+let currentProjectDocFilterCol = null;
+
+window.openProjectDocSidePanel = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const projectCard = document.getElementById('addProjectCard');
+  if (projectCard) projectCard.classList.add('card-dimmed-blurred');
+
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
+   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
+   'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard', 'addProjectActivityCard', 'projectActivitySidePanel'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  const dp = document.getElementById('projectTypeDocSidePanel');
+  if (dp) {
+    dp.style.display = 'block';
+    renderProjectDocTable();
+  }
+
+  overlay.style.display = 'flex';
+};
+
+window.renderProjectDocTable = function() {
+  const tbody = document.getElementById('tbodyProjectDocDetails');
+  if (!tbody) return;
+
+  let filtered = indusProjectDocData.filter(row => {
+    for (const [colKey, selectedValues] of Object.entries(activeProjectDocFilters)) {
+      if (!selectedValues || selectedValues.size === 0) continue;
+      const val = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!selectedValues.has(val)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td style="text-align: center; color: #94a3b8; padding: 24px;">No records found</td></tr>`;
+  } else {
+    // Plain text without any hyperlink or blue link
+    tbody.innerHTML = filtered.map(row => {
+      return `
+        <tr data-id="${row.id}">
+          <td style="text-align: left !important; padding: 10px 14px; color: #1e293b; font-weight: 400; font-size: 0.95rem;">${row.description || ''}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  const btn = document.getElementById('btnProjectDocDescFilter');
+  if (btn) {
+    if (activeProjectDocFilters['description'] && activeProjectDocFilters['description'].size > 0) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  }
+};
+
+window.openAddProjectApprovalForm = function() {
+  const newDesc = prompt('Enter Approval History Description:');
+  if (newDesc && newDesc.trim()) {
+    indusProjectDocData.unshift({
+      id: `doc-${Date.now()}`,
+      description: newDesc.trim()
+    });
+    renderProjectDocTable();
+    showToast('Approval History added successfully!');
+  }
+};
+
+window.openProjectDocFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  currentProjectDocFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const uniqueValues = Array.from(new Set(indusProjectDocData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeProjectDocFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById('btnProjectDocDescFilter');
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'projectDoc';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
 
 
 

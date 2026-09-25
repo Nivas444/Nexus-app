@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260925_1120">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260925_1955">
 </head>
 
 <body>
@@ -1099,7 +1099,7 @@
         </div>
 
         <!-- 1B. Indus / Infra Project Form Card (Matching Uploaded Mockup) -->
-        <div class="side-form-card" id="addInfraCard" style="display: none;">
+        <div class="side-form-card" id="addInfraCard" style="display: none; width: 480px; max-width: 95vw;">
           <!-- Header -->
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblInfraCardTitle">Add Infra</div>
@@ -1236,6 +1236,11 @@
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpProjectType">
                   <option value="" selected></option>
+                  <option value="New Site Build">New Site Build</option>
+                  <option value="Tower Sharing / Tenancy">Tower Sharing / Tenancy</option>
+                  <option value="Fiber Rollout / Opex">Fiber Rollout / Opex</option>
+                  <option value="Solar Hybrid Retrofit">Solar Hybrid Retrofit</option>
+                  <option value="Small Cell / IBS Deployment">Small Cell / IBS Deployment</option>
                   <option value="KTN">KTN</option>
                   <option value="KK">KK</option>
                   <option value="AP">AP</option>
@@ -1249,6 +1254,11 @@
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpSubProjectType">
                   <option value="" selected></option>
+                  <option value="GBT 40M With DG">GBT 40M With DG</option>
+                  <option value="Rooftop RTT 15M">Rooftop RTT 15M</option>
+                  <option value="Aerial OFC 10KM">Aerial OFC 10KM</option>
+                  <option value="5KW Solar + Li-Ion">5KW Solar + Li-Ion</option>
+                  <option value="Poles & Street Furniture">Poles & Street Furniture</option>
                   <option value="KTN">KTN</option>
                   <option value="KK">KK</option>
                   <option value="AP">AP</option>
@@ -1753,9 +1763,15 @@
         <div class="side-form-card" id="addGbpaCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add GBPA</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseGbpaForm"
-              aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblGbpaCardTitle">Add GBPA</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnGbpaCardEditToggle" title="Edit Info"
+                style="display: none;">
+                <img src="icons/Edit.svg" id="imgGbpaCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseGbpaForm"
+                aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -1882,9 +1898,15 @@
         <div class="side-form-card" id="addMaterialsCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Materials</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseMaterialsForm"
-              aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblMaterialsCardTitle">Add Materials</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnMaterialsCardEditToggle" title="Edit Info"
+                style="display: none;">
+                <img src="icons/Edit.svg" id="imgMaterialsCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseMaterialsForm"
+                aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -1896,11 +1918,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpMaterialHead">Material Head</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpMaterialHead">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpMaterialHead" placeholder="">
               </div>
             </div>
 
@@ -1908,11 +1926,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpMaterialCategory">Material Category</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpMaterialCategory">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpMaterialCategory" placeholder="">
               </div>
             </div>
 
@@ -1920,15 +1934,19 @@
             <div class="form-row-group">
               <label class="form-label" for="inpMaterialDescription">Material Description</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpMaterialDescription">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpMaterialDescription" placeholder="">
               </div>
             </div>
 
-            <!-- 4. Type -->
+            <!-- 4. Make -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpMaterialMake">Make</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpMaterialMake" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Type -->
             <div class="form-row-group">
               <label class="form-label" for="inpMaterialType">Type</label>
               <div class="form-input-wrap">
@@ -1939,7 +1957,15 @@
               </div>
             </div>
 
-            <!-- 5. Status -->
+            <!-- 6. UCF -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpMaterialUcf">UCF</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpMaterialUcf" placeholder="">
+              </div>
+            </div>
+
+            <!-- 7. Status -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -1965,9 +1991,15 @@
         <div class="side-form-card" id="addProductExpenseCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Expense</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProductExpenseForm"
-              aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblProductExpenseCardTitle">Add Expense</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProductExpenseCardEditToggle" title="Edit Info"
+                style="display: none;">
+                <img src="icons/Edit.svg" id="imgProductExpenseCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProductExpenseForm"
+                aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -1979,11 +2011,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProdExpenseHead">Expense Head</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProdExpenseHead">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProdExpenseHead" placeholder="">
               </div>
             </div>
 
@@ -1991,11 +2019,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProdExpenseCategory">Expense Category</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProdExpenseCategory">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProdExpenseCategory" placeholder="">
               </div>
             </div>
 
@@ -2003,11 +2027,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProdExpenseDescription">Expense Description</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProdExpenseDescription">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProdExpenseDescription" placeholder="">
               </div>
             </div>
 
@@ -2048,9 +2068,15 @@
         <div class="side-form-card" id="addProductInfraCard" style="display: none;">
           <!-- Header -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Infra</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProductInfraForm"
-              aria-label="Close form">&times;</button>
+            <div class="side-form-title-badge" id="lblProductInfraCardTitle">Add Infra</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnProductInfraCardEditToggle" title="Edit Info"
+                style="display: none;">
+                <img src="icons/Edit.svg" id="imgProductInfraCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProductInfraForm"
+                aria-label="Close form">&times;</button>
+            </div>
           </div>
 
           <!-- Decorative Action Icons on Top Right -->
@@ -2058,31 +2084,31 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProductInfra" onsubmit="event.preventDefault();">
-            <!-- 1. Infra Category -->
+            <!-- 1. Infra Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProdInfraCode">Infra Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpProdInfraCode" placeholder="">
+              </div>
+            </div>
+
+            <!-- 2. Infra Category -->
             <div class="form-row-group">
               <label class="form-label" for="inpProdInfraCategory">Infra Category</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProdInfraCategory">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProdInfraCategory" placeholder="">
               </div>
             </div>
 
-            <!-- 2. Infra Description -->
+            <!-- 3. Infra Description -->
             <div class="form-row-group">
               <label class="form-label" for="inpProdInfraDescription">Infra Description</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProdInfraDescription">
-                  <option value="" selected></option>
-                  <option value="230510678">230510678</option>
-                  <option value="230510679">230510679</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProdInfraDescription" placeholder="">
               </div>
             </div>
 
-            <!-- 3. Type -->
+            <!-- 4. Type -->
             <div class="form-row-group">
               <label class="form-label" for="inpProdInfraType">Type</label>
               <div class="form-input-wrap">
@@ -2093,7 +2119,7 @@
               </div>
             </div>
 
-            <!-- 4. Status -->
+            <!-- 5. Status -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -2372,6 +2398,38 @@
               <div class="form-input-wrap" style="flex: 1;">
                 <input type="number" class="form-input-control" id="inpProjectActivityDays" placeholder="Enter Days"
                   style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff;">
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- 1N. Indus / Project Type Details Add Approval Form Card -->
+        <div class="side-form-card side-contact-popup" id="addProjectApprovalCard"
+          style="display: none; width: 460px; max-width: 95vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <!-- Header -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblProjectApprovalCardTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">Add Approval</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnSubmitProjectApprovalHeader" title="Save" onclick="saveProjectApprovalRecord()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectApprovalForm" onclick="closeAddProjectApprovalForm()"
+                aria-label="Close form" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddProjectApproval" onsubmit="event.preventDefault(); saveProjectApprovalRecord();"
+            style="padding: 16px 24px 24px 24px;">
+            <!-- Description -->
+            <div class="form-row-group" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 0;">
+              <label class="form-label" for="inpProjectApprovalDesc" style="font-weight: 600; color: #475569; font-size: 0.95rem; margin-bottom: 0;">Description</label>
+              <div class="form-input-wrap" style="width: 100%;">
+                <textarea class="form-input-control" id="inpProjectApprovalDesc" placeholder="Enter Approval History Description" rows="4"
+                  style="width: 100%; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 10px 14px; font-size: 0.95rem; color: #1e293b; background: #ffffff; resize: vertical;"></textarea>
               </div>
             </div>
           </form>
@@ -7322,6 +7380,81 @@
           </div>
         </div>
 
+        <!-- Accounts TDS Summary Modal Tab (Triggered by clicking Month / Summary in TDS page of Accounts) -->
+        <div class="side-form-card side-contact-popup" id="accountsTdsSummaryModal"
+          style="display: none; width: 1250px !important; max-width: 98vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblAccountsTdsSummaryTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                TDS Summary Report for the Month of April 2026</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export PDF" onclick="triggerAccountsPdfUpload()">
+              <img src="icons/CSV upload.svg" alt="CSV" style="width: 28px; height: 28px; display: block; object-fit: contain; cursor: pointer;" title="Export CSV" onclick="triggerAccountsCsvUpload()">
+              <button type="button" class="side-form-close-btn" id="btnCloseAccountsTdsSummaryModal"
+                onclick="closeAccountsTdsSummaryModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblAccountsTdsSummaryPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th
+                    style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>TDS Type</span>
+                      <button type="button" class="contact-th-filter-btn" data-filter-col="tdsType" title="Filter TDS Type" style="background: transparent; border: none; cursor: pointer; padding: 0 2px; display: inline-flex; align-items: center;">
+                        <img src="icons/Filter Funnel.svg" alt="Filter" style="width: 13px; height: 13px; filter: brightness(0) invert(1);">
+                      </button>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>TDS Code</span>
+                      <button type="button" class="contact-th-filter-btn" data-filter-col="tdsCode" title="Filter TDS Code" style="background: transparent; border: none; cursor: pointer; padding: 0 2px; display: inline-flex; align-items: center;">
+                        <img src="icons/Filter Funnel.svg" alt="Filter" style="width: 13px; height: 13px; filter: brightness(0) invert(1);">
+                      </button>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>PAN Number</span>
+                      <button type="button" class="contact-th-filter-btn" data-filter-col="panNumber" title="Filter PAN Number" style="background: transparent; border: none; cursor: pointer; padding: 0 2px; display: inline-flex; align-items: center;">
+                        <img src="icons/Filter Funnel.svg" alt="Filter" style="width: 13px; height: 13px; filter: brightness(0) invert(1);">
+                      </button>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>PAN Name</span>
+                      <button type="button" class="contact-th-filter-btn" data-filter-col="panName" title="Filter PAN Name" style="background: transparent; border: none; cursor: pointer; padding: 0 2px; display: inline-flex; align-items: center;">
+                        <img src="icons/Filter Funnel.svg" alt="Filter" style="width: 13px; height: 13px; filter: brightness(0) invert(1);">
+                      </button>
+                    </div>
+                  </th>
+                  <th
+                    style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+                    <span>Taxable</span>
+                  </th>
+                  <th
+                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
+                    <span>TDS</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAccountsTdsSummary">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Accounts TDS Details Modal Tab (Triggered by clicking PAN Name) -->
         <div class="side-form-card side-contact-popup" id="accountsTdsDetailsModal"
           style="display: none; width: 900px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #e2e8f0;">
@@ -7789,7 +7922,7 @@
           <!-- Header -->
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblTelecomDetailsCardTitle" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Telecom Details
+              Indus Towers Ltd
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
               <button type="button" class="side-top-icon-btn" id="btnTelecomDetailsEditToggle" onclick="toggleTelecomDetailsEdit()" title="Edit Info" style="background: none; border: none; cursor: pointer; padding: 2px;">
@@ -8356,7 +8489,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260925_1128_fixed"></script>
+  <script src="assets/js/home.js?v=20260925_1955"></script>
 </body>
 
 </html>

@@ -4570,10 +4570,14 @@ function renderIndusToolbar() {
   }
 
   if (currentIndusSubpage === 'products') {
-    // Indus Towers GBPA Toolbar: CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
+    // Indus Towers GBPA Toolbar: Edit Icon (on select) + CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
     toolbar.innerHTML = `
       <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
+        <!-- Edit GBPA Row Button (Appears when row is selected) -->
+        <button type="button" class="toolbar-icon-btn btn-edit-action" id="btnIndusGbpaEditRow" data-tooltip="View / Edit GBPA Item" aria-label="View / Edit GBPA" style="display: ${selectedGbpaRowId ? 'inline-flex' : 'none'};" onclick="openSelectedGbpaItem()">
+          <img src="icons/Edit.svg" alt="Edit" class="toolbar-icon-img" width="28" height="28">
+        </button>
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
           <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
@@ -4966,6 +4970,9 @@ function renderIndusTableHead() {
   } else if (currentIndusSubpage === 'products') {
     thead.innerHTML = `
       <tr class="master-view-header">
+        <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <span>Select</span>
+        </th>
         <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 12px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Item Name</span>
@@ -5997,12 +6004,15 @@ window.openTelecomDetailsModal = function() {
   isTelecomDetailsEditing = false;
   setTelecomDetailsReadOnly(true);
 
+  const lblCardTitle = document.getElementById('lblTelecomDetailsCardTitle');
+  if (lblCardTitle) lblCardTitle.innerText = 'Indus Towers Ltd';
+
   const modal = document.getElementById('telecomDetailsCard');
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
-  showToast('Opened Telecom Details');
+  showToast('Opened Indus Towers Ltd Details');
 };
 
 window.closeTelecomDetailsModal = function() {
@@ -10202,7 +10212,9 @@ function applyFiltersAndRender() {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialHead || '').replace(/"/g, '&quot;')}">${row.materialHead || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialHead || '').replace(/"/g, '&quot;')}">
+                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaMaterialCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.materialHead || ''}</a>
+              </td>
               <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialCategory || '').replace(/"/g, '&quot;')}">${row.materialCategory || ''}</td>
               <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">${row.materialDescription || ''}</td>
               <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">${row.make || ''}</td>
@@ -10220,7 +10232,9 @@ function applyFiltersAndRender() {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">${row.expenseHead || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">
+                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaExpenseCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.expenseHead || ''}</a>
+              </td>
               <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseCategory || '').replace(/"/g, '&quot;')}">${row.expenseCategory || ''}</td>
               <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseDescription || '').replace(/"/g, '&quot;')}">${row.expenseDescription || ''}</td>
               <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
@@ -10236,7 +10250,9 @@ function applyFiltersAndRender() {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCode || '').replace(/"/g, '&quot;')}">${row.infraCode || ''}</td>
+              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCode || '').replace(/"/g, '&quot;')}">
+                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaProductInfraCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.infraCode || ''}</a>
+              </td>
               <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
               <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraDescription || '').replace(/"/g, '&quot;')}">${row.infraDescription || ''}</td>
               <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
@@ -10339,7 +10355,7 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentIndusSubpage === 'products') {
-      // Render Indus Towers -> Products (GBPA) Rows
+      // Render Indus Towers -> Products (GBPA) Rows with Select Radio
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         const dispItemName = row.itemName || row.productName || '';
@@ -10349,8 +10365,12 @@ function applyFiltersAndRender() {
         const dispHsnSacCode = row.hsnSacCode || '';
         const dispUom = row.uom || 'Pcs';
         const dispRate = row.rate || row.activeRate || '0.00';
+        const isSelected = selectedGbpaRowId === row.id;
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <tr data-row-id="${row.id}" id="gbpa-row-${row.id}" class="${isSelected ? 'row-selected-highlight' : ''}" style="border-bottom: 1px solid #e2e8f0; ${isSelected ? 'background-color: rgba(0, 203, 160, 0.12) !important;' : ''}">
+            <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; padding: 10px 6px; vertical-align: middle;">
+              <input type="radio" name="gbpaRowSelect" class="gbpa-row-radio" value="${row.id}" ${isSelected ? 'checked' : ''} onclick="handleGbpaRadioClick(event, '${row.id}')" style="accent-color: #00cba0; width: 18px; height: 18px; cursor: pointer;">
+            </td>
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${dispItemName.replace(/"/g, '&quot;')}">
               <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${dispItemName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${dispItemName}</a>
             </td>
@@ -17844,131 +17864,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- SITE CARD EDIT TOGGLE ---
-  const btnSiteCardEditToggle = document.getElementById('btnSiteCardEditToggle');
-  if (btnSiteCardEditToggle) {
-    btnSiteCardEditToggle.addEventListener('click', () => {
-      const lblTitle = document.getElementById('lblSiteCardTitle');
-      const imgIcon = document.getElementById('imgSiteCardEditIcon');
-
-      if (!isSiteFormEditing) {
-        isSiteFormEditing = true;
-        setSiteFormReadOnly(false); // Only WH ID, District, Latitude, Longitude, Transport Zone, Status editable
-        if (lblTitle) lblTitle.innerText = 'Edit Site';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Save.svg';
-          imgIcon.title = 'Save Changes';
-        }
-        showToast('Site form is now editable (WH ID, District, Latitude, Longitude, Transport Zone, Status)');
-      } else {
-        isSiteFormEditing = false;
-        if (currentViewedSiteId) {
-          const site = indusSiteData.find(s => s.id === currentViewedSiteId);
-          if (site) {
-            site.whId = document.getElementById('inpSiteWhId')?.value || site.whId;
-            site.district = document.getElementById('inpSiteDistrict')?.value || site.district;
-            site.latitude = document.getElementById('inpSiteLattitude')?.value || site.latitude;
-            site.longitude = document.getElementById('inpSiteLongtitude')?.value || site.longitude;
-            site.transportZone = document.getElementById('inpSiteTransportZone')?.value || site.transportZone;
-            const stToggle = document.getElementById('inpSiteStatusToggle');
-            if (stToggle) {
-              site.status = stToggle.checked ? 'Active' : 'In - Active';
-            }
-          }
-          renderTable();
-        }
-        setSiteFormReadOnly(true);
-        if (lblTitle) lblTitle.innerText = 'View Site';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Site details saved & updated successfully!');
-      }
-    });
-  }
-
-  // --- INFRA CARD EDIT TOGGLE ---
-  const btnInfraCardEditToggle = document.getElementById('btnInfraCardEditToggle');
-  if (btnInfraCardEditToggle) {
-    btnInfraCardEditToggle.addEventListener('click', () => {
-      const lblTitle = document.getElementById('lblInfraCardTitle');
-      const imgIcon = document.getElementById('imgInfraCardEditIcon');
-
-      if (!isInfraFormEditing) {
-        isInfraFormEditing = true;
-        setInfraFormReadOnly(false);
-        if (lblTitle) lblTitle.innerText = 'Edit Infra';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Save.svg';
-          imgIcon.title = 'Save Changes';
-        }
-        showToast('Infra form is now editable');
-      } else {
-        isInfraFormEditing = false;
-        if (currentViewedInfraId) {
-          const infra = indusInfraData.find(i => i.id === currentViewedInfraId);
-          if (infra) {
-            infra.infraCategory = document.getElementById('inpInfraCategory')?.value || infra.infraCategory;
-            infra.infraDescription = document.getElementById('inpInfraDescription')?.value || infra.infraDescription;
-            infra.uom = document.getElementById('inpInfraUom')?.value || infra.uom;
-            infra.make = document.getElementById('inpInfraMake')?.value || infra.make;
-          }
-          renderTable();
-        }
-        setInfraFormReadOnly(true);
-        if (lblTitle) lblTitle.innerText = 'View Infra';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Infra details saved & updated successfully!');
-      }
-    });
-  }
-
-  // --- PROJECT CARD EDIT TOGGLE ---
-  const btnProjectCardEditToggle = document.getElementById('btnProjectCardEditToggle');
-  if (btnProjectCardEditToggle) {
-    btnProjectCardEditToggle.addEventListener('click', () => {
-      const lblTitle = document.getElementById('lblProjectCardTitle');
-      const imgIcon = document.getElementById('imgProjectCardEditIcon');
-
-      if (!isProjectFormEditing) {
-        isProjectFormEditing = true;
-        setProjectFormReadOnly(false);
-        if (lblTitle) lblTitle.innerText = 'Edit Project';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Save.svg';
-          imgIcon.title = 'Save Changes';
-        }
-        showToast('Project form is now editable');
-      } else {
-        isProjectFormEditing = false;
-        if (currentViewedProjectId) {
-          const proj = indusProjectsData.find(p => p.id === currentViewedProjectId);
-          if (proj) {
-            proj.projectType = document.getElementById('inpProjectType')?.value || proj.projectType;
-            proj.subProjectType = document.getElementById('inpSubProjectType')?.value || proj.subProjectType;
-            proj.tat = document.getElementById('inpProjectTat')?.value || proj.tat;
-            proj.indusPm = document.getElementById('inpIndusPm')?.value || proj.indusPm;
-            proj.indusScm = document.getElementById('inpIndusScm')?.value || proj.indusScm;
-            proj.pm = document.getElementById('inpProjectPm')?.value || proj.pm;
-            proj.upgradationType = document.getElementById('inpProjectUpgradationType')?.value || proj.upgradationType || 'Major';
-          }
-          renderTable();
-        }
-        setProjectFormReadOnly(true);
-        if (lblTitle) lblTitle.innerText = 'View Project';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Project details saved & updated successfully!');
-      }
-    });
-  }
-
   // Wire btnProductCardEditToggle
   const btnProductCardEditToggle = document.getElementById('btnProductCardEditToggle');
   if (btnProductCardEditToggle) {
@@ -18205,17 +18100,15 @@ function setVendorBankEditingState(isEditing) {
   if (btnEditToggle) btnEditToggle.style.display = 'none';
 }
 
-// --- SITE, INFRA, PROJECT VIEW HANDLERS ---
+// --- SITE, INFRA, PROJECT, GBPA, MATERIALS, EXPENSES VIEW HANDLERS ---
 let currentViewedSiteId = null;
 let isSiteFormEditing = false;
 
-function setSiteFormReadOnly(isReadOnly) {
+function setSiteFormReadOnly(isReadOnly, isEditMode = false) {
   const form = document.getElementById('frmAddSite');
   if (!form) return;
 
-  // Fields strictly allowed to be edited during View Site Edit:
-  // ONLY wh id, district, latitude, longitude, transport zone, status
-  const editableFieldIds = ['inpSiteWhId', 'inpSiteDistrict', 'inpSiteLattitude', 'inpSiteLongtitude', 'inpSiteTransportZone'];
+  const editableInEditModeIds = ['inpSiteWhId', 'inpSiteDistrict', 'inpSiteLattitude', 'inpSiteLongtitude', 'inpSiteTransportZone'];
   const allFieldIds = ['inpSiteId', 'inpSiteWhId', 'inpSiteName', 'inpSiteTowerType', 'inpSiteDistrict', 'inpSiteTown', 'inpSiteAddress', 'inpSiteLattitude', 'inpSiteLongtitude', 'inpSiteTransportZone'];
 
   allFieldIds.forEach(id => {
@@ -18224,22 +18117,32 @@ function setSiteFormReadOnly(isReadOnly) {
     if (isReadOnly) {
       if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
       else el.setAttribute('readonly', 'true');
+      el.classList.remove('field-non-editable-dark');
       el.style.backgroundColor = '#f8fafc';
       el.style.color = '#64748b';
       el.style.cursor = 'not-allowed';
     } else {
-      if (editableFieldIds.includes(id)) {
+      if (isEditMode) {
+        if (editableInEditModeIds.includes(id)) {
+          if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+          else el.removeAttribute('readonly');
+          el.classList.remove('field-non-editable-dark');
+          el.style.backgroundColor = '#ffffff';
+          el.style.color = '#1e293b';
+          el.style.cursor = 'auto';
+        } else {
+          if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+          else el.setAttribute('readonly', 'true');
+          el.classList.add('field-non-editable-dark');
+          el.style.cursor = 'not-allowed';
+        }
+      } else {
         if (el.tagName === 'SELECT') el.removeAttribute('disabled');
         else el.removeAttribute('readonly');
+        el.classList.remove('field-non-editable-dark');
         el.style.backgroundColor = '#ffffff';
         el.style.color = '#1e293b';
         el.style.cursor = 'auto';
-      } else {
-        if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
-        else el.setAttribute('readonly', 'true');
-        el.style.backgroundColor = '#f8fafc';
-        el.style.color = '#64748b';
-        el.style.cursor = 'not-allowed';
       }
     }
   });
@@ -18260,6 +18163,7 @@ function setSiteFormFullEditable() {
   if (!form) return;
   const inputs = form.querySelectorAll('input, select');
   inputs.forEach(el => {
+    el.classList.remove('field-non-editable-dark');
     if (el.type === 'checkbox') {
       el.disabled = false;
       const parentSwitch = el.closest('.toggle-slide-switch');
@@ -18307,7 +18211,7 @@ window.handleSiteClick = function(siteId, siteName) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblSiteCardTitle');
-  if (lblTitle) lblTitle.innerText = 'View Site';
+  if (lblTitle) lblTitle.innerText = site.siteId || '230510678';
 
   const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
   const btnSiteMsg = document.getElementById('btnSiteCardMessageIcon');
@@ -18338,32 +18242,100 @@ window.handleSiteClick = function(siteId, siteName) {
   }
 
   setSiteFormReadOnly(true);
-  showToast(`Viewing site details: ${site.siteName}`);
+  showToast(`Viewing site details: ${site.siteId || site.siteName}`);
 };
+
+// Site Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnSiteCardEditToggle')?.addEventListener('click', () => {
+    let site = indusSiteData.find(s => s.id === currentViewedSiteId);
+    if (!site) site = indusSiteData[0];
+    const imgIcon = document.getElementById('imgSiteCardEditIcon');
+
+    if (!isSiteFormEditing) {
+      // Enter Edit Mode
+      isSiteFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setSiteFormReadOnly(false, true);
+      const lblTitle = document.getElementById('lblSiteCardTitle');
+      if (lblTitle && site) lblTitle.innerText = site.siteId || '230510678';
+      showToast('Edit mode enabled for site details');
+    } else {
+      // Save Mode
+      if (site) {
+        site.whId = document.getElementById('inpSiteWhId')?.value || site.whId;
+        site.district = document.getElementById('inpSiteDistrict')?.value || site.district;
+        site.latitude = document.getElementById('inpSiteLattitude')?.value || site.latitude;
+        site.longitude = document.getElementById('inpSiteLongtitude')?.value || site.longitude;
+        site.transportZone = document.getElementById('inpSiteTransportZone')?.value || site.transportZone;
+        const statusChk = document.getElementById('inpSiteStatusToggle');
+        if (statusChk) site.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isSiteFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setSiteFormReadOnly(true);
+      const lblTitle = document.getElementById('lblSiteCardTitle');
+      if (lblTitle && site) lblTitle.innerText = site.siteId || '230510678';
+      renderTable();
+      showToast('Site details updated successfully!');
+    }
+  });
+});
 
 let currentViewedInfraId = null;
 let isInfraFormEditing = false;
 
-function setInfraFormReadOnly(isReadOnly) {
+function setInfraFormReadOnly(isReadOnly, isEditMode = false) {
   const form = document.getElementById('frmAddInfra');
   if (!form) return;
-  const inputs = form.querySelectorAll('input, select');
-  inputs.forEach(input => {
-    if (input.type === 'checkbox') return;
+  const editableFieldIds = ['inpInfraDescription', 'inpInfraUom', 'inpInfraMake'];
+  const allFieldIds = ['inpInfraCategory', 'inpInfraDescription', 'inpInfraUom', 'inpInfraMake'];
+
+  allFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
     if (isReadOnly) {
-      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
-      else input.setAttribute('readonly', 'true');
-      input.style.backgroundColor = '#f8fafc';
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.classList.remove('field-non-editable-dark');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
     } else {
-      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
-      else input.removeAttribute('readonly');
-      input.style.backgroundColor = '#ffffff';
+      if (isEditMode) {
+        if (id === 'inpInfraCategory') {
+          if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+          else el.setAttribute('readonly', 'true');
+          el.classList.add('field-non-editable-dark');
+          el.style.cursor = 'not-allowed';
+        } else {
+          if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+          else el.removeAttribute('readonly');
+          el.classList.remove('field-non-editable-dark');
+          el.style.backgroundColor = '#ffffff';
+          el.style.color = '#1e293b';
+          el.style.cursor = 'auto';
+        }
+      } else {
+        if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+        else el.removeAttribute('readonly');
+        el.classList.remove('field-non-editable-dark');
+        el.style.backgroundColor = '#ffffff';
+        el.style.color = '#1e293b';
+        el.style.cursor = 'auto';
+      }
     }
   });
+
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
     t.disabled = isReadOnly;
-    if (isReadOnly) t.checked = false;
     const parentSwitch = t.closest('.toggle-slide-switch');
     if (parentSwitch) {
       parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
@@ -18398,7 +18370,7 @@ window.handleInfraClick = function(infraId, infraCat) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblInfraCardTitle');
-  if (lblTitle) lblTitle.innerText = 'View Infra';
+  if (lblTitle) lblTitle.innerText = infra.infraCategory || 'Infra Category';
 
   const btnEditToggle = document.getElementById('btnInfraCardEditToggle');
   const imgEditIcon = document.getElementById('imgInfraCardEditIcon');
@@ -18416,38 +18388,108 @@ window.handleInfraClick = function(infraId, infraCat) {
   if (document.getElementById('inpInfraUom')) document.getElementById('inpInfraUom').value = infra.uom || 'Nos';
   if (document.getElementById('inpInfraMake')) document.getElementById('inpInfraMake').value = infra.make || 'Dell';
   
-  // Keep slidebars in DEACTIVE state (unchecked / Red OFF) when viewing
-  if (document.getElementById('inpInfraCommissioningToggle')) document.getElementById('inpInfraCommissioningToggle').checked = false;
-  if (document.getElementById('inpInfraIMapToggle')) document.getElementById('inpInfraIMapToggle').checked = false;
-  if (document.getElementById('inpInfraStatusToggle')) document.getElementById('inpInfraStatusToggle').checked = false;
+  if (document.getElementById('inpInfraCommissioningToggle')) document.getElementById('inpInfraCommissioningToggle').checked = !((infra.commissioning || '').toLowerCase().includes('no'));
+  if (document.getElementById('inpInfraIMapToggle')) document.getElementById('inpInfraIMapToggle').checked = !((infra.iMap || '').toLowerCase().includes('no'));
+  if (document.getElementById('inpInfraStatusToggle')) document.getElementById('inpInfraStatusToggle').checked = !((infra.status || '').toLowerCase().includes('in'));
 
   setInfraFormReadOnly(true);
-  showToast(`Viewing infra details: ${infra.infraCategory}`);
+  showToast(`Viewing infra details: ${infra.infraCategory || infra.infraDescription}`);
 };
+
+// Infra Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnInfraCardEditToggle')?.addEventListener('click', () => {
+    let infra = indusInfraData.find(i => i.id === currentViewedInfraId);
+    if (!infra) infra = indusInfraData[0];
+    const imgIcon = document.getElementById('imgInfraCardEditIcon');
+
+    if (!isInfraFormEditing) {
+      // Enter Edit Mode
+      isInfraFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setInfraFormReadOnly(false, true);
+      const lblTitle = document.getElementById('lblInfraCardTitle');
+      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
+      showToast('Edit mode enabled for infra details');
+    } else {
+      // Save Mode
+      if (infra) {
+        infra.infraDescription = document.getElementById('inpInfraDescription')?.value || infra.infraDescription;
+        infra.uom = document.getElementById('inpInfraUom')?.value || infra.uom;
+        infra.make = document.getElementById('inpInfraMake')?.value || infra.make;
+        const commChk = document.getElementById('inpInfraCommissioningToggle');
+        if (commChk) infra.commissioning = commChk.checked ? 'Yes' : 'No';
+        const iMapChk = document.getElementById('inpInfraIMapToggle');
+        if (iMapChk) infra.iMap = iMapChk.checked ? 'Yes' : 'No';
+        const statusChk = document.getElementById('inpInfraStatusToggle');
+        if (statusChk) infra.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isInfraFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setInfraFormReadOnly(true);
+      const lblTitle = document.getElementById('lblInfraCardTitle');
+      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
+      renderTable();
+      showToast('Infra details updated successfully!');
+    }
+  });
+});
 
 let currentViewedProjectId = null;
 let isProjectFormEditing = false;
 
-function setProjectFormReadOnly(isReadOnly) {
+function setProjectFormReadOnly(isReadOnly, isEditMode = false) {
   const form = document.getElementById('frmAddProject');
   if (!form) return;
-  const inputs = form.querySelectorAll('input, select');
-  inputs.forEach(input => {
-    if (input.type === 'checkbox') return;
+
+  const editableInEditModeIds = ['inpProjectUpgradationType', 'inpProjectTat', 'inpIndusPm', 'inpIndusScm', 'inpProjectPm'];
+  const allFieldIds = ['inpProjectType', 'inpSubProjectType', 'inpProjectUpgradationType', 'inpProjectTat', 'inpIndusPm', 'inpIndusScm', 'inpProjectPm'];
+
+  allFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
     if (isReadOnly) {
-      if (input.tagName === 'SELECT') input.setAttribute('disabled', 'true');
-      else input.setAttribute('readonly', 'true');
-      input.style.backgroundColor = '#f8fafc';
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.classList.remove('field-non-editable-dark');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
     } else {
-      if (input.tagName === 'SELECT') input.removeAttribute('disabled');
-      else input.removeAttribute('readonly');
-      input.style.backgroundColor = '#ffffff';
+      if (isEditMode) {
+        if (id === 'inpProjectType' || id === 'inpSubProjectType') {
+          if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+          else el.setAttribute('readonly', 'true');
+          el.classList.add('field-non-editable-dark');
+          el.style.cursor = 'not-allowed';
+        } else {
+          if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+          else el.removeAttribute('readonly');
+          el.classList.remove('field-non-editable-dark');
+          el.style.backgroundColor = '#ffffff';
+          el.style.color = '#1e293b';
+          el.style.cursor = 'auto';
+        }
+      } else {
+        if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+        else el.removeAttribute('readonly');
+        el.classList.remove('field-non-editable-dark');
+        el.style.backgroundColor = '#ffffff';
+        el.style.color = '#1e293b';
+        el.style.cursor = 'auto';
+      }
     }
   });
+
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
     t.disabled = isReadOnly;
-    if (isReadOnly) t.checked = false;
     const parentSwitch = t.closest('.toggle-slide-switch');
     if (parentSwitch) {
       parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
@@ -18485,7 +18527,7 @@ window.handleProjectClick = function(projectId, projectType) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblProjectCardTitle');
-  if (lblTitle) lblTitle.innerText = 'View Project';
+  if (lblTitle) lblTitle.innerText = proj.projectType || 'KTN';
 
   const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
   const btnActivity = document.getElementById('btnProjectActivityIcon');
@@ -18512,14 +18554,722 @@ window.handleProjectClick = function(projectId, projectType) {
   if (document.getElementById('inpIndusScm')) document.getElementById('inpIndusScm').value = proj.indusScm || 'R/RL-234567';
   if (document.getElementById('inpProjectPm')) document.getElementById('inpProjectPm').value = proj.pm || 'R/RL-234567';
 
-  // Keep slidebars in DEACTIVE state (unchecked / Red OFF) when viewing
-  if (document.getElementById('inpProjectSurveyToggle')) document.getElementById('inpProjectSurveyToggle').checked = false;
-  if (document.getElementById('inpProjectTransportToggle')) document.getElementById('inpProjectTransportToggle').checked = false;
-  if (document.getElementById('inpProjectStatusToggle')) document.getElementById('inpProjectStatusToggle').checked = false;
+  if (document.getElementById('inpProjectSurveyToggle')) document.getElementById('inpProjectSurveyToggle').checked = !((proj.survey || '').toLowerCase().includes('no'));
+  if (document.getElementById('inpProjectTransportToggle')) document.getElementById('inpProjectTransportToggle').checked = !((proj.additionalTransport || '').toLowerCase().includes('no'));
+  if (document.getElementById('inpProjectStatusToggle')) document.getElementById('inpProjectStatusToggle').checked = !((proj.status || '').toLowerCase().includes('in'));
 
   setProjectFormReadOnly(true);
   showToast(`Viewing project details: ${proj.projectType}`);
 };
+
+// Project Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnProjectCardEditToggle')?.addEventListener('click', () => {
+    let proj = indusProjectsData.find(p => p.id === currentViewedProjectId);
+    if (!proj) proj = indusProjectsData[0];
+    const imgIcon = document.getElementById('imgProjectCardEditIcon');
+
+    if (!isProjectFormEditing) {
+      // Enter Edit Mode
+      isProjectFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setProjectFormReadOnly(false, true);
+      const lblTitle = document.getElementById('lblProjectCardTitle');
+      if (lblTitle && proj) lblTitle.innerText = proj.projectType || 'KTN';
+      showToast('Edit mode enabled for project details');
+    } else {
+      // Save Mode
+      if (proj) {
+        proj.subProjectType = document.getElementById('inpSubProjectType')?.value || proj.subProjectType;
+        proj.upgradationType = document.getElementById('inpProjectUpgradationType')?.value || proj.upgradationType;
+        proj.tat = document.getElementById('inpProjectTat')?.value || proj.tat;
+        proj.indusPm = document.getElementById('inpIndusPm')?.value || proj.indusPm;
+        proj.indusScm = document.getElementById('inpIndusScm')?.value || proj.indusScm;
+        proj.pm = document.getElementById('inpProjectPm')?.value || proj.pm;
+        const survChk = document.getElementById('inpProjectSurveyToggle');
+        if (survChk) proj.survey = survChk.checked ? 'Yes' : 'No';
+        const transChk = document.getElementById('inpProjectTransportToggle');
+        if (transChk) proj.additionalTransport = transChk.checked ? 'Yes' : 'No';
+        const statusChk = document.getElementById('inpProjectStatusToggle');
+        if (statusChk) proj.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isProjectFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setProjectFormReadOnly(true);
+      const lblTitle = document.getElementById('lblProjectCardTitle');
+      if (lblTitle && proj) lblTitle.innerText = proj.projectType || 'KTN';
+      renderTable();
+      showToast('Project details updated successfully!');
+    }
+  });
+});
+
+// --- GBPA (PRODUCTS) VIEW & EDIT ENGINE ---
+let selectedGbpaRowId = null;
+let currentViewedGbpaId = null;
+let isGbpaFormEditing = false;
+
+window.handleGbpaRadioClick = function(e, rowId) {
+  if (selectedGbpaRowId === rowId) {
+    // Unselect
+    selectedGbpaRowId = null;
+    const editBtn = document.getElementById('btnIndusGbpaEditRow');
+    if (editBtn) editBtn.style.display = 'none';
+    if (e && e.target) e.target.checked = false;
+    document.querySelectorAll('#tbodyMain tr').forEach(tr => {
+      tr.classList.remove('row-selected-highlight');
+      tr.style.backgroundColor = '';
+      const r = tr.querySelector('.gbpa-row-radio');
+      if (r) r.checked = false;
+    });
+  } else {
+    handleGbpaRowSelection(rowId);
+  }
+};
+
+window.handleGbpaRowSelection = function(rowId) {
+  selectedGbpaRowId = rowId;
+  const editBtn = document.getElementById('btnIndusGbpaEditRow');
+  if (editBtn) editBtn.style.display = 'inline-flex';
+
+  // Highlight selected row in table
+  document.querySelectorAll('#tbodyMain tr').forEach(tr => {
+    if (tr.getAttribute('data-row-id') === String(rowId)) {
+      tr.classList.add('row-selected-highlight');
+      tr.style.backgroundColor = 'rgba(0, 203, 160, 0.12)';
+      const radio = tr.querySelector('.gbpa-row-radio');
+      if (radio) radio.checked = true;
+    } else {
+      tr.classList.remove('row-selected-highlight');
+      tr.style.backgroundColor = '';
+      const radio = tr.querySelector('.gbpa-row-radio');
+      if (radio) radio.checked = false;
+    }
+  });
+};
+
+window.openSelectedGbpaItem = function() {
+  if (selectedGbpaRowId) {
+    openViewGbpaCard(selectedGbpaRowId);
+  } else {
+    showToast('Please select a GBPA row first');
+  }
+};
+
+function setGbpaFormReadOnly(isReadOnly, isEditMode = false) {
+  const form = document.getElementById('frmAddGbpa');
+  if (!form) return;
+
+  const editableFieldIds = ['inpGbpaProductName', 'inpGbpaProductType', 'inpGbpaProductDescription', 'inpGbpaUom', 'inpGbpaRate', 'inpGbpaHsnSac', 'inpGbpaHsnSacCode', 'inpGbpaBudgetPercent', 'inpGbpaBudgetAmount'];
+  const allFieldIds = ['inpGbpaItemCode', 'inpGbpaProductName', 'inpGbpaProductType', 'inpGbpaProductDescription', 'inpGbpaUom', 'inpGbpaRate', 'inpGbpaHsnSac', 'inpGbpaHsnSacCode', 'inpGbpaBudgetPercent', 'inpGbpaBudgetAmount'];
+
+  allFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isReadOnly) {
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.classList.remove('field-non-editable-dark');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
+    } else {
+      if (isEditMode) {
+        if (id === 'inpGbpaItemCode') {
+          if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+          else el.setAttribute('readonly', 'true');
+          el.classList.add('field-non-editable-dark');
+          el.style.cursor = 'not-allowed';
+        } else {
+          if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+          else el.removeAttribute('readonly');
+          el.classList.remove('field-non-editable-dark');
+          el.style.backgroundColor = '#ffffff';
+          el.style.color = '#1e293b';
+          el.style.cursor = 'auto';
+        }
+      } else {
+        if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+        else el.removeAttribute('readonly');
+        el.classList.remove('field-non-editable-dark');
+        el.style.backgroundColor = '#ffffff';
+        el.style.color = '#1e293b';
+        el.style.cursor = 'auto';
+      }
+    }
+  });
+
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.openViewGbpaCard = function(itemId) {
+  let item = indusProductsData.find(p => p.id === itemId || p.itemCode === itemId || p.itemName === itemId || p.productName === itemId);
+  if (!item) {
+    item = indusProductsData[0] || {
+      id: itemId || 'gbpa-1',
+      itemCode: "230510678",
+      itemName: "40M Tubular Tower",
+      productName: "40M Tubular Tower",
+      productType: "Capex",
+      productDescription: "Galvanized steel structure",
+      uom: "Pcs",
+      rate: "450000.00",
+      activeRate: "450000.00",
+      hsnSacType: "HSN",
+      hsnSacCode: "73082019",
+      budgetPercent: "10%",
+      budgetAmount: "45000.00",
+      status: "Active"
+    };
+  }
+
+  currentViewedGbpaId = item.id;
+  isGbpaFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addGbpaCard');
+  if (card) card.style.display = 'block';
+
+  const dispTitle = item.itemName || item.productName || 'GBPA Item';
+  const lblTitle = document.getElementById('lblGbpaCardTitle');
+  if (lblTitle) lblTitle.innerText = dispTitle;
+
+  const btnEditToggle = document.getElementById('btnGbpaCardEditToggle');
+  const imgEditIcon = document.getElementById('imgGbpaCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddGbpa .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpGbpaItemCode')) document.getElementById('inpGbpaItemCode').value = item.itemCode || '';
+  if (document.getElementById('inpGbpaProductName')) document.getElementById('inpGbpaProductName').value = item.itemName || item.productName || '';
+  if (document.getElementById('inpGbpaProductType')) document.getElementById('inpGbpaProductType').value = item.productType || item.itemType || 'Capex';
+  if (document.getElementById('inpGbpaProductDescription')) document.getElementById('inpGbpaProductDescription').value = item.productDescription || '';
+  if (document.getElementById('inpGbpaUom')) document.getElementById('inpGbpaUom').value = item.uom || 'Pcs';
+  if (document.getElementById('inpGbpaRate')) document.getElementById('inpGbpaRate').value = item.rate || item.activeRate || '0.00';
+  if (document.getElementById('inpGbpaHsnSac')) document.getElementById('inpGbpaHsnSac').value = item.hsnSacType || 'HSN';
+  if (document.getElementById('inpGbpaHsnSacCode')) document.getElementById('inpGbpaHsnSacCode').value = item.hsnSacCode || '';
+  if (document.getElementById('inpGbpaBudgetPercent')) document.getElementById('inpGbpaBudgetPercent').value = item.budgetPercent || '';
+  if (document.getElementById('inpGbpaBudgetAmount')) document.getElementById('inpGbpaBudgetAmount').value = item.budgetAmount || '';
+
+  if (document.getElementById('inpGbpaStatusToggle')) {
+    document.getElementById('inpGbpaStatusToggle').checked = !((item.status || '').toLowerCase().includes('in'));
+  }
+
+  setGbpaFormReadOnly(true);
+  showToast(`Viewing GBPA item: ${dispTitle}`);
+};
+
+// GBPA Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnGbpaCardEditToggle')?.addEventListener('click', () => {
+    let item = indusProductsData.find(p => p.id === currentViewedGbpaId);
+    if (!item) item = indusProductsData[0];
+    const imgIcon = document.getElementById('imgGbpaCardEditIcon');
+
+    if (!isGbpaFormEditing) {
+      // Enter Edit Mode
+      isGbpaFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setGbpaFormReadOnly(false, true);
+      const dispTitle = item?.itemName || item?.productName || 'GBPA Item';
+      const lblTitle = document.getElementById('lblGbpaCardTitle');
+      if (lblTitle) lblTitle.innerText = dispTitle;
+      showToast('Edit mode enabled for GBPA item');
+    } else {
+      // Save Mode
+      if (item) {
+        item.itemName = document.getElementById('inpGbpaProductName')?.value || item.itemName;
+        item.productName = item.itemName;
+        item.productType = document.getElementById('inpGbpaProductType')?.value || item.productType;
+        item.productDescription = document.getElementById('inpGbpaProductDescription')?.value || item.productDescription;
+        item.uom = document.getElementById('inpGbpaUom')?.value || item.uom;
+        item.rate = document.getElementById('inpGbpaRate')?.value || item.rate;
+        item.activeRate = item.rate;
+        item.hsnSacType = document.getElementById('inpGbpaHsnSac')?.value || item.hsnSacType;
+        item.hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value || item.hsnSacCode;
+        item.budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value || item.budgetPercent;
+        item.budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value || item.budgetAmount;
+        const statusChk = document.getElementById('inpGbpaStatusToggle');
+        if (statusChk) item.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isGbpaFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setGbpaFormReadOnly(true);
+      const dispTitle = item?.itemName || item?.productName || 'GBPA Item';
+      const lblTitle = document.getElementById('lblGbpaCardTitle');
+      if (lblTitle) lblTitle.innerText = dispTitle;
+      renderTable();
+      showToast('GBPA item details updated successfully!');
+    }
+  });
+});
+
+// --- PROJECT APPROVAL FUNCTIONS ---
+window.openAddProjectApprovalForm = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
+  const card = document.getElementById('addProjectApprovalCard');
+  if (card) {
+    card.style.display = 'block';
+    const desc = document.getElementById('inpProjectApprovalDesc');
+    if (desc) desc.value = '';
+  }
+};
+
+window.closeAddProjectApprovalForm = function() {
+  const card = document.getElementById('addProjectApprovalCard');
+  if (card) card.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.saveProjectApprovalRecord = function() {
+  const desc = document.getElementById('inpProjectApprovalDesc')?.value || '';
+  if (!desc.trim()) {
+    showToast('Please enter an approval description');
+    return;
+  }
+  if (typeof projectApprovalData !== 'undefined' && Array.isArray(projectApprovalData)) {
+    projectApprovalData.unshift({
+      id: 'appr-' + Date.now(),
+      date: new Date().toLocaleDateString('en-GB').replace(/\//g, ' - '),
+      name: 'Admin',
+      description: desc.trim(),
+      status: 'Approved'
+    });
+  }
+  closeAddProjectApprovalForm();
+  showToast('Approval record added successfully!');
+};
+
+// --- GBPA MATERIALS VIEW & EDIT ENGINE ---
+let currentViewedMaterialId = null;
+let isMaterialFormEditing = false;
+
+function setMaterialFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddMaterials');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(el => {
+    if (el.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
+    } else {
+      if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+      else el.removeAttribute('readonly');
+      el.style.backgroundColor = '#ffffff';
+      el.style.color = '#1e293b';
+      el.style.cursor = 'auto';
+    }
+  });
+
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.openViewGbpaMaterialCard = function(matId) {
+  let mat = indusProductMaterialsData.find(m => m.id === matId || m.materialHead === matId);
+  if (!mat) {
+    mat = indusProductMaterialsData[0] || {
+      id: matId || 'mat-1',
+      materialHead: "Tower Structure Mast",
+      materialCategory: "Structure",
+      materialDescription: "Galvanized tubular mast",
+      make: "Apex",
+      type: "Parent",
+      ucf: "100",
+      status: "Active"
+    };
+  }
+
+  currentViewedMaterialId = mat.id;
+  isMaterialFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addMaterialsCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblMaterialsCardTitle');
+  if (lblTitle) lblTitle.innerText = mat.materialHead || 'Material Head';
+
+  const btnEditToggle = document.getElementById('btnMaterialsCardEditToggle');
+  const imgEditIcon = document.getElementById('imgMaterialsCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddMaterials .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpMaterialHead')) document.getElementById('inpMaterialHead').value = mat.materialHead || '';
+  if (document.getElementById('inpMaterialCategory')) document.getElementById('inpMaterialCategory').value = mat.materialCategory || '';
+  if (document.getElementById('inpMaterialDescription')) document.getElementById('inpMaterialDescription').value = mat.materialDescription || '';
+  if (document.getElementById('inpMaterialMake')) document.getElementById('inpMaterialMake').value = mat.make || '';
+  if (document.getElementById('inpMaterialType')) document.getElementById('inpMaterialType').value = mat.type || 'Parent';
+  if (document.getElementById('inpMaterialUcf')) document.getElementById('inpMaterialUcf').value = mat.ucf || '';
+
+  if (document.getElementById('inpMaterialStatusToggle')) {
+    document.getElementById('inpMaterialStatusToggle').checked = !((mat.status || '').toLowerCase().includes('in'));
+  }
+
+  setMaterialFormReadOnly(true);
+  showToast(`Viewing material details: ${mat.materialHead}`);
+};
+
+// Material Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnMaterialsCardEditToggle')?.addEventListener('click', () => {
+    let mat = indusProductMaterialsData.find(m => m.id === currentViewedMaterialId);
+    if (!mat) mat = indusProductMaterialsData[0];
+    const imgIcon = document.getElementById('imgMaterialsCardEditIcon');
+
+    if (!isMaterialFormEditing) {
+      // Enter Edit Mode
+      isMaterialFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setMaterialFormReadOnly(false);
+      const lblTitle = document.getElementById('lblMaterialsCardTitle');
+      if (lblTitle && mat) lblTitle.innerText = mat.materialHead || 'Material Head';
+      showToast('Edit mode enabled for material');
+    } else {
+      // Save Mode
+      if (mat) {
+        mat.materialHead = document.getElementById('inpMaterialHead')?.value || mat.materialHead;
+        mat.materialCategory = document.getElementById('inpMaterialCategory')?.value || mat.materialCategory;
+        mat.materialDescription = document.getElementById('inpMaterialDescription')?.value || mat.materialDescription;
+        mat.make = document.getElementById('inpMaterialMake')?.value || mat.make;
+        mat.type = document.getElementById('inpMaterialType')?.value || mat.type;
+        mat.ucf = document.getElementById('inpMaterialUcf')?.value || mat.ucf;
+        const statusChk = document.getElementById('inpMaterialStatusToggle');
+        if (statusChk) mat.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isMaterialFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setMaterialFormReadOnly(true);
+      const lblTitle = document.getElementById('lblMaterialsCardTitle');
+      if (lblTitle && mat) lblTitle.innerText = mat.materialHead || 'Material Head';
+      renderTable();
+      showToast('Material details updated successfully!');
+    }
+  });
+});
+
+// --- GBPA EXPENSES VIEW & EDIT ENGINE ---
+let currentViewedGbpaExpenseId = null;
+let isGbpaExpenseFormEditing = false;
+
+function setProductExpenseFormReadOnly(isReadOnly) {
+  const form = document.getElementById('frmAddProductExpense');
+  if (!form) return;
+  const inputs = form.querySelectorAll('input, select');
+  inputs.forEach(el => {
+    if (el.type === 'checkbox') return;
+    if (isReadOnly) {
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
+    } else {
+      if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+      else el.removeAttribute('readonly');
+      el.style.backgroundColor = '#ffffff';
+      el.style.color = '#1e293b';
+      el.style.cursor = 'auto';
+    }
+  });
+
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.openViewGbpaExpenseCard = function(expId) {
+  let exp = indusProductExpensesData.find(e => e.id === expId || e.expenseHead === expId);
+  if (!exp) {
+    exp = indusProductExpensesData[0] || {
+      id: expId || 'exp-1',
+      expenseHead: "Tower Installation Labour",
+      expenseCategory: "Labour",
+      expenseDescription: "Tower erection charges",
+      type: "Parent",
+      status: "Active"
+    };
+  }
+
+  currentViewedGbpaExpenseId = exp.id;
+  isGbpaExpenseFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addProductExpenseCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblProductExpenseCardTitle');
+  if (lblTitle) lblTitle.innerText = exp.expenseHead || 'Expense Head';
+
+  const btnEditToggle = document.getElementById('btnProductExpenseCardEditToggle');
+  const imgEditIcon = document.getElementById('imgProductExpenseCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddProductExpense .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpProdExpenseHead')) document.getElementById('inpProdExpenseHead').value = exp.expenseHead || '';
+  if (document.getElementById('inpProdExpenseCategory')) document.getElementById('inpProdExpenseCategory').value = exp.expenseCategory || '';
+  if (document.getElementById('inpProdExpenseDescription')) document.getElementById('inpProdExpenseDescription').value = exp.expenseDescription || '';
+  if (document.getElementById('inpProdExpenseType')) document.getElementById('inpProdExpenseType').value = exp.type || 'Parent';
+
+  if (document.getElementById('inpProdExpenseStatusToggle')) {
+    document.getElementById('inpProdExpenseStatusToggle').checked = !((exp.status || '').toLowerCase().includes('in'));
+  }
+
+  setProductExpenseFormReadOnly(true);
+  showToast(`Viewing expense details: ${exp.expenseHead}`);
+};
+
+// Expense Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnProductExpenseCardEditToggle')?.addEventListener('click', () => {
+    let exp = indusProductExpensesData.find(e => e.id === currentViewedGbpaExpenseId);
+    if (!exp) exp = indusProductExpensesData[0];
+    const imgIcon = document.getElementById('imgProductExpenseCardEditIcon');
+
+    if (!isGbpaExpenseFormEditing) {
+      // Enter Edit Mode
+      isGbpaExpenseFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setProductExpenseFormReadOnly(false);
+      const lblTitle = document.getElementById('lblProductExpenseCardTitle');
+      if (lblTitle && exp) lblTitle.innerText = exp.expenseHead || 'Expense Head';
+      showToast('Edit mode enabled for expense');
+    } else {
+      // Save Mode
+      if (exp) {
+        exp.expenseHead = document.getElementById('inpProdExpenseHead')?.value || exp.expenseHead;
+        exp.expenseCategory = document.getElementById('inpProdExpenseCategory')?.value || exp.expenseCategory;
+        exp.expenseDescription = document.getElementById('inpProdExpenseDescription')?.value || exp.expenseDescription;
+        exp.type = document.getElementById('inpProdExpenseType')?.value || exp.type;
+        const statusChk = document.getElementById('inpProdExpenseStatusToggle');
+        if (statusChk) exp.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isGbpaExpenseFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setProductExpenseFormReadOnly(true);
+      const lblTitle = document.getElementById('lblProductExpenseCardTitle');
+      if (lblTitle && exp) lblTitle.innerText = exp.expenseHead || 'Expense Head';
+      renderTable();
+      showToast('Expense details updated successfully!');
+    }
+  });
+});
+
+// --- GBPA PRODUCT INFRA VIEW & EDIT ENGINE ---
+let currentViewedProductInfraId = null;
+let isProductInfraFormEditing = false;
+
+function setProductInfraFormReadOnly(isReadOnly, isEditMode = false) {
+  const form = document.getElementById('frmAddProductInfra');
+  if (!form) return;
+
+  const editableFieldIds = ['inpProdInfraDescription', 'inpProdInfraType'];
+  const allFieldIds = ['inpProdInfraCode', 'inpProdInfraCategory', 'inpProdInfraDescription', 'inpProdInfraType'];
+
+  allFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isReadOnly) {
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.classList.remove('field-non-editable-dark');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
+    } else {
+      if (editableFieldIds.includes(id)) {
+        if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+        else el.removeAttribute('readonly');
+        el.classList.remove('field-non-editable-dark');
+        el.style.backgroundColor = '#ffffff';
+        el.style.color = '#1e293b';
+        el.style.cursor = 'auto';
+      } else {
+        if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+        else el.setAttribute('readonly', 'true');
+        el.classList.add('field-non-editable-dark');
+        el.style.cursor = 'not-allowed';
+      }
+    }
+  });
+
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.openViewGbpaProductInfraCard = function(prodInfraId) {
+  let infra = indusProductInfraData.find(i => i.id === prodInfraId || i.infraCode === prodInfraId);
+  if (!infra) {
+    infra = indusProductInfraData[0] || {
+      id: prodInfraId || 'prod-infra-1',
+      infraCode: "230510678",
+      infraCategory: "DG Set",
+      infraDescription: "15kVA Silent Diesel Generator Set",
+      type: "Parent",
+      status: "Active"
+    };
+  }
+
+  currentViewedProductInfraId = infra.id;
+  isProductInfraFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addProductInfraCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblProductInfraCardTitle');
+  if (lblTitle) lblTitle.innerText = infra.infraDescription || infra.infraCode || 'Infra Details';
+
+  const btnEditToggle = document.getElementById('btnProductInfraCardEditToggle');
+  const imgEditIcon = document.getElementById('imgProductInfraCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddProductInfra .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpProdInfraCode')) document.getElementById('inpProdInfraCode').value = infra.infraCode || '';
+  if (document.getElementById('inpProdInfraCategory')) document.getElementById('inpProdInfraCategory').value = infra.infraCategory || '';
+  if (document.getElementById('inpProdInfraDescription')) document.getElementById('inpProdInfraDescription').value = infra.infraDescription || '';
+  if (document.getElementById('inpProdInfraType')) document.getElementById('inpProdInfraType').value = infra.type || 'Parent';
+
+  if (document.getElementById('inpProdInfraStatusToggle')) {
+    document.getElementById('inpProdInfraStatusToggle').checked = !((infra.status || '').toLowerCase().includes('in'));
+  }
+
+  setProductInfraFormReadOnly(true);
+  showToast(`Viewing product infra details: ${infra.infraDescription || infra.infraCode}`);
+};
+
+// Product Infra Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnProductInfraCardEditToggle')?.addEventListener('click', () => {
+    let infra = indusProductInfraData.find(i => i.id === currentViewedProductInfraId);
+    if (!infra) infra = indusProductInfraData[0];
+    const imgIcon = document.getElementById('imgProductInfraCardEditIcon');
+
+    if (!isProductInfraFormEditing) {
+      // Enter Edit Mode
+      isProductInfraFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setProductInfraFormReadOnly(false, true);
+      const lblTitle = document.getElementById('lblProductInfraCardTitle');
+      if (lblTitle && infra) lblTitle.innerText = infra.infraDescription || infra.infraCode || 'Infra Details';
+      showToast('Edit mode enabled for product infra');
+    } else {
+      // Save Mode
+      if (infra) {
+        infra.infraDescription = document.getElementById('inpProdInfraDescription')?.value || infra.infraDescription;
+        infra.type = document.getElementById('inpProdInfraType')?.value || infra.type;
+        const statusChk = document.getElementById('inpProdInfraStatusToggle');
+        if (statusChk) infra.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isProductInfraFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setProductInfraFormReadOnly(true);
+      const lblTitle = document.getElementById('lblProductInfraCardTitle');
+      if (lblTitle && infra) lblTitle.innerText = infra.infraDescription || infra.infraCode || 'Infra Details';
+      renderTable();
+      showToast('Product Infra details updated successfully!');
+    }
+  });
+});
 
 let currentViewedVendorId = null;
 let isVendorFormEditing = false;
@@ -20266,14 +21016,15 @@ function renderAccountsTdsSummaryTable() {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 18px;">No matching TDS records found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching TDS records found.</td></tr>`;
     updateTdsSummaryFilterBtnStates();
     return;
   }
 
   tbody.innerHTML = filtered.map((item, idx) => `
     <tr style="${idx !== filtered.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
-      <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tdsType || ''}</td>
+      <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-weight: 500;">${item.tdsType || ''}</td>
+      <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: inherit; font-weight: 500;">${item.tdsCode || ''}</td>
       <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem; font-family: monospace; font-weight: 500;">${item.panNumber || ''}</td>
       <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-size: 0.95rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(item.panName || '').replace(/"/g, '&quot;')}">
         <a href="#" class="td-link-blue" onclick="openAccountsTdsDetailsModal('${row.id}', '${(item.panNumber || '').replace(/'/g, "\\'")}', '${(item.panName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${item.panName || ''}</a>

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260925_1955">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260926_1525">
 </head>
 
 <body>
@@ -170,7 +170,23 @@
                   </div>
                 </div>
 
-                <!-- 2. Address -->
+                <!-- 2. Employee Name -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpEmpName">Employee Name</label>
+                  <div class="form-input-wrap">
+                    <input type="text" class="form-input-control" id="inpEmpName" placeholder="Enter Employee Name">
+                  </div>
+                </div>
+
+                <!-- 3. Employee ID -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpEmpId">Employee ID</label>
+                  <div class="form-input-wrap">
+                    <input type="text" class="form-input-control" id="inpEmpId" placeholder="Enter Employee ID">
+                  </div>
+                </div>
+
+                <!-- 4. Address -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpAddress">Address</label>
                   <div class="form-input-wrap">
@@ -178,7 +194,7 @@
                   </div>
                 </div>
 
-                <!-- 3. Mobile Number -->
+                <!-- 5. Mobile Number -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpMobile">Mobile Number</label>
                   <div class="form-input-wrap">
@@ -186,7 +202,7 @@
                   </div>
                 </div>
 
-                <!-- 4. E - Mail -->
+                <!-- 6. E - Mail -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpEmail">E - Mail</label>
                   <div class="form-input-wrap">
@@ -194,7 +210,7 @@
                   </div>
                 </div>
 
-                <!-- 5. DOB with Google Calendar Icon -->
+                <!-- 7. DOB with Google Calendar Icon -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpDob">DOB</label>
                   <div class="form-input-wrap with-action-badge">
@@ -205,7 +221,7 @@
                   </div>
                 </div>
 
-                <!-- 6. Blood Group -->
+                <!-- 8. Blood Group -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpBloodGroup">Blood Group</label>
                   <div class="form-input-wrap">
@@ -222,7 +238,7 @@
                   </div>
                 </div>
 
-                <!-- 7. Marital Status -->
+                <!-- 9. Marital Status -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpMaritalStatus">Marital Status</label>
                   <div class="form-input-wrap">
@@ -235,7 +251,7 @@
                   </div>
                 </div>
 
-                <!-- 8. Qualification with PDF Upload Badge -->
+                <!-- 10. Qualification with PDF Upload Badge -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpQualification">Qualification</label>
                   <div class="form-input-wrap with-action-badge">
@@ -247,7 +263,7 @@
                   </div>
                 </div>
 
-                <!-- 9. PAN Number with PDF Upload Badge -->
+                <!-- 11. PAN Number with PDF Upload Badge -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpPanNumber">PAN Number</label>
                   <div class="form-input-wrap with-action-badge">
@@ -258,7 +274,7 @@
                   </div>
                 </div>
 
-                <!-- 10. Aadhar Number with PDF Upload Badge -->
+                <!-- 12. Aadhar Number with PDF Upload Badge -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpAadharNumber">Aadhar Number</label>
                   <div class="form-input-wrap with-action-badge">
@@ -271,9 +287,33 @@
                 </div>
               </div>
 
-              <!-- RIGHT COLUMN -->
+              <!-- RIGHT COLUMN (12 Fields) -->
               <div class="side-grid-col">
-                <!-- 1. EPF UAN -->
+                <!-- 1. Driving License with PDF Upload Badge -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpEmpDrivingLicense">Driving License</label>
+                  <div class="form-input-wrap with-action-badge">
+                    <input type="text" class="form-input-control" id="inpEmpDrivingLicense"
+                      placeholder="Enter Driving License Number">
+                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 2. Passport Number with PDF Upload Badge -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpEmpPassportNumber">Passport Number</label>
+                  <div class="form-input-wrap with-action-badge">
+                    <input type="text" class="form-input-control" id="inpEmpPassportNumber"
+                      placeholder="Enter Passport Number">
+                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 3. EPF UAN -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpEpfUan">EPF UAN</label>
                   <div class="form-input-wrap">
@@ -281,15 +321,15 @@
                   </div>
                 </div>
 
-                <!-- 2. ESI Code -->
+                <!-- 4. ESI ID -->
                 <div class="form-row-group">
-                  <label class="form-label" for="inpEmpEsiCode">ESI Code</label>
+                  <label class="form-label" for="inpEmpEsiCode">ESI ID</label>
                   <div class="form-input-wrap">
-                    <input type="text" class="form-input-control" id="inpEmpEsiCode" placeholder="Enter ESI Code">
+                    <input type="text" class="form-input-control" id="inpEmpEsiCode" placeholder="Enter ESI ID">
                   </div>
                 </div>
 
-                <!-- 3. Previous Experience (YYYY - MM) -->
+                <!-- 5. Previous Experience (YYYY - MM) -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpPrevExp">Previous Experience</label>
                   <div class="form-input-wrap">
@@ -297,7 +337,7 @@
                   </div>
                 </div>
 
-                <!-- 4. Current Experience (YYYY - MM) -->
+                <!-- 6. Current Experience (YYYY - MM) -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpCurrExp">Current Experience</label>
                   <div class="form-input-wrap">
@@ -305,7 +345,7 @@
                   </div>
                 </div>
 
-                <!-- 5. Total Experience (YYYY - MM) -->
+                <!-- 7. Total Experience (YYYY - MM) -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpTotalExp">Total Experience</label>
                   <div class="form-input-wrap">
@@ -313,7 +353,7 @@
                   </div>
                 </div>
 
-                <!-- 6. DOJ with Google Calendar Icon -->
+                <!-- 8. DOJ with Google Calendar Icon -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpDoj">DOJ</label>
                   <div class="form-input-wrap with-action-badge">
@@ -324,7 +364,7 @@
                   </div>
                 </div>
 
-                <!-- 7. Designation -->
+                <!-- 9. Designation -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpDesignation">Designation</label>
                   <div class="form-input-wrap">
@@ -338,7 +378,7 @@
                   </div>
                 </div>
 
-                <!-- 8. Photo with Image Upload Badge -->
+                <!-- 10. Photo with Image Upload Badge -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpPhoto">Photo</label>
                   <div class="form-input-wrap with-action-badge">
@@ -350,7 +390,7 @@
                   </div>
                 </div>
 
-                <!-- 9. Geo Attendance Slidebar (Workable / Interactive, Deactive Initial Stage) -->
+                <!-- 11. Geo Attendance Slidebar (Workable / Interactive, Deactive Initial Stage) -->
                 <div class="form-row-group">
                   <label class="form-label">Geo Attendance</label>
                   <div class="form-input-wrap slider-wrap">
@@ -361,7 +401,7 @@
                   </div>
                 </div>
 
-                <!-- 10. Status Slidebar (Workable / Interactive, Deactive Initial Stage) -->
+                <!-- 12. Status Slidebar (Workable / Interactive, Deactive Initial Stage) -->
                 <div class="form-row-group">
                   <label class="form-label">Status</label>
                   <div class="form-input-wrap slider-wrap">
@@ -1475,397 +1515,645 @@
         <!-- 1F-3. Indus Tower Page Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card side-form-card-wide" id="addIndusTowerCard" style="display: none;">
           <!-- Header -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblIndusTowerCardTitle">View Company Name</div>
-            <div class="side-header-top-icons">
+          <div class="side-form-header" style="position: relative; width: 100%; height: 54px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
+            <div class="side-form-title-badge" id="lblIndusTowerCardTitle">
+              View Company Name
+            </div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto; padding-right: 0;">
               <button type="button" class="side-top-icon-btn" title="HR Policies" id="btnIndusTowerHrPolicies">
-                <img src="icons/HR Policies.svg" alt="HR Policies" width="26" height="26">
+                <img src="icons/HR Policies.svg" alt="HR Policies" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
               </button>
               <button type="button" class="side-top-icon-btn" title="Bank Details" id="btnIndusTowerBank">
-                <img src="icons/Bank.svg" alt="Bank Details" width="26" height="26">
+                <img src="icons/Bank.svg" alt="Bank Details" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
               </button>
               <button type="button" class="side-top-icon-btn" title="National holiday" id="btnIndusTowerAshokaChakra">
-                <img src="icons/Ashoka_Chakra.svg" alt="National holiday" width="26" height="26">
+                <img src="icons/Ashoka_Chakra.svg" alt="National holiday" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
               </button>
               <button type="button" class="side-top-icon-btn" title="Location" id="btnIndusTowerLocation">
-                <img src="icons/Location.svg" alt="Location" width="26" height="26">
+                <img src="icons/Location.svg" alt="Location" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
               </button>
               <button type="button" class="side-top-icon-btn" title="Edit" id="btnIndusTowerEdit">
-                <img src="icons/Edit.svg" alt="Edit" id="imgIndusTowerEditIcon" width="26" height="26">
+                <img src="icons/Edit.svg" alt="Edit" id="imgIndusTowerEditIcon" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
               </button>
-              <button type="button" class="side-form-close-btn" id="btnCloseIndusTowerForm"
-                aria-label="Close form">&times;</button>
+              <button type="button" class="side-form-close-btn" id="btnCloseIndusTowerForm" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; margin: 0 0 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
             </div>
           </div>
 
-          <!-- Decorative Action Icons on Top Right -->
-          <div class="side-form-top-icons"></div>
-
-          <!-- Form Body (2-Column Grid matching uploaded mockup) -->
+          <!-- Form Body (2-Column 12x12 Grid Layout) -->
           <form class="side-form-body" id="frmAddIndusTower" onsubmit="event.preventDefault();">
             <input type="file" id="inpIndusTowerLogoFile" accept="image/*" style="display: none;">
 
-            <div class="emp-form-grid">
+            <div class="emp-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 36px; width: 100%;">
 
-              <!-- LEFT COLUMN -->
-              <div class="emp-grid-col">
-                <!-- 1. Logo -->
+              <!-- LEFT COLUMN (12 Fields) -->
+              <div class="emp-grid-col" style="display: flex; flex-direction: column; gap: 14px;">
+                <!-- 1. Logo (Single preview + delete button) -->
                 <div class="form-row-group">
                   <label class="form-label">Logo</label>
-                  <div class="form-input-wrap">
-                    <button type="button" class="btn-pdf-upload-badge" id="btnIndusTowerLogo" title="Upload Logo"
-                      style="background: transparent; border: none; cursor: pointer; padding: 2px;">
-                      <img src="icons/Image Upload.svg" alt="Logo" id="imgIndusTowerLogoPreview" width="28" height="28">
+                  <div class="form-input-wrap" style="display: flex; align-items: center; gap: 10px;">
+                    <img src="assets/images/image.png" alt="Company Logo" id="imgIndusTowerLogoPreview"
+                      title="Company Logo (Click to choose file)"
+                      style="width: 36px; height: 36px; border-radius: 4px; object-fit: contain; border: 1px solid #cbd5e1; background: #ffffff; padding: 2px; cursor: pointer;">
+                    <button type="button" id="btnDeleteIndusTowerLogo" title="Delete Logo"
+                      style="background: transparent; border: none; cursor: pointer; padding: 2px; color: #ef4444; display: flex; align-items: center;">
+                      <img src="icons/Delete.svg" alt="Delete Logo" width="22" height="22">
                     </button>
                     <span id="lblIndusTowerLogoFileName"
-                      style="margin-left: 8px; font-size: 0.82rem; color: #475569; display: none;"></span>
+                      style="margin-left: 4px; font-size: 0.8rem; color: #475569; display: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;"></span>
                   </div>
                 </div>
 
-                <!-- 2. Company Type -->
+                <!-- 2. Entity Type -->
                 <div class="form-row-group">
-                  <label class="form-label" for="inpIndusCompanyType">Company Type</label>
+                  <label class="form-label" for="inpIndusEntityType">Entity Type</label>
                   <div class="form-input-wrap">
-                    <select class="form-select-control" id="inpIndusCompanyType">
+                    <select class="form-select-control" id="inpIndusEntityType">
                       <option value="" selected></option>
-                      <option value="Private Limited">Private Limited</option>
-                      <option value="Public Limited">Public Limited</option>
-                      <option value="LLP">LLP</option>
-                      <option value="Partnership">Partnership</option>
-                      <option value="Proprietorship">Proprietorship</option>
+                      <option value="Sole Proprietorship">Sole Proprietorship</option>
+                      <option value="Partnership Firm">Partnership Firm</option>
+                      <option value="Limited Liability Partnership">Limited Liability Partnership</option>
+                      <option value="Private Limited Company">Private Limited Company</option>
+                      <option value="Public Limited Company">Public Limited Company</option>
+                      <option value="One Person Company (OPC)">One Person Company (OPC)</option>
                     </select>
                   </div>
                 </div>
 
-                <!-- 3. Registered Address -->
+                <!-- 3. Industry -->
                 <div class="form-row-group">
-                  <label class="form-label">Registered Address</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusRegAddressToggle"
-                        onchange="toggleSlideInput('inpIndusRegAddressToggle', 'wrapIndusRegAddress')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusRegAddress"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRegAddress"
-                        placeholder="Enter Registered Address" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusRegAddress" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusRegAddress').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
+                  <label class="form-label" for="inpIndusIndustry">Industry</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpIndusIndustry">
+                      <option value="" selected></option>
+                      <option value="Projects">Projects</option>
+                      <option value="Supply">Supply</option>
+                      <option value="Projects & Supply">Projects & Supply</option>
+                    </select>
                   </div>
                 </div>
 
-                <!-- 4. PAN Number -->
+                <!-- 4. State -->
                 <div class="form-row-group">
-                  <label class="form-label">PAN Number</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusPanToggle"
-                        onchange="toggleSlideInput('inpIndusPanToggle', 'wrapIndusPan')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusPan"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPan"
-                        placeholder="Enter PAN Number" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusPan" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusPan').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
+                  <label class="form-label" for="inpIndusState">State</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpIndusState">
+                      <option value="" selected></option>
+                      <option value="Andhra Pradesh">Andhra Pradesh</option>
+                      <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                      <option value="Assam">Assam</option>
+                      <option value="Bihar">Bihar</option>
+                      <option value="Chhattisgarh">Chhattisgarh</option>
+                      <option value="Goa">Goa</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Haryana">Haryana</option>
+                      <option value="Himachal Pradesh">Himachal Pradesh</option>
+                      <option value="Jharkhand">Jharkhand</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Kerala">Kerala</option>
+                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Manipur">Manipur</option>
+                      <option value="Meghalaya">Meghalaya</option>
+                      <option value="Mizoram">Mizoram</option>
+                      <option value="Nagaland">Nagaland</option>
+                      <option value="Odisha">Odisha</option>
+                      <option value="Punjab">Punjab</option>
+                      <option value="Rajasthan">Rajasthan</option>
+                      <option value="Sikkim">Sikkim</option>
+                      <option value="Tamil Nadu">Tamil Nadu</option>
+                      <option value="Telangana">Telangana</option>
+                      <option value="Tripura">Tripura</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="Uttarakhand">Uttarakhand</option>
+                      <option value="West Bengal">West Bengal</option>
+                      <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                      <option value="Chandigarh">Chandigarh</option>
+                      <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                      <option value="Ladakh">Ladakh</option>
+                      <option value="Lakshadweep">Lakshadweep</option>
+                      <option value="Puducherry">Puducherry</option>
+                    </select>
                   </div>
                 </div>
 
-                <!-- 5. GST Code -->
+                <!-- 5. Registered Documents -->
                 <div class="form-row-group">
-                  <label class="form-label">GST Code</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusGstToggle"
-                        onchange="toggleSlideInput('inpIndusGstToggle', 'wrapIndusGst')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusGst"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusGst"
-                        placeholder="Enter GST Code" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusGst" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusGst').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
+                  <label class="form-label" for="txtIndusRegDocs">Registered Documents</label>
+                  <div class="form-input-wrap" style="position: relative; width: 100%;">
+                    <input type="text" class="form-input-control" id="txtIndusRegDocs"
+                      placeholder="Enter Document Details" style="padding-right: 38px; width: 100%;">
+                    <input type="file" id="fileIndusRegDocs" accept="application/pdf" style="display: none;"
+                      onchange="handleIndusPdfUpload(this, 'txtIndusRegDocs')">
+                    <span class="input-pdf-badge" title="Upload PDF"
+                      onclick="triggerIndusPdf('fileIndusRegDocs')"
+                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                    </span>
                   </div>
                 </div>
 
-                <!-- 6. TAN Number -->
+                <!-- 6. Registered Address -->
                 <div class="form-row-group">
-                  <label class="form-label">TAN Number</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusTanToggle"
-                        onchange="toggleSlideInput('inpIndusTanToggle', 'wrapIndusTan')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusTan"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusTan"
-                        placeholder="Enter TAN Number" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusTan" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusTan').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
+                  <label class="form-label" for="txtIndusRegAddress">Registered Address</label>
+                  <div class="form-input-wrap" style="position: relative; width: 100%;">
+                    <input type="text" class="form-input-control" id="txtIndusRegAddress"
+                      placeholder="Enter Registered Address" style="padding-right: 38px; width: 100%;">
+                    <input type="file" id="fileIndusRegAddress" accept="application/pdf" style="display: none;"
+                      onchange="handleIndusPdfUpload(this, 'txtIndusRegAddress')">
+                    <span class="input-pdf-badge" title="Upload PDF"
+                      onclick="triggerIndusPdf('fileIndusRegAddress')"
+                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                    </span>
                   </div>
                 </div>
 
-                <!-- 7. UDYAM Code -->
+                <!-- 7. PAN Number -->
+                <div class="form-row-group">
+                  <label class="form-label" for="txtIndusPan">PAN Number</label>
+                  <div class="form-input-wrap" style="position: relative; width: 100%;">
+                    <input type="text" class="form-input-control" id="txtIndusPan"
+                      placeholder="Enter PAN Number" style="padding-right: 38px; width: 100%;">
+                    <input type="file" id="fileIndusPan" accept="application/pdf" style="display: none;"
+                      onchange="handleIndusPdfUpload(this, 'txtIndusPan')">
+                    <span class="input-pdf-badge" title="Upload PDF"
+                      onclick="triggerIndusPdf('fileIndusPan')"
+                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 8. TAN Number -->
+                <div class="form-row-group">
+                  <label class="form-label" for="txtIndusTan">TAN Number</label>
+                  <div class="form-input-wrap" style="position: relative; width: 100%;">
+                    <input type="text" class="form-input-control" id="txtIndusTan"
+                      placeholder="Enter TAN Number" style="padding-right: 38px; width: 100%;">
+                    <input type="file" id="fileIndusTan" accept="application/pdf" style="display: none;"
+                      onchange="handleIndusPdfUpload(this, 'txtIndusTan')">
+                    <span class="input-pdf-badge" title="Upload PDF"
+                      onclick="triggerIndusPdf('fileIndusTan')"
+                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 9. GST Code -->
+                <div class="form-row-group">
+                  <label class="form-label" for="txtIndusGst">GST Code</label>
+                  <div class="form-input-wrap" style="position: relative; width: 100%;">
+                    <input type="text" class="form-input-control" id="txtIndusGst"
+                      placeholder="Enter GST Code" style="padding-right: 38px; width: 100%;">
+                    <input type="file" id="fileIndusGst" accept="application/pdf" style="display: none;"
+                      onchange="handleIndusPdfUpload(this, 'txtIndusGst')">
+                    <span class="input-pdf-badge" title="Upload PDF"
+                      onclick="triggerIndusPdf('fileIndusGst')"
+                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 10. Digital Stamp -->
+                <div class="form-row-group">
+                  <label class="form-label" for="txtIndusDigitalStamp">Digital Stamp</label>
+                  <div class="form-input-wrap" style="position: relative; width: 100%;">
+                    <input type="text" class="form-input-control" id="txtIndusDigitalStamp"
+                      placeholder="Enter Digital Stamp Details" style="padding-right: 38px; width: 100%;">
+                    <input type="file" id="fileIndusDigitalStamp" accept="image/png,.png" style="display: none;"
+                      onchange="handleIndusPdfUpload(this, 'txtIndusDigitalStamp')">
+                    <span class="input-pdf-badge" title="Upload PNG"
+                      onclick="triggerIndusPdf('fileIndusDigitalStamp')"
+                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                      <img src="icons/png_logo.svg?v=20260926_1500" alt="PNG Upload" class="input-pdf-icon" width="22" height="22">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 11. UDYAM Code (Disappearing Toggle -> PDF text field) -->
                 <div class="form-row-group">
                   <label class="form-label">UDYAM Code</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusUdyamToggle"
-                        onchange="toggleSlideInput('inpIndusUdyamToggle', 'wrapIndusUdyam')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusUdyam"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusUdyam"
-                        placeholder="Enter UDYAM Code" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusUdyam" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusUdyam').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusUdyam">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusUdyamToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusUdyamToggle', 'toggleWrapIndusUdyam', 'wrapIndusUdyam')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusUdyam" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusUdyam"
+                          placeholder="Enter UDYAM Code" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusUdyam" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusUdyam')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusUdyam')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusUdyamToggle', 'toggleWrapIndusUdyam', 'wrapIndusUdyam')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
                     </div>
                   </div>
                 </div>
 
-                <!-- 8. ROC Certificate -->
-                <div class="form-row-group">
-                  <label class="form-label">ROC Certificate</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusRocToggle"
-                        onchange="toggleSlideInput('inpIndusRocToggle', 'wrapIndusRoc')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusRoc"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusRoc"
-                        placeholder="Enter ROC Certificate No." style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusRoc" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusRoc').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- RIGHT COLUMN -->
-              <div class="emp-grid-col">
-                <!-- 1. EPF Code -->
+                <!-- 12. EPF Code (Disappearing Toggle -> PDF text field) -->
                 <div class="form-row-group">
                   <label class="form-label">EPF Code</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusEpfToggle"
-                        onchange="toggleSlideInput('inpIndusEpfToggle', 'wrapIndusEpf')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusEpf"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEpf"
-                        placeholder="Enter EPF Code" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusEpf" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusEpf').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusEpf">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusEpfToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusEpfToggle', 'toggleWrapIndusEpf', 'wrapIndusEpf')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
                     </div>
-                  </div>
-                </div>
-
-                <!-- 2. ESI Code -->
-                <div class="form-row-group">
-                  <label class="form-label">ESI Code</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusEsiToggle"
-                        onchange="toggleSlideInput('inpIndusEsiToggle', 'wrapIndusEsi')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusEsi"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEsi"
-                        placeholder="Enter ESI Code" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusEsi" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusEsi').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
+                    <div class="slide-dynamic-wrap" id="wrapIndusEpf" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusEpf"
+                          placeholder="Enter EPF Code" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusEpf" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusEpf')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusEpf')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusEpfToggle', 'toggleWrapIndusEpf', 'wrapIndusEpf')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
                     </div>
-                  </div>
-                </div>
-
-                <!-- 3. PTEC Code -->
-                <div class="form-row-group">
-                  <label class="form-label">PTEC Code</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusPtecToggle"
-                        onchange="toggleSlideInput('inpIndusPtecToggle', 'wrapIndusPtec')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusPtec"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusPtec"
-                        placeholder="Enter PTEC Code" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusPtec" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusPtec').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 4. LWF Code -->
-                <div class="form-row-group">
-                  <label class="form-label">LWF Code</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusLwfToggle"
-                        onchange="toggleSlideInput('inpIndusLwfToggle', 'wrapIndusLwf')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusLwf"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusLwf"
-                        placeholder="Enter LWF Code" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusLwf" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusLwf').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 5. Establishment Registration Code -->
-                <div class="form-row-group">
-                  <label class="form-label">Establishment Registration Code</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusEstRegToggle"
-                        onchange="toggleSlideInput('inpIndusEstRegToggle', 'wrapIndusEstReg')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusEstReg"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEstReg"
-                        placeholder="Enter Est. Reg. Code" style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusEstReg" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusEstReg').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 6. WC Policy -->
-                <div class="form-row-group">
-                  <label class="form-label">WC Policy</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusWcPolicyToggle"
-                        onchange="toggleSlideInput('inpIndusWcPolicyToggle', 'wrapIndusWcPolicy')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <div class="slide-dynamic-wrap" id="wrapIndusWcPolicy"
-                      style="display: none; position: relative; flex: 1; align-items: center;">
-                      <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusWcPolicy"
-                        placeholder="Enter WC Policy No." style="padding-right: 38px; width: 100%;">
-                      <input type="file" id="fileIndusWcPolicy" accept="application/pdf" style="display: none;"
-                        onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                      <span class="input-pdf-badge" title="Upload PDF"
-                        onclick="document.getElementById('fileIndusWcPolicy').click();"
-                        style="position: absolute; right: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                        <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="24" height="24">
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 7. WC Expiry Date -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpIndusWcExpiry">WC Expiry Date</label>
-                  <div class="form-input-wrap date-input-wrap"
-                    style="position: relative; display: flex; align-items: center;">
-                    <input type="date" class="form-input-control date-picker-control" id="inpIndusWcExpiry"
-                      style="padding-right: 38px;">
-                    <button type="button" class="input-pdf-badge input-date-badge" id="btnIndusWcExpiryCalendar"
-                      title="Select Date"
-                      style="position: absolute; right: 6px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                      <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
-                    </button>
-                  </div>
-                </div>
-
-                <!-- 8. E - Invoice -->
-                <div class="form-row-group">
-                  <label class="form-label">E - Invoice</label>
-                  <div class="form-input-wrap slider-input-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpIndusEInvoiceToggle"
-                        onchange="toggleSlideInput('inpIndusEInvoiceToggle', 'txtIndusEInvoice')">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
-                    <input type="text" class="form-input-control slide-dynamic-input" id="txtIndusEInvoice"
-                      placeholder="Enter E-Invoice Code" style="display: none;">
                   </div>
                 </div>
               </div>
 
-            </div>
+              <!-- RIGHT COLUMN (12 Fields) -->
+              <div class="emp-grid-col" style="display: flex; flex-direction: column; gap: 14px;">
+                <!-- 1. ESI Code -->
+                <div class="form-row-group">
+                  <label class="form-label">ESI Code</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusEsi">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusEsiToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusEsiToggle', 'toggleWrapIndusEsi', 'wrapIndusEsi')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusEsi" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusEsi"
+                          placeholder="Enter ESI Code" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusEsi" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusEsi')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusEsi')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusEsiToggle', 'toggleWrapIndusEsi', 'wrapIndusEsi')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
 
-            <!-- Submit Save Button Inside Tab Centered -->
-            <div class="form-submit-inside-wrap">
-              <button type="button" class="btn-card-submit-inside" id="btnSubmitIndusTower" title="Save"
-                aria-label="Submit">
-                <img src="icons/Save.svg" alt="Save" width="34" height="34">
-              </button>
+                <!-- 2. ISO Certificate -->
+                <div class="form-row-group">
+                  <label class="form-label">ISO Certificate</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusIso">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusIsoToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusIsoToggle', 'toggleWrapIndusIso', 'wrapIndusIso')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusIso" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusIso"
+                          placeholder="Enter ISO Certificate No." style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusIso" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusIso')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusIso')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusIsoToggle', 'toggleWrapIndusIso', 'wrapIndusIso')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. OSHA Certificate -->
+                <div class="form-row-group">
+                  <label class="form-label">OSHA Certificate</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusOsha">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusOshaToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusOshaToggle', 'toggleWrapIndusOsha', 'wrapIndusOsha')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusOsha" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusOsha"
+                          placeholder="Enter OSHA Certificate No." style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusOsha" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusOsha')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusOsha')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusOshaToggle', 'toggleWrapIndusOsha', 'wrapIndusOsha')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. PTEC Certificate -->
+                <div class="form-row-group">
+                  <label class="form-label">PTEC Certificate</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusPtec">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusPtecToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusPtecToggle', 'toggleWrapIndusPtec', 'wrapIndusPtec')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusPtec" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusPtec"
+                          placeholder="Enter PTEC Certificate No." style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusPtec" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusPtec')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusPtec')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusPtecToggle', 'toggleWrapIndusPtec', 'wrapIndusPtec')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. LWF Certificate -->
+                <div class="form-row-group">
+                  <label class="form-label">LWF Certificate</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusLwf">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusLwfToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusLwfToggle', 'toggleWrapIndusLwf', 'wrapIndusLwf')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusLwf" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusLwf"
+                          placeholder="Enter LWF Certificate No." style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusLwf" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusLwf')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusLwf')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusLwfToggle', 'toggleWrapIndusLwf', 'wrapIndusLwf')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6. Establishment Code Certificate -->
+                <div class="form-row-group">
+                  <label class="form-label">Establishment Code Certificate</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusEstReg">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusEstRegToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusEstRegToggle', 'toggleWrapIndusEstReg', 'wrapIndusEstReg')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusEstReg" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusEstReg"
+                          placeholder="Enter Est. Code Cert. No." style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusEstReg" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusEstReg')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusEstReg')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusEstRegToggle', 'toggleWrapIndusEstReg', 'wrapIndusEstReg')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 7. E-Invoice -->
+                <div class="form-row-group">
+                  <label class="form-label">E-Invoice</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusEInvoice">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusEInvoiceToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusEInvoiceToggle', 'toggleWrapIndusEInvoice', 'wrapIndusEInvoice')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusEInvoice" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusEInvoice"
+                          placeholder="Enter E-Invoice Code" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusEInvoice" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusEInvoice')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusEInvoice')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusEInvoiceToggle', 'toggleWrapIndusEInvoice', 'wrapIndusEInvoice')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 8. Multistate GST -->
+                <div class="form-row-group">
+                  <label class="form-label">Multistate GST</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusMultiGst">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusMultiGstToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusMultiGstToggle', 'toggleWrapIndusMultiGst', 'wrapIndusMultiGst')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusMultiGst" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusMultiGst"
+                          placeholder="Enter Multistate GST Details" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusMultiGst" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusMultiGst')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusMultiGst')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusMultiGstToggle', 'toggleWrapIndusMultiGst', 'wrapIndusMultiGst')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 9. DSC -->
+                <div class="form-row-group">
+                  <label class="form-label">DSC</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusDsc">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusDscToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusDscToggle', 'toggleWrapIndusDsc', 'wrapIndusDsc')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusDsc" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusDsc"
+                          placeholder="Enter DSC Details" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusDsc" accept=".pfx,.p12" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusDsc')">
+                        <span class="input-pdf-badge" title="Upload PFX" onclick="triggerIndusPdf('fileIndusDsc')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/pfx_icon.svg?v=20260926_1500" alt="PFX Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusDscToggle', 'toggleWrapIndusDsc', 'wrapIndusDsc')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 10. E-Signature -->
+                <div class="form-row-group">
+                  <label class="form-label">E-Signature</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusESig">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusESigToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusESigToggle', 'toggleWrapIndusESig', 'wrapIndusESig')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusESig" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusESig"
+                          placeholder="Enter E-Signature Details" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusESig" accept="image/png,.png" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusESig')">
+                        <span class="input-pdf-badge" title="Upload PNG" onclick="triggerIndusPdf('fileIndusESig')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/png_logo.svg?v=20260926_1500" alt="PNG Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusESigToggle', 'toggleWrapIndusESig', 'wrapIndusESig')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 11. SSL Certificate -->
+                <div class="form-row-group">
+                  <label class="form-label">SSL Certificate</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusSsl">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusSslToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusSslToggle', 'toggleWrapIndusSsl', 'wrapIndusSsl')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusSsl" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusSsl"
+                          placeholder="Enter SSL Certificate Details" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusSsl" accept=".csr" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusSsl')">
+                        <span class="input-pdf-badge" title="Upload CSR" onclick="triggerIndusPdf('fileIndusSsl')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/csr_icon.svg?v=20260926_1500" alt="CSR Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusSslToggle', 'toggleWrapIndusSsl', 'wrapIndusSsl')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 12. Hex Color Code (Theme Changer) -->
+                <div class="form-row-group">
+                  <label class="form-label">Hex Color Code</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusHexColor">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusHexColorToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusHexColorToggle', 'toggleWrapIndusHexColor', 'wrapIndusHexColor')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusHexColor" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <input type="text" class="form-input-control" id="txtPlatformHexColor"
+                        placeholder="#0454e4" value="#0454e4" style="width: 110px; font-family: monospace; text-transform: uppercase;"
+                        onchange="applyPlatformThemeColor(this.value)">
+                      <input type="color" id="pickerPlatformHexColor" value="#0454e4"
+                        style="width: 32px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0; background: none; cursor: pointer;"
+                        oninput="document.getElementById('txtPlatformHexColor').value = this.value; applyPlatformThemeColor(this.value);">
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusHexColorToggle', 'toggleWrapIndusHexColor', 'wrapIndusHexColor')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; margin-left: auto; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </form>
         </div>
@@ -8600,7 +8888,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260925_1955"></script>
+  <script src="assets/js/home.js?v=20260926_1525"></script>
 </body>
 
 </html>

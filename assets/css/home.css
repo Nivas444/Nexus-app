@@ -1629,24 +1629,32 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   box-sizing: border-box !important;
 }
 
+.side-form-container:has(#addIndusTowerCard),
+.side-form-container:has(#addIndusTowerCard:not([style*="display: none"])) {
+  max-width: 1320px !important;
+  width: 98vw !important;
+}
+
 #addIndusTowerCard {
   width: 1280px !important;
   max-width: 98vw !important;
-  padding: 0 32px 32px 32px !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
 }
 
 #addIndusTowerCard .side-form-header {
-  margin: 0 -32px 20px -32px !important;
-  height: 52px !important;
+  margin: 0 0 20px 0 !important;
+  width: 100% !important;
+  height: 54px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   background: #ffffff !important;
   border-bottom: none !important;
   position: relative !important;
-  padding: 0 16px 0 0 !important;
+  padding: 0 8px 0 0 !important;
+  box-sizing: border-box !important;
 }
 
 #addIndusTowerCard .side-form-title-badge {
@@ -1665,25 +1673,52 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 #addIndusTowerCard .side-header-top-icons {
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
-  padding-right: 16px !important;
+  gap: 14px !important;
+  padding-right: 0 !important;
   height: 100% !important;
   margin-left: auto !important;
 }
 
+#addIndusTowerCard .side-top-icon-btn {
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 2px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.15s ease !important;
+}
+
+#addIndusTowerCard .side-top-icon-btn:hover {
+  transform: scale(1.1) !important;
+}
+
 #addIndusTowerCard #btnCloseIndusTowerForm {
   color: #ef4444 !important;
-  font-size: 28px !important;
+  font-size: 32px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
   cursor: pointer !important;
   background: transparent !important;
   border: none !important;
-  margin-left: 14px !important;
+  margin: 0 0 0 4px !important;
   padding: 0 4px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  transition: transform 0.15s ease, color 0.15s ease !important;
+}
+
+#addIndusTowerCard #btnCloseIndusTowerForm:hover {
+  transform: scale(1.15) !important;
+  color: #dc2626 !important;
+}
+
+#addIndusTowerCard .side-form-body {
+  padding: 0 32px 32px 32px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 #addIndusTowerCard .emp-form-grid {
@@ -1722,6 +1757,50 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   min-width: 0 !important;
   display: flex !important;
   align-items: center !important;
+  position: relative !important;
+}
+
+#addIndusTowerCard .slide-dynamic-wrap {
+  position: relative !important;
+  width: 100% !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#addIndusTowerCard .slide-dynamic-wrap[style*="display: none"],
+#addIndusTowerCard .slide-dynamic-wrap[style*="display:none"] {
+  display: none !important;
+}
+
+#addIndusTowerCard .slide-dynamic-wrap .form-input-control {
+  width: 100% !important;
+  padding-right: 38px !important;
+  box-sizing: border-box !important;
+}
+
+#addIndusTowerCard .btn-toggle-revert {
+  background: transparent !important;
+  border: none !important;
+  color: #ef4444 !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 4px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: transform 0.15s ease, color 0.15s ease !important;
+}
+
+#addIndusTowerCard .btn-toggle-revert:hover {
+  background: transparent !important;
+  color: #dc2626 !important;
+  transform: scale(1.2) !important;
 }
 
 .side-form-body-grid {
@@ -3069,6 +3148,15 @@ td.col-master-vendor-status {
 .input-pdf-badge:hover {
   transform: translateY(-50%) scale(1.08);
   border-color: #ef4444;
+}
+
+.input-pdf-icon {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+  display: block !important;
+  object-fit: contain !important;
 }
 
 .input-process-badge {

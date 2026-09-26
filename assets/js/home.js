@@ -12942,6 +12942,67 @@ function initSideFormEvents() {
       return;
     }
 
+    if (currentModule === 'master' && currentMasterSubpage === 'employee') {
+      const employeeName = document.getElementById('inpEmpName')?.value.trim() || "New Employee";
+      const employeeId = document.getElementById('inpEmpId')?.value.trim() || `23051068${masterEmployeeData.length + 1}`;
+      const empType = document.getElementById('inpEmpType')?.value || "On-Roll";
+      const address = document.getElementById('inpEmpAddress')?.value.trim() || "";
+      const contactNumber = document.getElementById('inpEmpMobile')?.value.trim() || "";
+      const email = document.getElementById('inpEmpEmail')?.value.trim() || "";
+      const dob = document.getElementById('inpEmpDob')?.value || "";
+      const bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || "A+";
+      const maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || "Single";
+      const qualification = document.getElementById('inpEmpQualification')?.value.trim() || "";
+      const pan = document.getElementById('inpEmpPanNumber')?.value.trim() || "";
+      const aadhar = document.getElementById('inpEmpAadharNumber')?.value.trim() || "";
+      const drivingLicense = document.getElementById('inpEmpDrivingLicense')?.value.trim() || "";
+      const passportNumber = document.getElementById('inpEmpPassportNumber')?.value.trim() || "";
+      const epfUan = document.getElementById('inpEmpEpfUan')?.value.trim() || "";
+      const esiId = document.getElementById('inpEmpEsiCode')?.value.trim() || "";
+      const prevExp = document.getElementById('inpEmpPrevExp')?.value.trim() || "";
+      const currentExp = document.getElementById('inpEmpCurrExp')?.value.trim() || "";
+      const totalExp = document.getElementById('inpEmpTotalExp')?.value.trim() || "";
+      const doj = document.getElementById('inpEmpDoj')?.value || "";
+      const designation = document.getElementById('inpEmpDesignation')?.value || "Executive";
+      const statusToggle = document.getElementById('inpEmpStatusToggle');
+      const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+
+      const newRecord = {
+        id: `emp-${Date.now()}`,
+        employeeName,
+        employeeId,
+        empType,
+        employeeType: empType,
+        address,
+        contactNumber,
+        email,
+        dob,
+        bloodGroup,
+        maritalStatus,
+        qualification,
+        pan,
+        aadhar,
+        drivingLicense,
+        passportNumber,
+        epfUan,
+        esiId,
+        esiCode: esiId,
+        prevExp,
+        currentExp,
+        totalExp,
+        doj,
+        designation,
+        status
+      };
+
+      masterEmployeeData.unshift(newRecord);
+      currentDataset = [...masterEmployeeData];
+      applyFiltersAndRender();
+      closeSideForm();
+      showToast(`Employee ${employeeName} successfully saved & added to table!`);
+      return;
+    }
+
     const businessType = document.getElementById('inpBusinessType')?.value || "Projects";
     const customerId = `23051068${masterCustomerData.length + 1}`;
     const rawName = document.getElementById('inpCustomerName')?.value.trim();
@@ -13039,10 +13100,16 @@ function initSideFormEvents() {
     const alt = (img?.getAttribute('alt') || '').toLowerCase();
     const src = (img?.getAttribute('src') || '').toLowerCase();
 
-    const isPdfTrigger = title.includes('pdf') || alt.includes('pdf') || src.includes('pdf') || pdfBadge.classList.contains('btn-emp-pdf-trigger');
+    const isPdfTrigger = title.includes('pdf') || title.includes('png') || title.includes('csr') || title.includes('pfx') || alt.includes('pdf') || alt.includes('png') || alt.includes('csr') || alt.includes('pfx') || src.includes('pdf') || src.includes('png') || src.includes('csr') || src.includes('pfx') || pdfBadge.classList.contains('btn-emp-pdf-trigger');
     const isCalendarOrPhoto = title.includes('date') || title.includes('dob') || title.includes('doj') || title.includes('calendar') || title.includes('photo') || alt.includes('calendar') || alt.includes('photo') || src.includes('calendar') || src.includes('image') || src.includes('process');
 
     if (!isPdfTrigger || isCalendarOrPhoto) return;
+
+    // If inside Indus Tower card and not in edit mode, do not open file picker
+    const indusCard = pdfBadge.closest('#addIndusTowerCard');
+    if (indusCard && typeof isIndusTowerEditing !== 'undefined' && !isIndusTowerEditing) {
+      return;
+    }
 
     e.preventDefault();
     e.stopPropagation();
@@ -13050,6 +13117,10 @@ function initSideFormEvents() {
     // Find the associated text input field
     const container = pdfBadge.closest('.form-input-wrap, .slide-dynamic-wrap, .with-action-badge, .form-row-group, .doc-item-row') || pdfBadge.parentElement;
     const targetInput = container?.querySelector('input[type="text"], input:not([type="file"]):not([type="checkbox"]):not([type="radio"])');
+
+    if (targetInput && (targetInput.readOnly || targetInput.disabled)) {
+      return;
+    }
 
     // Check for nearby file input or create a dynamic one
     let pdfInput = container?.querySelector('input[type="file"]');
@@ -14437,6 +14508,10 @@ function openSideForm() {
       if (lblTitle) lblTitle.innerText = 'Add Employee';
       if (btnEditToggle) btnEditToggle.style.display = 'none';
       if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+      const frm = document.getElementById('frmAddEmployee');
+      if (frm) frm.reset();
+      const statusToggle = document.getElementById('inpEmpStatusToggle');
+      if (statusToggle) statusToggle.checked = true;
 
       setEmployeeFormReadOnly(false);
       currentViewedEmpId = null;
@@ -15031,50 +15106,122 @@ window.openCompanyLocationSidePanel = function() {
 
 let isIndusTowerEditing = false;
 
+window.handleIndusToggleDisappear = function(toggleId, toggleWrapId, wrapInputId) {
+  const toggle = document.getElementById(toggleId);
+  const toggleWrap = document.getElementById(toggleWrapId);
+  const wrapInput = document.getElementById(wrapInputId);
+  if (toggle && toggle.checked) {
+    if (toggleWrap) toggleWrap.style.display = 'none';
+    if (wrapInput) {
+      wrapInput.style.display = 'flex';
+      const textInp = wrapInput.querySelector('input[type="text"]');
+      if (textInp && isIndusTowerEditing) textInp.focus();
+    }
+  }
+};
+
+window.handleIndusToggleReappear = function(toggleId, toggleWrapId, wrapInputId) {
+  if (!isIndusTowerEditing) return;
+  const toggle = document.getElementById(toggleId);
+  const toggleWrap = document.getElementById(toggleWrapId);
+  const wrapInput = document.getElementById(wrapInputId);
+  if (toggle) toggle.checked = false;
+  if (wrapInput) wrapInput.style.display = 'none';
+  if (toggleWrap) toggleWrap.style.display = 'block';
+};
+
+window.triggerIndusPdf = function(fileInputId) {
+  if (!isIndusTowerEditing) return;
+  const fileInput = document.getElementById(fileInputId);
+  if (fileInput) fileInput.click();
+};
+
+window.handleIndusPdfUpload = function(fileInput, textInputId) {
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const txt = document.getElementById(textInputId);
+    if (txt) {
+      txt.value = file.name;
+    }
+    showToast('Document uploaded: ' + file.name);
+  }
+};
+
+window.applyPlatformThemeColor = function(colorHex) {
+  if (!colorHex) return;
+  const trimmed = colorHex.trim();
+  if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(trimmed)) {
+    document.documentElement.style.setProperty('--brand-primary', trimmed);
+    const badges = document.querySelectorAll('.side-form-title-badge');
+    badges.forEach(b => {
+      b.style.backgroundColor = trimmed;
+    });
+    showToast('Platform theme color updated to ' + trimmed);
+  }
+};
+
 function setIndusTowerFormReadOnly(isReadOnly) {
   const form = document.getElementById('frmAddIndusTower');
   if (!form) return;
 
   const inputs = form.querySelectorAll('input, select, textarea');
   inputs.forEach(input => {
-    if (input.type === 'checkbox' || input.type === 'file') return;
-    if (isReadOnly) {
-      if (input.tagName === 'SELECT') {
+    if (input.type === 'file') return;
+    if (input.type === 'checkbox') {
+      const isEditableToggle = !isReadOnly;
+      input.disabled = !isEditableToggle;
+      const parentSwitch = input.closest('.toggle-slide-switch');
+      if (parentSwitch) {
+        parentSwitch.style.pointerEvents = isEditableToggle ? 'auto' : 'none';
+        parentSwitch.style.opacity = isEditableToggle ? '1' : '0.65';
+      }
+      return;
+    }
+
+    if (input.tagName === 'SELECT') {
+      if (!isReadOnly) {
+        input.removeAttribute('disabled');
+        input.style.backgroundColor = '#ffffff';
+        input.style.cursor = 'auto';
+      } else {
         input.setAttribute('disabled', 'true');
+        input.style.backgroundColor = '#f8fafc';
+        input.style.cursor = 'not-allowed';
+      }
+    } else {
+      if (!isReadOnly) {
+        input.removeAttribute('readonly');
+        input.removeAttribute('disabled');
+        input.style.backgroundColor = '#ffffff';
+        input.style.cursor = 'auto';
       } else {
         input.setAttribute('readonly', 'true');
+        input.style.backgroundColor = '#f8fafc';
+        input.style.cursor = 'not-allowed';
       }
-      input.style.backgroundColor = '#f8fafc';
-    } else {
-      if (input.tagName === 'SELECT') {
-        input.removeAttribute('disabled');
-      } else {
-        input.removeAttribute('readonly');
-      }
-      input.style.backgroundColor = '#ffffff';
     }
   });
 
-  const toggles = form.querySelectorAll('input[type="checkbox"]');
-  toggles.forEach(t => {
-    t.disabled = isReadOnly;
-    const parentSwitch = t.closest('.toggle-slide-switch');
-    if (parentSwitch) {
-      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
-    }
-  });
-
-  const uploadBadges = form.querySelectorAll('.input-pdf-badge, .btn-pdf-upload-badge, #btnIndusWcExpiryCalendar');
+  // Action / PDF / PNG / CSR / PFX badges & cancel buttons
+  const uploadBadges = form.querySelectorAll('.input-pdf-badge, .btn-toggle-revert');
   uploadBadges.forEach(b => {
-    b.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-    b.style.opacity = isReadOnly ? '0.65' : '1';
-    b.style.cursor = isReadOnly ? 'default' : 'pointer';
+    b.style.pointerEvents = !isReadOnly ? 'auto' : 'none';
+    b.style.opacity = !isReadOnly ? '1' : '0.4';
+    b.style.cursor = !isReadOnly ? 'pointer' : 'not-allowed';
   });
 
-  const submitBtn = document.getElementById('btnSubmitIndusTower');
-  if (submitBtn) {
-    submitBtn.style.display = isReadOnly ? 'none' : 'flex';
+  // Logo preview and delete buttons
+  const imgLogoPreview = document.getElementById('imgIndusTowerLogoPreview');
+  const btnDeleteLogo = document.getElementById('btnDeleteIndusTowerLogo');
+  if (imgLogoPreview) {
+    imgLogoPreview.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+    imgLogoPreview.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
+    imgLogoPreview.style.opacity = isReadOnly ? '0.85' : '1';
+  }
+  if (btnDeleteLogo) {
+    btnDeleteLogo.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+    btnDeleteLogo.style.opacity = isReadOnly ? '0.4' : '1';
+    btnDeleteLogo.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
   }
 }
 
@@ -15092,6 +15239,38 @@ window.openIndusTowerPageCard = function() {
     const lblTitle = document.getElementById('lblIndusTowerCardTitle');
     if (lblTitle) lblTitle.innerText = 'View Company Name';
     
+    // Ensure text inputs for toggle fields are hidden and toggle switches are shown initially
+    const toggleFieldPairs = [
+      { toggleId: 'inpIndusUdyamToggle', toggleWrapId: 'toggleWrapIndusUdyam', wrapId: 'wrapIndusUdyam' },
+      { toggleId: 'inpIndusEpfToggle', toggleWrapId: 'toggleWrapIndusEpf', wrapId: 'wrapIndusEpf' },
+      { toggleId: 'inpIndusEsiToggle', toggleWrapId: 'toggleWrapIndusEsi', wrapId: 'wrapIndusEsi' },
+      { toggleId: 'inpIndusIsoToggle', toggleWrapId: 'toggleWrapIndusIso', wrapId: 'wrapIndusIso' },
+      { toggleId: 'inpIndusOshaToggle', toggleWrapId: 'toggleWrapIndusOsha', wrapId: 'wrapIndusOsha' },
+      { toggleId: 'inpIndusPtecToggle', toggleWrapId: 'toggleWrapIndusPtec', wrapId: 'wrapIndusPtec' },
+      { toggleId: 'inpIndusLwfToggle', toggleWrapId: 'toggleWrapIndusLwf', wrapId: 'wrapIndusLwf' },
+      { toggleId: 'inpIndusEstRegToggle', toggleWrapId: 'toggleWrapIndusEstReg', wrapId: 'wrapIndusEstReg' },
+      { toggleId: 'inpIndusEInvoiceToggle', toggleWrapId: 'toggleWrapIndusEInvoice', wrapId: 'wrapIndusEInvoice' },
+      { toggleId: 'inpIndusMultiGstToggle', toggleWrapId: 'toggleWrapIndusMultiGst', wrapId: 'wrapIndusMultiGst' },
+      { toggleId: 'inpIndusDscToggle', toggleWrapId: 'toggleWrapIndusDsc', wrapId: 'wrapIndusDsc' },
+      { toggleId: 'inpIndusESigToggle', toggleWrapId: 'toggleWrapIndusESig', wrapId: 'wrapIndusESig' },
+      { toggleId: 'inpIndusSslToggle', toggleWrapId: 'toggleWrapIndusSsl', wrapId: 'wrapIndusSsl' },
+      { toggleId: 'inpIndusHexColorToggle', toggleWrapId: 'toggleWrapIndusHexColor', wrapId: 'wrapIndusHexColor' }
+    ];
+
+    toggleFieldPairs.forEach(pair => {
+      const toggle = document.getElementById(pair.toggleId);
+      const toggleWrap = document.getElementById(pair.toggleWrapId);
+      const wrap = document.getElementById(pair.wrapId);
+      if (toggle && toggle.checked) {
+        if (toggleWrap) toggleWrap.style.display = 'none';
+        if (wrap) wrap.style.display = 'flex';
+      } else {
+        if (toggle) toggle.checked = false;
+        if (wrap) wrap.style.display = 'none';
+        if (toggleWrap) toggleWrap.style.display = 'block';
+      }
+    });
+
     // Set to read-only view mode initially until edit button is clicked
     isIndusTowerEditing = false;
     setIndusTowerFormReadOnly(true);
@@ -15113,13 +15292,13 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCloseIndusTower.addEventListener('click', closeSideForm);
   }
 
-  const btnLogo = document.getElementById('btnIndusTowerLogo');
+  const btnDeleteLogo = document.getElementById('btnDeleteIndusTowerLogo');
   const fileLogo = document.getElementById('inpIndusTowerLogoFile');
   const imgLogoPreview = document.getElementById('imgIndusTowerLogoPreview');
   const lblLogoFileName = document.getElementById('lblIndusTowerLogoFileName');
 
-  if (btnLogo && fileLogo) {
-    btnLogo.addEventListener('click', () => {
+  if (imgLogoPreview && fileLogo) {
+    imgLogoPreview.addEventListener('click', () => {
       if (isIndusTowerEditing) fileLogo.click();
     });
 
@@ -15134,15 +15313,28 @@ document.addEventListener('DOMContentLoaded', () => {
           const reader = new FileReader();
           reader.onload = function(evt) {
             imgLogoPreview.src = evt.target.result;
-            imgLogoPreview.style.width = '30px';
-            imgLogoPreview.style.height = '30px';
-            imgLogoPreview.style.borderRadius = '4px';
-            imgLogoPreview.style.objectFit = 'cover';
+            imgLogoPreview.style.opacity = '1';
+            const navLogo = document.querySelector('.nav-logo-img');
+            if (navLogo) navLogo.src = evt.target.result;
           };
           reader.readAsDataURL(file);
         }
         showToast('Logo uploaded: ' + file.name);
       }
+    });
+  }
+
+  if (btnDeleteLogo) {
+    btnDeleteLogo.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!isIndusTowerEditing) return;
+      if (imgLogoPreview) {
+        imgLogoPreview.src = 'icons/Image Upload.svg';
+        imgLogoPreview.style.opacity = '0.5';
+      }
+      if (fileLogo) fileLogo.value = '';
+      if (lblLogoFileName) lblLogoFileName.style.display = 'none';
+      showToast('Logo cleared. Click the logo icon to select a new image.');
     });
   }
 
@@ -15162,7 +15354,7 @@ document.addEventListener('DOMContentLoaded', () => {
           imgIcon.src = 'icons/Save.svg';
           imgIcon.title = 'Save Changes';
         }
-        showToast('Company Name form is now editable');
+        showToast('Company details: editable fields unlocked');
       } else {
         // SAVE EDITS
         isIndusTowerEditing = false;
@@ -15206,20 +15398,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnAshoka.addEventListener('click', (e) => {
       e.stopPropagation();
       openCompanyHolidaysSidePanel();
-    });
-  }
-
-  const btnWcCalendar = document.getElementById('btnIndusWcExpiryCalendar');
-  const inpWcExpiry = document.getElementById('inpIndusWcExpiry');
-  if (btnWcCalendar && inpWcExpiry) {
-    btnWcCalendar.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (!isIndusTowerEditing) return;
-      if (typeof inpWcExpiry.showPicker === 'function') {
-        inpWcExpiry.showPicker();
-      } else {
-        inpWcExpiry.focus();
-      }
     });
   }
 
@@ -17957,9 +18135,9 @@ window.handleEmpClick = function(empId, empName) {
   const card = document.getElementById('addEmployeeCard');
   if (card) card.style.display = 'block';
 
-  // Update Header Title to View Employee
+  // Update Header Title to Employee Name
   const lblTitle = document.getElementById('lblEmployeeCardTitle');
-  if (lblTitle) lblTitle.innerText = 'View Employee';
+  if (lblTitle) lblTitle.innerText = emp.employeeName || 'View Employee';
 
   // Hide Bank, Asset, Salary action icons in View Employee tab
   const btnEmpBank = document.getElementById('btnEmpBankDetails');
@@ -17983,7 +18161,9 @@ window.handleEmpClick = function(empId, empName) {
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
   // Populate form fields
-  if (document.getElementById('inpEmpType')) document.getElementById('inpEmpType').value = emp.empType || 'On-Roll';
+  if (document.getElementById('inpEmpType')) document.getElementById('inpEmpType').value = emp.empType || emp.employeeType || 'On-Roll';
+  if (document.getElementById('inpEmpName')) document.getElementById('inpEmpName').value = emp.employeeName || '';
+  if (document.getElementById('inpEmpId')) document.getElementById('inpEmpId').value = emp.employeeId || '';
   if (document.getElementById('inpEmpAddress')) document.getElementById('inpEmpAddress').value = emp.address || '123 Main Street, Tech Park';
   if (document.getElementById('inpEmpMobile')) document.getElementById('inpEmpMobile').value = emp.contactNumber || '9876543210';
   if (document.getElementById('inpEmpEmail')) document.getElementById('inpEmpEmail').value = emp.email || 'test.employee@example.com';
@@ -17993,13 +18173,17 @@ window.handleEmpClick = function(empId, empName) {
   if (document.getElementById('inpEmpQualification')) document.getElementById('inpEmpQualification').value = emp.qualification || 'B.Tech / MCA';
   if (document.getElementById('inpEmpPanNumber')) document.getElementById('inpEmpPanNumber').value = emp.pan || 'ABCDE1234F';
   if (document.getElementById('inpEmpAadharNumber')) document.getElementById('inpEmpAadharNumber').value = emp.aadhar || '1234-5678-9012';
+  if (document.getElementById('inpEmpDrivingLicense')) document.getElementById('inpEmpDrivingLicense').value = emp.drivingLicense || 'DL-2023-987654';
+  if (document.getElementById('inpEmpPassportNumber')) document.getElementById('inpEmpPassportNumber').value = emp.passportNumber || 'P9876543';
   if (document.getElementById('inpEmpEpfUan')) document.getElementById('inpEmpEpfUan').value = emp.epfUan || '100123456789';
-  if (document.getElementById('inpEmpEsiCode')) document.getElementById('inpEmpEsiCode').value = emp.esiCode || '31001234560000001';
+  if (document.getElementById('inpEmpEsiCode')) document.getElementById('inpEmpEsiCode').value = emp.esiId || emp.esiCode || '31001234560000001';
   if (document.getElementById('inpEmpPrevExp')) document.getElementById('inpEmpPrevExp').value = emp.prevExp || '02 - 00';
   if (document.getElementById('inpEmpCurrExp')) document.getElementById('inpEmpCurrExp').value = emp.currentExp || '01 - 00';
   if (document.getElementById('inpEmpTotalExp')) document.getElementById('inpEmpTotalExp').value = emp.totalExp || '03 - 00';
   if (document.getElementById('inpEmpDoj')) document.getElementById('inpEmpDoj').value = emp.doj || '2023-01-10';
   if (document.getElementById('inpEmpDesignation')) document.getElementById('inpEmpDesignation').value = emp.designation || 'Manager';
+  const statusToggleEl = document.getElementById('inpEmpStatusToggle');
+  if (statusToggleEl) statusToggleEl.checked = (emp.status === 'Active');
 
   setEmployeeFormReadOnly(true);
   showToast(`Viewing details for employee: ${emp.employeeName}`);
@@ -18012,12 +18196,13 @@ document.addEventListener('DOMContentLoaded', () => {
     btnEmpCardEditToggle.addEventListener('click', () => {
       const lblTitle = document.getElementById('lblEmployeeCardTitle');
       const imgIcon = document.getElementById('imgEmpCardEditIcon');
+      const currentEmp = masterEmployeeData.find(e => e.id === currentViewedEmpId);
 
       if (!isEmployeeFormEditing) {
         // ENTER EDIT MODE
         isEmployeeFormEditing = true;
         setEmployeeFormReadOnly(false);
-        if (lblTitle) lblTitle.innerText = 'Edit Employee';
+        if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || 'Edit Employee';
         if (imgIcon) {
           imgIcon.src = 'icons/Save.svg';
           imgIcon.title = 'Save Changes';
@@ -18031,6 +18216,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const emp = masterEmployeeData.find(e => e.id === currentViewedEmpId);
           if (emp) {
             emp.empType = document.getElementById('inpEmpType')?.value || emp.empType;
+            emp.employeeType = emp.empType;
+            emp.employeeName = document.getElementById('inpEmpName')?.value || emp.employeeName;
+            emp.employeeId = document.getElementById('inpEmpId')?.value || emp.employeeId;
             emp.address = document.getElementById('inpEmpAddress')?.value || emp.address;
             emp.contactNumber = document.getElementById('inpEmpMobile')?.value || emp.contactNumber;
             emp.email = document.getElementById('inpEmpEmail')?.value || emp.email;
@@ -18040,8 +18228,11 @@ document.addEventListener('DOMContentLoaded', () => {
             emp.qualification = document.getElementById('inpEmpQualification')?.value || emp.qualification;
             emp.pan = document.getElementById('inpEmpPanNumber')?.value || emp.pan;
             emp.aadhar = document.getElementById('inpEmpAadharNumber')?.value || emp.aadhar;
+            emp.drivingLicense = document.getElementById('inpEmpDrivingLicense')?.value || emp.drivingLicense;
+            emp.passportNumber = document.getElementById('inpEmpPassportNumber')?.value || emp.passportNumber;
             emp.epfUan = document.getElementById('inpEmpEpfUan')?.value || emp.epfUan;
-            emp.esiCode = document.getElementById('inpEmpEsiCode')?.value || emp.esiCode;
+            emp.esiId = document.getElementById('inpEmpEsiCode')?.value || emp.esiId;
+            emp.esiCode = emp.esiId;
             emp.prevExp = document.getElementById('inpEmpPrevExp')?.value || emp.prevExp;
             emp.currentExp = document.getElementById('inpEmpCurrExp')?.value || emp.currentExp;
             emp.totalExp = document.getElementById('inpEmpTotalExp')?.value || emp.totalExp;
@@ -18057,7 +18248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setEmployeeFormReadOnly(true);
-        if (lblTitle) lblTitle.innerText = 'View Employee';
+        if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || 'View Employee';
         if (imgIcon) {
           imgIcon.src = 'icons/Edit.svg';
           imgIcon.title = 'Edit Info';

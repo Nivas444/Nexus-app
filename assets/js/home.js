@@ -22319,6 +22319,7 @@ let siteDefaultContacts = [
 
 let activeSiteContactFilters = {};
 let currentSiteContactFilterCol = null;
+let currentEditingContactId = null;
 let isViewSiteContactEditing = false;
 
 window.openSiteContactModal = function() {
@@ -22331,63 +22332,26 @@ window.openSiteContactModal = function() {
   const legacyLocation = document.getElementById('locationDetailsSidePanel');
   if (legacyLocation) legacyLocation.style.display = 'none';
 
-  if (currentViewedSiteId) {
-    // In View Site Mode: Open View Site Contact Card (with Edit icon)
-    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-    cards.forEach(c => {
-      if (c.id !== 'viewSiteContactCard') c.style.display = 'none';
-    });
+  // Hide other cards and open Site Contact Details Table Popup
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(c => {
+    if (c.id !== 'siteContactSidePanel') c.style.display = 'none';
+  });
 
-    const site = indusSiteData.find(s => s.id === currentViewedSiteId) || indusSiteData[0];
-    const contact = (site && site.contacts && site.contacts.length > 0) ? site.contacts[0] : siteDefaultContacts[0];
-
-    const viewCard = document.getElementById('viewSiteContactCard');
-    if (viewCard) {
-      viewCard.style.display = 'block';
-      
-      const inpName = document.getElementById('inpViewSiteContactName');
-      const inpDesig = document.getElementById('inpViewSiteContactDesig');
-      const inpMob = document.getElementById('inpViewSiteContactMobile');
-      const inpEmail = document.getElementById('inpViewSiteContactEmail');
-      const stToggle = document.getElementById('inpViewSiteContactStatusToggle');
-      const imgEdit = document.getElementById('imgViewSiteContactEditIcon');
-
-      if (inpName) { inpName.value = contact.name || ''; inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
-      if (inpDesig) { inpDesig.value = contact.designation || ''; inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
-      if (inpMob) { inpMob.value = contact.mobile || contact.contact || ''; inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
-      if (inpEmail) { inpEmail.value = contact.email || ''; inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
-      if (stToggle) { stToggle.checked = !((contact.status || '').toLowerCase().includes('in')); stToggle.disabled = true; }
-
-      isViewSiteContactEditing = false;
-      if (imgEdit) {
-        imgEdit.src = 'icons/Edit.svg';
-        imgEdit.title = 'Edit Contact';
-      }
-    }
+  const modal = document.getElementById('siteContactSidePanel');
+  if (modal) {
+    modal.style.display = 'block';
     overlay.style.display = 'flex';
-    showToast('Opened Site Contact Details');
-  } else {
-    // In Add Site Mode: Open Site Contact Details Table Popup
-    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-    cards.forEach(c => {
-      if (c.id !== 'siteContactSidePanel') c.style.display = 'none';
-    });
-
-    const modal = document.getElementById('siteContactSidePanel');
-    if (modal) {
-      modal.style.display = 'block';
-      overlay.style.display = 'flex';
-    }
-    renderSiteContactTable();
-    showToast('Opened Site Contacts');
   }
+  renderSiteContactTable();
+  showToast('Opened Site Contact Details');
 };
 
 window.closeSiteContactModal = function() {
   const modal = document.getElementById('siteContactSidePanel');
   if (modal) modal.style.display = 'none';
   const siteCard = document.getElementById('addSiteCard');
-  if (siteCard) {
+  if (siteCard && (currentViewedSiteId || siteCard.style.display !== 'none')) {
     siteCard.style.display = 'block';
   } else {
     const overlay = document.getElementById('sideFormOverlay');
@@ -22395,15 +22359,76 @@ window.closeSiteContactModal = function() {
   }
 };
 
+window.openEditSiteContactCard = function(contactId) {
+  currentEditingContactId = contactId;
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  let contact = null;
+  if (currentViewedSiteId) {
+    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
+    if (site && site.contacts) {
+      contact = site.contacts.find(c => c.id === contactId);
+    }
+  }
+  if (!contact) {
+    contact = siteDefaultContacts.find(c => c.id === contactId) || siteDefaultContacts[0];
+  }
+
+  // Hide all cards except viewSiteContactCard
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(c => {
+    if (c.id !== 'viewSiteContactCard') c.style.display = 'none';
+  });
+
+  const viewCard = document.getElementById('viewSiteContactCard');
+  if (viewCard) {
+    viewCard.style.display = 'block';
+
+    const lblTitle = document.getElementById('lblViewSiteContactCardTitle');
+    if (lblTitle) {
+      lblTitle.innerText = contact.name || 'Edit Contact Details';
+    }
+
+    const inpName = document.getElementById('inpViewSiteContactName');
+    const inpDesig = document.getElementById('inpViewSiteContactDesig');
+    const inpMob = document.getElementById('inpViewSiteContactMobile');
+    const inpEmail = document.getElementById('inpViewSiteContactEmail');
+    const stToggle = document.getElementById('inpViewSiteContactStatusToggle');
+    const imgEdit = document.getElementById('imgViewSiteContactEditIcon');
+
+    if (inpName) { inpName.value = contact.name || ''; inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
+    if (inpDesig) { inpDesig.value = contact.designation || ''; inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
+    if (inpMob) { inpMob.value = contact.mobile || contact.contact || ''; inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
+    if (inpEmail) { inpEmail.value = contact.email || ''; inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
+    if (stToggle) { stToggle.checked = !((contact.status || '').toLowerCase().includes('in')); stToggle.disabled = true; }
+
+    isViewSiteContactEditing = false;
+    if (imgEdit) {
+      imgEdit.src = 'icons/Edit.svg';
+      imgEdit.title = 'Edit Contact';
+    }
+  }
+
+  overlay.style.display = 'flex';
+  showToast(`Viewing contact: ${contact.name || ''}`);
+};
+
 window.closeViewSiteContactModal = function() {
   const viewCard = document.getElementById('viewSiteContactCard');
   if (viewCard) viewCard.style.display = 'none';
-  const siteCard = document.getElementById('addSiteCard');
-  if (siteCard) {
-    siteCard.style.display = 'block';
+  const panel = document.getElementById('siteContactSidePanel');
+  if (panel) {
+    panel.style.display = 'block';
+    renderSiteContactTable();
   } else {
-    const overlay = document.getElementById('sideFormOverlay');
-    if (overlay) overlay.style.display = 'none';
+    const siteCard = document.getElementById('addSiteCard');
+    if (siteCard) {
+      siteCard.style.display = 'block';
+    } else {
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
   }
 };
 
@@ -22438,23 +22463,34 @@ window.toggleViewSiteContactEdit = function() {
     if (currentViewedSiteId) {
       const site = indusSiteData.find(s => s.id === currentViewedSiteId);
       if (site) {
-        if (!site.contacts || site.contacts.length === 0) site.contacts = [{ id: 'SC-01' }];
-        site.contacts[0].name = nameVal;
-        site.contacts[0].designation = desigVal;
-        site.contacts[0].mobile = mobVal;
-        site.contacts[0].email = emailVal;
-        site.contacts[0].status = statusVal;
+        if (!site.contacts) site.contacts = JSON.parse(JSON.stringify(siteDefaultContacts));
+        let c = site.contacts.find(item => item.id === currentEditingContactId);
+        if (!c && site.contacts.length > 0) c = site.contacts[0];
+        if (c) {
+          c.name = nameVal;
+          c.designation = desigVal;
+          c.mobile = mobVal;
+          c.email = emailVal;
+          c.status = statusVal;
+        }
       }
     }
     
     // Also update default contacts if present
     if (siteDefaultContacts.length > 0) {
-      siteDefaultContacts[0].name = nameVal;
-      siteDefaultContacts[0].designation = desigVal;
-      siteDefaultContacts[0].mobile = mobVal;
-      siteDefaultContacts[0].email = emailVal;
-      siteDefaultContacts[0].status = statusVal;
+      let defC = siteDefaultContacts.find(item => item.id === currentEditingContactId);
+      if (!defC) defC = siteDefaultContacts[0];
+      if (defC) {
+        defC.name = nameVal;
+        defC.designation = desigVal;
+        defC.mobile = mobVal;
+        defC.email = emailVal;
+        defC.status = statusVal;
+      }
     }
+
+    const lblTitle = document.getElementById('lblViewSiteContactCardTitle');
+    if (lblTitle && nameVal) lblTitle.innerText = nameVal;
 
     if (inpName) { inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
     if (inpDesig) { inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
@@ -22465,6 +22501,7 @@ window.toggleViewSiteContactEdit = function() {
       imgIcon.src = 'icons/Edit.svg';
       imgIcon.title = 'Edit Contact';
     }
+    renderSiteContactTable();
     showToast('Site contact details saved & updated successfully!');
   }
 };
@@ -22473,7 +22510,18 @@ window.renderSiteContactTable = function() {
   const tbody = document.getElementById('tbodySiteContactDetails');
   if (!tbody) return;
 
-  let filtered = [...siteDefaultContacts];
+  let activeList = siteDefaultContacts;
+  if (currentViewedSiteId) {
+    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
+    if (site) {
+      if (!site.contacts || site.contacts.length === 0) {
+        site.contacts = JSON.parse(JSON.stringify(siteDefaultContacts));
+      }
+      activeList = site.contacts;
+    }
+  }
+
+  let filtered = [...activeList];
 
   for (const [colKey, allowedSet] of Object.entries(activeSiteContactFilters)) {
     if (allowedSet && allowedSet instanceof Set) {
@@ -22488,7 +22536,9 @@ window.renderSiteContactTable = function() {
     const isInactive = (row.status || '').toLowerCase().includes('in');
     return `
       <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${(row.name || '').replace(/"/g, '&quot;')}">${row.name || ''}</td>
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500; cursor: pointer;" title="${(row.name || '').replace(/"/g, '&quot;')}" onclick="openEditSiteContactCard('${row.id}')">
+          <span style="color: #0454e4; text-decoration: underline; cursor: pointer;">${row.name || ''}</span>
+        </td>
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.mobile || row.contact || ''}</td>
         <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
@@ -22547,8 +22597,9 @@ window.saveSiteContact = function() {
     return;
   }
 
+  const newId = `SC-${Date.now().toString().slice(-4)}`;
   const newContact = {
-    id: `SC-${String(siteDefaultContacts.length + 1).padStart(2, '0')}`,
+    id: newId,
     name: name,
     designation: desig,
     mobile: mobile,
@@ -22556,6 +22607,13 @@ window.saveSiteContact = function() {
     status: status
   };
 
+  if (currentViewedSiteId) {
+    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
+    if (site) {
+      if (!site.contacts) site.contacts = [];
+      site.contacts.unshift(newContact);
+    }
+  }
   siteDefaultContacts.unshift(newContact);
   renderSiteContactTable();
   closeAddSiteContactForm();
@@ -22573,7 +22631,15 @@ window.openSiteContactFilter = function(colKey, event) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const uniqueValues = Array.from(new Set(siteDefaultContacts.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+  let activeList = siteDefaultContacts;
+  if (currentViewedSiteId) {
+    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
+    if (site && site.contacts && site.contacts.length > 0) {
+      activeList = site.contacts;
+    }
+  }
+
+  const uniqueValues = Array.from(new Set(activeList.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const activeSet = activeSiteContactFilters[colKey];

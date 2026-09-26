@@ -1933,7 +1933,8 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 #addHolidayCard,
 #addOfficeLocationCard,
 #viewBankCard,
-#viewOfficeLocationCard {
+#viewOfficeLocationCard,
+#bulkUploadCard {
   position: fixed !important;
   top: 50% !important;
   left: 50% !important;

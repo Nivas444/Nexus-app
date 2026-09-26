@@ -4191,7 +4191,11 @@ function goBackSubpage() {
     if (currentProjectsView === 'project_service_vendor_detail') {
       currentProjectsView = 'project_service_vendor';
       showToast('Returned to Service Vendor');
-    } else if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor') {
+    } else if (currentProjectsView === 'project_expenses') {
+      currentProjectsView = 'main';
+      currentProjectsSubpage = 'projects';
+      showToast('Returned to Projects');
+    } else if (currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor') {
       currentProjectsView = 'details';
       showToast('Returned to Project Details');
     } else if (currentProjectsView === 'supply_details') {
@@ -4699,7 +4703,7 @@ function renderIndusToolbar() {
       triggerCsvUpload();
     });
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-      showToast('Bulk Upload initiated');
+      openBulkUploadModal('GBPA');
     });
     document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -4723,7 +4727,7 @@ function renderIndusToolbar() {
       </div>
     `;
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-      showToast('Bulk Upload initiated');
+      openBulkUploadModal('Infra');
     });
     document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -4755,7 +4759,7 @@ function renderIndusToolbar() {
       triggerCsvUpload();
     });
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-      showToast('Bulk Upload initiated');
+      openBulkUploadModal('Site');
     });
     document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -4789,7 +4793,7 @@ function renderIndusToolbar() {
     openSideForm();
   });
   document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-    showToast('Bulk Upload initiated');
+    openBulkUploadModal('Projects');
   });
 }
 
@@ -5365,7 +5369,7 @@ function renderMasterToolbar() {
       triggerCsvUpload();
     });
     document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
-      triggerBulkUpload();
+      openBulkUploadModal('Employee');
     });
     document.getElementById('btnMasterAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -5375,6 +5379,7 @@ function renderMasterToolbar() {
 
   if (currentMasterSubpage === 'vendor' || currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
     // Toolbar: Green CSV Upload + Orange Bulk Upload + Blue Add (+) Button on Right (No Backward icon)
+    const pageLabel = currentMasterSubpage === 'products' ? 'Products' : currentMasterSubpage === 'expenses' ? 'Expense' : 'Vendor';
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
@@ -5394,7 +5399,7 @@ function renderMasterToolbar() {
     `;
 
     document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
-      showToast('Bulk Upload dialog opened');
+      openBulkUploadModal(pageLabel);
     });
   } else {
     // Master Customer Toolbar: Green CSV Upload + Blue Add (+) Button on Right (No Backward icon)
@@ -6880,7 +6885,6 @@ function renderProjectsToolbar() {
   if (currentProjectsView === 'project_service_vendor_detail') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
           <div style="display: flex; align-items: center; gap: 10px;" title="Total Amount">
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
@@ -6902,13 +6906,6 @@ function renderProjectsToolbar() {
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'project_service_vendor';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Service Vendor');
-    });
     toolbar.querySelector('#btnExportServiceVendorPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
       showToast('PDF Upload / View opened');
@@ -6917,27 +6914,15 @@ function renderProjectsToolbar() {
   }
   if (currentProjectsView === 'project_service_vendor') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
-      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;"></div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'details';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Project Details');
-    });
     return;
   }
   if (currentProjectsView === 'project_approvals') {
     const hasSelectedRow = projectApprovalsData.some(d => d.selected);
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         ${hasSelectedRow ? `
           <button type="button" class="tool-btn" id="btnApprovalsChart" title="E - Mail Approval" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openEmailApprovalModal('E - Mail Approval'); return false;">
@@ -6946,13 +6931,6 @@ function renderProjectsToolbar() {
         ` : ''}
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'details';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Project Details');
-    });
     if (hasSelectedRow) {
       toolbar.querySelector('#btnApprovalsChart')?.addEventListener('click', (e) => {
         e.preventDefault();
@@ -6964,7 +6942,6 @@ function renderProjectsToolbar() {
   if (currentProjectsView === 'project_boq') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Summation" style="width: 26px; height: 26px; display: block; object-fit: contain;">
           <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">11,00,000.00</span>
@@ -6986,13 +6963,6 @@ function renderProjectsToolbar() {
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'details';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Project Details');
-    });
     toolbar.querySelector('#btnBoqWcc')?.addEventListener('click', (e) => {
       e.preventDefault();
       openBoqWccModal();
@@ -7009,9 +6979,7 @@ function renderProjectsToolbar() {
   }
   if (currentProjectsView === 'project_dpr') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnDprApprovalHistory" title="Approval History" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
           <img src="icons/Approval History.svg" alt="Approval History" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -7027,13 +6995,6 @@ function renderProjectsToolbar() {
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'details';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Project Details');
-    });
     toolbar.querySelector('#btnDprApprovalHistory')?.addEventListener('click', (e) => {
       e.preventDefault();
       openDprSurveyReportModal();
@@ -7054,22 +7015,13 @@ function renderProjectsToolbar() {
   }
   if (currentProjectsView === 'project_infra') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
-      </div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center;">
         <button type="button" class="tool-btn btn-export-pdf" id="btnExportInfraPdf" title="Upload / View PDF" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openInfraDocModal('DOC / STATUS'); return false;">
           <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'details';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Project Details');
-    });
     toolbar.querySelector('#btnExportInfraPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
       openInfraDocModal('STN / SRN / CAM');
@@ -7079,7 +7031,6 @@ function renderProjectsToolbar() {
   if (currentProjectsView === 'project_material') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 10px; padding-left: 12px; cursor: pointer;" onclick="" title="Total Material Amount">
           <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
           <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
@@ -7091,13 +7042,6 @@ function renderProjectsToolbar() {
         </button>
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'details';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Project Details');
-    });
     toolbar.querySelector('#btnExportMaterialPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
       openMinMrnModal('MIN / MRN');
@@ -7125,19 +7069,11 @@ function renderProjectsToolbar() {
       </div>
       <div class="toolbar-right"></div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'details';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Project Details');
-    });
     return;
   }
   if (currentProjectsView === 'supply_details') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
-        ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
@@ -7155,19 +7091,11 @@ function renderProjectsToolbar() {
       </div>
       <div class="toolbar-right"></div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
-      currentProjectsView = 'main';
-      currentProjectsSubpage = 'supply';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Returned to Supply page');
-    });
     return;
   }
   if (currentProjectsView === 'details') {
     toolbar.innerHTML = `
-      <div class="toolbar-left">${universalBackBtnHtml}</div>
+      <div class="toolbar-left"></div>
       <div class="toolbar-right">
         <button type="button" class="tool-btn" id="btnProjectsDashboard" title="Dashboard" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
           <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block;">
@@ -7601,23 +7529,8 @@ function renderProjectsFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
-  if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor' || currentProjectsView === 'project_service_vendor_detail' || currentProjectsView === 'supply_details') {
-    footer.innerHTML = '';
-    footer.style.display = 'none';
-    return;
-  }
-
-  if (currentProjectsView === 'details') {
-    const detailTabs = [
-      { key: 'expenses', label: 'Expenses' },
-      { key: 'material', label: 'Material' },
-      { key: 'infra', label: 'Infra' },
-      { key: 'dpr', label: 'DPR' },
-      { key: 'boq', label: 'BOQ' },
-      { key: 'additional_approve', label: 'Additional Approve' },
-      { key: 'service_vendor', label: 'Service vendor' }
-    ];
-
+  // On Landing Page of Projects Module (main table / supply table)
+  if (currentProjectsView === 'main') {
     footer.style.display = 'flex';
     footer.style.justifyContent = 'flex-start';
     footer.style.alignItems = 'center';
@@ -7626,57 +7539,58 @@ function renderProjectsFooter() {
     footer.style.padding = '24px';
     footer.innerHTML = `
       <div class="segmented-toggle-group">
-        ${detailTabs.map((tab, idx) => `
-          <button type="button" class="segmented-btn ${currentProjectDetailTab === tab.key ? 'active' : ''}" data-project-tab="${tab.key}">
-            ${tab.label}
-          </button>
-          ${idx < detailTabs.length - 1 ? '<div class="segmented-divider"></div>' : ''}
-        `).join('')}
+        <button type="button" class="segmented-btn ${currentProjectsSubpage === 'projects' ? 'active' : ''}" id="btnToggleProjectsSubpage">
+          Projects
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentProjectsSubpage === 'supply' ? 'active' : ''}" id="btnToggleSupplySubpage">
+          Supply
+        </button>
       </div>
     `;
 
-    footer.querySelectorAll('.segmented-btn[data-project-tab]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabKey = btn.getAttribute('data-project-tab');
-        if (tabKey === 'expenses') {
-          openProjectExpensesPage();
-          return;
-        }
-        if (tabKey === 'material' || tabKey === 'materials') {
-          openProjectMaterialPage();
-          return;
-        }
-        if (tabKey === 'infra') {
-          openProjectInfraPage();
-          return;
-        }
-        if (tabKey === 'dpr') {
-          openProjectDprPage();
-          return;
-        }
-        if (tabKey === 'boq') {
-          openProjectBoqPage();
-          return;
-        }
-        if (tabKey === 'additional_approve' || tabKey === 'approvals' || tabKey === 'additional_approvals') {
-          openProjectApprovalsPage();
-          return;
-        }
-        if (tabKey === 'service_vendor' || tabKey === 'service_vendors') {
-          openProjectServiceVendorPage();
-          return;
-        }
-        if (currentProjectDetailTab !== tabKey) {
-          currentProjectDetailTab = tabKey;
-          activeColumnFilters = {};
-          updateURL();
-          renderApp();
-          showToast(`Switched to ${btn.textContent.trim()} Tab`);
-        }
-      });
+    document.getElementById('btnToggleProjectsSubpage')?.addEventListener('click', () => {
+      if (currentProjectsSubpage !== 'projects') {
+        currentProjectsSubpage = 'projects';
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast('Switched to Projects View');
+      }
+    });
+
+    document.getElementById('btnToggleSupplySubpage')?.addEventListener('click', () => {
+      if (currentProjectsSubpage !== 'supply') {
+        currentProjectsSubpage = 'supply';
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast('Switched to Supply View');
+      }
     });
     return;
   }
+
+  // In all customer content subpages: Expenses, Material, Infra, DPR, BOQ, Additional Approve, Service vendor
+  const detailTabs = [
+    { key: 'expenses', label: 'Expenses' },
+    { key: 'material', label: 'Material' },
+    { key: 'infra', label: 'Infra' },
+    { key: 'dpr', label: 'DPR' },
+    { key: 'boq', label: 'BOQ' },
+    { key: 'additional_approve', label: 'Additional Approve' },
+    { key: 'service_vendor', label: 'Service vendor' }
+  ];
+
+  let currentActiveTab = '';
+  if (currentProjectsView === 'project_expenses') currentActiveTab = 'expenses';
+  else if (currentProjectsView === 'project_material') currentActiveTab = 'material';
+  else if (currentProjectsView === 'project_infra') currentActiveTab = 'infra';
+  else if (currentProjectsView === 'project_dpr') currentActiveTab = 'dpr';
+  else if (currentProjectsView === 'project_boq') currentActiveTab = 'boq';
+  else if (currentProjectsView === 'project_approvals') currentActiveTab = 'additional_approve';
+  else if (currentProjectsView === 'project_service_vendor' || currentProjectsView === 'project_service_vendor_detail') currentActiveTab = 'service_vendor';
+  else if (currentProjectsView === 'details') currentActiveTab = currentProjectDetailTab || '';
 
   footer.style.display = 'flex';
   footer.style.justifyContent = 'flex-start';
@@ -7686,34 +7600,34 @@ function renderProjectsFooter() {
   footer.style.padding = '24px';
   footer.innerHTML = `
     <div class="segmented-toggle-group">
-      <button type="button" class="segmented-btn ${currentProjectsSubpage === 'projects' ? 'active' : ''}" id="btnToggleProjectsSubpage">
-        Projects
-      </button>
-      <div class="segmented-divider"></div>
-      <button type="button" class="segmented-btn ${currentProjectsSubpage === 'supply' ? 'active' : ''}" id="btnToggleSupplySubpage">
-        Supply
-      </button>
+      ${detailTabs.map((tab, idx) => `
+        <button type="button" class="segmented-btn ${currentActiveTab === tab.key ? 'active' : ''}" data-project-tab="${tab.key}">
+          ${tab.label}
+        </button>
+        ${idx < detailTabs.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+      `).join('')}
     </div>
   `;
 
-  document.getElementById('btnToggleProjectsSubpage')?.addEventListener('click', () => {
-    if (currentProjectsSubpage !== 'projects') {
-      currentProjectsSubpage = 'projects';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Switched to Projects View');
-    }
-  });
-
-  document.getElementById('btnToggleSupplySubpage')?.addEventListener('click', () => {
-    if (currentProjectsSubpage !== 'supply') {
-      currentProjectsSubpage = 'supply';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Switched to Supply View');
-    }
+  footer.querySelectorAll('.segmented-btn[data-project-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabKey = btn.getAttribute('data-project-tab');
+      if (tabKey === 'expenses') {
+        openProjectExpensesPage();
+      } else if (tabKey === 'material' || tabKey === 'materials') {
+        openProjectMaterialPage();
+      } else if (tabKey === 'infra') {
+        openProjectInfraPage();
+      } else if (tabKey === 'dpr') {
+        openProjectDprPage();
+      } else if (tabKey === 'boq') {
+        openProjectBoqPage();
+      } else if (tabKey === 'additional_approve' || tabKey === 'approvals' || tabKey === 'additional_approvals') {
+        openProjectApprovalsPage();
+      } else if (tabKey === 'service_vendor' || tabKey === 'service_vendors') {
+        openProjectServiceVendorPage();
+      }
+    });
   });
 }
 
@@ -21004,28 +20918,25 @@ function triggerPdfUpload(targetInput) {
   }, 1000);
 }
 
+function getCurrentBulkPageLabel() {
+  if (typeof currentModule !== 'undefined' && currentModule === 'master') {
+    if (currentMasterSubpage === 'products') return 'Products';
+    if (currentMasterSubpage === 'expenses') return 'Expense';
+    if (currentMasterSubpage === 'vendor') return 'Vendor';
+    return 'Employee';
+  }
+  if (typeof currentModule !== 'undefined' && (currentModule === 'indus' || currentModule === 'indus_towers' || currentModule === 'customer')) {
+    if (currentIndusSubpage === 'products') return 'GBPA';
+    if (currentIndusSubpage === 'infra') return 'Infra';
+    if (currentIndusSubpage === 'site') return 'Site';
+    if (currentIndusSubpage === 'projects') return 'Projects';
+  }
+  return 'Employee';
+}
+
 function triggerBulkUpload() {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.multiple = true;
-  fileInput.setAttribute('webkitdirectory', '');
-  fileInput.setAttribute('directory', '');
-  fileInput.style.display = 'none';
-
-  fileInput.addEventListener('change', (e) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      showToast(`Bulk Upload: ${files.length} file(s) selected from folder successfully!`);
-    }
-  });
-
-  document.body.appendChild(fileInput);
-  fileInput.click();
-  setTimeout(() => {
-    if (document.body.contains(fileInput)) {
-      document.body.removeChild(fileInput);
-    }
-  }, 1000);
+  const pageLabel = getCurrentBulkPageLabel();
+  openBulkUploadModal(pageLabel);
 }
 
 // Global click delegation for PDF upload badges, CSV upload, and Bulk upload buttons
@@ -23880,6 +23791,102 @@ window.openProjectDocFilter = function(colKey, event) {
   dropdown.style.left = `${Math.max(12, leftPos)}px`;
 
   if (searchInput) searchInput.focus();
+};
+
+// ==========================================================================
+// BULK UPLOAD MODAL CONTROLLERS
+// ==========================================================================
+let currentBulkUploadPageName = 'Employee';
+
+window.openBulkUploadModal = function(pageName) {
+  currentBulkUploadPageName = pageName || 'Employee';
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('bulkUploadCard');
+  const titleBadge = document.getElementById('lblBulkUploadTitle');
+  if (!overlay || !modal) return;
+
+  // Hide all other side form cards
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'bulkUploadCard') card.style.display = 'none';
+  });
+
+  if (titleBadge) {
+    titleBadge.textContent = `Bulk Upload - ${currentBulkUploadPageName}`;
+  }
+
+  modal.style.display = 'block';
+  overlay.style.display = 'flex';
+  showToast(`Bulk Upload - ${currentBulkUploadPageName} opened`);
+};
+
+window.closeBulkUploadModal = function() {
+  const modal = document.getElementById('bulkUploadCard');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.downloadBulkCsvTemplate = function() {
+  const page = currentBulkUploadPageName || 'Employee';
+  let headers = [];
+  let sampleRow = [];
+  switch (page.toLowerCase()) {
+    case 'employee':
+      headers = ['Employee Code', 'Employee Name', 'Designation', 'Department', 'DOJ', 'Mobile', 'Email', 'Status'];
+      sampleRow = ['EMP-001', 'John Doe', 'Senior Engineer', 'Engineering', '01/01/2024', '9876543210', 'john.doe@example.com', 'Active'];
+      break;
+    case 'vendor':
+      headers = ['Vendor ID', 'Vendor Name', 'Entity Type', 'Vendor Type', 'PAN Number', 'GST Number', 'Status'];
+      sampleRow = ['VEN-101', 'Apex Tech Solutions', 'Private Limited', 'Supply', 'ABCDE1234F', '33ABCDE1234F1Z5', 'Active'];
+      break;
+    case 'products':
+      headers = ['Product Code', 'Product Name', 'Category', 'UOM', 'Rate', 'HSN/SAC', 'Status'];
+      sampleRow = ['PRD-001', 'Solar Panel 400W', 'Hardware', 'Nos', '8500.00', '8541', 'Active'];
+      break;
+    case 'expense':
+    case 'expenses':
+      headers = ['Expense ID', 'Expense Head', 'Category', 'Description', 'Amount', 'Date', 'Status'];
+      sampleRow = ['EXP-001', 'Site Travel', 'Travel', 'Site Inspection Fuel', '2500.00', '15/04/2026', 'Approved'];
+      break;
+    case 'site':
+      headers = ['Site ID', 'WH ID', 'Site Name', 'District', 'Town', 'Latitude', 'Longitude', 'Transport Zone', 'Status'];
+      sampleRow = ['IN-123456', 'WH-101', 'Guindy Tower Site', 'Chennai', 'Guindy', '13.0067', '80.2206', 'A', 'Active'];
+      break;
+    case 'gbpa':
+      headers = ['Item Code', 'Item Name', 'Item Type', 'Description', 'UOM', 'Rate', 'HSN/SAC', 'Status'];
+      sampleRow = ['GBPA-001', 'Tower Foundation Bolts', 'Capex', 'High tensile bolts', 'Set', '15000.00', '7318', 'Active'];
+      break;
+    case 'infra':
+      headers = ['Infra Code', 'Category', 'Description', 'Make', 'Commissioning', 'I-Map', 'Status'];
+      sampleRow = ['INF-01', 'DG Set', '25 KVA Silent Generator', 'Kirloskar', '15/01/2025', 'Yes', 'Active'];
+      break;
+    case 'projects':
+      headers = ['Project ID', 'Customer', 'PO No', 'Site ID', 'Site Name', 'Project Type', 'Status', 'Task'];
+      sampleRow = ['PRJ-1001', 'Indus Towers', 'PO-987654', 'IN-123456', 'Guindy Hub', 'New Build', 'In Progress', 'Civil Foundation'];
+      break;
+    default:
+      headers = ['ID', 'Name', 'Description', 'Status'];
+      sampleRow = ['1', 'Sample Item', 'Sample Description', 'Active'];
+  }
+  const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), sampleRow.join(',')].join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `${page}_Template.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast(`CSV Template downloaded for ${page}`);
+};
+
+window.handleBulkCsvFileSelected = function(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    showToast(`Bulk CSV file "${file.name}" uploaded successfully for ${currentBulkUploadPageName}!`);
+    input.value = '';
+    closeBulkUploadModal();
+  }
 };
 
 

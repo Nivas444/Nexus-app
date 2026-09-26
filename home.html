@@ -5027,6 +5027,29 @@
           </form>
         </div>
 
+        <!-- Bulk Upload Modal Card (Opened from Bulk Upload Toolbar Icon) -->
+        <div class="side-form-card" id="bulkUploadCard" style="display: none; width: 440px;">
+          <!-- Header Ribbon: Slanted Green Title Badge & Top Right Icons: CSV Download + Close -->
+          <div class="side-form-header" style="position: relative; width: 100%; height: 54px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
+            <div class="side-form-title-badge" id="lblBulkUploadTitle">Bulk Upload - Employee</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnBulkCsvDownload" title="CSV Download" onclick="downloadBulkCsvTemplate()" style="background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/CSV download.svg" alt="CSV Download" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseBulkUploadCard" onclick="closeBulkUploadModal()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Body: Centered CSV Upload Area Below the Tab -->
+          <div class="side-form-body" style="padding: 28px 24px 36px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+            <input type="file" id="inpBulkCsvFilePicker" accept=".csv, .xlsx, .xls, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;" onchange="handleBulkCsvFileSelected(this)">
+            <button type="button" class="bulk-upload-dropzone-btn" id="btnTriggerBulkCsvUpload" onclick="document.getElementById('inpBulkCsvFilePicker').click();" title="Upload CSV" style="background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px 30px; transition: transform 0.2s ease;">
+              <img src="icons/CSV upload.svg" alt="CSV Upload" width="60" height="60" style="width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0, 203, 160, 0.25)); transition: transform 0.2s ease;">
+              <span style="font-size: 0.95rem; font-weight: 600; color: #475569;">Click to Upload CSV</span>
+            </button>
+          </div>
+        </div>
+
         <!-- 8. Add Salary Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addSalaryCard" style="display: none; width: 440px;">
           <!-- Header Ribbon Badge: Add Salary -->
@@ -9073,7 +9096,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260926_2100"></script>
+  <script src="assets/js/home.js?v=20260926_2238"></script>
 </body>
 
 </html>

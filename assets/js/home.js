@@ -5512,7 +5512,7 @@ function renderMasterTableHead() {
     rebindFilterButtons();
     return;
   } else if (currentMasterSubpage === 'products') {
-    // Products Table Headers (Product Name 40ch, Product Category 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch)
+    // Products Table Headers (Product Name 40ch, Product Category 20ch, Product Head 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch)
     thead.innerHTML = `
       <tr class="master-view-header">
         <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
@@ -5522,7 +5522,16 @@ function renderMasterTableHead() {
           </div>
         </th>
         <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Product Category</span>
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Product Category</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productCategory'] ? 'has-active-filter' : ''}" data-filter-col="productCategory" title="Filter Product Category">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Product Head</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['productHead'] ? 'has-active-filter' : ''}" data-filter-col="productHead" title="Filter Product Head">&#9660;</button>
+          </div>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Product Code</span>
@@ -5534,10 +5543,7 @@ function renderMasterTableHead() {
           <span>GST</span>
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <span>Price</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['price'] ? 'has-active-filter' : ''}" data-filter-col="price" title="Filter Price">&#9660;</button>
-          </div>
+          <span>Price</span>
         </th>
       </tr>
     `;
@@ -10676,7 +10682,7 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentMasterSubpage === 'products') {
-      // Render Products Rows: Product Name 40ch, Product Category 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch
+      // Render Products Rows: Product Name 40ch, Product Category 20ch, Product Head 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch
       tbody.innerHTML = filteredDataset.map(row => {
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
@@ -10684,6 +10690,7 @@ function applyFiltersAndRender() {
               <a href="#" class="req-link td-link-blue" onclick="openViewProductCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.productName || row.productHead || ''}</a>
             </td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productCategory || row.category || 'Telecom').replace(/"/g, '&quot;')}">${row.productCategory || row.category || 'Telecom'}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productHead || row.productName || '').replace(/"/g, '&quot;')}">${row.productHead || row.productName || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.productCode || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.hsnCode || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gst || row.gstRate || '18%'}</td>
@@ -13609,6 +13616,88 @@ function initSideFormEvents() {
     });
   }
 
+  // View Bank Details Card Handlers
+  const btnViewBankEdit = document.getElementById('btnViewBankEditToggle');
+  if (btnViewBankEdit) {
+    btnViewBankEdit.addEventListener('click', () => {
+      const imgIcon = document.getElementById('imgViewBankEditIcon');
+      if (!isViewBankEditing) {
+        // Switch to editable
+        isViewBankEditing = true;
+        setViewBankFormReadOnly(false);
+        if (imgIcon) imgIcon.src = 'icons/Save.svg';
+        showToast('Bank details form is now editable');
+      } else {
+        // Save changes
+        const bank = companyBankData.find(b => b.id === currentViewedBankId);
+        if (bank) {
+          bank.accountName = document.getElementById('inpViewBankAccountName')?.value.trim() || bank.accountName;
+          bank.accountNumber = document.getElementById('inpViewBankAccountNumber')?.value.trim() || bank.accountNumber;
+          bank.bankName = document.getElementById('inpViewBankName')?.value.trim() || bank.bankName;
+          bank.ifscCode = document.getElementById('inpViewBankIfsc')?.value.trim() || bank.ifscCode;
+          bank.responsible = document.getElementById('selViewBankResponsible')?.value || bank.responsible;
+          const isAct = document.getElementById('inpViewBankStatus')?.checked ?? true;
+          bank.status = isAct ? 'Active' : 'De-Active';
+
+          const lblTitle = document.getElementById('lblViewBankTitle');
+          if (lblTitle) lblTitle.innerText = bank.bankName || 'Bank Details';
+
+          renderCompanyBankTable();
+        }
+        isViewBankEditing = false;
+        setViewBankFormReadOnly(true);
+        if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+        showToast('Bank details updated successfully!');
+      }
+    });
+  }
+
+  const btnCloseViewBank = document.getElementById('btnCloseViewBankCard');
+  if (btnCloseViewBank) {
+    btnCloseViewBank.addEventListener('click', () => {
+      const bankCard = document.getElementById('viewBankCard');
+      const bankPanel = document.getElementById('bankDetailsSidePanel');
+      if (bankCard) bankCard.style.display = 'none';
+      if (bankPanel) bankPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
+    });
+  }
+
+  // Predictable Holiday Day Auto-Calculation
+  function autoCalculateHolidayDay() {
+    const yearVal = parseInt(document.getElementById('inpAddHolidayYear')?.value, 10);
+    const monthVal = document.getElementById('inpAddHolidayMonth')?.value;
+    const dateVal = parseInt(document.getElementById('inpAddHolidayDate')?.value, 10);
+
+    if (!yearVal || !monthVal || !dateVal || isNaN(yearVal) || isNaN(dateVal)) return;
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthVal.trim().toLowerCase());
+    if (monthIndex === -1) {
+      monthIndex = parseInt(monthVal, 10) - 1;
+    }
+    if (monthIndex < 0 || monthIndex > 11) return;
+
+    const d = new Date(yearVal, monthIndex, dateVal);
+    if (isNaN(d.getTime())) return;
+
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayName = daysOfWeek[d.getDay()];
+
+    const daySelect = document.getElementById('inpAddHolidayDay');
+    if (daySelect && dayName) {
+      daySelect.value = dayName;
+    }
+  }
+
+  ['inpAddHolidayYear', 'inpAddHolidayMonth', 'inpAddHolidayDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', autoCalculateHolidayDay);
+      el.addEventListener('change', autoCalculateHolidayDay);
+    }
+  });
+
   const btnHolidayAddRow = document.getElementById('btnHolidayAddRow');
   const addHolidayCard = document.getElementById('addHolidayCard');
   const btnCloseAddHolidayCard = document.getElementById('btnCloseAddHolidayCard');
@@ -13621,6 +13710,7 @@ function initSideFormEvents() {
       addHolidayCard.style.display = 'block';
       const frm = document.getElementById('frmAddHoliday');
       if (frm) frm.reset();
+      autoCalculateHolidayDay();
       showToast('Add Holiday Form opened');
     });
   }
@@ -13659,6 +13749,60 @@ function initSideFormEvents() {
       holidayPanel.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
       showToast(`Holiday "${holidayName}" added successfully!`);
+    });
+  }
+
+  // View Office Location Card Handlers
+  const btnViewOfficeEdit = document.getElementById('btnViewOfficeEditToggle');
+  if (btnViewOfficeEdit) {
+    btnViewOfficeEdit.addEventListener('click', () => {
+      const imgIcon = document.getElementById('imgViewOfficeEditIcon');
+      if (!isViewOfficeEditing) {
+        // Switch to editable
+        isViewOfficeEditing = true;
+        setViewOfficeFormReadOnly(false);
+        if (imgIcon) imgIcon.src = 'icons/Save.svg';
+        showToast('Office details form is now editable');
+      } else {
+        // Save changes
+        const loc = companyLocationData.find(l => l.id === currentViewedOfficeId);
+        if (loc) {
+          loc.officeCode = document.getElementById('inpViewOfficeLocationCode')?.value.trim() || loc.officeCode;
+          loc.officeName = document.getElementById('inpViewOfficeLocationName')?.value.trim() || loc.officeName;
+          loc.address = document.getElementById('inpViewOfficeLocationAddress')?.value.trim() || loc.address;
+          loc.latitude = document.getElementById('inpViewOfficeLocationLat')?.value.trim() || loc.latitude;
+          loc.longitude = document.getElementById('inpViewOfficeLocationLng')?.value.trim() || loc.longitude;
+          loc.inCharge = document.getElementById('inpViewOfficeLocationIncharge')?.value || loc.inCharge;
+          loc.llName = document.getElementById('inpViewOfficeLocationLLName')?.value.trim() || loc.llName;
+          loc.llContact = document.getElementById('inpViewOfficeLocationLLContact')?.value.trim() || loc.llContact;
+          loc.rental = document.getElementById('inpViewOfficeLocationRental')?.value.trim() || loc.rental;
+          loc.tdsDeduction = document.getElementById('inpViewOfficeLocationTDSDeduction')?.value || loc.tdsDeduction;
+          loc.tdsRate = document.getElementById('inpViewOfficeLocationTDSRate')?.value || loc.tdsRate;
+          loc.ebSc = document.getElementById('inpViewOfficeLocationEBSC')?.value.trim() || loc.ebSc;
+          const isAct = document.getElementById('inpViewOfficeLocationStatus')?.checked ?? true;
+          loc.status = isAct ? 'Active' : 'In - Active';
+
+          const lblTitle = document.getElementById('lblViewOfficeTitle');
+          if (lblTitle) lblTitle.innerText = loc.officeName || 'Office Location';
+
+          renderCompanyLocationTable();
+        }
+        isViewOfficeEditing = false;
+        setViewOfficeFormReadOnly(true);
+        if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+        showToast('Office location updated successfully!');
+      }
+    });
+  }
+
+  const btnCloseViewOffice = document.getElementById('btnCloseViewOfficeLocationCard');
+  if (btnCloseViewOffice) {
+    btnCloseViewOffice.addEventListener('click', () => {
+      const locCard = document.getElementById('viewOfficeLocationCard');
+      const locPanel = document.getElementById('locationDetailsSidePanel');
+      if (locCard) locCard.style.display = 'none';
+      if (locPanel) locPanel.classList.remove('card-dimmed-blurred');
+      updateCardDimmedState();
     });
   }
 
@@ -15249,8 +15393,6 @@ window.openIndusTowerPageCard = function() {
       { toggleId: 'inpIndusPtecToggle', toggleWrapId: 'toggleWrapIndusPtec', wrapId: 'wrapIndusPtec' },
       { toggleId: 'inpIndusLwfToggle', toggleWrapId: 'toggleWrapIndusLwf', wrapId: 'wrapIndusLwf' },
       { toggleId: 'inpIndusEstRegToggle', toggleWrapId: 'toggleWrapIndusEstReg', wrapId: 'wrapIndusEstReg' },
-      { toggleId: 'inpIndusEInvoiceToggle', toggleWrapId: 'toggleWrapIndusEInvoice', wrapId: 'wrapIndusEInvoice' },
-      { toggleId: 'inpIndusMultiGstToggle', toggleWrapId: 'toggleWrapIndusMultiGst', wrapId: 'wrapIndusMultiGst' },
       { toggleId: 'inpIndusDscToggle', toggleWrapId: 'toggleWrapIndusDsc', wrapId: 'wrapIndusDsc' },
       { toggleId: 'inpIndusESigToggle', toggleWrapId: 'toggleWrapIndusESig', wrapId: 'wrapIndusESig' },
       { toggleId: 'inpIndusSslToggle', toggleWrapId: 'toggleWrapIndusSsl', wrapId: 'wrapIndusSsl' },
@@ -15921,6 +16063,89 @@ let companyBankData = [
 let activeCompanyBankFilters = {};
 let currentCompanyBankFilterCol = null;
 
+// Bank View/Edit Modal Controller State
+let isViewBankEditing = false;
+let currentViewedBankId = null;
+
+function setViewBankFormReadOnly(isReadOnly) {
+  ['inpViewBankAccountName', 'inpViewBankAccountNumber', 'inpViewBankName', 'inpViewBankIfsc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.readOnly = isReadOnly;
+      if (isReadOnly) {
+        el.classList.remove('editable-active');
+      } else {
+        el.classList.add('editable-active');
+      }
+    }
+  });
+
+  const selResp = document.getElementById('selViewBankResponsible');
+  if (selResp) selResp.disabled = isReadOnly;
+
+  const chkStatus = document.getElementById('inpViewBankStatus');
+  if (chkStatus) chkStatus.disabled = isReadOnly;
+}
+
+function openViewCompanyBankCard(bankId) {
+  const bankCard = document.getElementById('viewBankCard');
+  const bankPanel = document.getElementById('bankDetailsSidePanel');
+  if (!bankCard) return;
+
+  const bank = companyBankData.find(b => b.id === bankId) || companyBankData[0];
+  if (!bank) return;
+
+  currentViewedBankId = bank.id;
+  isViewBankEditing = false;
+
+  const lblTitle = document.getElementById('lblViewBankTitle');
+  if (lblTitle) lblTitle.innerText = bank.bankName || 'Bank Details';
+
+  // Populate Responsible dropdown with Employee Names from masterEmployeeData
+  const selResp = document.getElementById('selViewBankResponsible');
+  if (selResp) {
+    const empNames = (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData))
+      ? masterEmployeeData.map(e => e.employeeName).filter(Boolean)
+      : ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Suresh Reddy', 'John Doe', 'Sarah Jenkins'];
+
+    if (bank.responsible && !empNames.includes(bank.responsible)) {
+      empNames.unshift(bank.responsible);
+    }
+
+    selResp.innerHTML = empNames.map(name => `<option value="${name}" ${name === bank.responsible ? 'selected' : ''}>${name}</option>`).join('');
+  }
+
+  const inpId = document.getElementById('inpViewBankId');
+  if (inpId) inpId.value = bank.id;
+
+  const inpAccName = document.getElementById('inpViewBankAccountName');
+  if (inpAccName) inpAccName.value = bank.accountName || '';
+
+  const inpAccNum = document.getElementById('inpViewBankAccountNumber');
+  if (inpAccNum) inpAccNum.value = bank.accountNumber || '';
+
+  const inpBName = document.getElementById('inpViewBankName');
+  if (inpBName) inpBName.value = bank.bankName || '';
+
+  const inpIfsc = document.getElementById('inpViewBankIfsc');
+  if (inpIfsc) inpIfsc.value = bank.ifscCode || '';
+
+  const chkStatus = document.getElementById('inpViewBankStatus');
+  if (chkStatus) {
+    const isInactive = (bank.status || '').toLowerCase().includes('in') || (bank.status || '').toLowerCase().includes('de');
+    chkStatus.checked = !isInactive;
+  }
+
+  setViewBankFormReadOnly(true);
+
+  const imgIcon = document.getElementById('imgViewBankEditIcon');
+  if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+
+  if (bankPanel) bankPanel.classList.add('card-dimmed-blurred');
+  bankCard.style.display = 'block';
+  showToast(`Viewing bank details: ${bank.bankName || bank.accountName}`);
+}
+
 function renderCompanyBankTable() {
   const tbody = document.getElementById('tbodyBankDetails');
   if (!tbody) return;
@@ -15943,14 +16168,16 @@ function renderCompanyBankTable() {
     const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
     return `
       <tr data-bank-id="${row.id}">
-        <td class="col-bank-acc-name">${row.accountName || ''}</td>
-        <td class="col-bank-acc-num">
-          <a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: ${row.accountNumber}'); return false;">${row.accountNumber || ''}</a>
+        <td class="col-bank-acc-name" style="text-align: left !important; padding-left: 14px;">
+          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyBankCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${row.accountName || ''}</a>
         </td>
-        <td class="col-bank-name">${row.bankName || ''}</td>
-        <td class="col-bank-ifsc">${row.ifscCode || ''}</td>
-        <td class="col-bank-responsible">${row.responsible || ''}</td>
-        <td class="col-bank-status">
+        <td class="col-bank-acc-num" style="text-align: left !important; padding-left: 14px;">
+          <a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: ${row.accountNumber}'); return false;" style="color: #0454e4; text-decoration: underline !important; text-underline-offset: 3px; font-weight: 500;">${row.accountNumber || ''}</a>
+        </td>
+        <td class="col-bank-name" style="text-align: left !important; padding-left: 14px;">${row.bankName || ''}</td>
+        <td class="col-bank-ifsc" style="text-align: center !important;">${row.ifscCode || ''}</td>
+        <td class="col-bank-responsible" style="text-align: left !important; padding-left: 14px;">${row.responsible || ''}</td>
+        <td class="col-bank-status td-center">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'De-Active' : 'Active'}</span>
         </td>
       </tr>
@@ -16186,41 +16413,185 @@ let companyLocationData = [
     id: 'loc-1',
     officeCode: 'LOC-001',
     officeName: 'Headquarters - Chennai',
+    address: 'No. 12, Anna Salai, Chennai, Tamil Nadu - 600002',
     latitude: '13.0827° N',
     longitude: '80.2707° E',
     inCharge: 'Rajesh Kumar',
+    llName: 'Ramanathan Iyer',
+    llContact: '+91 98401 23456',
+    rental: '1,25,000.00',
+    tdsDeduction: 'Applicable',
+    tdsRate: '10%',
+    ebSc: 'EB-CHN-40921',
     status: 'Active'
   },
   {
     id: 'loc-2',
     officeCode: 'LOC-002',
     officeName: 'Branch - Bengaluru',
+    address: 'Indiranagar 100ft Road, Bengaluru, Karnataka - 560038',
     latitude: '12.9716° N',
     longitude: '77.5946° E',
     inCharge: 'Priya Sharma',
+    llName: 'Venkatesh Murthy',
+    llContact: '+91 98802 34567',
+    rental: '95,000.00',
+    tdsDeduction: 'Applicable',
+    tdsRate: '10%',
+    ebSc: 'EB-BLR-89214',
     status: 'Active'
   },
   {
     id: 'loc-3',
     officeCode: 'LOC-003',
     officeName: 'Regional - Mumbai',
+    address: 'Bandra Kurla Complex, Bandra East, Mumbai - 400051',
     latitude: '19.0760° N',
     longitude: '72.8777° E',
     inCharge: 'Amit Patel',
+    llName: 'Hasmukh Shah',
+    llContact: '+91 98203 45678',
+    rental: '2,10,000.00',
+    tdsDeduction: 'Applicable',
+    tdsRate: '10%',
+    ebSc: 'EB-MUM-77341',
     status: 'Active'
   },
   {
     id: 'loc-4',
     officeCode: 'LOC-004',
     officeName: 'Hub - Hyderabad',
+    address: 'HITEC City, Madhapur, Hyderabad, Telangana - 500081',
     latitude: '17.3850° N',
     longitude: '78.4867° E',
     inCharge: 'Suresh Reddy',
+    llName: 'K. V. Rao',
+    llContact: '+91 98490 56789',
+    rental: '1,10,000.00',
+    tdsDeduction: 'Applicable',
+    tdsRate: '10%',
+    ebSc: 'EB-HYD-55129',
     status: 'Active'
   }
 ];
 let activeCompanyLocationFilters = {};
 let currentCompanyLocationFilterCol = null;
+
+// Office Location View/Edit Modal Controller State
+let isViewOfficeEditing = false;
+let currentViewedOfficeId = null;
+
+function setViewOfficeFormReadOnly(isReadOnly) {
+  [
+    'inpViewOfficeLocationCode',
+    'inpViewOfficeLocationName',
+    'inpViewOfficeLocationAddress',
+    'inpViewOfficeLocationLat',
+    'inpViewOfficeLocationLng',
+    'inpViewOfficeLocationLLName',
+    'inpViewOfficeLocationLLContact',
+    'inpViewOfficeLocationRental',
+    'inpViewOfficeLocationEBSC'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.readOnly = isReadOnly;
+      if (isReadOnly) {
+        el.classList.remove('editable-active');
+      } else {
+        el.classList.add('editable-active');
+      }
+    }
+  });
+
+  ['inpViewOfficeLocationIncharge', 'inpViewOfficeLocationTDSDeduction', 'inpViewOfficeLocationTDSRate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = isReadOnly;
+  });
+
+  const chkStatus = document.getElementById('inpViewOfficeLocationStatus');
+  if (chkStatus) chkStatus.disabled = isReadOnly;
+}
+
+function openViewCompanyLocationCard(locId) {
+  const locCard = document.getElementById('viewOfficeLocationCard');
+  const locPanel = document.getElementById('locationDetailsSidePanel');
+  if (!locCard) return;
+
+  const loc = companyLocationData.find(l => l.id === locId) || companyLocationData[0];
+  if (!loc) return;
+
+  currentViewedOfficeId = loc.id;
+  isViewOfficeEditing = false;
+
+  const lblTitle = document.getElementById('lblViewOfficeTitle');
+  if (lblTitle) lblTitle.innerText = loc.officeName || 'Office Location';
+
+  // Populate In-charge dropdown with Employee Names from masterEmployeeData
+  const selIncharge = document.getElementById('inpViewOfficeLocationIncharge');
+  if (selIncharge) {
+    const empNames = (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData))
+      ? masterEmployeeData.map(e => e.employeeName).filter(Boolean)
+      : ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Suresh Reddy', 'Anirban Das'];
+
+    if (loc.inCharge && !empNames.includes(loc.inCharge)) {
+      empNames.unshift(loc.inCharge);
+    }
+
+    selIncharge.innerHTML = empNames.map(name => `<option value="${name}" ${name === loc.inCharge ? 'selected' : ''}>${name}</option>`).join('');
+  }
+
+  const inpId = document.getElementById('inpViewOfficeId');
+  if (inpId) inpId.value = loc.id;
+
+  const inpCode = document.getElementById('inpViewOfficeLocationCode');
+  if (inpCode) inpCode.value = loc.officeCode || '';
+
+  const inpName = document.getElementById('inpViewOfficeLocationName');
+  if (inpName) inpName.value = loc.officeName || '';
+
+  const inpAddress = document.getElementById('inpViewOfficeLocationAddress');
+  if (inpAddress) inpAddress.value = loc.address || '';
+
+  const inpLat = document.getElementById('inpViewOfficeLocationLat');
+  if (inpLat) inpLat.value = loc.latitude || '';
+
+  const inpLng = document.getElementById('inpViewOfficeLocationLng');
+  if (inpLng) inpLng.value = loc.longitude || '';
+
+  const inpLLName = document.getElementById('inpViewOfficeLocationLLName');
+  if (inpLLName) inpLLName.value = loc.llName || '';
+
+  const inpLLContact = document.getElementById('inpViewOfficeLocationLLContact');
+  if (inpLLContact) inpLLContact.value = loc.llContact || '';
+
+  const inpRental = document.getElementById('inpViewOfficeLocationRental');
+  if (inpRental) inpRental.value = loc.rental || '';
+
+  const selTds = document.getElementById('inpViewOfficeLocationTDSDeduction');
+  if (selTds) selTds.value = loc.tdsDeduction || 'Applicable';
+
+  const selTdsRate = document.getElementById('inpViewOfficeLocationTDSRate');
+  if (selTdsRate) selTdsRate.value = loc.tdsRate || '1% / 2% / 10%';
+
+  const inpEb = document.getElementById('inpViewOfficeLocationEBSC');
+  if (inpEb) inpEb.value = loc.ebSc || '';
+
+  const chkStatus = document.getElementById('inpViewOfficeLocationStatus');
+  if (chkStatus) {
+    const isInactive = (loc.status || '').toLowerCase().includes('in') || (loc.status || '').toLowerCase().includes('de');
+    chkStatus.checked = !isInactive;
+  }
+
+  setViewOfficeFormReadOnly(true);
+
+  const imgIcon = document.getElementById('imgViewOfficeEditIcon');
+  if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+
+  if (locPanel) locPanel.classList.add('card-dimmed-blurred');
+  locCard.style.display = 'block';
+  showToast(`Viewing office location: ${loc.officeName}`);
+}
 
 function renderCompanyLocationTable() {
   const tbody = document.getElementById('tbodyLocationDetails');
@@ -16245,10 +16616,12 @@ function renderCompanyLocationTable() {
     return `
       <tr data-location-id="${row.id}">
         <td class="col-loc-code td-center">${row.officeCode || ''}</td>
-        <td class="col-loc-name">${row.officeName || ''}</td>
+        <td class="col-loc-name" style="text-align: left !important; padding-left: 14px;">
+          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyLocationCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${row.officeName || ''}</a>
+        </td>
         <td class="col-loc-lat td-center">${row.latitude || ''}</td>
         <td class="col-loc-lng td-center">${row.longitude || ''}</td>
-        <td class="col-loc-incharge">${row.inCharge || ''}</td>
+        <td class="col-loc-incharge" style="text-align: left !important; padding-left: 14px;">${row.inCharge || ''}</td>
         <td class="col-loc-status td-center">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'In - Active' : 'Active'}</span>
         </td>

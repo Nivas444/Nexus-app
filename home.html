@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260926_1525">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260926_2145">
 </head>
 
 <body>
@@ -1977,67 +1977,7 @@
                   </div>
                 </div>
 
-                <!-- 7. E-Invoice -->
-                <div class="form-row-group">
-                  <label class="form-label">E-Invoice</label>
-                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
-                    <div class="toggle-switch-container" id="toggleWrapIndusEInvoice">
-                      <label class="toggle-slide-switch">
-                        <input type="checkbox" id="inpIndusEInvoiceToggle"
-                          onchange="handleIndusToggleDisappear('inpIndusEInvoiceToggle', 'toggleWrapIndusEInvoice', 'wrapIndusEInvoice')">
-                        <span class="toggle-slide-slider"></span>
-                      </label>
-                    </div>
-                    <div class="slide-dynamic-wrap" id="wrapIndusEInvoice" style="display: none; width: 100%; align-items: center; gap: 8px;">
-                      <div style="position: relative; flex: 1; width: 100%;">
-                        <input type="text" class="form-input-control" id="txtIndusEInvoice"
-                          placeholder="Enter E-Invoice Code" style="width: 100%; padding-right: 38px;">
-                        <input type="file" id="fileIndusEInvoice" accept="application/pdf" style="display: none;"
-                          onchange="handleIndusPdfUpload(this, 'txtIndusEInvoice')">
-                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusEInvoice')"
-                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
-                        </span>
-                      </div>
-                      <button type="button" class="btn-toggle-revert"
-                        onclick="handleIndusToggleReappear('inpIndusEInvoiceToggle', 'toggleWrapIndusEInvoice', 'wrapIndusEInvoice')"
-                        title="Cancel / Reset"
-                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 8. Multistate GST -->
-                <div class="form-row-group">
-                  <label class="form-label">Multistate GST</label>
-                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
-                    <div class="toggle-switch-container" id="toggleWrapIndusMultiGst">
-                      <label class="toggle-slide-switch">
-                        <input type="checkbox" id="inpIndusMultiGstToggle"
-                          onchange="handleIndusToggleDisappear('inpIndusMultiGstToggle', 'toggleWrapIndusMultiGst', 'wrapIndusMultiGst')">
-                        <span class="toggle-slide-slider"></span>
-                      </label>
-                    </div>
-                    <div class="slide-dynamic-wrap" id="wrapIndusMultiGst" style="display: none; width: 100%; align-items: center; gap: 8px;">
-                      <div style="position: relative; flex: 1; width: 100%;">
-                        <input type="text" class="form-input-control" id="txtIndusMultiGst"
-                          placeholder="Enter Multistate GST Details" style="width: 100%; padding-right: 38px;">
-                        <input type="file" id="fileIndusMultiGst" accept="application/pdf" style="display: none;"
-                          onchange="handleIndusPdfUpload(this, 'txtIndusMultiGst')">
-                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusMultiGst')"
-                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
-                        </span>
-                      </div>
-                      <button type="button" class="btn-toggle-revert"
-                        onclick="handleIndusToggleReappear('inpIndusMultiGstToggle', 'toggleWrapIndusMultiGst', 'wrapIndusMultiGst')"
-                        title="Cancel / Reset"
-                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 9. DSC -->
+                <!-- 7. DSC -->
                 <div class="form-row-group">
                   <label class="form-label">DSC</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
@@ -2067,7 +2007,7 @@
                   </div>
                 </div>
 
-                <!-- 10. E-Signature -->
+                <!-- 8. E-Signature -->
                 <div class="form-row-group">
                   <label class="form-label">E-Signature</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
@@ -2097,7 +2037,7 @@
                   </div>
                 </div>
 
-                <!-- 11. SSL Certificate -->
+                <!-- 9. SSL Certificate -->
                 <div class="form-row-group">
                   <label class="form-label">SSL Certificate</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
@@ -2127,7 +2067,7 @@
                   </div>
                 </div>
 
-                <!-- 12. Hex Color Code (Theme Changer) -->
+                <!-- 10. Hex Color Code (Theme Changer) -->
                 <div class="form-row-group">
                   <label class="form-label">Hex Color Code</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
@@ -2149,6 +2089,32 @@
                         onclick="handleIndusToggleReappear('inpIndusHexColorToggle', 'toggleWrapIndusHexColor', 'wrapIndusHexColor')"
                         title="Cancel / Reset"
                         style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; margin-left: auto; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 11. E-Invoice (Toggle Alone) -->
+                <div class="form-row-group">
+                  <label class="form-label">E-Invoice</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusEInvoice" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusEInvoiceToggle">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 12. Multistate GST (Toggle Alone) -->
+                <div class="form-row-group">
+                  <label class="form-label">Multistate GST</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusMultiGst" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusMultiGstToggle">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -4590,6 +4556,83 @@
           </form>
         </div>
 
+        <!-- 7-View. View Bank Details Form Card (Opened by clicking Account Name in Bank Details Table) -->
+        <div class="side-form-card" id="viewBankCard" style="display: none; width: 460px;">
+          <!-- Header Ribbon Badge: Bank Name (e.g. HDFC Bank) + Top Right Icons: Edit, Close -->
+          <div class="side-form-header" style="position: relative; width: 100%; height: 54px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
+            <div class="side-form-title-badge" id="lblViewBankTitle">Bank Details</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnViewBankEditToggle" title="Edit Bank Details">
+                <img src="icons/Edit.svg" alt="Edit" id="imgViewBankEditIcon" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseViewBankCard" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmViewBank" onsubmit="event.preventDefault();" style="padding: 16px 24px 20px 24px;">
+            <input type="hidden" id="inpViewBankId">
+            <!-- 1. Account Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewBankAccountName">Account Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewBankAccountName" readonly>
+              </div>
+            </div>
+
+            <!-- 2. Account Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewBankAccountNumber">Account Number</label>
+              <div class="form-input-wrap with-action-badge">
+                <input type="text" class="form-input-control" id="inpViewBankAccountNumber" readonly>
+                <input type="file" id="fileViewBankDoc" accept="application/pdf" style="display: none;"
+                  onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
+                <span class="input-pdf-badge" title="Upload PDF"
+                  onclick="if(!document.getElementById('inpViewBankAccountNumber').readOnly) document.getElementById('fileViewBankDoc').click();" style="cursor: pointer;">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                </span>
+              </div>
+            </div>
+
+            <!-- 3. Bank Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewBankName" readonly>
+              </div>
+            </div>
+
+            <!-- 4. IFSC Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewBankIfsc">IFSC Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewBankIfsc" readonly>
+              </div>
+            </div>
+
+            <!-- 5. Responsible (Dropdown with Employee Names) -->
+            <div class="form-row-group">
+              <label class="form-label" for="selViewBankResponsible">Responsible</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selViewBankResponsible" disabled>
+                  <!-- Populated dynamically from masterEmployeeData -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap" style="display: flex; justify-content: center; align-items: center;">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpViewBankStatus" disabled>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+
         <!-- 7B. Add Holiday Form Card (Nested Modal) -->
         <div class="side-form-card" id="addHolidayCard" style="display: none; width: 440px;">
           <!-- Header Ribbon Badge: Add Holiday -->
@@ -4785,9 +4828,9 @@
               </div>
             </div>
 
-            <!-- 10. TDS Dedusction (Dropdown) -->
+            <!-- 10. TDS Deduction (Dropdown) -->
             <div class="form-row-group">
-              <label class="form-label" for="inpAddOfficeLocationTDSDeduction">TDS Dedusction</label>
+              <label class="form-label" for="inpAddOfficeLocationTDSDeduction">TDS Deduction</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpAddOfficeLocationTDSDeduction">
                   <option value="" selected disabled></option>
@@ -4838,6 +4881,148 @@
                 aria-label="Submit">
                 <img src="icons/Save.svg" alt="Save" width="34" height="34">
               </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 7C-View. View Office Form Card (Opened by clicking Office Name in Location Details Table) -->
+        <div class="side-form-card" id="viewOfficeLocationCard"
+          style="display: none; width: 440px; max-height: 92vh; overflow-y: auto;">
+          <!-- Header Ribbon Badge: Office Name + Top Right Icons: Edit, Close -->
+          <div class="side-form-header" style="position: sticky; top: 0; z-index: 10; background: #ffffff; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 0; margin-bottom: 20px;">
+            <div class="side-form-title-badge" id="lblViewOfficeTitle">Office Location</div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnViewOfficeEditToggle" title="Edit Office Location">
+                <img src="icons/Edit.svg" alt="Edit" id="imgViewOfficeEditIcon" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseViewOfficeLocationCard"
+                aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmViewOfficeLocation" onsubmit="event.preventDefault();"
+            style="padding: 14px 20px 18px 20px;">
+            <input type="hidden" id="inpViewOfficeId">
+            <!-- 1. Office Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationCode">Office Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationCode" readonly>
+              </div>
+            </div>
+
+            <!-- 2. Office Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationName">Office Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationName" readonly>
+              </div>
+            </div>
+
+            <!-- 3. Address -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationAddress">Address</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationAddress" readonly>
+              </div>
+            </div>
+
+            <!-- 4. Lattitude -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationLat">Lattitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationLat" readonly>
+              </div>
+            </div>
+
+            <!-- 5. Longtitude -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationLng">Longtitude</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationLng" readonly>
+              </div>
+            </div>
+
+            <!-- 6. In - Charge (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationIncharge">In - Charge</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpViewOfficeLocationIncharge" disabled>
+                  <!-- Dynamically populated from masterEmployeeData -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 7. LL Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationLLName">LL Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationLLName" readonly>
+              </div>
+            </div>
+
+            <!-- 8. LL Contact Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationLLContact">LL Contact Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationLLContact" readonly>
+              </div>
+            </div>
+
+            <!-- 9. Rental Amount -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationRental">Rental Amount</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationRental" readonly>
+              </div>
+            </div>
+
+            <!-- 10. TDS Deduction (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationTDSDeduction">TDS Deduction</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpViewOfficeLocationTDSDeduction" disabled>
+                  <option value="" selected disabled></option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="Applicable">Applicable</option>
+                  <option value="Not Applicable">Not Applicable</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 11. TDS Rate (Dropdown) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationTDSRate">TDS Rate</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpViewOfficeLocationTDSRate" disabled>
+                  <option value="1% / 2% / 10%">1% / 2% / 10%</option>
+                  <option value="1%">1%</option>
+                  <option value="2%">2%</option>
+                  <option value="5%">5%</option>
+                  <option value="10%">10%</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 12. EB SC Numer -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewOfficeLocationEBSC">EB SC Numer</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewOfficeLocationEBSC" readonly>
+              </div>
+            </div>
+
+            <!-- 13. Status (Slide Switch) -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap" style="display: flex; justify-content: center; align-items: center;">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpViewOfficeLocationStatus" disabled>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
             </div>
           </form>
         </div>
@@ -8888,7 +9073,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260926_1525"></script>
+  <script src="assets/js/home.js?v=20260926_2100"></script>
 </body>
 
 </html>

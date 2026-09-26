@@ -1130,7 +1130,7 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: none;
   }
 }
 
@@ -1730,6 +1730,8 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 
 #addIndusTowerCard .form-row-group {
   display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
   align-items: center !important;
   justify-content: space-between !important;
   gap: 12px !important;
@@ -1739,16 +1741,16 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 }
 
 #addIndusTowerCard .form-label {
-  width: 190px !important;
-  min-width: 190px !important;
-  flex: 0 0 190px !important;
-  font-size: 0.82rem !important;
+  min-width: 220px !important;
+  max-width: 235px !important;
+  flex: 0 0 230px !important;
+  font-size: 0.81rem !important;
   font-weight: 600 !important;
   color: #475569 !important;
-  white-space: normal !important;
+  white-space: nowrap !important;
   line-height: 1.25 !important;
   margin-bottom: 0 !important;
-  word-break: break-word !important;
+  overflow: visible !important;
 }
 
 #addIndusTowerCard .form-input-wrap {
@@ -1924,19 +1926,21 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   }
 }
 
-/* Nested Add Cards (Add Bank, Add Salary, Add Asset, Add Holiday, Add Office Location) centered overlapping on top */
+/* Nested Add & View Cards (Add Bank, Add Salary, Add Asset, Add Holiday, Add Office Location, View Bank, View Office Location) centered overlapping on top */
 #addBankCard,
 #addSalaryCard,
 #addAssetCard,
 #addHolidayCard,
-#addOfficeLocationCard {
-  position: absolute !important;
+#addOfficeLocationCard,
+#viewBankCard,
+#viewOfficeLocationCard {
+  position: fixed !important;
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
-  z-index: 1100 !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
   box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important;
-  animation: overlapPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
 @keyframes slideOutSidePanel {
@@ -4573,20 +4577,23 @@ a:visited,
   opacity: 0.85;
 }
 
-/* Active Excel Filter Funnel Button State */
+/* Active Excel Filter Funnel Button State - Clean Subtle Green Glow */
 .filter-funnel-btn.has-active-filter,
 .contact-th-filter-btn.has-active-filter,
 button.has-active-filter {
   color: #00cba0 !important;
-  background: rgba(0, 203, 160, 0.18) !important;
-  border: 1px solid #00cba0 !important;
-  border-radius: 4px !important;
-  box-shadow: 0 0 6px rgba(0, 203, 160, 0.4) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: 0 0 2px rgba(0, 203, 160, 0.6) !important;
+  filter: none !important;
 }
 
 .filter-funnel-btn.has-active-filter svg,
 .contact-th-filter-btn.has-active-filter svg {
   stroke: #00cba0 !important;
+  filter: none !important;
 }
 
 /* Company HR Policies Table Styles */
@@ -4661,19 +4668,47 @@ tr.row-selected-highlight {
   background-color: rgba(0, 203, 160, 0.12) !important;
 }
 
-/* Active Filter Indicator - Turns Filter Funnel Button Green (#00cba0) */
-.filter-funnel-btn.has-active-filter,
-.contact-th-filter-btn.has-active-filter,
-button.has-active-filter {
-  color: #00cba0 !important;
-  background: rgba(0, 203, 160, 0.22) !important;
-  border: 1px solid #00cba0 !important;
-  border-radius: 4px !important;
-  box-shadow: 0 0 8px rgba(0, 203, 160, 0.5) !important;
+/* Centered Toggle Switches for Form Grid */
+.toggle-switch-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
 }
 
-.filter-funnel-btn.has-active-filter img,
-.contact-th-filter-btn.has-active-filter img,
-button.has-active-filter img {
-  filter: invert(53%) sepia(85%) saturate(2400%) hue-rotate(130deg) brightness(96%) contrast(101%) !important;
+.emp-grid-col .slider-input-wrap,
+.emp-form-grid .slider-input-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+/* Bank and Location Table Header Centering & Content Alignment */
+#tblBankDetailsPopup th,
+#tblLocationPopup th,
+#tblHolidaysPopup th {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+#tblBankDetailsPopup th .th-content-wrap,
+#tblLocationPopup th .th-content-wrap,
+#tblHolidaysPopup th .th-content-wrap {
+  justify-content: center !important;
+}
+
+td.col-bank-acc-num,
+td.col-bank-acc-num a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+
+td.col-bank-acc-name,
+td.col-bank-name,
+td.col-bank-responsible,
+td.col-loc-name,
+td.col-loc-incharge {
+  text-align: left !important;
 }

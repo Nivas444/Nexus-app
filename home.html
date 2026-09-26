@@ -1361,6 +1361,117 @@
           </form>
         </div>
 
+        <!-- 1F-2. Indus / ESH Trainee Form Card -->
+        <div class="side-form-card" id="addEshTraineeCard" style="display: none; width: 480px; max-width: 95vw;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblEshTraineeCardTitle">Add New Trainee</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnEshTraineeCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgEshTraineeCardEditIcon" alt="Edit" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseEshTraineeForm" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddEshTrainee" onsubmit="event.preventDefault();">
+            <!-- 1. Employee Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpEshEmployeeType">Employee Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpEshEmployeeType">
+                  <option value="On-Roll" selected>On-Roll</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Service Vendor">Service Vendor</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Service Vendor Name -->
+            <div class="form-row-group" id="rowEshServiceVendorName">
+              <label class="form-label" for="inpEshServiceVendorName">Service Vendor Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpEshServiceVendorName" placeholder="Enter Service Vendor Name">
+              </div>
+            </div>
+
+            <!-- 3. Employee Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpEshEmployeeName">Employee Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpEshEmployeeName" placeholder="Enter Employee Name">
+              </div>
+            </div>
+
+            <!-- 4. Aadhar Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpEshAadharNumber">Aadhar Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpEshAadharNumber" placeholder="Enter Aadhar Number">
+              </div>
+            </div>
+
+            <!-- 5. Training Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpEshTrainingType">Training Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpEshTrainingType">
+                  <option value="CHCTE" selected>CHCTE</option>
+                  <option value="H-STAG">H-STAG</option>
+                  <option value="E-STAG">E-STAG</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. Training ID Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpEshTrainingIdNumber">Training ID Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpEshTrainingIdNumber" placeholder="Enter Training ID Number">
+              </div>
+            </div>
+
+            <!-- 7. Training Agency -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpEshTrainingAgency">Training Agency</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpEshTrainingAgency" placeholder="Enter Training Agency">
+              </div>
+            </div>
+
+            <!-- 8. Expiry Date with Calendar Icon inside field -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpEshExpiryDate">Expiry Date</label>
+              <div class="form-input-wrap" style="position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpEshExpiryDate" placeholder="DD - MM - YYYY" style="padding-right: 40px;">
+                <button type="button" class="input-pdf-badge input-date-badge" id="btnEshExpiryDateCalendar" title="Select Expiry Date" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
+                </button>
+                <input type="date" id="inpEshExpiryDateNative" style="position: absolute; right: 8px; width: 24px; height: 24px; opacity: 0; pointer-events: auto; cursor: pointer; z-index: 6;">
+              </div>
+            </div>
+
+            <!-- 9. Status -->
+            <div class="form-row-group">
+              <label class="form-label">Status</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpEshStatusToggle" checked>
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Save Button Inside Tab Centered -->
+            <div class="form-submit-inside-wrap">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitEshTrainee" title="Save" aria-label="Submit">
+                <img src="icons/Save.svg" alt="Save" width="34" height="34">
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- 1F-3. Indus Tower Page Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card side-form-card-wide" id="addIndusTowerCard" style="display: none;">
           <!-- Header -->

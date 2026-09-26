@@ -1031,6 +1031,81 @@ const indusProductRateData = [
   }
 ];
 
+const indusEshData = [
+  {
+    id: "esh-1",
+    name: "Ramesh Kumar",
+    employeeType: "On-Roll",
+    serviceVendorName: "Indus Towers Internal",
+    aadharNumber: "4532 8901 2345",
+    trainingType: "CHCTE",
+    trainingIdNumber: "TRN-IND-2026-081",
+    trainingAgency: "National Safety Council",
+    expiryDate: "15 - 08 - 2027",
+    status: "Active"
+  },
+  {
+    id: "esh-2",
+    name: "Vikram Sethi",
+    employeeType: "Contract",
+    serviceVendorName: "Apex Telecom Services",
+    aadharNumber: "7821 3490 1122",
+    trainingType: "H-STAG",
+    trainingIdNumber: "TRN-IND-2026-094",
+    trainingAgency: "Global Height Safety Institute",
+    expiryDate: "22 - 11 - 2026",
+    status: "Active"
+  },
+  {
+    id: "esh-3",
+    name: "Anand Rajan",
+    employeeType: "Service Vendor",
+    serviceVendorName: "Delta Power & Infra",
+    aadharNumber: "9012 4432 7865",
+    trainingType: "E-STAG",
+    trainingIdNumber: "TRN-IND-2026-112",
+    trainingAgency: "Energy & Electrical Safety Board",
+    expiryDate: "10 - 05 - 2027",
+    status: "Active"
+  },
+  {
+    id: "esh-4",
+    name: "Pooja Deshmukh",
+    employeeType: "On-Roll",
+    serviceVendorName: "Indus Towers Internal",
+    aadharNumber: "3321 8976 5410",
+    trainingType: "CHCTE",
+    trainingIdNumber: "TRN-IND-2026-135",
+    trainingAgency: "National Safety Council",
+    expiryDate: "30 - 09 - 2026",
+    status: "Active"
+  },
+  {
+    id: "esh-5",
+    name: "Mohammed Farhan",
+    employeeType: "Contract",
+    serviceVendorName: "Star Infra Tech",
+    aadharNumber: "6541 2289 9034",
+    trainingType: "H-STAG",
+    trainingIdNumber: "TRN-IND-2026-148",
+    trainingAgency: "Tower Riggers Academy",
+    expiryDate: "18 - 01 - 2027",
+    status: "In - Active"
+  },
+  {
+    id: "esh-6",
+    name: "Karthik Subramanian",
+    employeeType: "Service Vendor",
+    serviceVendorName: "Vertex Power Solutions",
+    aadharNumber: "8890 1243 6571",
+    trainingType: "E-STAG",
+    trainingIdNumber: "TRN-IND-2026-160",
+    trainingAgency: "Energy & Electrical Safety Board",
+    expiryDate: "14 - 03 - 2027",
+    status: "Active"
+  }
+];
+
 let selectedProjectType = "Project Type";
 let currentIndusProjectTypeSubpage = "survey"; // 'survey' | 'transport'
 
@@ -4152,7 +4227,7 @@ function goBackSubpage() {
     } else if (currentIndusSubpage === 'product_details') {
       currentIndusSubpage = 'products';
       showToast('Returned to GBPA');
-    } else if (currentIndusSubpage === 'infra' || currentIndusSubpage === 'projects' || currentIndusSubpage === 'products') {
+    } else if (currentIndusSubpage === 'infra' || currentIndusSubpage === 'projects' || currentIndusSubpage === 'products' || currentIndusSubpage === 'esh') {
       currentIndusSubpage = 'site';
       showToast('Returned to Site');
     } else {
@@ -4529,6 +4604,8 @@ function loadIndusDataset() {
     currentDataset = [...indusInfraData];
   } else if (currentIndusSubpage === 'projects') {
     currentDataset = [...indusProjectsData];
+  } else if (currentIndusSubpage === 'esh') {
+    currentDataset = [...indusEshData];
   } else if (currentIndusSubpage === 'project_type_details') {
     if (currentIndusProjectTypeSubpage === 'transport') {
       currentDataset = [...indusProjectTransportData];
@@ -4563,6 +4640,31 @@ function renderIndusToolbar() {
         </button>
       </div>
     `;
+    document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+      openSideForm();
+    });
+    return;
+  }
+
+  if (currentIndusSubpage === 'esh') {
+    // Indus Towers ESH Toolbar: Backward Icon on Left + CSV Upload + Blue Plus (+) on Right
+    toolbar.innerHTML = `
+      <div class="toolbar-left">${universalBackBtnHtml}</div>
+      <div class="toolbar-right">
+        <!-- Green CSV Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="Upload CSV / Excel" aria-label="Upload CSV">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Trainee" aria-label="Add Trainee">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
+      triggerCsvUpload();
+    });
     document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
       openSideForm();
     });
@@ -4897,6 +4999,51 @@ function renderIndusTableHead() {
     return;
   }
 
+  if (currentIndusSubpage === 'esh') {
+    // Indus Towers -> ESH Table Head
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['name'] ? 'has-active-filter' : ''}" data-filter-col="name" title="Filter Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Employee Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeType'] ? 'has-active-filter' : ''}" data-filter-col="employeeType" title="Filter Employee Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 17ch; min-width: 17ch; max-width: 17ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Aadhar Number</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Training Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['trainingType'] ? 'has-active-filter' : ''}" data-filter-col="trainingType" title="Filter Training Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Training ID Number</span>
+        </th>
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Training Agency</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <span>Expiry Date</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+    return;
+  }
+
   if (currentIndusSubpage === 'projects') {
     thead.innerHTML = `
       <tr class="master-view-header">
@@ -5145,7 +5292,8 @@ function renderIndusFooter() {
     { key: 'site', label: 'Site' },
     { key: 'products', label: 'GBPA' },
     { key: 'infra', label: 'Infra' },
-    { key: 'projects', label: 'Projects' }
+    { key: 'projects', label: 'Projects' },
+    { key: 'esh', label: 'ESH' }
   ];
 
   footer.innerHTML = `
@@ -10194,7 +10342,7 @@ function applyFiltersAndRender() {
             : (currentModule === 'projects'
               ? 14
               : (currentModule === 'indus_towers'
-                ? (currentIndusSubpage === 'projects' ? 8 : 10)
+                ? (currentIndusSubpage === 'esh' ? 8 : (currentIndusSubpage === 'projects' ? 8 : 10))
                 : (currentModule === 'master' ? (currentMasterView === 'hr_policies' ? 11 : (currentMasterSubpage === 'customer' ? 7 : 6)) : (currentWorklistView === 'po' ? 6 : 10)))))));
     tbody.innerHTML = `
       <tr>
@@ -10311,6 +10459,30 @@ function applyFiltersAndRender() {
           `;
         }).join('');
       }
+      return;
+    }
+
+    if (currentIndusSubpage === 'esh') {
+      // Render Indus Towers -> ESH (Trainee) Rows
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.name || '').replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="openViewEshTraineeCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.name || ''}</a>
+            </td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${(row.employeeType || '').replace(/"/g, '&quot;')}">${row.employeeType || ''}</td>
+            <td style="width: 17ch; min-width: 17ch; max-width: 17ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b;" title="${(row.aadharNumber || '').replace(/"/g, '&quot;')}">${row.aadharNumber || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${(row.trainingType || '').replace(/"/g, '&quot;')}">${row.trainingType || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${(row.trainingIdNumber || '').replace(/"/g, '&quot;')}">${row.trainingIdNumber || ''}</td>
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.trainingAgency || '').replace(/"/g, '&quot;')}">${row.trainingAgency || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${row.expiryDate || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
       return;
     }
 
@@ -14110,6 +14282,7 @@ function openSideForm() {
   const addProductCard = document.getElementById('addProductCard');
   const addExpenseCard = document.getElementById('addExpenseCard');
   const addGbpaCard = document.getElementById('addGbpaCard');
+  const addEshTraineeCard = document.getElementById('addEshTraineeCard');
   const addIndusTowerCard = document.getElementById('addIndusTowerCard');
 
   if (addEmployeeCard) addEmployeeCard.style.display = 'none';
@@ -14117,6 +14290,7 @@ function openSideForm() {
   if (addSiteCard) addSiteCard.style.display = 'none';
   if (addInfraCard) addInfraCard.style.display = 'none';
   if (addProjectCard) addProjectCard.style.display = 'none';
+  if (addEshTraineeCard) addEshTraineeCard.style.display = 'none';
   if (addMaterialsCard) addMaterialsCard.style.display = 'none';
   if (addProductExpenseCard) addProductExpenseCard.style.display = 'none';
   if (addProductInfraCard) addProductInfraCard.style.display = 'none';
@@ -14131,7 +14305,28 @@ function openSideForm() {
   if (addIndusTowerCard) addIndusTowerCard.style.display = 'none';
 
   if (currentModule === 'indus_towers') {
-    if (currentIndusSubpage === 'project_type_details') {
+    if (currentIndusSubpage === 'esh') {
+      if (addEshTraineeCard) {
+        addEshTraineeCard.style.display = 'block';
+        const lblTitle = document.getElementById('lblEshTraineeCardTitle');
+        const btnEditToggle = document.getElementById('btnEshTraineeCardEditToggle');
+        const btnSaveWrap = document.querySelector('#frmAddEshTrainee .form-submit-inside-wrap');
+        if (lblTitle) lblTitle.innerText = 'Add New Trainee';
+        if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+        const frm = document.getElementById('frmAddEshTrainee');
+        if (frm) frm.reset();
+        const empType = document.getElementById('inpEshEmployeeType');
+        if (empType) empType.value = 'On-Roll';
+        const trnType = document.getElementById('inpEshTrainingType');
+        if (trnType) trnType.value = 'CHCTE';
+        const stToggle = document.getElementById('inpEshStatusToggle');
+        if (stToggle) stToggle.checked = true;
+        setEshFormReadOnly(false);
+        currentViewedEshId = null;
+        isEshFormEditing = false;
+      }
+    } else if (currentIndusSubpage === 'project_type_details') {
       if (currentIndusProjectTypeSubpage === 'transport') {
         if (addProjectTransportCard) addProjectTransportCard.style.display = 'block';
       } else {
@@ -16599,6 +16794,9 @@ function getColumnDisplayName(colKey) {
     gstNumber: "GST Number",
     gstType: "GST Type",
     invoiceType: "Invoice Type",
+    name: "Name",
+    employeeType: "Employee Type",
+    trainingType: "Training Type",
     status: "Status",
     infraCategory: "Infra Category",
     infraDescription: "Infra Description",
@@ -19288,6 +19486,239 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// --- ESH (TRAINEE) VIEW & EDIT ENGINE ---
+let currentViewedEshId = null;
+let isEshFormEditing = false;
+
+function setEshFormReadOnly(isReadOnly, isEditMode = false) {
+  const form = document.getElementById('frmAddEshTrainee');
+  if (!form) return;
+
+  const allFieldIds = [
+    'inpEshEmployeeType',
+    'inpEshServiceVendorName',
+    'inpEshEmployeeName',
+    'inpEshAadharNumber',
+    'inpEshTrainingType',
+    'inpEshTrainingIdNumber',
+    'inpEshTrainingAgency',
+    'inpEshExpiryDate'
+  ];
+
+  allFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isReadOnly) {
+      if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
+      else el.setAttribute('readonly', 'true');
+      el.classList.remove('field-non-editable-dark');
+      el.style.backgroundColor = '#f8fafc';
+      el.style.color = '#64748b';
+      el.style.cursor = 'not-allowed';
+    } else {
+      if (el.tagName === 'SELECT') el.removeAttribute('disabled');
+      else el.removeAttribute('readonly');
+      el.classList.remove('field-non-editable-dark');
+      el.style.backgroundColor = '#ffffff';
+      el.style.color = '#1e293b';
+      el.style.cursor = 'auto';
+    }
+  });
+
+  const calendarBtn = document.getElementById('btnEshExpiryDateCalendar');
+  const nativeDate = document.getElementById('inpEshExpiryDateNative');
+  if (calendarBtn) calendarBtn.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+  if (nativeDate) nativeDate.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+
+  const toggles = form.querySelectorAll('input[type="checkbox"]');
+  toggles.forEach(t => {
+    t.disabled = isReadOnly;
+    const parentSwitch = t.closest('.toggle-slide-switch');
+    if (parentSwitch) {
+      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
+    }
+  });
+}
+
+window.openViewEshTraineeCard = function(traineeId) {
+  let trainee = indusEshData.find(t => t.id === traineeId || t.name === traineeId);
+  if (!trainee) {
+    trainee = indusEshData[0] || {
+      id: traineeId || 'esh-1',
+      name: "Ramesh Kumar",
+      employeeType: "On-Roll",
+      serviceVendorName: "Indus Towers Internal",
+      aadharNumber: "4532 8901 2345",
+      trainingType: "CHCTE",
+      trainingIdNumber: "TRN-IND-2026-081",
+      trainingAgency: "National Safety Council",
+      expiryDate: "15 - 08 - 2027",
+      status: "Active"
+    };
+  }
+
+  currentViewedEshId = trainee.id;
+  isEshFormEditing = false;
+  openSideForm();
+
+  const cards = document.querySelectorAll('.side-form-card');
+  cards.forEach(c => c.style.display = 'none');
+
+  const card = document.getElementById('addEshTraineeCard');
+  if (card) card.style.display = 'block';
+
+  const lblTitle = document.getElementById('lblEshTraineeCardTitle');
+  if (lblTitle) lblTitle.innerText = trainee.name || 'View Trainee';
+
+  const btnEditToggle = document.getElementById('btnEshTraineeCardEditToggle');
+  const imgEditIcon = document.getElementById('imgEshTraineeCardEditIcon');
+  if (btnEditToggle) btnEditToggle.style.display = 'inline-flex';
+  if (imgEditIcon) {
+    imgEditIcon.src = 'icons/Edit.svg';
+    imgEditIcon.title = 'Edit Info';
+  }
+
+  const btnSaveWrap = document.querySelector('#frmAddEshTrainee .form-submit-inside-wrap');
+  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+  if (document.getElementById('inpEshEmployeeType')) document.getElementById('inpEshEmployeeType').value = trainee.employeeType || 'On-Roll';
+  if (document.getElementById('inpEshServiceVendorName')) document.getElementById('inpEshServiceVendorName').value = trainee.serviceVendorName || '';
+  if (document.getElementById('inpEshEmployeeName')) document.getElementById('inpEshEmployeeName').value = trainee.name || '';
+  if (document.getElementById('inpEshAadharNumber')) document.getElementById('inpEshAadharNumber').value = trainee.aadharNumber || '';
+  if (document.getElementById('inpEshTrainingType')) document.getElementById('inpEshTrainingType').value = trainee.trainingType || 'CHCTE';
+  if (document.getElementById('inpEshTrainingIdNumber')) document.getElementById('inpEshTrainingIdNumber').value = trainee.trainingIdNumber || '';
+  if (document.getElementById('inpEshTrainingAgency')) document.getElementById('inpEshTrainingAgency').value = trainee.trainingAgency || '';
+  if (document.getElementById('inpEshExpiryDate')) document.getElementById('inpEshExpiryDate').value = trainee.expiryDate || '';
+
+  if (document.getElementById('inpEshStatusToggle')) {
+    document.getElementById('inpEshStatusToggle').checked = !((trainee.status || '').toLowerCase().includes('in'));
+  }
+
+  setEshFormReadOnly(true);
+  showToast(`Viewing trainee details: ${trainee.name}`);
+};
+
+// Trainee Card Edit / Save Toggle Listener
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btnEshTraineeCardEditToggle')?.addEventListener('click', () => {
+    let trainee = indusEshData.find(t => t.id === currentViewedEshId);
+    if (!trainee) trainee = indusEshData[0];
+    const imgIcon = document.getElementById('imgEshTraineeCardEditIcon');
+
+    if (!isEshFormEditing) {
+      // Enter Edit Mode
+      isEshFormEditing = true;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.title = 'Save Changes';
+      }
+      setEshFormReadOnly(false, true);
+      const lblTitle = document.getElementById('lblEshTraineeCardTitle');
+      if (lblTitle && trainee) lblTitle.innerText = trainee.name || 'View Trainee';
+      showToast('Edit mode enabled for trainee details');
+    } else {
+      // Save Mode
+      if (trainee) {
+        trainee.employeeType = document.getElementById('inpEshEmployeeType')?.value || trainee.employeeType;
+        trainee.serviceVendorName = document.getElementById('inpEshServiceVendorName')?.value || trainee.serviceVendorName;
+        trainee.name = document.getElementById('inpEshEmployeeName')?.value || trainee.name;
+        trainee.aadharNumber = document.getElementById('inpEshAadharNumber')?.value || trainee.aadharNumber;
+        trainee.trainingType = document.getElementById('inpEshTrainingType')?.value || trainee.trainingType;
+        trainee.trainingIdNumber = document.getElementById('inpEshTrainingIdNumber')?.value || trainee.trainingIdNumber;
+        trainee.trainingAgency = document.getElementById('inpEshTrainingAgency')?.value || trainee.trainingAgency;
+        trainee.expiryDate = document.getElementById('inpEshExpiryDate')?.value || trainee.expiryDate;
+        const statusChk = document.getElementById('inpEshStatusToggle');
+        if (statusChk) trainee.status = statusChk.checked ? 'Active' : 'In - Active';
+      }
+      isEshFormEditing = false;
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      setEshFormReadOnly(true);
+      const lblTitle = document.getElementById('lblEshTraineeCardTitle');
+      if (lblTitle && trainee) lblTitle.innerText = trainee.name || 'View Trainee';
+      loadIndusDataset();
+      applyFiltersAndRender();
+      showToast('Trainee details updated successfully!');
+    }
+  });
+
+  // Add New Trainee Submit Button
+  document.getElementById('btnSubmitEshTrainee')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const empName = document.getElementById('inpEshEmployeeName')?.value?.trim();
+    if (!empName) {
+      showToast('Please enter Employee Name');
+      return;
+    }
+    const empType = document.getElementById('inpEshEmployeeType')?.value || 'On-Roll';
+    const vendName = document.getElementById('inpEshServiceVendorName')?.value?.trim() || '';
+    const aadhar = document.getElementById('inpEshAadharNumber')?.value?.trim() || '';
+    const trnType = document.getElementById('inpEshTrainingType')?.value || 'CHCTE';
+    const trnId = document.getElementById('inpEshTrainingIdNumber')?.value?.trim() || `TRN-IND-2026-${String(indusEshData.length + 1).padStart(3, '0')}`;
+    const agency = document.getElementById('inpEshTrainingAgency')?.value?.trim() || '';
+    const expDate = document.getElementById('inpEshExpiryDate')?.value?.trim() || '31 - 12 - 2027';
+    const stToggle = document.getElementById('inpEshStatusToggle');
+    const status = (stToggle && stToggle.checked) ? 'Active' : 'In - Active';
+
+    const newRecord = {
+      id: `esh-${Date.now()}`,
+      name: empName,
+      employeeType: empType,
+      serviceVendorName: vendName,
+      aadharNumber: aadhar,
+      trainingType: trnType,
+      trainingIdNumber: trnId,
+      trainingAgency: agency,
+      expiryDate: expDate,
+      status: status
+    };
+
+    indusEshData.unshift(newRecord);
+
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+    const card = document.getElementById('addEshTraineeCard');
+    if (card) card.style.display = 'none';
+
+    loadIndusDataset();
+    applyFiltersAndRender();
+    showToast('New trainee added successfully!');
+  });
+
+  // Close ESH Trainee Form Button
+  document.getElementById('btnCloseEshTraineeForm')?.addEventListener('click', () => {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+    const card = document.getElementById('addEshTraineeCard');
+    if (card) card.style.display = 'none';
+  });
+
+  // ESH Native Date Picker Sync
+  document.getElementById('inpEshExpiryDateNative')?.addEventListener('change', (e) => {
+    const val = e.target.value;
+    if (val) {
+      const parts = val.split('-');
+      if (parts.length === 3) {
+        document.getElementById('inpEshExpiryDate').value = `${parts[2]} - ${parts[1]} - ${parts[0]}`;
+      }
+    }
+  });
+
+  document.getElementById('btnEshExpiryDateCalendar')?.addEventListener('click', () => {
+    const nativeInp = document.getElementById('inpEshExpiryDateNative');
+    if (nativeInp) {
+      if (typeof nativeInp.showPicker === 'function') {
+        nativeInp.showPicker();
+      } else {
+        nativeInp.focus();
+      }
+    }
+  });
+});
+
 let currentViewedVendorId = null;
 let isVendorFormEditing = false;
 
@@ -19948,7 +20379,7 @@ function showToast(message) {
 function triggerCsvUpload() {
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
-  fileInput.accept = '.csv, text/csv';
+  fileInput.accept = '.csv, .xlsx, .xls, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
   fileInput.style.display = 'none';
 
   fileInput.addEventListener('change', (e) => {
@@ -19956,15 +20387,11 @@ function triggerCsvUpload() {
     if (file) {
       const fileName = file.name;
       const ext = fileName.split('.').pop().toLowerCase();
-      if (ext !== 'csv') {
-        showToast('Invalid file format. Please select a .csv file');
+      if (ext !== 'csv' && ext !== 'xlsx' && ext !== 'xls') {
+        showToast('Invalid file format. Please select a .csv or .xlsx file');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        showToast(`CSV File "${fileName}" uploaded successfully!`);
-      };
-      reader.readAsText(file);
+      showToast(`File "${fileName}" uploaded successfully!`);
     }
   });
 

@@ -12874,12 +12874,18 @@ function initSideFormEvents() {
       const bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || "A+";
       const maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || "Single";
       const qualification = document.getElementById('inpEmpQualification')?.value.trim() || "";
-      const pan = document.getElementById('inpEmpPanNumber')?.value.trim() || "";
-      const aadhar = document.getElementById('inpEmpAadharNumber')?.value.trim() || "";
-      const drivingLicense = document.getElementById('inpEmpDrivingLicense')?.value.trim() || "";
-      const passportNumber = document.getElementById('inpEmpPassportNumber')?.value.trim() || "";
-      const epfUan = document.getElementById('inpEmpEpfUan')?.value.trim() || "";
-      const esiId = document.getElementById('inpEmpEsiCode')?.value.trim() || "";
+      const panToggle = document.getElementById('inpEmpPanToggle');
+      const pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value.trim() || "") : "";
+      const aadharToggle = document.getElementById('inpEmpAadharToggle');
+      const aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value.trim() || "") : "";
+      const dlToggle = document.getElementById('inpEmpDlToggle');
+      const drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value.trim() || "") : "";
+      const passportToggle = document.getElementById('inpEmpPassportToggle');
+      const passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value.trim() || "") : "";
+      const epfToggle = document.getElementById('inpEmpEpfToggle');
+      const epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value.trim() || "") : "";
+      const esiToggle = document.getElementById('inpEmpEsiToggle');
+      const esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value.trim() || "") : "";
       const prevExp = document.getElementById('inpEmpPrevExp')?.value.trim() || "";
       const currentExp = document.getElementById('inpEmpCurrExp')?.value.trim() || "";
       const totalExp = document.getElementById('inpEmpTotalExp')?.value.trim() || "";
@@ -14571,6 +14577,15 @@ function openSideForm() {
       const statusToggle = document.getElementById('inpEmpStatusToggle');
       if (statusToggle) statusToggle.checked = true;
 
+      ['Pan', 'Aadhar', 'Dl', 'Passport', 'Epf', 'Esi'].forEach(key => {
+        const toggle = document.getElementById(`inpEmp${key}Toggle`);
+        const wrap = document.getElementById(`wrapEmp${key}`);
+        const toggleWrap = document.getElementById(`toggleWrapEmp${key}`);
+        if (toggle) toggle.checked = false;
+        if (wrap) wrap.style.display = 'none';
+        if (toggleWrap) toggleWrap.style.display = 'flex';
+      });
+
       setEmployeeFormReadOnly(false);
       currentViewedEmpId = null;
       isEmployeeFormEditing = false;
@@ -15169,27 +15184,29 @@ window.handleIndusToggleDisappear = function(toggleId, toggleWrapId, wrapInputId
   const toggleWrap = document.getElementById(toggleWrapId);
   const wrapInput = document.getElementById(wrapInputId);
   if (toggle && toggle.checked) {
-    if (toggleWrap) toggleWrap.style.display = 'none';
+    if (toggleWrap) toggleWrap.style.setProperty('display', 'none', 'important');
     if (wrapInput) {
-      wrapInput.style.display = 'flex';
+      wrapInput.style.setProperty('display', 'flex', 'important');
       const textInp = wrapInput.querySelector('input[type="text"]');
-      if (textInp && isIndusTowerEditing) textInp.focus();
+      if (textInp) textInp.focus();
     }
   }
 };
 
 window.handleIndusToggleReappear = function(toggleId, toggleWrapId, wrapInputId) {
-  if (!isIndusTowerEditing) return;
   const toggle = document.getElementById(toggleId);
   const toggleWrap = document.getElementById(toggleWrapId);
   const wrapInput = document.getElementById(wrapInputId);
   if (toggle) toggle.checked = false;
-  if (wrapInput) wrapInput.style.display = 'none';
-  if (toggleWrap) toggleWrap.style.display = 'block';
+  if (wrapInput) {
+    wrapInput.style.setProperty('display', 'none', 'important');
+    const textInp = wrapInput.querySelector('input[type="text"]');
+    if (textInp) textInp.value = '';
+  }
+  if (toggleWrap) toggleWrap.style.setProperty('display', 'flex', 'important');
 };
 
 window.triggerIndusPdf = function(fileInputId) {
-  if (!isIndusTowerEditing) return;
   const fileInput = document.getElementById(fileInputId);
   if (fileInput) fileInput.click();
 };
@@ -15226,12 +15243,11 @@ function setIndusTowerFormReadOnly(isReadOnly) {
   inputs.forEach(input => {
     if (input.type === 'file') return;
     if (input.type === 'checkbox') {
-      const isEditableToggle = !isReadOnly;
-      input.disabled = !isEditableToggle;
+      input.disabled = false;
       const parentSwitch = input.closest('.toggle-slide-switch');
       if (parentSwitch) {
-        parentSwitch.style.pointerEvents = isEditableToggle ? 'auto' : 'none';
-        parentSwitch.style.opacity = isEditableToggle ? '1' : '0.65';
+        parentSwitch.style.pointerEvents = 'auto';
+        parentSwitch.style.opacity = '1';
       }
       return;
     }
@@ -18344,43 +18360,101 @@ window.openPurchaseBankTab = function() {
 let currentViewedEmpId = null;
 let isEmployeeFormEditing = false;
 
+window.handleEmpToggleDisappear = function(toggleId, toggleWrapId, wrapInputId) {
+  const toggle = document.getElementById(toggleId);
+  const toggleWrap = document.getElementById(toggleWrapId);
+  const wrapInput = document.getElementById(wrapInputId);
+  if (toggle && toggle.checked) {
+    if (toggleWrap) toggleWrap.style.setProperty('display', 'none', 'important');
+    if (wrapInput) {
+      wrapInput.style.setProperty('display', 'flex', 'important');
+      const textInp = wrapInput.querySelector('input[type="text"]');
+      if (textInp) textInp.focus();
+    }
+  }
+};
+
+window.handleEmpToggleReappear = function(toggleId, toggleWrapId, wrapInputId) {
+  const toggle = document.getElementById(toggleId);
+  const toggleWrap = document.getElementById(toggleWrapId);
+  const wrapInput = document.getElementById(wrapInputId);
+  if (toggle) toggle.checked = false;
+  if (wrapInput) {
+    wrapInput.style.setProperty('display', 'none', 'important');
+    const textInp = wrapInput.querySelector('input[type="text"]');
+    if (textInp) textInp.value = '';
+  }
+  if (toggleWrap) toggleWrap.style.setProperty('display', 'flex', 'important');
+};
+
+window.triggerEmpPdf = function(fileInputId) {
+  const fileInput = document.getElementById(fileInputId);
+  if (fileInput) fileInput.click();
+};
+
+window.handleEmpPdfUpload = function(fileInput, textInputId) {
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const txt = document.getElementById(textInputId);
+    if (txt) {
+      txt.value = file.name;
+    }
+    showToast('Document uploaded: ' + file.name);
+  }
+};
+
+window.handleEmpPhotoUpload = function(fileInput, textInputId) {
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const txt = document.getElementById(textInputId);
+    if (txt) {
+      txt.value = file.name;
+    }
+    showToast('Photo uploaded: ' + file.name);
+  }
+};
+
 function setEmployeeFormReadOnly(isReadOnly) {
   const form = document.getElementById('frmAddEmployee');
   if (!form) return;
 
   const inputs = form.querySelectorAll('input, select');
   inputs.forEach(input => {
-    if (input.id === 'inpEmpPhoto') return;
+    if (input.type === 'file') return;
     if (input.type === 'checkbox') {
-      input.disabled = isReadOnly;
+      input.disabled = false;
       const parentSwitch = input.closest('.toggle-slide-switch') || input.closest('label');
       if (parentSwitch) {
-        parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-        parentSwitch.style.opacity = isReadOnly ? '0.7' : '1';
+        parentSwitch.style.pointerEvents = 'auto';
+        parentSwitch.style.opacity = '1';
+      }
+      return;
+    }
+
+    if (input.tagName === 'SELECT') {
+      if (isReadOnly) {
+        input.setAttribute('disabled', 'true');
+        input.style.backgroundColor = '#f8fafc';
+      } else {
+        input.removeAttribute('disabled');
+        input.style.backgroundColor = '#ffffff';
       }
     } else {
       if (isReadOnly) {
-        if (input.tagName === 'SELECT') {
-          input.setAttribute('disabled', 'true');
-        } else {
-          input.setAttribute('readonly', 'true');
-        }
+        input.setAttribute('readonly', 'true');
         input.style.backgroundColor = '#f8fafc';
       } else {
-        if (input.tagName === 'SELECT') {
-          input.removeAttribute('disabled');
-        } else {
-          input.removeAttribute('readonly');
-        }
+        input.removeAttribute('readonly');
         input.style.backgroundColor = '#ffffff';
       }
     }
   });
 
-  const badges = form.querySelectorAll('.input-pdf-badge');
+  const badges = form.querySelectorAll('.input-pdf-badge, .btn-toggle-revert');
   badges.forEach(b => {
-    b.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-    b.style.opacity = isReadOnly ? '0.5' : '1';
+    b.style.pointerEvents = 'auto';
+    b.style.opacity = '1';
+    b.style.cursor = 'pointer';
   });
 }
 
@@ -18395,7 +18469,7 @@ window.handleEmpClick = function(empId, empName) {
       employeeName: empName || "R/RL-234567",
       empType: "On-Roll",
       address: "123 Main Street, Tech Park",
-      contactNumber: "9876543210",
+      contactNumber: "98401 12345",
       email: "test.employee@example.com",
       dob: "1995-05-15",
       bloodGroup: "A+",
@@ -18403,6 +18477,8 @@ window.handleEmpClick = function(empId, empName) {
       qualification: "B.Tech / MCA",
       pan: "ABCDE1234F",
       aadhar: "1234-5678-9012",
+      drivingLicense: "DL-2023-987654",
+      passportNumber: "P9876543",
       epfUan: "100123456789",
       esiCode: "31001234560000001",
       prevExp: "02 - 00",
@@ -18447,7 +18523,7 @@ window.handleEmpClick = function(empId, empName) {
   const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  // Populate form fields
+  // Populate form regular fields
   if (document.getElementById('inpEmpType')) document.getElementById('inpEmpType').value = emp.empType || emp.employeeType || 'On-Roll';
   if (document.getElementById('inpEmpName')) document.getElementById('inpEmpName').value = emp.employeeName || '';
   if (document.getElementById('inpEmpId')) document.getElementById('inpEmpId').value = emp.employeeId || '';
@@ -18455,20 +18531,44 @@ window.handleEmpClick = function(empId, empName) {
   if (document.getElementById('inpEmpMobile')) document.getElementById('inpEmpMobile').value = emp.contactNumber || '9876543210';
   if (document.getElementById('inpEmpEmail')) document.getElementById('inpEmpEmail').value = emp.email || 'test.employee@example.com';
   if (document.getElementById('inpEmpDob')) document.getElementById('inpEmpDob').value = emp.dob || '1995-05-15';
+  if (document.getElementById('inpEmpDoj')) document.getElementById('inpEmpDoj').value = emp.doj || '2023-01-10';
   if (document.getElementById('inpEmpBloodGroup')) document.getElementById('inpEmpBloodGroup').value = emp.bloodGroup || 'A+';
   if (document.getElementById('inpEmpMaritalStatus')) document.getElementById('inpEmpMaritalStatus').value = emp.maritalStatus || 'Single';
   if (document.getElementById('inpEmpQualification')) document.getElementById('inpEmpQualification').value = emp.qualification || 'B.Tech / MCA';
-  if (document.getElementById('inpEmpPanNumber')) document.getElementById('inpEmpPanNumber').value = emp.pan || 'ABCDE1234F';
-  if (document.getElementById('inpEmpAadharNumber')) document.getElementById('inpEmpAadharNumber').value = emp.aadhar || '1234-5678-9012';
-  if (document.getElementById('inpEmpDrivingLicense')) document.getElementById('inpEmpDrivingLicense').value = emp.drivingLicense || 'DL-2023-987654';
-  if (document.getElementById('inpEmpPassportNumber')) document.getElementById('inpEmpPassportNumber').value = emp.passportNumber || 'P9876543';
-  if (document.getElementById('inpEmpEpfUan')) document.getElementById('inpEmpEpfUan').value = emp.epfUan || '100123456789';
-  if (document.getElementById('inpEmpEsiCode')) document.getElementById('inpEmpEsiCode').value = emp.esiId || emp.esiCode || '31001234560000001';
   if (document.getElementById('inpEmpPrevExp')) document.getElementById('inpEmpPrevExp').value = emp.prevExp || '02 - 00';
   if (document.getElementById('inpEmpCurrExp')) document.getElementById('inpEmpCurrExp').value = emp.currentExp || '01 - 00';
   if (document.getElementById('inpEmpTotalExp')) document.getElementById('inpEmpTotalExp').value = emp.totalExp || '03 - 00';
-  if (document.getElementById('inpEmpDoj')) document.getElementById('inpEmpDoj').value = emp.doj || '2023-01-10';
   if (document.getElementById('inpEmpDesignation')) document.getElementById('inpEmpDesignation').value = emp.designation || 'Manager';
+
+  // Populate toggle fields (PAN, Aadhar, DL, Passport, EPF, ESI)
+  const toggleFields = [
+    { key: 'Pan', val: emp.pan, inpId: 'inpEmpPanNumber' },
+    { key: 'Aadhar', val: emp.aadhar, inpId: 'inpEmpAadharNumber' },
+    { key: 'Dl', val: emp.drivingLicense, inpId: 'inpEmpDrivingLicense' },
+    { key: 'Passport', val: emp.passportNumber, inpId: 'inpEmpPassportNumber' },
+    { key: 'Epf', val: emp.epfUan, inpId: 'inpEmpEpfUan' },
+    { key: 'Esi', val: emp.esiId || emp.esiCode, inpId: 'inpEmpEsiCode' }
+  ];
+
+  toggleFields.forEach(tf => {
+    const toggle = document.getElementById(`inpEmp${tf.key}Toggle`);
+    const wrap = document.getElementById(`wrapEmp${tf.key}`);
+    const toggleWrap = document.getElementById(`toggleWrapEmp${tf.key}`);
+    const textInp = document.getElementById(tf.inpId);
+
+    if (tf.val && String(tf.val).trim() !== '') {
+      if (toggle) toggle.checked = true;
+      if (toggleWrap) toggleWrap.style.display = 'none';
+      if (wrap) wrap.style.display = 'flex';
+      if (textInp) textInp.value = tf.val;
+    } else {
+      if (toggle) toggle.checked = false;
+      if (wrap) wrap.style.display = 'none';
+      if (toggleWrap) toggleWrap.style.display = 'flex';
+      if (textInp) textInp.value = '';
+    }
+  });
+
   const statusToggleEl = document.getElementById('inpEmpStatusToggle');
   if (statusToggleEl) statusToggleEl.checked = (emp.status === 'Active');
 
@@ -18513,13 +18613,21 @@ document.addEventListener('DOMContentLoaded', () => {
             emp.bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || emp.bloodGroup;
             emp.maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || emp.maritalStatus;
             emp.qualification = document.getElementById('inpEmpQualification')?.value || emp.qualification;
-            emp.pan = document.getElementById('inpEmpPanNumber')?.value || emp.pan;
-            emp.aadhar = document.getElementById('inpEmpAadharNumber')?.value || emp.aadhar;
-            emp.drivingLicense = document.getElementById('inpEmpDrivingLicense')?.value || emp.drivingLicense;
-            emp.passportNumber = document.getElementById('inpEmpPassportNumber')?.value || emp.passportNumber;
-            emp.epfUan = document.getElementById('inpEmpEpfUan')?.value || emp.epfUan;
-            emp.esiId = document.getElementById('inpEmpEsiCode')?.value || emp.esiId;
+            
+            const panToggle = document.getElementById('inpEmpPanToggle');
+            emp.pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value || '') : '';
+            const aadharToggle = document.getElementById('inpEmpAadharToggle');
+            emp.aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value || '') : '';
+            const dlToggle = document.getElementById('inpEmpDlToggle');
+            emp.drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value || '') : '';
+            const passportToggle = document.getElementById('inpEmpPassportToggle');
+            emp.passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value || '') : '';
+            const epfToggle = document.getElementById('inpEmpEpfToggle');
+            emp.epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value || '') : '';
+            const esiToggle = document.getElementById('inpEmpEsiToggle');
+            emp.esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value || '') : '';
             emp.esiCode = emp.esiId;
+
             emp.prevExp = document.getElementById('inpEmpPrevExp')?.value || emp.prevExp;
             emp.currentExp = document.getElementById('inpEmpCurrExp')?.value || emp.currentExp;
             emp.totalExp = document.getElementById('inpEmpTotalExp')?.value || emp.totalExp;

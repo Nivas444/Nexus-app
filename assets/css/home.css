@@ -1762,7 +1762,9 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   position: relative !important;
 }
 
-#addIndusTowerCard .slide-dynamic-wrap {
+#addIndusTowerCard .slide-dynamic-wrap,
+#addEmployeeCard .slide-dynamic-wrap,
+.slide-dynamic-wrap {
   position: relative !important;
   width: 100% !important;
   display: flex;
@@ -1771,17 +1773,25 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 }
 
 #addIndusTowerCard .slide-dynamic-wrap[style*="display: none"],
-#addIndusTowerCard .slide-dynamic-wrap[style*="display:none"] {
+#addIndusTowerCard .slide-dynamic-wrap[style*="display:none"],
+#addEmployeeCard .slide-dynamic-wrap[style*="display: none"],
+#addEmployeeCard .slide-dynamic-wrap[style*="display:none"],
+.slide-dynamic-wrap[style*="display: none"],
+.slide-dynamic-wrap[style*="display:none"] {
   display: none !important;
 }
 
-#addIndusTowerCard .slide-dynamic-wrap .form-input-control {
+#addIndusTowerCard .slide-dynamic-wrap .form-input-control,
+#addEmployeeCard .slide-dynamic-wrap .form-input-control,
+.slide-dynamic-wrap .form-input-control {
   width: 100% !important;
   padding-right: 38px !important;
   box-sizing: border-box !important;
 }
 
-#addIndusTowerCard .btn-toggle-revert {
+#addIndusTowerCard .btn-toggle-revert,
+#addEmployeeCard .btn-toggle-revert,
+.btn-toggle-revert {
   background: transparent !important;
   border: none !important;
   color: #ef4444 !important;
@@ -1799,7 +1809,9 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   transition: transform 0.15s ease, color 0.15s ease !important;
 }
 
-#addIndusTowerCard .btn-toggle-revert:hover {
+#addIndusTowerCard .btn-toggle-revert:hover,
+#addEmployeeCard .btn-toggle-revert:hover,
+.btn-toggle-revert:hover {
   background: transparent !important;
   color: #dc2626 !important;
   transform: scale(1.2) !important;
@@ -1807,8 +1819,8 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 
 .side-form-body-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 12px 24px !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px 28px !important;
   width: 100% !important;
   box-sizing: border-box !important;
 }
@@ -1836,9 +1848,9 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 }
 
 .side-form-body-grid .form-label {
-  width: 130px !important;
-  min-width: 130px !important;
-  flex: 0 0 130px !important;
+  width: 135px !important;
+  min-width: 135px !important;
+  flex: 0 0 135px !important;
   font-size: 0.83rem !important;
   white-space: nowrap;
 }
@@ -1857,6 +1869,123 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   min-width: 0 !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
+}
+
+/* Add & View Employee Card Specific Symmetrical Layout & Alignment */
+#addEmployeeCard .side-form-body {
+  padding: 16px 28px 24px 28px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#addEmployeeCard .side-form-body-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px 32px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#addEmployeeCard .side-grid-col {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  flex: 1 1 0% !important;
+  box-sizing: border-box !important;
+}
+
+#addEmployeeCard .form-row-group {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#addEmployeeCard .form-label {
+  width: 140px !important;
+  min-width: 140px !important;
+  max-width: 140px !important;
+  flex: 0 0 140px !important;
+  font-size: 0.83rem !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+  line-height: 1 !important;
+}
+
+#addEmployeeCard .form-input-wrap {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+#addEmployeeCard .form-input-control,
+#addEmployeeCard .form-select-control {
+  width: 100% !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  box-sizing: border-box !important;
+  font-size: 0.84rem !important;
+}
+
+#addEmployeeCard .slider-input-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  width: 100% !important;
+}
+
+#addEmployeeCard .toggle-switch-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+#addEmployeeCard .toggle-slide-switch {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+  vertical-align: middle !important;
+}
+
+#addEmployeeCard .slide-dynamic-wrap {
+  display: flex !important;
+  align-items: center !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  width: 100% !important;
+  gap: 8px !important;
 }
 
 /* Contact & Communication Side Message Popup (Table View) */

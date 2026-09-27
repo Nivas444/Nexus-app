@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260926_2145">
+  <link rel="stylesheet" href="assets/css/home.css?v=20260927_1955">
 </head>
 
 <body>
@@ -157,7 +157,7 @@
           <form class="side-form-body" id="frmAddEmployee" onsubmit="event.preventDefault();">
             <div class="side-form-body-grid">
 
-              <!-- LEFT COLUMN -->
+              <!-- LEFT COLUMN (12 Fields) -->
               <div class="side-grid-col">
                 <!-- 1. Employee Type -->
                 <div class="form-row-group">
@@ -186,7 +186,21 @@
                   </div>
                 </div>
 
-                <!-- 4. Address -->
+                <!-- 4. Designation -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpEmpDesignation">Designation</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpEmpDesignation">
+                      <option value="Manager" selected>Manager</option>
+                      <option value="Engineer">Engineer</option>
+                      <option value="Accountant">Accountant</option>
+                      <option value="Executive">Executive</option>
+                      <option value="Technician">Technician</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 5. Address -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpAddress">Address</label>
                   <div class="form-input-wrap">
@@ -194,7 +208,7 @@
                   </div>
                 </div>
 
-                <!-- 5. Mobile Number -->
+                <!-- 6. Mobile Number -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpMobile">Mobile Number</label>
                   <div class="form-input-wrap">
@@ -202,7 +216,7 @@
                   </div>
                 </div>
 
-                <!-- 6. E - Mail -->
+                <!-- 7. E - Mail -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpEmail">E - Mail</label>
                   <div class="form-input-wrap">
@@ -210,7 +224,7 @@
                   </div>
                 </div>
 
-                <!-- 7. DOB with Google Calendar Icon -->
+                <!-- 8. DOB with Google Calendar Icon -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpDob">DOB</label>
                   <div class="form-input-wrap with-action-badge">
@@ -221,7 +235,18 @@
                   </div>
                 </div>
 
-                <!-- 8. Blood Group -->
+                <!-- 9. DOJ with Google Calendar Icon -->
+                <div class="form-row-group">
+                  <label class="form-label" for="inpEmpDoj">DOJ</label>
+                  <div class="form-input-wrap with-action-badge">
+                    <input type="date" class="form-input-control date-picker-control" id="inpEmpDoj">
+                    <span class="input-pdf-badge btn-emp-calendar-trigger" title="Select DOJ">
+                      <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 10. Blood Group -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpBloodGroup">Blood Group</label>
                   <div class="form-input-wrap">
@@ -238,7 +263,7 @@
                   </div>
                 </div>
 
-                <!-- 9. Marital Status -->
+                <!-- 11. Marital Status -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpMaritalStatus">Marital Status</label>
                   <div class="form-input-wrap">
@@ -251,36 +276,15 @@
                   </div>
                 </div>
 
-                <!-- 10. Qualification with PDF Upload Badge -->
+                <!-- 12. Qualification with PDF Upload Badge -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpQualification">Qualification</label>
                   <div class="form-input-wrap with-action-badge">
                     <input type="text" class="form-input-control" id="inpEmpQualification"
                       placeholder="Enter Qualification">
-                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF">
-                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 11. PAN Number with PDF Upload Badge -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpPanNumber">PAN Number</label>
-                  <div class="form-input-wrap with-action-badge">
-                    <input type="text" class="form-input-control" id="inpEmpPanNumber" placeholder="Enter PAN Number">
-                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF">
-                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 12. Aadhar Number with PDF Upload Badge -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpAadharNumber">Aadhar Number</label>
-                  <div class="form-input-wrap with-action-badge">
-                    <input type="text" class="form-input-control" id="inpEmpAadharNumber"
-                      placeholder="Enter Aadhar Number">
-                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF">
+                    <input type="file" id="fileEmpQualification" accept="application/pdf" style="display: none;"
+                      onchange="handleEmpPdfUpload(this, 'inpEmpQualification')">
+                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF" onclick="triggerEmpPdf('fileEmpQualification')">
                       <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                     </span>
                   </div>
@@ -289,47 +293,7 @@
 
               <!-- RIGHT COLUMN (12 Fields) -->
               <div class="side-grid-col">
-                <!-- 1. Driving License with PDF Upload Badge -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpDrivingLicense">Driving License</label>
-                  <div class="form-input-wrap with-action-badge">
-                    <input type="text" class="form-input-control" id="inpEmpDrivingLicense"
-                      placeholder="Enter Driving License Number">
-                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF">
-                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 2. Passport Number with PDF Upload Badge -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpPassportNumber">Passport Number</label>
-                  <div class="form-input-wrap with-action-badge">
-                    <input type="text" class="form-input-control" id="inpEmpPassportNumber"
-                      placeholder="Enter Passport Number">
-                    <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF">
-                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 3. EPF UAN -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpEpfUan">EPF UAN</label>
-                  <div class="form-input-wrap">
-                    <input type="text" class="form-input-control" id="inpEmpEpfUan" placeholder="Enter EPF UAN">
-                  </div>
-                </div>
-
-                <!-- 4. ESI ID -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpEsiCode">ESI ID</label>
-                  <div class="form-input-wrap">
-                    <input type="text" class="form-input-control" id="inpEmpEsiCode" placeholder="Enter ESI ID">
-                  </div>
-                </div>
-
-                <!-- 5. Previous Experience (YYYY - MM) -->
+                <!-- 1. Previous Experience (YYYY - MM) -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpPrevExp">Previous Experience</label>
                   <div class="form-input-wrap">
@@ -337,7 +301,7 @@
                   </div>
                 </div>
 
-                <!-- 6. Current Experience (YYYY - MM) -->
+                <!-- 2. Current Experience (YYYY - MM) -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpCurrExp">Current Experience</label>
                   <div class="form-input-wrap">
@@ -345,7 +309,7 @@
                   </div>
                 </div>
 
-                <!-- 7. Total Experience (YYYY - MM) -->
+                <!-- 3. Total Experience (YYYY - MM) -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpTotalExp">Total Experience</label>
                   <div class="form-input-wrap">
@@ -353,62 +317,223 @@
                   </div>
                 </div>
 
-                <!-- 8. DOJ with Google Calendar Icon -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpDoj">DOJ</label>
-                  <div class="form-input-wrap with-action-badge">
-                    <input type="date" class="form-input-control date-picker-control" id="inpEmpDoj">
-                    <span class="input-pdf-badge btn-emp-calendar-trigger" title="Select DOJ">
-                      <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="24" height="24">
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 9. Designation -->
-                <div class="form-row-group">
-                  <label class="form-label" for="inpEmpDesignation">Designation</label>
-                  <div class="form-input-wrap">
-                    <select class="form-select-control" id="inpEmpDesignation">
-                      <option value="Manager" selected>Manager</option>
-                      <option value="Engineer">Engineer</option>
-                      <option value="Accountant">Accountant</option>
-                      <option value="Executive">Executive</option>
-                      <option value="Technician">Technician</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- 10. Photo with Image Upload Badge -->
+                <!-- 4. Photo with Image Upload Badge -->
                 <div class="form-row-group">
                   <label class="form-label" for="inpEmpPhoto">Photo</label>
                   <div class="form-input-wrap with-action-badge">
                     <input type="text" class="form-input-control" id="inpEmpPhoto" placeholder="Select Photo" readonly>
-                    <span class="input-pdf-badge btn-emp-img-trigger" id="btnEmpPhotoUpload" title="Upload Photo">
+                    <input type="file" id="fileEmpPhoto" accept="image/*" style="display: none;"
+                      onchange="handleEmpPhotoUpload(this, 'inpEmpPhoto')">
+                    <span class="input-pdf-badge btn-emp-img-trigger" id="btnEmpPhotoUpload" title="Upload Photo" onclick="triggerEmpPdf('fileEmpPhoto')">
                       <img src="icons/Image Upload.svg" alt="Upload Photo" class="input-pdf-icon" width="24"
                         height="24">
                     </span>
                   </div>
                 </div>
 
-                <!-- 11. Geo Attendance Slidebar (Workable / Interactive, Deactive Initial Stage) -->
+                <!-- 5. PAN Number (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
                 <div class="form-row-group">
-                  <label class="form-label">Geo Attendance</label>
-                  <div class="form-input-wrap slider-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpEmpGeoAttendanceToggle">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
+                  <label class="form-label">PAN Number</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpPan">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpPanToggle"
+                          onchange="handleEmpToggleDisappear('inpEmpPanToggle', 'toggleWrapEmpPan', 'wrapEmpPan')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapEmpPan" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="inpEmpPanNumber"
+                          placeholder="Enter PAN Number" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileEmpPan" accept="application/pdf" style="display: none;"
+                          onchange="handleEmpPdfUpload(this, 'inpEmpPanNumber')">
+                        <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF" onclick="triggerEmpPdf('fileEmpPan')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleEmpToggleReappear('inpEmpPanToggle', 'toggleWrapEmpPan', 'wrapEmpPan')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
                   </div>
                 </div>
 
-                <!-- 12. Status Slidebar (Workable / Interactive, Deactive Initial Stage) -->
+                <!-- 6. Aadhar Number (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
+                <div class="form-row-group">
+                  <label class="form-label">Aadhar Number</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpAadhar">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpAadharToggle"
+                          onchange="handleEmpToggleDisappear('inpEmpAadharToggle', 'toggleWrapEmpAadhar', 'wrapEmpAadhar')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapEmpAadhar" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="inpEmpAadharNumber"
+                          placeholder="Enter Aadhar Number" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileEmpAadhar" accept="application/pdf" style="display: none;"
+                          onchange="handleEmpPdfUpload(this, 'inpEmpAadharNumber')">
+                        <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF" onclick="triggerEmpPdf('fileEmpAadhar')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleEmpToggleReappear('inpEmpAadharToggle', 'toggleWrapEmpAadhar', 'wrapEmpAadhar')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 7. Driving License (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
+                <div class="form-row-group">
+                  <label class="form-label">Driving License</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpDl">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpDlToggle"
+                          onchange="handleEmpToggleDisappear('inpEmpDlToggle', 'toggleWrapEmpDl', 'wrapEmpDl')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapEmpDl" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="inpEmpDrivingLicense"
+                          placeholder="Enter Driving License Number" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileEmpDl" accept="application/pdf" style="display: none;"
+                          onchange="handleEmpPdfUpload(this, 'inpEmpDrivingLicense')">
+                        <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF" onclick="triggerEmpPdf('fileEmpDl')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleEmpToggleReappear('inpEmpDlToggle', 'toggleWrapEmpDl', 'wrapEmpDl')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 8. Passport Number (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
+                <div class="form-row-group">
+                  <label class="form-label">Passport Number</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpPassport">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpPassportToggle"
+                          onchange="handleEmpToggleDisappear('inpEmpPassportToggle', 'toggleWrapEmpPassport', 'wrapEmpPassport')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapEmpPassport" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="inpEmpPassportNumber"
+                          placeholder="Enter Passport Number" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileEmpPassport" accept="application/pdf" style="display: none;"
+                          onchange="handleEmpPdfUpload(this, 'inpEmpPassportNumber')">
+                        <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF" onclick="triggerEmpPdf('fileEmpPassport')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleEmpToggleReappear('inpEmpPassportToggle', 'toggleWrapEmpPassport', 'wrapEmpPassport')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 9. EPF UAN (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
+                <div class="form-row-group">
+                  <label class="form-label">EPF UAN</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpEpf">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpEpfToggle"
+                          onchange="handleEmpToggleDisappear('inpEmpEpfToggle', 'toggleWrapEmpEpf', 'wrapEmpEpf')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapEmpEpf" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="inpEmpEpfUan"
+                          placeholder="Enter EPF UAN" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileEmpEpf" accept="application/pdf" style="display: none;"
+                          onchange="handleEmpPdfUpload(this, 'inpEmpEpfUan')">
+                        <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF" onclick="triggerEmpPdf('fileEmpEpf')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleEmpToggleReappear('inpEmpEpfToggle', 'toggleWrapEmpEpf', 'wrapEmpEpf')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 10. ESI ID (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
+                <div class="form-row-group">
+                  <label class="form-label">ESI ID</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpEsi">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpEsiToggle"
+                          onchange="handleEmpToggleDisappear('inpEmpEsiToggle', 'toggleWrapEmpEsi', 'wrapEmpEsi')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapEmpEsi" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="inpEmpEsiCode"
+                          placeholder="Enter ESI ID" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileEmpEsi" accept="application/pdf" style="display: none;"
+                          onchange="handleEmpPdfUpload(this, 'inpEmpEsiCode')">
+                        <span class="input-pdf-badge btn-emp-pdf-trigger" title="Upload PDF" onclick="triggerEmpPdf('fileEmpEsi')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleEmpToggleReappear('inpEmpEsiToggle', 'toggleWrapEmpEsi', 'wrapEmpEsi')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 11. Geo Attendance Slidebar (Workable / Interactive, Centered) -->
+                <div class="form-row-group">
+                  <label class="form-label">Geo Attendance</label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpGeoAttendance" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpGeoAttendanceToggle">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 12. Status Slidebar (Workable / Interactive, Centered) -->
                 <div class="form-row-group">
                   <label class="form-label">Status</label>
-                  <div class="form-input-wrap slider-wrap">
-                    <label class="toggle-slide-switch">
-                      <input type="checkbox" id="inpEmpStatusToggle">
-                      <span class="toggle-slide-slider"></span>
-                    </label>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
+                    <div class="toggle-switch-container" id="toggleWrapEmpStatus" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpEmpStatusToggle" checked>
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -9096,7 +9221,7 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
-  <script src="assets/js/home.js?v=20260926_2238"></script>
+  <script src="assets/js/home.js?v=20260927_1935"></script>
 </body>
 
 </html>

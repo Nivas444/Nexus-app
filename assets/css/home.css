@@ -4875,6 +4875,22 @@ td.col-loc-incharge {
 #addIndusTowerCard.indus-company-edit .slide-dynamic-wrap {
   width: 100% !important;
 }
+/* Center logo image + delete icon in edit mode, matching toggle alignment */
+#addIndusTowerCard.indus-company-edit #wrapIndusLogoField {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  padding-left: 2px;
+}
+#addIndusTowerCard.indus-company-edit #imgIndusTowerLogoPreview {
+  width: 42px !important;
+  height: 42px !important;
+}
+#addIndusTowerCard.indus-company-edit #btnDeleteIndusTowerLogo {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
 
 /* Employee Contract Modes: Compact Width & 1-Column Layout */
 #addEmployeeCard.emp-contract-add {

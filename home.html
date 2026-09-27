@@ -160,7 +160,7 @@
               <!-- LEFT COLUMN (12 Fields) -->
               <div class="side-grid-col">
                 <!-- 1. Employee Type -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-type">
                   <label class="form-label" for="inpEmpType">Employee Type</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpEmpType">
@@ -171,7 +171,7 @@
                 </div>
 
                 <!-- 2. Employee Name -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-name">
                   <label class="form-label" for="inpEmpName">Employee Name</label>
                   <div class="form-input-wrap">
                     <input type="text" class="form-input-control" id="inpEmpName" placeholder="Enter Employee Name">
@@ -179,7 +179,7 @@
                 </div>
 
                 <!-- 3. Employee ID -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-id">
                   <label class="form-label" for="inpEmpId">Employee ID</label>
                   <div class="form-input-wrap">
                     <input type="text" class="form-input-control" id="inpEmpId" placeholder="Enter Employee ID">
@@ -187,7 +187,7 @@
                 </div>
 
                 <!-- 4. Designation -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-designation emp-row-other">
                   <label class="form-label" for="inpEmpDesignation">Designation</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpEmpDesignation">
@@ -201,7 +201,7 @@
                 </div>
 
                 <!-- 5. Address -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-address">
                   <label class="form-label" for="inpEmpAddress">Address</label>
                   <div class="form-input-wrap">
                     <input type="text" class="form-input-control" id="inpEmpAddress" placeholder="Enter Address">
@@ -209,7 +209,7 @@
                 </div>
 
                 <!-- 6. Mobile Number -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-mobile">
                   <label class="form-label" for="inpEmpMobile">Mobile Number</label>
                   <div class="form-input-wrap">
                     <input type="text" class="form-input-control" id="inpEmpMobile" placeholder="Enter Mobile Number">
@@ -217,7 +217,7 @@
                 </div>
 
                 <!-- 7. E - Mail -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-email emp-row-other">
                   <label class="form-label" for="inpEmpEmail">E - Mail</label>
                   <div class="form-input-wrap">
                     <input type="email" class="form-input-control" id="inpEmpEmail" placeholder="Enter Email Address">
@@ -225,7 +225,7 @@
                 </div>
 
                 <!-- 8. DOB with Google Calendar Icon -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-dob emp-row-other">
                   <label class="form-label" for="inpEmpDob">DOB</label>
                   <div class="form-input-wrap with-action-badge">
                     <input type="date" class="form-input-control date-picker-control" id="inpEmpDob">
@@ -236,7 +236,7 @@
                 </div>
 
                 <!-- 9. DOJ with Google Calendar Icon -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-doj emp-row-other">
                   <label class="form-label" for="inpEmpDoj">DOJ</label>
                   <div class="form-input-wrap with-action-badge">
                     <input type="date" class="form-input-control date-picker-control" id="inpEmpDoj">
@@ -247,7 +247,7 @@
                 </div>
 
                 <!-- 10. Blood Group -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-blood emp-row-other">
                   <label class="form-label" for="inpEmpBloodGroup">Blood Group</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpEmpBloodGroup">
@@ -264,7 +264,7 @@
                 </div>
 
                 <!-- 11. Marital Status -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-marital emp-row-other">
                   <label class="form-label" for="inpEmpMaritalStatus">Marital Status</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpEmpMaritalStatus">
@@ -277,7 +277,7 @@
                 </div>
 
                 <!-- 12. Qualification with PDF Upload Badge -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-qual emp-row-other">
                   <label class="form-label" for="inpEmpQualification">Qualification</label>
                   <div class="form-input-wrap with-action-badge">
                     <input type="text" class="form-input-control" id="inpEmpQualification"
@@ -294,7 +294,7 @@
               <!-- RIGHT COLUMN (12 Fields) -->
               <div class="side-grid-col">
                 <!-- 1. Previous Experience (YYYY - MM) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-prevexp emp-row-other">
                   <label class="form-label" for="inpEmpPrevExp">Previous Experience</label>
                   <div class="form-input-wrap">
                     <input type="text" class="form-input-control" id="inpEmpPrevExp" placeholder="YYYY - MM">
@@ -302,7 +302,7 @@
                 </div>
 
                 <!-- 2. Current Experience (YYYY - MM) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-currexp emp-row-other">
                   <label class="form-label" for="inpEmpCurrExp">Current Experience</label>
                   <div class="form-input-wrap">
                     <input type="text" class="form-input-control" id="inpEmpCurrExp" placeholder="YYYY - MM">
@@ -310,7 +310,7 @@
                 </div>
 
                 <!-- 3. Total Experience (YYYY - MM) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-totalexp emp-row-other">
                   <label class="form-label" for="inpEmpTotalExp">Total Experience</label>
                   <div class="form-input-wrap">
                     <input type="text" class="form-input-control" id="inpEmpTotalExp" placeholder="YYYY - MM">
@@ -318,7 +318,7 @@
                 </div>
 
                 <!-- 4. Photo with Image Upload Badge -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-photo emp-row-other">
                   <label class="form-label" for="inpEmpPhoto">Photo</label>
                   <div class="form-input-wrap with-action-badge">
                     <input type="text" class="form-input-control" id="inpEmpPhoto" placeholder="Select Photo" readonly>
@@ -332,7 +332,7 @@
                 </div>
 
                 <!-- 5. PAN Number (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-pan">
                   <label class="form-label">PAN Number</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapEmpPan">
@@ -362,7 +362,7 @@
                 </div>
 
                 <!-- 6. Aadhar Number (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-aadhar">
                   <label class="form-label">Aadhar Number</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapEmpAadhar">
@@ -392,7 +392,7 @@
                 </div>
 
                 <!-- 7. Driving License (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-dl emp-row-other">
                   <label class="form-label">Driving License</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapEmpDl">
@@ -422,7 +422,7 @@
                 </div>
 
                 <!-- 8. Passport Number (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-passport emp-row-other">
                   <label class="form-label">Passport Number</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapEmpPassport">
@@ -452,7 +452,7 @@
                 </div>
 
                 <!-- 9. EPF UAN (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-epf">
                   <label class="form-label">EPF UAN</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapEmpEpf">
@@ -482,7 +482,7 @@
                 </div>
 
                 <!-- 10. ESI ID (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-esi">
                   <label class="form-label">ESI ID</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapEmpEsi">
@@ -512,7 +512,7 @@
                 </div>
 
                 <!-- 11. Geo Attendance Slidebar (Workable / Interactive, Centered) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-geo emp-row-other">
                   <label class="form-label">Geo Attendance</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
                     <div class="toggle-switch-container" id="toggleWrapEmpGeoAttendance" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
@@ -525,7 +525,7 @@
                 </div>
 
                 <!-- 12. Status Slidebar (Workable / Interactive, Centered) -->
-                <div class="form-row-group">
+                <div class="form-row-group emp-row-item emp-row-status">
                   <label class="form-label">Status</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
                     <div class="toggle-switch-container" id="toggleWrapEmpStatus" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
@@ -1645,18 +1645,20 @@
               View Company Name
             </div>
             <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto; padding-right: 0;">
-              <button type="button" class="side-top-icon-btn" title="HR Policies" id="btnIndusTowerHrPolicies">
-                <img src="icons/HR Policies.svg" alt="HR Policies" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
-              </button>
-              <button type="button" class="side-top-icon-btn" title="Bank Details" id="btnIndusTowerBank">
-                <img src="icons/Bank.svg" alt="Bank Details" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
-              </button>
-              <button type="button" class="side-top-icon-btn" title="National holiday" id="btnIndusTowerAshokaChakra">
-                <img src="icons/Ashoka_Chakra.svg" alt="National holiday" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
-              </button>
-              <button type="button" class="side-top-icon-btn" title="Location" id="btnIndusTowerLocation">
-                <img src="icons/Location.svg" alt="Location" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
-              </button>
+              <div id="indusTowerViewIcons" style="display: flex; align-items: center; gap: 14px;">
+                <button type="button" class="side-top-icon-btn" title="HR Policies" id="btnIndusTowerHrPolicies">
+                  <img src="icons/HR Policies.svg" alt="HR Policies" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
+                </button>
+                <button type="button" class="side-top-icon-btn" title="Bank Details" id="btnIndusTowerBank">
+                  <img src="icons/Bank.svg" alt="Bank Details" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
+                </button>
+                <button type="button" class="side-top-icon-btn" title="National holiday" id="btnIndusTowerAshokaChakra">
+                  <img src="icons/Ashoka_Chakra.svg" alt="National holiday" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
+                </button>
+                <button type="button" class="side-top-icon-btn" title="Location" id="btnIndusTowerLocation">
+                  <img src="icons/Location.svg" alt="Location" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
+                </button>
+              </div>
               <button type="button" class="side-top-icon-btn" title="Edit" id="btnIndusTowerEdit">
                 <img src="icons/Edit.svg" alt="Edit" id="imgIndusTowerEditIcon" width="32" height="32" style="width: 32px; height: 32px; object-fit: contain;">
               </button>
@@ -1673,14 +1675,14 @@
               <!-- LEFT COLUMN (12 Fields) -->
               <div class="emp-grid-col" style="display: flex; flex-direction: column; gap: 14px;">
                 <!-- 1. Logo (Single preview + delete button) -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row indus-field-logo">
                   <label class="form-label">Logo</label>
                   <div class="form-input-wrap" style="display: flex; align-items: center; gap: 10px;">
                     <img src="assets/images/image.png" alt="Company Logo" id="imgIndusTowerLogoPreview"
                       title="Company Logo (Click to choose file)"
                       style="width: 36px; height: 36px; border-radius: 4px; object-fit: contain; border: 1px solid #cbd5e1; background: #ffffff; padding: 2px; cursor: pointer;">
                     <button type="button" id="btnDeleteIndusTowerLogo" title="Delete Logo"
-                      style="background: transparent; border: none; cursor: pointer; padding: 2px; color: #ef4444; display: flex; align-items: center;">
+                      style="background: transparent; border: none; cursor: pointer; padding: 2px; color: #ef4444; display: none; align-items: center;">
                       <img src="icons/Delete.svg" alt="Delete Logo" width="22" height="22">
                     </button>
                     <span id="lblIndusTowerLogoFileName"
@@ -1689,7 +1691,7 @@
                 </div>
 
                 <!-- 2. Entity Type -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label" for="inpIndusEntityType">Entity Type</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpIndusEntityType">
@@ -1705,7 +1707,7 @@
                 </div>
 
                 <!-- 3. Industry -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label" for="inpIndusIndustry">Industry</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpIndusIndustry">
@@ -1718,7 +1720,7 @@
                 </div>
 
                 <!-- 4. State -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label" for="inpIndusState">State</label>
                   <div class="form-input-wrap">
                     <select class="form-select-control" id="inpIndusState">
@@ -1764,7 +1766,7 @@
                 </div>
 
                 <!-- 5. Registered Documents -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label" for="txtIndusRegDocs">Registered Documents</label>
                   <div class="form-input-wrap" style="position: relative; width: 100%;">
                     <input type="text" class="form-input-control" id="txtIndusRegDocs"
@@ -1780,23 +1782,38 @@
                 </div>
 
                 <!-- 6. Registered Address -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row indus-field-reg-address" id="rowIndusRegAddress">
                   <label class="form-label" for="txtIndusRegAddress">Registered Address</label>
-                  <div class="form-input-wrap" style="position: relative; width: 100%;">
-                    <input type="text" class="form-input-control" id="txtIndusRegAddress"
-                      placeholder="Enter Registered Address" style="padding-right: 38px; width: 100%;">
-                    <input type="file" id="fileIndusRegAddress" accept="application/pdf" style="display: none;"
-                      onchange="handleIndusPdfUpload(this, 'txtIndusRegAddress')">
-                    <span class="input-pdf-badge" title="Upload PDF"
-                      onclick="triggerIndusPdf('fileIndusRegAddress')"
-                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
-                    </span>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusRegAddress">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusRegAddressToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusRegAddressToggle', 'toggleWrapIndusRegAddress', 'wrapIndusRegAddress')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusRegAddress" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusRegAddress"
+                          placeholder="Enter Registered Address" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusRegAddress" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusRegAddress')">
+                        <span class="input-pdf-badge" title="Upload PDF"
+                          onclick="triggerIndusPdf('fileIndusRegAddress')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusRegAddressToggle', 'toggleWrapIndusRegAddress', 'wrapIndusRegAddress')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
                   </div>
                 </div>
 
                 <!-- 7. PAN Number -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label" for="txtIndusPan">PAN Number</label>
                   <div class="form-input-wrap" style="position: relative; width: 100%;">
                     <input type="text" class="form-input-control" id="txtIndusPan"
@@ -1812,7 +1829,7 @@
                 </div>
 
                 <!-- 8. TAN Number -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label" for="txtIndusTan">TAN Number</label>
                   <div class="form-input-wrap" style="position: relative; width: 100%;">
                     <input type="text" class="form-input-control" id="txtIndusTan"
@@ -1828,23 +1845,38 @@
                 </div>
 
                 <!-- 9. GST Code -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row indus-field-gst" id="rowIndusGst">
                   <label class="form-label" for="txtIndusGst">GST Code</label>
-                  <div class="form-input-wrap" style="position: relative; width: 100%;">
-                    <input type="text" class="form-input-control" id="txtIndusGst"
-                      placeholder="Enter GST Code" style="padding-right: 38px; width: 100%;">
-                    <input type="file" id="fileIndusGst" accept="application/pdf" style="display: none;"
-                      onchange="handleIndusPdfUpload(this, 'txtIndusGst')">
-                    <span class="input-pdf-badge" title="Upload PDF"
-                      onclick="triggerIndusPdf('fileIndusGst')"
-                      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                      <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
-                    </span>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusGst">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusGstToggle"
+                          onchange="handleIndusToggleDisappear('inpIndusGstToggle', 'toggleWrapIndusGst', 'wrapIndusGst')">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <div class="slide-dynamic-wrap" id="wrapIndusGst" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtIndusGst"
+                          placeholder="Enter GST Code" style="width: 100%; padding-right: 38px;">
+                        <input type="file" id="fileIndusGst" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtIndusGst')">
+                        <span class="input-pdf-badge" title="Upload PDF"
+                          onclick="triggerIndusPdf('fileIndusGst')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusToggleReappear('inpIndusGstToggle', 'toggleWrapIndusGst', 'wrapIndusGst')"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
                   </div>
                 </div>
 
                 <!-- 10. Digital Stamp -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label" for="txtIndusDigitalStamp">Digital Stamp</label>
                   <div class="form-input-wrap" style="position: relative; width: 100%;">
                     <input type="text" class="form-input-control" id="txtIndusDigitalStamp"
@@ -1860,7 +1892,7 @@
                 </div>
 
                 <!-- 11. UDYAM Code (Disappearing Toggle -> PDF text field) -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">UDYAM Code</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusUdyam">
@@ -1890,7 +1922,7 @@
                 </div>
 
                 <!-- 12. EPF Code (Disappearing Toggle -> PDF text field) -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">EPF Code</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusEpf">
@@ -1923,7 +1955,7 @@
               <!-- RIGHT COLUMN (12 Fields) -->
               <div class="emp-grid-col" style="display: flex; flex-direction: column; gap: 14px;">
                 <!-- 1. ESI Code -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">ESI Code</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusEsi">
@@ -1953,7 +1985,7 @@
                 </div>
 
                 <!-- 2. ISO Certificate -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row indus-field-iso" id="rowIndusIso">
                   <label class="form-label">ISO Certificate</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusIso">
@@ -1983,7 +2015,7 @@
                 </div>
 
                 <!-- 3. OSHA Certificate -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">OSHA Certificate</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusOsha">
@@ -2013,7 +2045,7 @@
                 </div>
 
                 <!-- 4. PTEC Certificate -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">PTEC Certificate</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusPtec">
@@ -2043,7 +2075,7 @@
                 </div>
 
                 <!-- 5. LWF Certificate -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">LWF Certificate</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusLwf">
@@ -2073,7 +2105,7 @@
                 </div>
 
                 <!-- 6. Establishment Code Certificate -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">Establishment Code Certificate</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusEstReg">
@@ -2103,7 +2135,7 @@
                 </div>
 
                 <!-- 7. DSC -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">DSC</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusDsc">
@@ -2133,7 +2165,7 @@
                 </div>
 
                 <!-- 8. E-Signature -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">E-Signature</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusESig">
@@ -2163,7 +2195,7 @@
                 </div>
 
                 <!-- 9. SSL Certificate -->
-                <div class="form-row-group">
+                <div class="form-row-group indus-field-row">
                   <label class="form-label">SSL Certificate</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusSsl">
@@ -2193,8 +2225,8 @@
                 </div>
 
                 <!-- 10. Hex Color Code (Theme Changer) -->
-                <div class="form-row-group">
-                  <label class="form-label">Hex Color Code</label>
+                <div class="form-row-group indus-field-row indus-field-hex" id="rowIndusHexColor">
+                  <label class="form-label">Hex Colorcode</label>
                   <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
                     <div class="toggle-switch-container" id="toggleWrapIndusHexColor">
                       <label class="toggle-slide-switch">
@@ -2204,9 +2236,17 @@
                       </label>
                     </div>
                     <div class="slide-dynamic-wrap" id="wrapIndusHexColor" style="display: none; width: 100%; align-items: center; gap: 8px;">
-                      <input type="text" class="form-input-control" id="txtPlatformHexColor"
-                        placeholder="#0454e4" value="#0454e4" style="width: 110px; font-family: monospace; text-transform: uppercase;"
-                        onchange="applyPlatformThemeColor(this.value)">
+                      <div style="position: relative; flex: 1; width: 100%;">
+                        <input type="text" class="form-input-control" id="txtPlatformHexColor"
+                          placeholder="#0454e4" value="#0454e4" style="width: 100%; padding-right: 38px; font-family: monospace; text-transform: uppercase;"
+                          onchange="applyPlatformThemeColor(this.value)">
+                        <input type="file" id="fileIndusHexColor" accept="application/pdf" style="display: none;"
+                          onchange="handleIndusPdfUpload(this, 'txtPlatformHexColor')">
+                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusHexColor')"
+                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
+                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
+                        </span>
+                      </div>
                       <input type="color" id="pickerPlatformHexColor" value="#0454e4"
                         style="width: 32px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0; background: none; cursor: pointer;"
                         oninput="document.getElementById('txtPlatformHexColor').value = this.value; applyPlatformThemeColor(this.value);">
@@ -2218,11 +2258,11 @@
                   </div>
                 </div>
 
-                <!-- 11. E-Invoice (Toggle Alone) -->
-                <div class="form-row-group">
+                <!-- 11. E-Invoice -->
+                <div class="form-row-group indus-field-row indus-field-e-invoice" id="rowIndusEInvoice">
                   <label class="form-label">E-Invoice</label>
-                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
-                    <div class="toggle-switch-container" id="toggleWrapIndusEInvoice" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusEInvoice">
                       <label class="toggle-slide-switch">
                         <input type="checkbox" id="inpIndusEInvoiceToggle">
                         <span class="toggle-slide-slider"></span>
@@ -2231,11 +2271,11 @@
                   </div>
                 </div>
 
-                <!-- 12. Multistate GST (Toggle Alone) -->
-                <div class="form-row-group">
+                <!-- 12. Multistate GST -->
+                <div class="form-row-group indus-field-row indus-field-multigst" id="rowIndusMultiGst">
                   <label class="form-label">Multistate GST</label>
-                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center;">
-                    <div class="toggle-switch-container" id="toggleWrapIndusMultiGst" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <div class="toggle-switch-container" id="toggleWrapIndusMultiGst">
                       <label class="toggle-slide-switch">
                         <input type="checkbox" id="inpIndusMultiGstToggle">
                         <span class="toggle-slide-slider"></span>
@@ -4712,8 +4752,8 @@
                 <input type="text" class="form-input-control" id="inpViewBankAccountNumber" readonly>
                 <input type="file" id="fileViewBankDoc" accept="application/pdf" style="display: none;"
                   onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                <span class="input-pdf-badge" title="Upload PDF"
-                  onclick="if(!document.getElementById('inpViewBankAccountNumber').readOnly) document.getElementById('fileViewBankDoc').click();" style="cursor: pointer;">
+                <span class="input-pdf-badge" id="badgeViewBankPdf" title="Upload PDF"
+                  onclick="if(!document.getElementById('inpViewBankAccountNumber').readOnly) document.getElementById('fileViewBankDoc').click();" style="display: none; cursor: pointer;">
                   <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
                 </span>
               </div>

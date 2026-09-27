@@ -4842,3 +4842,78 @@ td.col-loc-name,
 td.col-loc-incharge {
   text-align: left !important;
 }
+
+/* Company Name Edit Mode: Compact 1-Column Layout for 7 Fields */
+#addIndusTowerCard.indus-company-edit {
+  width: 580px !important;
+  min-width: 580px !important;
+  max-width: 95vw !important;
+}
+#addIndusTowerCard.indus-company-edit .emp-form-grid {
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+#addIndusTowerCard.indus-company-edit .indus-field-row:not(.indus-field-logo):not(.indus-field-reg-address):not(.indus-field-gst):not(.indus-field-iso):not(.indus-field-hex):not(.indus-field-e-invoice):not(.indus-field-multigst) {
+  display: none !important;
+}
+/* In edit mode, E-Invoice and Multistate GST: hide the expanded text+pdf wrap, keep only the toggle */
+#addIndusTowerCard.indus-company-edit #wrapIndusEInvoice,
+#addIndusTowerCard.indus-company-edit #wrapIndusMultiGst {
+  display: none !important;
+}
+/* Widen text inputs in edit mode to fill the wider card */
+#addIndusTowerCard.indus-company-edit .form-input-control {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+#addIndusTowerCard.indus-company-edit .form-row-group {
+  width: 100% !important;
+}
+#addIndusTowerCard.indus-company-edit .form-input-wrap {
+  width: 100% !important;
+}
+#addIndusTowerCard.indus-company-edit .slide-dynamic-wrap {
+  width: 100% !important;
+}
+
+/* Employee Contract Modes: Compact Width & 1-Column Layout */
+#addEmployeeCard.emp-contract-add {
+  width: 480px !important;
+  min-width: 480px !important;
+  max-width: 95vw !important;
+}
+#addEmployeeCard.emp-contract-add .side-form-body-grid {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+#addEmployeeCard.emp-contract-add .emp-row-other {
+  display: none !important;
+}
+
+#addEmployeeCard.emp-contract-view {
+  width: 480px !important;
+  min-width: 480px !important;
+  max-width: 95vw !important;
+}
+#addEmployeeCard.emp-contract-view .side-form-body-grid {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+#addEmployeeCard.emp-contract-view .emp-row-other,
+#addEmployeeCard.emp-contract-view .emp-row-name,
+#addEmployeeCard.emp-contract-view .emp-row-id {
+  display: none !important;
+}
+
+#addEmployeeCard.emp-contract-edit {
+  width: 440px !important;
+  min-width: 440px !important;
+  max-width: 95vw !important;
+}
+#addEmployeeCard.emp-contract-edit .side-form-body-grid {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+#addEmployeeCard.emp-contract-edit .emp-row-item:not(.emp-row-address):not(.emp-row-mobile):not(.emp-row-status) {
+  display: none !important;
+}

@@ -10603,7 +10603,7 @@ function applyFiltersAndRender() {
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productName || row.productHead || '').replace(/"/g, '&quot;')}">
               <a href="#" class="req-link td-link-blue" onclick="openViewProductCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.productName || row.productHead || ''}</a>
             </td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productCategory || row.category || 'Telecom').replace(/"/g, '&quot;')}">${row.productCategory || row.category || 'Telecom'}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productCategory || row.category || 'Telecom').replace(/"/g, '&quot;')}">${row.productCategory || row.category || 'Telecom'}</td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productHead || row.productName || '').replace(/"/g, '&quot;')}">${row.productHead || row.productName || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.productCode || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.hsnCode || ''}</td>
@@ -10615,7 +10615,7 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentMasterSubpage === 'expenses') {
-      // Render Expenses Rows: Expense Name 40ch&left, Expense Category 20ch&center, Expense Head 20ch&center, GST 10ch&center, Status 10ch&center
+      // Render Expenses Rows: Expense Name 40ch&left, Expense Category 20ch&left, Expense Head 20ch&center, GST 10ch&center, Status 10ch&center
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
         const expTitle = row.expenseName || row.expenseDescription || row.expenseHead || '';
@@ -10624,7 +10624,7 @@ function applyFiltersAndRender() {
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${expTitle.replace(/"/g, '&quot;')}">
               <a href="#" class="req-link td-link-blue" onclick="openViewExpenseCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${expTitle}</a>
             </td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseCategory || 'Direct Operations').replace(/"/g, '&quot;')}">${row.expenseCategory || 'Direct Operations'}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseCategory || 'Direct Operations').replace(/"/g, '&quot;')}">${row.expenseCategory || 'Direct Operations'}</td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">${row.expenseHead || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gst || row.gstRate || '18%'}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
@@ -13539,8 +13539,14 @@ function initSideFormEvents() {
   // View Bank Details Card Handlers
   const btnViewBankEdit = document.getElementById('btnViewBankEditToggle');
   if (btnViewBankEdit) {
-    btnViewBankEdit.addEventListener('click', () => {
+    btnViewBankEdit.addEventListener('click', (e) => {
+      e.stopPropagation();
       const imgIcon = document.getElementById('imgViewBankEditIcon');
+      const bankPanel = document.getElementById('bankDetailsSidePanel');
+      if (bankPanel) {
+        bankPanel.style.display = 'block';
+        bankPanel.classList.add('card-dimmed-blurred');
+      }
       if (!isViewBankEditing) {
         // Switch to editable
         isViewBankEditing = true;
@@ -14374,7 +14380,13 @@ function initSideFormEvents() {
       }
     }
     if (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') {
-      if (!bankPanel.contains(e.target) && !(btnVendorBank && btnVendorBank.contains(e.target)) && !(btnEmpBank && btnEmpBank.contains(e.target))) {
+      const viewBankCard = document.getElementById('viewBankCard');
+      const addBankCard = document.getElementById('addBankCard');
+      const isInsideBankChild = (viewBankCard && viewBankCard.contains(e.target)) || (addBankCard && addBankCard.contains(e.target));
+      const btnIndusTowerBank = document.getElementById('btnIndusTowerBank');
+      const isInsideBankBtn = (btnVendorBank && btnVendorBank.contains(e.target)) || (btnEmpBank && btnEmpBank.contains(e.target)) || (btnIndusTowerBank && btnIndusTowerBank.contains(e.target));
+
+      if (!bankPanel.contains(e.target) && !isInsideBankBtn && !isInsideBankChild) {
         bankPanel.style.display = 'none';
         setBankEditableState(false);
         changed = true;
@@ -14589,6 +14601,10 @@ function openSideForm() {
       setEmployeeFormReadOnly(false);
       currentViewedEmpId = null;
       isEmployeeFormEditing = false;
+      const curEmpType = document.getElementById('inpEmpType')?.value || 'On-Roll';
+      if (typeof updateEmployeeFormLayout === 'function') {
+        updateEmployeeFormLayout('add', curEmpType);
+      }
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'vendor') {
     if (addVendorCard) {
@@ -14754,6 +14770,14 @@ function closeSideForm() {
   if (boqDetailModal) boqDetailModal.style.display = 'none';
   const purchaseDetailModal = document.getElementById('purchaseDetailModal');
   if (purchaseDetailModal) purchaseDetailModal.style.display = 'none';
+  const indusCard = document.getElementById('addIndusTowerCard');
+  if (indusCard) indusCard.classList.remove('indus-company-edit');
+  const empCard = document.getElementById('addEmployeeCard');
+  if (empCard) empCard.classList.remove('emp-contract-add', 'emp-contract-view', 'emp-contract-edit');
+  const viewBankCard = document.getElementById('viewBankCard');
+  if (viewBankCard) viewBankCard.style.display = 'none';
+  const addBankCard = document.getElementById('addBankCard');
+  if (addBankCard) addBankCard.style.display = 'none';
   // Remove blur from any dimmed cards and has-dimmed-card from row
   document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
   const cardsRow = document.querySelector('.side-form-cards-row');
@@ -15243,11 +15267,12 @@ function setIndusTowerFormReadOnly(isReadOnly) {
   inputs.forEach(input => {
     if (input.type === 'file') return;
     if (input.type === 'checkbox') {
-      input.disabled = false;
+      input.disabled = isReadOnly;
       const parentSwitch = input.closest('.toggle-slide-switch');
       if (parentSwitch) {
-        parentSwitch.style.pointerEvents = 'auto';
-        parentSwitch.style.opacity = '1';
+        parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+        parentSwitch.style.opacity = isReadOnly ? '0.6' : '1';
+        parentSwitch.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
       }
       return;
     }
@@ -15293,10 +15318,24 @@ function setIndusTowerFormReadOnly(isReadOnly) {
     imgLogoPreview.style.opacity = isReadOnly ? '0.85' : '1';
   }
   if (btnDeleteLogo) {
+    btnDeleteLogo.style.display = isReadOnly ? 'none' : 'inline-flex';
     btnDeleteLogo.style.pointerEvents = isReadOnly ? 'none' : 'auto';
     btnDeleteLogo.style.opacity = isReadOnly ? '0.4' : '1';
     btnDeleteLogo.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
   }
+}
+
+function updateIndusTowerFieldsVisibility(isEdit) {
+  const indusCard = document.getElementById('addIndusTowerCard');
+  if (!indusCard) return;
+  if (isEdit) {
+    indusCard.classList.add('indus-company-edit');
+  } else {
+    indusCard.classList.remove('indus-company-edit');
+  }
+  // Hide HR/Bank/Ashoka/Location icons in edit mode; show them in view mode
+  const viewIcons = document.getElementById('indusTowerViewIcons');
+  if (viewIcons) viewIcons.style.display = isEdit ? 'none' : 'flex';
 }
 
 window.openIndusTowerPageCard = function() {
@@ -15326,7 +15365,9 @@ window.openIndusTowerPageCard = function() {
       { toggleId: 'inpIndusDscToggle', toggleWrapId: 'toggleWrapIndusDsc', wrapId: 'wrapIndusDsc' },
       { toggleId: 'inpIndusESigToggle', toggleWrapId: 'toggleWrapIndusESig', wrapId: 'wrapIndusESig' },
       { toggleId: 'inpIndusSslToggle', toggleWrapId: 'toggleWrapIndusSsl', wrapId: 'wrapIndusSsl' },
-      { toggleId: 'inpIndusHexColorToggle', toggleWrapId: 'toggleWrapIndusHexColor', wrapId: 'wrapIndusHexColor' }
+      { toggleId: 'inpIndusHexColorToggle', toggleWrapId: 'toggleWrapIndusHexColor', wrapId: 'wrapIndusHexColor' },
+      { toggleId: 'inpIndusRegAddressToggle', toggleWrapId: 'toggleWrapIndusRegAddress', wrapId: 'wrapIndusRegAddress' },
+      { toggleId: 'inpIndusGstToggle', toggleWrapId: 'toggleWrapIndusGst', wrapId: 'wrapIndusGst' }
     ];
 
     toggleFieldPairs.forEach(pair => {
@@ -15345,6 +15386,7 @@ window.openIndusTowerPageCard = function() {
 
     // Set to read-only view mode initially until edit button is clicked
     isIndusTowerEditing = false;
+    updateIndusTowerFieldsVisibility(false);
     setIndusTowerFormReadOnly(true);
 
     const imgIcon = document.getElementById('imgIndusTowerEditIcon');
@@ -15421,6 +15463,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // ENTER EDIT MODE
         isIndusTowerEditing = true;
         setIndusTowerFormReadOnly(false);
+        updateIndusTowerFieldsVisibility(true);
         if (lblTitle) lblTitle.innerText = 'Edit Company Name';
         if (imgIcon) {
           imgIcon.src = 'icons/Save.svg';
@@ -15431,10 +15474,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // SAVE EDITS
         isIndusTowerEditing = false;
         setIndusTowerFormReadOnly(true);
+        updateIndusTowerFieldsVisibility(false);
         if (lblTitle) lblTitle.innerText = 'View Company Name';
         if (imgIcon) {
           imgIcon.src = 'icons/Edit.svg';
           imgIcon.title = 'Edit Info';
+        }
+        const indusCust = (typeof masterCustomerData !== 'undefined') ? masterCustomerData.find(c => c.id === 'cust-1' || (c.customerName && c.customerName.includes('Indus'))) : null;
+        if (indusCust) {
+          const regAddr = document.getElementById('txtIndusRegAddress')?.value.trim();
+          if (regAddr) indusCust.address = regAddr;
+          const gstVal = document.getElementById('txtIndusGst')?.value.trim();
+          if (gstVal) indusCust.gstNumber = gstVal;
+          if (typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
+            loadMasterDataset();
+            applyFiltersAndRender();
+          }
         }
         showToast('Company details saved & updated successfully!');
       }
@@ -15478,12 +15533,24 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSubmitIndus.addEventListener('click', () => {
       isIndusTowerEditing = false;
       setIndusTowerFormReadOnly(true);
+      updateIndusTowerFieldsVisibility(false);
       const lblTitle = document.getElementById('lblIndusTowerCardTitle');
       if (lblTitle) lblTitle.innerText = 'View Company Name';
       const imgIcon = document.getElementById('imgIndusTowerEditIcon');
       if (imgIcon) {
         imgIcon.src = 'icons/Edit.svg';
         imgIcon.title = 'Edit Info';
+      }
+      const indusCust = (typeof masterCustomerData !== 'undefined') ? masterCustomerData.find(c => c.id === 'cust-1' || (c.customerName && c.customerName.includes('Indus'))) : null;
+      if (indusCust) {
+        const regAddr = document.getElementById('txtIndusRegAddress')?.value.trim();
+        if (regAddr) indusCust.address = regAddr;
+        const gstVal = document.getElementById('txtIndusGst')?.value.trim();
+        if (gstVal) indusCust.gstNumber = gstVal;
+        if (typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
+          loadMasterDataset();
+          applyFiltersAndRender();
+        }
       }
       closeSideForm();
       showToast('Company Name details saved successfully!');
@@ -16015,6 +16082,9 @@ function setViewBankFormReadOnly(isReadOnly) {
 
   const chkStatus = document.getElementById('inpViewBankStatus');
   if (chkStatus) chkStatus.disabled = isReadOnly;
+
+  const badgePdf = document.getElementById('badgeViewBankPdf');
+  if (badgePdf) badgePdf.style.display = isReadOnly ? 'none' : 'inline-flex';
 }
 
 function openViewCompanyBankCard(bankId) {
@@ -18414,6 +18484,25 @@ window.handleEmpPhotoUpload = function(fileInput, textInputId) {
   }
 };
 
+window.updateEmployeeFormLayout = function(mode, empType) {
+  const empCard = document.getElementById('addEmployeeCard');
+  if (!empCard) return;
+
+  empCard.classList.remove('emp-contract-add', 'emp-contract-view', 'emp-contract-edit');
+
+  const isContract = (empType === 'Contract');
+
+  if (isContract) {
+    if (mode === 'add') {
+      empCard.classList.add('emp-contract-add');
+    } else if (mode === 'view') {
+      empCard.classList.add('emp-contract-view');
+    } else if (mode === 'edit') {
+      empCard.classList.add('emp-contract-edit');
+    }
+  }
+};
+
 function setEmployeeFormReadOnly(isReadOnly) {
   const form = document.getElementById('frmAddEmployee');
   if (!form) return;
@@ -18573,6 +18662,10 @@ window.handleEmpClick = function(empId, empName) {
   if (statusToggleEl) statusToggleEl.checked = (emp.status === 'Active');
 
   setEmployeeFormReadOnly(true);
+  const isContract = (emp.empType === 'Contract' || emp.employeeType === 'Contract');
+  if (typeof updateEmployeeFormLayout === 'function') {
+    updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
+  }
   showToast(`Viewing details for employee: ${emp.employeeName}`);
 };
 
@@ -18584,11 +18677,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const lblTitle = document.getElementById('lblEmployeeCardTitle');
       const imgIcon = document.getElementById('imgEmpCardEditIcon');
       const currentEmp = masterEmployeeData.find(e => e.id === currentViewedEmpId);
+      const isContract = currentEmp && (currentEmp.empType === 'Contract' || currentEmp.employeeType === 'Contract');
 
       if (!isEmployeeFormEditing) {
         // ENTER EDIT MODE
         isEmployeeFormEditing = true;
         setEmployeeFormReadOnly(false);
+        if (isContract && typeof updateEmployeeFormLayout === 'function') {
+          updateEmployeeFormLayout('edit', 'Contract');
+        }
         if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || 'Edit Employee';
         if (imgIcon) {
           imgIcon.src = 'icons/Save.svg';
@@ -18602,39 +18699,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentViewedEmpId) {
           const emp = masterEmployeeData.find(e => e.id === currentViewedEmpId);
           if (emp) {
-            emp.empType = document.getElementById('inpEmpType')?.value || emp.empType;
-            emp.employeeType = emp.empType;
-            emp.employeeName = document.getElementById('inpEmpName')?.value || emp.employeeName;
-            emp.employeeId = document.getElementById('inpEmpId')?.value || emp.employeeId;
-            emp.address = document.getElementById('inpEmpAddress')?.value || emp.address;
-            emp.contactNumber = document.getElementById('inpEmpMobile')?.value || emp.contactNumber;
-            emp.email = document.getElementById('inpEmpEmail')?.value || emp.email;
-            emp.dob = document.getElementById('inpEmpDob')?.value || emp.dob;
-            emp.bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || emp.bloodGroup;
-            emp.maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || emp.maritalStatus;
-            emp.qualification = document.getElementById('inpEmpQualification')?.value || emp.qualification;
-            
-            const panToggle = document.getElementById('inpEmpPanToggle');
-            emp.pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value || '') : '';
-            const aadharToggle = document.getElementById('inpEmpAadharToggle');
-            emp.aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value || '') : '';
-            const dlToggle = document.getElementById('inpEmpDlToggle');
-            emp.drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value || '') : '';
-            const passportToggle = document.getElementById('inpEmpPassportToggle');
-            emp.passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value || '') : '';
-            const epfToggle = document.getElementById('inpEmpEpfToggle');
-            emp.epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value || '') : '';
-            const esiToggle = document.getElementById('inpEmpEsiToggle');
-            emp.esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value || '') : '';
-            emp.esiCode = emp.esiId;
+            if (isContract) {
+              emp.address = document.getElementById('inpEmpAddress')?.value.trim() || emp.address;
+              emp.contactNumber = document.getElementById('inpEmpMobile')?.value.trim() || emp.contactNumber;
+              const statusToggle = document.getElementById('inpEmpStatusToggle');
+              if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
+            } else {
+              emp.empType = document.getElementById('inpEmpType')?.value || emp.empType;
+              emp.employeeType = emp.empType;
+              emp.employeeName = document.getElementById('inpEmpName')?.value || emp.employeeName;
+              emp.employeeId = document.getElementById('inpEmpId')?.value || emp.employeeId;
+              emp.address = document.getElementById('inpEmpAddress')?.value || emp.address;
+              emp.contactNumber = document.getElementById('inpEmpMobile')?.value || emp.contactNumber;
+              emp.email = document.getElementById('inpEmpEmail')?.value || emp.email;
+              emp.dob = document.getElementById('inpEmpDob')?.value || emp.dob;
+              emp.bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || emp.bloodGroup;
+              emp.maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || emp.maritalStatus;
+              emp.qualification = document.getElementById('inpEmpQualification')?.value || emp.qualification;
+              
+              const panToggle = document.getElementById('inpEmpPanToggle');
+              emp.pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value || '') : '';
+              const aadharToggle = document.getElementById('inpEmpAadharToggle');
+              emp.aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value || '') : '';
+              const dlToggle = document.getElementById('inpEmpDlToggle');
+              emp.drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value || '') : '';
+              const passportToggle = document.getElementById('inpEmpPassportToggle');
+              emp.passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value || '') : '';
+              const epfToggle = document.getElementById('inpEmpEpfToggle');
+              emp.epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value || '') : '';
+              const esiToggle = document.getElementById('inpEmpEsiToggle');
+              emp.esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value || '') : '';
+              emp.esiCode = emp.esiId;
 
-            emp.prevExp = document.getElementById('inpEmpPrevExp')?.value || emp.prevExp;
-            emp.currentExp = document.getElementById('inpEmpCurrExp')?.value || emp.currentExp;
-            emp.totalExp = document.getElementById('inpEmpTotalExp')?.value || emp.totalExp;
-            emp.doj = document.getElementById('inpEmpDoj')?.value || emp.doj;
-            emp.designation = document.getElementById('inpEmpDesignation')?.value || emp.designation;
-            const statusToggle = document.getElementById('inpEmpStatusToggle');
-            if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
+              emp.prevExp = document.getElementById('inpEmpPrevExp')?.value || emp.prevExp;
+              emp.currentExp = document.getElementById('inpEmpCurrExp')?.value || emp.currentExp;
+              emp.totalExp = document.getElementById('inpEmpTotalExp')?.value || emp.totalExp;
+              emp.doj = document.getElementById('inpEmpDoj')?.value || emp.doj;
+              emp.designation = document.getElementById('inpEmpDesignation')?.value || emp.designation;
+              const statusToggle = document.getElementById('inpEmpStatusToggle');
+              if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
+            }
           }
           if (typeof masterEmployeeData !== 'undefined' && currentModule === 'master' && currentMasterSubpage === 'employee') {
             currentDataset = [...masterEmployeeData];
@@ -18643,12 +18747,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setEmployeeFormReadOnly(true);
+        if (typeof updateEmployeeFormLayout === 'function') {
+          updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
+        }
         if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || 'View Employee';
         if (imgIcon) {
           imgIcon.src = 'icons/Edit.svg';
           imgIcon.title = 'Edit Info';
         }
         showToast('Employee details saved & updated successfully!');
+      }
+    });
+  }
+
+  const inpEmpTypeSelect = document.getElementById('inpEmpType');
+  if (inpEmpTypeSelect) {
+    inpEmpTypeSelect.addEventListener('change', () => {
+      if (!isEmployeeFormEditing && (!currentViewedEmpId || currentViewedEmpId === null)) {
+        if (typeof updateEmployeeFormLayout === 'function') {
+          updateEmployeeFormLayout('add', inpEmpTypeSelect.value);
+        }
       }
     });
   }

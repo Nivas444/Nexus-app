@@ -24163,56 +24163,18 @@ function handleExpenseHeadChange() {
   }
 }
 
-// ─── ESH TRAINEE: Show only Service Vendor Name when Employee Type = Service Vendor ────────
-function updateEshFormByEmployeeType(empType) {
-  const allEshFieldRows = [
-    'rowEshServiceVendorName',
-    'rowEshEmployeeName',
-    'rowEshAadharNumber',
-    'rowEshTrainingType',
-    'rowEshTrainingIdNumber',
-    'rowEshTrainingAgency',
-    'rowEshExpiryDate'
-  ];
-  const serviceVendorOnlyRows = ['rowEshServiceVendorName'];
-  const nonServiceVendorRows = [
-    'rowEshEmployeeName',
-    'rowEshAadharNumber',
-    'rowEshTrainingType',
-    'rowEshTrainingIdNumber',
-    'rowEshTrainingAgency',
-    'rowEshExpiryDate'
-  ];
-
-  if (empType === 'Service Vendor') {
-    serviceVendorOnlyRows.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.setProperty('display', 'flex', 'important');
-    });
-    nonServiceVendorRows.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.setProperty('display', 'none', 'important');
-    });
-  } else {
-    // On-Roll or Contract: show all fields, hide Service Vendor Name
-    allEshFieldRows.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.setProperty('display', 'flex', 'important');
-    });
-    const rowVendorName = document.getElementById('rowEshServiceVendorName');
-    if (rowVendorName) rowVendorName.style.setProperty('display', 'none', 'important');
-  }
+// ─── ESH TRAINEE: Show Service Vendor Name only when Employee Type = Service Vendor ──────────
+function toggleEshServiceVendorRow(empType) {
+  const row = document.getElementById('rowEshServiceVendorName');
+  if (!row) return;
+  row.style.setProperty('display', empType === 'Service Vendor' ? 'flex' : 'none', 'important');
 }
 
-// Wire ESH Employee Type change
 document.addEventListener('DOMContentLoaded', () => {
   const eshEmpTypeEl = document.getElementById('inpEshEmployeeType');
   if (eshEmpTypeEl) {
-    eshEmpTypeEl.addEventListener('change', () => {
-      updateEshFormByEmployeeType(eshEmpTypeEl.value);
-    });
-    // Initialize on load
-    updateEshFormByEmployeeType(eshEmpTypeEl.value);
+    eshEmpTypeEl.addEventListener('change', () => toggleEshServiceVendorRow(eshEmpTypeEl.value));
+    toggleEshServiceVendorRow(eshEmpTypeEl.value); // init on load
   }
 });
 

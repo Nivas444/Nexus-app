@@ -263,16 +263,11 @@
                   </div>
                 </div>
 
-                <!-- 11. Marital Status -->
-                <div class="form-row-group emp-row-item emp-row-marital emp-row-other">
-                  <label class="form-label" for="inpEmpMaritalStatus">Marital Status</label>
+                <!-- 11. Previous Experience (YYYY - MM) -->
+                <div class="form-row-group emp-row-item emp-row-prevexp emp-row-other">
+                  <label class="form-label" for="inpEmpPrevExp">Previous Experience</label>
                   <div class="form-input-wrap">
-                    <select class="form-select-control" id="inpEmpMaritalStatus">
-                      <option value="Single" selected>Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Divorced">Divorced</option>
-                      <option value="Widowed">Widowed</option>
-                    </select>
+                    <input type="text" class="form-input-control" id="inpEmpPrevExp" placeholder="YYYY - MM">
                   </div>
                 </div>
 
@@ -293,15 +288,7 @@
 
               <!-- RIGHT COLUMN (12 Fields) -->
               <div class="side-grid-col">
-                <!-- 1. Previous Experience (YYYY - MM) -->
-                <div class="form-row-group emp-row-item emp-row-prevexp emp-row-other">
-                  <label class="form-label" for="inpEmpPrevExp">Previous Experience</label>
-                  <div class="form-input-wrap">
-                    <input type="text" class="form-input-control" id="inpEmpPrevExp" placeholder="YYYY - MM">
-                  </div>
-                </div>
-
-                <!-- 2. Current Experience (YYYY - MM) -->
+                <!-- 1. Current Experience (YYYY - MM) -->
                 <div class="form-row-group emp-row-item emp-row-currexp emp-row-other">
                   <label class="form-label" for="inpEmpCurrExp">Current Experience</label>
                   <div class="form-input-wrap">
@@ -481,6 +468,19 @@
                   </div>
                 </div>
 
+                <!-- 9. Marital Status -->
+                <div class="form-row-group emp-row-item emp-row-marital emp-row-other">
+                  <label class="form-label" for="inpEmpMaritalStatus">Marital Status</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpEmpMaritalStatus">
+                      <option value="Single" selected>Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Divorced">Divorced</option>
+                      <option value="Widowed">Widowed</option>
+                    </select>
+                  </div>
+                </div>
+
                 <!-- 10. ESI ID (Centered Toggle -> Text Field + PDF Icon + Cancel Icon) -->
                 <div class="form-row-group emp-row-item emp-row-esi">
                   <label class="form-label">ESI ID</label>
@@ -601,6 +601,14 @@
               </div>
             </div>
 
+            <!-- Customer Name (shown when Business Type = Projects) -->
+            <div class="form-row-group" id="rowCustomerProjectName" style="display: none;">
+              <label class="form-label" for="inpCustomerProjectName">Customer Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpCustomerProjectName" placeholder="Enter Customer Name">
+              </div>
+            </div>
+
             <!-- 3. GST Slidebar Toggle -->
             <div class="form-row-group" id="rowCustomerGstToggle">
               <label class="form-label">GST</label>
@@ -636,15 +644,12 @@
               </div>
             </div>
 
-            <!-- 6. PAN Number with PDF badge (Shown when Business Type is Projects) -->
+            <!-- 6. PAN Number (Shown when Business Type is Projects) -->
             <div class="form-row-group" id="rowCustomerPanNumber">
               <label class="form-label" for="inpPanNumber">PAN Number</label>
-              <div class="form-input-wrap with-action-badge">
+              <div class="form-input-wrap">
                 <input type="text" class="form-input-control form-input-highlight" id="inpPanNumber"
                   placeholder="Enter PAN Number">
-                <span class="input-pdf-badge" title="Upload PDF">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
-                </span>
               </div>
             </div>
 
@@ -943,6 +948,22 @@
               </div>
             </div>
 
+            <!-- 2b. Product Head -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpProductHead">Product Head</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpProductHead">
+                  <option value="" selected></option>
+                  <option value="Civil">Civil</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="Mechanical">Mechanical</option>
+                  <option value="Telecom">Telecom</option>
+                  <option value="IT">IT</option>
+                  <option value="General">General</option>
+                </select>
+              </div>
+            </div>
+
             <!-- 3. Product Code -->
             <div class="form-row-group">
               <label class="form-label" for="inpProductCode">Product Code</label>
@@ -1033,13 +1054,7 @@
               </div>
             </div>
 
-            <!-- 11. Market Price -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProductInflation">Market Price</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProductInflation" placeholder="">
-              </div>
-            </div>
+
 
             <!-- 12. Margin (1% / 2% / 3% / 4% / 5% / 10%) -->
             <div class="form-row-group">
@@ -1213,8 +1228,8 @@
               </div>
             </div>
 
-            <!-- 6. Depreciation (0% / 5% / 10% / 15% / 25% / 30% / 40%) -->
-            <div class="form-row-group">
+            <!-- 6. Depreciation (0% / 5% / 10% / 15% / 25% / 30% / 40%) — shown only when Expense Head = Capex -->
+            <div class="form-row-group" id="rowExpenseDepreciation" style="display: none;">
               <label class="form-label" for="inpExpenseDepreciation">Depreciation</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpExpenseDepreciation">
@@ -1562,7 +1577,7 @@
             </div>
 
             <!-- 3. Employee Name -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowEshEmployeeName">
               <label class="form-label" for="inpEshEmployeeName">Employee Name</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpEshEmployeeName" placeholder="Enter Employee Name">
@@ -1570,7 +1585,7 @@
             </div>
 
             <!-- 4. Aadhar Number -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowEshAadharNumber">
               <label class="form-label" for="inpEshAadharNumber">Aadhar Number</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpEshAadharNumber" placeholder="Enter Aadhar Number">
@@ -1578,7 +1593,7 @@
             </div>
 
             <!-- 5. Training Type -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowEshTrainingType">
               <label class="form-label" for="inpEshTrainingType">Training Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpEshTrainingType">
@@ -1590,7 +1605,7 @@
             </div>
 
             <!-- 6. Training ID Number -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowEshTrainingIdNumber">
               <label class="form-label" for="inpEshTrainingIdNumber">Training ID Number</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpEshTrainingIdNumber" placeholder="Enter Training ID Number">
@@ -1598,7 +1613,7 @@
             </div>
 
             <!-- 7. Training Agency -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowEshTrainingAgency">
               <label class="form-label" for="inpEshTrainingAgency">Training Agency</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpEshTrainingAgency" placeholder="Enter Training Agency">
@@ -1606,7 +1621,7 @@
             </div>
 
             <!-- 8. Expiry Date with Calendar Icon inside field -->
-            <div class="form-row-group">
+            <div class="form-row-group" id="rowEshExpiryDate">
               <label class="form-label" for="inpEshExpiryDate">Expiry Date</label>
               <div class="form-input-wrap" style="position: relative; display: flex; align-items: center;">
                 <input type="text" class="form-input-control" id="inpEshExpiryDate" placeholder="DD - MM - YYYY" style="padding-right: 40px;">
@@ -1674,19 +1689,34 @@
 
               <!-- LEFT COLUMN (12 Fields) -->
               <div class="emp-grid-col" style="display: flex; flex-direction: column; gap: 14px;">
-                <!-- 1. Logo (Single preview + delete button) -->
+                <!-- 1. Logo (Toggle: enable to replace existing logo with SVG icon) -->
                 <div class="form-row-group indus-field-row indus-field-logo">
                   <label class="form-label">Logo</label>
-                  <div class="form-input-wrap" id="wrapIndusLogoField" style="display: flex; align-items: center; gap: 10px;">
-                    <img src="assets/images/image.png" alt="Company Logo" id="imgIndusTowerLogoPreview"
-                      title="Company Logo (Click to choose file)"
-                      style="width: 36px; height: 36px; border-radius: 4px; object-fit: contain; border: 1px solid #cbd5e1; background: #ffffff; padding: 2px; cursor: pointer;">
-                    <button type="button" id="btnDeleteIndusTowerLogo" title="Delete Logo"
-                      style="background: transparent; border: none; cursor: pointer; padding: 2px; color: #ef4444; display: none; align-items: center;">
-                      <img src="icons/Delete.svg" alt="Delete Logo" width="22" height="22">
-                    </button>
-                    <span id="lblIndusTowerLogoFileName"
-                      style="margin-left: 4px; font-size: 0.8rem; color: #475569; display: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;"></span>
+                  <div class="form-input-wrap slider-input-wrap" style="position: relative; width: 100%;">
+                    <!-- Toggle OFF state: show existing logo preview -->
+                    <div class="toggle-switch-container" id="toggleWrapIndusLogo">
+                      <label class="toggle-slide-switch">
+                        <input type="checkbox" id="inpIndusLogoToggle"
+                          onchange="handleIndusLogoToggle()">
+                        <span class="toggle-slide-slider"></span>
+                      </label>
+                    </div>
+                    <!-- Toggle ON state: existing logo deleted, SVG icon shown + uploadable + revert button -->
+                    <div class="slide-dynamic-wrap" id="wrapIndusLogoNew" style="display: none; width: 100%; align-items: center; gap: 8px;">
+                      <div style="position: relative; flex: 1; width: 100%; display: flex; align-items: center; gap: 10px;">
+                        <input type="file" id="inpIndusSvgUpload" accept=".svg,image/svg+xml,image/*" style="display: none;" onchange="handleIndusSvgFileSelected(this)">
+                        <div id="wrapIndusSvgBox" onclick="triggerIndusSvgUpload()" title="Click to upload SVG file from disk"
+                          style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #ffffff; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 4px; box-sizing: border-box; flex-shrink: 0; transition: all 0.2s;">
+                          <img src="icons/svg_icon.svg" alt="SVG Icon" id="imgIndusSvgIcon"
+                            style="width: 100%; height: 100%; object-fit: contain; cursor: pointer; display: block;">
+                        </div>
+                        <span id="lblIndusSvgStatus" style="font-size: 0.85rem; color: #475569; font-weight: 500; cursor: pointer;" onclick="triggerIndusSvgUpload()" title="Click to upload SVG file">New logo applied</span>
+                      </div>
+                      <button type="button" class="btn-toggle-revert"
+                        onclick="handleIndusLogoRevert()"
+                        title="Cancel / Reset"
+                        style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
                   </div>
                 </div>
 

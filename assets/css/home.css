@@ -4933,3 +4933,23 @@ td.col-loc-incharge {
 #addEmployeeCard.emp-contract-edit .emp-row-item:not(.emp-row-address):not(.emp-row-mobile):not(.emp-row-status) {
   display: none !important;
 }
+
+/* On-Roll Employee Edit Mode: Compact Width & only editable fields */
+#addEmployeeCard.emp-onroll-edit {
+  width: 580px !important;
+  min-width: 580px !important;
+  max-width: 95vw !important;
+}
+#addEmployeeCard.emp-onroll-edit .side-form-body-grid {
+  grid-template-columns: 1fr 1fr !important;
+  gap: 14px 24px !important;
+}
+#addEmployeeCard.emp-onroll-edit .emp-row-item:not(.emp-row-address):not(.emp-row-mobile):not(.emp-row-email):not(.emp-row-marital):not(.emp-row-designation):not(.emp-row-esi):not(.emp-row-geo):not(.emp-row-status) {
+  display: none !important;
+}
+
+#wrapIndusSvgBox:hover {
+  border-color: #0454e4 !important;
+  background-color: #f0f7ff !important;
+  transform: scale(1.04);
+}

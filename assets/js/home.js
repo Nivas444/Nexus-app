@@ -13,7 +13,7 @@ const masterEmployeeData = [
     id: "emp-1",
     employeeName: "Aakash Verma",
     employeeId: "230510678",
-    employeeType: "Permanent",
+    employeeType: "On-Roll",
     designation: "Project Manager",
     contactNumber: "+91 98401 12345",
     email: "aakash.v@nexus.com",
@@ -33,7 +33,7 @@ const masterEmployeeData = [
     id: "emp-3",
     employeeName: "Karthik Subramanian",
     employeeId: "230510680",
-    employeeType: "Permanent",
+    employeeType: "On-Roll",
     designation: "Telecom Lead",
     contactNumber: "+91 98403 34567",
     email: "karthik.s@nexus.com",
@@ -43,7 +43,7 @@ const masterEmployeeData = [
     id: "emp-4",
     employeeName: "Meera Nambiar",
     employeeId: "230510681",
-    employeeType: "Permanent",
+    employeeType: "On-Roll",
     designation: "CAD Designer",
     contactNumber: "+91 98404 45678",
     email: "meera.n@nexus.com",
@@ -5517,41 +5517,51 @@ function renderMasterTableHead() {
     rebindFilterButtons();
     return;
   } else if (currentMasterSubpage === 'products') {
-    // Products Table Headers (Product Name 40ch, Product Category 20ch, Product Head 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch)
+    // Products Table Headers: Product Name 30ch, Product Category 20ch, Product Head 20ch, Product Code 15ch, HSN Code 15ch, GST 12ch, Price 12ch (All headers centered)
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Product Name</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productName'] ? 'has-active-filter' : ''}" data-filter-col="productName" title="Filter Product Name">&#9660;</button>
           </div>
         </th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Product Category</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productCategory'] ? 'has-active-filter' : ''}" data-filter-col="productCategory" title="Filter Product Category">&#9660;</button>
           </div>
         </th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
             <span>Product Head</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['productHead'] ? 'has-active-filter' : ''}" data-filter-col="productHead" title="Filter Product Head">&#9660;</button>
           </div>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Product Code</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Product Code</span>
+          </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>HSN Code</span>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>HSN Code</span>
+          </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>GST</span>
+        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>GST</span>
+          </div>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Price</span>
+        <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center;">
+            <span>Price</span>
+          </div>
         </th>
       </tr>
     `;
+    rebindFilterButtons();
+    return;
   } else if (currentMasterSubpage === 'expenses') {
     // Expenses Table Headers: Expense Name 40ch, Expense Category 20ch, Expense Head 20ch, GST 10ch, Status 10ch (All headers centered)
     thead.innerHTML = `
@@ -10596,19 +10606,19 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     } else if (currentMasterSubpage === 'products') {
-      // Render Products Rows: Product Name 40ch, Product Category 20ch, Product Head 20ch, Product Code 15ch, HSN Code 10ch, GST 10ch, Price 10ch
+      // Render Products Rows: Product Name 30ch, Product Category 20ch, Product Head 20ch, Product Code 15ch, HSN Code 15ch, GST 12ch, Price 12ch
       tbody.innerHTML = filteredDataset.map(row => {
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productName || row.productHead || '').replace(/"/g, '&quot;')}">
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productName || row.productHead || '').replace(/"/g, '&quot;')}">
               <a href="#" class="req-link td-link-blue" onclick="openViewProductCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.productName || row.productHead || ''}</a>
             </td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productCategory || row.category || 'Telecom').replace(/"/g, '&quot;')}">${row.productCategory || row.category || 'Telecom'}</td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.productHead || row.productName || '').replace(/"/g, '&quot;')}">${row.productHead || row.productName || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.productCode || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.hsnCode || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gst || row.gstRate || '18%'}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.hsnCode || ''}</td>
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gst || row.gstRate || '18%'}</td>
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: #0454e4; font-weight: 500;">
               <a href="#" class="req-link td-link-blue" onclick="openProductPriceTab('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.price || row.stockPrices || ''}</a>
             </td>
           </tr>
@@ -10643,7 +10653,7 @@ function applyFiltersAndRender() {
               <a href="#" class="req-link td-link-blue" onclick="handleEmpClick('${row.id}', '${row.employeeName}'); return false;" style="color: #0454e4; font-weight: 500;">${row.employeeName || ''}</a>
             </td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeId || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employeeType || 'Permanent'}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${(row.employeeType || 'On-Roll') === 'Permanent' ? 'On-Roll' : (row.employeeType || 'On-Roll')}</td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;">${row.designation || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.contactNumber || ''}</td>
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;">${row.email || ''}</td>
@@ -18488,7 +18498,7 @@ window.updateEmployeeFormLayout = function(mode, empType) {
   const empCard = document.getElementById('addEmployeeCard');
   if (!empCard) return;
 
-  empCard.classList.remove('emp-contract-add', 'emp-contract-view', 'emp-contract-edit');
+  empCard.classList.remove('emp-contract-add', 'emp-contract-view', 'emp-contract-edit', 'emp-onroll-edit');
 
   const isContract = (empType === 'Contract');
 
@@ -18499,6 +18509,11 @@ window.updateEmployeeFormLayout = function(mode, empType) {
       empCard.classList.add('emp-contract-view');
     } else if (mode === 'edit') {
       empCard.classList.add('emp-contract-edit');
+    }
+  } else {
+    // On-Roll: only apply restricted layout and compact width in edit mode
+    if (mode === 'edit') {
+      empCard.classList.add('emp-onroll-edit');
     }
   }
 };
@@ -18683,8 +18698,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // ENTER EDIT MODE
         isEmployeeFormEditing = true;
         setEmployeeFormReadOnly(false);
-        if (isContract && typeof updateEmployeeFormLayout === 'function') {
-          updateEmployeeFormLayout('edit', 'Contract');
+        if (typeof updateEmployeeFormLayout === 'function') {
+          updateEmployeeFormLayout('edit', isContract ? 'Contract' : 'On-Roll');
         }
         if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || 'Edit Employee';
         if (imgIcon) {
@@ -18705,37 +18720,16 @@ document.addEventListener('DOMContentLoaded', () => {
               const statusToggle = document.getElementById('inpEmpStatusToggle');
               if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
             } else {
-              emp.empType = document.getElementById('inpEmpType')?.value || emp.empType;
-              emp.employeeType = emp.empType;
-              emp.employeeName = document.getElementById('inpEmpName')?.value || emp.employeeName;
-              emp.employeeId = document.getElementById('inpEmpId')?.value || emp.employeeId;
+              emp.designation = document.getElementById('inpEmpDesignation')?.value || emp.designation;
               emp.address = document.getElementById('inpEmpAddress')?.value || emp.address;
               emp.contactNumber = document.getElementById('inpEmpMobile')?.value || emp.contactNumber;
               emp.email = document.getElementById('inpEmpEmail')?.value || emp.email;
-              emp.dob = document.getElementById('inpEmpDob')?.value || emp.dob;
-              emp.bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || emp.bloodGroup;
               emp.maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || emp.maritalStatus;
-              emp.qualification = document.getElementById('inpEmpQualification')?.value || emp.qualification;
-              
-              const panToggle = document.getElementById('inpEmpPanToggle');
-              emp.pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value || '') : '';
-              const aadharToggle = document.getElementById('inpEmpAadharToggle');
-              emp.aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value || '') : '';
-              const dlToggle = document.getElementById('inpEmpDlToggle');
-              emp.drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value || '') : '';
-              const passportToggle = document.getElementById('inpEmpPassportToggle');
-              emp.passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value || '') : '';
-              const epfToggle = document.getElementById('inpEmpEpfToggle');
-              emp.epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value || '') : '';
+
               const esiToggle = document.getElementById('inpEmpEsiToggle');
               emp.esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value || '') : '';
               emp.esiCode = emp.esiId;
 
-              emp.prevExp = document.getElementById('inpEmpPrevExp')?.value || emp.prevExp;
-              emp.currentExp = document.getElementById('inpEmpCurrExp')?.value || emp.currentExp;
-              emp.totalExp = document.getElementById('inpEmpTotalExp')?.value || emp.totalExp;
-              emp.doj = document.getElementById('inpEmpDoj')?.value || emp.doj;
-              emp.designation = document.getElementById('inpEmpDesignation')?.value || emp.designation;
               const statusToggle = document.getElementById('inpEmpStatusToggle');
               if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
             }
@@ -20300,6 +20294,10 @@ window.openViewEshTraineeCard = function(traineeId) {
   }
 
   setEshFormReadOnly(true);
+  // Apply field visibility based on employee type (Service Vendor shows only vendor name)
+  if (typeof updateEshFormByEmployeeType === 'function') {
+    updateEshFormByEmployeeType(trainee.employeeType || 'On-Roll');
+  }
   showToast(`Viewing trainee details: ${trainee.name}`);
 };
 
@@ -20341,6 +20339,10 @@ document.addEventListener('DOMContentLoaded', () => {
         imgIcon.title = 'Edit Info';
       }
       setEshFormReadOnly(true);
+      // Reapply field layout based on saved employee type
+      if (trainee && typeof updateEshFormByEmployeeType === 'function') {
+        updateEshFormByEmployeeType(trainee.employeeType || 'On-Roll');
+      }
       const lblTitle = document.getElementById('lblEshTraineeCardTitle');
       if (lblTitle && trainee) lblTitle.innerText = trainee.name || 'View Trainee';
       loadIndusDataset();
@@ -20352,13 +20354,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add New Trainee Submit Button
   document.getElementById('btnSubmitEshTrainee')?.addEventListener('click', (e) => {
     e.preventDefault();
-    const empName = document.getElementById('inpEshEmployeeName')?.value?.trim();
-    if (!empName) {
-      showToast('Please enter Employee Name');
-      return;
-    }
     const empType = document.getElementById('inpEshEmployeeType')?.value || 'On-Roll';
     const vendName = document.getElementById('inpEshServiceVendorName')?.value?.trim() || '';
+    let empName = document.getElementById('inpEshEmployeeName')?.value?.trim();
+
+    if (empType === 'Service Vendor') {
+      if (!vendName) {
+        showToast('Please enter Service Vendor Name');
+        return;
+      }
+      // Use vendor name as the record name when no employee name
+      if (!empName) empName = vendName;
+    } else {
+      if (!empName) {
+        showToast('Please enter Employee Name');
+        return;
+      }
+    }
+
     const aadhar = document.getElementById('inpEshAadharNumber')?.value?.trim() || '';
     const trnType = document.getElementById('inpEshTrainingType')?.value || 'CHCTE';
     const trnId = document.getElementById('inpEshTrainingIdNumber')?.value?.trim() || `TRN-IND-2026-${String(indusEshData.length + 1).padStart(3, '0')}`;
@@ -20559,37 +20572,50 @@ function updateCustomerConditionalFields() {
   const rowName = document.getElementById('rowCustomerName');
   const rowPan = document.getElementById('rowCustomerPanNumber');
   const rowPoDigits = document.getElementById('rowCustomerPoDigits');
+  const rowGstToggle = document.getElementById('rowCustomerGstToggle');
   const rowGstType = document.getElementById('rowCustomerGstType');
   const rowGstNumber = document.getElementById('rowCustomerGstNumber');
+  const rowProjectName = document.getElementById('rowCustomerProjectName');
 
   const bType = (inpBusinessType?.value || 'Projects').trim();
   const cName = (inpCustomerName?.value || '').trim().toLowerCase();
   const isGstOn = inpGstToggle ? inpGstToggle.checked : false;
 
+  const isProjects = bType.toLowerCase() === 'projects';
+  const isSupply = bType.toLowerCase() === 'supply';
+
   // 1. Business Type logic:
-  // When Supply: Customer Name and PAN Number should NOT appear.
-  // When Projects: Customer Name and PAN Number appear.
-  if (bType.toLowerCase() === 'supply') {
+  if (isSupply) {
     if (rowName) rowName.style.setProperty('display', 'none', 'important');
     if (rowPan) rowPan.style.setProperty('display', 'none', 'important');
     if (rowPoDigits) rowPoDigits.style.setProperty('display', 'none', 'important');
+    if (rowProjectName) rowProjectName.style.setProperty('display', 'none', 'important');
+    // Show GST for Supply
+    if (rowGstToggle) rowGstToggle.style.setProperty('display', 'flex', 'important');
   } else {
     // Projects
     if (rowName) rowName.style.setProperty('display', 'flex', 'important');
     if (rowPan) rowPan.style.setProperty('display', 'flex', 'important');
 
+    // Show Customer Name field for Projects
+    if (rowProjectName) rowProjectName.style.setProperty('display', 'flex', 'important');
+
+    // Hide GST toggle for Projects
+    if (rowGstToggle) rowGstToggle.style.setProperty('display', 'none', 'important');
+    // Also hide GST sub-fields
+    if (rowGstType) rowGstType.style.setProperty('display', 'none', 'important');
+    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'none', 'important');
+
     // 2. Customer Legal Name logic:
-    // When user enters "indus tower" (or "indus towers ltd") -> show PO Starting Digits field, else hide
     if (cName.includes('indus tower')) {
       if (rowPoDigits) rowPoDigits.style.setProperty('display', 'flex', 'important');
     } else {
       if (rowPoDigits) rowPoDigits.style.setProperty('display', 'none', 'important');
     }
+    return; // skip GST toggle logic below for Projects
   }
 
-  // 3. GST Slidebar logic:
-  // When enabled -> show GST Number and GST Type
-  // When disabled -> hide GST Number and GST Type
+  // 3. GST Slidebar logic (only for Supply):
   if (isGstOn) {
     if (rowGstType) rowGstType.style.setProperty('display', 'flex', 'important');
     if (rowGstNumber) rowGstNumber.style.setProperty('display', 'flex', 'important');
@@ -24115,5 +24141,132 @@ window.handleBulkCsvFileSelected = function(input) {
   }
 };
 
+// ─── EXPENSE: Depreciation visibility — show only when Expense Head = Capex ─────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const expenseHeadEl = document.getElementById('inpExpenseHead');
+  if (expenseHeadEl) {
+    expenseHeadEl.addEventListener('change', handleExpenseHeadChange);
+  }
+});
+
+function handleExpenseHeadChange() {
+  const expenseHead = document.getElementById('inpExpenseHead')?.value || '';
+  const rowDeprec = document.getElementById('rowExpenseDepreciation');
+  if (!rowDeprec) return;
+  if (expenseHead.toLowerCase() === 'capex') {
+    rowDeprec.style.setProperty('display', 'flex', 'important');
+  } else {
+    rowDeprec.style.setProperty('display', 'none', 'important');
+    // Also reset the depreciation value when hidden
+    const inpDeprec = document.getElementById('inpExpenseDepreciation');
+    if (inpDeprec) inpDeprec.value = '';
+  }
+}
+
+// ─── ESH TRAINEE: Show only Service Vendor Name when Employee Type = Service Vendor ────────
+function updateEshFormByEmployeeType(empType) {
+  const allEshFieldRows = [
+    'rowEshServiceVendorName',
+    'rowEshEmployeeName',
+    'rowEshAadharNumber',
+    'rowEshTrainingType',
+    'rowEshTrainingIdNumber',
+    'rowEshTrainingAgency',
+    'rowEshExpiryDate'
+  ];
+  const serviceVendorOnlyRows = ['rowEshServiceVendorName'];
+  const nonServiceVendorRows = [
+    'rowEshEmployeeName',
+    'rowEshAadharNumber',
+    'rowEshTrainingType',
+    'rowEshTrainingIdNumber',
+    'rowEshTrainingAgency',
+    'rowEshExpiryDate'
+  ];
+
+  if (empType === 'Service Vendor') {
+    serviceVendorOnlyRows.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.setProperty('display', 'flex', 'important');
+    });
+    nonServiceVendorRows.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.setProperty('display', 'none', 'important');
+    });
+  } else {
+    // On-Roll or Contract: show all fields, hide Service Vendor Name
+    allEshFieldRows.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.setProperty('display', 'flex', 'important');
+    });
+    const rowVendorName = document.getElementById('rowEshServiceVendorName');
+    if (rowVendorName) rowVendorName.style.setProperty('display', 'none', 'important');
+  }
+}
+
+// Wire ESH Employee Type change
+document.addEventListener('DOMContentLoaded', () => {
+  const eshEmpTypeEl = document.getElementById('inpEshEmployeeType');
+  if (eshEmpTypeEl) {
+    eshEmpTypeEl.addEventListener('change', () => {
+      updateEshFormByEmployeeType(eshEmpTypeEl.value);
+    });
+    // Initialize on load
+    updateEshFormByEmployeeType(eshEmpTypeEl.value);
+  }
+});
+
+// ─── INDUS TOWER: Logo Toggle — replace existing logo with SVG icon ─────────────────────────
+window.handleIndusLogoToggle = function() {
+  const toggle = document.getElementById('inpIndusLogoToggle');
+  const toggleWrap = document.getElementById('toggleWrapIndusLogo');
+  const newWrap = document.getElementById('wrapIndusLogoNew');
+  if (!toggle) return;
+  if (toggle.checked) {
+    // Enable: hide toggle container completely, show SVG icon
+    if (toggleWrap) toggleWrap.style.setProperty('display', 'none', 'important');
+    if (newWrap) {
+      newWrap.style.setProperty('display', 'flex', 'important');
+      newWrap.style.alignItems = 'center';
+    }
+  } else {
+    handleIndusLogoRevert();
+  }
+};
+
+window.triggerIndusSvgUpload = function() {
+  const fileInput = document.getElementById('inpIndusSvgUpload');
+  if (fileInput) fileInput.click();
+};
+
+window.handleIndusSvgFileSelected = function(input) {
+  if (input && input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById('imgIndusSvgIcon');
+      if (img) img.src = e.target.result;
+      const lbl = document.getElementById('lblIndusSvgStatus');
+      if (lbl) lbl.innerText = file.name;
+      showToast('SVG logo "' + file.name + '" uploaded successfully!');
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+window.handleIndusLogoRevert = function() {
+  const toggle = document.getElementById('inpIndusLogoToggle');
+  const toggleWrap = document.getElementById('toggleWrapIndusLogo');
+  const newWrap = document.getElementById('wrapIndusLogoNew');
+  const img = document.getElementById('imgIndusSvgIcon');
+  const lbl = document.getElementById('lblIndusSvgStatus');
+  const fileInput = document.getElementById('inpIndusSvgUpload');
+  if (toggle) toggle.checked = false;
+  if (toggleWrap) toggleWrap.style.setProperty('display', 'flex', 'important');
+  if (newWrap) newWrap.style.setProperty('display', 'none', 'important');
+  if (img) img.src = 'icons/svg_icon.svg';
+  if (lbl) lbl.innerText = 'New logo applied';
+  if (fileInput) fileInput.value = '';
+};
 
 

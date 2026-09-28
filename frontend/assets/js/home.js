@@ -323,128 +323,33 @@ const masterProductsData = [
   }
 ];
 
-/// Master -> Expenses Dataset (Matching Uploaded Mockup)
-const masterExpensesData = [
-  {
-    id: "exp-1",
-    expenseName: "Site Infrastructure & Telecom Tower Installation",
-    expenseCategory: "Direct Operations",
-    expenseSubCategory: "Civil Works",
-    expenseHead: "Capex",
-    expenseCode: "EXP-PRJ-001",
-    sacCode: "998313",
-    expenseDescription: "Site Infrastructure & Telecom Tower Installation",
-    tdsRate: "2%",
-    gstRate: "18%",
-    gst: "18%",
-    depreciation: "15%",
-    uom: "Pcs",
-    rcm: "No",
-    status: "Active"
-  },
-  {
-    id: "exp-2",
-    expenseName: "Procurement of Cables, Hardware & Consumables",
-    expenseCategory: "Material Procurement",
-    expenseSubCategory: "Hardware Consumables",
-    expenseHead: "Capex",
-    expenseCode: "EXP-PUR-002",
-    sacCode: "998719",
-    expenseDescription: "Procurement of Cables, Hardware & Consumables",
-    tdsRate: "1%",
-    gstRate: "18%",
-    gst: "18%",
-    depreciation: "10%",
-    uom: "Nos",
-    rcm: "No",
-    status: "Active"
-  },
-  {
-    id: "exp-3",
-    expenseName: "Field Staff Allowances, Travel & Reimbursements",
-    expenseCategory: "Human Resources",
-    expenseSubCategory: "Travel Allowances",
-    expenseHead: "Opex",
-    expenseCode: "EXP-EMP-003",
-    sacCode: "998519",
-    expenseDescription: "Field Staff Allowances, Travel & Reimbursements",
-    tdsRate: "10%",
-    gstRate: "0%",
-    gst: "0%",
-    depreciation: "0%",
-    uom: "Month",
-    rcm: "No",
-    status: "Active"
-  },
-  {
-    id: "exp-4",
-    expenseName: "Logistics, Vehicle Freight & Heavy Cargo Dispatch",
-    expenseCategory: "Logistics & Transport",
-    expenseSubCategory: "Fuel & Freight",
-    expenseHead: "Opex",
-    expenseCode: "EXP-TRN-004",
-    sacCode: "996511",
-    expenseDescription: "Logistics, Vehicle Freight & Heavy Cargo Dispatch",
-    tdsRate: "2%",
-    gstRate: "5%",
-    gst: "5%",
-    depreciation: "25%",
-    uom: "Nos",
-    rcm: "Yes",
-    status: "Active"
-  },
-  {
-    id: "exp-5",
-    expenseName: "Office Maintenance, Utilities & Facility Operations",
-    expenseCategory: "Administrative Support",
-    expenseSubCategory: "Office Utilities",
-    expenseHead: "Opex",
-    expenseCode: "EXP-ADM-005",
-    sacCode: "998599",
-    expenseDescription: "Office Maintenance, Utilities & Facility Operations",
-    tdsRate: "10%",
-    gstRate: "18%",
-    gst: "18%",
-    depreciation: "10%",
-    uom: "Month",
-    rcm: "No",
-    status: "Active"
-  },
-  {
-    id: "exp-6",
-    expenseName: "Statutory Audit, Legal & Financial Consultancy",
-    expenseCategory: "Professional Services",
-    expenseSubCategory: "Audit & Legal",
-    expenseHead: "Opex",
-    expenseCode: "EXP-ACC-006",
-    sacCode: "998222",
-    expenseDescription: "Statutory Audit, Legal & Financial Consultancy",
-    tdsRate: "10%",
-    gstRate: "18%",
-    gst: "18%",
-    depreciation: "0%",
-    uom: "Nos",
-    rcm: "No",
-    status: "Active"
-  },
-  {
-    id: "exp-7",
-    expenseName: "Government Licensing, Spectrum & Municipal Filings",
-    expenseCategory: "Regulatory Compliance",
-    expenseSubCategory: "Licensing",
-    expenseHead: "Opex",
-    expenseCode: "EXP-STA-007",
-    sacCode: "999112",
-    expenseDescription: "Government Licensing, Spectrum & Municipal Filings",
-    tdsRate: "0%",
-    gstRate: "0%",
-    gst: "0%",
-    depreciation: "0%",
-    uom: "Nos",
-    rcm: "No",
-    status: "Active"
+/// Master -> Expenses Dataset (Loaded dynamically from PostgreSQL via FastAPI)
+let masterExpensesData = [];
+
+async function loadMasterExpensesFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+    try {
+      const response = await NexusApi.expenses.getAll({ limit: 500 });
+      if (response && Array.isArray(response.items)) {
+        masterExpensesData = response.items;
+      } else if (Array.isArray(response)) {
+        masterExpensesData = response;
+      }
+    } catch (err) {
+      console.error('Error fetching master expenses from API:', err);
+      if (typeof showToast === 'function') {
+        showToast('Could not load expenses from database: ' + (err.message || err));
+      }
+    }
   }
-];
+  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'expenses') {
+    currentDataset = [...masterExpensesData];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+  }
+}
+
 
 // Company HR Policies Datasets
 const companyHrEpfData = [
@@ -5339,6 +5244,9 @@ function loadMasterDataset() {
     currentDataset = [...masterProductsData];
   } else if (currentMasterSubpage === 'expenses') {
     currentDataset = [...masterExpensesData];
+    if (typeof loadMasterExpensesFromApi === 'function') {
+      loadMasterExpensesFromApi();
+    }
   }
 }
 
@@ -12793,36 +12701,66 @@ function initSideFormEvents() {
       return;
     }
 
-    if (currentModule === 'master' && currentMasterSubpage === 'expenses') {
-      const expenseName = document.getElementById('inpExpenseName')?.value || "Office Supplies & Maintenance";
-      const expenseCategory = document.getElementById('inpExpenseCategory')?.value || "Administrative Support";
-      const expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value || "Office Utilities";
-      const expenseHead = document.getElementById('inpExpenseHead')?.value || "Opex";
+    const isExpenseCardOpen = document.getElementById('addExpenseCard') && document.getElementById('addExpenseCard').style.display === 'block';
+    if (isExpenseCardOpen || (currentModule === 'master' && currentMasterSubpage === 'expenses')) {
+      const expenseName = document.getElementById('inpExpenseName')?.value?.trim();
+      if (!expenseName) {
+        showToast('Please enter Expense Name');
+        return;
+      }
+      const expenseCategory = document.getElementById('inpExpenseCategory')?.value || "Direct Operations";
+      const expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value || "";
+      const expenseHead = document.getElementById('inpExpenseHead')?.value || "Capex";
       const gst = document.getElementById('inpExpenseGst')?.value || "18%";
       const depreciation = document.getElementById('inpExpenseDepreciation')?.value || "10%";
       const expenseRcmToggle = document.getElementById('inpExpenseRcmToggle');
-      const rcm = (expenseRcmToggle && expenseRcmToggle.checked) ? "Yes" : "No";
+      const rcm = (expenseRcmToggle && expenseRcmToggle.checked);
       const expenseStatusToggle = document.getElementById('inpExpenseStatusToggle');
       const status = (expenseStatusToggle && expenseStatusToggle.checked) ? "Active" : "In - Active";
 
-      const newRecord = {
-        id: `exp-${Date.now()}`,
+      const payload = {
         expenseName,
         expenseCategory,
         expenseSubCategory,
         expenseHead,
         gst,
-        gstRate: gst,
-        depreciation,
+        depreciation_rate: (expenseHead.toLowerCase() === 'capex' ? depreciation : '0%'),
         rcm,
         status
       };
 
-      masterExpensesData.push(newRecord);
-      currentDataset = [...masterExpensesData];
-      applyFiltersAndRender();
-      closeSideForm();
-      showToast(`Expense ${expenseName} successfully saved & added to table!`);
+      if (typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+        NexusApi.expenses.create(payload)
+          .then(newRecord => {
+            masterExpensesData.unshift(newRecord);
+            currentDataset = [...masterExpensesData];
+            applyFiltersAndRender();
+            closeSideForm();
+            showToast(`Expense ${expenseName} successfully saved to database!`);
+          })
+          .catch(err => {
+            console.error('Failed to create expense:', err);
+            showToast(`Error saving expense: ${err.message || err}`);
+          });
+      } else {
+        const newRecord = {
+          id: `exp-${Date.now()}`,
+          expenseName,
+          expenseCategory,
+          expenseSubCategory,
+          expenseHead,
+          gst,
+          gstRate: gst,
+          depreciation: (expenseHead.toLowerCase() === 'capex' ? depreciation : '0%'),
+          rcm: rcm ? "Yes" : "No",
+          status
+        };
+        masterExpensesData.unshift(newRecord);
+        currentDataset = [...masterExpensesData];
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`Expense ${expenseName} successfully saved!`);
+      }
       return;
     }
 
@@ -18823,7 +18761,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Wire btnExpenseCardEditToggle
   const btnExpenseCardEditToggle = document.getElementById('btnExpenseCardEditToggle');
   if (btnExpenseCardEditToggle) {
-    btnExpenseCardEditToggle.addEventListener('click', () => {
+    btnExpenseCardEditToggle.addEventListener('click', async () => {
       const lblTitle = document.getElementById('lblExpenseCardTitle');
       const imgIcon = document.getElementById('imgExpenseCardEditIcon');
 
@@ -18839,32 +18777,76 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Expense form is now editable');
       } else {
         // SAVE EDITS
-        isExpenseFormEditing = false;
         if (currentViewedExpenseId) {
-          const exp = masterExpensesData.find(e => e.id === currentViewedExpenseId);
-          if (exp) {
-            exp.expenseName = document.getElementById('inpExpenseName')?.value || exp.expenseName || exp.expenseDescription;
-            exp.expenseCategory = document.getElementById('inpExpenseCategory')?.value || exp.expenseCategory;
-            exp.expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value || exp.expenseSubCategory;
-            exp.expenseHead = document.getElementById('inpExpenseHead')?.value || exp.expenseHead;
-            exp.gst = document.getElementById('inpExpenseGst')?.value || exp.gst || exp.gstRate;
-            exp.gstRate = exp.gst;
-            exp.depreciation = document.getElementById('inpExpenseDepreciation')?.value || exp.depreciation;
-            const rcmToggle = document.getElementById('inpExpenseRcmToggle');
-            exp.rcm = (rcmToggle && rcmToggle.checked) ? "Yes" : "No";
-            const statusToggle = document.getElementById('inpExpenseStatusToggle');
-            exp.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+          const expenseName = document.getElementById('inpExpenseName')?.value?.trim();
+          const expenseCategory = document.getElementById('inpExpenseCategory')?.value;
+          const expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value;
+          const expenseHead = document.getElementById('inpExpenseHead')?.value;
+          const gst = document.getElementById('inpExpenseGst')?.value;
+          const depreciation = document.getElementById('inpExpenseDepreciation')?.value;
+          const rcmToggle = document.getElementById('inpExpenseRcmToggle');
+          const statusToggle = document.getElementById('inpExpenseStatusToggle');
+
+          const updatePayload = {
+            expenseName,
+            expenseCategory,
+            expenseSubCategory,
+            expenseHead,
+            gst,
+            depreciation_rate: (expenseHead?.toLowerCase() === 'capex' ? depreciation : '0%'),
+            rcm: (rcmToggle && rcmToggle.checked),
+            status: (statusToggle && statusToggle.checked) ? "Active" : "In - Active"
+          };
+
+          if (typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+            try {
+              const updatedRecord = await NexusApi.expenses.update(currentViewedExpenseId, updatePayload);
+              const idx = masterExpensesData.findIndex(e => String(e.id) === String(currentViewedExpenseId) || String(e.expense_id) === String(currentViewedExpenseId));
+              if (idx !== -1) {
+                masterExpensesData[idx] = updatedRecord;
+              } else {
+                masterExpensesData.unshift(updatedRecord);
+              }
+              currentDataset = [...masterExpensesData];
+              applyFiltersAndRender();
+
+              isExpenseFormEditing = false;
+              setExpenseFormReadOnly(true);
+              if (lblTitle) lblTitle.innerText = 'View Expense';
+              if (imgIcon) {
+                imgIcon.src = 'icons/Edit.svg';
+                imgIcon.title = 'Edit Info';
+              }
+              showToast('Expense details saved & updated successfully to database!');
+            } catch (err) {
+              console.error('Failed to update expense:', err);
+              showToast(`Failed to update expense: ${err.message || err}`);
+            }
+          } else {
+            const exp = masterExpensesData.find(e => String(e.id) === String(currentViewedExpenseId) || String(e.expense_id) === String(currentViewedExpenseId));
+            if (exp) {
+              exp.expenseName = expenseName || exp.expenseName || exp.expenseDescription;
+              exp.expenseCategory = expenseCategory || exp.expenseCategory;
+              exp.expenseSubCategory = expenseSubCategory || exp.expenseSubCategory;
+              exp.expenseHead = expenseHead || exp.expenseHead;
+              exp.gst = gst || exp.gst || exp.gstRate;
+              exp.gstRate = exp.gst;
+              exp.depreciation = depreciation || exp.depreciation;
+              exp.rcm = (rcmToggle && rcmToggle.checked) ? "Yes" : "No";
+              exp.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+            }
+            currentDataset = [...masterExpensesData];
+            applyFiltersAndRender();
+            isExpenseFormEditing = false;
+            setExpenseFormReadOnly(true);
+            if (lblTitle) lblTitle.innerText = 'View Expense';
+            if (imgIcon) {
+              imgIcon.src = 'icons/Edit.svg';
+              imgIcon.title = 'Edit Info';
+            }
+            showToast('Expense details saved & updated successfully!');
           }
-          currentDataset = [...masterExpensesData];
-          applyFiltersAndRender();
         }
-        setExpenseFormReadOnly(true);
-        if (lblTitle) lblTitle.innerText = 'View Expense';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Expense details saved & updated successfully!');
       }
     });
   }
@@ -20968,23 +20950,22 @@ function setExpenseFormReadOnly(isReadOnly, isEditModeOnly = false) {
   });
 }
 
-window.openViewExpenseCard = function(expenseId) {
-  let exp = masterExpensesData.find(e => e.id === expenseId || e.expenseHead === expenseId || e.expenseName === expenseId);
-  if (!exp) {
-    exp = masterExpensesData[0] || {
-      id: expenseId || 'exp-1',
-      expenseName: "Site Infrastructure & Telecom Tower Installation",
-      expenseCategory: "Direct Operations",
-      expenseSubCategory: "Civil Works",
-      expenseHead: "Capex",
-      gst: "18%",
-      depreciation: "15%",
-      rcm: "No",
-      status: "Active"
-    };
+window.openViewExpenseCard = async function(expenseId) {
+  let exp = masterExpensesData.find(e => String(e.id) === String(expenseId) || String(e.expense_id) === String(expenseId) || e.expenseHead === expenseId || e.expenseName === expenseId);
+  if (!exp && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+    try {
+      exp = await NexusApi.expenses.getById(expenseId);
+    } catch (e) {
+      console.warn('Could not fetch expense by ID from API', e);
+    }
   }
 
-  currentViewedExpenseId = exp.id;
+  if (!exp) {
+    showToast('Expense record not found.');
+    return;
+  }
+
+  currentViewedExpenseId = exp.id || exp.expense_id;
   isExpenseFormEditing = false;
 
   const overlay = document.getElementById('sideFormOverlay');
@@ -21010,25 +20991,30 @@ window.openViewExpenseCard = function(expenseId) {
   const btnSaveWrap = document.querySelector('#frmAddExpense .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpExpenseName')) document.getElementById('inpExpenseName').value = exp.expenseName || exp.expenseDescription || exp.expenseHead || '';
-  if (document.getElementById('inpExpenseCategory')) document.getElementById('inpExpenseCategory').value = exp.expenseCategory || 'Direct Operations';
-  if (document.getElementById('inpExpenseSubCategory')) document.getElementById('inpExpenseSubCategory').value = exp.expenseSubCategory || 'Civil Works';
-  if (document.getElementById('inpExpenseHead')) document.getElementById('inpExpenseHead').value = exp.expenseHead || 'Capex';
-  if (document.getElementById('inpExpenseGst')) document.getElementById('inpExpenseGst').value = exp.gst || exp.gstRate || '18%';
-  if (document.getElementById('inpExpenseDepreciation')) document.getElementById('inpExpenseDepreciation').value = exp.depreciation || '10%';
+  if (document.getElementById('inpExpenseName')) document.getElementById('inpExpenseName').value = exp.expenseName || exp.expense_name || exp.expenseDescription || exp.expenseHead || '';
+  if (document.getElementById('inpExpenseCategory')) document.getElementById('inpExpenseCategory').value = exp.expenseCategory || exp.expense_category || 'Direct Operations';
+  if (document.getElementById('inpExpenseSubCategory')) document.getElementById('inpExpenseSubCategory').value = exp.expenseSubCategory || exp.expense_sub_category || exp.expense_description || 'Civil Works';
+  if (document.getElementById('inpExpenseHead')) {
+    document.getElementById('inpExpenseHead').value = exp.expenseHead || exp.expense_head || 'Capex';
+    if (typeof handleExpenseHeadChange === 'function') {
+      handleExpenseHeadChange();
+    }
+  }
+  if (document.getElementById('inpExpenseGst')) document.getElementById('inpExpenseGst').value = exp.gst || (exp.gst_rate != null ? exp.gst_rate + '%' : '18%');
+  if (document.getElementById('inpExpenseDepreciation')) document.getElementById('inpExpenseDepreciation').value = exp.depreciation_rate || exp.depreciation || '10%';
 
   const rcmToggle = document.getElementById('inpExpenseRcmToggle');
   if (rcmToggle) {
-    rcmToggle.checked = (exp.rcm || '').toLowerCase() === 'yes' || exp.rcm === true;
+    rcmToggle.checked = (String(exp.rcm || '').toLowerCase() === 'yes' || exp.rcm === true);
   }
 
   const statusToggle = document.getElementById('inpExpenseStatusToggle');
   if (statusToggle) {
-    statusToggle.checked = (exp.status || '').toLowerCase() === 'active';
+    statusToggle.checked = (String(exp.status || '').toLowerCase() === 'active' || exp.status === true);
   }
 
   setExpenseFormReadOnly(true);
-  showToast(`Viewing expense details: ${exp.expenseName || exp.expenseHead}`);
+  showToast(`Viewing expense details: ${exp.expenseName || exp.expense_name || exp.expenseHead || ''}`);
 };
 
 function exportToCsv() {
@@ -21112,7 +21098,7 @@ function triggerCsvUpload() {
   fileInput.accept = '.csv, .xlsx, .xls, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
   fileInput.style.display = 'none';
 
-  fileInput.addEventListener('change', (e) => {
+  fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (file) {
       const fileName = file.name;
@@ -21121,7 +21107,21 @@ function triggerCsvUpload() {
         showToast('Invalid file format. Please select a .csv or .xlsx file');
         return;
       }
-      showToast(`File "${fileName}" uploaded successfully!`);
+      if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'expenses' && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+        try {
+          showToast(`Uploading "${fileName}" to PostgreSQL...`);
+          const result = await NexusApi.expenses.bulkUpload(file);
+          showToast(`Bulk upload successful: ${result.imported_count || 0} expenses imported!`);
+          if (typeof loadMasterExpensesFromApi === 'function') {
+            await loadMasterExpensesFromApi();
+          }
+        } catch (err) {
+          console.error('Bulk upload error:', err);
+          showToast(`Bulk upload failed: ${err.message || err}`);
+        }
+      } else {
+        showToast(`File "${fileName}" uploaded successfully!`);
+      }
     }
   });
 
@@ -24098,8 +24098,8 @@ window.downloadBulkCsvTemplate = function() {
       break;
     case 'expense':
     case 'expenses':
-      headers = ['Expense ID', 'Expense Head', 'Category', 'Description', 'Amount', 'Date', 'Status'];
-      sampleRow = ['EXP-001', 'Site Travel', 'Travel', 'Site Inspection Fuel', '2500.00', '15/04/2026', 'Approved'];
+      headers = ['Expense Name', 'Expense Category', 'Expense Sub-Category', 'Expense Head', 'GST Rate', 'Depreciation', 'RCM', 'Status'];
+      sampleRow = ['Site Infrastructure & Telecom Tower Installation', 'Direct Operations', 'Civil Works', 'Capex', '18%', 'Yes', 'No', 'Active'];
       break;
     case 'site':
       headers = ['Site ID', 'WH ID', 'Site Name', 'District', 'Town', 'Latitude', 'Longitude', 'Transport Zone', 'Status'];
@@ -24132,10 +24132,24 @@ window.downloadBulkCsvTemplate = function() {
   showToast(`CSV Template downloaded for ${page}`);
 };
 
-window.handleBulkCsvFileSelected = function(input) {
+window.handleBulkCsvFileSelected = async function(input) {
   if (input.files && input.files[0]) {
     const file = input.files[0];
-    showToast(`Bulk CSV file "${file.name}" uploaded successfully for ${currentBulkUploadPageName}!`);
+    if (typeof currentBulkUploadPageName === 'string' && currentBulkUploadPageName.toLowerCase().includes('expense') && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+      try {
+        showToast(`Uploading "${file.name}" to PostgreSQL...`);
+        const result = await NexusApi.expenses.bulkUpload(file);
+        showToast(`Bulk upload successful: ${result.imported_count || 0} expenses imported!`);
+        if (typeof loadMasterExpensesFromApi === 'function') {
+          await loadMasterExpensesFromApi();
+        }
+      } catch (err) {
+        console.error('Bulk upload error:', err);
+        showToast(`Bulk upload failed: ${err.message || err}`);
+      }
+    } else {
+      showToast(`Bulk CSV file "${file.name}" uploaded successfully for ${currentBulkUploadPageName}!`);
+    }
     input.value = '';
     closeBulkUploadModal();
   }

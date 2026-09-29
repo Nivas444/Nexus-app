@@ -4953,3 +4953,99 @@ td.col-loc-incharge {
   background-color: #f0f7ff !important;
   transform: scale(1.04);
 }
+
+/* ─── NEXUS SVG ERROR POPUP MODAL ────────────────────────────────────────── */
+.nexus-error-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  animation: nexusErrFadeIn 0.2s ease-out forwards;
+}
+
+.nexus-error-popup-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: nexusErrPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  max-width: 95vw;
+}
+
+.nexus-error-svg-card {
+  max-width: 92vw;
+  height: auto;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.25));
+}
+
+@keyframes nexusErrFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nexusErrPopIn {
+  from {
+    transform: scale(0.88) translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ─── NEXUS SVG SUCCESS POPUP MODAL ──────────────────────────────────────── */
+.nexus-success-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  animation: nexusSuccFadeIn 0.2s ease-out forwards;
+}
+
+.nexus-success-popup-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: nexusSuccPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  max-width: 95vw;
+}
+
+.nexus-success-svg-card {
+  max-width: 92vw;
+  height: auto;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.25));
+}
+
+@keyframes nexusSuccFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nexusSuccPopIn {
+  from {
+    transform: scale(0.88) translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}

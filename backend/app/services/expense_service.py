@@ -18,6 +18,8 @@ from app.schemas.expense import (
     parse_status_field
 )
 
+from sqlalchemy.exc import IntegrityError
+
 class ExpenseService:
     def __init__(self, db: Session):
         self.repository = ExpenseRepository(db)
@@ -112,6 +114,13 @@ class ExpenseService:
                 detail="Expense Name is required."
             )
 
+        # Check duplicate expense name
+        if self.repository.get_by_name(name):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Expense name already exists."
+            )
+
         category = (data.expense_category or data.expenseCategory or "").strip()
         sub_category = (data.expense_sub_category or data.expenseSubCategory or "").strip()
         head = (data.expense_head or data.expenseHead or "Capex").strip()
@@ -132,8 +141,13 @@ class ExpenseService:
         rcm_bool = parse_boolean_field(data.rcm)
         status_val = parse_status_field(data.status)
 
-        # Generate default expense code if not provided
+        # Generate or validate expense code
         exp_code = data.expense_code or f"EXP-{head[:3].upper()}-{abs(hash(name)) % 1000:03d}"
+        if data.expense_code and self.repository.get_by_code(data.expense_code):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Expense code already exists."
+            )
 
         new_expense = CompanyExpense(
             expense_name=name,
@@ -152,8 +166,27 @@ class ExpenseService:
             uom=data.uom or "Nos"
         )
 
-        saved = self.repository.create(new_expense)
-        return self._to_response_dto(saved)
+        try:
+            saved = self.repository.create(new_expense)
+            return self._to_response_dto(saved)
+        except IntegrityError as e:
+            self.repository.db.rollback()
+            err_str = str(e.orig).lower() if hasattr(e, 'orig') else str(e).lower()
+            if "expense_code" in err_str:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense code already exists."
+                )
+            elif "expense_name" in err_str:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense name already exists."
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense record already exists."
+                )
 
     def update_expense(self, expense_id: int, data: ExpenseUpdate) -> ExpenseResponse:
         exp = self.repository.get_by_id(expense_id)
@@ -165,7 +198,24 @@ class ExpenseService:
 
         name = data.expense_name or data.expenseName
         if name is not None and name.strip():
-            exp.expense_name = name.strip()
+            name_clean = name.strip()
+            existing_with_name = self.repository.get_by_name(name_clean, exclude_id=expense_id)
+            if existing_with_name:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense name already exists."
+                )
+            exp.expense_name = name_clean
+
+        if data.expense_code is not None and data.expense_code.strip():
+            code_clean = data.expense_code.strip()
+            existing_with_code = self.repository.get_by_code(code_clean, exclude_id=expense_id)
+            if existing_with_code:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense code already exists."
+                )
+            exp.expense_code = code_clean
 
         category = data.expense_category or data.expenseCategory
         if category is not None:
@@ -201,8 +251,6 @@ class ExpenseService:
         if data.status is not None:
             exp.status = parse_status_field(data.status)
 
-        if data.expense_code is not None:
-            exp.expense_code = data.expense_code
         if data.sac_code is not None:
             exp.sac_code = data.sac_code
         if data.uom is not None:
@@ -212,8 +260,27 @@ class ExpenseService:
         if data.company_name is not None:
             exp.company_name = data.company_name
 
-        updated = self.repository.update(exp)
-        return self._to_response_dto(updated)
+        try:
+            updated = self.repository.update(exp)
+            return self._to_response_dto(updated)
+        except IntegrityError as e:
+            self.repository.db.rollback()
+            err_str = str(e.orig).lower() if hasattr(e, 'orig') else str(e).lower()
+            if "expense_code" in err_str:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense code already exists."
+                )
+            elif "expense_name" in err_str:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense name already exists."
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Expense record already exists."
+                )
 
     def update_status(self, expense_id: int, status_data: ExpenseStatusUpdate) -> ExpenseResponse:
         exp = self.repository.get_by_id(expense_id)

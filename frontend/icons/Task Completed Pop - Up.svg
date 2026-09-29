@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="100%" height="100%">
+  <defs>
+    <!-- Background card drop shadow -->
+    <filter id="card-shadow" x="-10%" y="-8%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#0b1b14" flood-opacity="0.08" />
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#0b1b14" flood-opacity="0.04" />
+    </filter>
+
+    <!-- Button glow shadow in #008744 -->
+    <filter id="btn-shadow" x="-20%" y="-20%" width="140%" height="160%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#008744" flood-opacity="0.35" />
+    </filter>
+
+    <!-- Clip path to keep header shape aligned to the card's rounded top -->
+    <clipPath id="card-clip">
+      <rect x="25" y="20" width="350" height="440" rx="36" ry="36" />
+    </clipPath>
+  </defs>
+
+  <style>
+    .title {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      fill: #1a1a1a;
+      text-anchor: middle;
+    }
+    .body-text {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      line-height: 1.5;
+      fill: #555555;
+      text-anchor: middle;
+    }
+    .btn-text {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      fill: #ffffff;
+      text-anchor: middle;
+      letter-spacing: 0.2px;
+    }
+  </style>
+
+  <!-- Card Background with Shadow -->
+  <rect x="25" y="20" width="350" height="440" rx="36" ry="36" fill="#ffffff" filter="url(#card-shadow)" />
+
+  <!-- Top Header Section (clipped to rounded corners) -->
+  <g clip-path="url(#card-clip)">
+    <!-- Header Banner in #008744 with curved bottom -->
+    <path d="M 25,20 
+             L 375,20 
+             L 375,205 
+             C 275,240 125,240 25,205 
+             Z" 
+          fill="#008744" />
+
+    <!-- Checkmark Circle Badge -->
+    <g transform="translate(200, 125)">
+      <!-- Outer Circle with Gap for Checkmark Tail -->
+      <path d="M 0,-56 
+               A 56 56 0 1 0 54,-14" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="10" 
+            stroke-linecap="round" />
+
+      <!-- Checkmark -->
+      <path d="M -27,-2 
+               L -5,22 
+               L 54,-38" 
+            fill="none" 
+            stroke="#ffffff" 
+            stroke-width="10" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" />
+    </g>
+  </g>
+
+  <!-- Title -->
+  <text x="200" y="278" class="title">Task Completed</text>
+
+  <!-- Description / Lorem Ipsum Body -->
+  <text class="body-text">
+    <tspan x="200" y="304">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed</tspan>
+    <tspan x="200" y="321">diam nonummy nibh euismod tincidunt ut laoreet dolore magna</tspan>
+    <tspan x="200" y="338">aliquam erat volutpat wisi enim ad minim veniam duis</tspan>
+    <tspan x="200" y="355">autem vel eum iriure dolor.</tspan>
+  </text>
+
+  <!-- Call-to-Action Button with Glow Shadow in #008744 -->
+  <rect x="75" y="390" width="250" height="48" rx="24" ry="24" fill="#008744" filter="url(#btn-shadow)" />
+  <text x="200" y="420" class="btn-text">Close Window</text>
+</svg>

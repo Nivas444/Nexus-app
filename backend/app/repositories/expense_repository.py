@@ -1,6 +1,6 @@
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc, asc
+from sqlalchemy import or_, desc, asc, func
 from app.models.expense import CompanyExpense
 
 class ExpenseRepository:
@@ -9,6 +9,22 @@ class ExpenseRepository:
 
     def get_by_id(self, expense_id: int) -> Optional[CompanyExpense]:
         return self.db.query(CompanyExpense).filter(CompanyExpense.expense_id == expense_id).first()
+
+    def get_by_name(self, name: str, exclude_id: Optional[int] = None) -> Optional[CompanyExpense]:
+        if not name or not name.strip():
+            return None
+        query = self.db.query(CompanyExpense).filter(func.lower(CompanyExpense.expense_name) == name.strip().lower())
+        if exclude_id:
+            query = query.filter(CompanyExpense.expense_id != exclude_id)
+        return query.first()
+
+    def get_by_code(self, code: str, exclude_id: Optional[int] = None) -> Optional[CompanyExpense]:
+        if not code or not code.strip():
+            return None
+        query = self.db.query(CompanyExpense).filter(func.lower(CompanyExpense.expense_code) == code.strip().lower())
+        if exclude_id:
+            query = query.filter(CompanyExpense.expense_id != exclude_id)
+        return query.first()
 
     def get_by_name_or_code(self, name: str, code: Optional[str] = None) -> Optional[CompanyExpense]:
         query = self.db.query(CompanyExpense).filter(CompanyExpense.expense_name == name)

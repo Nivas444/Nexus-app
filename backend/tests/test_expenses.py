@@ -143,3 +143,63 @@ def test_download_template(client: TestClient):
     assert response.status_code == 200
     assert "text/csv" in response.headers.get("content-type", "")
     assert "Expense Name" in response.text
+
+def test_duplicate_expense_name_conflict_409(client: TestClient):
+    payload = {
+        "expenseName": "Unique Expense Conflict Test",
+        "expenseCategory": "Direct Operations",
+        "expenseHead": "Capex"
+    }
+    # 1. First creation succeeds
+    res1 = client.post("/api/v1/master/expenses", json=payload)
+    assert res1.status_code == 201
+    exp_id = res1.json()["expense_id"]
+
+    try:
+        # 2. Duplicate creation fails with 409
+        res2 = client.post("/api/v1/master/expenses", json=payload)
+        assert res2.status_code == 409
+        assert "Expense name already exists." in res2.json()["detail"]
+    finally:
+        client.delete(f"/api/v1/master/expenses/{exp_id}")
+
+def test_duplicate_expense_code_conflict_409(client: TestClient):
+    payload1 = {
+        "expenseName": "Expense Code Test 1",
+        "expense_code": "EXP-DUPLICATE-001",
+        "expenseHead": "Capex"
+    }
+    payload2 = {
+        "expenseName": "Expense Code Test 2",
+        "expense_code": "EXP-DUPLICATE-001",
+        "expenseHead": "Capex"
+    }
+    res1 = client.post("/api/v1/master/expenses", json=payload1)
+    assert res1.status_code == 201
+    exp_id = res1.json()["expense_id"]
+
+    try:
+        res2 = client.post("/api/v1/master/expenses", json=payload2)
+        assert res2.status_code == 409
+        assert "Expense code already exists." in res2.json()["detail"]
+    finally:
+        client.delete(f"/api/v1/master/expenses/{exp_id}")
+
+def test_update_expense_duplicate_name_conflict_409(client: TestClient):
+    res1 = client.post("/api/v1/master/expenses", json={"expenseName": "Expense Alpha", "expenseHead": "Capex"})
+    assert res1.status_code == 201
+    id1 = res1.json()["expense_id"]
+
+    res2 = client.post("/api/v1/master/expenses", json={"expenseName": "Expense Beta", "expenseHead": "Capex"})
+    assert res2.status_code == 201
+    id2 = res2.json()["expense_id"]
+
+    try:
+        # Try updating Beta's name to Alpha's name
+        update_res = client.put(f"/api/v1/master/expenses/{id2}", json={"expenseName": "Expense Alpha"})
+        assert update_res.status_code == 409
+        assert "Expense name already exists." in update_res.json()["detail"]
+    finally:
+        client.delete(f"/api/v1/master/expenses/{id1}")
+        client.delete(f"/api/v1/master/expenses/{id2}")
+

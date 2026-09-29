@@ -6,6 +6,31 @@ from app.schemas.expense import (
     ExpenseListResponse,
     ExpenseStatusUpdate
 )
+from app.schemas.product import (
+    ProductBase,
+    ProductCreate,
+    ProductUpdate,
+    ProductResponse,
+    ProductListResponse,
+    ProductStatusUpdate
+)
+from app.schemas.customer import (
+    CustomerBase,
+    CustomerCreate,
+    CustomerUpdate,
+    CustomerRestrictedUpdate,
+    CustomerResponse,
+    CustomerListResponse,
+    CustomerStatusUpdate,
+    CustomerContactBase,
+    CustomerContactCreate,
+    CustomerContactResponse,
+    CustomerContactListResponse,
+    CustomerLocationBase,
+    CustomerLocationCreate,
+    CustomerLocationResponse,
+    CustomerLocationListResponse
+)
 
 __all__ = [
     "ExpenseBase",
@@ -13,5 +38,26 @@ __all__ = [
     "ExpenseUpdate",
     "ExpenseResponse",
     "ExpenseListResponse",
-    "ExpenseStatusUpdate"
+    "ExpenseStatusUpdate",
+    "ProductBase",
+    "ProductCreate",
+    "ProductUpdate",
+    "ProductResponse",
+    "ProductListResponse",
+    "ProductStatusUpdate",
+    "CustomerBase",
+    "CustomerCreate",
+    "CustomerUpdate",
+    "CustomerRestrictedUpdate",
+    "CustomerResponse",
+    "CustomerListResponse",
+    "CustomerStatusUpdate",
+    "CustomerContactBase",
+    "CustomerContactCreate",
+    "CustomerContactResponse",
+    "CustomerContactListResponse",
+    "CustomerLocationBase",
+    "CustomerLocationCreate",
+    "CustomerLocationResponse",
+    "CustomerLocationListResponse"
 ]

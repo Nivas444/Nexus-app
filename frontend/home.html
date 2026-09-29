@@ -9291,6 +9291,190 @@
   <!-- Toast Notification Container -->
   <div class="home-toast" id="homeToast"></div>
 
+  <!-- SVG ERROR POPUP MODAL (Duplicate & Validation Error Dialog) -->
+  <div class="nexus-error-popup-overlay" id="nexusErrorPopupOverlay" style="display: none;" onclick="if(event.target === this) closeSvgErrorPopup();">
+    <div class="nexus-error-popup-content" id="nexusErrorPopupContent">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" width="350" height="315" class="nexus-error-svg-card">
+        <defs>
+          <filter id="card-shadow-err" x="-10%" y="-8%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0b1b14" flood-opacity="0.12" />
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0b1b14" flood-opacity="0.05" />
+          </filter>
+          <filter id="btn-shadow-err" x="-20%" y="-20%" width="140%" height="160%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#e93f33" flood-opacity="0.28" />
+          </filter>
+          <clipPath id="card-clip-err">
+            <rect x="25" y="15" width="350" height="330" rx="28" ry="28" />
+          </clipPath>
+        </defs>
+
+        <style>
+          .svg-err-title {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            fill: #1a1a1a;
+            text-anchor: middle;
+          }
+          .svg-err-body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            fill: #4b5563;
+            text-anchor: middle;
+          }
+          .svg-err-btn-text {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            fill: #ffffff;
+            text-anchor: middle;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            user-select: none;
+            pointer-events: none;
+          }
+          .svg-err-btn-rect {
+            cursor: pointer;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+          }
+          .svg-err-btn-rect:hover {
+            opacity: 0.92;
+          }
+          .svg-err-btn-group:active .svg-err-btn-rect {
+            transform: scale(0.98);
+            transform-origin: 200px 306px;
+          }
+        </style>
+
+        <!-- Card Background with Shadow -->
+        <rect x="25" y="15" width="350" height="330" rx="28" ry="28" fill="#ffffff" filter="url(#card-shadow-err)" />
+
+        <!-- Top Header Section (clipped to card's rounded top corners) -->
+        <g clip-path="url(#card-clip-err)">
+          <!-- Red Header Banner with curved bottom -->
+          <path d="M 25,15 L 375,15 L 375,135 C 275,158 125,158 25,135 Z" fill="#eb3f33" />
+
+          <!-- Rounded Warning Triangle Icon -->
+          <g transform="translate(0, -18)">
+            <path d="M 200,48 C 209,48 217,53 222,62 L 249,108 C 254,116 254,126 249,134 C 244,142 235,147 225,147 L 175,147 C 165,147 156,142 151,134 C 146,126 146,116 151,108 L 178,62 C 183,53 191,48 200,48 Z" fill="#ffffff" />
+            <!-- Exclamation Mark Inside Triangle -->
+            <path d="M 200,74 C 203.5,74 206,76.5 205.6,81 L 203.6,108 C 203.3,111 201,113 198.3,113 C 195.6,113 193.3,111 193,108 L 191,81 C 190.6,76.5 193.1,74 196.6,74 Z" fill="#eb3f33" />
+            <circle cx="198.3" cy="123" r="4.2" fill="#eb3f33" />
+          </g>
+        </g>
+
+        <!-- Title -->
+        <text x="200" y="188" class="svg-err-title" id="svgErrorPopupTitle">Error Message!</text>
+
+        <!-- Error Description Body (Populated dynamically) -->
+        <text class="svg-err-body" id="svgErrorPopupBody">
+          <tspan x="200" y="216" id="svgErrorPopupLine1">Expense name already exists.</tspan>
+          <tspan x="200" y="235" id="svgErrorPopupLine2"></tspan>
+          <tspan x="200" y="254" id="svgErrorPopupLine3"></tspan>
+        </text>
+
+        <!-- Dismiss Button Group -->
+        <g id="btnSvgErrorDismiss" class="svg-err-btn-group" onclick="closeSvgErrorPopup()" style="cursor: pointer;">
+          <rect x="90" y="278" width="220" height="42" rx="21" ry="21" fill="#eb3f33" filter="url(#btn-shadow-err)" class="svg-err-btn-rect" />
+          <text x="200" y="304" class="svg-err-btn-text" id="svgErrorPopupBtnLabel">Dismiss</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- SVG SUCCESS POPUP MODAL (Add & Edit Expense Success Dialog) -->
+  <div class="nexus-success-popup-overlay" id="nexusSuccessPopupOverlay" style="display: none;" onclick="if(event.target === this) closeSvgSuccessPopup();">
+    <div class="nexus-success-popup-content" id="nexusSuccessPopupContent">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360" width="350" height="315" class="nexus-success-svg-card">
+        <defs>
+          <filter id="card-shadow-succ" x="-10%" y="-8%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0b1b14" flood-opacity="0.12" />
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0b1b14" flood-opacity="0.05" />
+          </filter>
+          <filter id="btn-shadow-succ" x="-20%" y="-20%" width="140%" height="160%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#008744" flood-opacity="0.28" />
+          </filter>
+          <clipPath id="card-clip-succ">
+            <rect x="25" y="15" width="350" height="330" rx="28" ry="28" />
+          </clipPath>
+        </defs>
+
+        <style>
+          .svg-succ-title {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            fill: #1a1a1a;
+            text-anchor: middle;
+          }
+          .svg-succ-body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            font-size: 13.5px;
+            font-weight: 500;
+            fill: #4b5563;
+            text-anchor: middle;
+          }
+          .svg-succ-btn-text {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            fill: #ffffff;
+            text-anchor: middle;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            user-select: none;
+            pointer-events: none;
+          }
+          .svg-succ-btn-rect {
+            cursor: pointer;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+          }
+          .svg-succ-btn-rect:hover {
+            opacity: 0.92;
+          }
+          .svg-succ-btn-group:active .svg-succ-btn-rect {
+            transform: scale(0.98);
+            transform-origin: 200px 306px;
+          }
+        </style>
+
+        <!-- Card Background with Shadow -->
+        <rect x="25" y="15" width="350" height="330" rx="28" ry="28" fill="#ffffff" filter="url(#card-shadow-succ)" />
+
+        <!-- Top Header Section (clipped to card's rounded top corners) -->
+        <g clip-path="url(#card-clip-succ)">
+          <!-- Green Header Banner with curved bottom -->
+          <path d="M 25,15 L 375,15 L 375,135 C 275,158 125,158 25,135 Z" fill="#008744" />
+
+          <!-- Checkmark Circle Badge -->
+          <g transform="translate(200, 75) scale(0.68)">
+            <!-- Outer Circle with Gap for Checkmark Tail -->
+            <path d="M 0,-56 A 56 56 0 1 0 54,-14" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" />
+            <!-- Checkmark -->
+            <path d="M -27,-2 L -5,22 L 54,-38" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+        </g>
+
+        <!-- Title -->
+        <text x="200" y="188" class="svg-succ-title" id="svgSuccessPopupTitle">Success!</text>
+
+        <!-- Success Description Body (Populated dynamically) -->
+        <text class="svg-succ-body" id="svgSuccessPopupBody">
+          <tspan x="200" y="216" id="svgSuccessPopupLine1">Expense added successfully!</tspan>
+          <tspan x="200" y="235" id="svgSuccessPopupLine2"></tspan>
+          <tspan x="200" y="254" id="svgSuccessPopupLine3"></tspan>
+        </text>
+
+        <!-- Dismiss Button Group -->
+        <g id="btnSvgSuccessDismiss" class="svg-succ-btn-group" onclick="closeSvgSuccessPopup()" style="cursor: pointer;">
+          <rect x="90" y="278" width="220" height="42" rx="21" ry="21" fill="#008744" filter="url(#btn-shadow-succ)" class="svg-succ-btn-rect" />
+          <text x="200" y="304" class="svg-succ-btn-text" id="svgSuccessPopupBtnLabel">Continue</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
   <script src="assets/js/api.js?v=20260928_2230"></script>
   <script src="assets/js/home.js?v=20260928_2230"></script>
 </body>

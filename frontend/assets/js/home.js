@@ -61,43 +61,75 @@ const masterEmployeeData = [
   }
 ];
 
-// Master -> Customer Sub-Page Dataset (matches uploaded user mockup)
-const masterCustomerData = [
+// Master -> Customer Sub-Page Dataset (Loaded dynamically from PostgreSQL via FastAPI)
+let masterCustomerData = [
   {
     id: "cust-1",
+    customer_id: 1,
     customerName: "Indus Towers Ltd",
+    customer_name: "Indus Towers Ltd",
+    legal_name: "Indus Towers Ltd",
     customerId: "230510678",
+    customer_code: "230510678",
     businessType: "Projects",
-    panNumber: "33ASMPM8643F",
-    poDigits: "450",
+    business_type: "Projects",
     gstNumber: "33ASMPM8643F1Z5",
+    gst_number: "33ASMPM8643F1Z5",
     gstType: "SGST",
+    gst_type: "SGST",
     invoiceType: "B2B",
+    invoice_type: "B2B",
+    panNumber: "33ASMPM8643F",
+    pan_number: "33ASMPM8643F",
     address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
-    status: "Active",
-    gstEnabled: true
-  },
-  {
-    id: "cust-2",
-    customerName: "Bharti Hexacom",
-    customerId: "230510679",
-    businessType: "Supply",
-    gstNumber: "29AABCU9603R1ZM",
-    gstType: "IGST",
-    invoiceType: "B2C",
-    status: "In - Active"
-  },
-  {
-    id: "cust-3",
-    customerName: "ATC India Infrastructure",
-    customerId: "230510680",
-    businessType: "Projects",
-    gstNumber: "36BKMPM4321K1Z3",
-    gstType: "SGST",
-    invoiceType: "Cash",
+    gst_address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
+    poDigits: "450",
+    po_stating_3_digits: "450",
     status: "Active"
   }
 ];
+
+async function loadMasterCustomersFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.customers) {
+    try {
+      const response = await NexusApi.customers.getAll({ limit: 500 });
+      let items = [];
+      if (response && Array.isArray(response.items)) {
+        items = response.items;
+      } else if (Array.isArray(response)) {
+        items = response;
+      }
+      if (items.length > 0) {
+        masterCustomerData = items.map(c => ({
+          ...c,
+          id: c.customer_id || c.id || `cust-${c.customer_code || Date.now()}`,
+          customerName: c.customer_name || c.customerName || c.legal_name || 'Customer',
+          customerId: c.customer_code || c.customerId || c.customer_id || '',
+          businessType: c.business_type || c.businessType || 'Projects',
+          gstNumber: c.gst_number || c.gstNumber || 'NA',
+          gstType: c.gst_type || c.gstType || 'SGST',
+          invoiceType: c.invoice_type || c.invoiceType || 'B2B',
+          panNumber: c.pan_number || c.panNumber || '',
+          address: c.gst_address || c.address || '',
+          poDigits: c.po_stating_3_digits || c.poDigits || '',
+          status: c.status || 'Active'
+        }));
+      }
+    } catch (err) {
+      console.error('Error fetching master customers from API:', err);
+      if (typeof showToast === 'function') {
+        showToast('Could not load customers from database: ' + (err.message || err));
+      }
+    }
+  }
+  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
+    currentDataset = [...masterCustomerData];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+  }
+}
+
 
 // Master -> Vendor Dataset (Matching Uploaded Mockup)
 const masterVendorData = [
@@ -205,123 +237,33 @@ const masterVendorData = [
   }
 ];
 
-// Master -> Products Dataset (Matching Uploaded Mockup)
-const masterProductsData = [
-  {
-    id: "prod-1",
-    productName: "Telecom Tower Mast",
-    productHead: "Telecom Tower Mast",
-    productCategory: "Tower Infrastructure",
-    productCode: "PRD-TTM-001",
-    hsnCode: "73082019",
-    gst: "18%",
-    gstRate: "18%",
-    price: "4,50,000.00",
-    stockPrices: "4,50,000.00",
-    productDescription: "40M Galvanized Tubular Telecom Tower Mast Structure",
-    uom: "Nos",
-    msq: "10",
-    moq: "2",
-    oh: "2%",
-    margin: "10%",
-    status: "Active"
-  },
-  {
-    id: "prod-2",
-    productName: "Optical Fiber Cable",
-    productHead: "Optical Fiber Cable",
-    productCategory: "Optical Cables",
-    productCode: "PRD-OFC-002",
-    hsnCode: "85447090",
-    gst: "18%",
-    gstRate: "18%",
-    price: "85.00",
-    stockPrices: "85.00",
-    productDescription: "24-Core Armored Outdoor Single-Mode Fiber Cable",
-    uom: "Mtr",
-    msq: "5000",
-    moq: "500",
-    oh: "1%",
-    margin: "5%",
-    status: "Active"
-  },
-  {
-    id: "prod-3",
-    productName: "Power Distribution Unit",
-    productHead: "Power Distribution Unit",
-    productCategory: "Electrical Equipment",
-    productCode: "PRD-PDU-003",
-    hsnCode: "85371000",
-    gst: "18%",
-    gstRate: "18%",
-    price: "32,000.00",
-    stockPrices: "32,000.00",
-    productDescription: "AC/DC Dual Power Distribution Panel with Surge Protection",
-    uom: "Pcs",
-    msq: "25",
-    moq: "5",
-    oh: "2%",
-    margin: "8%",
-    status: "In - Active"
-  },
-  {
-    id: "prod-4",
-    productName: "Diesel Generator 15kVA",
-    productHead: "Diesel Generator 15kVA",
-    productCategory: "Power Backup",
-    productCode: "PRD-GEN-004",
-    hsnCode: "85021100",
-    gst: "28%",
-    gstRate: "28%",
-    price: "2,80,000.00",
-    stockPrices: "2,80,000.00",
-    productDescription: "15kVA Soundproof Silent Diesel Generator Set",
-    uom: "Nos",
-    msq: "5",
-    moq: "1",
-    oh: "2%",
-    margin: "8%",
-    status: "Active"
-  },
-  {
-    id: "prod-5",
-    productName: "Lithium-Ion Battery 48V",
-    productHead: "Lithium-Ion Battery 48V",
-    productCategory: "Energy Storage",
-    productCode: "PRD-BAT-005",
-    hsnCode: "85076000",
-    gst: "18%",
-    gstRate: "18%",
-    price: "1,20,000.00",
-    stockPrices: "1,20,000.00",
-    productDescription: "48V 100Ah Telecom Grade LiFePO4 Battery Bank",
-    uom: "Nos",
-    msq: "12",
-    moq: "2",
-    oh: "1.5%",
-    margin: "7%",
-    status: "Active"
-  },
-  {
-    id: "prod-6",
-    productName: "Earthing Copper Strip",
-    productHead: "Earthing Copper Strip",
-    productCategory: "Earthing & Protection",
-    productCode: "PRD-ETH-006",
-    hsnCode: "74071010",
-    gst: "18%",
-    gstRate: "18%",
-    price: "650.00",
-    stockPrices: "650.00",
-    productDescription: "25x3mm Pure Copper Earthing Flat Strip",
-    uom: "Mtr",
-    msq: "200",
-    moq: "25",
-    oh: "1%",
-    margin: "6%",
-    status: "Active"
+// Master -> Products Dataset (Loaded dynamically from PostgreSQL via FastAPI)
+let masterProductsData = [];
+
+async function loadMasterProductsFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.products) {
+    try {
+      const response = await NexusApi.products.getAll({ limit: 500 });
+      if (response && Array.isArray(response.items)) {
+        masterProductsData = response.items;
+      } else if (Array.isArray(response)) {
+        masterProductsData = response;
+      }
+    } catch (err) {
+      console.error('Error fetching master products from API:', err);
+      if (typeof showToast === 'function') {
+        showToast('Could not load products from database: ' + (err.message || err));
+      }
+    }
   }
-];
+  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'products') {
+    currentDataset = [...masterProductsData];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+  }
+}
+
 
 /// Master -> Expenses Dataset (Loaded dynamically from PostgreSQL via FastAPI)
 let masterExpensesData = [];
@@ -4136,9 +4078,6 @@ function goBackSubpage() {
     } else if (currentIndusSubpage === 'product_details') {
       currentIndusSubpage = 'products';
       showToast('Returned to GBPA');
-    } else if (currentIndusSubpage === 'infra' || currentIndusSubpage === 'projects' || currentIndusSubpage === 'products' || currentIndusSubpage === 'esh') {
-      currentIndusSubpage = 'site';
-      showToast('Returned to Site');
     } else {
       currentModule = 'master';
       currentMasterSubpage = 'customer';
@@ -5238,10 +5177,16 @@ function loadMasterDataset() {
     currentDataset = [...masterEmployeeData];
   } else if (currentMasterSubpage === 'customer') {
     currentDataset = [...masterCustomerData];
+    if (typeof loadMasterCustomersFromApi === 'function') {
+      loadMasterCustomersFromApi();
+    }
   } else if (currentMasterSubpage === 'vendor') {
     currentDataset = [...masterVendorData];
   } else if (currentMasterSubpage === 'products') {
     currentDataset = [...masterProductsData];
+    if (typeof loadMasterProductsFromApi === 'function') {
+      loadMasterProductsFromApi();
+    }
   } else if (currentMasterSubpage === 'expenses') {
     currentDataset = [...masterExpensesData];
     if (typeof loadMasterExpensesFromApi === 'function') {
@@ -6034,7 +5979,7 @@ window.openTelecomDetailsModal = function() {
     if (card.id !== 'telecomDetailsCard') card.style.display = 'none';
   });
 
-  const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => (c.customerName || '').toLowerCase().includes('indus tower'))) || 
+  const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => ((c.customerName || c.customer_name || '').toLowerCase().includes('indus')))) || 
                (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]) || {
                  customerName: "Indus Towers Ltd",
                  customerId: "230510678",
@@ -6049,30 +5994,31 @@ window.openTelecomDetailsModal = function() {
                };
 
   const inpType = document.getElementById('inpTelecomBusinessType');
-  if (inpType) inpType.value = cust.businessType || 'Projects';
+  if (inpType) inpType.value = cust.businessType || cust.business_type || 'Projects';
 
   const inpName = document.getElementById('inpTelecomCustomerName');
-  if (inpName) inpName.value = cust.customerName || 'Indus Towers Ltd';
+  if (inpName) inpName.value = cust.customerName || cust.customer_name || 'Indus Towers Ltd';
 
   const inpDigits = document.getElementById('inpTelecomPoDigits');
-  if (inpDigits) inpDigits.value = cust.poDigits || '450';
+  if (inpDigits) inpDigits.value = cust.poDigits || cust.po_stating_3_digits || '450';
 
   const inpPan = document.getElementById('inpTelecomPanNumber');
-  if (inpPan) inpPan.value = cust.panNumber || '33ASMPM8643F';
+  if (inpPan) inpPan.value = cust.panNumber || cust.pan_number || '33ASMPM8643F';
 
   const inpGstToggle = document.getElementById('inpTelecomGstToggle');
   if (inpGstToggle) {
-    inpGstToggle.checked = (cust.gstEnabled !== false && cust.gstNumber && cust.gstNumber !== 'NA');
+    inpGstToggle.checked = (cust.gstEnabled !== false && cust.gstNumber !== 'NA' && cust.gst_number !== 'NA');
   }
 
   const inpGstType = document.getElementById('inpTelecomGstType');
-  if (inpGstType) inpGstType.value = cust.gstType || 'SGST';
+  if (inpGstType) inpGstType.value = cust.gstType || cust.gst_type || 'SGST';
 
   const inpGstNumber = document.getElementById('inpTelecomGstNumber');
-  if (inpGstNumber) inpGstNumber.value = (cust.gstNumber && cust.gstNumber !== 'NA') ? cust.gstNumber : '33ASMPM8643F1Z5';
+  const actualGst = cust.gstNumber || cust.gst_number;
+  if (inpGstNumber) inpGstNumber.value = (actualGst && actualGst !== 'NA') ? actualGst : '33ASMPM8643F1Z5';
 
   const inpAddress = document.getElementById('inpTelecomAddress');
-  if (inpAddress) inpAddress.value = cust.address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
+  if (inpAddress) inpAddress.value = cust.address || cust.gst_address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
 
   const inpStatus = document.getElementById('inpTelecomStatusToggle');
   if (inpStatus) inpStatus.checked = !((cust.status || '').toLowerCase().includes('in'));
@@ -6082,7 +6028,7 @@ window.openTelecomDetailsModal = function() {
   setTelecomDetailsReadOnly(true);
 
   const lblCardTitle = document.getElementById('lblTelecomDetailsCardTitle');
-  if (lblCardTitle) lblCardTitle.innerText = 'Indus Towers Ltd';
+  if (lblCardTitle) lblCardTitle.innerText = cust.customerName || cust.customer_name || 'Indus Towers Ltd';
 
   const modal = document.getElementById('telecomDetailsCard');
   if (modal) {
@@ -6099,7 +6045,7 @@ window.closeTelecomDetailsModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.toggleTelecomDetailsEdit = function() {
+window.toggleTelecomDetailsEdit = async function() {
   if (!isTelecomDetailsEditing) {
     // Switch to edit mode
     isTelecomDetailsEditing = true;
@@ -6115,24 +6061,64 @@ window.toggleTelecomDetailsEdit = function() {
     const statusToggle = document.getElementById('inpTelecomStatusToggle');
     const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
 
-    const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => (c.customerName || '').toLowerCase().includes('indus tower'))) || 
+    const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => ((c.customerName || c.customer_name || '').toLowerCase().includes('indus')))) || 
                  (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]);
-    if (cust) {
-      cust.gstEnabled = isGstOn;
-      cust.gstType = gstType;
-      cust.gstNumber = gstNumber;
-      cust.address = address;
-      cust.status = status;
-    }
 
-    if (currentModule === 'master' && currentMasterSubpage === 'customer') {
-      currentDataset = [...masterCustomerData];
-      applyFiltersAndRender();
-    }
+    const payload = {
+      gstEnabled: isGstOn,
+      gst_enabled: isGstOn,
+      gstType: gstType,
+      gst_type: gstType,
+      gstNumber: gstNumber,
+      gst_number: gstNumber,
+      address: address,
+      gst_address: address,
+      status: status
+    };
 
-    isTelecomDetailsEditing = false;
-    setTelecomDetailsReadOnly(true);
-    showToast('Telecom Details saved successfully!');
+    if (cust && (cust.customer_id || cust.id) && typeof NexusApi !== 'undefined' && NexusApi.customers) {
+      try {
+        const custId = cust.customer_id || cust.id;
+        const updated = await NexusApi.customers.updateRestricted(custId, payload);
+        Object.assign(cust, updated);
+        if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
+          currentDataset = [...masterCustomerData];
+          applyFiltersAndRender();
+        }
+        isTelecomDetailsEditing = false;
+        setTelecomDetailsReadOnly(true);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Customer updated successfully!', 'Task Completed');
+        } else {
+          showToast('Telecom Details saved successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update Indus Tower details:', err);
+        const msg = err.detail || err.message || 'Failed to update customer details.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(msg, 'Error Message!');
+        } else {
+          showToast(`Error: ${msg}`);
+        }
+      }
+    } else {
+      if (cust) {
+        cust.gstEnabled = isGstOn;
+        cust.gstType = gstType;
+        cust.gstNumber = gstNumber;
+        cust.address = address;
+        cust.status = status;
+      }
+
+      if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
+        currentDataset = [...masterCustomerData];
+        applyFiltersAndRender();
+      }
+
+      isTelecomDetailsEditing = false;
+      setTelecomDetailsReadOnly(true);
+      showToast('Telecom Details saved successfully!');
+    }
   }
 };
 
@@ -10471,21 +10457,26 @@ function applyFiltersAndRender() {
       // Render Customer Rows: Customer Name (25ch&left), Customer ID (15ch&center), Business Type (15ch&left), GST Number (20ch&center), GST Type (15ch&center), Invoice Type (15ch&center), Status (10ch&center)
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
-        const cName = row.customerName || (row.businessType === 'Telecom' ? 'Indus Towers Ltd' : 'Customer Name');
-        const isIndus = cName.toLowerCase().includes('indus tower');
+        const cName = row.customerName || row.customer_name || row.legal_name || (row.businessType === 'Telecom' ? 'Indus Towers Ltd' : 'Customer Name');
+        const cId = row.customerId || row.customer_code || row.customer_id || '';
+        const bType = row.businessType || row.business_type || '';
+        const gstNum = row.gstNumber || row.gst_number || '';
+        const gstT = row.gstType || row.gst_type || '';
+        const invT = row.invoiceType || row.invoice_type || '';
+        const isIndus = cName.toLowerCase().includes('indus');
         const nameCellHtml = isIndus
           ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Indus Towers details" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${cName}</a>`
           : `<span style="color: #1e293b; font-weight: 500;">${cName}</span>`;
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <tr data-row-id="${row.id || row.customer_id}" style="border-bottom: 1px solid #e2e8f0;">
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${cName.replace(/"/g, '&quot;')}">
               ${nameCellHtml}
             </td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.customerId || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.businessType || '').replace(/"/g, '&quot;')}">${row.businessType || ''}</td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.gstNumber || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gstType || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.invoiceType || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${cId}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${bType.replace(/"/g, '&quot;')}">${bType}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${gstNum}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${gstT}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${invT}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
@@ -12736,11 +12727,21 @@ function initSideFormEvents() {
             currentDataset = [...masterExpensesData];
             applyFiltersAndRender();
             closeSideForm();
-            showToast(`Expense ${expenseName} successfully saved to database!`);
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('Expense added successfully!', 'Task Completed');
+            } else {
+              showToast(`Expense ${expenseName} successfully saved to database!`);
+            }
           })
           .catch(err => {
             console.error('Failed to create expense:', err);
-            showToast(`Error saving expense: ${err.message || err}`);
+            const msg = err.detail || err.message || "Expense with this name or code already exists.";
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(msg, "Error Message!");
+            } else {
+              showToast(`Error: ${msg}`);
+            }
+            // Form remains open and all field values are preserved for user correction!
           });
       } else {
         const newRecord = {
@@ -12765,49 +12766,81 @@ function initSideFormEvents() {
     }
 
     if (currentModule === 'master' && currentMasterSubpage === 'products') {
-      const productName = document.getElementById('inpProductName')?.value || document.getElementById('inpProductHead')?.value || "Telecom Tower Mast";
+      const productName = document.getElementById('inpProductName')?.value?.trim();
+      if (!productName) {
+        showToast('Please enter Product Name');
+        return;
+      }
       const productCategory = document.getElementById('inpProductCategory')?.value || "Tower Infrastructure";
-      const productCode = document.getElementById('inpProductCode')?.value || `PRD-${Date.now().toString().slice(-4)}`;
-      const hsnCode = document.getElementById('inpProductHsn')?.value || "73082019";
+      const productHead = document.getElementById('inpProductHead')?.value || productName;
+      const productCode = document.getElementById('inpProductCode')?.value?.trim() || `PRD-${Date.now().toString().slice(-4)}`;
+      const hsnCode = document.getElementById('inpProductHsn')?.value?.trim() || "73082019";
       const uom = document.getElementById('inpProductUom')?.value || "Nos";
       const saleUom = document.getElementById('inpProductSaleUom')?.value || "Nos";
-      const ucf = document.getElementById('inpProductUcf')?.value || "";
+      const ucf = document.getElementById('inpProductUcf')?.value?.trim() || "";
       const gstRate = document.getElementById('inpProductGstRate')?.value || "18%";
-      const msq = document.getElementById('inpProductMsq')?.value || "";
-      const moq = document.getElementById('inpProductMoq')?.value || "";
-      const inflation = document.getElementById('inpProductInflation')?.value || "";
+      const msq = document.getElementById('inpProductMsq')?.value?.trim() || "";
+      const moq = document.getElementById('inpProductMoq')?.value?.trim() || "";
       const margin = document.getElementById('inpProductMargin')?.value || "5%";
       const oh = document.getElementById('inpProductOh')?.value || "2%";
       const productStatusToggle = document.getElementById('inpProductStatusToggle');
       const status = (productStatusToggle && productStatusToggle.checked) ? "Active" : "In - Active";
 
-      const newRecord = {
-        id: `prod-${Date.now()}`,
+      const payload = {
         productName,
-        productHead: productName,
+        productHead,
         productCategory,
         productCode,
         hsnCode,
         uom,
         saleUom,
         ucf,
-        gst: gstRate,
         gstRate,
         msq,
         moq,
-        inflation,
         margin,
         oh,
-        price: "1,50,000.00",
-        stockPrices: "1,50,000.00",
         status
       };
 
-      masterProductsData.push(newRecord);
-      currentDataset = [...masterProductsData];
-      applyFiltersAndRender();
-      closeSideForm();
-      showToast(`Product ${productName} successfully saved & added to table!`);
+      if (typeof NexusApi !== 'undefined' && NexusApi.products) {
+        NexusApi.products.create(payload)
+          .then(newRecord => {
+            masterProductsData.unshift(newRecord);
+            currentDataset = [...masterProductsData];
+            applyFiltersAndRender();
+            closeSideForm();
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('Product added successfully!', 'Task Completed');
+            } else {
+              showToast(`Product ${productName} successfully saved to database!`);
+            }
+          })
+          .catch(err => {
+            console.error('Failed to create product:', err);
+            const msg = err.detail || err.message || "Product with this name or material head already exists.";
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(msg, "Error Message!");
+            } else {
+              showToast(`Error: ${msg}`);
+            }
+            // Form remains open and all field values are preserved for user correction!
+          });
+      } else {
+        const newRecord = {
+          id: `prod-${Date.now()}`,
+          ...payload,
+          gst: gstRate,
+          profit: margin,
+          price: "4,50,000.00",
+          stockPrices: "4,50,000.00"
+        };
+        masterProductsData.unshift(newRecord);
+        currentDataset = [...masterProductsData];
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`Product ${productName} successfully saved!`);
+      }
       return;
     }
 
@@ -12879,41 +12912,158 @@ function initSideFormEvents() {
     }
 
     const businessType = document.getElementById('inpBusinessType')?.value || "Projects";
-    const customerId = `23051068${masterCustomerData.length + 1}`;
-    const rawName = document.getElementById('inpCustomerName')?.value.trim();
-    const customerName = businessType === 'Projects' ? (rawName || "Indus Towers Ltd") : (rawName || "Supply Customer");
+    const legalName = document.getElementById('inpCustomerName')?.value?.trim();
+    const customerProjectName = document.getElementById('inpCustomerProjectName')?.value?.trim();
+    const customerName = (businessType === 'Projects' && customerProjectName) ? customerProjectName : (legalName || "");
+
+    if (!legalName && !customerName) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup("Please enter Customer Legal Name.", "Error Message!");
+      } else {
+        showToast("Please enter Customer Legal Name.");
+      }
+      return;
+    }
+
+    const effectiveCustomerName = customerName || legalName;
+    const effectiveLegalName = legalName || customerName;
+
+    // Check Indus Towers variant uniqueness (Only 1 Indus Towers record is allowable)
+    const isIndusVariant = (effectiveCustomerName + ' ' + effectiveLegalName).toLowerCase().replace(/[^a-z0-9]/g, '').includes('industower');
+    if (isIndusVariant) {
+      const existingIndus = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {
+        const cn = (c.customerName || c.customer_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const ln = (c.legalName || c.legal_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return cn.includes('industower') || ln.includes('industower');
+      }) : null;
+
+      if (existingIndus) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup("Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable.", "Duplicate Error!");
+        } else {
+          showToast("Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable.");
+        }
+        return;
+      }
+    }
+
+    // Check general duplicate customer name in active dataset
+    const normEnteredName = effectiveCustomerName.trim().toLowerCase();
+    const normEnteredLegal = effectiveLegalName.trim().toLowerCase();
+    const existingDup = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {
+      const cn = (c.customerName || c.customer_name || '').trim().toLowerCase();
+      const ln = (c.legalName || c.legal_name || '').trim().toLowerCase();
+      return (cn && cn === normEnteredName) || (ln && ln === normEnteredLegal);
+    }) : null;
+
+    if (existingDup) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup("Customer name already exists. Please use a different name.", "Duplicate Error!");
+      } else {
+        showToast("Customer name already exists.");
+      }
+      return;
+    }
+
     const isGstOn = document.getElementById('inpCustomerGstToggle')?.checked || false;
     const gstType = isGstOn ? (document.getElementById('inpGstType')?.value || "SGST") : "NA";
-    const gstNumber = isGstOn ? (document.getElementById('inpGstNumber')?.value.trim() || "33ASMPM8643F") : "NA";
-    const panNumber = businessType === 'Projects' ? (document.getElementById('inpPanNumber')?.value.trim() || "") : "";
-    const address = document.getElementById('inpAddress')?.value.trim() || "";
-    const poDigits = (businessType === 'Projects' && customerName.toLowerCase().includes('indus tower')) ? (document.getElementById('inpCustomerPoDigits')?.value.trim() || "") : "";
+    const gstNumber = isGstOn ? (document.getElementById('inpGstNumber')?.value?.trim() || "NA") : "NA";
+    const panNumber = businessType === 'Projects' ? (document.getElementById('inpPanNumber')?.value?.trim() || "") : "";
+    const address = document.getElementById('inpAddress')?.value?.trim() || "";
+    const poDigits = (businessType === 'Projects' && isIndusVariant) ? (document.getElementById('inpCustomerPoDigits')?.value?.trim() || "") : "";
     const statusToggleEl = document.getElementById('inpStatusToggle');
     const status = (statusToggleEl && statusToggleEl.checked) ? "Active" : "In - Active";
     const invoiceType = "B2B";
 
-    const newRecord = {
-      id: `cust-${Date.now()}`,
-      customerName,
-      customerId,
-      businessType,
-      gstNumber,
-      gstType,
-      invoiceType,
-      panNumber,
-      address,
-      poDigits,
-      status
+    const payload = {
+      customer_name: customerName || legalName,
+      customerName: customerName || legalName,
+      legal_name: legalName || customerName,
+      legalName: legalName || customerName,
+      business_type: businessType,
+      businessType: businessType,
+      gst_type: gstType,
+      gstType: gstType,
+      gst_number: gstNumber,
+      gstNumber: gstNumber,
+      pan_number: panNumber,
+      panNumber: panNumber,
+      invoice_type: invoiceType,
+      invoiceType: invoiceType,
+      po_stating_3_digits: poDigits,
+      poDigits: poDigits,
+      gst_address: address,
+      address: address,
+      status: status,
+      gst_enabled: isGstOn,
+      gstEnabled: isGstOn
     };
 
-    masterCustomerData.unshift(newRecord);
-    if (currentModule === 'master' && currentMasterSubpage === 'customer') {
-      currentDataset = [...masterCustomerData];
-      applyFiltersAndRender();
-    }
+    if (typeof NexusApi !== 'undefined' && NexusApi.customers) {
+      NexusApi.customers.create(payload)
+        .then(newRecord => {
+          const mapped = {
+            ...newRecord,
+            id: newRecord.customer_id || newRecord.id || `cust-${Date.now()}`,
+            customerName: newRecord.customer_name || newRecord.customerName || customerName || legalName,
+            customerId: newRecord.customer_code || newRecord.customerId || '',
+            businessType: newRecord.business_type || newRecord.businessType || businessType,
+            gstNumber: newRecord.gst_number || newRecord.gstNumber || gstNumber,
+            gstType: newRecord.gst_type || newRecord.gstType || gstType,
+            invoiceType: newRecord.invoice_type || newRecord.invoiceType || invoiceType,
+            panNumber: newRecord.pan_number || newRecord.panNumber || panNumber,
+            address: newRecord.gst_address || newRecord.address || address,
+            poDigits: newRecord.po_stating_3_digits || newRecord.poDigits || poDigits,
+            status: newRecord.status || status
+          };
+          masterCustomerData.unshift(mapped);
+          currentDataset = [...masterCustomerData];
+          applyFiltersAndRender();
+          closeSideForm();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Customer added successfully!', 'Task Completed');
+          } else {
+            showToast(`Customer ${customerName || legalName} successfully saved to database!`);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to create customer in DB:', err);
+          const msg = err.detail || err.message || "Customer with this name or code already exists.";
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, "Error Message!");
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+          // Form remains open and all field values are preserved for user correction!
+        });
+    } else {
+      const newRecord = {
+        id: `cust-${Date.now()}`,
+        customerName: customerName || legalName,
+        customerId: `23051068${masterCustomerData.length + 1}`,
+        businessType,
+        gstNumber,
+        gstType,
+        invoiceType,
+        panNumber,
+        address,
+        poDigits,
+        status
+      };
 
-    closeSideForm();
-    showToast(`Customer ${customerName} successfully saved & added to table!`);
+      masterCustomerData.unshift(newRecord);
+      if (currentModule === 'master' && currentMasterSubpage === 'customer') {
+        currentDataset = [...masterCustomerData];
+        applyFiltersAndRender();
+      }
+
+      closeSideForm();
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Customer added successfully!', 'Task Completed');
+      } else {
+        showToast(`Customer ${customerName || legalName} successfully saved!`);
+      }
+    }
     return;
   }
 
@@ -18706,12 +18856,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Wire btnProductCardEditToggle
   const btnProductCardEditToggle = document.getElementById('btnProductCardEditToggle');
   if (btnProductCardEditToggle) {
-    btnProductCardEditToggle.addEventListener('click', () => {
+    btnProductCardEditToggle.addEventListener('click', async () => {
       const lblTitle = document.getElementById('lblProductCardTitle');
       const imgIcon = document.getElementById('imgProductCardEditIcon');
 
       if (!isProductFormEditing) {
-        // ENTER EDIT MODE (Only HSN Code, GST Rate, MSQ, MOQ, Market Price, Margin, OH, Status editable)
+        // ENTER EDIT MODE (Strictly permitted fields: GST Rate, MSQ, MOQ, Margin, OH, Status)
         isProductFormEditing = true;
         setProductFormReadOnly(false, true);
         if (lblTitle) lblTitle.innerText = 'Edit Product';
@@ -18719,41 +18869,84 @@ document.addEventListener('DOMContentLoaded', () => {
           imgIcon.src = 'icons/Save.svg';
           imgIcon.title = 'Save Changes';
         }
-        showToast('HSN Code, GST Rate, MSQ, MOQ, Market Price, Margin, OH, Status are now editable');
+        showToast('GST Rate, MSQ, MOQ, Margin, OH, and Status are now editable');
       } else {
         // SAVE EDITS
-        isProductFormEditing = false;
         if (currentViewedProductId) {
-          const prod = masterProductsData.find(p => p.id === currentViewedProductId);
-          if (prod) {
-            prod.productName = document.getElementById('inpProductName')?.value || prod.productName;
-            prod.productHead = prod.productName;
-            prod.productCategory = document.getElementById('inpProductCategory')?.value || prod.productCategory;
-            prod.productCode = document.getElementById('inpProductCode')?.value || prod.productCode;
-            prod.hsnCode = document.getElementById('inpProductHsn')?.value || prod.hsnCode;
-            prod.uom = document.getElementById('inpProductUom')?.value || prod.uom;
-            prod.saleUom = document.getElementById('inpProductSaleUom')?.value || prod.saleUom;
-            prod.ucf = document.getElementById('inpProductUcf')?.value || prod.ucf;
-            prod.gstRate = document.getElementById('inpProductGstRate')?.value || prod.gstRate;
-            prod.gst = prod.gstRate;
-            prod.msq = document.getElementById('inpProductMsq')?.value || prod.msq;
-            prod.moq = document.getElementById('inpProductMoq')?.value || prod.moq;
-            prod.inflation = document.getElementById('inpProductInflation')?.value || prod.inflation;
-            prod.margin = document.getElementById('inpProductMargin')?.value || prod.margin;
-            prod.oh = document.getElementById('inpProductOh')?.value || prod.oh;
-            const statusToggle = document.getElementById('inpProductStatusToggle');
-            prod.status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+          const gstRate = document.getElementById('inpProductGstRate')?.value;
+          const msq = document.getElementById('inpProductMsq')?.value;
+          const moq = document.getElementById('inpProductMoq')?.value;
+          const margin = document.getElementById('inpProductMargin')?.value;
+          const oh = document.getElementById('inpProductOh')?.value;
+          const statusToggle = document.getElementById('inpProductStatusToggle');
+          const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+
+          const updatePayload = {
+            gstRate,
+            msq,
+            moq,
+            margin,
+            oh,
+            status
+          };
+
+          if (typeof NexusApi !== 'undefined' && NexusApi.products) {
+            try {
+              const updatedRecord = await NexusApi.products.update(currentViewedProductId, updatePayload);
+              const idx = masterProductsData.findIndex(p => String(p.id) === String(currentViewedProductId) || String(p.material_id) === String(currentViewedProductId));
+              if (idx !== -1) {
+                masterProductsData[idx] = updatedRecord;
+              } else {
+                masterProductsData.unshift(updatedRecord);
+              }
+              currentDataset = [...masterProductsData];
+              applyFiltersAndRender();
+
+              isProductFormEditing = false;
+              setProductFormReadOnly(true);
+              if (lblTitle) lblTitle.innerText = 'View Product';
+              if (imgIcon) {
+                imgIcon.src = 'icons/Edit.svg';
+                imgIcon.title = 'Edit Info';
+              }
+              if (typeof showSvgSuccessPopup === 'function') {
+                showSvgSuccessPopup('Product updated successfully!', 'Task Completed');
+              } else {
+                showToast('Product details saved & updated successfully to database!');
+              }
+            } catch (err) {
+              console.error('Failed to update product:', err);
+              const msg = err.detail || err.message || "Failed to update product.";
+              if (typeof showSvgErrorPopup === 'function') {
+                showSvgErrorPopup(msg, "Error Message!");
+              } else {
+                showToast(`Error: ${msg}`);
+              }
+              // Keep panel in edit mode and preserve user modifications for correction!
+            }
+          } else {
+            const prod = masterProductsData.find(p => String(p.id) === String(currentViewedProductId) || String(p.material_id) === String(currentViewedProductId));
+            if (prod) {
+              prod.gstRate = gstRate || prod.gstRate;
+              prod.gst = prod.gstRate;
+              prod.msq = msq || prod.msq;
+              prod.moq = moq || prod.moq;
+              prod.margin = margin || prod.margin;
+              prod.oh = oh || prod.oh;
+              prod.status = status;
+            }
+            currentDataset = [...masterProductsData];
+            applyFiltersAndRender();
+            isProductFormEditing = false;
+            setProductFormReadOnly(true);
+            if (lblTitle) lblTitle.innerText = 'View Product';
+            if (imgIcon) {
+              imgIcon.src = 'icons/Edit.svg';
+              imgIcon.title = 'Edit Info';
+            }
+            showToast('Product details saved & updated successfully!');
           }
-          currentDataset = [...masterProductsData];
-          applyFiltersAndRender();
         }
-        setProductFormReadOnly(true);
-        if (lblTitle) lblTitle.innerText = 'View Product';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Product details saved & updated successfully!');
       }
     });
   }
@@ -18817,10 +19010,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 imgIcon.src = 'icons/Edit.svg';
                 imgIcon.title = 'Edit Info';
               }
-              showToast('Expense details saved & updated successfully to database!');
+              if (typeof showSvgSuccessPopup === 'function') {
+                showSvgSuccessPopup('Expense updated successfully!', 'Task Completed');
+              } else {
+                showToast('Expense details saved & updated successfully to database!');
+              }
             } catch (err) {
               console.error('Failed to update expense:', err);
-              showToast(`Failed to update expense: ${err.message || err}`);
+              const msg = err.detail || err.message || "Expense with this name or code already exists.";
+              if (typeof showSvgErrorPopup === 'function') {
+                showSvgErrorPopup(msg, "Error Message!");
+              } else {
+                showToast(`Error: ${msg}`);
+              }
+              // Keep panel in edit mode and preserve user modifications for correction!
             }
           } else {
             const exp = masterExpensesData.find(e => String(e.id) === String(currentViewedExpenseId) || String(e.expense_id) === String(currentViewedExpenseId));
@@ -20588,8 +20791,10 @@ function updateCustomerConditionalFields() {
     if (rowGstType) rowGstType.style.setProperty('display', 'none', 'important');
     if (rowGstNumber) rowGstNumber.style.setProperty('display', 'none', 'important');
 
-    // 2. Customer Legal Name logic:
-    if (cName.includes('indus tower')) {
+    // 2. Customer Legal Name & Project Name logic:
+    const projName = (document.getElementById('inpCustomerProjectName')?.value || '').trim().toLowerCase();
+    const isIndus = (cName + ' ' + projName).replace(/[^a-z0-9]/g, '').includes('industower');
+    if (isIndus) {
       if (rowPoDigits) rowPoDigits.style.setProperty('display', 'flex', 'important');
     } else {
       if (rowPoDigits) rowPoDigits.style.setProperty('display', 'none', 'important');
@@ -20614,11 +20819,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('inpCustomerGstToggle')?.addEventListener('change', updateCustomerConditionalFields);
   document.getElementById('inpCustomerName')?.addEventListener('input', updateCustomerConditionalFields);
   document.getElementById('inpCustomerName')?.addEventListener('change', updateCustomerConditionalFields);
+  document.getElementById('inpCustomerProjectName')?.addEventListener('input', updateCustomerConditionalFields);
+  document.getElementById('inpCustomerProjectName')?.addEventListener('change', updateCustomerConditionalFields);
 });
 document.getElementById('inpBusinessType')?.addEventListener('change', updateCustomerConditionalFields);
 document.getElementById('inpCustomerGstToggle')?.addEventListener('change', updateCustomerConditionalFields);
 document.getElementById('inpCustomerName')?.addEventListener('input', updateCustomerConditionalFields);
 document.getElementById('inpCustomerName')?.addEventListener('change', updateCustomerConditionalFields);
+document.getElementById('inpCustomerProjectName')?.addEventListener('input', updateCustomerConditionalFields);
+document.getElementById('inpCustomerProjectName')?.addEventListener('change', updateCustomerConditionalFields);
 
 
 window.openViewVendorCard = function(vendorId) {
@@ -20716,12 +20925,11 @@ function setProductFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const form = document.getElementById('frmAddProduct');
   if (!form) return;
 
+  // STRICTLY PERMITTED EDITABLE FIELDS (HSN code, Product Name, Material Head are strictly read-only)
   const editableInEditModeIds = [
-    'inpProductHsn',
     'inpProductGstRate',
     'inpProductMsq',
     'inpProductMoq',
-    'inpProductInflation',
     'inpProductMargin',
     'inpProductOh'
   ];
@@ -20763,16 +20971,29 @@ function setProductFormReadOnly(isReadOnly, isEditModeOnly = false) {
   });
 }
 
-window.openViewProductCard = function(productId) {
-  let prod = masterProductsData.find(p => p.id === productId || p.productHead === productId);
+window.openViewProductCard = async function(productId) {
+  let prod = masterProductsData.find(p => String(p.id) === String(productId) || String(p.material_id) === String(productId) || p.productHead === productId || p.productName === productId);
+  
+  if (!prod && typeof NexusApi !== 'undefined' && NexusApi.products && !isNaN(productId)) {
+    try {
+      prod = await NexusApi.products.getById(productId);
+    } catch (err) {
+      console.warn('Could not fetch product details from API:', err);
+    }
+  }
+
   if (!prod) {
     prod = {
-      id: productId || 'prod-1',
+      id: productId || '1',
+      material_id: productId || 1,
+      productName: "Telecom Tower Mast",
       productHead: "Telecom Tower Mast",
+      productCategory: "Tower Infrastructure",
       productCode: "PRD-TTM-001",
       hsnCode: "73082019",
-      productDescription: "40M Galvanized Tubular Telecom Tower Mast Structure",
+      material_description: "40M Galvanized Tubular Telecom Tower Mast Structure",
       uom: "Nos",
+      saleUom: "Nos",
       msq: "10",
       moq: "2",
       stockPrices: "4,50,000.00",
@@ -20783,7 +21004,7 @@ window.openViewProductCard = function(productId) {
     };
   }
 
-  currentViewedProductId = prod.id;
+  currentViewedProductId = prod.material_id || prod.id;
   isProductFormEditing = false;
 
   const overlay = document.getElementById('sideFormOverlay');
@@ -20809,19 +21030,18 @@ window.openViewProductCard = function(productId) {
   const btnSaveWrap = document.querySelector('#frmAddProduct .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpProductName')) document.getElementById('inpProductName').value = prod.productName || prod.productHead || '';
-  if (document.getElementById('inpProductHead')) document.getElementById('inpProductHead').value = prod.productName || prod.productHead || '';
-  if (document.getElementById('inpProductCategory')) document.getElementById('inpProductCategory').value = prod.productCategory || 'Tower Infrastructure';
-  if (document.getElementById('inpProductCode')) document.getElementById('inpProductCode').value = prod.productCode || '';
-  if (document.getElementById('inpProductHsn')) document.getElementById('inpProductHsn').value = prod.hsnCode || '';
+  if (document.getElementById('inpProductName')) document.getElementById('inpProductName').value = prod.productName || prod.product_name || prod.productHead || '';
+  if (document.getElementById('inpProductHead')) document.getElementById('inpProductHead').value = prod.productHead || prod.material_head || prod.productName || '';
+  if (document.getElementById('inpProductCategory')) document.getElementById('inpProductCategory').value = prod.productCategory || prod.material_category || 'Tower Infrastructure';
+  if (document.getElementById('inpProductCode')) document.getElementById('inpProductCode').value = prod.productCode || prod.material_code || '';
+  if (document.getElementById('inpProductHsn')) document.getElementById('inpProductHsn').value = prod.hsnCode || prod.hsn_code || '';
   if (document.getElementById('inpProductUom')) document.getElementById('inpProductUom').value = prod.uom || 'Nos';
-  if (document.getElementById('inpProductSaleUom')) document.getElementById('inpProductSaleUom').value = prod.saleUom || prod.uom || 'Nos';
+  if (document.getElementById('inpProductSaleUom')) document.getElementById('inpProductSaleUom').value = prod.saleUom || prod.sale_uom || prod.uom || 'Nos';
   if (document.getElementById('inpProductUcf')) document.getElementById('inpProductUcf').value = prod.ucf || '';
-  if (document.getElementById('inpProductGstRate')) document.getElementById('inpProductGstRate').value = prod.gstRate || prod.gst || '18%';
+  if (document.getElementById('inpProductGstRate')) document.getElementById('inpProductGstRate').value = prod.gstRate || prod.gst || (prod.gst_rate ? `${prod.gst_rate}%` : '18%');
   if (document.getElementById('inpProductMsq')) document.getElementById('inpProductMsq').value = prod.msq || '';
   if (document.getElementById('inpProductMoq')) document.getElementById('inpProductMoq').value = prod.moq || '';
-  if (document.getElementById('inpProductInflation')) document.getElementById('inpProductInflation').value = prod.inflation || '';
-  if (document.getElementById('inpProductMargin')) document.getElementById('inpProductMargin').value = prod.margin || '5%';
+  if (document.getElementById('inpProductMargin')) document.getElementById('inpProductMargin').value = prod.margin || (prod.profit ? `${prod.profit}%` : '5%');
   if (document.getElementById('inpProductOh')) document.getElementById('inpProductOh').value = prod.oh || '2%';
 
   const statusToggle = document.getElementById('inpProductStatusToggle');
@@ -20830,7 +21050,7 @@ window.openViewProductCard = function(productId) {
   }
 
   setProductFormReadOnly(true);
-  showToast(`Viewing product details: ${prod.productHead}`);
+  showToast(`Viewing product details: ${prod.productName || prod.productHead || 'Product'}`);
 };
 
 const defaultProductPriceHistory = {
@@ -20907,12 +21127,9 @@ let isExpenseFormEditing = false;
 function setExpenseFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const form = document.getElementById('frmAddExpense');
   if (!form) return;
+  // In edit mode, ONLY GST, RCM, and Status are editable
   const editableInEditModeIds = [
-    'inpExpenseCategory',
-    'inpExpenseSubCategory',
-    'inpExpenseHead',
-    'inpExpenseGst',
-    'inpExpenseDepreciation'
+    'inpExpenseGst'
   ];
   const inputs = form.querySelectorAll('input, select');
   inputs.forEach(input => {
@@ -20942,7 +21159,7 @@ function setExpenseFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
     t.disabled = isReadOnly;
-    const parentSwitch = t.closest('.toggle-slide-switch');
+    const parentSwitch = t.closest('.toggle-slide-switch') || t.closest('.form-toggle-wrap') || t.closest('label');
     if (parentSwitch) {
       parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
       parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
@@ -24244,5 +24461,143 @@ window.handleIndusLogoRevert = function() {
   if (lbl) lbl.innerText = 'New logo applied';
   if (fileInput) fileInput.value = '';
 };
+
+// ─── NEXUS SVG ERROR POPUP CONTROLLER ─────────────────────────────────────────
+window.showSvgErrorPopup = function(message, title = "Error Message!") {
+  const overlay = document.getElementById('nexusErrorPopupOverlay');
+  if (!overlay) return;
+
+  const titleEl = document.getElementById('svgErrorPopupTitle');
+  if (titleEl) {
+    titleEl.textContent = title || "Error Message!";
+  }
+
+  const line1 = document.getElementById('svgErrorPopupLine1');
+  const line2 = document.getElementById('svgErrorPopupLine2');
+  const line3 = document.getElementById('svgErrorPopupLine3');
+
+  if (line1) line1.textContent = '';
+  if (line2) line2.textContent = '';
+  if (line3) line3.textContent = '';
+
+  let cleanMsg = '';
+  if (typeof message === 'string') {
+    cleanMsg = message;
+  } else if (message && typeof message === 'object') {
+    cleanMsg = message.detail || message.message || JSON.stringify(message);
+  } else {
+    cleanMsg = "An unexpected error occurred.";
+  }
+
+  // Wrap text cleanly into tspans
+  if (cleanMsg.length <= 40) {
+    if (line1) line1.textContent = cleanMsg;
+  } else {
+    const words = cleanMsg.split(' ');
+    let lineA = '';
+    let lineB = '';
+    let lineC = '';
+
+    for (const w of words) {
+      if ((lineA + ' ' + w).trim().length <= 38) {
+        lineA = (lineA + ' ' + w).trim();
+      } else if ((lineB + ' ' + w).trim().length <= 38) {
+        lineB = (lineB + ' ' + w).trim();
+      } else {
+        lineC = (lineC + ' ' + w).trim();
+      }
+    }
+
+    if (line1 && lineA) line1.textContent = lineA;
+    if (line2 && lineB) line2.textContent = lineB;
+    if (line3 && lineC) line3.textContent = lineC;
+  }
+
+  overlay.style.display = 'flex';
+};
+
+window.closeSvgErrorPopup = function() {
+  const overlay = document.getElementById('nexusErrorPopupOverlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+// ─── NEXUS SVG SUCCESS POPUP CONTROLLER ───────────────────────────────────────
+window.showSvgSuccessPopup = function(message, title = "Task Completed") {
+  const overlay = document.getElementById('nexusSuccessPopupOverlay');
+  if (!overlay) return;
+
+  const titleEl = document.getElementById('svgSuccessPopupTitle');
+  if (titleEl) {
+    titleEl.textContent = title || "Task Completed";
+  }
+
+  const line1 = document.getElementById('svgSuccessPopupLine1');
+  const line2 = document.getElementById('svgSuccessPopupLine2');
+  const line3 = document.getElementById('svgSuccessPopupLine3');
+
+  if (line1) line1.textContent = '';
+  if (line2) line2.textContent = '';
+  if (line3) line3.textContent = '';
+
+  let cleanMsg = '';
+  if (typeof message === 'string') {
+    cleanMsg = message;
+  } else if (message && typeof message === 'object') {
+    cleanMsg = message.detail || message.message || JSON.stringify(message);
+  } else {
+    cleanMsg = "Operation completed successfully!";
+  }
+
+  // Wrap text cleanly into tspans
+  if (cleanMsg.length <= 40) {
+    if (line1) line1.textContent = cleanMsg;
+  } else {
+    const words = cleanMsg.split(' ');
+    let lineA = '';
+    let lineB = '';
+    let lineC = '';
+
+    for (const w of words) {
+      if ((lineA + ' ' + w).trim().length <= 38) {
+        lineA = (lineA + ' ' + w).trim();
+      } else if ((lineB + ' ' + w).trim().length <= 38) {
+        lineB = (lineB + ' ' + w).trim();
+      } else {
+        lineC = (lineC + ' ' + w).trim();
+      }
+    }
+
+    if (line1 && lineA) line1.textContent = lineA;
+    if (line2 && lineB) line2.textContent = lineB;
+    if (line3 && lineC) line3.textContent = lineC;
+  }
+
+  overlay.style.display = 'flex';
+};
+
+window.closeSvgSuccessPopup = function() {
+  const overlay = document.getElementById('nexusSuccessPopupOverlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+// Global escape key listener to close error and success popups
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const errOverlay = document.getElementById('nexusErrorPopupOverlay');
+    if (errOverlay && errOverlay.style.display === 'flex') {
+      errOverlay.style.display = 'none';
+    }
+    const succOverlay = document.getElementById('nexusSuccessPopupOverlay');
+    if (succOverlay && succOverlay.style.display === 'flex') {
+      succOverlay.style.display = 'none';
+    }
+  }
+});
+
+
 
 

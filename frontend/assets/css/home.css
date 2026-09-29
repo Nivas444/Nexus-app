@@ -1777,7 +1777,13 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 #addEmployeeCard .slide-dynamic-wrap[style*="display: none"],
 #addEmployeeCard .slide-dynamic-wrap[style*="display:none"],
 .slide-dynamic-wrap[style*="display: none"],
-.slide-dynamic-wrap[style*="display:none"] {
+.slide-dynamic-wrap[style*="display:none"],
+#addIndusTowerCard .toggle-switch-container[style*="display: none"],
+#addIndusTowerCard .toggle-switch-container[style*="display:none"],
+#addEmployeeCard .toggle-switch-container[style*="display: none"],
+#addEmployeeCard .toggle-switch-container[style*="display:none"],
+.toggle-switch-container[style*="display: none"],
+.toggle-switch-container[style*="display:none"] {
   display: none !important;
 }
 
@@ -1960,32 +1966,37 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 }
 
 #addEmployeeCard .toggle-switch-container {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  max-height: 36px !important;
-  width: 100% !important;
-  margin: 0 auto !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 #addEmployeeCard .toggle-slide-switch {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin: 0 auto !important;
-  vertical-align: middle !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  vertical-align: middle;
 }
 
 #addEmployeeCard .slide-dynamic-wrap {
-  display: flex !important;
-  align-items: center !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  max-height: 36px !important;
-  width: 100% !important;
-  gap: 8px !important;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  min-height: 36px;
+  max-height: 36px;
+  width: 100%;
+  gap: 8px;
+}
+
+#addEmployeeCard.is-view-mode .btn-toggle-revert,
+#frmAddEmployee.is-view-mode .btn-toggle-revert {
+  display: none !important;
 }
 
 /* Contact & Communication Side Message Popup (Table View) */
@@ -4930,7 +4941,7 @@ td.col-loc-incharge {
   grid-template-columns: 1fr !important;
   gap: 10px !important;
 }
-#addEmployeeCard.emp-contract-edit .emp-row-item:not(.emp-row-address):not(.emp-row-mobile):not(.emp-row-status) {
+#addEmployeeCard.emp-contract-edit .emp-row-item:not(.emp-row-address):not(.emp-row-mobile):not(.emp-row-geo):not(.emp-row-status) {
   display: none !important;
 }
 

@@ -441,19 +441,40 @@ class CustomerService:
         return {"success": True, "message": f"Customer {customer_id} deleted successfully."}
 
     # --- Contacts & Locations Service Methods ---
-    def get_contacts(self, customer_name: Optional[str] = None) -> CustomerContactListResponse:
-        items = self.repository.get_contacts(customer_name)
+    def get_contacts(self, customer_id: Optional[int] = None, customer_name: Optional[str] = None) -> CustomerContactListResponse:
+        if customer_id is not None:
+            c = self.repository.get_by_id(customer_id)
+            if not c:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Customer with ID {customer_id} not found"
+                )
+            items = self.repository.get_contacts_by_customer(c)
+        else:
+            items = self.repository.get_contacts(customer_name)
         return CustomerContactListResponse(
             total=len(items),
             items=[self._to_contact_dto(it) for it in items]
         )
 
-    def create_contact(self, data: CustomerContactCreate) -> CustomerContactResponse:
+    def create_contact(self, data: CustomerContactCreate, customer_id: Optional[int] = None) -> CustomerContactResponse:
+        target_customer_name = None
+        if customer_id is not None:
+            c = self.repository.get_by_id(customer_id)
+            if not c:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Customer with ID {customer_id} not found"
+                )
+            target_customer_name = c.customer_name or c.legal_name
+        else:
+            target_customer_name = data.customer_name or data.customerName or "Indus Towers Ltd"
+
         name_val = data.name or ""
         if not name_val.strip():
             raise HTTPException(status_code=422, detail="Contact Name is required.")
         new_c = CustomerContact(
-            customer_name=data.customer_name or data.customerName or "Indus Towers Ltd",
+            customer_name=target_customer_name,
             name=name_val.strip(),
             designation=(data.designation or "").strip(),
             contact_number=(data.contact_number or data.contact or "").strip(),
@@ -470,19 +491,40 @@ class CustomerService:
             raise HTTPException(status_code=404, detail=f"Contact {contact_id} not found")
         return {"success": True, "message": "Contact deleted."}
 
-    def get_locations(self, customer_name: Optional[str] = None) -> CustomerLocationListResponse:
-        items = self.repository.get_locations(customer_name)
+    def get_locations(self, customer_id: Optional[int] = None, customer_name: Optional[str] = None) -> CustomerLocationListResponse:
+        if customer_id is not None:
+            c = self.repository.get_by_id(customer_id)
+            if not c:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Customer with ID {customer_id} not found"
+                )
+            items = self.repository.get_locations_by_customer(c)
+        else:
+            items = self.repository.get_locations(customer_name)
         return CustomerLocationListResponse(
             total=len(items),
             items=[self._to_location_dto(it) for it in items]
         )
 
-    def create_location(self, data: CustomerLocationCreate) -> CustomerLocationResponse:
+    def create_location(self, data: CustomerLocationCreate, customer_id: Optional[int] = None) -> CustomerLocationResponse:
+        target_customer_name = None
+        if customer_id is not None:
+            c = self.repository.get_by_id(customer_id)
+            if not c:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Customer with ID {customer_id} not found"
+                )
+            target_customer_name = c.customer_name or c.legal_name
+        else:
+            target_customer_name = data.customer_name or data.customerName or "Indus Towers Ltd"
+
         off_name = data.office_name or data.officeName or ""
         if not off_name.strip():
             raise HTTPException(status_code=422, detail="Office Name is required.")
         new_loc = CustomerOfficeLocation(
-            customer_name=data.customer_name or data.customerName or "Indus Towers Ltd",
+            customer_name=target_customer_name,
             office_name=off_name.strip(),
             latitude=data.latitude if data.latitude else None,
             longitude=data.longitude if data.longitude else None,
@@ -497,3 +539,4 @@ class CustomerService:
         if not success:
             raise HTTPException(status_code=404, detail=f"Location {office_id} not found")
         return {"success": True, "message": "Location deleted."}
+

@@ -129,9 +129,12 @@ def delete_customer(
 # ----------------- Contact Details Endpoints -----------------
 
 @router.get("/customers/{customer_id}/contacts", response_model=CustomerContactListResponse, summary="List Customer Contacts by ID", include_in_schema=False)
+@router.get("/customers/{customer_id}/contact-details", response_model=CustomerContactListResponse, summary="List Customer Contact Details by ID", include_in_schema=False)
 @router.get("/master/customers/{customer_id}/contacts", response_model=CustomerContactListResponse, summary="List Customer Contacts by ID")
+@router.get("/master/customers/{customer_id}/contact-details", response_model=CustomerContactListResponse, summary="List Customer Contact Details by ID", include_in_schema=False)
 @router.get("/customer-contacts", response_model=CustomerContactListResponse, summary="List Customer Contacts")
 def list_contacts(
+    customer_id: Optional[int] = None,
     customer_name: Optional[str] = Query(None, description="Filter contacts by customer name"),
     db: Session = Depends(get_db)
 ):
@@ -139,11 +142,13 @@ def list_contacts(
     Retrieve contact details records from `customer_contact_details`.
     """
     service = CustomerService(db)
-    return service.get_contacts(customer_name)
+    return service.get_contacts(customer_id=customer_id, customer_name=customer_name)
 
 @router.post("/customer-contacts", response_model=CustomerContactResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Contact")
 @router.post("/customers/{customer_id}/contacts", response_model=CustomerContactResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Contact by Customer ID", include_in_schema=False)
+@router.post("/customers/{customer_id}/contact-details", response_model=CustomerContactResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Contact by Customer ID", include_in_schema=False)
 @router.post("/master/customers/{customer_id}/contacts", response_model=CustomerContactResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Contact by Customer ID", include_in_schema=False)
+@router.post("/master/customers/{customer_id}/contact-details", response_model=CustomerContactResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Contact by Customer ID", include_in_schema=False)
 def create_contact(
     payload: CustomerContactCreate,
     customer_id: Optional[int] = None,
@@ -153,9 +158,9 @@ def create_contact(
     Save contact details into `customer_contact_details`.
     """
     service = CustomerService(db)
-    return service.create_contact(payload)
+    return service.create_contact(payload, customer_id=customer_id)
 
-@router.delete("/customer-contacts/{contact_id}", summary="Delete Customer Contact")
+@router.delete("/customer-contacts/{contact_id}", summary="Delete Customer Contact", include_in_schema=False)
 def delete_contact(
     contact_id: int = Path(..., ge=1),
     db: Session = Depends(get_db)
@@ -166,9 +171,12 @@ def delete_contact(
 # ----------------- Office Location Details Endpoints -----------------
 
 @router.get("/customers/{customer_id}/locations", response_model=CustomerLocationListResponse, summary="List Customer Locations by ID", include_in_schema=False)
+@router.get("/customers/{customer_id}/office-locations", response_model=CustomerLocationListResponse, summary="List Customer Office Locations by ID", include_in_schema=False)
 @router.get("/master/customers/{customer_id}/locations", response_model=CustomerLocationListResponse, summary="List Customer Locations by ID")
+@router.get("/master/customers/{customer_id}/office-locations", response_model=CustomerLocationListResponse, summary="List Customer Office Locations by ID", include_in_schema=False)
 @router.get("/customer-locations", response_model=CustomerLocationListResponse, summary="List Customer Locations")
 def list_locations(
+    customer_id: Optional[int] = None,
     customer_name: Optional[str] = Query(None, description="Filter locations by customer name"),
     db: Session = Depends(get_db)
 ):
@@ -176,11 +184,13 @@ def list_locations(
     Retrieve office locations from `customer_office_location_details`.
     """
     service = CustomerService(db)
-    return service.get_locations(customer_name)
+    return service.get_locations(customer_id=customer_id, customer_name=customer_name)
 
 @router.post("/customer-locations", response_model=CustomerLocationResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Location")
 @router.post("/customers/{customer_id}/locations", response_model=CustomerLocationResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Location by Customer ID", include_in_schema=False)
+@router.post("/customers/{customer_id}/office-locations", response_model=CustomerLocationResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Office Location by Customer ID", include_in_schema=False)
 @router.post("/master/customers/{customer_id}/locations", response_model=CustomerLocationResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Location by Customer ID", include_in_schema=False)
+@router.post("/master/customers/{customer_id}/office-locations", response_model=CustomerLocationResponse, status_code=status.HTTP_201_CREATED, summary="Create Customer Office Location by Customer ID", include_in_schema=False)
 def create_location(
     payload: CustomerLocationCreate,
     customer_id: Optional[int] = None,
@@ -190,9 +200,9 @@ def create_location(
     Save office location into `customer_office_location_details`.
     """
     service = CustomerService(db)
-    return service.create_location(payload)
+    return service.create_location(payload, customer_id=customer_id)
 
-@router.delete("/customer-locations/{office_id}", summary="Delete Customer Location")
+@router.delete("/customer-locations/{office_id}", summary="Delete Customer Location", include_in_schema=False)
 def delete_location(
     office_id: int = Path(..., ge=1),
     db: Session = Depends(get_db)

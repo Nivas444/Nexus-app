@@ -151,11 +151,26 @@ class CustomerRepository:
             query = query.filter(CustomerContact.customer_name.ilike(customer_name.strip()))
         return query.order_by(desc(CustomerContact.contact_id)).all()
 
+    def get_contacts_by_customer(self, customer: Customer) -> List[CustomerContact]:
+        query = self.db.query(CustomerContact)
+        filters = []
+        if customer.customer_name:
+            filters.append(CustomerContact.customer_name.ilike(customer.customer_name.strip()))
+        if customer.legal_name and customer.legal_name != customer.customer_name:
+            filters.append(CustomerContact.customer_name.ilike(customer.legal_name.strip()))
+        if filters:
+            query = query.filter(or_(*filters))
+        return query.order_by(desc(CustomerContact.contact_id)).all()
+
     def create_contact(self, contact: CustomerContact) -> CustomerContact:
-        self.db.add(contact)
-        self.db.commit()
-        self.db.refresh(contact)
-        return contact
+        try:
+            self.db.add(contact)
+            self.db.commit()
+            self.db.refresh(contact)
+            return contact
+        except Exception:
+            self.db.rollback()
+            raise
 
     def delete_contact(self, contact_id: int) -> bool:
         c = self.db.query(CustomerContact).filter(CustomerContact.contact_id == contact_id).first()
@@ -172,11 +187,26 @@ class CustomerRepository:
             query = query.filter(CustomerOfficeLocation.customer_name.ilike(customer_name.strip()))
         return query.order_by(desc(CustomerOfficeLocation.office_id)).all()
 
+    def get_locations_by_customer(self, customer: Customer) -> List[CustomerOfficeLocation]:
+        query = self.db.query(CustomerOfficeLocation)
+        filters = []
+        if customer.customer_name:
+            filters.append(CustomerOfficeLocation.customer_name.ilike(customer.customer_name.strip()))
+        if customer.legal_name and customer.legal_name != customer.customer_name:
+            filters.append(CustomerOfficeLocation.customer_name.ilike(customer.legal_name.strip()))
+        if filters:
+            query = query.filter(or_(*filters))
+        return query.order_by(desc(CustomerOfficeLocation.office_id)).all()
+
     def create_location(self, loc: CustomerOfficeLocation) -> CustomerOfficeLocation:
-        self.db.add(loc)
-        self.db.commit()
-        self.db.refresh(loc)
-        return loc
+        try:
+            self.db.add(loc)
+            self.db.commit()
+            self.db.refresh(loc)
+            return loc
+        except Exception:
+            self.db.rollback()
+            raise
 
     def delete_location(self, office_id: int) -> bool:
         loc = self.db.query(CustomerOfficeLocation).filter(CustomerOfficeLocation.office_id == office_id).first()
@@ -185,3 +215,4 @@ class CustomerRepository:
             self.db.commit()
             return True
         return False
+

@@ -7,59 +7,65 @@
 // DATASETS
 // ==========================================================================
 
-// Master -> Employee Sub-Page Dataset
-const masterEmployeeData = [
-  {
-    id: "emp-1",
-    employeeName: "Aakash Verma",
-    employeeId: "230510678",
-    employeeType: "On-Roll",
-    designation: "Project Manager",
-    contactNumber: "+91 98401 12345",
-    email: "aakash.v@nexus.com",
-    status: "Active"
-  },
-  {
-    id: "emp-2",
-    employeeName: "Deepak Sharma",
-    employeeId: "230510679",
-    employeeType: "Contract",
-    designation: "Site Engineer",
-    contactNumber: "+91 98402 23456",
-    email: "deepak.s@nexus.com",
-    status: "In - Active"
-  },
-  {
-    id: "emp-3",
-    employeeName: "Karthik Subramanian",
-    employeeId: "230510680",
-    employeeType: "On-Roll",
-    designation: "Telecom Lead",
-    contactNumber: "+91 98403 34567",
-    email: "karthik.s@nexus.com",
-    status: "Active"
-  },
-  {
-    id: "emp-4",
-    employeeName: "Meera Nambiar",
-    employeeId: "230510681",
-    employeeType: "On-Roll",
-    designation: "CAD Designer",
-    contactNumber: "+91 98404 45678",
-    email: "meera.n@nexus.com",
-    status: "Active"
-  },
-  {
-    id: "emp-5",
-    employeeName: "Pooja Hegde",
-    employeeId: "230510682",
-    employeeType: "Contract",
-    designation: "HR Officer",
-    contactNumber: "+91 98405 56789",
-    email: "pooja.h@nexus.com",
-    status: "Active"
+// Master -> Employee Sub-Page Dataset (Loaded dynamically from PostgreSQL via FastAPI)
+let masterEmployeeData = [];
+
+async function loadMasterEmployeesFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.employees) {
+    try {
+      const response = await NexusApi.employees.getAll({ limit: 500 });
+      let items = [];
+      if (response && Array.isArray(response.items)) {
+        items = response.items;
+      } else if (Array.isArray(response)) {
+        items = response;
+      }
+      masterEmployeeData = items.map(e => ({
+        ...e,
+        id: e.employee_id || e.id || `emp-${e.employee_code || Date.now()}`,
+        employee_id: e.employee_id || e.id,
+        employeeName: e.employee_name || e.employeeName || '',
+        employeeId: e.employee_code || e.employeeId || '',
+        employee_code: e.employee_code || e.employeeId || '',
+        employeeType: e.employee_type || e.empType || 'On-Roll',
+        empType: e.employee_type || e.empType || 'On-Roll',
+        designation: e.designation || '',
+        contactNumber: e.mobile_number || e.contactNumber || '',
+        email: e.email || '',
+        address: e.address || '',
+        pan: e.pan_number || e.pan || '',
+        aadhar: e.aadhaar_number || e.aadhar || '',
+        drivingLicense: e.dl_number || e.drivingLicense || '',
+        passportNumber: e.passport_number || e.passportNumber || '',
+        epfUan: e.epf_uan || e.epfUan || '',
+        esiCode: e.esi_code || e.esiId || e.esiCode || '',
+        esiId: e.esi_code || e.esiId || e.esiCode || '',
+        documents: e.documents || [],
+        pan_documents: e.pan_documents || '',
+        aadhaar_documents: e.aadhaar_documents || '',
+        dl_documents: e.dl_documents || '',
+        passport_documents: e.passport_documents || '',
+        epf_documents: e.epf_documents || '',
+        esi_documents: e.esi_documents || '',
+        qualification_documents: e.qualification_documents || '',
+        geo_attendance: (e.geo_attendance === true || e.geo_attendance === 'true' || e.geoAttendance === true || e.geoAttendance === 'true' || e.geo_attendance === 1 || e.geoAttendance === 1),
+        geoAttendance: (e.geo_attendance === true || e.geo_attendance === 'true' || e.geoAttendance === true || e.geoAttendance === 'true' || e.geo_attendance === 1 || e.geoAttendance === 1),
+        status: (e.status === false || e.status === 'In - Active' || e.status === 'Inactive' || (typeof e.status === 'string' && (e.status.toLowerCase().includes('in') || e.status.toLowerCase().includes('false')))) ? 'In - Active' : 'Active'
+      }));
+    } catch (err) {
+      console.error('Error fetching master employees from API:', err);
+      if (typeof showToast === 'function') {
+        showToast('Could not load employees from database: ' + (err.message || err));
+      }
+    }
   }
-];
+  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'employee') {
+    currentDataset = [...masterEmployeeData];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+  }
+}
 
 // Master -> Customer Sub-Page Dataset (Loaded dynamically from PostgreSQL via FastAPI)
 let masterCustomerData = [
@@ -5175,6 +5181,9 @@ function renderIndusFooter() {
 function loadMasterDataset() {
   if (currentMasterSubpage === 'employee') {
     currentDataset = [...masterEmployeeData];
+    if (typeof loadMasterEmployeesFromApi === 'function') {
+      loadMasterEmployeesFromApi();
+    }
   } else if (currentMasterSubpage === 'customer') {
     currentDataset = [...masterCustomerData];
     if (typeof loadMasterCustomersFromApi === 'function') {
@@ -12398,7 +12407,7 @@ function initSideFormEvents() {
   }
 
   // Submit / Save Actions
-  function handleFormSave() {
+  async function handleFormSave() {
     if (currentModule === 'indus_towers') {
       if (currentIndusSubpage === 'projects') {
         const projectType = document.getElementById('inpProjectType')?.value || "New Site Build";
@@ -12845,8 +12854,14 @@ function initSideFormEvents() {
     }
 
     if (currentModule === 'master' && currentMasterSubpage === 'employee') {
-      const employeeName = document.getElementById('inpEmpName')?.value.trim() || "New Employee";
-      const employeeId = document.getElementById('inpEmpId')?.value.trim() || `23051068${masterEmployeeData.length + 1}`;
+      if (isEmployeeFormEditing || currentViewedEmpId) {
+        if (typeof window.saveEmployeeEdits === 'function') {
+          window.saveEmployeeEdits();
+        }
+        return;
+      }
+      const employeeName = document.getElementById('inpEmpName')?.value.trim();
+      const employeeId = document.getElementById('inpEmpId')?.value.trim();
       const empType = document.getElementById('inpEmpType')?.value || "On-Roll";
       const address = document.getElementById('inpEmpAddress')?.value.trim() || "";
       const contactNumber = document.getElementById('inpEmpMobile')?.value.trim() || "";
@@ -12872,15 +12887,34 @@ function initSideFormEvents() {
       const totalExp = document.getElementById('inpEmpTotalExp')?.value.trim() || "";
       const doj = document.getElementById('inpEmpDoj')?.value || "";
       const designation = document.getElementById('inpEmpDesignation')?.value || "Executive";
+      const geoToggle = document.getElementById('inpEmpGeoAttendanceToggle');
+      const geoAttendance = geoToggle ? geoToggle.checked : false;
       const statusToggle = document.getElementById('inpEmpStatusToggle');
       const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
 
-      const newRecord = {
-        id: `emp-${Date.now()}`,
+      if (!employeeName) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup("Please enter Employee Name.", "Error Message!");
+        } else {
+          showToast("Please enter Employee Name.");
+        }
+        return;
+      }
+
+      if (!employeeId) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup("Please enter Employee ID / Code.", "Error Message!");
+        } else {
+          showToast("Please enter Employee ID / Code.");
+        }
+        return;
+      }
+
+      const payload = {
         employeeName,
         employeeId,
         empType,
-        employeeType: empType,
+        designation,
         address,
         contactNumber,
         email,
@@ -12894,20 +12928,92 @@ function initSideFormEvents() {
         passportNumber,
         epfUan,
         esiId,
-        esiCode: esiId,
         prevExp,
         currentExp,
         totalExp,
         doj,
-        designation,
+        geoAttendance,
         status
       };
 
-      masterEmployeeData.unshift(newRecord);
-      currentDataset = [...masterEmployeeData];
-      applyFiltersAndRender();
-      closeSideForm();
-      showToast(`Employee ${employeeName} successfully saved & added to table!`);
+      if (typeof NexusApi !== 'undefined' && NexusApi.employees) {
+        try {
+          const newRecord = await NexusApi.employees.create(payload);
+          const dbEmpId = newRecord.employee_id || newRecord.id;
+
+          // Upload any pending PDF documents
+          if (window.pendingEmployeePdfs && Object.keys(window.pendingEmployeePdfs).length > 0 && dbEmpId) {
+            for (const [docType, file] of Object.entries(window.pendingEmployeePdfs)) {
+              try {
+                await NexusApi.employees.uploadDocument(dbEmpId, docType, file);
+              } catch (docErr) {
+                console.error(`Failed to upload ${docType} PDF:`, docErr);
+              }
+            }
+            window.pendingEmployeePdfs = {};
+          }
+
+          masterEmployeeData.unshift({
+            ...newRecord,
+            id: newRecord.employee_id || newRecord.id,
+            employeeName: newRecord.employee_name || newRecord.employeeName,
+            employeeId: newRecord.employee_code || newRecord.employeeId,
+            employeeType: newRecord.employee_type || newRecord.empType,
+            empType: newRecord.employee_type || newRecord.empType,
+            contactNumber: newRecord.mobile_number || newRecord.contactNumber
+          });
+          currentDataset = [...masterEmployeeData];
+          applyFiltersAndRender();
+          closeSideForm();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Employee added successfully!', 'Task Completed');
+          } else {
+            showToast(`Employee ${employeeName} successfully saved & added to table!`);
+          }
+        } catch (err) {
+          console.error('Failed to create employee via API:', err);
+          const msg = err.detail || err.message || "Failed to create employee.";
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, "Error Message!");
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+        }
+      } else {
+        const newRecord = {
+          id: `emp-${Date.now()}`,
+          employeeName,
+          employeeId,
+          empType,
+          employeeType: empType,
+          address,
+          contactNumber,
+          email,
+          dob,
+          bloodGroup,
+          maritalStatus,
+          qualification,
+          pan,
+          aadhar,
+          drivingLicense,
+          passportNumber,
+          epfUan,
+          esiId,
+          esiCode: esiId,
+          prevExp,
+          currentExp,
+          totalExp,
+          doj,
+          designation,
+          status
+        };
+
+        masterEmployeeData.unshift(newRecord);
+        currentDataset = [...masterEmployeeData];
+        applyFiltersAndRender();
+        closeSideForm();
+        showToast(`Employee ${employeeName} successfully saved & added to table!`);
+      }
       return;
     }
 
@@ -14684,17 +14790,43 @@ function openSideForm() {
       if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
       const frm = document.getElementById('frmAddEmployee');
       if (frm) frm.reset();
+      window.pendingEmployeePdfs = {};
       const statusToggle = document.getElementById('inpEmpStatusToggle');
       if (statusToggle) statusToggle.checked = true;
+      const geoToggle = document.getElementById('inpEmpGeoAttendanceToggle');
+      if (geoToggle) geoToggle.checked = false;
 
       ['Pan', 'Aadhar', 'Dl', 'Passport', 'Epf', 'Esi'].forEach(key => {
         const toggle = document.getElementById(`inpEmp${key}Toggle`);
         const wrap = document.getElementById(`wrapEmp${key}`);
         const toggleWrap = document.getElementById(`toggleWrapEmp${key}`);
+        const textInp = wrap ? wrap.querySelector('input[type="text"]') : null;
+        const revertBtn = wrap ? wrap.querySelector('.btn-toggle-revert') : null;
+        const pdfBadge = wrap ? wrap.querySelector('.input-pdf-badge') : null;
         if (toggle) toggle.checked = false;
         if (wrap) wrap.style.display = 'none';
         if (toggleWrap) toggleWrap.style.display = 'flex';
+        if (revertBtn) revertBtn.style.display = 'flex';
+        if (pdfBadge) pdfBadge.style.display = 'flex';
+        if (textInp) {
+          textInp.value = '';
+          textInp.style.textDecoration = 'none';
+          textInp.style.color = '#1e293b';
+          textInp.style.cursor = 'text';
+          textInp.onclick = null;
+        }
       });
+
+      const qualInp = document.getElementById('inpEmpQualification');
+      const qualBadge = document.querySelector('#frmAddEmployee .emp-row-qual .input-pdf-badge');
+      if (qualBadge) qualBadge.style.display = 'flex';
+      if (qualInp) {
+        qualInp.value = '';
+        qualInp.style.textDecoration = 'none';
+        qualInp.style.color = '#1e293b';
+        qualInp.style.cursor = 'text';
+        qualInp.onclick = null;
+      }
 
       setEmployeeFormReadOnly(false);
       currentViewedEmpId = null;
@@ -14773,6 +14905,9 @@ function openSideForm() {
       if (lblTitle) lblTitle.innerText = 'Add Customer';
       const frm = document.getElementById('frmAddCustomer');
       if (frm) frm.reset();
+      window.currentCustomerContext = null;
+      window.currentCustomerName = '';
+      window.currentCustomerId = null;
       const bTypeSelect = document.getElementById('inpBusinessType');
       if (bTypeSelect) bTypeSelect.value = 'Projects';
       const statusToggle = document.getElementById('inpStatusToggle');
@@ -18560,6 +18695,8 @@ window.triggerEmpPdf = function(fileInputId) {
   if (fileInput) fileInput.click();
 };
 
+window.pendingEmployeePdfs = window.pendingEmployeePdfs || {};
+
 window.handleEmpPdfUpload = function(fileInput, textInputId) {
   if (fileInput && fileInput.files && fileInput.files[0]) {
     const file = fileInput.files[0];
@@ -18567,7 +18704,19 @@ window.handleEmpPdfUpload = function(fileInput, textInputId) {
     if (txt) {
       txt.value = file.name;
     }
-    showToast('Document uploaded: ' + file.name);
+    window.pendingEmployeePdfs = window.pendingEmployeePdfs || {};
+    const map = {
+      'inpEmpQualification': 'qualification',
+      'inpEmpPanNumber': 'pan',
+      'inpEmpAadharNumber': 'aadhar',
+      'inpEmpDrivingLicense': 'driving_license',
+      'inpEmpPassportNumber': 'passport',
+      'inpEmpEpfUan': 'epf',
+      'inpEmpEsiCode': 'esi'
+    };
+    const docType = map[textInputId] || textInputId;
+    window.pendingEmployeePdfs[docType] = file;
+    showToast('Document selected: ' + file.name);
   }
 };
 
@@ -18578,7 +18727,9 @@ window.handleEmpPhotoUpload = function(fileInput, textInputId) {
     if (txt) {
       txt.value = file.name;
     }
-    showToast('Photo uploaded: ' + file.name);
+    window.pendingEmployeePdfs = window.pendingEmployeePdfs || {};
+    window.pendingEmployeePdfs['photo'] = file;
+    showToast('Photo selected: ' + file.name);
   }
 };
 
@@ -18608,17 +18759,37 @@ window.updateEmployeeFormLayout = function(mode, empType) {
 
 function setEmployeeFormReadOnly(isReadOnly) {
   const form = document.getElementById('frmAddEmployee');
+  const card = document.getElementById('addEmployeeCard');
   if (!form) return;
+
+  if (isReadOnly) {
+    if (card) card.classList.add('is-view-mode');
+    form.classList.add('is-view-mode');
+  } else {
+    if (card) card.classList.remove('is-view-mode');
+    form.classList.remove('is-view-mode');
+  }
 
   const inputs = form.querySelectorAll('input, select');
   inputs.forEach(input => {
     if (input.type === 'file') return;
     if (input.type === 'checkbox') {
-      input.disabled = false;
-      const parentSwitch = input.closest('.toggle-slide-switch') || input.closest('label');
-      if (parentSwitch) {
-        parentSwitch.style.pointerEvents = 'auto';
-        parentSwitch.style.opacity = '1';
+      if (isReadOnly) {
+        input.disabled = true;
+        const parentSwitch = input.closest('.toggle-slide-switch') || input.closest('label');
+        if (parentSwitch) {
+          parentSwitch.style.pointerEvents = 'none';
+          parentSwitch.style.opacity = '0.75';
+          parentSwitch.style.cursor = 'not-allowed';
+        }
+      } else {
+        input.disabled = false;
+        const parentSwitch = input.closest('.toggle-slide-switch') || input.closest('label');
+        if (parentSwitch) {
+          parentSwitch.style.pointerEvents = 'auto';
+          parentSwitch.style.opacity = '1';
+          parentSwitch.style.cursor = 'pointer';
+        }
       }
       return;
     }
@@ -18642,7 +18813,50 @@ function setEmployeeFormReadOnly(isReadOnly) {
     }
   });
 
-  const badges = form.querySelectorAll('.input-pdf-badge, .btn-toggle-revert');
+  // Explicitly ensure Status and Geo Attendance toggles and containers are properly enabled/disabled
+  const statusToggle = document.getElementById('inpEmpStatusToggle');
+  if (statusToggle) {
+    statusToggle.disabled = isReadOnly;
+    const parent = statusToggle.closest('.toggle-slide-switch') || statusToggle.parentElement;
+    if (parent) {
+      parent.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parent.style.opacity = isReadOnly ? '0.75' : '1';
+      parent.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
+    }
+    const wrap = document.getElementById('toggleWrapEmpStatus');
+    if (wrap) {
+      wrap.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+    }
+  }
+
+  const geoToggle = document.getElementById('inpEmpGeoAttendanceToggle');
+  if (geoToggle) {
+    geoToggle.disabled = isReadOnly;
+    const parent = geoToggle.closest('.toggle-slide-switch') || geoToggle.parentElement;
+    if (parent) {
+      parent.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      parent.style.opacity = isReadOnly ? '0.75' : '1';
+      parent.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
+    }
+    const wrap = document.getElementById('toggleWrapEmpGeoAttendance');
+    if (wrap) {
+      wrap.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+    }
+  }
+
+  const reverts = form.querySelectorAll('.btn-toggle-revert');
+  reverts.forEach(b => {
+    if (isReadOnly) {
+      b.style.setProperty('display', 'none', 'important');
+    } else {
+      const wrap = b.closest('.slide-dynamic-wrap');
+      if (wrap && wrap.style.display !== 'none') {
+        b.style.setProperty('display', 'flex', 'important');
+      }
+    }
+  });
+
+  const badges = form.querySelectorAll('.input-pdf-badge');
   badges.forEach(b => {
     b.style.pointerEvents = 'auto';
     b.style.opacity = '1';
@@ -18652,47 +18866,51 @@ function setEmployeeFormReadOnly(isReadOnly) {
 
 window.handleEmpClick = function(empId, empName) {
   const dataset = masterEmployeeData;
-  let emp = dataset.find(e => e.id === empId || e.employeeName === empName || e.employeeId === empId);
+  let emp = dataset.find(e => String(e.id) === String(empId) || String(e.employee_id) === String(empId) || e.employeeName === empName || e.employeeId === empId);
 
   if (!emp) {
     emp = {
       id: empId || 'emp-1',
-      employeeId: "230510678",
-      employeeName: empName || "R/RL-234567",
+      employeeId: "",
+      employeeName: empName || "",
       empType: "On-Roll",
-      address: "123 Main Street, Tech Park",
-      contactNumber: "98401 12345",
-      email: "test.employee@example.com",
-      dob: "1995-05-15",
+      address: "",
+      contactNumber: "",
+      email: "",
+      dob: "",
       bloodGroup: "A+",
       maritalStatus: "Single",
-      qualification: "B.Tech / MCA",
-      pan: "ABCDE1234F",
-      aadhar: "1234-5678-9012",
-      drivingLicense: "DL-2023-987654",
-      passportNumber: "P9876543",
-      epfUan: "100123456789",
-      esiCode: "31001234560000001",
-      prevExp: "02 - 00",
-      currentExp: "01 - 00",
-      totalExp: "03 - 00",
-      doj: "2023-01-10",
-      designation: "Manager",
+      qualification: "",
+      pan: "",
+      aadhar: "",
+      drivingLicense: "",
+      passportNumber: "",
+      epfUan: "",
+      esiCode: "",
+      prevExp: "",
+      currentExp: "",
+      totalExp: "",
+      doj: "",
+      designation: "",
       status: "Active"
     };
   }
 
-  currentViewedEmpId = emp.id;
+  currentViewedEmpId = emp.employee_id || emp.id;
   isEmployeeFormEditing = false;
 
-  openSideForm();
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
+
+  const cards = document.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(c => c.style.display = 'none');
 
   const card = document.getElementById('addEmployeeCard');
   if (card) card.style.display = 'block';
 
   // Update Header Title to Employee Name
   const lblTitle = document.getElementById('lblEmployeeCardTitle');
-  if (lblTitle) lblTitle.innerText = emp.employeeName || 'View Employee';
+  if (lblTitle) lblTitle.innerText = emp.employeeName || emp.employee_name || 'View Employee';
 
   // Hide Bank, Asset, Salary action icons in View Employee tab
   const btnEmpBank = document.getElementById('btnEmpBankDetails');
@@ -18716,30 +18934,30 @@ window.handleEmpClick = function(empId, empName) {
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
   // Populate form regular fields
-  if (document.getElementById('inpEmpType')) document.getElementById('inpEmpType').value = emp.empType || emp.employeeType || 'On-Roll';
-  if (document.getElementById('inpEmpName')) document.getElementById('inpEmpName').value = emp.employeeName || '';
-  if (document.getElementById('inpEmpId')) document.getElementById('inpEmpId').value = emp.employeeId || '';
-  if (document.getElementById('inpEmpAddress')) document.getElementById('inpEmpAddress').value = emp.address || '123 Main Street, Tech Park';
-  if (document.getElementById('inpEmpMobile')) document.getElementById('inpEmpMobile').value = emp.contactNumber || '9876543210';
-  if (document.getElementById('inpEmpEmail')) document.getElementById('inpEmpEmail').value = emp.email || 'test.employee@example.com';
-  if (document.getElementById('inpEmpDob')) document.getElementById('inpEmpDob').value = emp.dob || '1995-05-15';
-  if (document.getElementById('inpEmpDoj')) document.getElementById('inpEmpDoj').value = emp.doj || '2023-01-10';
-  if (document.getElementById('inpEmpBloodGroup')) document.getElementById('inpEmpBloodGroup').value = emp.bloodGroup || 'A+';
-  if (document.getElementById('inpEmpMaritalStatus')) document.getElementById('inpEmpMaritalStatus').value = emp.maritalStatus || 'Single';
-  if (document.getElementById('inpEmpQualification')) document.getElementById('inpEmpQualification').value = emp.qualification || 'B.Tech / MCA';
-  if (document.getElementById('inpEmpPrevExp')) document.getElementById('inpEmpPrevExp').value = emp.prevExp || '02 - 00';
-  if (document.getElementById('inpEmpCurrExp')) document.getElementById('inpEmpCurrExp').value = emp.currentExp || '01 - 00';
-  if (document.getElementById('inpEmpTotalExp')) document.getElementById('inpEmpTotalExp').value = emp.totalExp || '03 - 00';
-  if (document.getElementById('inpEmpDesignation')) document.getElementById('inpEmpDesignation').value = emp.designation || 'Manager';
+  if (document.getElementById('inpEmpType')) document.getElementById('inpEmpType').value = emp.empType || emp.employeeType || emp.employee_type || 'On-Roll';
+  if (document.getElementById('inpEmpName')) document.getElementById('inpEmpName').value = emp.employeeName || emp.employee_name || '';
+  if (document.getElementById('inpEmpId')) document.getElementById('inpEmpId').value = emp.employeeId || emp.employee_code || '';
+  if (document.getElementById('inpEmpAddress')) document.getElementById('inpEmpAddress').value = emp.address || '';
+  if (document.getElementById('inpEmpMobile')) document.getElementById('inpEmpMobile').value = emp.contactNumber || emp.mobile_number || '';
+  if (document.getElementById('inpEmpEmail')) document.getElementById('inpEmpEmail').value = emp.email || '';
+  if (document.getElementById('inpEmpDob')) document.getElementById('inpEmpDob').value = emp.dob || '';
+  if (document.getElementById('inpEmpDoj')) document.getElementById('inpEmpDoj').value = emp.doj || '';
+  if (document.getElementById('inpEmpBloodGroup')) document.getElementById('inpEmpBloodGroup').value = emp.bloodGroup || emp.blood_group || 'A+';
+  if (document.getElementById('inpEmpMaritalStatus')) document.getElementById('inpEmpMaritalStatus').value = emp.maritalStatus || emp.marital_status || 'Single';
+  if (document.getElementById('inpEmpQualification')) document.getElementById('inpEmpQualification').value = emp.qualification || '';
+  if (document.getElementById('inpEmpPrevExp')) document.getElementById('inpEmpPrevExp').value = emp.prevExp || '';
+  if (document.getElementById('inpEmpCurrExp')) document.getElementById('inpEmpCurrExp').value = emp.currentExp || '';
+  if (document.getElementById('inpEmpTotalExp')) document.getElementById('inpEmpTotalExp').value = emp.totalExp || '';
+  if (document.getElementById('inpEmpDesignation')) document.getElementById('inpEmpDesignation').value = emp.designation || '';
 
   // Populate toggle fields (PAN, Aadhar, DL, Passport, EPF, ESI)
   const toggleFields = [
-    { key: 'Pan', val: emp.pan, inpId: 'inpEmpPanNumber' },
-    { key: 'Aadhar', val: emp.aadhar, inpId: 'inpEmpAadharNumber' },
-    { key: 'Dl', val: emp.drivingLicense, inpId: 'inpEmpDrivingLicense' },
-    { key: 'Passport', val: emp.passportNumber, inpId: 'inpEmpPassportNumber' },
-    { key: 'Epf', val: emp.epfUan, inpId: 'inpEmpEpfUan' },
-    { key: 'Esi', val: emp.esiId || emp.esiCode, inpId: 'inpEmpEsiCode' }
+    { key: 'Pan', val: emp.pan || emp.pan_number, inpId: 'inpEmpPanNumber' },
+    { key: 'Aadhar', val: emp.aadhar || emp.aadhaar_number, inpId: 'inpEmpAadharNumber' },
+    { key: 'Dl', val: emp.drivingLicense || emp.dl_number, inpId: 'inpEmpDrivingLicense' },
+    { key: 'Passport', val: emp.passportNumber || emp.passport_number, inpId: 'inpEmpPassportNumber' },
+    { key: 'Epf', val: emp.epfUan || emp.epf_uan, inpId: 'inpEmpEpfUan' },
+    { key: 'Esi', val: emp.esiId || emp.esiCode || emp.esi_code, inpId: 'inpEmpEsiCode' }
   ];
 
   toggleFields.forEach(tf => {
@@ -18750,37 +18968,287 @@ window.handleEmpClick = function(empId, empName) {
 
     if (tf.val && String(tf.val).trim() !== '') {
       if (toggle) toggle.checked = true;
-      if (toggleWrap) toggleWrap.style.display = 'none';
-      if (wrap) wrap.style.display = 'flex';
+      if (toggleWrap) toggleWrap.style.setProperty('display', 'none', 'important');
+      if (wrap) wrap.style.setProperty('display', 'flex', 'important');
       if (textInp) textInp.value = tf.val;
     } else {
       if (toggle) toggle.checked = false;
-      if (wrap) wrap.style.display = 'none';
-      if (toggleWrap) toggleWrap.style.display = 'flex';
+      if (wrap) wrap.style.setProperty('display', 'none', 'important');
+      if (toggleWrap) toggleWrap.style.setProperty('display', 'flex', 'important');
       if (textInp) textInp.value = '';
     }
   });
 
   const statusToggleEl = document.getElementById('inpEmpStatusToggle');
-  if (statusToggleEl) statusToggleEl.checked = (emp.status === 'Active');
+  const rawStatus = emp.status !== undefined ? emp.status : 'Active';
+  const isStatusActive = (rawStatus === true || rawStatus === 'Active' || (typeof rawStatus === 'string' && rawStatus.trim().toLowerCase() === 'active'));
+  if (statusToggleEl) {
+    statusToggleEl.checked = isStatusActive;
+    if (isStatusActive) {
+      statusToggleEl.setAttribute('checked', 'checked');
+    } else {
+      statusToggleEl.removeAttribute('checked');
+    }
+  }
+
+  const geoToggleEl = document.getElementById('inpEmpGeoAttendanceToggle');
+  const rawGeo = emp.geo_attendance !== undefined ? emp.geo_attendance : emp.geoAttendance;
+  const isGeoActive = Boolean(rawGeo === true || rawGeo === 'true' || rawGeo === 1 || rawGeo === '1');
+  if (geoToggleEl) {
+    geoToggleEl.checked = isGeoActive;
+    if (isGeoActive) {
+      geoToggleEl.setAttribute('checked', 'checked');
+    } else {
+      geoToggleEl.removeAttribute('checked');
+    }
+  }
 
   setEmployeeFormReadOnly(true);
-  const isContract = (emp.empType === 'Contract' || emp.employeeType === 'Contract');
+  const isContract = (emp.empType === 'Contract' || emp.employeeType === 'Contract' || emp.employee_type === 'Contract');
   if (typeof updateEmployeeFormLayout === 'function') {
     updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
   }
-  showToast(`Viewing details for employee: ${emp.employeeName}`);
+  showToast(`Viewing details for employee: ${emp.employeeName || emp.employee_name}`);
+};
+
+window.saveEmployeeEdits = async function() {
+  const currentEmp = masterEmployeeData.find(e => String(e.id) === String(currentViewedEmpId) || String(e.employee_id) === String(currentViewedEmpId) || String(e.employeeId) === String(currentViewedEmpId));
+  const dbEmpId = (currentEmp && (currentEmp.employee_id || currentEmp.id)) || currentViewedEmpId;
+  const isContract = currentEmp && (currentEmp.empType === 'Contract' || currentEmp.employeeType === 'Contract' || currentEmp.employee_type === 'Contract');
+
+  const empType = document.getElementById('inpEmpType')?.value || (currentEmp ? currentEmp.employeeType : 'On-Roll');
+  const employeeName = document.getElementById('inpEmpName')?.value?.trim() || (currentEmp ? currentEmp.employeeName : '');
+  const employeeId = document.getElementById('inpEmpId')?.value?.trim() || (currentEmp ? currentEmp.employeeId : '');
+  const address = document.getElementById('inpEmpAddress')?.value?.trim() || '';
+  const contactNumber = document.getElementById('inpEmpMobile')?.value?.trim() || '';
+  const email = document.getElementById('inpEmpEmail')?.value?.trim() || '';
+  const dob = document.getElementById('inpEmpDob')?.value || '';
+  const doj = document.getElementById('inpEmpDoj')?.value || '';
+  const bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || 'A+';
+  const maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || 'Single';
+  const qualification = document.getElementById('inpEmpQualification')?.value?.trim() || '';
+  const designation = document.getElementById('inpEmpDesignation')?.value?.trim() || '';
+
+  const panToggle = document.getElementById('inpEmpPanToggle');
+  const pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value?.trim() || '') : (document.getElementById('inpEmpPanNumber')?.value?.trim() || '');
+
+  const aadharToggle = document.getElementById('inpEmpAadharToggle');
+  const aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value?.trim() || '') : (document.getElementById('inpEmpAadharNumber')?.value?.trim() || '');
+
+  const dlToggle = document.getElementById('inpEmpDlToggle');
+  const drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value?.trim() || '') : (document.getElementById('inpEmpDrivingLicense')?.value?.trim() || '');
+
+  const passportToggle = document.getElementById('inpEmpPassportToggle');
+  const passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value?.trim() || '') : (document.getElementById('inpEmpPassportNumber')?.value?.trim() || '');
+
+  const epfToggle = document.getElementById('inpEmpEpfToggle');
+  const epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value?.trim() || '') : (document.getElementById('inpEmpEpfUan')?.value?.trim() || '');
+
+  const esiToggle = document.getElementById('inpEmpEsiToggle');
+  const esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value?.trim() || '') : (document.getElementById('inpEmpEsiCode')?.value?.trim() || '');
+
+  const prevExp = document.getElementById('inpEmpPrevExp')?.value?.trim() || '';
+  const currentExp = document.getElementById('inpEmpCurrExp')?.value?.trim() || '';
+  const totalExp = document.getElementById('inpEmpTotalExp')?.value?.trim() || '';
+
+  const geoToggle = document.getElementById('inpEmpGeoAttendanceToggle');
+  const geoAttendance = Boolean(geoToggle && geoToggle.checked);
+
+  const statusToggle = document.getElementById('inpEmpStatusToggle');
+  const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
+
+  const payload = {
+    employee_type: empType,
+    empType: empType,
+    employee_name: employeeName,
+    employeeName: employeeName,
+    employee_code: employeeId,
+    employeeId: employeeId,
+    address,
+    mobile_number: contactNumber,
+    contactNumber,
+    email,
+    dob,
+    doj,
+    blood_group: bloodGroup,
+    bloodGroup,
+    marital_status: maritalStatus,
+    maritalStatus,
+    qualification,
+    designation,
+    pan_number: pan,
+    pan,
+    aadhaar_number: aadhar,
+    aadhar,
+    dl_number: drivingLicense,
+    drivingLicense,
+    passport_number: passportNumber,
+    passportNumber,
+    epf_uan: epfUan,
+    epfUan,
+    esi_code: esiId,
+    esiId,
+    esiCode: esiId,
+    previous_experience: prevExp,
+    prevExp,
+    current_experience: currentExp,
+    currentExp,
+    total_experience: totalExp,
+    totalExp,
+    geo_attendance: geoAttendance,
+    geoAttendance,
+    status
+  };
+
+  let numericEmpId = parseInt(dbEmpId, 10);
+  if (isNaN(numericEmpId) && currentEmp && currentEmp.employee_id) {
+    numericEmpId = parseInt(currentEmp.employee_id, 10);
+  }
+
+  if (typeof NexusApi !== 'undefined' && NexusApi.employees && !isNaN(numericEmpId)) {
+    try {
+      const updatedRecord = await NexusApi.employees.update(numericEmpId, payload);
+
+      if (window.pendingEmployeePdfs && Object.keys(window.pendingEmployeePdfs).length > 0) {
+        for (const [docType, file] of Object.entries(window.pendingEmployeePdfs)) {
+          try {
+            await NexusApi.employees.uploadDocument(numericEmpId, docType, file);
+          } catch (docErr) {
+            console.error(`Failed to upload ${docType} PDF:`, docErr);
+          }
+        }
+        window.pendingEmployeePdfs = {};
+      }
+
+      const targetIdx = masterEmployeeData.findIndex(e => String(e.id) === String(currentViewedEmpId) || String(e.employee_id) === String(currentViewedEmpId) || String(e.employeeId) === String(currentViewedEmpId) || String(e.employee_id) === String(numericEmpId));
+
+      const mappedRecord = {
+        ...updatedRecord,
+        id: updatedRecord.employee_id || updatedRecord.id || numericEmpId,
+        employee_id: updatedRecord.employee_id || updatedRecord.id || numericEmpId,
+        employeeName: updatedRecord.employee_name || updatedRecord.employeeName || employeeName,
+        employee_name: updatedRecord.employee_name || updatedRecord.employeeName || employeeName,
+        employeeId: updatedRecord.employee_code || updatedRecord.employeeId || employeeId,
+        employee_code: updatedRecord.employee_code || updatedRecord.employeeId || employeeId,
+        employeeType: updatedRecord.employee_type || updatedRecord.empType || empType,
+        empType: updatedRecord.employee_type || updatedRecord.empType || empType,
+        designation: updatedRecord.designation !== undefined ? updatedRecord.designation : designation,
+        address: updatedRecord.address !== undefined ? updatedRecord.address : address,
+        contactNumber: updatedRecord.mobile_number || updatedRecord.contactNumber || contactNumber,
+        mobile_number: updatedRecord.mobile_number || updatedRecord.contactNumber || contactNumber,
+        email: updatedRecord.email !== undefined ? updatedRecord.email : email,
+        dob: updatedRecord.dob !== undefined ? updatedRecord.dob : dob,
+        doj: updatedRecord.doj !== undefined ? updatedRecord.doj : doj,
+        bloodGroup: updatedRecord.blood_group || updatedRecord.bloodGroup || bloodGroup,
+        maritalStatus: updatedRecord.marital_status || updatedRecord.maritalStatus || maritalStatus,
+        qualification: updatedRecord.qualification !== undefined ? updatedRecord.qualification : qualification,
+        pan: updatedRecord.pan_number || updatedRecord.pan || pan,
+        aadhar: updatedRecord.aadhaar_number || updatedRecord.aadhar || aadhar,
+        drivingLicense: updatedRecord.dl_number || updatedRecord.drivingLicense || drivingLicense,
+        passportNumber: updatedRecord.passport_number || updatedRecord.passportNumber || passportNumber,
+        epfUan: updatedRecord.epf_uan || updatedRecord.epfUan || epfUan,
+        esiCode: updatedRecord.esi_code || updatedRecord.esiId || esiId,
+        esiId: updatedRecord.esi_code || updatedRecord.esiId || esiId,
+        geo_attendance: updatedRecord.geo_attendance !== undefined ? updatedRecord.geo_attendance : geoAttendance,
+        geoAttendance: updatedRecord.geo_attendance !== undefined ? updatedRecord.geo_attendance : geoAttendance,
+        status: updatedRecord.status || status
+      };
+
+      if (targetIdx !== -1) {
+        masterEmployeeData[targetIdx] = mappedRecord;
+      } else {
+        masterEmployeeData.unshift(mappedRecord);
+      }
+
+      if (currentModule === 'master' && currentMasterSubpage === 'employee') {
+        currentDataset = [...masterEmployeeData];
+        applyFiltersAndRender();
+      }
+
+      isEmployeeFormEditing = false;
+      setEmployeeFormReadOnly(true);
+      if (typeof updateEmployeeFormLayout === 'function') {
+        updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
+      }
+
+      const lblTitle = document.getElementById('lblEmployeeCardTitle');
+      if (lblTitle) lblTitle.innerText = mappedRecord.employeeName;
+      const imgIcon = document.getElementById('imgEmpCardEditIcon');
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Info';
+      }
+      const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
+      if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+      currentViewedEmpId = mappedRecord.employee_id || mappedRecord.id;
+
+      // Synchronize form toggle elements in view mode
+      const stToggle = document.getElementById('inpEmpStatusToggle');
+      if (stToggle) {
+        const isStActive = (mappedRecord.status === true || mappedRecord.status === 'Active' || (typeof mappedRecord.status === 'string' && !mappedRecord.status.toLowerCase().includes('in') && !mappedRecord.status.toLowerCase().includes('false')));
+        stToggle.checked = isStActive;
+      }
+      const gToggle = document.getElementById('inpEmpGeoAttendanceToggle');
+      if (gToggle) {
+        const rawG = mappedRecord.geo_attendance !== undefined ? mappedRecord.geo_attendance : mappedRecord.geoAttendance;
+        gToggle.checked = Boolean(rawG === true || rawG === 'true' || rawG === 1 || rawG === '1');
+      }
+
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Employee details updated successfully!', 'Task Completed');
+      } else {
+        showToast('Employee details saved & updated successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to update employee via API:', err);
+      const msg = err.detail || err.message || 'Failed to update employee.';
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(msg, 'Error Message!');
+      } else {
+        showToast(`Error: ${msg}`);
+      }
+    }
+  } else {
+    // Fallback local update
+    if (currentEmp) {
+      Object.assign(currentEmp, payload);
+    }
+    if (currentModule === 'master' && currentMasterSubpage === 'employee') {
+      currentDataset = [...masterEmployeeData];
+      applyFiltersAndRender();
+    }
+    isEmployeeFormEditing = false;
+    setEmployeeFormReadOnly(true);
+    if (typeof updateEmployeeFormLayout === 'function') {
+      updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
+    }
+    const lblTitle = document.getElementById('lblEmployeeCardTitle');
+    if (lblTitle) lblTitle.innerText = employeeName || 'View Employee';
+    const imgIcon = document.getElementById('imgEmpCardEditIcon');
+    if (imgIcon) {
+      imgIcon.src = 'icons/Edit.svg';
+      imgIcon.title = 'Edit Info';
+    }
+    const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
+    if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Employee details updated successfully!', 'Task Completed');
+    } else {
+      showToast('Employee details saved & updated successfully!');
+    }
+  }
 };
 
 // Wire btnEmpCardEditToggle
 document.addEventListener('DOMContentLoaded', () => {
   const btnEmpCardEditToggle = document.getElementById('btnEmpCardEditToggle');
   if (btnEmpCardEditToggle) {
-    btnEmpCardEditToggle.addEventListener('click', () => {
+    btnEmpCardEditToggle.addEventListener('click', async () => {
       const lblTitle = document.getElementById('lblEmployeeCardTitle');
       const imgIcon = document.getElementById('imgEmpCardEditIcon');
-      const currentEmp = masterEmployeeData.find(e => e.id === currentViewedEmpId);
-      const isContract = currentEmp && (currentEmp.empType === 'Contract' || currentEmp.employeeType === 'Contract');
+      const currentEmp = masterEmployeeData.find(e => String(e.id) === String(currentViewedEmpId) || String(e.employee_id) === String(currentViewedEmpId) || String(e.employeeId) === String(currentViewedEmpId));
+      const isContract = currentEmp && (currentEmp.empType === 'Contract' || currentEmp.employeeType === 'Contract' || currentEmp.employee_type === 'Contract');
 
       if (!isEmployeeFormEditing) {
         // ENTER EDIT MODE
@@ -18789,55 +19257,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof updateEmployeeFormLayout === 'function') {
           updateEmployeeFormLayout('edit', isContract ? 'Contract' : 'On-Roll');
         }
-        if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || 'Edit Employee';
+        if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || currentEmp?.employee_name || 'Edit Employee';
         if (imgIcon) {
           imgIcon.src = 'icons/Save.svg';
           imgIcon.title = 'Save Changes';
         }
+        const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
+        if (btnSaveWrap) btnSaveWrap.style.display = 'none';
         showToast('Employee form is now editable');
       } else {
         // SAVE EDITS
-        isEmployeeFormEditing = false;
-        
-        if (currentViewedEmpId) {
-          const emp = masterEmployeeData.find(e => e.id === currentViewedEmpId);
-          if (emp) {
-            if (isContract) {
-              emp.address = document.getElementById('inpEmpAddress')?.value.trim() || emp.address;
-              emp.contactNumber = document.getElementById('inpEmpMobile')?.value.trim() || emp.contactNumber;
-              const statusToggle = document.getElementById('inpEmpStatusToggle');
-              if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
-            } else {
-              emp.designation = document.getElementById('inpEmpDesignation')?.value || emp.designation;
-              emp.address = document.getElementById('inpEmpAddress')?.value || emp.address;
-              emp.contactNumber = document.getElementById('inpEmpMobile')?.value || emp.contactNumber;
-              emp.email = document.getElementById('inpEmpEmail')?.value || emp.email;
-              emp.maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || emp.maritalStatus;
-
-              const esiToggle = document.getElementById('inpEmpEsiToggle');
-              emp.esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value || '') : '';
-              emp.esiCode = emp.esiId;
-
-              const statusToggle = document.getElementById('inpEmpStatusToggle');
-              if (statusToggle) emp.status = statusToggle.checked ? 'Active' : 'In - Active';
-            }
-          }
-          if (typeof masterEmployeeData !== 'undefined' && currentModule === 'master' && currentMasterSubpage === 'employee') {
-            currentDataset = [...masterEmployeeData];
-          }
-          applyFiltersAndRender();
-        }
-
-        setEmployeeFormReadOnly(true);
-        if (typeof updateEmployeeFormLayout === 'function') {
-          updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
-        }
-        if (lblTitle) lblTitle.innerText = currentEmp?.employeeName || 'View Employee';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('Employee details saved & updated successfully!');
+        await window.saveEmployeeEdits();
       }
     });
   }
@@ -22794,27 +23224,59 @@ window.triggerAccountsPdfUpload = function() {
 // ==========================================================================
 // MASTER -> CUSTOMER LOCATION & CONTACT MODALS
 // ==========================================================================
-let customerLocationData = [
-  { id: "CL-01", officeName: "Corporate Head Office", latitude: "28.4595", longitude: "77.0266", status: "Active" },
-  { id: "CL-02", officeName: "Regional Operations Hub", latitude: "19.0760", longitude: "72.8777", status: "Active" },
-  { id: "CL-03", officeName: "Southern Regional Office", latitude: "13.0827", longitude: "80.2707", status: "Active" },
-  { id: "CL-04", officeName: "Western Regional Office", latitude: "23.0225", longitude: "72.5714", status: "In - Active" }
-];
-
+// ==========================================================================
+// MASTER -> CUSTOMER LOCATION & CONTACT MODALS
+// ==========================================================================
+let customerLocationData = [];
 let activeCustomerLocFilters = {};
 let currentCustomerLocFilterCol = null;
+let isSavingCustomerLocation = false;
 
-let customerContactData = [
-  { id: "CC-01", name: "Vikram Malhotra", designation: "Chief Procurement Officer", contact: "+91 98101 23456", email: "vikram.m@indus.com", status: "Active" },
-  { id: "CC-02", name: "Ananya Deshmukh", designation: "Project Director", contact: "+91 98202 34567", email: "ananya.d@indus.com", status: "Active" },
-  { id: "CC-03", name: "Rajesh Kannan", designation: "Regional Ops Manager", contact: "+91 98403 45678", email: "rajesh.k@indus.com", status: "Active" },
-  { id: "CC-04", name: "Sunil Sharma", designation: "Commercial Lead", contact: "+91 98114 56789", email: "sunil.s@indus.com", status: "In - Active" }
-];
-
+let customerContactData = [];
 let activeCustomerContactFilters = {};
 let currentCustomerContactFilterCol = null;
+let isSavingCustomerContact = false;
+
+function getCurrentCustomerContext() {
+  const inpName = document.getElementById('inpCustomerName')?.value?.trim();
+  const inpProj = document.getElementById('inpCustomerProjectName')?.value?.trim();
+  const name = inpName || inpProj || window.currentCustomerName || (window.currentCustomerContext && (window.currentCustomerContext.customerName || window.currentCustomerContext.customer_name || window.currentCustomerContext.legalName)) || '';
+  const id = window.currentCustomerId || (window.currentCustomerContext && (window.currentCustomerContext.customer_id || window.currentCustomerContext.id)) || null;
+  return { customer_name: name, customer_id: id };
+}
 
 // --- CUSTOMER LOCATION MODAL HANDLERS ---
+window.loadCustomerLocationsFromApi = async function() {
+  try {
+    const { customer_name, customer_id } = getCurrentCustomerContext();
+    let res;
+    if (customer_id) {
+      res = await NexusApi.customers.getLocations({ customerId: customer_id });
+    } else if (customer_name) {
+      res = await NexusApi.customers.getLocations({ customerName: customer_name });
+    } else {
+      res = await NexusApi.customers.getLocations();
+    }
+    if (res && res.items) {
+      customerLocationData = res.items.map(item => ({
+        id: item.office_id || item.id,
+        office_id: item.office_id || item.id,
+        officeName: item.office_name || item.officeName || '',
+        latitude: item.latitude !== null && item.latitude !== undefined ? String(item.latitude) : '',
+        longitude: item.longitude !== null && item.longitude !== undefined ? String(item.longitude) : '',
+        status: item.status || 'Active',
+        customer_name: item.customer_name || item.customerName || ''
+      }));
+    } else {
+      customerLocationData = [];
+    }
+  } catch (err) {
+    console.error('Failed to load customer locations from backend:', err);
+    customerLocationData = [];
+  }
+  renderCustomerLocationTable();
+};
+
 window.openCustomerLocationModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -22829,8 +23291,9 @@ window.openCustomerLocationModal = function() {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
-  renderCustomerLocationTable();
-  showToast('Opened Office Locations');
+  activeCustomerLocFilters = {};
+  currentCustomerLocFilterCol = null;
+  loadCustomerLocationsFromApi();
 };
 
 window.closeCustomerLocationModal = function() {
@@ -22860,19 +23323,29 @@ window.renderCustomerLocationTable = function() {
     }
   }
 
-  tbody.innerHTML = filtered.map(row => {
-    const isInactive = (row.status || '').toLowerCase().includes('in');
-    return `
-      <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.officeName || '').replace(/"/g, '&quot;')}">${row.officeName || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.latitude || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.longitude || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 24px; color: #64748b; font-weight: 500; font-size: 14px;">
+          No office locations found
         </td>
       </tr>
     `;
-  }).join('');
+  } else {
+    tbody.innerHTML = filtered.map(row => {
+      const isInactive = (row.status || '').toLowerCase().includes('in');
+      return `
+        <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.officeName || '').replace(/"/g, '&quot;')}">${row.officeName || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.latitude || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.longitude || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+            <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
 
   // Update filter button active states
   const btnOffice = document.getElementById('btnCustomerLocOfficeFilter');
@@ -22909,7 +23382,9 @@ window.closeAddCustomerLocationForm = function() {
   if (panel) panel.style.display = 'block';
 };
 
-window.saveCustomerLocation = function() {
+window.saveCustomerLocation = async function() {
+  if (isSavingCustomerLocation) return;
+
   const name = document.getElementById('inpCustLocOfficeName')?.value?.trim();
   const lat = document.getElementById('inpCustLocLatitude')?.value?.trim() || '';
   const lng = document.getElementById('inpCustLocLongitude')?.value?.trim() || '';
@@ -22917,22 +23392,46 @@ window.saveCustomerLocation = function() {
   const status = isChecked ? 'Active' : 'In - Active';
 
   if (!name) {
-    showToast('Please enter Office Name');
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup("Please enter Office Name", "Error Message!");
+    } else {
+      showToast('Please enter Office Name');
+    }
     return;
   }
 
-  const newLoc = {
-    id: `CL-${String(customerLocationData.length + 1).padStart(2, '0')}`,
-    officeName: name,
-    latitude: lat,
-    longitude: lng,
+  const { customer_name, customer_id } = getCurrentCustomerContext();
+  const payload = {
+    customer_name: customer_name || 'Indus Towers Ltd',
+    office_name: name,
+    latitude: lat ? parseFloat(lat) : null,
+    longitude: lng ? parseFloat(lng) : null,
     status: status
   };
 
-  customerLocationData.unshift(newLoc);
-  renderCustomerLocationTable();
-  closeAddCustomerLocationForm();
-  showToast('Office Location added successfully!');
+  isSavingCustomerLocation = true;
+  try {
+    await NexusApi.customers.createLocation(payload, customer_id);
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Office location added successfully!', 'Task Completed');
+    } else {
+      showToast('Office location added successfully!');
+    }
+
+    await loadCustomerLocationsFromApi();
+    closeAddCustomerLocationForm();
+  } catch (err) {
+    console.error('Failed to save office location:', err);
+    const msg = (err && (err.message || err.detail)) || 'Failed to add office location. Please try again.';
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(msg, 'Error Message!');
+    } else {
+      showToast(msg);
+    }
+  } finally {
+    isSavingCustomerLocation = false;
+  }
 };
 
 window.openCustomerLocFilter = function(colKey, event) {
@@ -22983,6 +23482,38 @@ window.openCustomerLocFilter = function(colKey, event) {
 };
 
 // --- CUSTOMER CONTACT MODAL HANDLERS ---
+window.loadCustomerContactsFromApi = async function() {
+  try {
+    const { customer_name, customer_id } = getCurrentCustomerContext();
+    let res;
+    if (customer_id) {
+      res = await NexusApi.customers.getContacts({ customerId: customer_id });
+    } else if (customer_name) {
+      res = await NexusApi.customers.getContacts({ customerName: customer_name });
+    } else {
+      res = await NexusApi.customers.getContacts();
+    }
+    if (res && res.items) {
+      customerContactData = res.items.map(item => ({
+        id: item.contact_id || item.id,
+        contact_id: item.contact_id || item.id,
+        name: item.name || '',
+        designation: item.designation || '',
+        contact: item.contact_number || item.contact || '',
+        email: item.email || '',
+        status: item.status || 'Active',
+        customer_name: item.customer_name || item.customerName || ''
+      }));
+    } else {
+      customerContactData = [];
+    }
+  } catch (err) {
+    console.error('Failed to load customer contacts from backend:', err);
+    customerContactData = [];
+  }
+  renderCustomerContactTable();
+};
+
 window.openCustomerContactModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -22997,8 +23528,9 @@ window.openCustomerContactModal = function() {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
-  renderCustomerContactTable();
-  showToast('Opened Contact Details');
+  activeCustomerContactFilters = {};
+  currentCustomerContactFilterCol = null;
+  loadCustomerContactsFromApi();
 };
 
 window.closeCustomerContactModal = function() {
@@ -23028,20 +23560,30 @@ window.renderCustomerContactTable = function() {
     }
   }
 
-  tbody.innerHTML = filtered.map(row => {
-    const isInactive = (row.status || '').toLowerCase().includes('in');
-    return `
-      <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-        <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${(row.name || '').replace(/"/g, '&quot;')}">${row.name || ''}</td>
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.contact || ''}</td>
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-          <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 24px; color: #64748b; font-weight: 500; font-size: 14px;">
+          No contact details found
         </td>
       </tr>
     `;
-  }).join('');
+  } else {
+    tbody.innerHTML = filtered.map(row => {
+      const isInactive = (row.status || '').toLowerCase().includes('in');
+      return `
+        <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${(row.name || '').replace(/"/g, '&quot;')}">${row.name || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.contact || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+            <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
 
   // Update filter button active states
   const btnName = document.getElementById('btnCustomerContactNameFilter');
@@ -23083,7 +23625,9 @@ window.closeAddCustomerContactForm = function() {
   if (panel) panel.style.display = 'block';
 };
 
-window.saveCustomerContact = function() {
+window.saveCustomerContact = async function() {
+  if (isSavingCustomerContact) return;
+
   const name = document.getElementById('inpCustContactName')?.value?.trim();
   const desig = document.getElementById('inpCustContactDesignation')?.value?.trim() || '';
   const phone = document.getElementById('inpCustContactPhone')?.value?.trim() || '';
@@ -23092,23 +23636,47 @@ window.saveCustomerContact = function() {
   const status = isChecked ? 'Active' : 'In - Active';
 
   if (!name) {
-    showToast('Please enter Name');
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup("Please enter Name", "Error Message!");
+    } else {
+      showToast('Please enter Name');
+    }
     return;
   }
 
-  const newContact = {
-    id: `CC-${String(customerContactData.length + 1).padStart(2, '0')}`,
+  const { customer_name, customer_id } = getCurrentCustomerContext();
+  const payload = {
+    customer_name: customer_name || 'Indus Towers Ltd',
     name: name,
     designation: desig,
-    contact: phone,
+    contact_number: phone,
     email: email,
     status: status
   };
 
-  customerContactData.unshift(newContact);
-  renderCustomerContactTable();
-  closeAddCustomerContactForm();
-  showToast('Contact added successfully!');
+  isSavingCustomerContact = true;
+  try {
+    await NexusApi.customers.createContact(payload, customer_id);
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Contact details added successfully!', 'Task Completed');
+    } else {
+      showToast('Contact details added successfully!');
+    }
+
+    await loadCustomerContactsFromApi();
+    closeAddCustomerContactForm();
+  } catch (err) {
+    console.error('Failed to save customer contact:', err);
+    const msg = (err && (err.message || err.detail)) || 'Failed to add contact details. Please try again.';
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(msg, 'Error Message!');
+    } else {
+      showToast(msg);
+    }
+  } finally {
+    isSavingCustomerContact = false;
+  }
 };
 
 window.triggerCustomerContactCsvUpload = function() {
@@ -23118,13 +23686,7 @@ window.triggerCustomerContactCsvUpload = function() {
 window.handleCustomerContactCsvFile = function(input) {
   if (input.files && input.files[0]) {
     const file = input.files[0];
-    const newItems = [
-      { id: `CC-${String(customerContactData.length + 1).padStart(2, '0')}`, name: "Suresh Narayanan", designation: "Regional Procurement Head", contact: "+91 98401 11223", email: "suresh.n@indus.com", status: "Active" },
-      { id: `CC-${String(customerContactData.length + 2).padStart(2, '0')}`, name: "Meera Krishnan", designation: "Site Coordinator", contact: "+91 98402 33445", email: "meera.k@indus.com", status: "Active" }
-    ];
-    customerContactData.unshift(...newItems);
-    renderCustomerContactTable();
-    showToast(`CSV uploaded successfully: ${file.name}`);
+    showToast(`File selected: ${file.name}`);
     input.value = '';
   }
 };
@@ -23138,13 +23700,7 @@ window.handleCustomerContactFolderFile = function(input) {
     const count = input.files.length;
     const folderPath = input.files[0].webkitRelativePath || '';
     const folderName = folderPath.split('/')[0] || 'Selected Folder';
-    const newItems = [
-      { id: `CC-${String(customerContactData.length + 1).padStart(2, '0')}`, name: "Pooja Banerjee", designation: "Commercial Executive", contact: "+91 98305 66778", email: "pooja.b@indus.com", status: "Active" },
-      { id: `CC-${String(customerContactData.length + 2).padStart(2, '0')}`, name: "Ramesh Verma", designation: "Operations Lead", contact: "+91 98306 77889", email: "ramesh.v@indus.com", status: "Active" }
-    ];
-    customerContactData.unshift(...newItems);
-    renderCustomerContactTable();
-    showToast(`Bulk upload completed: ${count} documents imported from folder "${folderName}"`);
+    showToast(`Folder selected: "${folderName}" (${count} files)`);
     input.value = '';
   }
 };
@@ -23205,9 +23761,13 @@ window.openViewCustomerCard = function(rowId) {
     if (card.id !== 'addCustomerCard') card.style.display = 'none';
   });
 
-  const row = (rowId && (typeof masterCustomerData !== 'undefined') && masterCustomerData.find(r => r.id === rowId)) || 
+  const row = (rowId && (typeof masterCustomerData !== 'undefined') && masterCustomerData.find(r => r.id === rowId || r.customer_id === rowId || r.customerName === rowId)) || 
               ((typeof masterCustomerData !== 'undefined') && masterCustomerData[0]);
   if (!row) return;
+
+  window.currentCustomerContext = row;
+  window.currentCustomerName = row.customerName || row.customer_name || row.legalName || '';
+  window.currentCustomerId = row.customer_id || row.id || null;
 
   const addCustomerCard = document.getElementById('addCustomerCard');
   if (addCustomerCard) {
@@ -23219,25 +23779,25 @@ window.openViewCustomerCard = function(rowId) {
     if (bTypeSelect) bTypeSelect.value = row.businessType || 'Projects';
 
     const inpName = document.getElementById('inpCustomerName');
-    if (inpName) inpName.value = row.customerName || '';
+    if (inpName) inpName.value = row.customerName || row.customer_name || '';
 
     const inpDigits = document.getElementById('inpCustomerPoDigits');
-    if (inpDigits) inpDigits.value = row.poDigits || '450';
+    if (inpDigits) inpDigits.value = row.poDigits || row.po_stating_3_digits || '450';
 
     const gstToggle = document.getElementById('inpCustomerGstToggle');
-    if (gstToggle) gstToggle.checked = (row.gstNumber && row.gstNumber !== 'NA');
+    if (gstToggle) gstToggle.checked = (row.gstNumber && row.gstNumber !== 'NA') || (row.gst_number && row.gst_number !== 'NA');
 
     const inpGstType = document.getElementById('inpGstType');
-    if (inpGstType) inpGstType.value = row.gstType || 'SGST';
+    if (inpGstType) inpGstType.value = row.gstType || row.gst_type || 'SGST';
 
     const inpGstNumber = document.getElementById('inpGstNumber');
-    if (inpGstNumber) inpGstNumber.value = (row.gstNumber && row.gstNumber !== 'NA') ? row.gstNumber : '';
+    if (inpGstNumber) inpGstNumber.value = (row.gstNumber && row.gstNumber !== 'NA') ? row.gstNumber : ((row.gst_number && row.gst_number !== 'NA') ? row.gst_number : '');
 
     const inpPan = document.getElementById('inpPanNumber');
-    if (inpPan) inpPan.value = row.panNumber || '33ASMPM8643F';
+    if (inpPan) inpPan.value = row.panNumber || row.pan_number || '33ASMPM8643F';
 
     const inpAddress = document.getElementById('inpAddress');
-    if (inpAddress) inpAddress.value = row.address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
+    if (inpAddress) inpAddress.value = row.address || row.gst_address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
 
     const statusToggle = document.getElementById('inpStatusToggle');
     if (statusToggle) statusToggle.checked = !((row.status || '').toLowerCase().includes('in'));

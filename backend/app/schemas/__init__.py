@@ -32,6 +32,16 @@ from app.schemas.customer import (
     CustomerLocationListResponse
 )
 
+from app.schemas.employee import (
+    CompanyEmployeeBase,
+    CompanyEmployeeCreate,
+    CompanyEmployeeUpdate,
+    CompanyEmployeeStatusUpdate,
+    CompanyEmployeeResponse,
+    CompanyEmployeeListResponse,
+    CompanyEmployeeDocumentMetadata
+)
+
 __all__ = [
     "ExpenseBase",
     "ExpenseCreate",
@@ -59,5 +69,12 @@ __all__ = [
     "CustomerLocationBase",
     "CustomerLocationCreate",
     "CustomerLocationResponse",
-    "CustomerLocationListResponse"
+    "CustomerLocationListResponse",
+    "CompanyEmployeeBase",
+    "CompanyEmployeeCreate",
+    "CompanyEmployeeUpdate",
+    "CompanyEmployeeStatusUpdate",
+    "CompanyEmployeeResponse",
+    "CompanyEmployeeListResponse",
+    "CompanyEmployeeDocumentMetadata"
 ]

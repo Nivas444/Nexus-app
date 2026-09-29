@@ -239,6 +239,116 @@
       }
     },
 
+    employees: {
+      /**
+       * Fetch employees with optional search, filters, pagination
+       */
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.employee_type) query.set('employee_type', params.employee_type);
+        if (params.status) query.set('status', params.status);
+
+        const qs = query.toString();
+        return await request(`/master/employees${qs ? '?' + qs : ''}`, {
+          method: 'GET'
+        });
+      },
+
+      /**
+       * Fetch single employee by ID
+       */
+      async getById(employeeId) {
+        return await request(`/master/employees/${employeeId}`, {
+          method: 'GET'
+        });
+      },
+
+      /**
+       * Create new employee in PostgreSQL company_employee_details
+       */
+      async create(payload) {
+        return await request('/master/employees', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Update employee by ID
+       */
+      async update(employeeId, payload) {
+        return await request(`/master/employees/${employeeId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Update On-Roll employee restricted fields
+       */
+      async updateOnRollRestricted(employeeId, payload) {
+        return await this.update(employeeId, payload);
+      },
+
+      /**
+       * Update Contract employee restricted fields
+       */
+      async updateContractRestricted(employeeId, payload) {
+        return await this.update(employeeId, payload);
+      },
+
+      /**
+       * Toggle employee active/inactive status
+       */
+      async updateStatus(employeeId, statusData) {
+        return await request(`/master/employees/${employeeId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify(statusData)
+        });
+      },
+
+      /**
+       * Delete employee
+       */
+      async delete(employeeId) {
+        return await request(`/master/employees/${employeeId}`, {
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Upload PDF document for employee
+       */
+      async uploadDocument(employeeId, documentType, file) {
+        const formData = new FormData();
+        formData.append('document_type', documentType);
+        formData.append('file', file);
+        return await request(`/master/employees/${employeeId}/documents`, {
+          method: 'POST',
+          body: formData
+        });
+      },
+
+      /**
+       * List documents attached to employee
+       */
+      async listDocuments(employeeId) {
+        return await request(`/master/employees/${employeeId}/documents`, {
+          method: 'GET'
+        });
+      },
+
+      /**
+       * Get document download URL
+       */
+      getDocumentUrl(employeeId, documentType) {
+        return `${API_BASE_URL}/master/employees/${employeeId}/documents/${documentType}`;
+      }
+    },
+
     customers: {
       /**
        * Fetch customers with optional search, filters, pagination
@@ -321,6 +431,20 @@
        * Fetch contacts
        */
       async getContacts(params = {}) {
+        let customerId = null;
+        if (typeof params === 'number' || typeof params === 'string') {
+          if (!isNaN(params)) customerId = params;
+          params = {};
+        } else if (params && (params.customerId || params.customer_id)) {
+          customerId = params.customerId || params.customer_id;
+        }
+
+        if (customerId) {
+          return await request(`/customers/${customerId}/contact-details`, {
+            method: 'GET'
+          });
+        }
+
         const query = new URLSearchParams();
         if (params.customer_name || params.customerName) {
           query.set('customer_name', params.customer_name || params.customerName);
@@ -334,7 +458,14 @@
       /**
        * Create contact
        */
-      async createContact(payload) {
+      async createContact(payload, customerId = null) {
+        const cId = customerId || (payload && (payload.customerId || payload.customer_id));
+        if (cId) {
+          return await request(`/customers/${cId}/contact-details`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
         return await request('/customer-contacts', {
           method: 'POST',
           body: JSON.stringify(payload)
@@ -354,6 +485,20 @@
        * Fetch office locations
        */
       async getLocations(params = {}) {
+        let customerId = null;
+        if (typeof params === 'number' || typeof params === 'string') {
+          if (!isNaN(params)) customerId = params;
+          params = {};
+        } else if (params && (params.customerId || params.customer_id)) {
+          customerId = params.customerId || params.customer_id;
+        }
+
+        if (customerId) {
+          return await request(`/customers/${customerId}/office-locations`, {
+            method: 'GET'
+          });
+        }
+
         const query = new URLSearchParams();
         if (params.customer_name || params.customerName) {
           query.set('customer_name', params.customer_name || params.customerName);
@@ -367,7 +512,14 @@
       /**
        * Create office location
        */
-      async createLocation(payload) {
+      async createLocation(payload, customerId = null) {
+        const cId = customerId || (payload && (payload.customerId || payload.customer_id));
+        if (cId) {
+          return await request(`/customers/${cId}/office-locations`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
         return await request('/customer-locations', {
           method: 'POST',
           body: JSON.stringify(payload)
@@ -381,6 +533,102 @@
         return await request(`/customer-locations/${officeId}`, {
           method: 'DELETE'
         });
+      }
+    },
+
+    /**
+     * Master Employees API
+     */
+    employees: {
+      /**
+       * List employees with optional filters
+       */
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.pageSize) query.set('page_size', params.page_size || params.pageSize || 100);
+        if (params.search) query.set('search', params.search);
+        if (params.employee_type || params.employeeType || params.empType) {
+          query.set('employee_type', params.employee_type || params.employeeType || params.empType);
+        }
+        if (params.status) query.set('status', params.status);
+
+        const qs = query.toString();
+        const data = await request(`/master/employees${qs ? '?' + qs : ''}`);
+        return data.items || data;
+      },
+
+      /**
+       * Get employee details by ID
+       */
+      async getById(employeeId) {
+        return await request(`/master/employees/${employeeId}`);
+      },
+
+      /**
+       * Create new employee
+       */
+      async create(payload) {
+        return await request('/master/employees', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Update employee details
+       */
+      async update(employeeId, payload) {
+        return await request(`/master/employees/${employeeId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Toggle employee status
+       */
+      async updateStatus(employeeId, status) {
+        return await request(`/master/employees/${employeeId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status })
+        });
+      },
+
+      /**
+       * Delete employee
+       */
+      async delete(employeeId) {
+        return await request(`/master/employees/${employeeId}`, {
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Upload employee PDF document
+       */
+      async uploadDocument(employeeId, documentType, file) {
+        const formData = new FormData();
+        formData.append('document_type', documentType);
+        formData.append('file', file);
+        return await request(`/master/employees/${employeeId}/documents`, {
+          method: 'POST',
+          body: formData
+        });
+      },
+
+      /**
+       * List document metadata for an employee
+       */
+      async getDocuments(employeeId) {
+        return await request(`/master/employees/${employeeId}/documents`);
+      },
+
+      /**
+       * Get direct URL to view/download PDF document
+       */
+      getDocumentUrl(employeeId, documentType) {
+        return `${API_BASE_URL}/master/employees/${employeeId}/documents/${documentType}`;
       }
     }
   };

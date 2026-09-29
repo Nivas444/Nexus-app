@@ -5,8 +5,15 @@
 (function(window) {
   'use strict';
 
-  const defaultHost = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '127.0.0.1';
-  const API_BASE_URL = window.API_BASE_URL || `http://${defaultHost === 'localhost' ? 'localhost' : '127.0.0.1'}:8000/api/v1`;
+  const isLocal = typeof window !== 'undefined' && window.location && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '' ||
+    window.location.protocol === 'file:'
+  );
+
+  const storedApiUrl = (typeof window !== 'undefined' && window.localStorage) ? window.localStorage.getItem('API_BASE_URL') : null;
+  const API_BASE_URL = window.API_BASE_URL || storedApiUrl || (isLocal ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
 
   async function request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;

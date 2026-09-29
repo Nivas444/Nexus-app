@@ -1,4 +1,12 @@
 {
-  "outputDirectory": "frontend",
-  "cleanUrls": true
+  "rewrites": [
+    { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/index.html", "destination": "/frontend/index.html" },
+    { "source": "/home.html", "destination": "/frontend/home.html" },
+    { "source": "/home", "destination": "/frontend/home.html" },
+    { "source": "/assets/(.*)", "destination": "/frontend/assets/$1" },
+    { "source": "/icons/(.*)", "destination": "/frontend/icons/$1" },
+    { "source": "/bulk upload template/(.*)", "destination": "/frontend/bulk upload template/$1" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
+  ]
 }

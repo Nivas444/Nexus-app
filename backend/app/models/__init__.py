@@ -9,6 +9,13 @@ from app.models.employee_subdetails import (
     EmployeeSalaryDetail
 )
 from app.models.vendor import VendorMaster, VendorPrice
+from app.models.company import (
+    CompanyMasterDetails,
+    CompanyBankAccount,
+    CompanyOfficeLocation,
+    CompanyHoliday
+)
+from app.models.hr_compliance import HRCompliance
 
 __all__ = [
     "CompanyExpense",
@@ -23,6 +30,10 @@ __all__ = [
     "EmployeeAssetDetail",
     "EmployeeSalaryDetail",
     "VendorMaster",
-    "VendorPrice"
+    "VendorPrice",
+    "CompanyMasterDetails",
+    "CompanyBankAccount",
+    "CompanyOfficeLocation",
+    "CompanyHoliday",
+    "HRCompliance"
 ]
-

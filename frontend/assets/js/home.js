@@ -440,156 +440,169 @@ async function loadMasterExpensesFromApi() {
 }
 
 
-// Company HR Policies Datasets
-const companyHrEpfData = [
-  {
-    id: "hr-epf-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Monthly",
-    fillingDueDate: "15th of Every Month",
-    sealingAmount: "15,000.00",
-    employee: "12%",
-    epf: "3.67%",
-    eps: "8.33%",
-    edli: "0.50%",
-    adminCharges: "0.50%",
-    status: "Active"
-  },
-  {
-    id: "hr-epf-2",
-    from: "01 - 04 - 2025",
-    to: "31 - 03 - 2026",
-    fillingFrequency: "Monthly",
-    fillingDueDate: "15th of Every Month",
-    sealingAmount: "15,000.00",
-    employee: "12%",
-    epf: "3.67%",
-    eps: "8.33%",
-    edli: "0.50%",
-    adminCharges: "0.50%",
-    status: "In - Active"
-  }
-];
+// Company HR Policies Datasets (Loaded dynamically from PostgreSQL hr_compliance)
+let companyHrEpfData = [];
+let companyHrEsiData = [];
+let companyHrPtData = [];
+let companyHrLwfData = [];
+let companyHrTdsData = [];
+let companyHrLeaveData = [];
+let companyHrBonusData = [];
+let companyHrMedicalInsuranceData = [];
 
-const companyHrEsiData = [
-  {
-    id: "hr-esi-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Monthly",
-    fillingDueDate: "15th of Every Month",
-    sealingAmount: "21,000.00",
-    employee: "0.75%",
-    epf: "3.25%",
-    eps: "0.00%",
-    edli: "0.00%",
-    adminCharges: "0.00%",
-    status: "Active"
+function formatHrDateToUI(dateStr) {
+  if (!dateStr) return '';
+  const dStr = String(dateStr).trim();
+  const m = dStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) {
+    return `${m[3]} - ${m[2]} - ${m[1]}`;
   }
-];
+  return dStr;
+}
 
-const companyHrPtData = [
-  {
-    id: "hr-pt-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Half Yearly",
-    fillingDueDate: "30th Sept / 31st Mar",
-    sealingAmount: "30,000.00",
-    employee: "200.00",
-    epf: "0.00",
-    eps: "0.00",
-    edli: "0.00",
-    adminCharges: "0.00",
-    status: "Active"
-  }
-];
+function formatHrAmount(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const num = Number(val);
+  if (isNaN(num)) return String(val);
+  return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
-const companyHrLwfData = [
-  {
-    id: "hr-lwf-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Annually",
-    fillingDueDate: "31st Dec",
-    sealingAmount: "NA",
-    employee: "20.00",
-    epf: "40.00",
-    eps: "0.00",
-    edli: "0.00",
-    adminCharges: "0.00",
-    status: "Active"
-  }
-];
+function mapHrComplianceRecordToRow(r, type) {
+  const t = (type || r.compliance_type || '').toLowerCase();
+  const base = {
+    id: `hr-${r.compliance_id}`,
+    compliance_id: r.compliance_id,
+    from: formatHrDateToUI(r.from_date),
+    to: formatHrDateToUI(r.to_date)
+  };
 
-const companyHrTdsData = [
-  {
-    id: "hr-tds-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Quarterly",
-    fillingDueDate: "31st of Following Month",
-    sealingAmount: "50,000.00",
-    employee: "10%",
-    epf: "10%",
-    eps: "0.00%",
-    edli: "0.00%",
-    adminCharges: "0.00%",
-    status: "Active"
+  if (t === 'epf') {
+    return {
+      ...base,
+      fillingFrequency: r.epf_filling_frequency || 'Monthly',
+      fillingDueDate: formatHrDateToUI(r.epf_filling_due_date) || (r.epf_filling_due_date ? String(r.epf_filling_due_date) : ''),
+      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : '',
+      employee: r.epf_employee_contribution !== null && r.epf_employee_contribution !== undefined ? `${r.epf_employee_contribution}%` : '',
+      epf: r.epf_employer_contribution !== null && r.epf_employer_contribution !== undefined ? `${r.epf_employer_contribution}%` : '',
+      eps: r.eps_employer_contribution !== null && r.eps_employer_contribution !== undefined ? `${r.eps_employer_contribution}%` : '',
+      edli: r.edli_employer_contribution !== null && r.edli_employer_contribution !== undefined ? `${r.edli_employer_contribution}%` : '',
+      adminCharges: r.epf_admin_charges !== null && r.epf_admin_charges !== undefined ? `${r.epf_admin_charges}%` : '',
+      status: r.epf_status || 'Active'
+    };
+  } else if (t === 'esi') {
+    return {
+      ...base,
+      fillingFrequency: r.esi_filling_frequency || 'Monthly',
+      fillingDueDate: formatHrDateToUI(r.esi_filling_date) || (r.esi_filling_date ? String(r.esi_filling_date) : ''),
+      sealingAmount: r.esi_sealing_amount !== null && r.esi_sealing_amount !== undefined ? formatHrAmount(r.esi_sealing_amount) : '',
+      employee: r.esi_employee_contribution !== null && r.esi_employee_contribution !== undefined ? `${r.esi_employee_contribution}%` : '',
+      employer: r.esi_employer_contribution !== null && r.esi_employer_contribution !== undefined ? `${r.esi_employer_contribution}%` : '',
+      status: r.esi_status || 'Active'
+    };
+  } else if (t === 'pt') {
+    return {
+      ...base,
+      state: r.state || '',
+      fillingFrequency: r.pt_filling_frequency || 'Half Yearly',
+      fillingDueDate: formatHrDateToUI(r.pt_filling_due_date) || (r.pt_filling_due_date ? String(r.pt_filling_due_date) : ''),
+      thresholdLimit: r.gross_salary_from !== null && r.gross_salary_from !== undefined ? formatHrAmount(r.gross_salary_from) : '',
+      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : '',
+      employee: r.pt_employee_deduction !== null && r.pt_employee_deduction !== undefined ? formatHrAmount(r.pt_employee_deduction) : '',
+      status: r.pt_status || 'Active'
+    };
+  } else if (t === 'lwf') {
+    return {
+      ...base,
+      state: r.state || '',
+      fillingFrequency: r.lwf_filling_frequency || 'Annually',
+      fillingDueDate: formatHrDateToUI(r.lwf_filling_due_date) || (r.lwf_filling_due_date ? String(r.lwf_filling_due_date) : ''),
+      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : 'NA',
+      employee: r.lwf_employee_contribution !== null && r.lwf_employee_contribution !== undefined ? formatHrAmount(r.lwf_employee_contribution) : '',
+      employer: r.lwf_employer_contribution !== null && r.lwf_employer_contribution !== undefined ? formatHrAmount(r.lwf_employer_contribution) : '',
+      status: r.lwf_status || 'Active'
+    };
+  } else if (t === 'tds') {
+    return {
+      ...base,
+      fillingFrequency: r.pt_filling_frequency || 'Quarterly',
+      fillingDueDate: formatHrDateToUI(r.pt_filling_due_date) || (r.pt_filling_due_date ? String(r.pt_filling_due_date) : ''),
+      tdsCode: r.state || '192B',
+      tdsCategory: r.epf_filling_frequency || 'Salaries',
+      thresholdLimit: r.gross_salary_from !== null && r.gross_salary_from !== undefined ? formatHrAmount(r.gross_salary_from) : '',
+      standardDeduction: r.tds_standard_deduction !== null && r.tds_standard_deduction !== undefined ? formatHrAmount(r.tds_standard_deduction) : '',
+      tdsRate: r.tds_deduction_percentage !== null && r.tds_deduction_percentage !== undefined ? `${r.tds_deduction_percentage}%` : '',
+      healthEducationCess: r.health_and_education_cess !== null && r.health_and_education_cess !== undefined ? `${r.health_and_education_cess}%` : '',
+      sealingAmount: r.gross_salary_to !== null && r.gross_salary_to !== undefined ? formatHrAmount(r.gross_salary_to) : '',
+      status: r.tds_status || 'Active'
+    };
+  } else if (t === 'leave') {
+    return {
+      ...base,
+      leaveType: r.sandwich_leave_policy || 'Casual Leave',
+      clEligible: r.cl_eligible !== null && r.cl_eligible !== undefined ? `${r.cl_eligible} Days` : (r.sl_eligible ? `${r.sl_eligible} Days` : (r.el_eligible ? `${r.el_eligible} Days` : '')),
+      clClaimable: r.cl_can_claim !== null && r.cl_can_claim !== undefined ? `${r.cl_can_claim} / Month` : (r.sl_can_claim ? `${r.sl_can_claim} / Month` : (r.el_can_claim ? `${r.el_can_claim} / Month` : '')),
+      slEligible: r.sl_eligible !== null && r.sl_eligible !== undefined ? `${r.sl_eligible} Days` : '',
+      slClaimable: r.sl_can_claim !== null && r.sl_can_claim !== undefined ? `${r.sl_can_claim} / Month` : '',
+      elEligible: r.el_eligible !== null && r.el_eligible !== undefined ? `${r.el_eligible} Days` : '',
+      elClaimable: r.el_can_claim !== null && r.el_can_claim !== undefined ? `${r.el_can_claim} / Month` : '',
+      status: r.leave_status || 'Active'
+    };
+  } else if (t === 'bonus') {
+    return {
+      ...base,
+      bonusType: r.state || 'Statutory Bonus',
+      sealingAmount: r.statutory_bonus_sealing_amount !== null && r.statutory_bonus_sealing_amount !== undefined ? formatHrAmount(r.statutory_bonus_sealing_amount) : '',
+      bonusPercent: r.statutory_bonus !== null && r.statutory_bonus !== undefined ? `${r.statutory_bonus}%` : '',
+      status: r.bonus_status || 'Active'
+    };
+  } else if (t === 'medical_insurance') {
+    return {
+      ...base,
+      insuranceCompany: r.medical_insurance_company_name || '',
+      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : '',
+      employee: r.medical_insurance_employee_contribution !== null && r.medical_insurance_employee_contribution !== undefined ? `${r.medical_insurance_employee_contribution}%` : '0.00%',
+      employer: r.medical_insurance_employer_contribution !== null && r.medical_insurance_employer_contribution !== undefined ? `${r.medical_insurance_employer_contribution}%` : '100%',
+      status: r.medical_insurance_status || 'Active'
+    };
   }
-];
+  return base;
+}
 
-const companyHrLeaveData = [
-  {
-    id: "hr-leave-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Yearly",
-    fillingDueDate: "31st Dec",
-    sealingAmount: "18 Days",
-    employee: "1.5 / Mo",
-    epf: "Earned",
-    eps: "Sick",
-    edli: "Casual",
-    adminCharges: "0.00",
-    status: "Active"
-  }
-];
+async function fetchCompanyHrDataFromBackend(tabKey) {
+  const targetTab = tabKey || (typeof currentCompanyHrTab !== 'undefined' ? currentCompanyHrTab : 'epf');
+  const typeMap = {
+    'epf': 'EPF',
+    'esi': 'ESI',
+    'pt': 'PT',
+    'lwf': 'LWF',
+    'tds': 'TDS',
+    'leave': 'Leave',
+    'bonus': 'Bonus',
+    'medical_insurance': 'Medical Insurance'
+  };
+  const complianceType = typeMap[targetTab] || 'EPF';
+  const companyName = (typeof currentCompanyMasterName !== 'undefined' && currentCompanyMasterName) ? currentCompanyMasterName : 'Nexus';
 
-const companyHrBonusData = [
-  {
-    id: "hr-bonus-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Annually",
-    fillingDueDate: "30th Nov",
-    sealingAmount: "21,000.00",
-    employee: "8.33%",
-    epf: "8.33%",
-    eps: "20.00%",
-    edli: "0.00%",
-    adminCharges: "0.00%",
-    status: "Active"
-  }
-];
+  try {
+    if (window.NexusApi && window.NexusApi.hrCompliance) {
+      const records = await window.NexusApi.hrCompliance.getAll(companyName, complianceType);
+      const mapped = (records || []).map(r => mapHrComplianceRecordToRow(r, targetTab));
+      if (targetTab === 'epf') companyHrEpfData = mapped;
+      else if (targetTab === 'esi') companyHrEsiData = mapped;
+      else if (targetTab === 'pt') companyHrPtData = mapped;
+      else if (targetTab === 'lwf') companyHrLwfData = mapped;
+      else if (targetTab === 'tds') companyHrTdsData = mapped;
+      else if (targetTab === 'leave') companyHrLeaveData = mapped;
+      else if (targetTab === 'bonus') companyHrBonusData = mapped;
+      else if (targetTab === 'medical_insurance') companyHrMedicalInsuranceData = mapped;
 
-const companyHrMedicalInsuranceData = [
-  {
-    id: "hr-med-1",
-    from: "01 - 04 - 2026",
-    to: "31 - 03 - 2027",
-    fillingFrequency: "Annually",
-    fillingDueDate: "31st March",
-    sealingAmount: "5,00,000.00",
-    employee: "0.00",
-    epf: "100%",
-    eps: "0.00",
-    edli: "0.00",
-    adminCharges: "0.00",
-    status: "Active"
+      if (typeof loadCompanyHrDataset === 'function') loadCompanyHrDataset();
+      if (typeof renderApp === 'function') renderApp();
+    }
+  } catch (err) {
+    console.error(`Failed to fetch ${complianceType} records:`, err);
   }
-];
+}
 
 // Worklist -> Project Payment Details Dataset (Matching Uploaded Mockup)
 let selectedProjectPaymentReq = "R/RL-234567";
@@ -5758,8 +5771,22 @@ function renderCompanyHrToolbar() {
   document.getElementById('btnCompanyHrAdd')?.addEventListener('click', () => {
     if (currentCompanyHrTab === 'epf') {
       openCompanyHrEpfModal();
+    } else if (currentCompanyHrTab === 'esi') {
+      openCompanyHrEsiModal();
+    } else if (currentCompanyHrTab === 'pt') {
+      openCompanyHrPtModal();
+    } else if (currentCompanyHrTab === 'lwf') {
+      openCompanyHrLwfModal();
+    } else if (currentCompanyHrTab === 'tds') {
+      openCompanyHrTdsModal();
+    } else if (currentCompanyHrTab === 'leave') {
+      openCompanyHrLeaveModal();
+    } else if (currentCompanyHrTab === 'bonus') {
+      openCompanyHrBonusModal();
+    } else if (currentCompanyHrTab === 'medical_insurance') {
+      openCompanyHrMedicalInsuranceModal();
     } else {
-      showToast(`Add New ${(currentCompanyHrTab || 'epf').toUpperCase()} Record`);
+      openCompanyHrEpfModal();
     }
   });
 }
@@ -5768,63 +5795,141 @@ function renderCompanyHrTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
 
+  const thStyle = (width, extraStyle = '') => `style="width: ${width}; min-width: ${width}; max-width: ${width}; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap; ${extraStyle}"`;
+
   if (currentCompanyHrTab === 'epf') {
     thead.innerHTML = `
       <tr class="master-view-header company-hr-header">
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>From</span>
-        </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>To</span>
-        </th>
-        <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>Filling Frequency</span>
-        </th>
-        <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>Filling Due Date</span>
-        </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>Sealing Amount</span>
-        </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>Employee</span>
-        </th>
+        <th rowspan="2" ${thStyle('15ch')}><span>From</span></th>
+        <th rowspan="2" ${thStyle('15ch')}><span>To</span></th>
+        <th rowspan="2" ${thStyle('20ch')}><span>Filling Frequency</span></th>
+        <th rowspan="2" ${thStyle('20ch')}><span>Filling Due Date</span></th>
+        <th rowspan="2" ${thStyle('13ch')}><span>Sealing Amount</span></th>
+        <th rowspan="2" ${thStyle('10ch')}><span>Employee</span></th>
         <th colspan="4" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
           <span>Employer</span>
         </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>Status</span>
-        </th>
+        <th rowspan="2" ${thStyle('10ch')}><span>Status</span></th>
       </tr>
       <tr class="master-view-header company-hr-header tr-sub-headers">
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>EPF</span>
+        <th ${thStyle('7ch', 'border-top: 1.5px solid #ffffff !important;')}><span>EPF</span></th>
+        <th ${thStyle('7ch', 'border-top: 1.5px solid #ffffff !important;')}><span>EPS</span></th>
+        <th ${thStyle('7ch', 'border-top: 1.5px solid #ffffff !important;')}><span>EDLI</span></th>
+        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Admin Charges</span></th>
+      </tr>
+    `;
+  } else if (currentCompanyHrTab === 'esi') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header" style="height: 64px;">
+        <th ${thStyle('15ch', 'height: 64px;')}><span>From</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>To</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Frequency</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Due Date</span></th>
+        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Employee</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Employer</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
+      </tr>
+    `;
+  } else if (currentCompanyHrTab === 'pt') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header" style="height: 64px;">
+        <th ${thStyle('15ch', 'height: 64px;')}><span>From</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>To</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>State</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Frequency</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Due Date</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>Threshold Limit</span></th>
+        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Employee</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
+      </tr>
+    `;
+  } else if (currentCompanyHrTab === 'lwf') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header" style="height: 64px;">
+        <th ${thStyle('15ch', 'height: 64px;')}><span>From</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>To</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>State</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Frequency</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Due Date</span></th>
+        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Employee</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Employer</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
+      </tr>
+    `;
+  } else if (currentCompanyHrTab === 'tds') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header" style="height: 64px;">
+        <th ${thStyle('15ch', 'height: 64px;')}><span>From</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>To</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Frequency</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Due Date</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>TDS Code</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>TDS Category</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>Threshold Limit</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Standard Deduction</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>TDS Rate</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Health &amp; Education Cess</span></th>
+        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
+      </tr>
+    `;
+  } else if (currentCompanyHrTab === 'leave') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header">
+        <th rowspan="2" ${thStyle('15ch')}><span>From</span></th>
+        <th rowspan="2" ${thStyle('15ch')}><span>To</span></th>
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>CL</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>EPS</span>
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>SL</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>EDLI</span>
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+          <span>EL</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
-          <span>Admin Charges</span>
-        </th>
+        <th rowspan="2" ${thStyle('10ch')}><span>Status</span></th>
+      </tr>
+      <tr class="master-view-header company-hr-header tr-sub-headers">
+        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Eligible working days</span></th>
+        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Claimable day</span></th>
+        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Eligible working days</span></th>
+        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Claimable day</span></th>
+        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Eligible working days</span></th>
+        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Claimable day</span></th>
+      </tr>
+    `;
+  } else if (currentCompanyHrTab === 'bonus') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header" style="height: 64px;">
+        <th ${thStyle('15ch', 'height: 64px;')}><span>From</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>To</span></th>
+        <th ${thStyle('20ch', 'height: 64px;')}><span>Bonus Type</span></th>
+        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
+        <th ${thStyle('12ch', 'height: 64px;')}><span>Bonus (%)</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
+      </tr>
+    `;
+  } else if (currentCompanyHrTab === 'medical_insurance') {
+    thead.innerHTML = `
+      <tr class="master-view-header company-hr-header" style="height: 64px;">
+        <th ${thStyle('15ch', 'height: 64px;')}><span>From</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>To</span></th>
+        <th ${thStyle('25ch', 'height: 64px;')}><span>Insurance Company Name</span></th>
+        <th ${thStyle('15ch', 'height: 64px;')}><span>Sealing Amount</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Employee</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Employer</span></th>
+        <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
       </tr>
     `;
   } else {
     thead.innerHTML = `
-      <tr class="master-view-header company-hr-header">
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">From</th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">To</th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Filling Frequency</th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Filling Due Date</th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Sealing Amount</th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Employee</th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">EPF</th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">EPS</th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">EDLI</th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Admin Charges</th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">Status</th>
+      <tr class="master-view-header company-hr-header" style="height: 64px;">
+        <th ${thStyle('15ch')}><span>From</span></th>
+        <th ${thStyle('15ch')}><span>To</span></th>
+        <th ${thStyle('10ch')}><span>Status</span></th>
       </tr>
     `;
   }
@@ -5871,6 +5976,7 @@ function renderCompanyHrFooter() {
         activeColumnFilters = {};
         updateURL();
         renderApp();
+        fetchCompanyHrDataFromBackend(tabKey);
         showToast(`Switched to Company HR Policies • ${btn.textContent.trim()}`);
       }
     });
@@ -5885,30 +5991,33 @@ window.openCompanyHrPoliciesPage = function(tab) {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  fetchCompanyHrDataFromBackend(currentCompanyHrTab);
   showToast(`Opened Company HR Policies • ${(currentCompanyHrTab || 'epf').toUpperCase()}`);
 };
 
-let isCompanyHrEpfEditing = false;
-
-function setCompanyHrEpfReadOnly(isReadOnly) {
-  const form = document.getElementById('frmCompanyHrEpf');
+// Generic Helper for HR Modals
+function genericSetHrReadOnly(formId, toggleId, isReadOnly) {
+  const form = document.getElementById(formId);
   if (!form) return;
-
   const inputs = form.querySelectorAll('input:not([type="checkbox"])');
   inputs.forEach(inp => {
     inp.readOnly = isReadOnly;
     inp.style.backgroundColor = '#ffffff';
     inp.style.cursor = isReadOnly ? 'default' : 'text';
   });
-
+  const selects = form.querySelectorAll('select');
+  selects.forEach(sel => {
+    sel.disabled = isReadOnly;
+    sel.style.backgroundColor = isReadOnly ? '#f8fafc' : '#ffffff';
+    sel.style.cursor = isReadOnly ? 'default' : 'pointer';
+  });
   const calTriggers = form.querySelectorAll('.btn-calendar-trigger');
   calTriggers.forEach(b => {
     b.style.pointerEvents = isReadOnly ? 'none' : 'auto';
     b.style.opacity = isReadOnly ? '0.65' : '1';
     b.style.cursor = isReadOnly ? 'default' : 'pointer';
   });
-
-  const toggle = document.getElementById('inpEpfStatusToggle');
+  const toggle = document.getElementById(toggleId);
   if (toggle) {
     toggle.disabled = isReadOnly;
     const parentSwitch = toggle.closest('.toggle-slide-switch');
@@ -5919,58 +6028,264 @@ function setCompanyHrEpfReadOnly(isReadOnly) {
   }
 }
 
+let isSubmittingHrCompliance = false;
+
+window.saveCompanyHrCompliance = async function(complianceType) {
+  if (isSubmittingHrCompliance) return;
+
+  const companyName = (typeof currentCompanyMasterName !== 'undefined' && currentCompanyMasterName) ? currentCompanyMasterName : 'Nexus';
+  let payload = {
+    compliance_type: complianceType,
+    company_name: companyName
+  };
+
+  const getVal = id => {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  };
+
+  const getChecked = id => {
+    const el = document.getElementById(id);
+    return el ? el.checked : true;
+  };
+
+  if (complianceType === 'EPF') {
+    const fromDate = getVal('inpEpfFromDate');
+    const toDate = getVal('inpEpfToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.epf_filling_due_date = getVal('inpEpfFillingDueDate') || null;
+    payload.epf_sealing_amount = getVal('inpEpfSealingAmount') || null;
+    payload.epf_employee_contribution = getVal('inpEpfEmpContribution') || null;
+    payload.epf_employer_contribution = getVal('inpEpfEmployerContribution') || null;
+    payload.eps_employer_contribution = getVal('inpEpsEmployerContribution') || null;
+    payload.edli_employer_contribution = getVal('inpEdliEmployerContribution') || null;
+    payload.epf_admin_charges = getVal('inpEpfAdminCharges') || null;
+    payload.epf_status = getChecked('inpEpfStatusToggle') ? 'Active' : 'In - Active';
+  } else if (complianceType === 'ESI') {
+    const fromDate = getVal('inpEsiFromDate');
+    const toDate = getVal('inpEsiToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.esi_filling_frequency = getVal('inpEsiFillingFrequency') || 'Monthly';
+    payload.esi_filling_date = getVal('inpEsiFillingDueDate') || null;
+    payload.esi_sealing_amount = getVal('inpEsiSealingAmount') || null;
+    payload.esi_employee_contribution = getVal('inpEsiEmpContribution') || null;
+    payload.esi_employer_contribution = getVal('inpEsiEmployerContribution') || null;
+    payload.esi_status = getChecked('inpEsiStatusToggle') ? 'Active' : 'In - Active';
+  } else if (complianceType === 'PT') {
+    const fromDate = getVal('inpPtFromDate');
+    const toDate = getVal('inpPtToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.state = getVal('inpPtState') || null;
+    payload.pt_filling_frequency = getVal('inpPtFillingFrequency') || null;
+    payload.pt_filling_due_date = getVal('inpPtFillingDueDate') || null;
+    payload.gross_salary_from = getVal('inpPtThresholdLimit') || null;
+    payload.epf_sealing_amount = getVal('inpPtSealingAmount') || null;
+    payload.pt_employee_deduction = getVal('inpPtEmpContribution') || null;
+    payload.pt_status = getChecked('inpPtStatusToggle') ? 'Active' : 'In - Active';
+  } else if (complianceType === 'LWF') {
+    const fromDate = getVal('inpLwfFromDate');
+    const toDate = getVal('inpLwfToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.state = getVal('inpLwfState') || null;
+    payload.lwf_filling_frequency = getVal('inpLwfFillingFrequency') || null;
+    payload.lwf_filling_due_date = getVal('inpLwfFillingDueDate') || null;
+    payload.epf_sealing_amount = getVal('inpLwfSealingAmount') || null;
+    payload.lwf_employee_contribution = getVal('inpLwfEmpContribution') || null;
+    payload.lwf_employer_contribution = getVal('inpLwfEmployerContribution') || null;
+    payload.lwf_status = getChecked('inpLwfStatusToggle') ? 'Active' : 'In - Active';
+  } else if (complianceType === 'TDS') {
+    const fromDate = getVal('inpTdsFromDate');
+    const toDate = getVal('inpTdsToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.pt_filling_frequency = getVal('inpTdsFillingFrequency') || null;
+    payload.pt_filling_due_date = getVal('inpTdsFillingDueDate') || null;
+    payload.state = getVal('inpTdsCode') || null;
+    payload.epf_filling_frequency = getVal('inpTdsCategory') || null;
+    payload.gross_salary_from = getVal('inpTdsThresholdLimit') || null;
+    payload.tds_standard_deduction = getVal('inpTdsStandardDeduction') || null;
+    payload.tds_deduction_percentage = getVal('inpTdsRate') || null;
+    payload.health_and_education_cess = getVal('inpTdsHealthCess') || null;
+    payload.gross_salary_to = getVal('inpTdsSealingAmount') || null;
+    payload.tds_status = getChecked('inpTdsStatusToggle') ? 'Active' : 'In - Active';
+  } else if (complianceType === 'Leave') {
+    const fromDate = getVal('inpLeaveFromDate');
+    const toDate = getVal('inpLeaveToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    const leaveType = getVal('inpLeaveType') || 'Casual Leave';
+    const eligibleDays = getVal('inpLeaveEligibleWorkingDays');
+    const claimablePeriod = getVal('inpLeaveClaimablePeriod');
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.sandwich_leave_policy = leaveType;
+    if (leaveType === 'Casual Leave') {
+      payload.cl_eligible = eligibleDays || null;
+      payload.cl_can_claim = claimablePeriod || null;
+    } else if (leaveType === 'Sick Leave') {
+      payload.sl_eligible = eligibleDays || null;
+      payload.sl_can_claim = claimablePeriod || null;
+    } else if (leaveType === 'Earning Leave') {
+      payload.el_eligible = eligibleDays || null;
+      payload.el_can_claim = claimablePeriod || null;
+    }
+    payload.leave_status = getChecked('inpLeaveStatusToggle') ? 'Active' : 'In - Active';
+  } else if (complianceType === 'Bonus') {
+    const fromDate = getVal('inpBonusFromDate');
+    const toDate = getVal('inpBonusToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.state = getVal('inpBonusType') || null;
+    payload.statutory_bonus_sealing_amount = getVal('inpBonusSealingAmount') || null;
+    payload.statutory_bonus = getVal('inpBonusPercent') || null;
+    payload.bonus_status = getChecked('inpBonusStatusToggle') ? 'Active' : 'In - Active';
+  } else if (complianceType === 'Medical Insurance') {
+    const fromDate = getVal('inpMedFromDate');
+    const toDate = getVal('inpMedToDate');
+    if (!fromDate || !toDate) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
+      } else {
+        showToast('From Date and To Date are required.');
+      }
+      return;
+    }
+    payload.from_date = fromDate;
+    payload.to_date = toDate;
+    payload.medical_insurance_company_name = getVal('inpMedInsuranceCompany') || null;
+    payload.epf_sealing_amount = getVal('inpMedSealingAmount') || null;
+    payload.medical_insurance_employee_contribution = getVal('inpMedEmpContribution') || null;
+    payload.medical_insurance_employer_contribution = getVal('inpMedEmployerContribution') || null;
+    payload.medical_insurance_status = getChecked('inpMedStatusToggle') ? 'Active' : 'In - Active';
+  }
+
+  isSubmittingHrCompliance = true;
+  try {
+    if (!window.NexusApi || !window.NexusApi.hrCompliance) {
+      throw new Error('HR Compliance API is not available.');
+    }
+    const res = await window.NexusApi.hrCompliance.create(payload, companyName);
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`${complianceType} compliance details added successfully!`, 'Task Completed');
+    }
+
+    // Close the corresponding modal
+    const closeFns = {
+      'EPF': closeCompanyHrEpfModal,
+      'ESI': closeCompanyHrEsiModal,
+      'PT': closeCompanyHrPtModal,
+      'LWF': closeCompanyHrLwfModal,
+      'TDS': closeCompanyHrTdsModal,
+      'Leave': closeCompanyHrLeaveModal,
+      'Bonus': closeCompanyHrBonusModal,
+      'Medical Insurance': closeCompanyHrMedicalInsuranceModal
+    };
+    if (closeFns[complianceType]) closeFns[complianceType]();
+
+    // Reload backend data
+    const tabMap = {
+      'EPF': 'epf',
+      'ESI': 'esi',
+      'PT': 'pt',
+      'LWF': 'lwf',
+      'TDS': 'tds',
+      'Leave': 'leave',
+      'Bonus': 'bonus',
+      'Medical Insurance': 'medical_insurance'
+    };
+    await fetchCompanyHrDataFromBackend(tabMap[complianceType]);
+  } catch (err) {
+    console.error(`Failed to save ${complianceType} compliance record:`, err);
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || `Failed to save ${complianceType} compliance details`, 'Error Message!');
+    }
+  } finally {
+    isSubmittingHrCompliance = false;
+  }
+};
+
+// 1. EPF Modal Controller
+let isCompanyHrEpfEditing = false;
+function setCompanyHrEpfReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrEpf', 'inpEpfStatusToggle', isReadOnly);
+}
+
 window.openCompanyHrEpfModal = function(rowId) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
-
-  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(card => {
-    if (card.id !== 'companyHrEpfCard') card.style.display = 'none';
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrEpfCard') c.style.display = 'none';
   });
+  const row = (rowId && (typeof companyHrEpfData !== 'undefined') && companyHrEpfData.find(r => r.id === rowId)) || null;
 
-  const row = (rowId && (typeof companyHrEpfData !== 'undefined') && companyHrEpfData.find(r => r.id === rowId)) || 
-              ((typeof companyHrEpfData !== 'undefined') && companyHrEpfData[0]) || {
-                from: "01 - 04 - 2026",
-                to: "31 - 03 - 2027",
-                fillingDueDate: "15 - 05 - 2026",
-                sealingAmount: "15,000.00",
-                employee: "12%",
-                epf: "3.67%",
-                eps: "8.33%",
-                edli: "0.50%",
-                adminCharges: "0.50%",
-                status: "Active"
-              };
-
-  const inpFrom = document.getElementById('inpEpfFromDate');
-  if (inpFrom) inpFrom.value = row.from || '';
-
-  const inpTo = document.getElementById('inpEpfToDate');
-  if (inpTo) inpTo.value = row.to || '';
-
-  const inpDue = document.getElementById('inpEpfFillingDueDate');
-  if (inpDue) inpDue.value = row.fillingDueDate || '';
-
-  const inpSealing = document.getElementById('inpEpfSealingAmount');
-  if (inpSealing) inpSealing.value = String(row.sealingAmount || '').replace('₹', '').trim();
-
-  const inpEmp = document.getElementById('inpEpfEmpContribution');
-  if (inpEmp) inpEmp.value = String(row.employee || '').replace('%', '').trim();
-
-  const inpEpf = document.getElementById('inpEpfEmployerContribution');
-  if (inpEpf) inpEpf.value = String(row.epf || '').replace('%', '').trim();
-
-  const inpEps = document.getElementById('inpEpsEmployerContribution');
-  if (inpEps) inpEps.value = String(row.eps || '').replace('%', '').trim();
-
-  const inpEdli = document.getElementById('inpEdliEmployerContribution');
-  if (inpEdli) inpEdli.value = String(row.edli || '').replace('%', '').trim();
-
-  const inpAdmin = document.getElementById('inpEpfAdminCharges');
-  if (inpAdmin) inpAdmin.value = String(row.adminCharges || '').replace('%', '').trim();
-
-  const inpStatus = document.getElementById('inpEpfStatusToggle');
-  if (inpStatus) inpStatus.checked = !((row.status || '').toLowerCase().includes('in'));
+  if (document.getElementById('inpEpfFromDate')) document.getElementById('inpEpfFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpEpfToDate')) document.getElementById('inpEpfToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpEpfFillingDueDate')) document.getElementById('inpEpfFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
+  if (document.getElementById('inpEpfSealingAmount')) document.getElementById('inpEpfSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpEpfEmpContribution')) document.getElementById('inpEpfEmpContribution').value = row ? String(row.employee || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpEpfEmployerContribution')) document.getElementById('inpEpfEmployerContribution').value = row ? String(row.epf || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpEpsEmployerContribution')) document.getElementById('inpEpsEmployerContribution').value = row ? String(row.eps || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpEdliEmployerContribution')) document.getElementById('inpEdliEmployerContribution').value = row ? String(row.edli || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpEpfAdminCharges')) document.getElementById('inpEpfAdminCharges').value = row ? String(row.adminCharges || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpEpfStatusToggle')) document.getElementById('inpEpfStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
   isCompanyHrEpfEditing = true;
   setCompanyHrEpfReadOnly(false);
@@ -5981,7 +6296,6 @@ window.openCompanyHrEpfModal = function(rowId) {
     imgIcon.className = 'icon-green';
     imgIcon.title = 'Save';
   }
-
   const modal = document.getElementById('companyHrEpfCard');
   if (modal) {
     modal.style.display = 'block';
@@ -5990,10 +6304,317 @@ window.openCompanyHrEpfModal = function(rowId) {
 };
 
 window.closeCompanyHrEpfModal = function() {
-  const modal = document.getElementById('companyHrEpfCard');
-  if (modal) modal.style.display = 'none';
+  document.getElementById('companyHrEpfCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
+};
+
+// 2. ESI Modal Controller
+let isCompanyHrEsiEditing = false;
+function setCompanyHrEsiReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrEsi', 'inpEsiStatusToggle', isReadOnly);
+}
+
+window.openCompanyHrEsiModal = function(rowId) {
   const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'none';
+  if (!overlay) return;
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrEsiCard') c.style.display = 'none';
+  });
+  const row = (rowId && (typeof companyHrEsiData !== 'undefined') && companyHrEsiData.find(r => r.id === rowId)) || null;
+
+  if (document.getElementById('inpEsiFromDate')) document.getElementById('inpEsiFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpEsiToDate')) document.getElementById('inpEsiToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpEsiFillingFrequency')) document.getElementById('inpEsiFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
+  if (document.getElementById('inpEsiFillingDueDate')) document.getElementById('inpEsiFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
+  if (document.getElementById('inpEsiSealingAmount')) document.getElementById('inpEsiSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpEsiEmpContribution')) document.getElementById('inpEsiEmpContribution').value = row ? String(row.employee || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpEsiEmployerContribution')) document.getElementById('inpEsiEmployerContribution').value = row ? String(row.employer || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpEsiStatusToggle')) document.getElementById('inpEsiStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+
+  isCompanyHrEsiEditing = true;
+  setCompanyHrEsiReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrEsiEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+  const modal = document.getElementById('companyHrEsiCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrEsiModal = function() {
+  document.getElementById('companyHrEsiCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
+};
+
+// 3. PT Modal Controller
+let isCompanyHrPtEditing = false;
+function setCompanyHrPtReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrPt', 'inpPtStatusToggle', isReadOnly);
+}
+
+window.openCompanyHrPtModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrPtCard') c.style.display = 'none';
+  });
+  const row = (rowId && (typeof companyHrPtData !== 'undefined') && companyHrPtData.find(r => r.id === rowId)) || null;
+
+  if (document.getElementById('inpPtFromDate')) document.getElementById('inpPtFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpPtToDate')) document.getElementById('inpPtToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpPtState')) document.getElementById('inpPtState').value = row ? (row.state || '') : '';
+  if (document.getElementById('inpPtFillingFrequency')) document.getElementById('inpPtFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
+  if (document.getElementById('inpPtFillingDueDate')) document.getElementById('inpPtFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
+  if (document.getElementById('inpPtThresholdLimit')) document.getElementById('inpPtThresholdLimit').value = row ? String(row.thresholdLimit || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpPtSealingAmount')) document.getElementById('inpPtSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpPtEmpContribution')) document.getElementById('inpPtEmpContribution').value = row ? String(row.employee || '').replace('₹', '').replace('%', '').trim() : '';
+  if (document.getElementById('inpPtStatusToggle')) document.getElementById('inpPtStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+
+  isCompanyHrPtEditing = true;
+  setCompanyHrPtReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrPtEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+  const modal = document.getElementById('companyHrPtCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrPtModal = function() {
+  document.getElementById('companyHrPtCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
+};
+
+// 4. LWF Modal Controller
+let isCompanyHrLwfEditing = false;
+function setCompanyHrLwfReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrLwf', 'inpLwfStatusToggle', isReadOnly);
+}
+
+window.openCompanyHrLwfModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrLwfCard') c.style.display = 'none';
+  });
+  const row = (rowId && (typeof companyHrLwfData !== 'undefined') && companyHrLwfData.find(r => r.id === rowId)) || null;
+
+  if (document.getElementById('inpLwfFromDate')) document.getElementById('inpLwfFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpLwfToDate')) document.getElementById('inpLwfToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpLwfState')) document.getElementById('inpLwfState').value = row ? (row.state || '') : '';
+  if (document.getElementById('inpLwfFillingFrequency')) document.getElementById('inpLwfFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
+  if (document.getElementById('inpLwfFillingDueDate')) document.getElementById('inpLwfFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
+  if (document.getElementById('inpLwfSealingAmount')) document.getElementById('inpLwfSealingAmount').value = row ? (row.sealingAmount || '') : '';
+  if (document.getElementById('inpLwfEmpContribution')) document.getElementById('inpLwfEmpContribution').value = row ? String(row.employee || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpLwfEmployerContribution')) document.getElementById('inpLwfEmployerContribution').value = row ? String(row.employer || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpLwfStatusToggle')) document.getElementById('inpLwfStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+
+  isCompanyHrLwfEditing = true;
+  setCompanyHrLwfReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrLwfEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+  const modal = document.getElementById('companyHrLwfCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrLwfModal = function() {
+  document.getElementById('companyHrLwfCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
+};
+
+// 5. TDS Modal Controller
+let isCompanyHrTdsEditing = false;
+function setCompanyHrTdsReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrTds', 'inpTdsStatusToggle', isReadOnly);
+}
+
+window.openCompanyHrTdsModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrTdsCard') c.style.display = 'none';
+  });
+  const row = (rowId && (typeof companyHrTdsData !== 'undefined') && companyHrTdsData.find(r => r.id === rowId)) || null;
+
+  if (document.getElementById('inpTdsFromDate')) document.getElementById('inpTdsFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpTdsToDate')) document.getElementById('inpTdsToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpTdsFillingFrequency')) document.getElementById('inpTdsFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
+  if (document.getElementById('inpTdsFillingDueDate')) document.getElementById('inpTdsFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
+  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = row ? (row.tdsCode || '') : '';
+  if (document.getElementById('inpTdsCategory')) document.getElementById('inpTdsCategory').value = row ? (row.tdsCategory || '') : '';
+  if (document.getElementById('inpTdsThresholdLimit')) document.getElementById('inpTdsThresholdLimit').value = row ? String(row.thresholdLimit || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpTdsStandardDeduction')) document.getElementById('inpTdsStandardDeduction').value = row ? String(row.standardDeduction || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = row ? String(row.tdsRate || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpTdsHealthCess')) document.getElementById('inpTdsHealthCess').value = row ? String(row.healthEducationCess || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpTdsSealingAmount')) document.getElementById('inpTdsSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpTdsStatusToggle')) document.getElementById('inpTdsStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+
+  isCompanyHrTdsEditing = true;
+  setCompanyHrTdsReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrTdsEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+  const modal = document.getElementById('companyHrTdsCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrTdsModal = function() {
+  document.getElementById('companyHrTdsCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
+};
+
+// 6. Leave Modal Controller
+let isCompanyHrLeaveEditing = false;
+function setCompanyHrLeaveReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrLeave', 'inpLeaveStatusToggle', isReadOnly);
+}
+
+window.openCompanyHrLeaveModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrLeaveCard') c.style.display = 'none';
+  });
+  const row = (rowId && (typeof companyHrLeaveData !== 'undefined') && companyHrLeaveData.find(r => r.id === rowId)) || null;
+
+  if (document.getElementById('inpLeaveFromDate')) document.getElementById('inpLeaveFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpLeaveToDate')) document.getElementById('inpLeaveToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpLeaveType')) document.getElementById('inpLeaveType').value = row ? (row.leaveType || row.leave_type || 'Casual Leave') : 'Casual Leave';
+  if (document.getElementById('inpLeaveEligibleWorkingDays')) document.getElementById('inpLeaveEligibleWorkingDays').value = row ? (row.eligibleWorkingDays || row.eligible_working_days || row.clEligible || '') : '';
+  if (document.getElementById('inpLeaveClaimablePeriod')) document.getElementById('inpLeaveClaimablePeriod').value = row ? (row.claimablePeriod || row.claimable_period || row.clClaimable || '') : '';
+  if (document.getElementById('inpLeaveStatusToggle')) document.getElementById('inpLeaveStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+
+  isCompanyHrLeaveEditing = true;
+  setCompanyHrLeaveReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrLeaveEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+  const modal = document.getElementById('companyHrLeaveCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrLeaveModal = function() {
+  document.getElementById('companyHrLeaveCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
+};
+
+// 7. Bonus Modal Controller
+let isCompanyHrBonusEditing = false;
+function setCompanyHrBonusReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrBonus', 'inpBonusStatusToggle', isReadOnly);
+}
+
+window.openCompanyHrBonusModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrBonusCard') c.style.display = 'none';
+  });
+  const row = (rowId && (typeof companyHrBonusData !== 'undefined') && companyHrBonusData.find(r => r.id === rowId)) || null;
+
+  if (document.getElementById('inpBonusFromDate')) document.getElementById('inpBonusFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpBonusToDate')) document.getElementById('inpBonusToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpBonusType')) document.getElementById('inpBonusType').value = row ? (row.bonusType || '') : '';
+  if (document.getElementById('inpBonusSealingAmount')) document.getElementById('inpBonusSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpBonusPercent')) document.getElementById('inpBonusPercent').value = row ? String(row.bonusPercent || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpBonusStatusToggle')) document.getElementById('inpBonusStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+
+  isCompanyHrBonusEditing = true;
+  setCompanyHrBonusReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrBonusEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+  const modal = document.getElementById('companyHrBonusCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrBonusModal = function() {
+  document.getElementById('companyHrBonusCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
+};
+
+// 8. Medical Insurance Modal Controller
+let isCompanyHrMedEditing = false;
+function setCompanyHrMedicalInsuranceReadOnly(isReadOnly) {
+  genericSetHrReadOnly('frmCompanyHrMed', 'inpMedStatusToggle', isReadOnly);
+}
+
+window.openCompanyHrMedicalInsuranceModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+    if (c.id !== 'companyHrMedicalInsuranceCard') c.style.display = 'none';
+  });
+  const row = (rowId && (typeof companyHrMedicalInsuranceData !== 'undefined') && companyHrMedicalInsuranceData.find(r => r.id === rowId)) || null;
+
+  if (document.getElementById('inpMedFromDate')) document.getElementById('inpMedFromDate').value = row ? (row.from || '') : '';
+  if (document.getElementById('inpMedToDate')) document.getElementById('inpMedToDate').value = row ? (row.to || '') : '';
+  if (document.getElementById('inpMedInsuranceCompany')) document.getElementById('inpMedInsuranceCompany').value = row ? (row.insuranceCompany || '') : '';
+  if (document.getElementById('inpMedSealingAmount')) document.getElementById('inpMedSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
+  if (document.getElementById('inpMedEmpContribution')) document.getElementById('inpMedEmpContribution').value = row ? String(row.employee || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpMedEmployerContribution')) document.getElementById('inpMedEmployerContribution').value = row ? String(row.employer || '').replace('%', '').trim() : '';
+  if (document.getElementById('inpMedStatusToggle')) document.getElementById('inpMedStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+
+  isCompanyHrMedEditing = true;
+  setCompanyHrMedicalInsuranceReadOnly(false);
+
+  const imgIcon = document.getElementById('imgCompanyHrMedEditIcon');
+  if (imgIcon) {
+    imgIcon.src = 'icons/Save.svg';
+    imgIcon.className = 'icon-green';
+    imgIcon.title = 'Save';
+  }
+  const modal = document.getElementById('companyHrMedicalInsuranceCard');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeCompanyHrMedicalInsuranceModal = function() {
+  document.getElementById('companyHrMedicalInsuranceCard')?.style.setProperty('display', 'none');
+  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
 };
 
 // ==========================================================================
@@ -10561,24 +11182,148 @@ function applyFiltersAndRender() {
     }
   } else if (currentModule === 'master') {
     if (currentMasterView === 'hr_policies') {
+      const tdC = (w, val) => `<td style="width: ${w}; min-width: ${w}; max-width: ${w}; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500;">${val || ''}</td>`;
+      const statusBadge = (st, isInactive) => `<td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;"><span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${st || 'Active'}</span></td>`;
+
       if (currentCompanyHrTab === 'epf') {
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}" onclick="openCompanyHrEpfModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.from || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.to || ''}</td>
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingFrequency || ''}</td>
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingDueDate || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.sealingAmount || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employee || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.eps || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.edli || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.adminCharges || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
-              </td>
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('20ch', row.fillingFrequency)}
+              ${tdC('20ch', row.fillingDueDate)}
+              ${tdC('13ch', row.sealingAmount)}
+              ${tdC('10ch', row.employee)}
+              ${tdC('7ch', row.epf)}
+              ${tdC('7ch', row.eps)}
+              ${tdC('7ch', row.edli)}
+              ${tdC('15ch', row.adminCharges)}
+              ${statusBadge(row.status, isInactive)}
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else if (currentCompanyHrTab === 'esi') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrEsiModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('20ch', row.fillingFrequency)}
+              ${tdC('20ch', row.fillingDueDate)}
+              ${tdC('13ch', row.sealingAmount)}
+              ${tdC('10ch', row.employee)}
+              ${tdC('10ch', row.employer)}
+              ${statusBadge(row.status, isInactive)}
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else if (currentCompanyHrTab === 'pt') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrPtModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('20ch', row.state)}
+              ${tdC('20ch', row.fillingFrequency)}
+              ${tdC('20ch', row.fillingDueDate)}
+              ${tdC('15ch', row.thresholdLimit)}
+              ${tdC('13ch', row.sealingAmount)}
+              ${tdC('10ch', row.employee)}
+              ${statusBadge(row.status, isInactive)}
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else if (currentCompanyHrTab === 'lwf') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrLwfModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('20ch', row.state)}
+              ${tdC('20ch', row.fillingFrequency)}
+              ${tdC('20ch', row.fillingDueDate)}
+              ${tdC('13ch', row.sealingAmount)}
+              ${tdC('10ch', row.employee)}
+              ${tdC('10ch', row.employer)}
+              ${statusBadge(row.status, isInactive)}
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else if (currentCompanyHrTab === 'tds') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrTdsModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('20ch', row.fillingFrequency)}
+              ${tdC('20ch', row.fillingDueDate)}
+              ${tdC('10ch', row.tdsCode)}
+              ${tdC('20ch', row.tdsCategory)}
+              ${tdC('15ch', row.thresholdLimit)}
+              ${tdC('20ch', row.standardDeduction)}
+              ${tdC('10ch', row.tdsRate)}
+              ${tdC('20ch', row.healthEducationCess)}
+              ${tdC('13ch', row.sealingAmount)}
+              ${statusBadge(row.status, isInactive)}
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else if (currentCompanyHrTab === 'leave') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrLeaveModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('15ch', row.clEligible)}
+              ${tdC('15ch', row.clClaimable)}
+              ${tdC('15ch', row.slEligible)}
+              ${tdC('15ch', row.slClaimable)}
+              ${tdC('15ch', row.elEligible)}
+              ${tdC('15ch', row.elClaimable)}
+              ${statusBadge(row.status, isInactive)}
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else if (currentCompanyHrTab === 'bonus') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrBonusModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('20ch', row.bonusType)}
+              ${tdC('13ch', row.sealingAmount)}
+              ${tdC('12ch', row.bonusPercent)}
+              ${statusBadge(row.status, isInactive)}
+            </tr>
+          `;
+        }).join('');
+        return;
+      } else if (currentCompanyHrTab === 'medical_insurance') {
+        tbody.innerHTML = filteredDataset.map(row => {
+          const isInactive = (row.status || '').toLowerCase().includes('in');
+          return `
+            <tr data-row-id="${row.id}" onclick="openCompanyHrMedicalInsuranceModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${tdC('25ch', row.insuranceCompany)}
+              ${tdC('15ch', row.sealingAmount)}
+              ${tdC('10ch', row.employee)}
+              ${tdC('10ch', row.employer)}
+              ${statusBadge(row.status, isInactive)}
             </tr>
           `;
         }).join('');
@@ -10588,19 +11333,9 @@ function applyFiltersAndRender() {
           const isInactive = (row.status || '').toLowerCase().includes('in');
           return `
             <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.from || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.to || ''}</td>
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingFrequency || ''}</td>
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.fillingDueDate || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.sealingAmount || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.employee || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.epf || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.eps || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.edli || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.adminCharges || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
-              </td>
+              ${tdC('15ch', row.from)}
+              ${tdC('15ch', row.to)}
+              ${statusBadge(row.status, isInactive)}
             </tr>
           `;
         }).join('');
@@ -11650,7 +12385,8 @@ function initSideFormEvents() {
       }
     }
     if (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '') {
-      if (!locationPanel.contains(e.target) && !btnLocation.contains(e.target)) {
+      const btnIndusTowerLoc = document.getElementById('btnIndusTowerLocation');
+      if (!locationPanel.contains(e.target) && !(btnLocation && btnLocation.contains(e.target)) && !(btnIndusTowerLoc && btnIndusTowerLoc.contains(e.target))) {
         locationPanel.style.display = 'none';
       }
     }
@@ -14134,7 +14870,9 @@ function initSideFormEvents() {
         return;
       }
 
-      const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+      const indusCard = document.getElementById('addIndusTowerCard');
+      const isCompanyContext = Boolean(indusCard && indusCard.style.display !== 'none');
+
       const payload = {
         account_name: accName,
         account_number: accNum,
@@ -14144,7 +14882,32 @@ function initSideFormEvents() {
         status: isStatusActive ? 'Active' : 'De-Active'
       };
 
-      if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank) {
+      if (isCompanyContext && typeof NexusApi !== 'undefined' && NexusApi.companyBank) {
+        try {
+          await NexusApi.companyBank.create(payload, currentCompanyMasterName || 'Nexus');
+          document.getElementById('frmAddBank')?.reset();
+          if (window.loadCompanyBankFromApi) await window.loadCompanyBankFromApi(currentCompanyMasterName || 'Nexus');
+
+          addBankCard.style.display = 'none';
+          bankPanel.classList.remove('card-dimmed-blurred');
+          updateCardDimmedState();
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Bank details added successfully!', 'Task Completed');
+          } else {
+            showToast(`Bank details for ${accName} added successfully!`);
+          }
+        } catch (err) {
+          console.error('Failed to add company bank details via API:', err);
+          const msg = err.detail || err.message || 'Failed to save bank details.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, 'Error Message!');
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+        }
+      } else if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank) {
+        const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
         try {
           const created = await NexusApi.employeeBank.create(payload, activeEmp);
           const bankId = created.employee_bank_account_id || created.id;
@@ -14245,7 +15008,36 @@ function initSideFormEvents() {
           status: isAct ? 'Active' : 'De-Active'
         };
 
-        if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank && bankId) {
+        const indusCard = document.getElementById('addIndusTowerCard');
+        const isCompanyContext = Boolean(indusCard && indusCard.style.display !== 'none');
+
+        if (isCompanyContext && typeof NexusApi !== 'undefined' && NexusApi.companyBank && bankId) {
+          try {
+            await NexusApi.companyBank.update(bankId, updatePayload, currentCompanyMasterName || 'Nexus');
+            if (window.loadCompanyBankFromApi) await window.loadCompanyBankFromApi(currentCompanyMasterName || 'Nexus');
+
+            const lblTitle = document.getElementById('lblViewBankTitle');
+            if (lblTitle) lblTitle.innerText = bName || 'Bank Details';
+
+            isViewBankEditing = false;
+            setViewBankFormReadOnly(true);
+            if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('Bank details updated successfully!', 'Task Completed');
+            } else {
+              showToast('Bank details updated successfully!');
+            }
+          } catch (err) {
+            console.error('Failed to update company bank details:', err);
+            const msg = err.detail || err.message || 'Failed to update bank details.';
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(msg, 'Error Message!');
+            } else {
+              showToast(`Error: ${msg}`);
+            }
+          }
+        } else if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank && bankId) {
           try {
             await NexusApi.employeeBank.update(bankId, updatePayload);
 
@@ -14283,7 +15075,7 @@ function initSideFormEvents() {
             }
           }
         } else {
-          const bank = companyBankData.find(b => String(b.employee_bank_account_id || b.id) === String(bankId));
+          const bank = companyBankData.find(b => String(b.bank_account_id || b.employee_bank_account_id || b.id) === String(bankId));
           if (bank) {
             Object.assign(bank, updatePayload);
             const lblTitle = document.getElementById('lblViewBankTitle');
@@ -14375,7 +15167,7 @@ function initSideFormEvents() {
   }
 
   if (btnSubmitAddHoliday && addHolidayCard && holidayPanel) {
-    btnSubmitAddHoliday.addEventListener('click', () => {
+    btnSubmitAddHoliday.addEventListener('click', async () => {
       const year = document.getElementById('inpAddHolidayYear')?.value.trim() || '2026';
       const month = document.getElementById('inpAddHolidayMonth')?.value.trim() || 'January';
       const date = document.getElementById('inpAddHolidayDate')?.value.trim() || '26';
@@ -14383,30 +15175,67 @@ function initSideFormEvents() {
       const holidayName = document.getElementById('inpAddHolidayName')?.value.trim() || 'Republic Day';
       const isStatusActive = document.getElementById('inpAddHolidayStatus')?.checked ?? true;
 
-      const newRecord = {
-        id: `h-${Date.now()}`,
-        year: year,
+      const payload = {
+        year: parseInt(year, 10) || 2026,
         month: month,
-        date: date,
+        date: parseInt(date, 10) || 1,
         day: day,
-        holidayName: holidayName,
+        holiday_name: holidayName,
         status: isStatusActive ? 'Active' : 'In - Active'
       };
 
-      companyHolidaysData.unshift(newRecord);
-      renderCompanyHolidaysTable();
+      if (typeof NexusApi !== 'undefined' && NexusApi.companyHolidays) {
+        try {
+          await NexusApi.companyHolidays.create(payload, currentCompanyMasterName || 'Nexus');
+          if (window.loadCompanyHolidaysFromApi) await window.loadCompanyHolidaysFromApi(currentCompanyMasterName || 'Nexus');
 
-      addHolidayCard.style.display = 'none';
-      holidayPanel.classList.remove('card-dimmed-blurred');
-      updateCardDimmedState();
-      showToast(`Holiday "${holidayName}" added successfully!`);
+          addHolidayCard.style.display = 'none';
+          holidayPanel.classList.remove('card-dimmed-blurred');
+          updateCardDimmedState();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Holiday added successfully!', 'Task Completed');
+          } else {
+            showToast(`Holiday "${holidayName}" added successfully!`);
+          }
+        } catch (err) {
+          console.error('Failed to add holiday via API:', err);
+          const msg = err.detail || err.message || 'Failed to add holiday.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, 'Error Message!');
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+        }
+      } else {
+        const newRecord = {
+          id: `h-${Date.now()}`,
+          year: parseInt(year, 10) || 2026,
+          month: month,
+          date: parseInt(date, 10) || 1,
+          day: day,
+          holiday_name: holidayName,
+          status: isStatusActive ? 'Active' : 'In - Active'
+        };
+
+        companyHolidaysData.unshift(newRecord);
+        renderCompanyHolidaysTable();
+
+        addHolidayCard.style.display = 'none';
+        holidayPanel.classList.remove('card-dimmed-blurred');
+        updateCardDimmedState();
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Holiday added successfully!', 'Task Completed');
+        } else {
+          showToast(`Holiday "${holidayName}" added successfully!`);
+        }
+      }
     });
   }
 
   // View Office Location Card Handlers
   const btnViewOfficeEdit = document.getElementById('btnViewOfficeEditToggle');
   if (btnViewOfficeEdit) {
-    btnViewOfficeEdit.addEventListener('click', () => {
+    btnViewOfficeEdit.addEventListener('click', async () => {
       const imgIcon = document.getElementById('imgViewOfficeEditIcon');
       if (!isViewOfficeEditing) {
         // Switch to editable
@@ -14416,32 +15245,80 @@ function initSideFormEvents() {
         showToast('Office details form is now editable');
       } else {
         // Save changes
-        const loc = companyLocationData.find(l => l.id === currentViewedOfficeId);
-        if (loc) {
-          loc.officeCode = document.getElementById('inpViewOfficeLocationCode')?.value.trim() || loc.officeCode;
-          loc.officeName = document.getElementById('inpViewOfficeLocationName')?.value.trim() || loc.officeName;
-          loc.address = document.getElementById('inpViewOfficeLocationAddress')?.value.trim() || loc.address;
-          loc.latitude = document.getElementById('inpViewOfficeLocationLat')?.value.trim() || loc.latitude;
-          loc.longitude = document.getElementById('inpViewOfficeLocationLng')?.value.trim() || loc.longitude;
-          loc.inCharge = document.getElementById('inpViewOfficeLocationIncharge')?.value || loc.inCharge;
-          loc.llName = document.getElementById('inpViewOfficeLocationLLName')?.value.trim() || loc.llName;
-          loc.llContact = document.getElementById('inpViewOfficeLocationLLContact')?.value.trim() || loc.llContact;
-          loc.rental = document.getElementById('inpViewOfficeLocationRental')?.value.trim() || loc.rental;
-          loc.tdsDeduction = document.getElementById('inpViewOfficeLocationTDSDeduction')?.value || loc.tdsDeduction;
-          loc.tdsRate = document.getElementById('inpViewOfficeLocationTDSRate')?.value || loc.tdsRate;
-          loc.ebSc = document.getElementById('inpViewOfficeLocationEBSC')?.value.trim() || loc.ebSc;
-          const isAct = document.getElementById('inpViewOfficeLocationStatus')?.checked ?? true;
-          loc.status = isAct ? 'Active' : 'In - Active';
+        const locId = document.getElementById('inpViewOfficeId')?.value || currentViewedOfficeId;
+        const code = document.getElementById('inpViewOfficeLocationCode')?.value.trim();
+        const name = document.getElementById('inpViewOfficeLocationName')?.value.trim();
+        const address = document.getElementById('inpViewOfficeLocationAddress')?.value.trim();
+        const lat = document.getElementById('inpViewOfficeLocationLat')?.value.trim();
+        const lng = document.getElementById('inpViewOfficeLocationLng')?.value.trim();
+        const incharge = document.getElementById('inpViewOfficeLocationIncharge')?.value || '';
+        const llName = document.getElementById('inpViewOfficeLocationLLName')?.value.trim();
+        const llContact = document.getElementById('inpViewOfficeLocationLLContact')?.value.trim();
+        const rental = document.getElementById('inpViewOfficeLocationRental')?.value.trim();
+        const tdsDeduction = document.getElementById('inpViewOfficeLocationTDSDeduction')?.value || 'Applicable';
+        const tdsRate = document.getElementById('inpViewOfficeLocationTDSRate')?.value || '10%';
+        const ebSc = document.getElementById('inpViewOfficeLocationEBSC')?.value.trim();
+        const isAct = document.getElementById('inpViewOfficeLocationStatus')?.checked ?? true;
 
-          const lblTitle = document.getElementById('lblViewOfficeTitle');
-          if (lblTitle) lblTitle.innerText = loc.officeName || 'Office Location';
+        const updatePayload = {
+          office_code: code,
+          office_name: name,
+          address: address,
+          latitude: lat,
+          longitude: lng,
+          in_charge: incharge,
+          ll_name: llName,
+          ll_contact_number: llContact,
+          rental_amount: rental,
+          tds_deduction: tdsDeduction,
+          tds_rate: tdsRate,
+          eb_sc_number: ebSc,
+          status: isAct ? 'Active' : 'In - Active'
+        };
 
-          renderCompanyLocationTable();
+        if (typeof NexusApi !== 'undefined' && NexusApi.companyLocations && locId) {
+          try {
+            await NexusApi.companyLocations.update(locId, updatePayload, currentCompanyMasterName || 'Nexus');
+            if (window.loadCompanyLocationsFromApi) await window.loadCompanyLocationsFromApi(currentCompanyMasterName || 'Nexus');
+
+            const lblTitle = document.getElementById('lblViewOfficeTitle');
+            if (lblTitle) lblTitle.innerText = name || 'Office Location';
+
+            isViewOfficeEditing = false;
+            setViewOfficeFormReadOnly(true);
+            if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('Office location updated successfully!', 'Task Completed');
+            } else {
+              showToast('Office location updated successfully!');
+            }
+          } catch (err) {
+            console.error('Failed to update office location via API:', err);
+            const msg = err.detail || err.message || 'Failed to update office location.';
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(msg, 'Error Message!');
+            } else {
+              showToast(`Error: ${msg}`);
+            }
+          }
+        } else {
+          const loc = companyLocationData.find(l => String(l.office_id || l.id) === String(locId));
+          if (loc) {
+            Object.assign(loc, updatePayload);
+            const lblTitle = document.getElementById('lblViewOfficeTitle');
+            if (lblTitle) lblTitle.innerText = name || 'Office Location';
+            renderCompanyLocationTable();
+          }
+          isViewOfficeEditing = false;
+          setViewOfficeFormReadOnly(true);
+          if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Office location updated successfully!', 'Task Completed');
+          } else {
+            showToast('Office location updated successfully!');
+          }
         }
-        isViewOfficeEditing = false;
-        setViewOfficeFormReadOnly(true);
-        if (imgIcon) imgIcon.src = 'icons/Edit.svg';
-        showToast('Office location updated successfully!');
       }
     });
   }
@@ -14482,7 +15359,7 @@ function initSideFormEvents() {
   }
 
   if (btnSubmitAddOfficeLocation && addOfficeLocationCard && locationPanel) {
-    btnSubmitAddOfficeLocation.addEventListener('click', () => {
+    btnSubmitAddOfficeLocation.addEventListener('click', async () => {
       const code = document.getElementById('inpAddOfficeLocationCode')?.value.trim() || 'LOC-005';
       const name = document.getElementById('inpAddOfficeLocationName')?.value.trim() || 'Regional Office';
       const address = document.getElementById('inpAddOfficeLocationAddress')?.value.trim() || '';
@@ -14492,35 +15369,79 @@ function initSideFormEvents() {
       const llName = document.getElementById('inpAddOfficeLocationLLName')?.value.trim() || '';
       const llContact = document.getElementById('inpAddOfficeLocationLLContact')?.value.trim() || '';
       const rental = document.getElementById('inpAddOfficeLocationRental')?.value.trim() || '';
-      const tdsDeduction = document.getElementById('inpAddOfficeLocationTDSDeduction')?.value.trim() || '';
-      const tdsRate = document.getElementById('inpAddOfficeLocationTDSRate')?.value.trim() || '';
+      const tdsDeduction = document.getElementById('inpAddOfficeLocationTDSDeduction')?.value.trim() || 'Applicable';
+      const tdsRate = document.getElementById('inpAddOfficeLocationTDSRate')?.value.trim() || '10%';
       const ebSc = document.getElementById('inpAddOfficeLocationEBSC')?.value.trim() || '';
       const isStatusActive = document.getElementById('inpAddOfficeLocationStatus')?.checked ?? true;
 
-      const newRecord = {
-        id: `loc-${Date.now()}`,
-        officeCode: code,
-        officeName: name,
+      const payload = {
+        office_code: code,
+        office_name: name,
         address: address,
         latitude: lat,
         longitude: lng,
-        inCharge: incharge,
-        llName: llName,
-        llContact: llContact,
-        rental: rental,
-        tdsDeduction: tdsDeduction,
-        tdsRate: tdsRate,
-        ebSc: ebSc,
+        in_charge: incharge,
+        ll_name: llName,
+        ll_contact_number: llContact,
+        rental_amount: rental,
+        tds_deduction: tdsDeduction,
+        tds_rate: tdsRate,
+        eb_sc_number: ebSc,
         status: isStatusActive ? 'Active' : 'In - Active'
       };
 
-      companyLocationData.unshift(newRecord);
-      renderCompanyLocationTable();
+      if (typeof NexusApi !== 'undefined' && NexusApi.companyLocations) {
+        try {
+          await NexusApi.companyLocations.create(payload, currentCompanyMasterName || 'Nexus');
+          if (window.loadCompanyLocationsFromApi) await window.loadCompanyLocationsFromApi(currentCompanyMasterName || 'Nexus');
 
-      addOfficeLocationCard.style.display = 'none';
-      locationPanel.classList.remove('card-dimmed-blurred');
-      updateCardDimmedState();
-      showToast(`Office "${name}" added successfully!`);
+          addOfficeLocationCard.style.display = 'none';
+          locationPanel.classList.remove('card-dimmed-blurred');
+          updateCardDimmedState();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Office location added successfully!', 'Task Completed');
+          } else {
+            showToast(`Office "${name}" added successfully!`);
+          }
+        } catch (err) {
+          console.error('Failed to add office location via API:', err);
+          const msg = err.detail || err.message || 'Failed to add office location.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, 'Error Message!');
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+        }
+      } else {
+        const newRecord = {
+          id: `loc-${Date.now()}`,
+          officeCode: code,
+          officeName: name,
+          address: address,
+          latitude: lat,
+          longitude: lng,
+          inCharge: incharge,
+          llName: llName,
+          llContact: llContact,
+          rental: rental,
+          tdsDeduction: tdsDeduction,
+          tdsRate: tdsRate,
+          ebSc: ebSc,
+          status: isStatusActive ? 'Active' : 'In - Active'
+        };
+
+        companyLocationData.unshift(newRecord);
+        renderCompanyLocationTable();
+
+        addOfficeLocationCard.style.display = 'none';
+        locationPanel.classList.remove('card-dimmed-blurred');
+        updateCardDimmedState();
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Office location added successfully!', 'Task Completed');
+        } else {
+          showToast(`Office "${name}" added successfully!`);
+        }
+      }
     });
   }
 
@@ -14770,37 +15691,56 @@ function initSideFormEvents() {
   attachNexusCalendar('inpOtherServiceRateFrom', 'btnOtherServiceRateFromCalendar');
   window.openNexusCalendar = openNexusCalendar;
 
-  // Attach to Company HR Policies EPF calendar inputs
+  // Attach to Company HR Policies calendar inputs
   attachNexusCalendar('inpEpfFromDate', 'btnEpfFromDateCalendar');
   attachNexusCalendar('inpEpfToDate', 'btnEpfToDateCalendar');
   attachNexusCalendar('inpEpfFillingDueDate', 'btnEpfFillingDueDateCalendar');
 
-  const btnCompanyHrEpfEditToggle = document.getElementById('btnCompanyHrEpfEditToggle');
-  if (btnCompanyHrEpfEditToggle) {
-    btnCompanyHrEpfEditToggle.addEventListener('click', (e) => {
+  attachNexusCalendar('inpEsiFromDate', 'btnEsiFromDateCalendar');
+  attachNexusCalendar('inpEsiToDate', 'btnEsiToDateCalendar');
+  attachNexusCalendar('inpEsiFillingDueDate', 'btnEsiFillingDueDateCalendar');
+
+  attachNexusCalendar('inpPtFromDate', 'btnPtFromDateCalendar');
+  attachNexusCalendar('inpPtToDate', 'btnPtToDateCalendar');
+  attachNexusCalendar('inpPtFillingDueDate', 'btnPtFillingDueDateCalendar');
+
+  attachNexusCalendar('inpLwfFromDate', 'btnLwfFromDateCalendar');
+  attachNexusCalendar('inpLwfToDate', 'btnLwfToDateCalendar');
+  attachNexusCalendar('inpLwfFillingDueDate', 'btnLwfFillingDueDateCalendar');
+
+  attachNexusCalendar('inpTdsFromDate', 'btnTdsFromDateCalendar');
+  attachNexusCalendar('inpTdsToDate', 'btnTdsToDateCalendar');
+  attachNexusCalendar('inpTdsFillingDueDate', 'btnTdsFillingDueDateCalendar');
+
+  attachNexusCalendar('inpLeaveFromDate', 'btnLeaveFromDateCalendar');
+  attachNexusCalendar('inpLeaveToDate', 'btnLeaveToDateCalendar');
+
+  attachNexusCalendar('inpBonusFromDate', 'btnBonusFromDateCalendar');
+  attachNexusCalendar('inpBonusToDate', 'btnBonusToDateCalendar');
+
+  attachNexusCalendar('inpMedFromDate', 'btnMedFromDateCalendar');
+  attachNexusCalendar('inpMedToDate', 'btnMedToDateCalendar');
+
+  const setupHrEditToggle = (btnId, name) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const imgIcon = document.getElementById('imgCompanyHrEpfEditIcon');
-      if (!isCompanyHrEpfEditing) {
-        isCompanyHrEpfEditing = true;
-        setCompanyHrEpfReadOnly(false);
-        if (imgIcon) {
-          imgIcon.src = 'icons/Save.svg';
-          imgIcon.className = 'icon-green';
-          imgIcon.title = 'Save';
-        }
-        showToast('EPF form is now editable');
-      } else {
-        isCompanyHrEpfEditing = false;
-        setCompanyHrEpfReadOnly(true);
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.className = 'icon-blue';
-          imgIcon.title = 'Edit Info';
-        }
-        showToast('EPF details saved successfully!');
+      e.preventDefault();
+      if (typeof window.saveCompanyHrCompliance === 'function') {
+        await window.saveCompanyHrCompliance(name);
       }
     });
-  }
+  };
+
+  setupHrEditToggle('btnCompanyHrEpfEditToggle', 'EPF');
+  setupHrEditToggle('btnCompanyHrEsiEditToggle', 'ESI');
+  setupHrEditToggle('btnCompanyHrPtEditToggle', 'PT');
+  setupHrEditToggle('btnCompanyHrLwfEditToggle', 'LWF');
+  setupHrEditToggle('btnCompanyHrTdsEditToggle', 'TDS');
+  setupHrEditToggle('btnCompanyHrLeaveEditToggle', 'Leave');
+  setupHrEditToggle('btnCompanyHrBonusEditToggle', 'Bonus');
+  setupHrEditToggle('btnCompanyHrMedEditToggle', 'Medical Insurance');
 
   const btnSalaryAddRow = document.getElementById('btnSalaryAddRow');
   const addSalaryCard = document.getElementById('addSalaryCard');
@@ -15284,7 +16224,8 @@ function initSideFormEvents() {
       }
     }
     if (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '') {
-      if (!locationPanel.contains(e.target) && !btnLocation.contains(e.target)) {
+      const btnIndusTowerLoc = document.getElementById('btnIndusTowerLocation');
+      if (!locationPanel.contains(e.target) && !(btnLocation && btnLocation.contains(e.target)) && !(btnIndusTowerLoc && btnIndusTowerLoc.contains(e.target))) {
         locationPanel.style.display = 'none';
         changed = true;
       }
@@ -16079,8 +17020,13 @@ window.openVendorBankSidePanel = function() {
   showToast('Bank details opened');
 };
 
+// Active Company Master Context
+let currentCompanyMasterName = 'Nexus';
+let currentCompanyMasterId = null;
+let currentCompanyMasterRecord = null;
+
 // Opens Company Bank Details panel as a child tab next to View Company card
-window.openCompanyBankSidePanel = function() {
+window.openCompanyBankSidePanel = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -16106,13 +17052,14 @@ window.openCompanyBankSidePanel = function() {
     bankPanel.style.display = 'block';
   }
 
-  renderCompanyBankTable();
+  activeCompanyBankFilters = {};
+  await window.loadCompanyBankFromApi(currentCompanyMasterName || 'Nexus');
   overlay.style.display = 'flex';
   showToast('Bank details opened');
 };
 
 // Opens Company Holidays Details panel as a child tab next to View Company card
-window.openCompanyHolidaysSidePanel = function() {
+window.openCompanyHolidaysSidePanel = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -16138,13 +17085,14 @@ window.openCompanyHolidaysSidePanel = function() {
     holidayPanel.style.display = 'block';
   }
 
-  renderCompanyHolidaysTable();
+  activeCompanyHolidaysFilters = {};
+  await window.loadCompanyHolidaysFromApi(currentCompanyMasterName || 'Nexus');
   overlay.style.display = 'flex';
   showToast('Holidays opened');
 };
 
 // Opens Company Office Location Details panel as a child tab next to View Company card
-window.openCompanyLocationSidePanel = function() {
+window.openCompanyLocationSidePanel = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -16170,7 +17118,8 @@ window.openCompanyLocationSidePanel = function() {
     locPanel.style.display = 'block';
   }
 
-  renderCompanyLocationTable();
+  activeCompanyLocationFilters = {};
+  await window.loadCompanyLocationsFromApi(currentCompanyMasterName || 'Nexus');
   overlay.style.display = 'flex';
   showToast('Office Location opened');
 };
@@ -16312,7 +17261,172 @@ function updateIndusTowerFieldsVisibility(isEdit) {
   if (viewIcons) viewIcons.style.display = isEdit ? 'none' : 'flex';
 }
 
-window.openIndusTowerPageCard = function() {
+// Global API Loaders & Persistence for Company Master
+window.loadCompanyMasterFromApi = async function(companyNameOrId = null) {
+  const target = companyNameOrId || currentCompanyMasterName || 'Nexus';
+  if (typeof NexusApi !== 'undefined' && NexusApi.company) {
+    try {
+      const co = await NexusApi.company.get({ company_name: target });
+      if (co) {
+        currentCompanyMasterRecord = co;
+        currentCompanyMasterId = co.company_id;
+        currentCompanyMasterName = co.company_name || 'Nexus';
+
+        if (document.getElementById('inpIndusLegalName')) document.getElementById('inpIndusLegalName').value = co.company_legal_name || '';
+        if (document.getElementById('inpIndusEntityType')) document.getElementById('inpIndusEntityType').value = co.entity_type || '';
+        if (document.getElementById('inpIndusIndustry')) document.getElementById('inpIndusIndustry').value = co.industry || '';
+        if (document.getElementById('inpIndusState')) document.getElementById('inpIndusState').value = co.state || '';
+        if (document.getElementById('txtIndusRegDocs')) document.getElementById('txtIndusRegDocs').value = co.registered_documents || '';
+        if (document.getElementById('txtIndusRegAddress')) document.getElementById('txtIndusRegAddress').value = co.registered_address || '';
+        if (document.getElementById('txtIndusPan')) document.getElementById('txtIndusPan').value = co.pan_number || '';
+        if (document.getElementById('txtIndusTan')) document.getElementById('txtIndusTan').value = co.tan_number || '';
+        if (document.getElementById('txtIndusGst')) document.getElementById('txtIndusGst').value = co.gst_code || '';
+        if (document.getElementById('txtIndusDigitalStamp')) document.getElementById('txtIndusDigitalStamp').value = co.digital_stamp_file || '';
+        if (document.getElementById('txtIndusUdyam')) document.getElementById('txtIndusUdyam').value = co.udyam_code || '';
+        if (document.getElementById('txtIndusEpf')) document.getElementById('txtIndusEpf').value = co.epf_code || '';
+        if (document.getElementById('txtIndusEsi')) document.getElementById('txtIndusEsi').value = co.esi_code || '';
+        if (document.getElementById('txtIndusIso')) document.getElementById('txtIndusIso').value = co.iso_certificate_number || '';
+        if (document.getElementById('txtIndusOsha')) document.getElementById('txtIndusOsha').value = co.osha_certificate_number || '';
+        if (document.getElementById('txtIndusPtec')) document.getElementById('txtIndusPtec').value = co.ptec_code || '';
+        if (document.getElementById('txtIndusLwf')) document.getElementById('txtIndusLwf').value = co.lwf_code || '';
+        if (document.getElementById('txtIndusEstReg')) document.getElementById('txtIndusEstReg').value = co.establishment_registration_code || '';
+        if (document.getElementById('txtIndusDsc')) document.getElementById('txtIndusDsc').value = co.dsc_file || '';
+        if (document.getElementById('txtIndusESig')) document.getElementById('txtIndusESig').value = co.e_signature_file || '';
+        if (document.getElementById('txtIndusSsl')) document.getElementById('txtIndusSsl').value = co.ssl_certificate_file || '';
+        if (document.getElementById('txtPlatformHexColor')) {
+          document.getElementById('txtPlatformHexColor').value = co.hex_color_code || '#0454e4';
+          if (typeof applyPlatformThemeColor === 'function' && co.hex_color_code) applyPlatformThemeColor(co.hex_color_code);
+        }
+        if (document.getElementById('pickerPlatformHexColor')) document.getElementById('pickerPlatformHexColor').value = co.hex_color_code || '#0454e4';
+
+        if (document.getElementById('inpIndusEInvoiceToggle')) document.getElementById('inpIndusEInvoiceToggle').checked = Boolean(co.e_invoice);
+        if (document.getElementById('inpIndusMultiGstToggle')) document.getElementById('inpIndusMultiGstToggle').checked = Boolean(co.gst_multi_state);
+
+        const toggleConfigs = [
+          { toggleId: 'inpIndusUdyamToggle', toggleWrapId: 'toggleWrapIndusUdyam', wrapId: 'wrapIndusUdyam', active: Boolean(co.udyam_code || co.udyam_code_available) },
+          { toggleId: 'inpIndusEpfToggle', toggleWrapId: 'toggleWrapIndusEpf', wrapId: 'wrapIndusEpf', active: Boolean(co.epf_code || co.epf_code_available) },
+          { toggleId: 'inpIndusEsiToggle', toggleWrapId: 'toggleWrapIndusEsi', wrapId: 'wrapIndusEsi', active: Boolean(co.esi_code || co.esi_code_available) },
+          { toggleId: 'inpIndusIsoToggle', toggleWrapId: 'toggleWrapIndusIso', wrapId: 'wrapIndusIso', active: Boolean(co.iso_certificate_number || co.iso_certificate_available) },
+          { toggleId: 'inpIndusOshaToggle', toggleWrapId: 'toggleWrapIndusOsha', wrapId: 'wrapIndusOsha', active: Boolean(co.osha_certificate_number || co.osha_certificate_available) },
+          { toggleId: 'inpIndusPtecToggle', toggleWrapId: 'toggleWrapIndusPtec', wrapId: 'wrapIndusPtec', active: Boolean(co.ptec_code || co.ptec_code_available) },
+          { toggleId: 'inpIndusLwfToggle', toggleWrapId: 'toggleWrapIndusLwf', wrapId: 'wrapIndusLwf', active: Boolean(co.lwf_code || co.lwf_code_available) },
+          { toggleId: 'inpIndusEstRegToggle', toggleWrapId: 'toggleWrapIndusEstReg', wrapId: 'wrapIndusEstReg', active: Boolean(co.establishment_registration_code || co.establishment_registration_code_available) },
+          { toggleId: 'inpIndusDscToggle', toggleWrapId: 'toggleWrapIndusDsc', wrapId: 'wrapIndusDsc', active: Boolean(co.dsc_file) },
+          { toggleId: 'inpIndusESigToggle', toggleWrapId: 'toggleWrapIndusESig', wrapId: 'wrapIndusESig', active: Boolean(co.e_signature_file) },
+          { toggleId: 'inpIndusSslToggle', toggleWrapId: 'toggleWrapIndusSsl', wrapId: 'wrapIndusSsl', active: Boolean(co.ssl_certificate_file) },
+          { toggleId: 'inpIndusHexColorToggle', toggleWrapId: 'toggleWrapIndusHexColor', wrapId: 'wrapIndusHexColor', active: Boolean(co.hex_color_code) },
+          { toggleId: 'inpIndusRegAddressToggle', toggleWrapId: 'toggleWrapIndusRegAddress', wrapId: 'wrapIndusRegAddress', active: Boolean(co.registered_address) },
+          { toggleId: 'inpIndusGstToggle', toggleWrapId: 'toggleWrapIndusGst', wrapId: 'wrapIndusGst', active: Boolean(co.gst_code) }
+        ];
+
+        toggleConfigs.forEach(cfg => {
+          const toggle = document.getElementById(cfg.toggleId);
+          const toggleWrap = document.getElementById(cfg.toggleWrapId);
+          const wrap = document.getElementById(cfg.wrapId);
+          if (toggle) toggle.checked = cfg.active;
+          if (cfg.active) {
+            if (toggleWrap) toggleWrap.style.setProperty('display', 'none', 'important');
+            if (wrap) wrap.style.setProperty('display', 'flex', 'important');
+          } else {
+            if (wrap) wrap.style.setProperty('display', 'none', 'important');
+            if (toggleWrap) toggleWrap.style.setProperty('display', 'block', 'important');
+          }
+        });
+
+        const imgLogoPreview = document.getElementById('imgIndusTowerLogoPreview');
+        const lblLogoFileName = document.getElementById('lblIndusTowerLogoFileName');
+        if (co.logo_file || co.logo) {
+          if (imgLogoPreview) imgLogoPreview.src = co.logo_file || co.logo;
+          if (lblLogoFileName) {
+            lblLogoFileName.textContent = (co.logo_file || '').split('/').pop() || 'company_logo';
+            lblLogoFileName.style.display = 'inline';
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load company master details:', err);
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to retrieve company details.', 'Database Error');
+      }
+    }
+  }
+};
+
+window.saveCompanyMasterToApi = async function() {
+  const payload = {
+    company_legal_name: document.getElementById('inpIndusLegalName')?.value.trim() || null,
+    entity_type: document.getElementById('inpIndusEntityType')?.value || null,
+    industry: document.getElementById('inpIndusIndustry')?.value || null,
+    state: document.getElementById('inpIndusState')?.value || null,
+    registered_documents: document.getElementById('txtIndusRegDocs')?.value.trim() || null,
+    registered_address: document.getElementById('txtIndusRegAddress')?.value.trim() || null,
+    pan_number: document.getElementById('txtIndusPan')?.value.trim() || null,
+    tan_number: document.getElementById('txtIndusTan')?.value.trim() || null,
+    gst_code: document.getElementById('txtIndusGst')?.value.trim() || null,
+    digital_stamp_file: document.getElementById('txtIndusDigitalStamp')?.value.trim() || null,
+    udyam_code: document.getElementById('txtIndusUdyam')?.value.trim() || null,
+    udyam_code_available: Boolean(document.getElementById('txtIndusUdyam')?.value.trim() || document.getElementById('inpIndusUdyamToggle')?.checked),
+    epf_code: document.getElementById('txtIndusEpf')?.value.trim() || null,
+    epf_code_available: Boolean(document.getElementById('txtIndusEpf')?.value.trim() || document.getElementById('inpIndusEpfToggle')?.checked),
+    esi_code: document.getElementById('txtIndusEsi')?.value.trim() || null,
+    esi_code_available: Boolean(document.getElementById('txtIndusEsi')?.value.trim() || document.getElementById('inpIndusEsiToggle')?.checked),
+    iso_certificate_number: document.getElementById('txtIndusIso')?.value.trim() || null,
+    iso_certificate_available: Boolean(document.getElementById('txtIndusIso')?.value.trim() || document.getElementById('inpIndusIsoToggle')?.checked),
+    osha_certificate_number: document.getElementById('txtIndusOsha')?.value.trim() || null,
+    osha_certificate_available: Boolean(document.getElementById('txtIndusOsha')?.value.trim() || document.getElementById('inpIndusOshaToggle')?.checked),
+    ptec_code: document.getElementById('txtIndusPtec')?.value.trim() || null,
+    ptec_code_available: Boolean(document.getElementById('txtIndusPtec')?.value.trim() || document.getElementById('inpIndusPtecToggle')?.checked),
+    lwf_code: document.getElementById('txtIndusLwf')?.value.trim() || null,
+    lwf_code_available: Boolean(document.getElementById('txtIndusLwf')?.value.trim() || document.getElementById('inpIndusLwfToggle')?.checked),
+    establishment_registration_code: document.getElementById('txtIndusEstReg')?.value.trim() || null,
+    establishment_registration_code_available: Boolean(document.getElementById('txtIndusEstReg')?.value.trim() || document.getElementById('inpIndusEstRegToggle')?.checked),
+    dsc_file: document.getElementById('txtIndusDsc')?.value.trim() || null,
+    e_signature_file: document.getElementById('txtIndusESig')?.value.trim() || null,
+    ssl_certificate_file: document.getElementById('txtIndusSsl')?.value.trim() || null,
+    hex_color_code: document.getElementById('txtPlatformHexColor')?.value.trim() || null,
+    e_invoice: Boolean(document.getElementById('inpIndusEInvoiceToggle')?.checked),
+    gst_multi_state: Boolean(document.getElementById('inpIndusMultiGstToggle')?.checked)
+  };
+
+  const targetId = currentCompanyMasterId || currentCompanyMasterName || 'Nexus';
+  try {
+    const updated = await NexusApi.company.update(targetId, payload);
+    currentCompanyMasterRecord = updated;
+    currentCompanyMasterId = updated.company_id;
+    currentCompanyMasterName = updated.company_name || 'Nexus';
+
+    isIndusTowerEditing = false;
+    setIndusTowerFormReadOnly(true);
+    updateIndusTowerFieldsVisibility(false);
+
+    const lblTitle = document.getElementById('lblIndusTowerCardTitle');
+    if (lblTitle) lblTitle.innerText = 'View Company Name';
+    const imgIcon = document.getElementById('imgIndusTowerEditIcon');
+    if (imgIcon) {
+      imgIcon.src = 'icons/Edit.svg';
+      imgIcon.title = 'Edit Info';
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Company details updated successfully!', 'Task Completed');
+    } else {
+      showToast('Company details updated successfully!');
+    }
+
+    await window.loadCompanyMasterFromApi(currentCompanyMasterName);
+    return true;
+  } catch (err) {
+    console.error('Failed to update company master details:', err);
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to update company details.', 'Error Message!');
+    } else {
+      showToast(`Error: ${err.message || 'Failed to update'}`);
+    }
+    return false;
+  }
+};
+
+window.openIndusTowerPageCard = async function(companyName = null) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -16325,40 +17439,8 @@ window.openIndusTowerPageCard = function() {
     indusCard.style.display = 'block';
     const lblTitle = document.getElementById('lblIndusTowerCardTitle');
     if (lblTitle) lblTitle.innerText = 'View Company Name';
-    
-    // Ensure text inputs for toggle fields are hidden and toggle switches are shown initially
-    const toggleFieldPairs = [
-      { toggleId: 'inpIndusUdyamToggle', toggleWrapId: 'toggleWrapIndusUdyam', wrapId: 'wrapIndusUdyam' },
-      { toggleId: 'inpIndusEpfToggle', toggleWrapId: 'toggleWrapIndusEpf', wrapId: 'wrapIndusEpf' },
-      { toggleId: 'inpIndusEsiToggle', toggleWrapId: 'toggleWrapIndusEsi', wrapId: 'wrapIndusEsi' },
-      { toggleId: 'inpIndusIsoToggle', toggleWrapId: 'toggleWrapIndusIso', wrapId: 'wrapIndusIso' },
-      { toggleId: 'inpIndusOshaToggle', toggleWrapId: 'toggleWrapIndusOsha', wrapId: 'wrapIndusOsha' },
-      { toggleId: 'inpIndusPtecToggle', toggleWrapId: 'toggleWrapIndusPtec', wrapId: 'wrapIndusPtec' },
-      { toggleId: 'inpIndusLwfToggle', toggleWrapId: 'toggleWrapIndusLwf', wrapId: 'wrapIndusLwf' },
-      { toggleId: 'inpIndusEstRegToggle', toggleWrapId: 'toggleWrapIndusEstReg', wrapId: 'wrapIndusEstReg' },
-      { toggleId: 'inpIndusDscToggle', toggleWrapId: 'toggleWrapIndusDsc', wrapId: 'wrapIndusDsc' },
-      { toggleId: 'inpIndusESigToggle', toggleWrapId: 'toggleWrapIndusESig', wrapId: 'wrapIndusESig' },
-      { toggleId: 'inpIndusSslToggle', toggleWrapId: 'toggleWrapIndusSsl', wrapId: 'wrapIndusSsl' },
-      { toggleId: 'inpIndusHexColorToggle', toggleWrapId: 'toggleWrapIndusHexColor', wrapId: 'wrapIndusHexColor' },
-      { toggleId: 'inpIndusRegAddressToggle', toggleWrapId: 'toggleWrapIndusRegAddress', wrapId: 'wrapIndusRegAddress' },
-      { toggleId: 'inpIndusGstToggle', toggleWrapId: 'toggleWrapIndusGst', wrapId: 'wrapIndusGst' }
-    ];
 
-    toggleFieldPairs.forEach(pair => {
-      const toggle = document.getElementById(pair.toggleId);
-      const toggleWrap = document.getElementById(pair.toggleWrapId);
-      const wrap = document.getElementById(pair.wrapId);
-      if (toggle && toggle.checked) {
-        if (toggleWrap) toggleWrap.style.display = 'none';
-        if (wrap) wrap.style.display = 'flex';
-      } else {
-        if (toggle) toggle.checked = false;
-        if (wrap) wrap.style.display = 'none';
-        if (toggleWrap) toggleWrap.style.display = 'block';
-      }
-    });
-
-    // Set to read-only view mode initially until edit button is clicked
+    // Set to read-only view mode initially
     isIndusTowerEditing = false;
     updateIndusTowerFieldsVisibility(false);
     setIndusTowerFormReadOnly(true);
@@ -16368,6 +17450,9 @@ window.openIndusTowerPageCard = function() {
       imgIcon.src = 'icons/Edit.svg';
       imgIcon.title = 'Edit Info';
     }
+
+    // Load persisted details from PostgreSQL
+    await window.loadCompanyMasterFromApi(companyName || currentCompanyMasterName || 'Nexus');
   }
 
   overlay.style.display = 'flex';
@@ -16428,7 +17513,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnEdit = document.getElementById('btnIndusTowerEdit');
   if (btnEdit) {
-    btnEdit.addEventListener('click', (e) => {
+    btnEdit.addEventListener('click', async (e) => {
       e.stopPropagation();
       const lblTitle = document.getElementById('lblIndusTowerCardTitle');
       const imgIcon = document.getElementById('imgIndusTowerEditIcon');
@@ -16445,27 +17530,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         showToast('Company details: editable fields unlocked');
       } else {
-        // SAVE EDITS
-        isIndusTowerEditing = false;
-        setIndusTowerFormReadOnly(true);
-        updateIndusTowerFieldsVisibility(false);
-        if (lblTitle) lblTitle.innerText = 'View Company Name';
-        if (imgIcon) {
-          imgIcon.src = 'icons/Edit.svg';
-          imgIcon.title = 'Edit Info';
-        }
-        const indusCust = (typeof masterCustomerData !== 'undefined') ? masterCustomerData.find(c => c.id === 'cust-1' || (c.customerName && c.customerName.includes('Indus'))) : null;
-        if (indusCust) {
-          const regAddr = document.getElementById('txtIndusRegAddress')?.value.trim();
-          if (regAddr) indusCust.address = regAddr;
-          const gstVal = document.getElementById('txtIndusGst')?.value.trim();
-          if (gstVal) indusCust.gstNumber = gstVal;
-          if (typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
-            loadMasterDataset();
-            applyFiltersAndRender();
-          }
-        }
-        showToast('Company details saved & updated successfully!');
+        // SAVE EDITS TO BACKEND
+        await window.saveCompanyMasterToApi();
       }
     });
   }
@@ -16504,30 +17570,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnSubmitIndus = document.getElementById('btnSubmitIndusTower');
   if (btnSubmitIndus) {
-    btnSubmitIndus.addEventListener('click', () => {
-      isIndusTowerEditing = false;
-      setIndusTowerFormReadOnly(true);
-      updateIndusTowerFieldsVisibility(false);
-      const lblTitle = document.getElementById('lblIndusTowerCardTitle');
-      if (lblTitle) lblTitle.innerText = 'View Company Name';
-      const imgIcon = document.getElementById('imgIndusTowerEditIcon');
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
-      }
-      const indusCust = (typeof masterCustomerData !== 'undefined') ? masterCustomerData.find(c => c.id === 'cust-1' || (c.customerName && c.customerName.includes('Indus'))) : null;
-      if (indusCust) {
-        const regAddr = document.getElementById('txtIndusRegAddress')?.value.trim();
-        if (regAddr) indusCust.address = regAddr;
-        const gstVal = document.getElementById('txtIndusGst')?.value.trim();
-        if (gstVal) indusCust.gstNumber = gstVal;
-        if (typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
-          loadMasterDataset();
-          applyFiltersAndRender();
-        }
+    btnSubmitIndus.addEventListener('click', async () => {
+      if (isIndusTowerEditing) {
+        await window.saveCompanyMasterToApi();
       }
       closeSideForm();
-      showToast('Company Name details saved successfully!');
     });
   }
 });
@@ -17001,7 +18048,7 @@ function rebindFilterButtons() {
   });
 }
 
-// Global Company Bank Dataset & Filter State (Loaded dynamically from PostgreSQL employee_bank_details)
+// Global Company Bank Dataset & Filter State (Loaded dynamically from PostgreSQL employee_bank_details or company_bank_accounts)
 let companyBankData = [];
 let activeCompanyBankFilters = {};
 let currentCompanyBankFilterCol = null;
@@ -17010,7 +18057,7 @@ let currentCompanyBankFilterCol = null;
 let isViewBankEditing = false;
 let currentViewedBankId = null;
 
-// Global Async Data Loaders for Employee Subdetails
+// Global Async Data Loaders for Subdetails
 window.loadEmployeeBankData = async function(empId = null) {
   if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank) {
     try {
@@ -17023,6 +18070,25 @@ window.loadEmployeeBankData = async function(empId = null) {
       renderCompanyBankTable();
       if (typeof showSvgErrorPopup === 'function') {
         showSvgErrorPopup(err.message || 'Failed to retrieve bank details.', 'Database Error');
+      }
+    }
+  } else {
+    renderCompanyBankTable();
+  }
+};
+
+window.loadCompanyBankFromApi = async function(companyName = 'Nexus') {
+  if (typeof NexusApi !== 'undefined' && NexusApi.companyBank) {
+    try {
+      const records = await NexusApi.companyBank.getAll(companyName);
+      companyBankData = Array.isArray(records) ? records : [];
+      renderCompanyBankTable();
+    } catch (err) {
+      console.error('Failed to load company bank details from API:', err);
+      companyBankData = [];
+      renderCompanyBankTable();
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to retrieve company bank details.', 'Database Error');
       }
     }
   } else {
@@ -17184,10 +18250,10 @@ function openViewCompanyBankCard(bankId) {
   const bankPanel = document.getElementById('bankDetailsSidePanel');
   if (!bankCard) return;
 
-  const bank = companyBankData.find(b => String(b.employee_bank_account_id || b.id) === String(bankId)) || companyBankData[0];
+  const bank = companyBankData.find(b => String(b.bank_account_id || b.employee_bank_account_id || b.id) === String(bankId)) || companyBankData[0];
   if (!bank) return;
 
-  currentViewedBankId = bank.employee_bank_account_id || bank.id;
+  currentViewedBankId = bank.bank_account_id || bank.employee_bank_account_id || bank.id;
   isViewBankEditing = false;
 
   const lblTitle = document.getElementById('lblViewBankTitle');
@@ -17259,7 +18325,7 @@ function renderCompanyBankTable() {
 
   tbody.innerHTML = filtered.map(row => {
     const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
-    const bankId = row.employee_bank_account_id || row.id;
+    const bankId = row.bank_account_id || row.employee_bank_account_id || row.id;
     const accNum = row.account_number || row.accountNumber || '';
     const hasDoc = Boolean(row.has_document || row.cancelled_cheque);
     return `
@@ -17349,56 +18415,29 @@ function openCompanyBankFilter(colKey, triggerBtn) {
   if (searchInput) searchInput.focus();
 }
 
-// Global Company Holidays Dataset & Filter State
-let companyHolidaysData = [
-  {
-    id: 'h-1',
-    year: '2026',
-    month: 'January',
-    date: '26',
-    day: 'Monday',
-    holidayName: 'Republic Day',
-    status: 'Active'
-  },
-  {
-    id: 'h-2',
-    year: '2026',
-    month: 'August',
-    date: '15',
-    day: 'Saturday',
-    holidayName: 'Independence Day',
-    status: 'Active'
-  },
-  {
-    id: 'h-3',
-    year: '2026',
-    month: 'October',
-    date: '02',
-    day: 'Friday',
-    holidayName: 'Gandhi Jayanti',
-    status: 'Active'
-  },
-  {
-    id: 'h-4',
-    year: '2026',
-    month: 'November',
-    date: '08',
-    day: 'Sunday',
-    holidayName: 'Diwali',
-    status: 'Active'
-  },
-  {
-    id: 'h-5',
-    year: '2026',
-    month: 'December',
-    date: '25',
-    day: 'Friday',
-    holidayName: 'Christmas Day',
-    status: 'Active'
-  }
-];
+// Global Company Holidays Dataset & Filter State (Loaded dynamically from PostgreSQL company_holidays)
+let companyHolidaysData = [];
 let activeCompanyHolidaysFilters = {};
 let currentCompanyHolidaysFilterCol = null;
+
+window.loadCompanyHolidaysFromApi = async function(companyName = 'Nexus') {
+  if (typeof NexusApi !== 'undefined' && NexusApi.companyHolidays) {
+    try {
+      const records = await NexusApi.companyHolidays.getAll(companyName);
+      companyHolidaysData = Array.isArray(records) ? records : [];
+      renderCompanyHolidaysTable();
+    } catch (err) {
+      console.error('Failed to load company holidays from API:', err);
+      companyHolidaysData = [];
+      renderCompanyHolidaysTable();
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to retrieve company holidays.', 'Database Error');
+      }
+    }
+  } else {
+    renderCompanyHolidaysTable();
+  }
+};
 
 function renderCompanyHolidaysTable() {
   const tbody = document.getElementById('tbodyHolidaysDetails');
@@ -17420,13 +18459,15 @@ function renderCompanyHolidaysTable() {
 
   tbody.innerHTML = filtered.map(row => {
     const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
+    const hId = row.holiday_id || row.id;
+    const hName = row.holiday_name || row.holidayName || '';
     return `
-      <tr data-holiday-id="${row.id}">
+      <tr data-holiday-id="${hId}">
         <td class="col-holiday-year td-center">${row.year || ''}</td>
         <td class="col-holiday-month">${row.month || ''}</td>
         <td class="col-holiday-date td-center">${row.date || ''}</td>
         <td class="col-holiday-day">${row.day || ''}</td>
-        <td class="col-holiday-name">${row.holidayName || ''}</td>
+        <td class="col-holiday-name">${hName}</td>
         <td class="col-holiday-status td-center">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'In - Active' : 'Active'}</span>
         </td>
@@ -17503,79 +18544,33 @@ function openCompanyHolidaysFilter(colKey, triggerBtn) {
   if (searchInput) searchInput.focus();
 }
 
-// Global Company Office Location Dataset & Filter State
-let companyLocationData = [
-  {
-    id: 'loc-1',
-    officeCode: 'LOC-001',
-    officeName: 'Headquarters - Chennai',
-    address: 'No. 12, Anna Salai, Chennai, Tamil Nadu - 600002',
-    latitude: '13.0827° N',
-    longitude: '80.2707° E',
-    inCharge: 'Rajesh Kumar',
-    llName: 'Ramanathan Iyer',
-    llContact: '+91 98401 23456',
-    rental: '1,25,000.00',
-    tdsDeduction: 'Applicable',
-    tdsRate: '10%',
-    ebSc: 'EB-CHN-40921',
-    status: 'Active'
-  },
-  {
-    id: 'loc-2',
-    officeCode: 'LOC-002',
-    officeName: 'Branch - Bengaluru',
-    address: 'Indiranagar 100ft Road, Bengaluru, Karnataka - 560038',
-    latitude: '12.9716° N',
-    longitude: '77.5946° E',
-    inCharge: 'Priya Sharma',
-    llName: 'Venkatesh Murthy',
-    llContact: '+91 98802 34567',
-    rental: '95,000.00',
-    tdsDeduction: 'Applicable',
-    tdsRate: '10%',
-    ebSc: 'EB-BLR-89214',
-    status: 'Active'
-  },
-  {
-    id: 'loc-3',
-    officeCode: 'LOC-003',
-    officeName: 'Regional - Mumbai',
-    address: 'Bandra Kurla Complex, Bandra East, Mumbai - 400051',
-    latitude: '19.0760° N',
-    longitude: '72.8777° E',
-    inCharge: 'Amit Patel',
-    llName: 'Hasmukh Shah',
-    llContact: '+91 98203 45678',
-    rental: '2,10,000.00',
-    tdsDeduction: 'Applicable',
-    tdsRate: '10%',
-    ebSc: 'EB-MUM-77341',
-    status: 'Active'
-  },
-  {
-    id: 'loc-4',
-    officeCode: 'LOC-004',
-    officeName: 'Hub - Hyderabad',
-    address: 'HITEC City, Madhapur, Hyderabad, Telangana - 500081',
-    latitude: '17.3850° N',
-    longitude: '78.4867° E',
-    inCharge: 'Suresh Reddy',
-    llName: 'K. V. Rao',
-    llContact: '+91 98490 56789',
-    rental: '1,10,000.00',
-    tdsDeduction: 'Applicable',
-    tdsRate: '10%',
-    ebSc: 'EB-HYD-55129',
-    status: 'Active'
-  }
-];
+// Global Company Office Location Dataset & Filter State (Loaded dynamically from PostgreSQL company_office_locations)
+let companyLocationData = [];
 let activeCompanyLocationFilters = {};
 let currentCompanyLocationFilterCol = null;
 
 // Office Location View/Edit Modal Controller State
 let isViewOfficeEditing = false;
 let currentViewedOfficeId = null;
+
+window.loadCompanyLocationsFromApi = async function(companyName = 'Nexus') {
+  if (typeof NexusApi !== 'undefined' && NexusApi.companyLocations) {
+    try {
+      const records = await NexusApi.companyLocations.getAll(companyName);
+      companyLocationData = Array.isArray(records) ? records : [];
+      renderCompanyLocationTable();
+    } catch (err) {
+      console.error('Failed to load company office locations from API:', err);
+      companyLocationData = [];
+      renderCompanyLocationTable();
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to retrieve company office locations.', 'Database Error');
+      }
+    }
+  } else {
+    renderCompanyLocationTable();
+  }
+};
 
 function setViewOfficeFormReadOnly(isReadOnly) {
   [
@@ -17614,37 +18609,39 @@ function openViewCompanyLocationCard(locId) {
   const locPanel = document.getElementById('locationDetailsSidePanel');
   if (!locCard) return;
 
-  const loc = companyLocationData.find(l => l.id === locId) || companyLocationData[0];
+  const loc = companyLocationData.find(l => String(l.office_id || l.id) === String(locId)) || companyLocationData[0];
   if (!loc) return;
 
-  currentViewedOfficeId = loc.id;
+  currentViewedOfficeId = loc.office_id || loc.id;
   isViewOfficeEditing = false;
 
+  const locName = loc.office_name || loc.officeName || 'Office Location';
   const lblTitle = document.getElementById('lblViewOfficeTitle');
-  if (lblTitle) lblTitle.innerText = loc.officeName || 'Office Location';
+  if (lblTitle) lblTitle.innerText = locName;
 
   // Populate In-charge dropdown with Employee Names from masterEmployeeData
   const selIncharge = document.getElementById('inpViewOfficeLocationIncharge');
   if (selIncharge) {
     const empNames = (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData))
-      ? masterEmployeeData.map(e => e.employeeName).filter(Boolean)
+      ? masterEmployeeData.map(e => e.employeeName || e.employee_name).filter(Boolean)
       : ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Suresh Reddy', 'Anirban Das'];
 
-    if (loc.inCharge && !empNames.includes(loc.inCharge)) {
-      empNames.unshift(loc.inCharge);
+    const inchargeVal = loc.in_charge || loc.inCharge || '';
+    if (inchargeVal && !empNames.includes(inchargeVal)) {
+      empNames.unshift(inchargeVal);
     }
 
-    selIncharge.innerHTML = empNames.map(name => `<option value="${name}" ${name === loc.inCharge ? 'selected' : ''}>${name}</option>`).join('');
+    selIncharge.innerHTML = empNames.map(name => `<option value="${name}" ${name === inchargeVal ? 'selected' : ''}>${name}</option>`).join('');
   }
 
   const inpId = document.getElementById('inpViewOfficeId');
-  if (inpId) inpId.value = loc.id;
+  if (inpId) inpId.value = currentViewedOfficeId;
 
   const inpCode = document.getElementById('inpViewOfficeLocationCode');
-  if (inpCode) inpCode.value = loc.officeCode || '';
+  if (inpCode) inpCode.value = loc.office_code || loc.officeCode || '';
 
   const inpName = document.getElementById('inpViewOfficeLocationName');
-  if (inpName) inpName.value = loc.officeName || '';
+  if (inpName) inpName.value = locName;
 
   const inpAddress = document.getElementById('inpViewOfficeLocationAddress');
   if (inpAddress) inpAddress.value = loc.address || '';
@@ -17656,22 +18653,22 @@ function openViewCompanyLocationCard(locId) {
   if (inpLng) inpLng.value = loc.longitude || '';
 
   const inpLLName = document.getElementById('inpViewOfficeLocationLLName');
-  if (inpLLName) inpLLName.value = loc.llName || '';
+  if (inpLLName) inpLLName.value = loc.ll_name || loc.llName || '';
 
   const inpLLContact = document.getElementById('inpViewOfficeLocationLLContact');
-  if (inpLLContact) inpLLContact.value = loc.llContact || '';
+  if (inpLLContact) inpLLContact.value = loc.ll_contact_number || loc.llContact || '';
 
   const inpRental = document.getElementById('inpViewOfficeLocationRental');
-  if (inpRental) inpRental.value = loc.rental || '';
+  if (inpRental) inpRental.value = loc.rental_amount || loc.rental || '';
 
   const selTds = document.getElementById('inpViewOfficeLocationTDSDeduction');
-  if (selTds) selTds.value = loc.tdsDeduction || 'Applicable';
+  if (selTds) selTds.value = loc.tds_deduction || loc.tdsDeduction || 'Applicable';
 
   const selTdsRate = document.getElementById('inpViewOfficeLocationTDSRate');
-  if (selTdsRate) selTdsRate.value = loc.tdsRate || '1% / 2% / 10%';
+  if (selTdsRate) selTdsRate.value = loc.tds_rate || loc.tdsRate || '10%';
 
   const inpEb = document.getElementById('inpViewOfficeLocationEBSC');
-  if (inpEb) inpEb.value = loc.ebSc || '';
+  if (inpEb) inpEb.value = loc.eb_sc_number || loc.ebSc || '';
 
   const chkStatus = document.getElementById('inpViewOfficeLocationStatus');
   if (chkStatus) {
@@ -17686,7 +18683,7 @@ function openViewCompanyLocationCard(locId) {
 
   if (locPanel) locPanel.classList.add('card-dimmed-blurred');
   locCard.style.display = 'block';
-  showToast(`Viewing office location: ${loc.officeName}`);
+  showToast(`Viewing office location: ${locName}`);
 }
 
 function renderCompanyLocationTable() {
@@ -17709,15 +18706,19 @@ function renderCompanyLocationTable() {
 
   tbody.innerHTML = filtered.map(row => {
     const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
+    const locId = row.office_id || row.id;
+    const locCode = row.office_code || row.officeCode || '';
+    const locName = row.office_name || row.officeName || '';
+    const incharge = row.in_charge || row.inCharge || '';
     return `
-      <tr data-location-id="${row.id}">
-        <td class="col-loc-code td-center">${row.officeCode || ''}</td>
+      <tr data-location-id="${locId}">
+        <td class="col-loc-code td-center">${locCode}</td>
         <td class="col-loc-name" style="text-align: left !important; padding-left: 14px;">
-          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyLocationCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${row.officeName || ''}</a>
+          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyLocationCard('${locId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${locName}</a>
         </td>
         <td class="col-loc-lat td-center">${row.latitude || ''}</td>
         <td class="col-loc-lng td-center">${row.longitude || ''}</td>
-        <td class="col-loc-incharge" style="text-align: left !important; padding-left: 14px;">${row.inCharge || ''}</td>
+        <td class="col-loc-incharge" style="text-align: left !important; padding-left: 14px;">${incharge}</td>
         <td class="col-loc-status td-center">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'In - Active' : 'Active'}</span>
         </td>

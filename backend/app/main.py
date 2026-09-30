@@ -1,6 +1,8 @@
+import os
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.api.v1.router import api_router
@@ -38,6 +40,12 @@ def health_check():
 # Register Version 1 Routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+# Mount Frontend Static Files if directory exists
+frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend"))
+if os.path.exists(frontend_dir):
+    app.mount("/static", StaticFiles(directory=frontend_dir, html=True), name="static")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
+

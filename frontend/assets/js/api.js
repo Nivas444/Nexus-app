@@ -926,6 +926,120 @@
           method: 'DELETE'
         });
       }
+    },
+
+    company: {
+      async get(params = {}) {
+        const query = new URLSearchParams();
+        if (params.company_name || params.companyName) query.set('company_name', params.company_name || params.companyName);
+        if (params.company_id || params.companyId) query.set('company_id', params.company_id || params.companyId);
+        const qs = query.toString();
+        return await request(`/master/company${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getAll() {
+        return await request('/master/companies', { method: 'GET' });
+      },
+      async update(companyIdOrName, payload) {
+        return await request(`/master/company/${encodeURIComponent(companyIdOrName)}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    companyBank: {
+      async getAll(companyName = 'Nexus', status = null) {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        if (status) query.set('status', status);
+        const qs = query.toString();
+        return await request(`/master/company-bank-accounts${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async create(payload, companyName = 'Nexus') {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        const qs = query.toString();
+        return await request(`/master/company-bank-accounts${qs ? '?' + qs : ''}`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(bankAccountId, payload, companyName = 'Nexus') {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        const qs = query.toString();
+        return await request(`/master/company-bank-accounts/${bankAccountId}${qs ? '?' + qs : ''}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    companyLocations: {
+      async getAll(companyName = 'Nexus', status = null) {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        if (status) query.set('status', status);
+        const qs = query.toString();
+        return await request(`/master/company-locations${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async create(payload, companyName = 'Nexus') {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        const qs = query.toString();
+        return await request(`/master/company-locations${qs ? '?' + qs : ''}`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(officeId, payload, companyName = 'Nexus') {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        const qs = query.toString();
+        return await request(`/master/company-locations/${officeId}${qs ? '?' + qs : ''}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    companyHolidays: {
+      async getAll(companyName = 'Nexus', year = null, status = null) {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        if (year) query.set('year', year);
+        if (status) query.set('status', status);
+        const qs = query.toString();
+        return await request(`/master/company-holidays${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async create(payload, companyName = 'Nexus') {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        const qs = query.toString();
+        return await request(`/master/company-holidays${qs ? '?' + qs : ''}`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    hrCompliance: {
+      async getAll(companyName = 'Nexus', complianceType = null) {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        if (complianceType) query.set('compliance_type', complianceType);
+        const qs = query.toString();
+        return await request(`/master/hr-compliance${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async create(payload, companyName = 'Nexus') {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        const qs = query.toString();
+        return await request(`/master/hr-compliance${qs ? '?' + qs : ''}`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
     }
   };
 

@@ -3421,20 +3421,6 @@
                 </tr>
               </thead>
               <tbody id="tbodySalaryDetails">
-                <tr>
-                  <td class="col-salary-year">2024</td>
-                  <td class="col-salary-month">01</td>
-                  <td class="col-salary-year">2025</td>
-                  <td class="col-salary-month">12</td>
-                  <td class="col-salary-sub col-salary-basic">25000.00</td>
-                  <td class="col-salary-sub col-salary-hra">10000.00</td>
-                  <td class="col-salary-sub col-salary-da">5000.00</td>
-                  <td class="col-salary-sub col-salary-sa">2000.00</td>
-                  <td class="col-salary-sub col-salary-total">42000.00</td>
-                  <td class="col-salary-status">
-                    <span class="status-badge status-active">Active</span>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -3459,8 +3445,10 @@
           <!-- Sigma Sum Icon Bar Above Table Matching Uploaded Mockup 2 -->
           <div
             style="display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: #ffffff;">
-            <span style="color: #2563eb; font-weight: 800; font-size: 1.5rem; line-height: 1; user-select: none;"
-              title="Total Sum">∑</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="icons/summation.svg" alt="Total Sum" width="26" height="26" style="display: block; object-fit: contain;">
+              <span id="lblAssetTotalAmt" style="font-weight: 700; font-size: 1.05rem; color: #2563eb; line-height: 1;">0.00</span>
+            </div>
           </div>
 
           <!-- Table Body Matching Uploaded Mockup 2 -->
@@ -3478,15 +3466,6 @@
                 </tr>
               </thead>
               <tbody id="tbodyAssetDetails">
-                <tr>
-                  <td class="col-asset-date">01-01-2024</td>
-                  <td class="col-asset-detail">Laptop Dell Latitude</td>
-                  <td class="col-asset-uom">Nos</td>
-                  <td class="col-asset-qty">1</td>
-                  <td class="col-asset-rate">55000.00</td>
-                  <td class="col-asset-amount">55000.00</td>
-                  <td class="col-asset-expiry">01-01-2027</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -4726,7 +4705,9 @@
             <div class="form-row-group">
               <label class="form-label" for="inpAddBankResponsible">Responsible</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpAddBankResponsible" placeholder="">
+                <select class="form-select-control" id="inpAddBankResponsible">
+                  <option value="">Select Responsible</option>
+                </select>
               </div>
             </div>
 

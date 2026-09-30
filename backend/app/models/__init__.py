@@ -2,6 +2,13 @@ from app.models.expense import CompanyExpense
 from app.models.product import CompanyProduct
 from app.models.customer import Customer, CustomerContact, CustomerOfficeLocation
 from app.models.employee import CompanyEmployee, CompanyEmployeeDocument
+from app.models.employee_subdetails import (
+    EmployeeBankDetail,
+    EmployeeBankDocument,
+    EmployeeAssetDetail,
+    EmployeeSalaryDetail
+)
+from app.models.vendor import VendorMaster, VendorPrice
 
 __all__ = [
     "CompanyExpense",
@@ -10,5 +17,12 @@ __all__ = [
     "CustomerContact",
     "CustomerOfficeLocation",
     "CompanyEmployee",
-    "CompanyEmployeeDocument"
+    "CompanyEmployeeDocument",
+    "EmployeeBankDetail",
+    "EmployeeBankDocument",
+    "EmployeeAssetDetail",
+    "EmployeeSalaryDetail",
+    "VendorMaster",
+    "VendorPrice"
 ]
+

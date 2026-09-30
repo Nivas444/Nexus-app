@@ -137,111 +137,252 @@ async function loadMasterCustomersFromApi() {
 }
 
 
-// Master -> Vendor Dataset (Matching Uploaded Mockup)
-const masterVendorData = [
-  {
-    id: "vend-1",
-    vendorName: "Apex Telecom Infrastructure",
-    businessType: "Telecom",
-    serviceType: "Project",
-    vendorType: "Telecom",
-    vendorId: "230510678",
-    gstNumber: "33ASMPM8643F1Z5",
-    panNumber: "ASMPM8643F",
-    gstType: "SGST",
-    status: "Active",
-    tdsDeduction: true,
-    tdsCode: "1027",
-    tdsRate: "1%",
-    address: "123 Telecom Tower Complex, Chennai",
-    tcsDeduction: false
-  },
-  {
-    id: "vend-2",
-    vendorName: "Steel Infra Supplies Ltd",
-    businessType: "Supply",
-    serviceType: "Civil",
-    vendorType: "Supply",
-    vendorId: "230510679",
-    gstNumber: "29AABCU9603R1ZM",
-    panNumber: "AABCU9603R",
-    gstType: "IGST",
-    status: "In - Active",
-    tdsDeduction: false,
-    tdsCode: "1031",
-    tdsRate: "2%",
-    address: "45 Industrial Area, Bengaluru",
-    tcsDeduction: true
-  },
-  {
-    id: "vend-3",
-    vendorName: "Express Logistics Services",
-    businessType: "Logistics",
-    serviceType: "Transport",
-    vendorType: "Logistics",
-    vendorId: "230510680",
-    gstNumber: "36BKMPM4321K1Z3",
-    panNumber: "BKMPM4321K",
-    gstType: "SGST",
-    status: "Active",
-    tdsDeduction: true,
-    tdsCode: "1023",
-    tdsRate: "1%",
-    address: "78 Transport Nagar, Hyderabad",
-    tcsDeduction: false
-  },
-  {
-    id: "vend-4",
-    vendorName: "Schneider Electric India Pvt Ltd",
-    businessType: "Electrical",
-    serviceType: "Supply",
-    vendorType: "Electrical",
-    vendorId: "230510681",
-    gstNumber: "27AAACS1234A1Z5",
-    panNumber: "AAACS1234A",
-    gstType: "IGST",
-    status: "Active",
-    tdsDeduction: true,
-    tdsCode: "1027",
-    tdsRate: "2%",
-    address: "88 Andheri East, Mumbai",
-    tcsDeduction: false
-  },
-  {
-    id: "vend-5",
-    vendorName: "Kirloskar Power Systems",
-    businessType: "Power",
-    serviceType: "O&M",
-    vendorType: "Power",
-    vendorId: "230510682",
-    gstNumber: "27AAACK4321B1Z2",
-    panNumber: "AAACK4321B",
-    gstType: "IGST",
-    status: "Active",
-    tdsDeduction: true,
-    tdsCode: "1028",
-    tdsRate: "2%",
-    address: "12 Kirloskar Road, Pune",
-    tcsDeduction: false
-  },
-  {
-    id: "vend-6",
-    vendorName: "Larsen & Toubro Ltd",
-    businessType: "Infra",
-    serviceType: "Construction",
-    vendorType: "Infra",
-    vendorId: "230510683",
-    gstNumber: "33AAACL9876E1Z3",
-    panNumber: "AAACL9876E",
-    gstType: "SGST",
-    status: "In - Active",
-    tdsDeduction: true,
-    tdsCode: "1030",
-    tdsRate: "1%",
-    address: "Mount Poonamallee Road, Manapakkam, Chennai",
-    tcsDeduction: true
+// Master -> Vendor Dataset (Loaded dynamically from PostgreSQL via FastAPI)
+let masterVendorData = [];
+
+// --- VENDOR-SPECIFIC SUB-DATA STORE (Bank, Contacts, Scope) ---
+let currentViewedVendorId = null;
+let isVendorFormEditing = false;
+let isVendorBankEditing = false;
+
+const vendorSubDataStore = {};
+
+let newVendorTempSubData = {
+  bank: null,
+  contacts: [],
+  supplyScope: [],
+  serviceProjectScope: [],
+  serviceTransportScope: [],
+  serviceOthersScope: []
+};
+
+async function loadMasterVendorsFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+    try {
+      const response = await NexusApi.vendors.getAll({ limit: 500 });
+      let items = [];
+      if (response && Array.isArray(response.items)) {
+        items = response.items;
+      } else if (Array.isArray(response)) {
+        items = response;
+      }
+      masterVendorData = items.map(v => {
+        const vId = v.vendor_id || v.id;
+        if (!vendorSubDataStore[vId]) {
+          vendorSubDataStore[vId] = {
+            bank: (v.account_name || v.account_number || v.bank_name) ? {
+              accountName: v.account_name || '',
+              accountNumber: v.account_number || '',
+              bankName: v.bank_name || '',
+              accountType: v.account_type || '',
+              ifscCode: v.ifsc_code || '',
+              status: v.status || 'Active'
+            } : null,
+            contacts: v.contact_name ? [{
+              id: `c-${vId}-1`,
+              name: v.contact_name,
+              designation: 'Primary Contact',
+              phone: v.contact_number || '',
+              email: v.email || '',
+              status: v.status || 'Active'
+            }] : [],
+            supplyScope: [],
+            serviceProjectScope: [],
+            serviceTransportScope: [],
+            serviceOthersScope: []
+          };
+        } else {
+          if (v.account_name || v.account_number || v.bank_name) {
+            vendorSubDataStore[vId].bank = {
+              accountName: v.account_name || '',
+              accountNumber: v.account_number || '',
+              bankName: v.bank_name || '',
+              accountType: v.account_type || '',
+              ifscCode: v.ifsc_code || '',
+              status: v.status || 'Active'
+            };
+          }
+          if (v.contact_name && (!vendorSubDataStore[vId].contacts || vendorSubDataStore[vId].contacts.length === 0)) {
+            vendorSubDataStore[vId].contacts = [{
+              id: `c-${vId}-1`,
+              name: v.contact_name,
+              designation: 'Primary Contact',
+              phone: v.contact_number || '',
+              email: v.email || '',
+              status: v.status || 'Active'
+            }];
+          }
+        }
+
+        return {
+          ...v,
+          id: vId,
+          vendor_id: vId,
+          vendorName: v.vendor_name || v.vendorName || '',
+          vendor_name: v.vendor_name || v.vendorName || '',
+          entityType: v.entity_type || v.entityType || 'Proprietorship',
+          businessType: v.business_type || v.businessType || 'Supply',
+          vendorType: v.business_type || v.vendorType || 'Supply',
+          serviceType: v.service_type || v.serviceType || '',
+          contractType: v.contract_type || v.contractType || '',
+          gstEnabled: (v.gst_number_available !== undefined) ? v.gst_number_available : (v.gst_number && v.gst_number !== 'NA' && v.gst_number !== ''),
+          gstNumber: v.gst_number || v.gstNumber || '',
+          gstType: v.gst_type || v.gstType || 'SGST',
+          panNumber: v.pan_number || v.panNumber || '',
+          tdsDeduction: v.tds_deduction !== undefined ? v.tds_deduction : false,
+          tdsCode: v.tds_code || v.tdsCode || '',
+          tdsRate: v.tds_rate ? `${v.tds_rate}%` : (v.tdsRate || '1%'),
+          address: v.address || '',
+          status: v.status || 'Active'
+        };
+      });
+    } catch (err) {
+      console.error('Error fetching master vendors from API:', err);
+      if (typeof showToast === 'function') {
+        showToast('Could not load vendors from database: ' + (err.message || err));
+      }
+    }
   }
-];
+  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'vendor') {
+    currentDataset = [...masterVendorData];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+  }
+}
+
+async function loadVendorPricingFromApi(vendorId) {
+  if (typeof NexusApi !== 'undefined' && NexusApi.vendors && vendorId) {
+    try {
+      const numericId = parseInt(vendorId, 10);
+      const res = !isNaN(numericId) ? await NexusApi.vendors.getPricing(numericId) : null;
+      if (res && Array.isArray(res.items)) {
+        if (!vendorSubDataStore[vendorId]) {
+          vendorSubDataStore[vendorId] = {
+            bank: null,
+            contacts: [],
+            supplyScope: [],
+            serviceProjectScope: [],
+            serviceTransportScope: [],
+            serviceOthersScope: []
+          };
+        }
+        const store = vendorSubDataStore[vendorId];
+        store.supplyScope = [];
+        store.serviceProjectScope = [];
+        store.serviceTransportScope = [];
+        store.serviceOthersScope = [];
+
+        res.items.forEach(item => {
+          if (item.vehicle_type || item.vehicle_number) {
+            store.serviceTransportScope.push({
+              id: item.vendor_service_id || item.id,
+              vendor_service_id: item.vendor_service_id,
+              vehicleType: item.vehicle_type || '',
+              vehicleNumber: item.vehicle_number || '',
+              fuelType: item.fuel_type || '',
+              range: item.range_value ? String(item.range_value) : (item.sub_project_type || 'Project'),
+              rentalType: item.rental_type || 'Monthly',
+              rate: item.rate ? String(item.rate) : '',
+              status: item.status || 'Active'
+            });
+          } else if (item.sub_project_type && item.sub_project_type.toLowerCase() !== 'supply') {
+            store.serviceProjectScope.push({
+              id: item.vendor_service_id || item.id,
+              vendor_service_id: item.vendor_service_id,
+              subProjectType: item.sub_project_type || '',
+              uom: item.item_description || 'LS',
+              rate: item.rate ? String(item.rate) : '',
+              status: item.status || 'Active'
+            });
+          } else if (item.service_description) {
+            store.serviceOthersScope.push({
+              id: item.vendor_service_id || item.id,
+              vendor_service_id: item.vendor_service_id,
+              description: item.service_description || '',
+              from: item.fromDate || '01 - 01 - 2026',
+              to: item.toDate || '31 - 12 - 2026',
+              uom: item.item_description || 'Project',
+              rate: item.rate ? String(item.rate) : '',
+              status: item.status || 'Active'
+            });
+          } else {
+            store.supplyScope.push({
+              id: item.vendor_service_id || item.id,
+              vendor_service_id: item.vendor_service_id,
+              category: item.sub_project_type || 'Supply',
+              productName: item.product_name || '',
+              uom: item.item_description || 'Nos',
+              price: item.rate ? String(item.rate) : '',
+              status: item.status || 'Active'
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Could not fetch vendor pricing from API:', err);
+    }
+  }
+}
+
+function getEffectiveVendorContext() {
+  if (currentViewedVendorId) {
+    if (!vendorSubDataStore[currentViewedVendorId]) {
+      vendorSubDataStore[currentViewedVendorId] = {
+        bank: null,
+        contacts: [],
+        supplyScope: [],
+        serviceProjectScope: [],
+        serviceTransportScope: [],
+        serviceOthersScope: []
+      };
+    }
+    return vendorSubDataStore[currentViewedVendorId];
+  }
+  return newVendorTempSubData;
+}
+
+function loadVendorBankDataToForm() {
+  const ctx = getEffectiveVendorContext();
+  const bank = ctx.bank;
+  const inpName = document.getElementById('inpVendorBankAccountName');
+  const inpNum = document.getElementById('inpVendorBankAccountNumber');
+  const inpIfsc = document.getElementById('inpVendorBankIfsc');
+  const selBank = document.getElementById('inpVendorBankName');
+  const chkStatus = document.getElementById('inpVendorBankStatusToggle');
+
+  if (bank) {
+    if (inpName) inpName.value = bank.accountName || '';
+    if (inpNum) inpNum.value = bank.accountNumber || '';
+    if (inpIfsc) inpIfsc.value = bank.ifscCode || '';
+    if (selBank) selBank.value = bank.bankName || '';
+    if (chkStatus) chkStatus.checked = (bank.status || '').toLowerCase() === 'active';
+  } else {
+    if (inpName) inpName.value = '';
+    if (inpNum) inpNum.value = '';
+    if (inpIfsc) inpIfsc.value = '';
+    if (selBank) selBank.value = '';
+    if (chkStatus) chkStatus.checked = true;
+  }
+}
+
+function saveVendorBankDataFromForm() {
+  const ctx = getEffectiveVendorContext();
+  const inpName = document.getElementById('inpVendorBankAccountName');
+  const inpNum = document.getElementById('inpVendorBankAccountNumber');
+  const inpIfsc = document.getElementById('inpVendorBankIfsc');
+  const selBank = document.getElementById('inpVendorBankName');
+  const chkStatus = document.getElementById('inpVendorBankStatusToggle');
+
+  ctx.bank = {
+    accountName: inpName ? inpName.value.trim() : '',
+    accountNumber: inpNum ? inpNum.value.trim() : '',
+    ifscCode: inpIfsc ? inpIfsc.value.trim() : '',
+    bankName: selBank ? selBank.value : '',
+    status: (chkStatus && chkStatus.checked) ? 'Active' : 'In - Active'
+  };
+}
+
 
 // Master -> Products Dataset (Loaded dynamically from PostgreSQL via FastAPI)
 let masterProductsData = [];
@@ -5191,6 +5332,9 @@ function loadMasterDataset() {
     }
   } else if (currentMasterSubpage === 'vendor') {
     currentDataset = [...masterVendorData];
+    if (typeof loadMasterVendorsFromApi === 'function') {
+      loadMasterVendorsFromApi();
+    }
   } else if (currentMasterSubpage === 'products') {
     currentDataset = [...masterProductsData];
     if (typeof loadMasterProductsFromApi === 'function') {
@@ -5281,6 +5425,7 @@ function renderMasterToolbar() {
   }
 
   document.getElementById('btnMasterAdd')?.addEventListener('click', () => {
+    currentViewedVendorId = null;
     openSideForm();
   });
 
@@ -11557,13 +11702,13 @@ function initSideFormEvents() {
   // Submit / Save New Contact Form
   const btnSubmitNewContact = document.getElementById('btnSubmitNewContact');
   if (btnSubmitNewContact) {
-    btnSubmitNewContact.addEventListener('click', () => {
+    btnSubmitNewContact.addEventListener('click', async () => {
       const nameVal = document.getElementById('inpNewContactName')?.value.trim() || 'New Contact';
       const desigVal = document.getElementById('inpNewContactDesignation')?.value.trim() || '';
       const phoneVal = document.getElementById('inpNewContactPhone')?.value.trim() || '';
       const emailVal = document.getElementById('inpNewContactEmail')?.value.trim() || '';
       const isStatusActive = document.getElementById('inpNewContactStatusToggle') ? document.getElementById('inpNewContactStatusToggle').checked : true;
-      const statusVal = isStatusActive ? 'Active' : 'Inactive';
+      const statusVal = isStatusActive ? 'Active' : 'In - Active';
 
       const newContact = {
         id: 'c-' + Date.now(),
@@ -11574,7 +11719,9 @@ function initSideFormEvents() {
         status: statusVal
       };
 
-      vendorContactData.push(newContact);
+      const ctx = getEffectiveVendorContext();
+      if (!ctx.contacts) ctx.contacts = [];
+      ctx.contacts.push(newContact);
       renderVendorContactTable();
 
       // Reset fields
@@ -11589,9 +11736,47 @@ function initSideFormEvents() {
       const ac = document.getElementById('addContactFormCard');
       if (ac) ac.style.display = 'none';
       const contactPanel = document.getElementById('contactDetailsSidePanel');
-      if (contactPanel) contactPanel.classList.remove('card-dimmed-blurred');
+      if (contactPanel) {
+        contactPanel.style.display = 'none';
+        contactPanel.classList.remove('card-dimmed-blurred');
+      }
 
-      showToast('New Contact details added successfully!');
+      const vendorCard = document.getElementById('addVendorCard');
+      if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      if (typeof updateCardDimmedState === 'function') updateCardDimmedState();
+
+      const numericVendorId = parseInt(currentViewedVendorId, 10);
+      if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+        try {
+          await NexusApi.vendors.updateContact(numericVendorId, {
+            contact_name: nameVal,
+            contact_number: phoneVal,
+            email: emailVal,
+            status: statusVal
+          });
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Contact details saved successfully!', 'Task Completed');
+          } else {
+            showToast('New Contact details added successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to save vendor contact:', err);
+          const errorMsg = err.detail || err.message || 'Failed to save contact';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errorMsg, 'Error Message!');
+          } else {
+            showToast(`Error: ${errorMsg}`);
+          }
+        }
+      } else {
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Contact details saved successfully!', 'Task Completed');
+        } else {
+          showToast('New Contact details added successfully!');
+        }
+      }
     });
   }
 
@@ -11607,6 +11792,7 @@ function initSideFormEvents() {
       if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
       const cardsRow = document.querySelector('.side-form-cards-row');
       if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      if (typeof updateCardDimmedState === 'function') updateCardDimmedState();
       showToast('Contact details closed');
     });
   }
@@ -11639,11 +11825,13 @@ function initSideFormEvents() {
             let addedCount = 0;
 
             const startIdx = (lines.length > 0 && (lines[0].toLowerCase().includes('category') || lines[0].toLowerCase().includes('product') || lines[0].toLowerCase().includes('name'))) ? 1 : 0;
+            const ctx = getEffectiveVendorContext();
+            if (!ctx.supplyScope) ctx.supplyScope = [];
 
             for (let i = startIdx; i < lines.length; i++) {
               const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
               if (cols.length >= 2 && cols[0]) {
-                vendorSupplyScopeData.push({
+                ctx.supplyScope.push({
                   id: 'ss-' + Date.now() + '-' + i,
                   category: cols[0] || 'Supply',
                   productName: cols[1] || ('230510' + Math.floor(100 + Math.random() * 900)),
@@ -11656,10 +11844,10 @@ function initSideFormEvents() {
             }
 
             if (addedCount === 0) {
-              vendorSupplyScopeData.push({
+              ctx.supplyScope.push({
                 id: 'ss-' + Date.now(),
                 category: 'Supply',
-                productName: 'Imported ' + (vendorSupplyScopeData.length + 1),
+                productName: 'Imported ' + (ctx.supplyScope.length + 1),
                 uom: 'Nos',
                 price: '15000.00',
                 status: 'Active'
@@ -11676,10 +11864,12 @@ function initSideFormEvents() {
         reader.readAsText(file);
       } else {
         // Excel file (.xlsx, .xls)
-        vendorSupplyScopeData.push({
+        const ctx = getEffectiveVendorContext();
+        if (!ctx.supplyScope) ctx.supplyScope = [];
+        ctx.supplyScope.push({
           id: 'ss-' + Date.now(),
           category: 'Supply',
-          productName: 'Excel Import ' + (vendorSupplyScopeData.length + 1),
+          productName: 'Excel Import ' + (ctx.supplyScope.length + 1),
           uom: 'Nos',
           price: '15000.00',
           status: 'Active'
@@ -11720,7 +11910,7 @@ function initSideFormEvents() {
   // Save Product via Header Edit/Save Icon
   const btnProductScopeSave = document.getElementById('btnProductScopeEditToggle');
   if (btnProductScopeSave) {
-    btnProductScopeSave.addEventListener('click', () => {
+    btnProductScopeSave.addEventListener('click', async () => {
       const catVal = document.getElementById('selAddProductCategory')?.value || 'Supply';
       const prodNameVal = document.getElementById('selAddProductName')?.value || '230510678';
       const isStatusActive = document.getElementById('inpAddProductStatusToggle')?.checked;
@@ -11735,7 +11925,9 @@ function initSideFormEvents() {
         status: statusVal
       };
 
-      vendorSupplyScopeData.push(newProduct);
+      const ctx = getEffectiveVendorContext();
+      if (!ctx.supplyScope) ctx.supplyScope = [];
+      ctx.supplyScope.push(newProduct);
       renderVendorSupplyScopeTable();
 
       const ap = document.getElementById('addProductScopeCard');
@@ -11743,7 +11935,39 @@ function initSideFormEvents() {
       const scopePanel = document.getElementById('vendorSupplyScopeSidePanel');
       if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
 
-      showToast('New Product added to Supply Scope!');
+      const numericVendorId = parseInt(currentViewedVendorId, 10);
+      if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+        try {
+          const created = await NexusApi.vendors.createPricing(numericVendorId, {
+            product_name: prodNameVal,
+            sub_project_type: catVal,
+            item_description: 'R/RL-234567',
+            rate: 15000.00,
+            status: statusVal
+          });
+          newProduct.id = created.vendor_service_id || created.id;
+          newProduct.vendor_service_id = created.vendor_service_id;
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+          } else {
+            showToast('New Product added to Supply Scope!');
+          }
+        } catch (err) {
+          console.error('Failed to save supply scope:', err);
+          const errorMsg = err.detail || err.message || 'Failed to save supply scope';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errorMsg, 'Error Message!');
+          } else {
+            showToast(`Error: ${errorMsg}`);
+          }
+        }
+      } else {
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+        } else {
+          showToast('New Product added to Supply Scope!');
+        }
+      }
     });
   }
 
@@ -11790,11 +12014,13 @@ function initSideFormEvents() {
             let addedCount = 0;
 
             const startIdx = (lines.length > 0 && (lines[0].toLowerCase().includes('project') || lines[0].toLowerCase().includes('type') || lines[0].toLowerCase().includes('sub'))) ? 1 : 0;
+            const ctx = getEffectiveVendorContext();
+            if (!ctx.serviceProjectScope) ctx.serviceProjectScope = [];
 
             for (let i = startIdx; i < lines.length; i++) {
               const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
               if (cols.length >= 2 && cols[0]) {
-                vendorServiceProjectScopeData.push({
+                ctx.serviceProjectScope.push({
                   id: 'sps-' + Date.now() + '-' + i,
                   subProjectType: cols[0] || 'Project',
                   uom: cols[1] || 'LS',
@@ -11806,9 +12032,9 @@ function initSideFormEvents() {
             }
 
             if (addedCount === 0) {
-              vendorServiceProjectScopeData.push({
+              ctx.serviceProjectScope.push({
                 id: 'sps-' + Date.now(),
-                subProjectType: 'Imported Project ' + (vendorServiceProjectScopeData.length + 1),
+                subProjectType: 'Imported Project ' + (ctx.serviceProjectScope.length + 1),
                 uom: 'LS',
                 rate: '',
                 status: 'Active'
@@ -11824,9 +12050,11 @@ function initSideFormEvents() {
         };
         reader.readAsText(file);
       } else {
-        vendorServiceProjectScopeData.push({
+        const ctx = getEffectiveVendorContext();
+        if (!ctx.serviceProjectScope) ctx.serviceProjectScope = [];
+        ctx.serviceProjectScope.push({
           id: 'sps-' + Date.now(),
-          subProjectType: 'Excel Project ' + (vendorServiceProjectScopeData.length + 1),
+          subProjectType: 'Excel Project ' + (ctx.serviceProjectScope.length + 1),
           uom: 'LS',
           rate: '',
           status: 'Active'
@@ -11866,7 +12094,7 @@ function initSideFormEvents() {
   // Save Sub - Project Type via Bottom Save Button
   const btnSubmitSubProject = document.getElementById('btnSubmitSubProjectType');
   if (btnSubmitSubProject) {
-    btnSubmitSubProject.addEventListener('click', () => {
+    btnSubmitSubProject.addEventListener('click', async () => {
       const subTypeVal = document.getElementById('selAddSubProjectType')?.value || 'Project';
       const uomVal = document.getElementById('selAddSubProjectUom')?.value || 'PO / LS';
       const isStatusActive = document.getElementById('inpAddSubProjectStatusToggle')?.checked;
@@ -11880,7 +12108,9 @@ function initSideFormEvents() {
         status: statusVal
       };
 
-      vendorServiceProjectScopeData.push(newRec);
+      const ctx = getEffectiveVendorContext();
+      if (!ctx.serviceProjectScope) ctx.serviceProjectScope = [];
+      ctx.serviceProjectScope.push(newRec);
       renderVendorServiceProjectScopeTable();
 
       const ap = document.getElementById('addSubProjectTypeCard');
@@ -11888,7 +12118,37 @@ function initSideFormEvents() {
       const scopePanel = document.getElementById('vendorServiceProjectScopeSidePanel');
       if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
 
-      showToast('New Sub - Project Type added to Project Scope!');
+      const numericVendorId = parseInt(currentViewedVendorId, 10);
+      if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+        try {
+          const created = await NexusApi.vendors.createPricing(numericVendorId, {
+            sub_project_type: subTypeVal,
+            item_description: uomVal,
+            status: statusVal
+          });
+          newRec.id = created.vendor_service_id || created.id;
+          newRec.vendor_service_id = created.vendor_service_id;
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+          } else {
+            showToast('New Sub - Project Type added to Project Scope!');
+          }
+        } catch (err) {
+          console.error('Failed to save project scope:', err);
+          const errorMsg = err.detail || err.message || 'Failed to save project scope';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errorMsg, 'Error Message!');
+          } else {
+            showToast(`Error: ${errorMsg}`);
+          }
+        }
+      } else {
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+        } else {
+          showToast('New Sub - Project Type added to Project Scope!');
+        }
+      }
     });
   }
 
@@ -12059,7 +12319,7 @@ function initSideFormEvents() {
   // Save Vehicle via Bottom Save Button
   const btnSubmitVehicle = document.getElementById('btnSubmitVehicleScope');
   if (btnSubmitVehicle) {
-    btnSubmitVehicle.addEventListener('click', () => {
+    btnSubmitVehicle.addEventListener('click', async () => {
       const vTypeVal = document.getElementById('selAddVehicleType')?.value || 'LCV';
       const vNumVal = document.getElementById('inpAddVehicleNumber')?.value || ('230510' + Math.floor(100 + Math.random() * 900));
       const fuelVal = document.getElementById('selAddVehicleFuelType')?.value || 'Petrol';
@@ -12078,7 +12338,9 @@ function initSideFormEvents() {
         status: statusVal
       };
 
-      vendorServiceTransportScopeData.push(newRec);
+      const ctx = getEffectiveVendorContext();
+      if (!ctx.serviceTransportScope) ctx.serviceTransportScope = [];
+      ctx.serviceTransportScope.push(newRec);
       renderVendorServiceTransportScopeTable();
 
       const addVehCard = document.getElementById('addVehicleScopeCard');
@@ -12086,7 +12348,40 @@ function initSideFormEvents() {
       const scopePanel = document.getElementById('vendorServiceTransportScopeSidePanel');
       if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
 
-      showToast('New Vehicle added to Transport Scope!');
+      const numericVendorId = parseInt(currentViewedVendorId, 10);
+      if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+        try {
+          const created = await NexusApi.vendors.createPricing(numericVendorId, {
+            vehicle_type: vTypeVal,
+            vehicle_number: vNumVal,
+            fuel_type: fuelVal,
+            sub_project_type: rangeVal,
+            rental_type: rentalVal,
+            status: statusVal
+          });
+          newRec.id = created.vendor_service_id || created.id;
+          newRec.vendor_service_id = created.vendor_service_id;
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+          } else {
+            showToast('New Vehicle added to Transport Scope!');
+          }
+        } catch (err) {
+          console.error('Failed to save vehicle scope:', err);
+          const errorMsg = err.detail || err.message || 'Failed to save vehicle scope';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errorMsg, 'Error Message!');
+          } else {
+            showToast(`Error: ${errorMsg}`);
+          }
+        }
+      } else {
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+        } else {
+          showToast('New Vehicle added to Transport Scope!');
+        }
+      }
     });
   }
 
@@ -12235,7 +12530,7 @@ function initSideFormEvents() {
   // Save Other Service via Bottom Save Button
   const btnSubmitOtherService = document.getElementById('btnSubmitOtherServiceScope');
   if (btnSubmitOtherService) {
-    btnSubmitOtherService.addEventListener('click', () => {
+    btnSubmitOtherService.addEventListener('click', async () => {
       const descVal = document.getElementById('selAddOtherServiceDesc')?.value || 'Petrol';
       const uomVal = document.getElementById('selAddOtherServiceUom')?.value || 'Project';
       const rateVal = document.getElementById('inpAddOtherServiceRate')?.value || '1500.00';
@@ -12252,7 +12547,9 @@ function initSideFormEvents() {
         status: statusVal
       };
 
-      vendorServiceOthersScopeData.push(newRec);
+      const ctx = getEffectiveVendorContext();
+      if (!ctx.serviceOthersScope) ctx.serviceOthersScope = [];
+      ctx.serviceOthersScope.push(newRec);
       renderVendorServiceOthersScopeTable();
 
       const addOtherCard = document.getElementById('addOtherServiceScopeCard');
@@ -12260,7 +12557,38 @@ function initSideFormEvents() {
       const scopePanel = document.getElementById('vendorServiceOthersScopeSidePanel');
       if (scopePanel) scopePanel.classList.remove('card-dimmed-blurred');
 
-      showToast('New Service added to Other Service Scope!');
+      const numericVendorId = parseInt(currentViewedVendorId, 10);
+      if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+        try {
+          const created = await NexusApi.vendors.createPricing(numericVendorId, {
+            service_description: descVal,
+            item_description: uomVal,
+            rate: parseFloat(rateVal) || 0,
+            status: statusVal
+          });
+          newRec.id = created.vendor_service_id || created.id;
+          newRec.vendor_service_id = created.vendor_service_id;
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+          } else {
+            showToast('New Service added to Other Service Scope!');
+          }
+        } catch (err) {
+          console.error('Failed to save other service scope:', err);
+          const errorMsg = err.detail || err.message || 'Failed to save service scope';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errorMsg, 'Error Message!');
+          } else {
+            showToast(`Error: ${errorMsg}`);
+          }
+        }
+      } else {
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Supply details saved successfully!', 'Task Completed');
+        } else {
+          showToast('New Service added to Other Service Scope!');
+        }
+      }
     });
   }
 
@@ -13522,13 +13850,36 @@ function initSideFormEvents() {
 
   function updateCardDimmedState() {
     const holidayPanel = document.getElementById('holidaysSidePanel');
+    const addBankCard = document.getElementById('addBankCard');
+    const viewBankCard = document.getElementById('viewBankCard');
+    const addSalaryCard = document.getElementById('addSalaryCard');
+    const addAssetCard = document.getElementById('addAssetCard');
+    const vendorBankCard = document.getElementById('vendorBankSideCard');
+    const addContactCard = document.getElementById('addContactFormCard');
+    const vendorSupplyScope = document.getElementById('vendorSupplyScopeSidePanel');
+    const addProductScope = document.getElementById('addProductScopeCard');
+    const vendorServiceProject = document.getElementById('vendorServiceProjectScopeSidePanel');
+    const vendorServiceTransport = document.getElementById('vendorServiceTransportScopeSidePanel');
+    const vendorServiceOthers = document.getElementById('vendorServiceOthersScopeSidePanel');
+
     const isAnyPopupOpen = 
       (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') ||
       (holidayPanel && holidayPanel.style.display !== 'none' && holidayPanel.style.display !== '') ||
       (salaryPanel && salaryPanel.style.display !== 'none' && salaryPanel.style.display !== '') ||
       (assetPanel && assetPanel.style.display !== 'none' && assetPanel.style.display !== '') ||
       (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') ||
-      (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '');
+      (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '') ||
+      (addBankCard && addBankCard.style.display !== 'none' && addBankCard.style.display !== '') ||
+      (viewBankCard && viewBankCard.style.display !== 'none' && viewBankCard.style.display !== '') ||
+      (addSalaryCard && addSalaryCard.style.display !== 'none' && addSalaryCard.style.display !== '') ||
+      (addAssetCard && addAssetCard.style.display !== 'none' && addAssetCard.style.display !== '') ||
+      (vendorBankCard && vendorBankCard.style.display !== 'none' && vendorBankCard.style.display !== '') ||
+      (addContactCard && addContactCard.style.display !== 'none' && addContactCard.style.display !== '') ||
+      (vendorSupplyScope && vendorSupplyScope.style.display !== 'none' && vendorSupplyScope.style.display !== '') ||
+      (addProductScope && addProductScope.style.display !== 'none' && addProductScope.style.display !== '') ||
+      (vendorServiceProject && vendorServiceProject.style.display !== 'none' && vendorServiceProject.style.display !== '') ||
+      (vendorServiceTransport && vendorServiceTransport.style.display !== 'none' && vendorServiceTransport.style.display !== '') ||
+      (vendorServiceOthers && vendorServiceOthers.style.display !== 'none' && vendorServiceOthers.style.display !== '');
 
     const cardsRow = document.querySelector('.side-form-cards-row');
     const empCard = document.getElementById('addEmployeeCard');
@@ -13548,6 +13899,7 @@ function initSideFormEvents() {
       if (customerCard) customerCard.classList.remove('card-dimmed-blurred');
       if (indusCard) indusCard.classList.remove('card-dimmed-blurred');
       if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+      document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
     }
   }
 
@@ -13620,15 +13972,35 @@ function initSideFormEvents() {
 
   const btnSubmitVendorBank = document.getElementById('btnSubmitVendorBank');
   if (btnSubmitVendorBank) {
-    btnSubmitVendorBank.addEventListener('click', (e) => {
+    btnSubmitVendorBank.addEventListener('click', async (e) => {
       e.preventDefault();
+      saveVendorBankDataFromForm();
       const vb = document.getElementById('vendorBankSideCard');
       if (vb) vb.style.display = 'none';
       const vendorCard = document.getElementById('addVendorCard');
       if (vendorCard) vendorCard.classList.remove('card-dimmed-blurred');
       const cardsRow = document.querySelector('.side-form-cards-row');
       if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
-      showToast('Vendor bank details saved successfully!');
+
+      const numericVendorId = parseInt(currentViewedVendorId, 10);
+      if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+        try {
+          const ctx = getEffectiveVendorContext();
+          await NexusApi.vendors.updateBank(numericVendorId, {
+            account_name: ctx.bank?.accountName || '',
+            account_number: ctx.bank?.accountNumber || '',
+            bank_name: ctx.bank?.bankName || '',
+            ifsc_code: ctx.bank?.ifscCode || ''
+          });
+          await loadMasterVendorsFromApi();
+          showToast('Vendor bank details saved to database!');
+        } catch (err) {
+          console.error('Error saving bank details to API:', err);
+          showToast('Failed to save bank details: ' + (err.message || 'Unknown error'));
+        }
+      } else {
+        showToast('Vendor bank details saved successfully!');
+      }
     });
   }
 
@@ -13646,6 +14018,8 @@ function initSideFormEvents() {
       bankPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
+        const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+        if (window.loadEmployeeBankData) window.loadEmployeeBankData(activeEmp);
         showToast('Bank details opened');
       } else {
         showToast('Bank details closed');
@@ -13664,6 +14038,8 @@ function initSideFormEvents() {
       salaryPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
+        const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+        if (window.loadEmployeeSalaryData) window.loadEmployeeSalaryData(activeEmp);
         showToast('Salary Details opened');
       } else {
         showToast('Salary Details closed');
@@ -13682,6 +14058,8 @@ function initSideFormEvents() {
       assetPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
+        const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+        if (window.loadEmployeeAssetData) window.loadEmployeeAssetData(activeEmp);
         showToast('Asset Details opened');
       } else {
         showToast('Asset Details closed');
@@ -13694,17 +14072,30 @@ function initSideFormEvents() {
   const btnCloseAddBankCard = document.getElementById('btnCloseAddBankCard');
   const btnSubmitAddBank = document.getElementById('btnSubmitAddBank');
 
+  function populateAddBankResponsibleDropdown() {
+    const sel = document.getElementById('inpAddBankResponsible');
+    if (!sel) return;
+    const empNames = (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData) && masterEmployeeData.length > 0)
+      ? masterEmployeeData.map(e => e.employeeName || e.employee_name).filter(Boolean)
+      : ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Suresh Reddy', 'John Doe', 'Sarah Jenkins'];
+
+    sel.innerHTML = '<option value="">Select Responsible</option>' + empNames.map(n => `<option value="${n}">${n}</option>`).join('');
+  }
+
   if (btnBankAddRow && addBankCard && bankPanel) {
     btnBankAddRow.addEventListener('click', (e) => {
       e.stopPropagation();
       bankPanel.classList.add('card-dimmed-blurred');
+      populateAddBankResponsibleDropdown();
       addBankCard.style.display = 'block';
+      updateCardDimmedState();
       showToast('Add Bank Form opened');
     });
   }
 
   if (btnCloseAddBankCard && addBankCard && bankPanel) {
-    btnCloseAddBankCard.addEventListener('click', () => {
+    btnCloseAddBankCard.addEventListener('click', (e) => {
+      if (e) e.stopPropagation();
       addBankCard.style.display = 'none';
       bankPanel.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
@@ -13712,39 +14103,116 @@ function initSideFormEvents() {
   }
 
   if (btnSubmitAddBank && addBankCard && bankPanel) {
-    btnSubmitAddBank.addEventListener('click', () => {
-      const accName = document.getElementById('inpAddBankAccountName')?.value.trim() || 'ABC Private Ltd';
-      const accNum = document.getElementById('inpAddBankAccountNumber')?.value.trim() || '12345678910';
-      const bankName = document.getElementById('inpAddBankName')?.value.trim() || 'ABC Private Ltd';
-      const ifsc = document.getElementById('inpAddBankIfsc')?.value.trim() || 'ABC Private';
-      const responsible = document.getElementById('inpAddBankResponsible')?.value.trim() || 'ABC Private';
+    btnSubmitAddBank.addEventListener('click', async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const accName = document.getElementById('inpAddBankAccountName')?.value.trim();
+      const accNum = document.getElementById('inpAddBankAccountNumber')?.value.trim();
+      const bankName = document.getElementById('inpAddBankName')?.value.trim();
+      const ifsc = document.getElementById('inpAddBankIfsc')?.value.trim();
+      const responsible = document.getElementById('inpAddBankResponsible')?.value.trim();
       const isStatusActive = document.getElementById('inpAddBankStatus')?.checked ?? true;
+      const fileInput = document.getElementById('fileAddBankDoc');
 
-      const newRecord = {
-        id: `cbank-${Date.now()}`,
-        accountName: accName,
-        accountNumber: accNum,
-        bankName: bankName,
-        ifscCode: ifsc,
-        responsible: responsible,
+      if (!accName) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Account Name.', 'Error Message!');
+        } else {
+          showToast('Please enter Account Name.');
+        }
+        return;
+      }
+
+      if (!accNum) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Account Number.', 'Error Message!');
+        } else {
+          showToast('Please enter Account Number.');
+        }
+        return;
+      }
+
+      const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+      const payload = {
+        account_name: accName,
+        account_number: accNum,
+        bank_name: bankName || accName,
+        ifsc_code: ifsc || '',
+        responsible: responsible || '',
         status: isStatusActive ? 'Active' : 'De-Active'
       };
 
-      companyBankData.unshift(newRecord);
-      renderCompanyBankTable();
+      if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank) {
+        try {
+          const created = await NexusApi.employeeBank.create(payload, activeEmp);
+          const bankId = created.employee_bank_account_id || created.id;
 
-      addBankCard.style.display = 'none';
-      bankPanel.classList.remove('card-dimmed-blurred');
-      updateCardDimmedState();
-      showToast(`Bank details for ${accName} added successfully!`);
+          if (fileInput && fileInput.files && fileInput.files[0] && bankId) {
+            try {
+              await NexusApi.employeeBank.uploadDocument(bankId, fileInput.files[0]);
+              fileInput.value = '';
+            } catch (docErr) {
+              console.error('Failed to upload bank document:', docErr);
+            }
+          }
+
+          document.getElementById('frmAddBank')?.reset();
+          if (window.loadEmployeeBankData) await window.loadEmployeeBankData(activeEmp);
+
+          addBankCard.style.display = 'none';
+          bankPanel.classList.remove('card-dimmed-blurred');
+          updateCardDimmedState();
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Bank details added successfully!', 'Task Completed');
+          } else {
+            showToast(`Bank details for ${accName} added successfully!`);
+          }
+        } catch (err) {
+          console.error('Failed to add bank details via API:', err);
+          const msg = err.detail || err.message || 'Failed to save bank details.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, 'Error Message!');
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+        }
+      } else {
+        const newRecord = {
+          id: `cbank-${Date.now()}`,
+          accountName: accName,
+          accountNumber: accNum,
+          bankName: bankName || accName,
+          ifscCode: ifsc || '',
+          responsible: responsible || '',
+          status: isStatusActive ? 'Active' : 'De-Active'
+        };
+
+        companyBankData.unshift(newRecord);
+        renderCompanyBankTable();
+
+        addBankCard.style.display = 'none';
+        bankPanel.classList.remove('card-dimmed-blurred');
+        updateCardDimmedState();
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Bank details added successfully!', 'Task Completed');
+        } else {
+          showToast(`Bank details for ${accName} added successfully!`);
+        }
+      }
     });
   }
 
   // View Bank Details Card Handlers
   const btnViewBankEdit = document.getElementById('btnViewBankEditToggle');
   if (btnViewBankEdit) {
-    btnViewBankEdit.addEventListener('click', (e) => {
-      e.stopPropagation();
+    btnViewBankEdit.addEventListener('click', async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       const imgIcon = document.getElementById('imgViewBankEditIcon');
       const bankPanel = document.getElementById('bankDetailsSidePanel');
       if (bankPanel) {
@@ -13759,25 +14227,78 @@ function initSideFormEvents() {
         showToast('Bank details form is now editable');
       } else {
         // Save changes
-        const bank = companyBankData.find(b => b.id === currentViewedBankId);
-        if (bank) {
-          bank.accountName = document.getElementById('inpViewBankAccountName')?.value.trim() || bank.accountName;
-          bank.accountNumber = document.getElementById('inpViewBankAccountNumber')?.value.trim() || bank.accountNumber;
-          bank.bankName = document.getElementById('inpViewBankName')?.value.trim() || bank.bankName;
-          bank.ifscCode = document.getElementById('inpViewBankIfsc')?.value.trim() || bank.ifscCode;
-          bank.responsible = document.getElementById('selViewBankResponsible')?.value || bank.responsible;
-          const isAct = document.getElementById('inpViewBankStatus')?.checked ?? true;
-          bank.status = isAct ? 'Active' : 'De-Active';
+        const bankId = document.getElementById('inpViewBankId')?.value || currentViewedBankId;
+        const accName = document.getElementById('inpViewBankAccountName')?.value.trim();
+        const accNum = document.getElementById('inpViewBankAccountNumber')?.value.trim();
+        const bName = document.getElementById('inpViewBankName')?.value.trim();
+        const ifsc = document.getElementById('inpViewBankIfsc')?.value.trim();
+        const responsible = document.getElementById('selViewBankResponsible')?.value;
+        const isAct = document.getElementById('inpViewBankStatus')?.checked ?? true;
+        const fileInput = document.getElementById('fileViewBankDoc');
 
-          const lblTitle = document.getElementById('lblViewBankTitle');
-          if (lblTitle) lblTitle.innerText = bank.bankName || 'Bank Details';
+        const updatePayload = {
+          account_name: accName,
+          account_number: accNum,
+          bank_name: bName,
+          ifsc_code: ifsc,
+          responsible: responsible,
+          status: isAct ? 'Active' : 'De-Active'
+        };
 
-          renderCompanyBankTable();
+        if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank && bankId) {
+          try {
+            await NexusApi.employeeBank.update(bankId, updatePayload);
+
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+              try {
+                await NexusApi.employeeBank.uploadDocument(bankId, fileInput.files[0]);
+                fileInput.value = '';
+              } catch (docErr) {
+                console.error('Failed to upload replacement bank document:', docErr);
+              }
+            }
+
+            const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+            if (window.loadEmployeeBankData) await window.loadEmployeeBankData(activeEmp);
+
+            const lblTitle = document.getElementById('lblViewBankTitle');
+            if (lblTitle) lblTitle.innerText = bName || 'Bank Details';
+
+            isViewBankEditing = false;
+            setViewBankFormReadOnly(true);
+            if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('Bank details updated successfully!', 'Task Completed');
+            } else {
+              showToast('Bank details updated successfully!');
+            }
+          } catch (err) {
+            console.error('Failed to update bank details:', err);
+            const msg = err.detail || err.message || 'Failed to update bank details.';
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(msg, 'Error Message!');
+            } else {
+              showToast(`Error: ${msg}`);
+            }
+          }
+        } else {
+          const bank = companyBankData.find(b => String(b.employee_bank_account_id || b.id) === String(bankId));
+          if (bank) {
+            Object.assign(bank, updatePayload);
+            const lblTitle = document.getElementById('lblViewBankTitle');
+            if (lblTitle) lblTitle.innerText = bName || 'Bank Details';
+            renderCompanyBankTable();
+          }
+          isViewBankEditing = false;
+          setViewBankFormReadOnly(true);
+          if (imgIcon) imgIcon.src = 'icons/Edit.svg';
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Bank details updated successfully!', 'Task Completed');
+          } else {
+            showToast('Bank details updated successfully!');
+          }
         }
-        isViewBankEditing = false;
-        setViewBankFormReadOnly(true);
-        if (imgIcon) imgIcon.src = 'icons/Edit.svg';
-        showToast('Bank details updated successfully!');
       }
     });
   }
@@ -14316,45 +14837,61 @@ function initSideFormEvents() {
   }
 
   if (btnSubmitAddSalary && addSalaryCard && salaryPanel) {
-    btnSubmitAddSalary.addEventListener('click', () => {
-      const fromVal = document.getElementById('inpAddSalaryFrom')?.value.trim() || '01 - 01 - 2026';
-      const toVal = document.getElementById('inpAddSalaryTo')?.value.trim() || '31 - 12 - 2026';
-      const grossVal = parseFloat(document.getElementById('inpAddSalaryGross')?.value) || 42000;
-      const epf = document.getElementById('inpAddSalaryEpf')?.value || '12%';
-      const esi = document.getElementById('inpAddSalaryEsi')?.value || '0.75%';
+    btnSubmitAddSalary.addEventListener('click', async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const fromVal = document.getElementById('inpAddSalaryFrom')?.value.trim();
+      const toVal = document.getElementById('inpAddSalaryTo')?.value.trim();
+      const grossVal = parseFloat(document.getElementById('inpAddSalaryGross')?.value) || 0;
       const isStatusActive = document.getElementById('inpAddSalaryStatus')?.checked ?? true;
 
-      const [fromYear, fromMonth] = parseYearMonth(fromVal, '2026', '01');
-      const [toYear, toMonth] = parseYearMonth(toVal, '2026', '12');
-      const basic = (grossVal * 0.55).toFixed(2);
-      const hra = (grossVal * 0.25).toFixed(2);
-      const da = (grossVal * 0.12).toFixed(2);
-      const sa = (grossVal * 0.08).toFixed(2);
-      const total = grossVal.toFixed(2);
+      const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+      const payload = {
+        from_date: fromVal || '2026-01-01',
+        to_date: toVal || '2026-12-31',
+        gross_salary: grossVal,
+        status: isStatusActive ? 'Active' : 'De-Active'
+      };
 
-      const tbody = document.getElementById('tbodySalaryDetails');
-      if (tbody) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="col-salary-year">${fromYear}</td>
-          <td class="col-salary-month">${fromMonth}</td>
-          <td class="col-salary-year">${toYear}</td>
-          <td class="col-salary-month">${toMonth}</td>
-          <td class="col-salary-sub col-salary-basic">${basic}</td>
-          <td class="col-salary-sub col-salary-hra">${hra}</td>
-          <td class="col-salary-sub col-salary-da">${da}</td>
-          <td class="col-salary-sub col-salary-sa">${sa}</td>
-          <td class="col-salary-sub col-salary-total">${total}</td>
-          <td class="col-salary-status"><span class="status-badge ${isStatusActive ? 'status-active' : 'status-inactive'}">${isStatusActive ? 'Active' : 'De-Active'}</span></td>
-        `;
-        tbody.insertBefore(tr, tbody.firstChild);
+      if (typeof NexusApi !== 'undefined' && NexusApi.employeeSalary) {
+        try {
+          await NexusApi.employeeSalary.create(payload, activeEmp);
+          document.getElementById('frmAddSalary')?.reset();
+          if (window.loadEmployeeSalaryData) await window.loadEmployeeSalaryData(activeEmp);
+
+          addSalaryCard.style.display = 'none';
+          closeNexusCalendar();
+          salaryPanel.classList.remove('card-dimmed-blurred');
+          updateCardDimmedState();
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Salary details added successfully!', 'Task Completed');
+          } else {
+            showToast('Salary details added successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to save salary details via API:', err);
+          const msg = err.detail || err.message || 'Failed to add salary details.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, 'Error Message!');
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+        }
+      } else {
+        if (window.loadEmployeeSalaryData) await window.loadEmployeeSalaryData(activeEmp);
+        addSalaryCard.style.display = 'none';
+        closeNexusCalendar();
+        salaryPanel.classList.remove('card-dimmed-blurred');
+        updateCardDimmedState();
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Salary details added successfully!', 'Task Completed');
+        } else {
+          showToast('Salary details added successfully!');
+        }
       }
-
-      addSalaryCard.style.display = 'none';
-      closeNexusCalendar();
-      salaryPanel.classList.remove('card-dimmed-blurred');
-      updateCardDimmedState();
-      showToast('New Salary details saved successfully!');
     });
   }
 
@@ -14363,17 +14900,33 @@ function initSideFormEvents() {
   const btnCloseAddAssetCard = document.getElementById('btnCloseAddAssetCard');
   const btnSubmitAddAsset = document.getElementById('btnSubmitAddAsset');
 
+  // Auto-calculate amount in Add Asset Form
+  const inpAssetQty = document.getElementById('inpAddAssetQty');
+  const inpAssetRate = document.getElementById('inpAddAssetRate');
+  const inpAssetAmt = document.getElementById('inpAddAssetAmount');
+  function recalcAssetAmount() {
+    const q = parseFloat(inpAssetQty?.value) || 0;
+    const r = parseFloat(inpAssetRate?.value) || 0;
+    if (inpAssetAmt) {
+      inpAssetAmt.value = (q * r).toFixed(2);
+    }
+  }
+  inpAssetQty?.addEventListener('input', recalcAssetAmount);
+  inpAssetRate?.addEventListener('input', recalcAssetAmount);
+
   if (btnAssetAddRow && addAssetCard && assetPanel) {
     btnAssetAddRow.addEventListener('click', (e) => {
       e.stopPropagation();
       assetPanel.classList.add('card-dimmed-blurred');
       addAssetCard.style.display = 'block';
+      updateCardDimmedState();
       showToast('Add Asset Form opened');
     });
   }
 
   if (btnCloseAddAssetCard && addAssetCard && assetPanel) {
-    btnCloseAddAssetCard.addEventListener('click', () => {
+    btnCloseAddAssetCard.addEventListener('click', (e) => {
+      if (e) e.stopPropagation();
       addAssetCard.style.display = 'none';
       closeNexusCalendar();
       assetPanel.classList.remove('card-dimmed-blurred');
@@ -14382,38 +14935,76 @@ function initSideFormEvents() {
   }
 
   if (btnSubmitAddAsset && addAssetCard && assetPanel) {
-    btnSubmitAddAsset.addEventListener('click', () => {
-      const date = document.getElementById('inpAddAssetDate')?.value.trim() || '01 - 01 - 2026';
-      const details = document.getElementById('inpAddAssetDetails')?.value.trim() || 'Laptop Dell Latitude';
+    btnSubmitAddAsset.addEventListener('click', async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const date = document.getElementById('inpAddAssetDate')?.value.trim();
+      const details = document.getElementById('inpAddAssetDetails')?.value.trim();
       const uom = document.getElementById('inpAddAssetUom')?.value || 'Nos';
-      const qty = document.getElementById('inpAddAssetQty')?.value.trim() || '1';
-      const rate = document.getElementById('inpAddAssetRate')?.value.trim() || '55000.00';
-      const amount = document.getElementById('inpAddAssetAmount')?.value.trim() || (parseFloat(qty) * parseFloat(rate)).toFixed(2);
-      const expiry = document.getElementById('inpAddAssetExpiryDate')?.value.trim() || '01 - 01 - 2027';
+      const qty = parseFloat(document.getElementById('inpAddAssetQty')?.value.trim()) || 1;
+      const rate = parseFloat(document.getElementById('inpAddAssetRate')?.value.trim()) || 0;
+      const amount = parseFloat(document.getElementById('inpAddAssetAmount')?.value.trim()) || (qty * rate);
+      const expiry = document.getElementById('inpAddAssetExpiryDate')?.value.trim();
 
-      const rateNum = parseFloat(rate) || 0;
-      const amountNum = parseFloat(amount) || 0;
-
-      const tbody = document.getElementById('tbodyAssetDetails');
-      if (tbody) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="col-asset-date">${date}</td>
-          <td class="col-asset-detail">${details}</td>
-          <td class="col-asset-uom">${uom}</td>
-          <td class="col-asset-qty">${qty}</td>
-          <td class="col-asset-rate">${rateNum.toFixed(2)}</td>
-          <td class="col-asset-amount">${amountNum.toFixed(2)}</td>
-          <td class="col-asset-expiry">${expiry}</td>
-        `;
-        tbody.insertBefore(tr, tbody.firstChild);
+      if (!details) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Asset Details.', 'Error Message!');
+        } else {
+          showToast('Please enter Asset Details.');
+        }
+        return;
       }
 
-      addAssetCard.style.display = 'none';
-      closeNexusCalendar();
-      assetPanel.classList.remove('card-dimmed-blurred');
-      updateCardDimmedState();
-      showToast('New Asset details saved successfully!');
+      const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+      const payload = {
+        date: date || '2026-01-01',
+        asset_details: details,
+        uom: uom,
+        qty: qty,
+        rate: rate,
+        amount: amount,
+        expiry_date: expiry || null
+      };
+
+      if (typeof NexusApi !== 'undefined' && NexusApi.employeeAssets) {
+        try {
+          await NexusApi.employeeAssets.create(payload, activeEmp);
+          document.getElementById('frmAddAsset')?.reset();
+          if (window.loadEmployeeAssetData) await window.loadEmployeeAssetData(activeEmp);
+
+          addAssetCard.style.display = 'none';
+          closeNexusCalendar();
+          assetPanel.classList.remove('card-dimmed-blurred');
+          updateCardDimmedState();
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Asset details added successfully!', 'Task Completed');
+          } else {
+            showToast('Asset details added successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to save asset details via API:', err);
+          const msg = err.detail || err.message || 'Failed to add asset details.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(msg, 'Error Message!');
+          } else {
+            showToast(`Error: ${msg}`);
+          }
+        }
+      } else {
+        if (window.loadEmployeeAssetData) await window.loadEmployeeAssetData(activeEmp);
+        addAssetCard.style.display = 'none';
+        closeNexusCalendar();
+        assetPanel.classList.remove('card-dimmed-blurred');
+        updateCardDimmedState();
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Asset details added successfully!', 'Task Completed');
+        } else {
+          showToast('Asset details added successfully!');
+        }
+      }
     });
   }
 
@@ -14423,10 +15014,14 @@ function initSideFormEvents() {
   document.getElementById('inpVendorGstToggle')?.addEventListener('change', updateVendorConditionalFields);
   document.getElementById('inpTdsDeductionToggle')?.addEventListener('change', updateVendorConditionalFields);
 
-  function saveVendorForm(isFormSubmit = true) {
+  async function saveVendorForm(isFormSubmit = true) {
     const vName = document.getElementById('inpVendorName')?.value.trim();
     if (!vName) {
-      showToast('Please enter a Vendor Name');
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('Please enter a Vendor Name', 'Validation Error');
+      } else {
+        showToast('Please enter a Vendor Name');
+      }
       return false;
     }
 
@@ -14445,85 +15040,191 @@ function initSideFormEvents() {
     const status = document.getElementById('inpVendorStatusToggle')?.checked ? 'Active' : 'In - Active';
 
     if (currentViewedVendorId) {
-      // Update existing vendor
-      const vIndex = masterVendorData.findIndex(v => v.id === currentViewedVendorId || v.vendorId === currentViewedVendorId || v.vendorName === currentViewedVendorId);
-      if (vIndex !== -1) {
-        masterVendorData[vIndex].vendorName = vName;
-        masterVendorData[vIndex].entityType = entityType;
-        masterVendorData[vIndex].businessType = bType;
-        masterVendorData[vIndex].vendorType = bType;
-        masterVendorData[vIndex].serviceType = (bType.toLowerCase() === 'service') ? sType : '';
-        masterVendorData[vIndex].contractType = (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '';
-        masterVendorData[vIndex].address = address;
-        masterVendorData[vIndex].panNumber = pan;
-        masterVendorData[vIndex].gstEnabled = isGstOn;
-        masterVendorData[vIndex].gstType = isGstOn ? gstType : 'NA';
-        masterVendorData[vIndex].gstNumber = gstNumber;
-        masterVendorData[vIndex].tdsDeduction = isTdsOn;
-        masterVendorData[vIndex].tdsCode = isTdsOn ? tdsCode : '';
-        masterVendorData[vIndex].tdsRate = isTdsOn ? tdsRate : '';
-        masterVendorData[vIndex].status = status;
-      }
-
-      const lblTitle = document.getElementById('lblVendorCardTitle');
-      if (lblTitle) lblTitle.innerText = vName;
-
-      isVendorFormEditing = false;
-      setVendorFormReadOnly(true);
-
-      const imgIcon = document.getElementById('imgVendorCardEditIcon');
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.className = 'icon-blue';
-        imgIcon.title = 'Edit Info';
-      }
-
-      if (currentMasterSubpage === 'vendor') {
-        loadMasterDataset();
-        applyFiltersAndRender();
-      }
-
-      if (isFormSubmit) {
-        closeSideForm();
-      }
-      showToast(`Vendor ${vName} updated successfully!`);
-      return true;
-    } else {
-      // Add new vendor
-      const newVendor = {
-        id: `vend-${Date.now()}`,
-        vendorName: vName,
-        entityType: entityType,
-        businessType: bType,
-        vendorType: bType,
-        serviceType: (bType.toLowerCase() === 'service') ? sType : '',
-        contractType: (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '',
-        vendorId: String(Math.floor(100000000 + Math.random() * 900000000)),
+      // Update existing vendor in PostgreSQL
+      const numericVendorId = parseInt(currentViewedVendorId, 10);
+      const updatePayload = {
+        vendor_name: vName,
+        entity_type: entityType,
+        business_type: bType,
+        service_type: (bType.toLowerCase() === 'service') ? sType : '',
+        contract_type: (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '',
         address: address,
-        panNumber: pan,
-        gstEnabled: isGstOn,
-        gstType: isGstOn ? gstType : 'NA',
-        gstNumber: gstNumber,
-        tdsDeduction: isTdsOn,
-        tdsCode: isTdsOn ? tdsCode : '',
-        tdsRate: isTdsOn ? tdsRate : '',
+        pan_number: pan,
+        gst_number_available: isGstOn,
+        gst_type: isGstOn ? gstType : 'NA',
+        gst_number: gstNumber,
+        tds_deduction: isTdsOn,
+        tds_code: isTdsOn ? tdsCode : '',
+        tds_rate: isTdsOn ? tdsRate : '',
         status: status
       };
 
-      masterVendorData.unshift(newVendor);
-      if (currentMasterSubpage === 'vendor') {
-        loadMasterDataset();
-        applyFiltersAndRender();
+      const ctx = getEffectiveVendorContext();
+      if (ctx && ctx.bank) {
+        updatePayload.account_name = ctx.bank.accountName;
+        updatePayload.account_number = ctx.bank.accountNumber;
+        updatePayload.bank_name = ctx.bank.bankName;
+        updatePayload.ifsc_code = ctx.bank.ifscCode;
+        updatePayload.account_type = ctx.bank.accountType;
       }
-      closeSideForm();
-      showToast(`Vendor ${vName} added successfully!`);
-      return true;
+
+      if (typeof NexusApi !== 'undefined' && NexusApi.vendors && !isNaN(numericVendorId)) {
+        try {
+          await NexusApi.vendors.update(numericVendorId, updatePayload);
+          await loadMasterVendorsFromApi();
+
+          const lblTitle = document.getElementById('lblVendorCardTitle');
+          if (lblTitle) lblTitle.innerText = vName;
+
+          isVendorFormEditing = false;
+          setVendorFormReadOnly(true);
+
+          const imgIcon = document.getElementById('imgVendorCardEditIcon');
+          if (imgIcon) {
+            imgIcon.src = 'icons/Edit.svg';
+            imgIcon.className = 'icon-blue';
+            imgIcon.title = 'Edit Info';
+          }
+          const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
+          if (btnSaveWrap) btnSaveWrap.style.display = 'none';
+
+          if (isFormSubmit) {
+            closeSideForm();
+          }
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup(`Vendor updated successfully!`, 'Task Completed');
+          } else {
+            showToast(`Vendor ${vName} updated successfully!`);
+          }
+          return true;
+        } catch (err) {
+          console.error('Failed to update vendor:', err);
+          const errorMsg = err.detail || err.message || 'Failed to update vendor';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errorMsg, 'Error Message!');
+          } else {
+            showToast(`Error: ${errorMsg}`);
+          }
+          return false;
+        }
+      }
+    } else {
+      // Add new vendor in PostgreSQL
+      const createPayload = {
+        vendor_name: vName,
+        entity_type: entityType,
+        business_type: bType,
+        service_type: (bType.toLowerCase() === 'service') ? sType : '',
+        contract_type: (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '',
+        address: address,
+        pan_number: pan,
+        gst_number_available: isGstOn,
+        gst_type: isGstOn ? gstType : 'NA',
+        gst_number: gstNumber,
+        tds_deduction: isTdsOn,
+        tds_code: isTdsOn ? tdsCode : '',
+        tds_rate: isTdsOn ? tdsRate : '',
+        status: status
+      };
+
+      if (newVendorTempSubData.bank) {
+        createPayload.account_name = newVendorTempSubData.bank.accountName;
+        createPayload.account_number = newVendorTempSubData.bank.accountNumber;
+        createPayload.bank_name = newVendorTempSubData.bank.bankName;
+        createPayload.ifsc_code = newVendorTempSubData.bank.ifscCode;
+        createPayload.account_type = newVendorTempSubData.bank.accountType;
+      }
+      if (newVendorTempSubData.contacts && newVendorTempSubData.contacts.length > 0) {
+        createPayload.contact_name = newVendorTempSubData.contacts[0].name;
+        createPayload.contact_number = newVendorTempSubData.contacts[0].phone;
+        createPayload.email = newVendorTempSubData.contacts[0].email;
+      }
+
+      if (typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+        try {
+          const created = await NexusApi.vendors.create(createPayload);
+          const createdId = created.vendor_id || created.id;
+
+          // If temporary pricing rows were configured, save them to vendor_price
+          if (createdId) {
+            const allScopes = [
+              ...(newVendorTempSubData.supplyScope || []).map(s => ({
+                product_name: s.productName,
+                item_description: s.uom,
+                rate: s.price,
+                sub_project_type: s.category || 'Supply',
+                status: s.status || 'Active'
+              })),
+              ...(newVendorTempSubData.serviceProjectScope || []).map(s => ({
+                sub_project_type: s.subProjectType,
+                item_description: s.uom,
+                rate: s.rate,
+                status: s.status || 'Active'
+              })),
+              ...(newVendorTempSubData.serviceTransportScope || []).map(s => ({
+                vehicle_type: s.vehicleType,
+                vehicle_number: s.vehicleNumber,
+                fuel_type: s.fuelType,
+                rental_type: s.rentalType,
+                rate: s.rate,
+                sub_project_type: s.range,
+                status: s.status || 'Active'
+              })),
+              ...(newVendorTempSubData.serviceOthersScope || []).map(s => ({
+                service_description: s.description,
+                from_date: s.from,
+                to_date: s.to,
+                item_description: s.uom,
+                rate: s.rate,
+                status: s.status || 'Active'
+              }))
+            ];
+
+            for (const scopePayload of allScopes) {
+              try {
+                await NexusApi.vendors.createPricing(createdId, scopePayload);
+              } catch (e) {
+                console.warn('Failed to save scope row:', e);
+              }
+            }
+          }
+
+          newVendorTempSubData = {
+            bank: null,
+            contacts: [],
+            supplyScope: [],
+            serviceProjectScope: [],
+            serviceTransportScope: [],
+            serviceOthersScope: []
+          };
+
+          await loadMasterVendorsFromApi();
+          closeSideForm();
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup(`Vendor added successfully!`, 'Task Completed');
+          } else {
+            showToast(`Vendor ${vName} added successfully!`);
+          }
+          return true;
+        } catch (err) {
+          console.error('Failed to create vendor:', err);
+          const errorMsg = err.detail || err.message || 'Failed to create vendor';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errorMsg, 'Error Message!');
+          } else {
+            showToast(`Error: ${errorMsg}`);
+          }
+          return false;
+        }
+      }
     }
   }
 
   const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
   if (btnVendorCardEditToggle) {
-    btnVendorCardEditToggle.addEventListener('click', (e) => {
+    btnVendorCardEditToggle.addEventListener('click', async (e) => {
       e.stopPropagation();
       const imgIcon = document.getElementById('imgVendorCardEditIcon');
       if (!isVendorFormEditing) {
@@ -14538,16 +15239,16 @@ function initSideFormEvents() {
         if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
         showToast('Vendor form is now editable');
       } else {
-        saveVendorForm(false);
+        await saveVendorForm(false);
       }
     });
   }
 
   const btnSubmitVendor = document.getElementById('btnSubmitVendor');
   if (btnSubmitVendor) {
-    btnSubmitVendor.addEventListener('click', (e) => {
+    btnSubmitVendor.addEventListener('click', async (e) => {
       e.preventDefault();
-      saveVendorForm(true);
+      await saveVendorForm(true);
     });
   }
 
@@ -14566,6 +15267,11 @@ function initSideFormEvents() {
 
   // Close Contact / Location / Bank Message Popups when user clicks outside of them
   document.addEventListener('click', (e) => {
+    // If clicking inside success/error popups or calendar dropdown, ignore
+    if (e.target.closest('#nexusSuccessPopupOverlay, #nexusErrorPopupOverlay, .nexus-calendar-dropdown')) {
+      return;
+    }
+
     let changed = false;
     if (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') {
       const isInsideBtn = (btnMessage && btnMessage.contains(e.target)) || (btnInfraMessage && btnInfraMessage.contains(e.target)) || (btnVendorMessage && btnVendorMessage.contains(e.target));
@@ -14597,13 +15303,17 @@ function initSideFormEvents() {
       }
     }
     if (salaryPanel && salaryPanel.style.display !== 'none' && salaryPanel.style.display !== '') {
-      if (!salaryPanel.contains(e.target) && !(btnEmpSalary && btnEmpSalary.contains(e.target))) {
+      const addSalaryCard = document.getElementById('addSalaryCard');
+      const isInsideSalaryChild = (addSalaryCard && addSalaryCard.contains(e.target));
+      if (!salaryPanel.contains(e.target) && !(btnEmpSalary && btnEmpSalary.contains(e.target)) && !isInsideSalaryChild) {
         salaryPanel.style.display = 'none';
         changed = true;
       }
     }
     if (assetPanel && assetPanel.style.display !== 'none' && assetPanel.style.display !== '') {
-      if (!assetPanel.contains(e.target) && !(btnEmpAsset && btnEmpAsset.contains(e.target))) {
+      const addAssetCard = document.getElementById('addAssetCard');
+      const isInsideAssetChild = (addAssetCard && addAssetCard.contains(e.target));
+      if (!assetPanel.contains(e.target) && !(btnEmpAsset && btnEmpAsset.contains(e.target)) && !isInsideAssetChild) {
         assetPanel.style.display = 'none';
         changed = true;
       }
@@ -14842,29 +15552,46 @@ function openSideForm() {
       const lblTitle = document.getElementById('lblVendorCardTitle');
       const btnEditToggle = document.getElementById('btnVendorCardEditToggle');
       const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
-      if (lblTitle) lblTitle.innerText = 'Add Vendor';
-      if (btnEditToggle) btnEditToggle.style.display = 'none';
-      if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+
+      if (!currentViewedVendorId) {
+        if (lblTitle) lblTitle.innerText = 'Add Vendor';
+        if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+
+        setVendorFormReadOnly(false);
+        isVendorFormEditing = false;
+        newVendorTempSubData = {
+          bank: null,
+          contacts: [],
+          supplyScope: [],
+          serviceProjectScope: [],
+          serviceTransportScope: [],
+          serviceOthersScope: []
+        };
+        loadVendorBankDataToForm();
+        activeContactFilters = {};
+        activeSupplyScopeFilters = {};
+        activeServiceProjectScopeFilters = {};
+        activeServiceTransportScopeFilters = {};
+        activeServiceOthersScopeFilters = {};
+        const frm = document.getElementById('frmAddVendor');
+        if (frm) frm.reset();
+        const statusToggle = document.getElementById('inpVendorStatusToggle');
+        if (statusToggle) statusToggle.checked = true;
+        const gstToggle = document.getElementById('inpVendorGstToggle');
+        if (gstToggle) gstToggle.checked = false;
+        const tdsToggle = document.getElementById('inpTdsDeductionToggle');
+        if (tdsToggle) tdsToggle.checked = false;
+        document.querySelectorAll('#addVendorCard .input-pdf-badge').forEach(b => b.style.removeProperty('display'));
+        updateVendorConditionalFields();
+      }
+
       const btnBank = document.getElementById('btnVendorCardBank');
       const btnMessage = document.getElementById('btnVendorCardMessage');
       const btnScope = document.getElementById('btnVendorCardScope');
       if (btnBank) btnBank.style.display = 'inline-flex';
       if (btnMessage) btnMessage.style.display = 'inline-flex';
       if (btnScope) btnScope.style.display = 'inline-flex';
-
-      setVendorFormReadOnly(false);
-      currentViewedVendorId = null;
-      isVendorFormEditing = false;
-      const frm = document.getElementById('frmAddVendor');
-      if (frm) frm.reset();
-      const statusToggle = document.getElementById('inpVendorStatusToggle');
-      if (statusToggle) statusToggle.checked = true;
-      const gstToggle = document.getElementById('inpVendorGstToggle');
-      if (gstToggle) gstToggle.checked = false;
-      const tdsToggle = document.getElementById('inpTdsDeductionToggle');
-      if (tdsToggle) tdsToggle.checked = false;
-      document.querySelectorAll('#addVendorCard .input-pdf-badge').forEach(b => b.style.removeProperty('display'));
-      updateVendorConditionalFields();
     }
   } else if (currentModule === 'master' && currentMasterSubpage === 'products') {
     if (addProductCard) {
@@ -15011,6 +15738,7 @@ function closeSideForm() {
   if (viewBankCard) viewBankCard.style.display = 'none';
   const addBankCard = document.getElementById('addBankCard');
   if (addBankCard) addBankCard.style.display = 'none';
+  currentViewedVendorId = null;
   // Remove blur from any dimmed cards and has-dimmed-card from row
   document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
   const cardsRow = document.querySelector('.side-form-cards-row');
@@ -15076,6 +15804,7 @@ window.openVendorContactSidePanel = function() {
     contactPanel.style.display = 'block';
   }
 
+  activeContactFilters = {};
   renderVendorContactTable();
   overlay.style.display = 'flex';
   showToast('Contact Details opened');
@@ -15117,6 +15846,7 @@ window.openVendorSupplyScopeSidePanel = function() {
     scopeTitle.textContent = vName ? `Supply ${vName}` : 'Supply Vendor Name';
   }
 
+  activeSupplyScopeFilters = {};
   renderVendorSupplyScopeTable();
   overlay.style.display = 'flex';
   showToast('Supply Scope details opened');
@@ -15160,6 +15890,7 @@ window.openVendorServiceProjectScopeSidePanel = function() {
     scopeTitle.textContent = vName ? `Project ${vName}` : 'Project Vendor Name';
   }
 
+  activeServiceProjectScopeFilters = {};
   renderVendorServiceProjectScopeTable();
   overlay.style.display = 'flex';
   showToast('Project Scope details opened');
@@ -15198,6 +15929,7 @@ window.openVendorServiceTransportScopeSidePanel = function() {
     scopeTitle.textContent = vName ? `Transport ${vName}` : 'Transport Vendor Name';
   }
 
+  activeServiceTransportScopeFilters = {};
   renderVendorServiceTransportScopeTable();
   overlay.style.display = 'flex';
   showToast('Transport Scope details opened');
@@ -15236,6 +15968,7 @@ window.openVendorServiceOthersScopeSidePanel = function() {
     scopeTitle.textContent = vName ? `Other Service ${vName}` : 'Other Service Vendor Name';
   }
 
+  activeServiceOthersScopeFilters = {};
   renderVendorServiceOthersScopeTable();
   overlay.style.display = 'flex';
   showToast('Other Service Scope details opened');
@@ -15316,7 +16049,11 @@ window.openVendorBankSidePanel = function() {
   // Hide other sub-panels
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
-   'projectTypeDocSidePanel'].forEach(id => {
+   'projectTypeDocSidePanel', 'vendorSupplyScopeSidePanel', 'addProductScopeCard',
+   'vendorServiceProjectScopeSidePanel', 'addSubProjectTypeCard', 'subProjectTypeReportCard',
+   'addSubProjectRateFormCard', 'addVehicleScopeCard', 'vehicleReportCard', 'addVehicleRateFormCard',
+   'vendorServiceTransportScopeSidePanel', 'vendorServiceOthersScopeSidePanel',
+   'addOtherServiceScopeCard', 'otherServiceReportCard', 'addOtherServiceRateFormCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -15332,8 +16069,12 @@ window.openVendorBankSidePanel = function() {
     vendorBankTitle.textContent = 'Bank Details';
   }
 
-  // Reset to non-editing mode
-  setVendorBankEditingState(false);
+  // Load bank data for currently selected vendor
+  loadVendorBankDataToForm();
+
+  // If viewing an existing vendor, start in read-only mode; if adding new, start in edit mode
+  setVendorBankEditingState(!currentViewedVendorId);
+
   overlay.style.display = 'flex';
   showToast('Bank details opened');
 };
@@ -16260,42 +17001,160 @@ function rebindFilterButtons() {
   });
 }
 
-// Global Company Bank Dataset & Filter State
-let companyBankData = [
-  {
-    id: 'cbank-1',
-    accountName: 'ABC Private Ltd',
-    accountNumber: '12345678910',
-    bankName: 'ABC Private Ltd',
-    ifscCode: 'ABC Private',
-    responsible: 'ABC Private',
-    status: 'Active'
-  },
-  {
-    id: 'cbank-2',
-    accountName: 'Nexus Telecom Corp',
-    accountNumber: '98765432101',
-    bankName: 'HDFC Bank',
-    ifscCode: 'HDFC0001234',
-    responsible: 'John Doe',
-    status: 'Active'
-  },
-  {
-    id: 'cbank-3',
-    accountName: 'Nexus Infra Solutions',
-    accountNumber: '45678912301',
-    bankName: 'State Bank of India',
-    ifscCode: 'SBIN0004567',
-    responsible: 'Sarah Jenkins',
-    status: 'De-Active'
-  }
-];
+// Global Company Bank Dataset & Filter State (Loaded dynamically from PostgreSQL employee_bank_details)
+let companyBankData = [];
 let activeCompanyBankFilters = {};
 let currentCompanyBankFilterCol = null;
 
 // Bank View/Edit Modal Controller State
 let isViewBankEditing = false;
 let currentViewedBankId = null;
+
+// Global Async Data Loaders for Employee Subdetails
+window.loadEmployeeBankData = async function(empId = null) {
+  if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank) {
+    try {
+      const records = await NexusApi.employeeBank.getAll(empId);
+      companyBankData = Array.isArray(records) ? records : [];
+      renderCompanyBankTable();
+    } catch (err) {
+      console.error('Failed to load bank details from API:', err);
+      companyBankData = [];
+      renderCompanyBankTable();
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to retrieve bank details.', 'Database Error');
+      }
+    }
+  } else {
+    renderCompanyBankTable();
+  }
+};
+
+window.downloadBankDocument = async function(bankDetailId, accountNumber = '') {
+  if (!bankDetailId) return;
+  if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank) {
+    try {
+      showToast('Downloading account document...');
+      const fallbackName = accountNumber ? `account_${accountNumber}.pdf` : 'bank_document.pdf';
+      await NexusApi.employeeBank.downloadDocument(bankDetailId, fallbackName);
+      showToast('Download complete.');
+    } catch (err) {
+      console.error('Failed to download document:', err);
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'No PDF document attached to this bank account.', 'Document Not Found');
+      } else {
+        showToast(`Error: ${err.message || 'Failed to download document'}`);
+      }
+    }
+  }
+};
+
+window.loadEmployeeAssetData = async function(empId = null) {
+  const tbody = document.getElementById('tbodyAssetDetails');
+  const lblTotal = document.getElementById('lblAssetTotalAmt');
+  if (typeof NexusApi !== 'undefined' && NexusApi.employeeAssets) {
+    try {
+      const [records, totalData] = await Promise.all([
+        NexusApi.employeeAssets.getAll(empId),
+        NexusApi.employeeAssets.getTotal(empId)
+      ]);
+      const assets = Array.isArray(records) ? records : [];
+      let totalSum = 0;
+      assets.forEach(r => {
+        totalSum += (parseFloat(r.amount) || 0);
+      });
+      const formattedTotal = (totalData && totalData.formatted_total) ? totalData.formatted_total : totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (lblTotal) {
+        lblTotal.innerText = formattedTotal;
+        lblTotal.style.color = '#2563eb';
+      }
+      if (tbody) {
+        if (assets.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 18px;">No asset records found.</td></tr>`;
+        } else {
+          tbody.innerHTML = assets.map(r => {
+            const dt = r.date ? (typeof r.date === 'string' ? r.date : new Date(r.date).toISOString().split('T')[0]) : '';
+            const exp = r.expiry_date ? (typeof r.expiry_date === 'string' ? r.expiry_date : new Date(r.expiry_date).toISOString().split('T')[0]) : '';
+            const qtyVal = r.qty !== undefined ? r.qty : '1';
+            const rateVal = r.rate !== undefined ? parseFloat(r.rate).toFixed(2) : '0.00';
+            const amtVal = r.amount !== undefined ? parseFloat(r.amount).toFixed(2) : '0.00';
+            return `
+              <tr>
+                <td class="col-asset-date">${dt}</td>
+                <td class="col-asset-detail">${r.asset_details || r.assetDetails || ''}</td>
+                <td class="col-asset-uom">${r.uom || 'Nos'}</td>
+                <td class="col-asset-qty">${qtyVal}</td>
+                <td class="col-asset-rate">${rateVal}</td>
+                <td class="col-asset-amount">${amtVal}</td>
+                <td class="col-asset-expiry">${exp}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load asset details:', err);
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444; padding: 18px;">Failed to load asset records.</td></tr>`;
+      if (lblTotal) {
+        lblTotal.innerText = '0.00';
+        lblTotal.style.color = '#2563eb';
+      }
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to retrieve asset details.', 'Database Error');
+      }
+    }
+  }
+};
+
+window.loadEmployeeSalaryData = async function(empId = null) {
+  const tbody = document.getElementById('tbodySalaryDetails');
+  if (typeof NexusApi !== 'undefined' && NexusApi.employeeSalary) {
+    try {
+      const records = await NexusApi.employeeSalary.getAll(empId);
+      const salaries = Array.isArray(records) ? records : [];
+      if (tbody) {
+        if (salaries.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #64748b; padding: 18px;">No salary structure records found.</td></tr>`;
+        } else {
+          tbody.innerHTML = salaries.map(r => {
+            const fromD = r.from_date || r.fromDate || '';
+            const toD = r.to_date || r.toDate || '';
+            const [fromYear, fromMonth] = (typeof parseYearMonth === 'function') ? parseYearMonth(fromD, '', '') : [String(fromD).split('-')[0] || '', String(fromD).split('-')[1] || ''];
+            const [toYear, toMonth] = (typeof parseYearMonth === 'function') ? parseYearMonth(toD, '', '') : [String(toD).split('-')[0] || '', String(toD).split('-')[1] || ''];
+            const basic = r.basic_salary !== undefined ? parseFloat(r.basic_salary).toFixed(2) : '0.00';
+            const hra = r.hra !== undefined ? parseFloat(r.hra).toFixed(2) : '0.00';
+            const da = r.da !== undefined ? parseFloat(r.da).toFixed(2) : '0.00';
+            const sa = r.sa !== undefined ? parseFloat(r.sa).toFixed(2) : '0.00';
+            const total = r.gross_salary !== undefined ? parseFloat(r.gross_salary).toFixed(2) : '0.00';
+            const isInactive = (r.status || '').toLowerCase().includes('in') || (r.status || '').toLowerCase().includes('de');
+            return `
+              <tr>
+                <td class="col-salary-year">${fromYear}</td>
+                <td class="col-salary-month">${fromMonth}</td>
+                <td class="col-salary-year">${toYear}</td>
+                <td class="col-salary-month">${toMonth}</td>
+                <td class="col-salary-sub col-salary-basic">${basic}</td>
+                <td class="col-salary-sub col-salary-hra">${hra}</td>
+                <td class="col-salary-sub col-salary-da">${da}</td>
+                <td class="col-salary-sub col-salary-sa">${sa}</td>
+                <td class="col-salary-sub col-salary-total">${total}</td>
+                <td class="col-salary-status">
+                  <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'De-Active' : 'Active'}</span>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load salary details:', err);
+      if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #ef4444; padding: 18px;">Failed to load salary records.</td></tr>`;
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to retrieve salary details.', 'Database Error');
+      }
+    }
+  }
+};
 
 function setViewBankFormReadOnly(isReadOnly) {
   ['inpViewBankAccountName', 'inpViewBankAccountNumber', 'inpViewBankName', 'inpViewBankIfsc'].forEach(id => {
@@ -16325,43 +17184,44 @@ function openViewCompanyBankCard(bankId) {
   const bankPanel = document.getElementById('bankDetailsSidePanel');
   if (!bankCard) return;
 
-  const bank = companyBankData.find(b => b.id === bankId) || companyBankData[0];
+  const bank = companyBankData.find(b => String(b.employee_bank_account_id || b.id) === String(bankId)) || companyBankData[0];
   if (!bank) return;
 
-  currentViewedBankId = bank.id;
+  currentViewedBankId = bank.employee_bank_account_id || bank.id;
   isViewBankEditing = false;
 
   const lblTitle = document.getElementById('lblViewBankTitle');
-  if (lblTitle) lblTitle.innerText = bank.bankName || 'Bank Details';
+  if (lblTitle) lblTitle.innerText = bank.bank_name || bank.bankName || 'Bank Details';
 
   // Populate Responsible dropdown with Employee Names from masterEmployeeData
   const selResp = document.getElementById('selViewBankResponsible');
   if (selResp) {
     const empNames = (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData))
-      ? masterEmployeeData.map(e => e.employeeName).filter(Boolean)
+      ? masterEmployeeData.map(e => e.employeeName || e.employee_name).filter(Boolean)
       : ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Suresh Reddy', 'John Doe', 'Sarah Jenkins'];
 
-    if (bank.responsible && !empNames.includes(bank.responsible)) {
-      empNames.unshift(bank.responsible);
+    const respVal = bank.employee_name || bank.responsible;
+    if (respVal && !empNames.includes(respVal)) {
+      empNames.unshift(respVal);
     }
 
-    selResp.innerHTML = empNames.map(name => `<option value="${name}" ${name === bank.responsible ? 'selected' : ''}>${name}</option>`).join('');
+    selResp.innerHTML = empNames.map(name => `<option value="${name}" ${name === respVal ? 'selected' : ''}>${name}</option>`).join('');
   }
 
   const inpId = document.getElementById('inpViewBankId');
-  if (inpId) inpId.value = bank.id;
+  if (inpId) inpId.value = currentViewedBankId;
 
   const inpAccName = document.getElementById('inpViewBankAccountName');
-  if (inpAccName) inpAccName.value = bank.accountName || '';
+  if (inpAccName) inpAccName.value = bank.account_name || bank.accountName || '';
 
   const inpAccNum = document.getElementById('inpViewBankAccountNumber');
-  if (inpAccNum) inpAccNum.value = bank.accountNumber || '';
+  if (inpAccNum) inpAccNum.value = bank.account_number || bank.accountNumber || '';
 
   const inpBName = document.getElementById('inpViewBankName');
-  if (inpBName) inpBName.value = bank.bankName || '';
+  if (inpBName) inpBName.value = bank.bank_name || bank.bankName || '';
 
   const inpIfsc = document.getElementById('inpViewBankIfsc');
-  if (inpIfsc) inpIfsc.value = bank.ifscCode || '';
+  if (inpIfsc) inpIfsc.value = bank.ifsc_code || bank.ifscCode || '';
 
   const chkStatus = document.getElementById('inpViewBankStatus');
   if (chkStatus) {
@@ -16376,7 +17236,7 @@ function openViewCompanyBankCard(bankId) {
 
   if (bankPanel) bankPanel.classList.add('card-dimmed-blurred');
   bankCard.style.display = 'block';
-  showToast(`Viewing bank details: ${bank.bankName || bank.accountName}`);
+  showToast(`Viewing bank details: ${bank.bank_name || bank.bankName || bank.account_name || bank.accountName}`);
 }
 
 function renderCompanyBankTable() {
@@ -16399,17 +17259,20 @@ function renderCompanyBankTable() {
 
   tbody.innerHTML = filtered.map(row => {
     const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
+    const bankId = row.employee_bank_account_id || row.id;
+    const accNum = row.account_number || row.accountNumber || '';
+    const hasDoc = Boolean(row.has_document || row.cancelled_cheque);
     return `
-      <tr data-bank-id="${row.id}">
+      <tr data-bank-id="${bankId}">
         <td class="col-bank-acc-name" style="text-align: left !important; padding-left: 14px;">
-          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyBankCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${row.accountName || ''}</a>
+          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyBankCard('${bankId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${row.account_name || row.accountName || ''}</a>
         </td>
         <td class="col-bank-acc-num" style="text-align: left !important; padding-left: 14px;">
-          <a href="#" class="req-link td-link-blue" onclick="showToast('Account Number: ${row.accountNumber}'); return false;" style="color: #0454e4; text-decoration: underline !important; text-underline-offset: 3px; font-weight: 500;">${row.accountNumber || ''}</a>
+          <a href="#" class="req-link td-link-blue" onclick="${hasDoc ? `window.downloadBankDocument('${bankId}', '${accNum}');` : `if(typeof showSvgErrorPopup === 'function') { showSvgErrorPopup('No PDF document uploaded for this account number.', 'Document Not Found'); } else { showToast('No document attached.'); }`} return false;" style="color: #0454e4; text-decoration: underline !important; text-underline-offset: 3px; font-weight: 500; cursor: pointer;" title="${hasDoc ? 'Click to download account PDF' : 'No document attached'}">${accNum}</a>
         </td>
-        <td class="col-bank-name" style="text-align: left !important; padding-left: 14px;">${row.bankName || ''}</td>
-        <td class="col-bank-ifsc" style="text-align: center !important;">${row.ifscCode || ''}</td>
-        <td class="col-bank-responsible" style="text-align: left !important; padding-left: 14px;">${row.responsible || ''}</td>
+        <td class="col-bank-name" style="text-align: left !important; padding-left: 14px;">${row.bank_name || row.bankName || ''}</td>
+        <td class="col-bank-ifsc" style="text-align: center !important;">${row.ifsc_code || row.ifscCode || ''}</td>
+        <td class="col-bank-responsible" style="text-align: left !important; padding-left: 14px;">${row.employee_name || row.responsible || ''}</td>
         <td class="col-bank-status td-center">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'De-Active' : 'Active'}</span>
         </td>
@@ -16931,10 +17794,7 @@ function openCompanyLocationFilter(colKey, triggerBtn) {
   if (searchInput) searchInput.focus();
 }
 
-// Global Contact Dataset & Filter State
-let vendorContactData = [
-  { id: 'c-1', name: 'Indus', designation: '', phone: '', email: 'R/RL-234567', status: 'SGST' }
-];
+// Contact Dataset & Filter State (Isolated per vendor context)
 let activeContactFilters = {};
 let currentContactFilterCol = null;
 
@@ -16942,7 +17802,10 @@ function renderVendorContactTable() {
   const tbody = document.getElementById('tbodyContactDetails');
   if (!tbody) return;
 
-  let filtered = vendorContactData.filter(row => {
+  const ctx = getEffectiveVendorContext();
+  const contactList = ctx.contacts || [];
+
+  let filtered = contactList.filter(row => {
     for (const [colKey, allowedSet] of Object.entries(activeContactFilters)) {
       const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
       if (!allowedSet.has(cellVal)) return false;
@@ -16995,7 +17858,10 @@ function openContactFilter(colKey, triggerBtn) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const uniqueValues = Array.from(new Set(vendorContactData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+  const ctx = getEffectiveVendorContext();
+  const contactList = ctx.contacts || [];
+
+  const uniqueValues = Array.from(new Set(contactList.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const activeSet = activeContactFilters[colKey];
@@ -17030,11 +17896,7 @@ function openContactFilter(colKey, triggerBtn) {
   if (searchInput) searchInput.focus();
 }
 
-// Global Supply Scope Dataset & Filter State
-let vendorSupplyScopeData = [
-  { id: 'ss-1', category: 'Service', productName: '230510678', uom: 'R/RL-234567', price: '15000.00', status: 'Active' },
-  { id: 'ss-2', category: 'Supply', productName: '230510678', uom: 'R/RL-234567', price: '15000.00', status: 'In - Active' }
-];
+// Supply Scope Dataset & Filter State (Isolated per vendor context)
 let activeSupplyScopeFilters = {};
 let currentSupplyScopeFilterCol = null;
 
@@ -17042,7 +17904,10 @@ function renderVendorSupplyScopeTable() {
   const tbody = document.getElementById('tbodySupplyScopeDetails');
   if (!tbody) return;
 
-  let filtered = vendorSupplyScopeData.filter(row => {
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.supplyScope || [];
+
+  let filtered = scopeList.filter(row => {
     for (const [colKey, allowedSet] of Object.entries(activeSupplyScopeFilters)) {
       const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
       if (!allowedSet.has(cellVal)) return false;
@@ -17099,7 +17964,10 @@ function openSupplyScopeFilter(colKey, triggerBtn) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const uniqueValues = Array.from(new Set(vendorSupplyScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.supplyScope || [];
+
+  const uniqueValues = Array.from(new Set(scopeList.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const activeSet = activeSupplyScopeFilters[colKey];
@@ -17134,11 +18002,7 @@ function openSupplyScopeFilter(colKey, triggerBtn) {
   if (searchInput) searchInput.focus();
 }
 
-// Global Service (Project) Scope Dataset & Filter State
-let vendorServiceProjectScopeData = [
-  { id: 'sps-1', subProjectType: 'Project', uom: 'LS', rate: '', status: 'Active' },
-  { id: 'sps-2', subProjectType: 'Item Wise', uom: 'Meter', rate: '', status: 'In - Active' }
-];
+// Service (Project) Scope Dataset & Filter State (Isolated per vendor context)
 let activeServiceProjectScopeFilters = {};
 let currentServiceProjectScopeFilterCol = null;
 
@@ -17146,7 +18010,10 @@ function renderVendorServiceProjectScopeTable() {
   const tbody = document.getElementById('tbodyServiceProjectScopeDetails');
   if (!tbody) return;
 
-  let filtered = vendorServiceProjectScopeData.filter(row => {
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.serviceProjectScope || [];
+
+  let filtered = scopeList.filter(row => {
     for (const [colKey, allowedSet] of Object.entries(activeServiceProjectScopeFilters)) {
       const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
       if (!allowedSet.has(cellVal)) return false;
@@ -17202,7 +18069,10 @@ function openServiceProjectScopeFilter(colKey, triggerBtn) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const uniqueValues = Array.from(new Set(vendorServiceProjectScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.serviceProjectScope || [];
+
+  const uniqueValues = Array.from(new Set(scopeList.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const activeSet = activeServiceProjectScopeFilters[colKey];
@@ -17237,11 +18107,7 @@ function openServiceProjectScopeFilter(colKey, triggerBtn) {
   if (searchInput) searchInput.focus();
 }
 
-// Global Service (Transport) Scope Dataset & Filter State
-let vendorServiceTransportScopeData = [
-  { id: 'sts-1', vehicleType: 'LCV', vehicleNumber: '230510678', fuelType: 'Petrol', range: 'Project', rentalType: 'Monthly', status: 'Active' },
-  { id: 'sts-2', vehicleType: 'MCV', vehicleNumber: '230510678', fuelType: 'Diesel', range: 'Item Wise', rentalType: 'Daily', status: 'In - Active' }
-];
+// Service (Transport) Scope Dataset & Filter State (Isolated per vendor context)
 let activeServiceTransportScopeFilters = {};
 let currentServiceTransportScopeFilterCol = null;
 
@@ -17249,7 +18115,10 @@ function renderVendorServiceTransportScopeTable() {
   const tbody = document.getElementById('tbodyServiceTransportScopeDetails');
   if (!tbody) return;
 
-  let filtered = vendorServiceTransportScopeData.filter(row => {
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.serviceTransportScope || [];
+
+  let filtered = scopeList.filter(row => {
     for (const [colKey, allowedSet] of Object.entries(activeServiceTransportScopeFilters)) {
       const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
       if (!allowedSet.has(cellVal)) return false;
@@ -17307,7 +18176,10 @@ function openServiceTransportScopeFilter(colKey, triggerBtn) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const uniqueValues = Array.from(new Set(vendorServiceTransportScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.serviceTransportScope || [];
+
+  const uniqueValues = Array.from(new Set(scopeList.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const activeSet = activeServiceTransportScopeFilters[colKey];
@@ -17342,11 +18214,7 @@ function openServiceTransportScopeFilter(colKey, triggerBtn) {
   if (searchInput) searchInput.focus();
 }
 
-// Global Service (Others) Scope Dataset & Filter State
-let vendorServiceOthersScopeData = [
-  { id: 'sot-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', description: 'Petrol', uom: 'Project', status: 'Active' },
-  { id: 'sot-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', description: 'Diesel', uom: 'Item Wise', status: 'In - Active' }
-];
+// Service (Others) Scope Dataset & Filter State (Isolated per vendor context)
 let activeServiceOthersScopeFilters = {};
 let currentServiceOthersScopeFilterCol = null;
 
@@ -17354,7 +18222,10 @@ function renderVendorServiceOthersScopeTable() {
   const tbody = document.getElementById('tbodyServiceOthersScopeDetails');
   if (!tbody) return;
 
-  let filtered = vendorServiceOthersScopeData.filter(row => {
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.serviceOthersScope || [];
+
+  let filtered = scopeList.filter(row => {
     for (const [colKey, allowedSet] of Object.entries(activeServiceOthersScopeFilters)) {
       const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
       if (!allowedSet.has(cellVal)) return false;
@@ -17411,7 +18282,10 @@ function openServiceOthersScopeFilter(colKey, triggerBtn) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const uniqueValues = Array.from(new Set(vendorServiceOthersScopeData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
+  const ctx = getEffectiveVendorContext();
+  const scopeList = ctx.serviceOthersScope || [];
+
+  const uniqueValues = Array.from(new Set(scopeList.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const activeSet = activeServiceOthersScopeFilters[colKey];
@@ -19558,14 +20432,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // Vendor Bank Edit Toggle (switches to Save icon when editing)
   const btnVendorBankEditToggle = document.getElementById('btnVendorBankEditToggle');
   if (btnVendorBankEditToggle) {
-    btnVendorBankEditToggle.addEventListener('click', () => {
+    btnVendorBankEditToggle.addEventListener('click', async () => {
       if (!isVendorBankEditing) {
         setVendorBankEditingState(true);
         document.getElementById('inpVendorBankAccountName')?.focus();
         showToast('Vendor Bank form is now editable');
       } else {
+        saveVendorBankDataFromForm();
         setVendorBankEditingState(false);
-        showToast('Vendor Bank details saved & updated successfully!');
+        const numericVendorId = parseInt(currentViewedVendorId, 10);
+        if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+          try {
+            const ctx = getEffectiveVendorContext();
+            await NexusApi.vendors.updateBank(numericVendorId, {
+              account_name: ctx.bank?.accountName || '',
+              account_number: ctx.bank?.accountNumber || '',
+              bank_name: ctx.bank?.bankName || '',
+              ifsc_code: ctx.bank?.ifscCode || ''
+            });
+            await loadMasterVendorsFromApi();
+            showToast('Vendor Bank details saved & updated to database!');
+          } catch (err) {
+            console.error('Error updating bank details in API:', err);
+            showToast('Failed to update bank details: ' + (err.message || 'Unknown error'));
+          }
+        } else {
+          showToast('Vendor Bank details saved & updated successfully!');
+        }
       }
     });
   }
@@ -19588,8 +20481,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- VENDOR BANK EDIT HANDLER ---
-let isVendorBankEditing = false;
-
 function setVendorBankEditingState(isEditing) {
   isVendorBankEditing = isEditing;
   const form = document.getElementById('frmVendorBank');
@@ -19597,23 +20488,60 @@ function setVendorBankEditingState(isEditing) {
 
   const textInputs = form.querySelectorAll('input[type="text"]');
   textInputs.forEach(inp => {
-    inp.removeAttribute('readonly');
-    inp.style.backgroundColor = '#ffffff';
+    if (isEditing) {
+      inp.removeAttribute('readonly');
+      inp.style.backgroundColor = '#ffffff';
+      inp.style.cursor = 'text';
+    } else {
+      inp.setAttribute('readonly', 'true');
+      inp.style.backgroundColor = '#f8fafc';
+      inp.style.cursor = 'not-allowed';
+    }
   });
 
   const selects = form.querySelectorAll('select');
   selects.forEach(sel => {
-    sel.removeAttribute('disabled');
-    sel.style.backgroundColor = '#ffffff';
+    if (isEditing) {
+      sel.removeAttribute('disabled');
+      sel.style.backgroundColor = '#ffffff';
+      sel.style.cursor = 'pointer';
+    } else {
+      sel.setAttribute('disabled', 'true');
+      sel.style.backgroundColor = '#f8fafc';
+      sel.style.cursor = 'not-allowed';
+    }
   });
 
   const toggles = form.querySelectorAll('input[type="checkbox"]');
   toggles.forEach(t => {
-    t.disabled = false;
+    t.disabled = !isEditing;
   });
 
   const btnEditToggle = document.getElementById('btnVendorBankEditToggle');
-  if (btnEditToggle) btnEditToggle.style.display = 'none';
+  const imgEditIcon = document.getElementById('imgVendorBankEditIcon');
+  if (btnEditToggle) {
+    if (currentViewedVendorId) {
+      btnEditToggle.style.display = 'flex';
+      if (imgEditIcon) {
+        if (isEditing) {
+          imgEditIcon.src = 'icons/Save.svg';
+          imgEditIcon.className = 'icon-green';
+          imgEditIcon.title = 'Save';
+        } else {
+          imgEditIcon.src = 'icons/Edit.svg';
+          imgEditIcon.className = 'icon-blue';
+          imgEditIcon.title = 'Edit Info';
+        }
+      }
+    } else {
+      btnEditToggle.style.display = 'none';
+    }
+  }
+
+  const btnSubmitWrap = form.querySelector('.form-submit-inside-wrap');
+  if (btnSubmitWrap) {
+    btnSubmitWrap.style.display = (!currentViewedVendorId) ? 'flex' : 'none';
+  }
 }
 
 // --- SITE, INFRA, PROJECT, GBPA, MATERIALS, EXPENSES VIEW HANDLERS ---
@@ -21051,9 +21979,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-let currentViewedVendorId = null;
-let isVendorFormEditing = false;
-
 function setVendorFormReadOnly(isReadOnly, isEditModeOnly = false) {
   const form = document.getElementById('frmAddVendor');
   if (!form) return;
@@ -21260,31 +22185,20 @@ document.getElementById('inpCustomerProjectName')?.addEventListener('input', upd
 document.getElementById('inpCustomerProjectName')?.addEventListener('change', updateCustomerConditionalFields);
 
 
-window.openViewVendorCard = function(vendorId) {
-  let vend = masterVendorData.find(v => v.id === vendorId || v.vendorName === vendorId || v.vendorId === vendorId);
-  if (!vend) {
-    vend = {
-      id: vendorId || 'vend-1',
-      vendorName: "Apex Telecom Infrastructure",
-      entityType: "Private Limited",
-      businessType: "Service",
-      vendorType: "Service",
-      serviceType: "Project",
-      contractType: "B2B",
-      vendorId: "230510678",
-      gstEnabled: true,
-      gstType: "SGST",
-      gstNumber: "33ASMPM8643F1Z5",
-      address: "123 Telecom Tower Complex, Chennai",
-      panNumber: "ASMPM8643F",
-      tdsDeduction: true,
-      tdsCode: "1027",
-      tdsRate: "1%",
-      status: "Active"
-    };
+window.openViewVendorCard = async function(vendorId) {
+  let vend = masterVendorData.find(v => v.id === vendorId || v.vendorName === vendorId || v.vendorId === vendorId || String(v.vendor_id) === String(vendorId));
+  const numericId = parseInt(vendorId, 10);
+  if (!vend && !isNaN(numericId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
+    try {
+      vend = await NexusApi.vendors.getById(numericId);
+    } catch (err) {
+      console.warn('Could not fetch vendor by ID:', err);
+    }
   }
+  if (!vend) return;
 
-  currentViewedVendorId = vend.id;
+  const actualVendorId = vend.vendor_id || vend.id;
+  currentViewedVendorId = actualVendorId;
   isVendorFormEditing = false;
   openSideForm();
 
@@ -21295,7 +22209,7 @@ window.openViewVendorCard = function(vendorId) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblVendorCardTitle');
-  if (lblTitle) lblTitle.innerText = vend.vendorName || 'View Vendor';
+  if (lblTitle) lblTitle.innerText = vend.vendor_name || vend.vendorName || 'View Vendor';
 
   const btnEditToggle = document.getElementById('btnVendorCardEditToggle');
   const imgEditIcon = document.getElementById('imgVendorCardEditIcon');
@@ -21316,27 +22230,27 @@ window.openViewVendorCard = function(vendorId) {
   const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpVendorName')) document.getElementById('inpVendorName').value = vend.vendorName || '';
-  if (document.getElementById('inpVendorEntityType')) document.getElementById('inpVendorEntityType').value = vend.entityType || 'Proprietorship';
-  if (document.getElementById('inpVendorType')) document.getElementById('inpVendorType').value = (vend.businessType || vend.vendorType || 'Supply');
-  if (document.getElementById('inpServiceType')) document.getElementById('inpServiceType').value = vend.serviceType || 'Project';
-  if (document.getElementById('inpVendorContractType')) document.getElementById('inpVendorContractType').value = vend.contractType || 'B2B';
+  if (document.getElementById('inpVendorName')) document.getElementById('inpVendorName').value = vend.vendor_name || vend.vendorName || '';
+  if (document.getElementById('inpVendorEntityType')) document.getElementById('inpVendorEntityType').value = vend.entity_type || vend.entityType || 'Proprietorship';
+  if (document.getElementById('inpVendorType')) document.getElementById('inpVendorType').value = (vend.business_type || vend.businessType || vend.vendorType || 'Supply');
+  if (document.getElementById('inpServiceType')) document.getElementById('inpServiceType').value = vend.service_type || vend.serviceType || 'Project';
+  if (document.getElementById('inpVendorContractType')) document.getElementById('inpVendorContractType').value = vend.contract_type || vend.contractType || 'B2B';
   if (document.getElementById('inpVendorAddress')) document.getElementById('inpVendorAddress').value = vend.address || '';
-  if (document.getElementById('inpVendorPanNumber')) document.getElementById('inpVendorPanNumber').value = vend.panNumber || '';
+  if (document.getElementById('inpVendorPanNumber')) document.getElementById('inpVendorPanNumber').value = vend.pan_number || vend.panNumber || '';
 
   const chkGst = document.getElementById('inpVendorGstToggle');
   if (chkGst) {
-    chkGst.checked = (vend.gstEnabled !== undefined) ? vend.gstEnabled : (vend.gstNumber && vend.gstNumber !== 'NA' && vend.gstNumber !== '');
+    chkGst.checked = (vend.gst_number_available !== undefined) ? vend.gst_number_available : (vend.gstEnabled !== undefined ? vend.gstEnabled : (vend.gst_number && vend.gst_number !== 'NA' && vend.gst_number !== ''));
   }
 
-  if (document.getElementById('inpVendorGstType')) document.getElementById('inpVendorGstType').value = vend.gstType || 'SGST';
-  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = (vend.gstNumber && vend.gstNumber !== 'NA') ? vend.gstNumber : '';
+  if (document.getElementById('inpVendorGstType')) document.getElementById('inpVendorGstType').value = vend.gst_type || vend.gstType || 'SGST';
+  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = (vend.gst_number && vend.gst_number !== 'NA') ? vend.gst_number : ((vend.gstNumber && vend.gstNumber !== 'NA') ? vend.gstNumber : '');
 
   const chkTds = document.getElementById('inpTdsDeductionToggle');
-  if (chkTds) chkTds.checked = vend.tdsDeduction === true;
+  if (chkTds) chkTds.checked = (vend.tds_deduction === true || vend.tdsDeduction === true);
 
-  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = vend.tdsCode || '';
-  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = vend.tdsRate || '1%';
+  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = vend.tds_code || vend.tdsCode || '';
+  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = vend.tds_rate ? `${vend.tds_rate}%` : (vend.tdsRate || '1%');
 
   const statusToggle = document.getElementById('inpVendorStatusToggle');
   if (statusToggle) {
@@ -21345,7 +22259,19 @@ window.openViewVendorCard = function(vendorId) {
 
   updateVendorConditionalFields();
   setVendorFormReadOnly(true);
-  showToast(`Viewing vendor details: ${vend.vendorName}`);
+
+  // Pre-load bank data and reset active filter sets for view
+  loadVendorBankDataToForm();
+  activeContactFilters = {};
+  activeSupplyScopeFilters = {};
+  activeServiceProjectScopeFilters = {};
+  activeServiceTransportScopeFilters = {};
+  activeServiceOthersScopeFilters = {};
+
+  // Fetch live pricing records from backend
+  await loadVendorPricingFromApi(actualVendorId);
+
+  showToast(`Viewing vendor details: ${vend.vendor_name || vend.vendorName}`);
 };
 
 let currentViewedProductId = null;
@@ -25081,6 +26007,9 @@ window.closeSvgErrorPopup = function() {
   if (overlay) {
     overlay.style.display = 'none';
   }
+  if (typeof updateCardDimmedState === 'function') {
+    updateCardDimmedState();
+  }
 };
 
 // ─── NEXUS SVG SUCCESS POPUP CONTROLLER ───────────────────────────────────────
@@ -25141,6 +26070,9 @@ window.closeSvgSuccessPopup = function() {
   const overlay = document.getElementById('nexusSuccessPopupOverlay');
   if (overlay) {
     overlay.style.display = 'none';
+  }
+  if (typeof updateCardDimmedState === 'function') {
+    updateCardDimmedState();
   }
 };
 

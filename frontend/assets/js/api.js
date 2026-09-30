@@ -349,6 +349,146 @@
       }
     },
 
+    employeeBank: {
+      async getAll(employeeIdOrParams = null) {
+        if (typeof employeeIdOrParams === 'string' || typeof employeeIdOrParams === 'number') {
+          return await request(`/master/employees/${employeeIdOrParams}/bank-details`, { method: 'GET' });
+        }
+        const query = new URLSearchParams();
+        if (employeeIdOrParams && employeeIdOrParams.employee_id) query.set('employee_id', employeeIdOrParams.employee_id);
+        const qs = query.toString();
+        return await request(`/master/employee-bank-details${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+
+      async getById(bankDetailId) {
+        return await request(`/master/employee-bank-details/${bankDetailId}`, { method: 'GET' });
+      },
+
+      async create(payload, employeeId = null) {
+        if (employeeId) {
+          return await request(`/master/employees/${employeeId}/bank-details`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+        return await request('/master/employee-bank-details', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      async update(bankDetailId, payload) {
+        return await request(`/master/employee-bank-details/${bankDetailId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      async uploadDocument(bankDetailId, file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request(`/master/employee-bank-details/${bankDetailId}/document`, {
+          method: 'POST',
+          body: formData
+        });
+      },
+
+      getDocumentUrl(bankDetailId) {
+        return `${API_BASE_URL}/master/employee-bank-details/${bankDetailId}/document`;
+      },
+
+      async downloadDocument(bankDetailId, defaultFileName = 'bank_document.pdf') {
+        const url = `${API_BASE_URL}/master/employee-bank-details/${bankDetailId}/document`;
+        const res = await fetch(url, { method: 'GET' });
+        if (!res.ok) {
+          let msg = 'Failed to download account document.';
+          try {
+            const errJson = await res.json();
+            if (errJson && errJson.detail) msg = errJson.detail;
+          } catch(e) {}
+          throw new Error(msg);
+        }
+        const blob = await res.blob();
+        const disposition = res.headers.get('content-disposition');
+        let filename = defaultFileName;
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+          const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (match && match[1]) {
+            filename = match[1].replace(/['"]/g, '');
+          }
+        }
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          window.URL.revokeObjectURL(blobUrl);
+          a.remove();
+        }, 200);
+        return filename;
+      }
+    },
+
+    employeeAssets: {
+      async getAll(employeeIdOrParams = null) {
+        if (typeof employeeIdOrParams === 'string' || typeof employeeIdOrParams === 'number') {
+          return await request(`/master/employees/${employeeIdOrParams}/assets`, { method: 'GET' });
+        }
+        const query = new URLSearchParams();
+        if (employeeIdOrParams && employeeIdOrParams.employee_id) query.set('employee_id', employeeIdOrParams.employee_id);
+        const qs = query.toString();
+        return await request(`/master/employee-assets${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+
+      async create(payload, employeeId = null) {
+        if (employeeId) {
+          return await request(`/master/employees/${employeeId}/assets`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+        return await request('/master/employee-assets', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      async getTotal(employeeId = null) {
+        if (employeeId) {
+          return await request(`/master/employees/${employeeId}/assets/total`, { method: 'GET' });
+        }
+        return await request('/master/employee-assets/total', { method: 'GET' });
+      }
+    },
+
+    employeeSalary: {
+      async getAll(employeeIdOrParams = null) {
+        if (typeof employeeIdOrParams === 'string' || typeof employeeIdOrParams === 'number') {
+          return await request(`/master/employees/${employeeIdOrParams}/salary-details`, { method: 'GET' });
+        }
+        const query = new URLSearchParams();
+        if (employeeIdOrParams && employeeIdOrParams.employee_id) query.set('employee_id', employeeIdOrParams.employee_id);
+        const qs = query.toString();
+        return await request(`/master/employee-salary-details${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+
+      async create(payload, employeeId = null) {
+        if (employeeId) {
+          return await request(`/master/employees/${employeeId}/salary-details`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+        return await request('/master/employee-salary-details', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
     customers: {
       /**
        * Fetch customers with optional search, filters, pagination
@@ -630,8 +770,165 @@
       getDocumentUrl(employeeId, documentType) {
         return `${API_BASE_URL}/master/employees/${employeeId}/documents/${documentType}`;
       }
+    },
+
+    vendors: {
+      /**
+       * Fetch vendors with optional search, filters, pagination
+       */
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.business_type || params.businessType) query.set('business_type', params.business_type || params.businessType);
+        if (params.service_type || params.serviceType) query.set('service_type', params.service_type || params.serviceType);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+
+        const qs = query.toString();
+        return await request(`/master/vendors${qs ? '?' + qs : ''}`, {
+          method: 'GET'
+        });
+      },
+
+      /**
+       * Fetch single vendor by ID
+       */
+      async getById(vendorId) {
+        return await request(`/master/vendors/${vendorId}`, {
+          method: 'GET'
+        });
+      },
+
+      /**
+       * Create new vendor in PostgreSQL vendor_master
+       */
+      async create(payload) {
+        return await request('/master/vendors', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Update existing vendor by ID
+       */
+      async update(vendorId, payload) {
+        return await request(`/master/vendors/${vendorId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Toggle active/inactive status
+       */
+      async updateStatus(vendorId, statusData) {
+        return await request(`/master/vendors/${vendorId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify(statusData)
+        });
+      },
+
+      /**
+       * Update vendor bank details
+       */
+      async updateBank(vendorId, payload) {
+        return await request(`/master/vendors/${vendorId}/bank`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Update vendor contact details
+       */
+      async updateContact(vendorId, payload) {
+        return await request(`/master/vendors/${vendorId}/contact`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Delete vendor
+       */
+      async delete(vendorId) {
+        return await request(`/master/vendors/${vendorId}`, {
+          method: 'DELETE'
+        });
+      },
+
+      /**
+       * Fetch pricing / scope details for a vendor
+       */
+      async getPricing(vendorId, params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.status) query.set('status', params.status);
+
+        const qs = query.toString();
+        return await request(`/master/vendors/${vendorId}/pricing${qs ? '?' + qs : ''}`, {
+          method: 'GET'
+        });
+      },
+
+      /**
+       * Create new pricing / scope record against a vendor
+       */
+      async createPricing(vendorId, payload) {
+        return await request(`/master/vendors/${vendorId}/pricing`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    vendorPricing: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.vendor_name || params.vendorName) query.set('vendor_name', params.vendor_name || params.vendorName);
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.status) query.set('status', params.status);
+
+        const qs = query.toString();
+        return await request(`/master/vendor-pricing${qs ? '?' + qs : ''}`, {
+          method: 'GET'
+        });
+      },
+
+      async getById(pricingId) {
+        return await request(`/master/vendor-pricing/${pricingId}`, {
+          method: 'GET'
+        });
+      },
+
+      async create(payload) {
+        return await request('/master/vendor-pricing', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      async update(pricingId, payload) {
+        return await request(`/master/vendor-pricing/${pricingId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      async delete(pricingId) {
+        return await request(`/master/vendor-pricing/${pricingId}`, {
+          method: 'DELETE'
+        });
+      }
     }
   };
 
   window.NexusApi = NexusApi;
 })(window);
+

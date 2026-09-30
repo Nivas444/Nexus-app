@@ -128,17 +128,52 @@ class HRComplianceBase(BaseModel):
     leave_status: Optional[str] = "Active"
 
     # Bonus Specific
+    bonus_type: Optional[str] = None
     statutory_bonus_sealing_amount: Optional[Decimal] = None
     statutory_bonus: Optional[Decimal] = None
     performance_bonus: Optional[Decimal] = None
     company_bonus: Optional[Decimal] = None
     bonus_status: Optional[str] = "Active"
 
+    # Leave helper
+    leave_type: Optional[str] = None
+
     # Medical Insurance Specific
     medical_insurance_company_name: Optional[str] = None
     medical_insurance_employee_contribution: Optional[Decimal] = None
     medical_insurance_employer_contribution: Optional[Decimal] = None
     medical_insurance_status: Optional[str] = "Active"
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_compliance_aliases(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Sync bonus_type to state or vice versa
+            if data.get("bonus_type") and not data.get("state"):
+                data["state"] = data["bonus_type"]
+            elif data.get("state") and not data.get("bonus_type") and data.get("compliance_type") == "Bonus":
+                data["bonus_type"] = data["state"]
+
+            # Sync leave_type
+            if data.get("leave_type") and not data.get("state"):
+                data["state"] = data["leave_type"]
+
+            # Normalize sandwich leave policy
+            if "sandwich_leave_policy" in data and data["sandwich_leave_policy"] is not None:
+                val = str(data["sandwich_leave_policy"]).strip()
+                if val.lower() in ("yes", "true", "1"):
+                    data["sandwich_leave_policy"] = "Yes"
+                elif val.lower() in ("no", "false", "0"):
+                    data["sandwich_leave_policy"] = "No"
+                else:
+                    data["sandwich_leave_policy"] = val
+
+            # Sync bonus values based on bonus_type
+            b_type = data.get("bonus_type") or data.get("state")
+            if b_type == "Performance Bonus":
+                if data.get("statutory_bonus") is not None and data.get("performance_bonus") is None:
+                    data["performance_bonus"] = data["statutory_bonus"]
+        return data
 
     @field_validator("compliance_type")
     @classmethod
@@ -148,6 +183,18 @@ class HRComplianceBase(BaseModel):
                 f"Invalid compliance_type '{val}'. Must be one of: {', '.join(ALLOWED_COMPLIANCE_TYPES)}"
             )
         return val.strip()
+
+    @field_validator("sandwich_leave_policy", mode="before")
+    @classmethod
+    def validate_sandwich_leave_policy(cls, val: Any) -> Optional[str]:
+        if val is None or val == "":
+            return None
+        s = str(val).strip()
+        if s.lower() in ("yes", "true", "1"):
+            return "Yes"
+        if s.lower() in ("no", "false", "0"):
+            return "No"
+        return s
 
     @field_validator("from_date", "to_date", "epf_filling_due_date", "esi_filling_date", "pt_filling_due_date", "lwf_filling_due_date", mode="before")
     @classmethod

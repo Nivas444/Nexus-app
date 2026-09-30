@@ -506,7 +506,6 @@ function mapHrComplianceRecordToRow(r, type) {
       fillingFrequency: r.pt_filling_frequency || 'Half Yearly',
       fillingDueDate: formatHrDateToUI(r.pt_filling_due_date) || (r.pt_filling_due_date ? String(r.pt_filling_due_date) : ''),
       thresholdLimit: r.gross_salary_from !== null && r.gross_salary_from !== undefined ? formatHrAmount(r.gross_salary_from) : '',
-      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : '',
       employee: r.pt_employee_deduction !== null && r.pt_employee_deduction !== undefined ? formatHrAmount(r.pt_employee_deduction) : '',
       status: r.pt_status || 'Active'
     };
@@ -516,7 +515,6 @@ function mapHrComplianceRecordToRow(r, type) {
       state: r.state || '',
       fillingFrequency: r.lwf_filling_frequency || 'Annually',
       fillingDueDate: formatHrDateToUI(r.lwf_filling_due_date) || (r.lwf_filling_due_date ? String(r.lwf_filling_due_date) : ''),
-      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : 'NA',
       employee: r.lwf_employee_contribution !== null && r.lwf_employee_contribution !== undefined ? formatHrAmount(r.lwf_employee_contribution) : '',
       employer: r.lwf_employer_contribution !== null && r.lwf_employer_contribution !== undefined ? formatHrAmount(r.lwf_employer_contribution) : '',
       status: r.lwf_status || 'Active'
@@ -532,27 +530,40 @@ function mapHrComplianceRecordToRow(r, type) {
       standardDeduction: r.tds_standard_deduction !== null && r.tds_standard_deduction !== undefined ? formatHrAmount(r.tds_standard_deduction) : '',
       tdsRate: r.tds_deduction_percentage !== null && r.tds_deduction_percentage !== undefined ? `${r.tds_deduction_percentage}%` : '',
       healthEducationCess: r.health_and_education_cess !== null && r.health_and_education_cess !== undefined ? `${r.health_and_education_cess}%` : '',
-      sealingAmount: r.gross_salary_to !== null && r.gross_salary_to !== undefined ? formatHrAmount(r.gross_salary_to) : '',
       status: r.tds_status || 'Active'
     };
   } else if (t === 'leave') {
+    let sandwichVal = 'No';
+    if (r.sandwich_leave_policy) {
+      const sw = String(r.sandwich_leave_policy).trim().toLowerCase();
+      if (sw === 'yes' || sw === 'true' || sw === '1') {
+        sandwichVal = 'Yes';
+      } else if (sw === 'no' || sw === 'false' || sw === '0') {
+        sandwichVal = 'No';
+      } else {
+        sandwichVal = r.sandwich_leave_policy;
+      }
+    }
     return {
       ...base,
-      leaveType: r.sandwich_leave_policy || 'Casual Leave',
-      clEligible: r.cl_eligible !== null && r.cl_eligible !== undefined ? `${r.cl_eligible} Days` : (r.sl_eligible ? `${r.sl_eligible} Days` : (r.el_eligible ? `${r.el_eligible} Days` : '')),
-      clClaimable: r.cl_can_claim !== null && r.cl_can_claim !== undefined ? `${r.cl_can_claim} / Month` : (r.sl_can_claim ? `${r.sl_can_claim} / Month` : (r.el_can_claim ? `${r.el_can_claim} / Month` : '')),
+      leaveType: r.state || (r.cl_eligible ? 'Casual Leave' : (r.sl_eligible ? 'Sick Leave' : (r.el_eligible ? 'Earning Leave' : 'Casual Leave'))),
+      clEligible: r.cl_eligible !== null && r.cl_eligible !== undefined ? `${r.cl_eligible} Days` : '',
+      clClaimable: r.cl_can_claim !== null && r.cl_can_claim !== undefined ? `${r.cl_can_claim} / Month` : '',
       slEligible: r.sl_eligible !== null && r.sl_eligible !== undefined ? `${r.sl_eligible} Days` : '',
       slClaimable: r.sl_can_claim !== null && r.sl_can_claim !== undefined ? `${r.sl_can_claim} / Month` : '',
       elEligible: r.el_eligible !== null && r.el_eligible !== undefined ? `${r.el_eligible} Days` : '',
       elClaimable: r.el_can_claim !== null && r.el_can_claim !== undefined ? `${r.el_can_claim} / Month` : '',
+      sandwichLeavePolicy: sandwichVal,
       status: r.leave_status || 'Active'
     };
   } else if (t === 'bonus') {
+    const bType = r.state || r.bonus_type || (r.performance_bonus !== null && r.performance_bonus !== undefined ? 'Performance Bonus' : 'Statutory Bonus');
+    const bVal = r.statutory_bonus !== null && r.statutory_bonus !== undefined ? r.statutory_bonus : r.performance_bonus;
     return {
       ...base,
-      bonusType: r.state || 'Statutory Bonus',
+      bonusType: bType,
       sealingAmount: r.statutory_bonus_sealing_amount !== null && r.statutory_bonus_sealing_amount !== undefined ? formatHrAmount(r.statutory_bonus_sealing_amount) : '',
-      bonusPercent: r.statutory_bonus !== null && r.statutory_bonus !== undefined ? `${r.statutory_bonus}%` : '',
+      bonusPercent: bVal !== null && bVal !== undefined ? `${bVal}%` : '',
       status: r.bonus_status || 'Active'
     };
   } else if (t === 'medical_insurance') {
@@ -5840,7 +5851,6 @@ function renderCompanyHrTableHead() {
         <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Frequency</span></th>
         <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Due Date</span></th>
         <th ${thStyle('15ch', 'height: 64px;')}><span>Threshold Limit</span></th>
-        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
         <th ${thStyle('10ch', 'height: 64px;')}><span>Employee</span></th>
         <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
       </tr>
@@ -5853,7 +5863,6 @@ function renderCompanyHrTableHead() {
         <th ${thStyle('20ch', 'height: 64px;')}><span>State</span></th>
         <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Frequency</span></th>
         <th ${thStyle('20ch', 'height: 64px;')}><span>Filling Due Date</span></th>
-        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
         <th ${thStyle('10ch', 'height: 64px;')}><span>Employee</span></th>
         <th ${thStyle('10ch', 'height: 64px;')}><span>Employer</span></th>
         <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
@@ -5872,7 +5881,6 @@ function renderCompanyHrTableHead() {
         <th ${thStyle('20ch', 'height: 64px;')}><span>Standard Deduction</span></th>
         <th ${thStyle('10ch', 'height: 64px;')}><span>TDS Rate</span></th>
         <th ${thStyle('20ch', 'height: 64px;')}><span>Health &amp; Education Cess</span></th>
-        <th ${thStyle('13ch', 'height: 64px;')}><span>Sealing Amount</span></th>
         <th ${thStyle('10ch', 'height: 64px;')}><span>Status</span></th>
       </tr>
     `;
@@ -5890,6 +5898,7 @@ function renderCompanyHrTableHead() {
         <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
           <span>EL</span>
         </th>
+        <th rowspan="2" ${thStyle('20ch')}><span>Sandwich Leave Policy</span></th>
         <th rowspan="2" ${thStyle('10ch')}><span>Status</span></th>
       </tr>
       <tr class="master-view-header company-hr-header tr-sub-headers">
@@ -6106,7 +6115,6 @@ window.saveCompanyHrCompliance = async function(complianceType) {
     payload.pt_filling_frequency = getVal('inpPtFillingFrequency') || null;
     payload.pt_filling_due_date = getVal('inpPtFillingDueDate') || null;
     payload.gross_salary_from = getVal('inpPtThresholdLimit') || null;
-    payload.epf_sealing_amount = getVal('inpPtSealingAmount') || null;
     payload.pt_employee_deduction = getVal('inpPtEmpContribution') || null;
     payload.pt_status = getChecked('inpPtStatusToggle') ? 'Active' : 'In - Active';
   } else if (complianceType === 'LWF') {
@@ -6125,7 +6133,6 @@ window.saveCompanyHrCompliance = async function(complianceType) {
     payload.state = getVal('inpLwfState') || null;
     payload.lwf_filling_frequency = getVal('inpLwfFillingFrequency') || null;
     payload.lwf_filling_due_date = getVal('inpLwfFillingDueDate') || null;
-    payload.epf_sealing_amount = getVal('inpLwfSealingAmount') || null;
     payload.lwf_employee_contribution = getVal('inpLwfEmpContribution') || null;
     payload.lwf_employer_contribution = getVal('inpLwfEmployerContribution') || null;
     payload.lwf_status = getChecked('inpLwfStatusToggle') ? 'Active' : 'In - Active';
@@ -6150,7 +6157,6 @@ window.saveCompanyHrCompliance = async function(complianceType) {
     payload.tds_standard_deduction = getVal('inpTdsStandardDeduction') || null;
     payload.tds_deduction_percentage = getVal('inpTdsRate') || null;
     payload.health_and_education_cess = getVal('inpTdsHealthCess') || null;
-    payload.gross_salary_to = getVal('inpTdsSealingAmount') || null;
     payload.tds_status = getChecked('inpTdsStatusToggle') ? 'Active' : 'In - Active';
   } else if (complianceType === 'Leave') {
     const fromDate = getVal('inpLeaveFromDate');
@@ -6166,9 +6172,14 @@ window.saveCompanyHrCompliance = async function(complianceType) {
     const leaveType = getVal('inpLeaveType') || 'Casual Leave';
     const eligibleDays = getVal('inpLeaveEligibleWorkingDays');
     const claimablePeriod = getVal('inpLeaveClaimablePeriod');
+    const sandwichPolicy = getVal('inpLeaveSandwichPolicy') || 'No';
+
     payload.from_date = fromDate;
     payload.to_date = toDate;
-    payload.sandwich_leave_policy = leaveType;
+    payload.state = leaveType;
+    payload.leave_type = leaveType;
+    payload.sandwich_leave_policy = sandwichPolicy;
+
     if (leaveType === 'Casual Leave') {
       payload.cl_eligible = eligibleDays || null;
       payload.cl_can_claim = claimablePeriod || null;
@@ -6191,11 +6202,19 @@ window.saveCompanyHrCompliance = async function(complianceType) {
       }
       return;
     }
+    const bonusType = getVal('inpBonusType') || 'Statutory Bonus';
+    const bonusVal = getVal('inpBonusPercent') || null;
     payload.from_date = fromDate;
     payload.to_date = toDate;
-    payload.state = getVal('inpBonusType') || null;
+    payload.state = bonusType;
+    payload.bonus_type = bonusType;
     payload.statutory_bonus_sealing_amount = getVal('inpBonusSealingAmount') || null;
-    payload.statutory_bonus = getVal('inpBonusPercent') || null;
+    if (bonusType === 'Performance Bonus') {
+      payload.performance_bonus = bonusVal;
+      payload.statutory_bonus = bonusVal;
+    } else {
+      payload.statutory_bonus = bonusVal;
+    }
     payload.bonus_status = getChecked('inpBonusStatusToggle') ? 'Active' : 'In - Active';
   } else if (complianceType === 'Medical Insurance') {
     const fromDate = getVal('inpMedFromDate');
@@ -6372,7 +6391,6 @@ window.openCompanyHrPtModal = function(rowId) {
   if (document.getElementById('inpPtFillingFrequency')) document.getElementById('inpPtFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
   if (document.getElementById('inpPtFillingDueDate')) document.getElementById('inpPtFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
   if (document.getElementById('inpPtThresholdLimit')) document.getElementById('inpPtThresholdLimit').value = row ? String(row.thresholdLimit || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpPtSealingAmount')) document.getElementById('inpPtSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
   if (document.getElementById('inpPtEmpContribution')) document.getElementById('inpPtEmpContribution').value = row ? String(row.employee || '').replace('₹', '').replace('%', '').trim() : '';
   if (document.getElementById('inpPtStatusToggle')) document.getElementById('inpPtStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
@@ -6416,7 +6434,6 @@ window.openCompanyHrLwfModal = function(rowId) {
   if (document.getElementById('inpLwfState')) document.getElementById('inpLwfState').value = row ? (row.state || '') : '';
   if (document.getElementById('inpLwfFillingFrequency')) document.getElementById('inpLwfFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
   if (document.getElementById('inpLwfFillingDueDate')) document.getElementById('inpLwfFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
-  if (document.getElementById('inpLwfSealingAmount')) document.getElementById('inpLwfSealingAmount').value = row ? (row.sealingAmount || '') : '';
   if (document.getElementById('inpLwfEmpContribution')) document.getElementById('inpLwfEmpContribution').value = row ? String(row.employee || '').replace('₹', '').trim() : '';
   if (document.getElementById('inpLwfEmployerContribution')) document.getElementById('inpLwfEmployerContribution').value = row ? String(row.employer || '').replace('₹', '').trim() : '';
   if (document.getElementById('inpLwfStatusToggle')) document.getElementById('inpLwfStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
@@ -6466,7 +6483,6 @@ window.openCompanyHrTdsModal = function(rowId) {
   if (document.getElementById('inpTdsStandardDeduction')) document.getElementById('inpTdsStandardDeduction').value = row ? String(row.standardDeduction || '').replace('₹', '').trim() : '';
   if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = row ? String(row.tdsRate || '').replace('%', '').trim() : '';
   if (document.getElementById('inpTdsHealthCess')) document.getElementById('inpTdsHealthCess').value = row ? String(row.healthEducationCess || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpTdsSealingAmount')) document.getElementById('inpTdsSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
   if (document.getElementById('inpTdsStatusToggle')) document.getElementById('inpTdsStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
   isCompanyHrTdsEditing = true;
@@ -6507,8 +6523,21 @@ window.openCompanyHrLeaveModal = function(rowId) {
   if (document.getElementById('inpLeaveFromDate')) document.getElementById('inpLeaveFromDate').value = row ? (row.from || '') : '';
   if (document.getElementById('inpLeaveToDate')) document.getElementById('inpLeaveToDate').value = row ? (row.to || '') : '';
   if (document.getElementById('inpLeaveType')) document.getElementById('inpLeaveType').value = row ? (row.leaveType || row.leave_type || 'Casual Leave') : 'Casual Leave';
-  if (document.getElementById('inpLeaveEligibleWorkingDays')) document.getElementById('inpLeaveEligibleWorkingDays').value = row ? (row.eligibleWorkingDays || row.eligible_working_days || row.clEligible || '') : '';
-  if (document.getElementById('inpLeaveClaimablePeriod')) document.getElementById('inpLeaveClaimablePeriod').value = row ? (row.claimablePeriod || row.claimable_period || row.clClaimable || '') : '';
+
+  let eligVal = '';
+  let claimVal = '';
+  if (row) {
+    if (row.clEligible) eligVal = row.clEligible;
+    else if (row.slEligible) eligVal = row.slEligible;
+    else if (row.elEligible) eligVal = row.elEligible;
+
+    if (row.clClaimable) claimVal = row.clClaimable;
+    else if (row.slClaimable) claimVal = row.slClaimable;
+    else if (row.elClaimable) claimVal = row.elClaimable;
+  }
+  if (document.getElementById('inpLeaveEligibleWorkingDays')) document.getElementById('inpLeaveEligibleWorkingDays').value = eligVal ? String(eligVal).replace('Days', '').trim() : '';
+  if (document.getElementById('inpLeaveClaimablePeriod')) document.getElementById('inpLeaveClaimablePeriod').value = claimVal ? String(claimVal).replace('/ Month', '').trim() : '';
+  if (document.getElementById('inpLeaveSandwichPolicy')) document.getElementById('inpLeaveSandwichPolicy').value = row ? (row.sandwichLeavePolicy || 'No') : 'No';
   if (document.getElementById('inpLeaveStatusToggle')) document.getElementById('inpLeaveStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
   isCompanyHrLeaveEditing = true;
@@ -6548,7 +6577,7 @@ window.openCompanyHrBonusModal = function(rowId) {
 
   if (document.getElementById('inpBonusFromDate')) document.getElementById('inpBonusFromDate').value = row ? (row.from || '') : '';
   if (document.getElementById('inpBonusToDate')) document.getElementById('inpBonusToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpBonusType')) document.getElementById('inpBonusType').value = row ? (row.bonusType || '') : '';
+  if (document.getElementById('inpBonusType')) document.getElementById('inpBonusType').value = row ? (row.bonusType || 'Statutory Bonus') : 'Statutory Bonus';
   if (document.getElementById('inpBonusSealingAmount')) document.getElementById('inpBonusSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
   if (document.getElementById('inpBonusPercent')) document.getElementById('inpBonusPercent').value = row ? String(row.bonusPercent || '').replace('%', '').trim() : '';
   if (document.getElementById('inpBonusStatusToggle')) document.getElementById('inpBonusStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
@@ -11233,7 +11262,6 @@ function applyFiltersAndRender() {
               ${tdC('20ch', row.fillingFrequency)}
               ${tdC('20ch', row.fillingDueDate)}
               ${tdC('15ch', row.thresholdLimit)}
-              ${tdC('13ch', row.sealingAmount)}
               ${tdC('10ch', row.employee)}
               ${statusBadge(row.status, isInactive)}
             </tr>
@@ -11250,7 +11278,6 @@ function applyFiltersAndRender() {
               ${tdC('20ch', row.state)}
               ${tdC('20ch', row.fillingFrequency)}
               ${tdC('20ch', row.fillingDueDate)}
-              ${tdC('13ch', row.sealingAmount)}
               ${tdC('10ch', row.employee)}
               ${tdC('10ch', row.employer)}
               ${statusBadge(row.status, isInactive)}
@@ -11273,7 +11300,6 @@ function applyFiltersAndRender() {
               ${tdC('20ch', row.standardDeduction)}
               ${tdC('10ch', row.tdsRate)}
               ${tdC('20ch', row.healthEducationCess)}
-              ${tdC('13ch', row.sealingAmount)}
               ${statusBadge(row.status, isInactive)}
             </tr>
           `;
@@ -11292,6 +11318,7 @@ function applyFiltersAndRender() {
               ${tdC('15ch', row.slClaimable)}
               ${tdC('15ch', row.elEligible)}
               ${tdC('15ch', row.elClaimable)}
+              ${tdC('20ch', row.sandwichLeavePolicy || 'No')}
               ${statusBadge(row.status, isInactive)}
             </tr>
           `;
@@ -25968,7 +25995,7 @@ window.renderSiteContactTable = function() {
     return `
       <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500; cursor: pointer;" title="${(row.name || '').replace(/"/g, '&quot;')}" onclick="openEditSiteContactCard('${row.id}')">
-          <span style="color: #0454e4; text-decoration: underline; cursor: pointer;">${row.name || ''}</span>
+          <span style="color: #0454e4; text-decoration: none; cursor: pointer;">${row.name || ''}</span>
         </td>
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.mobile || row.contact || ''}</td>

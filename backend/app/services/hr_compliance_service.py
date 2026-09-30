@@ -35,8 +35,12 @@ class HRComplianceService:
         record_data["company_name"] = target_company
         record_data["compliance_type"] = c_type
 
+        # Filter record_data to existing model columns
+        valid_cols = {c.name for c in HRCompliance.__table__.columns}
+        filtered_data = {k: v for k, v in record_data.items() if k in valid_cols}
+
         try:
-            record = HRCompliance(**record_data)
+            record = HRCompliance(**filtered_data)
             saved = self.repo.create(record)
             return HRComplianceResponse.model_validate(saved)
         except Exception as e:

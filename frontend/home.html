@@ -8855,13 +8855,7 @@
               </div>
             </div>
 
-            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-              <label class="form-label" for="inpPtSealingAmount" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Sealing Amount</label>
-              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
-                <span style="position: absolute; left: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">₹</span>
-                <input type="text" class="form-input-control" id="inpPtSealingAmount" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px 6px 26px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
-              </div>
-            </div>
+
 
             <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
               <label class="form-label" for="inpPtEmpContribution" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Employee Contribution</label>
@@ -8942,12 +8936,7 @@
               </div>
             </div>
 
-            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-              <label class="form-label" for="inpLwfSealingAmount" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Sealing Amount</label>
-              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
-                <input type="text" class="form-input-control" id="inpLwfSealingAmount" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
-              </div>
-            </div>
+
 
             <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
               <label class="form-label" for="inpLwfEmpContribution" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Employee Contribution</label>
@@ -9075,13 +9064,7 @@
               </div>
             </div>
 
-            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-              <label class="form-label" for="inpTdsSealingAmount" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Sealing Amount</label>
-              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
-                <span style="position: absolute; left: 10px; color: #64748b; font-size: 0.9rem; font-weight: 500;">₹</span>
-                <input type="text" class="form-input-control" id="inpTdsSealingAmount" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px 6px 26px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
-              </div>
-            </div>
+
 
             <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px;">
               <label class="form-label" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Status</label>
@@ -9138,7 +9121,6 @@
                   <option value="Casual Leave">Casual Leave</option>
                   <option value="Sick Leave">Sick Leave</option>
                   <option value="Earning Leave">Earning Leave</option>
-                  <option value="Sandwich Leave Policy">Sandwich Leave Policy</option>
                 </select>
               </div>
             </div>
@@ -9156,6 +9138,17 @@
               <label class="form-label" for="inpLeaveClaimablePeriod" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Claimable Period</label>
               <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
                 <input type="text" class="form-input-control" id="inpLeaveClaimablePeriod" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
+              </div>
+            </div>
+
+            <!-- 6. Sandwich Leave Policy (Dropdown with Yes / No) -->
+            <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <label class="form-label" for="inpLeaveSandwichPolicy" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Sandwich Leave Policy</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <select class="form-input-control" id="inpLeaveSandwichPolicy" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
+                  <option value="Yes">Yes</option>
+                  <option value="No" selected>No</option>
+                </select>
               </div>
             </div>
 
@@ -9209,7 +9202,10 @@
             <div class="form-row-group" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
               <label class="form-label" for="inpBonusType" style="width: 250px; min-width: 250px; white-space: nowrap; font-size: 0.88rem; font-weight: 600; color: #64748b; margin: 0;">Bonus Type</label>
               <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
-                <input type="text" class="form-input-control" id="inpBonusType" placeholder="" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
+                <select class="form-input-control" id="inpBonusType" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 6px 12px; font-size: 0.9rem; color: #1e293b; background: #ffffff;">
+                  <option value="Statutory Bonus">Statutory Bonus</option>
+                  <option value="Performance Bonus">Performance Bonus</option>
+                </select>
               </div>
             </div>
 

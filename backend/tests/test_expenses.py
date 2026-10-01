@@ -186,17 +186,21 @@ def test_duplicate_expense_code_conflict_409(client: TestClient):
         client.delete(f"/api/v1/master/expenses/{exp_id}")
 
 def test_update_expense_duplicate_name_conflict_409(client: TestClient):
-    res1 = client.post("/api/v1/master/expenses", json={"expenseName": "Expense Alpha", "expenseHead": "Capex"})
+    import time
+    ts = int(time.time() * 1000)
+    name_alpha = f"Expense Alpha {ts}"
+    name_beta = f"Expense Beta {ts}"
+    res1 = client.post("/api/v1/master/expenses", json={"expenseName": name_alpha, "expenseHead": "Capex"})
     assert res1.status_code == 201
     id1 = res1.json()["expense_id"]
 
-    res2 = client.post("/api/v1/master/expenses", json={"expenseName": "Expense Beta", "expenseHead": "Capex"})
+    res2 = client.post("/api/v1/master/expenses", json={"expenseName": name_beta, "expenseHead": "Capex"})
     assert res2.status_code == 201
     id2 = res2.json()["expense_id"]
 
     try:
         # Try updating Beta's name to Alpha's name
-        update_res = client.put(f"/api/v1/master/expenses/{id2}", json={"expenseName": "Expense Alpha"})
+        update_res = client.put(f"/api/v1/master/expenses/{id2}", json={"expenseName": name_alpha})
         assert update_res.status_code == 409
         assert "Expense name already exists." in update_res.json()["detail"]
     finally:

@@ -1166,9 +1166,11 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 }
 
 #addGbpaCard {
-  width: 440px !important;
-  max-width: 95vw !important;
+  width: max-content !important;
+  min-width: 440px !important;
+  max-width: min(920px, 95vw) !important;
   box-sizing: border-box !important;
+  transition: width 0.2s ease;
 }
 
 #addGbpaCard .side-form-body {
@@ -1181,7 +1183,7 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  gap: 12px !important;
+  gap: 16px !important;
   width: 100% !important;
   margin: 0 !important;
   box-sizing: border-box !important;
@@ -1198,9 +1200,9 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 }
 
 #addGbpaCard .form-input-wrap {
-  flex: 1 1 0% !important;
+  flex: 1 1 auto !important;
   width: 100% !important;
-  min-width: 0 !important;
+  min-width: 220px !important;
 }
 
 #addVendorCard {
@@ -3095,6 +3097,7 @@ td.col-master-vendor-status {
   position: relative !important;
   width: 100% !important;
   box-sizing: border-box !important;
+  gap: 12px !important;
 }
 
 .side-form-title-badge {
@@ -3103,7 +3106,7 @@ td.col-master-vendor-status {
   font-family: 'Outfit', sans-serif !important;
   font-weight: 700 !important;
   font-size: 1.15rem !important;
-  padding: 0 68px 0 28px !important;
+  padding: 0 60px 0 28px !important;
   letter-spacing: 0.3px !important;
   display: flex !important;
   align-items: center !important;
@@ -3115,6 +3118,7 @@ td.col-master-vendor-status {
   user-select: none !important;
   border: none !important;
   box-shadow: none !important;
+  flex: 0 0 auto !important;
 }
 
 .side-form-close-btn {
@@ -3124,7 +3128,8 @@ td.col-master-vendor-status {
   line-height: 1 !important;
   color: #ef4444 !important;
   cursor: pointer !important;
-  padding: 0 18px !important;
+  padding: 0 14px !important;
+  flex-shrink: 0 !important;
   margin-left: auto !important;
   transition: var(--transition);
   display: flex !important;
@@ -3146,10 +3151,14 @@ td.col-master-vendor-status {
 }
 
 .side-header-top-icons {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-left: auto;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  z-index: 5 !important;
+  padding-right: 6px !important;
 }
 
 .side-top-icon-btn,

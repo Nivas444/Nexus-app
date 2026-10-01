@@ -1040,9 +1040,373 @@
           body: JSON.stringify(payload)
         });
       }
+    },
+
+    indusSites: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.tower_type) query.set('tower_type', params.tower_type);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/sites${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(siteId) {
+        return await request(`/customer/indus/sites/${siteId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/sites', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(siteId, payload) {
+        return await request(`/customer/indus/sites/${siteId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async delete(siteId) {
+        return await request(`/customer/indus/sites/${siteId}`, { method: 'DELETE' });
+      },
+      async getContacts(siteId) {
+        return await request(`/customer/indus/sites/${siteId}/contacts`, { method: 'GET' });
+      },
+      async saveContact(siteId, payload) {
+        return await request(`/customer/indus/sites/${siteId}/contacts`, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    indusGbpa: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.item_type) query.set('item_type', params.item_type);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/gbpa${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(itemId) {
+        return await request(`/customer/indus/gbpa/${itemId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/gbpa', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(itemId, payload) {
+        return await request(`/customer/indus/gbpa/${itemId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    indusGbpaMaterials: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.customer_name) query.set('customer_name', params.customer_name);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/gbpa/materials${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(materialId) {
+        return await request(`/customer/indus/gbpa/materials/${materialId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/gbpa/materials', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(materialId, payload) {
+        return await request(`/customer/indus/gbpa/materials/${materialId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async delete(materialId) {
+        return await request(`/customer/indus/gbpa/materials/${materialId}`, { method: 'DELETE' });
+      }
+    },
+
+    indusGbpaExpenses: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.customer_name) query.set('customer_name', params.customer_name);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/gbpa/expenses${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(expenseId) {
+        return await request(`/customer/indus/gbpa/expenses/${expenseId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/gbpa/expenses', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(expenseId, payload) {
+        return await request(`/customer/indus/gbpa/expenses/${expenseId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async delete(expenseId) {
+        return await request(`/customer/indus/gbpa/expenses/${expenseId}`, { method: 'DELETE' });
+      }
+    },
+
+    indusGbpaInfra: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.customer_name) query.set('customer_name', params.customer_name);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/gbpa/infra${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(infraId) {
+        return await request(`/customer/indus/gbpa/infra/${infraId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/gbpa/infra', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(infraId, payload) {
+        return await request(`/customer/indus/gbpa/infra/${infraId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async delete(infraId) {
+        return await request(`/customer/indus/gbpa/infra/${infraId}`, { method: 'DELETE' });
+      }
+    },
+
+    indusInfra: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.customer_name) query.set('customer_name', params.customer_name);
+        if (params.infra_category) query.set('infra_category', params.infra_category);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/infra${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(infraId) {
+        return await request(`/customer/indus/infra/${infraId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/infra', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(infraId, payload) {
+        return await request(`/customer/indus/infra/${infraId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async delete(infraId) {
+        return await request(`/customer/indus/infra/${infraId}`, { method: 'DELETE' });
+      }
+    },
+
+    indusEsh: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.company_name || params.companyName) query.set('company_name', params.company_name || params.companyName);
+        if (params.employee_type || params.employeeType) query.set('employee_type', params.employee_type || params.employeeType);
+        if (params.training_type || params.trainingType) query.set('training_type', params.training_type || params.trainingType);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/esh${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(eshId) {
+        return await request(`/customer/indus/esh/${eshId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/esh', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(eshId, payload) {
+        return await request(`/customer/indus/esh/${eshId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async delete(eshId) {
+        return await request(`/customer/indus/esh/${eshId}`, { method: 'DELETE' });
+      }
+    },
+
+    indusProjects: {
+      // 1. Project Master
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.search) query.set('search', params.search);
+        if (params.customer_name || params.customerName) query.set('customer_name', params.customer_name || params.customerName);
+        if (params.project_type || params.projectType) query.set('project_type', params.project_type || params.projectType);
+        if (params.status) query.set('status', params.status);
+        if (params.sort_by) query.set('sort_by', params.sort_by);
+        if (params.sort_desc !== undefined) query.set('sort_desc', params.sort_desc);
+        const qs = query.toString();
+        return await request(`/customer/indus/projects${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getById(projectId) {
+        return await request(`/customer/indus/projects/${projectId}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/customer/indus/projects', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(projectId, payload) {
+        return await request(`/customer/indus/projects/${projectId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async delete(projectId) {
+        return await request(`/customer/indus/projects/${projectId}`, { method: 'DELETE' });
+      },
+
+      // 2. Activities (Icon 1)
+      async getActivities(params = {}) {
+        const query = new URLSearchParams();
+        if (params.project_type || params.projectType) query.set('project_type', params.project_type || params.projectType);
+        if (params.sub_project_type || params.subProjectType) query.set('sub_project_type', params.sub_project_type || params.subProjectType);
+        if (params.stage) query.set('stage', params.stage);
+        if (params.search) query.set('search', params.search);
+        const qs = query.toString();
+        return await request(`/customer/indus/projects/activities/list${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getActivityById(activityId) {
+        return await request(`/customer/indus/projects-activities/${activityId}`, { method: 'GET' });
+      },
+      async createActivity(payload) {
+        return await request('/customer/indus/projects-activities', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async updateActivity(activityId, payload) {
+        return await request(`/customer/indus/projects-activities/${activityId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async deleteActivity(activityId) {
+        return await request(`/customer/indus/projects-activities/${activityId}`, { method: 'DELETE' });
+      },
+
+      // 3. Transports (Icon 2)
+      async getTransports(params = {}) {
+        const query = new URLSearchParams();
+        if (params.project_type || params.projectType) query.set('project_type', params.project_type || params.projectType);
+        if (params.sub_project_type || params.subProjectType) query.set('sub_project_type', params.sub_project_type || params.subProjectType);
+        if (params.customer_name || params.customerName) query.set('customer_name', params.customer_name || params.customerName);
+        if (params.status) query.set('status', params.status);
+        if (params.search) query.set('search', params.search);
+        const qs = query.toString();
+        return await request(`/customer/indus/projects/transports/list${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getTransportById(transportId) {
+        return await request(`/customer/indus/projects-transports/${transportId}`, { method: 'GET' });
+      },
+      async createTransport(payload) {
+        return await request('/customer/indus/projects-transports', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async updateTransport(transportId, payload) {
+        return await request(`/customer/indus/projects-transports/${transportId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async deleteTransport(transportId) {
+        return await request(`/customer/indus/projects-transports/${transportId}`, { method: 'DELETE' });
+      },
+
+      // 4. Approvals / Supply History (Icon 3)
+      async getApprovals(params = {}) {
+        const query = new URLSearchParams();
+        if (params.sub_project_type || params.subProjectType) query.set('sub_project_type', params.sub_project_type || params.subProjectType);
+        if (params.customer_name || params.customerName) query.set('customer_name', params.customer_name || params.customerName);
+        if (params.search) query.set('search', params.search);
+        const qs = query.toString();
+        return await request(`/customer/indus/projects/approvals/list${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async getApprovalById(approvalId) {
+        return await request(`/customer/indus/projects-approvals/${approvalId}`, { method: 'GET' });
+      },
+      async createApproval(payload) {
+        return await request('/customer/indus/projects-approvals', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async updateApproval(approvalId, payload) {
+        return await request(`/customer/indus/projects-approvals/${approvalId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async deleteApproval(approvalId) {
+        return await request(`/customer/indus/projects-approvals/${approvalId}`, { method: 'DELETE' });
+      }
     }
   };
 
   window.NexusApi = NexusApi;
 })(window);
+
+
 

@@ -1298,6 +1298,7 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddInfra" onsubmit="event.preventDefault();">
+            <input type="hidden" id="hdnInfraDetailId" value="">
             <!-- 1. Infra Category -->
             <div class="form-row-group">
               <label class="form-label" for="inpInfraCategory">Infra Category</label>
@@ -1396,7 +1397,7 @@
               <button type="button" class="side-top-icon-btn" id="btnProjectSurveyIcon" title="Approval History" style="display: none;">
                 <img src="icons/Approval History.svg" alt="Approval History" width="28" height="28">
               </button>
-              <button type="button" class="side-top-icon-btn" id="btnProjectCardEditToggle" title="Edit Info"
+              <button type="button" class="side-top-icon-btn" id="btnProjectCardEditToggle" title="Edit Info" onclick="handleProjectCardEditToggle()"
                 style="display: none;">
                 <img src="icons/Edit.svg" id="imgProjectCardEditIcon" alt="Edit" width="28" height="28">
               </button>
@@ -1410,6 +1411,7 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProject" onsubmit="event.preventDefault();">
+            <input type="hidden" id="hdnProjectDetailId">
             <!-- 1. Project Type -->
             <div class="form-row-group">
               <label class="form-label" for="inpProjectType">Project Type</label>
@@ -1556,6 +1558,7 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddEshTrainee" onsubmit="event.preventDefault();">
+            <input type="hidden" id="hdnEshTraineeId" value="">
             <!-- 1. Employee Type -->
             <div class="form-row-group">
               <label class="form-label" for="inpEshEmployeeType">Employee Type</label>
@@ -3011,7 +3014,7 @@
                 style="background: none; border: none; cursor: pointer; padding: 2px;">
                 <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="24" height="24">
               </button>
-              <button type="button" class="side-form-close-btn" id="btnCloseSiteForm"
+              <button type="button" class="side-form-close-btn" id="btnCloseSiteForm" onclick="closeSideForm()"
                 aria-label="Close form" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
             </div>
           </div>

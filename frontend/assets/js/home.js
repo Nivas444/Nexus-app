@@ -762,273 +762,174 @@ const paymentData = [
 // ==========================================================================
 let currentIndusSubpage = 'site'; // 'site', 'products', 'infra', 'projects'
 
-const indusSiteData = [
-  {
-    id: "indus-1",
-    siteId: "230510678",
-    whId: "WH-101",
-    siteName: "R/RL-234567",
-    towerType: "GBT",
-    district: "Chennai",
-    town: "Ambattur",
-    address: "123 Industrial Area, Sector 4",
-    latitude: "13.0827",
-    longitude: "80.2707",
-    transportZone: "Zone-A",
-    status: "Active",
-    contacts: [
-      { id: "SC-101", name: "Suresh Narayanan", designation: "Site Engineer", mobile: "+91 98401 12345", email: "suresh.n@indus.com", status: "Active" },
-      { id: "SC-102", name: "Kavitha Raman", designation: "Operations Officer", mobile: "+91 98402 23456", email: "kavitha.r@indus.com", status: "Active" }
-    ]
-  },
-  {
-    id: "indus-2",
-    siteId: "230510679",
-    whId: "WH-102",
-    siteName: "R/RL-234568",
-    towerType: "RTT",
-    district: "Kanchipuram",
-    town: "Sriperumbudur",
-    address: "Plot 45, SIPCOT Industrial Park",
-    latitude: "12.9675",
-    longitude: "79.9404",
-    transportZone: "Zone-B",
-    status: "Active",
-    contacts: [
-      { id: "SC-103", name: "Rajesh Kannan", designation: "Field Supervisor", mobile: "+91 98403 34567", email: "rajesh.k@indus.com", status: "Active" }
-    ]
-  },
-  {
-    id: "indus-3",
-    siteId: "230510680",
-    whId: "WH-103",
-    siteName: "R/RL-234569",
-    towerType: "GBT",
-    district: "Tiruvallur",
-    town: "Gummidipoondi",
-    address: "Highway Cross 12, GNT Road",
-    latitude: "13.4072",
-    longitude: "80.1292",
-    transportZone: "Zone-C",
-    status: "In - Active",
-    contacts: [
-      { id: "SC-104", name: "Dinesh Kumar", designation: "Technical Lead", mobile: "+91 98404 45678", email: "dinesh.k@indus.com", status: "In - Active" }
-    ]
-  }
-];
+let indusSiteData = [];
 
-const indusProductsData = [
-  {
-    id: "indus-prod-1",
-    itemCode: "ITM-1001",
-    productName: "Fiber Optic Cable 24 Core",
-    itemName: "Fiber Optic Cable 24 Core",
-    productType: "Capex",
-    itemType: "Capex",
-    productDescription: "Armored single mode 24 core outdoor cable",
-    itemDescription: "Armored single mode 24 core outdoor cable",
-    uom: "Mtr",
-    rate: "125.00",
-    activeRate: "125.00",
-    hsnSacType: "HSN",
-    hsnSacCode: "854470",
-    budgetPercent: "95",
-    budgetAmount: "125000.00",
-    status: "Active"
-  },
-  {
-    id: "indus-prod-2",
-    itemCode: "ITM-1002",
-    productName: "DG Set Maintenance Kit",
-    itemName: "DG Set Maintenance Kit",
-    productType: "Opex",
-    itemType: "Opex",
-    productDescription: "Quarterly preventative maintenance service pack",
-    itemDescription: "Quarterly preventative maintenance service pack",
-    uom: "Set",
-    rate: "15400.00",
-    activeRate: "15400.00",
-    hsnSacType: "SAC",
-    hsnSacCode: "998719",
-    budgetPercent: "90",
-    budgetAmount: "45000.00",
-    status: "Active"
-  },
-  {
-    id: "indus-prod-3",
-    itemCode: "ITM-1003",
-    productName: "Tower Grounding Copper Strip",
-    itemName: "Tower Grounding Copper Strip",
-    productType: "Capex",
-    itemType: "Capex",
-    productDescription: "25x3mm pure copper grounding tape",
-    itemDescription: "25x3mm pure copper grounding tape",
-    uom: "Kg",
-    rate: "850.00",
-    activeRate: "850.00",
-    hsnSacType: "HSN",
-    hsnSacCode: "740710",
-    budgetPercent: "85",
-    budgetAmount: "25000.00",
-    status: "In - Active"
-  }
-];
 
-const indusInfraData = [
-  {
-    id: "indus-infra-1",
-    infraCategory: "Tower Structure",
-    infraDescription: "40M Ground Based Lattice Tower Structure GBT-40",
-    uom: "Nos",
-    make: "Skipper Ltd",
-    commissioning: "Yes",
-    iMap: "Yes",
-    status: "Active"
-  },
-  {
-    id: "indus-infra-2",
-    infraCategory: "Diesel Generator",
-    infraDescription: "15 KVA Silent Diesel Generator Set CPCB-II",
-    uom: "Set",
-    make: "Kirloskar",
-    commissioning: "Yes",
-    iMap: "Yes",
-    status: "Active"
-  },
-  {
-    id: "indus-infra-3",
-    infraCategory: "SMPS Power Plant",
-    infraDescription: "48V 100A Modular DC Power Plant with 4 Rectifiers",
-    uom: "Nos",
-    make: "Delta Electronics",
-    commissioning: "No",
-    iMap: "No",
-    status: "In - Active"
-  }
-];
+let indusProductsData = [];
 
-const indusProjectsData = [
-  {
-    id: "indus-proj-1",
-    projectType: "New Site Build",
-    subProjectType: "GBT 40M With DG",
-    tat: "45 Days",
-    indusPm: "Rajesh Sharma",
-    indusScm: "Anand Verma",
-    pm: "Suresh Narayanan",
-    status: "Active"
-  },
-  {
-    id: "indus-proj-2",
-    projectType: "Tower Sharing / Tenancy",
-    subProjectType: "Rooftop RTT 15M",
-    tat: "30 Days",
-    indusPm: "Vikram Malhotra",
-    indusScm: "Siddharth Sen",
-    pm: "Manoj Swaminathan",
-    status: "Active"
-  },
-  {
-    id: "indus-proj-3",
-    projectType: "Power Upgrade",
-    subProjectType: "Solar Hybrid 5KW",
-    tat: "20 Days",
-    indusPm: "Pooja Reddy",
-    indusScm: "Kavita Rao",
-    pm: "Venkatesh Iyer",
-    status: "In - Active"
+
+let indusInfraData = [];
+
+
+let indusProjectsData = [];
+
+async function fetchIndusProjects(renderAfter = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.indusProjects) return [];
+  try {
+    const resp = await NexusApi.indusProjects.getAll({
+      company_name: 'Indus Tower Ltd',
+      page: 1,
+      page_size: 500
+    });
+    const items = (resp && (resp.items || resp)) || [];
+    indusProjectsData = items.map(item => ({
+      id: item.project_type_id || item.id,
+      projectType: item.project_type || '',
+      subProjectType: item.sub_project_type || '',
+      upgradationType: item.upgradation_type || 'Major',
+      tat: item.tat || '',
+      indusPm: item.indus_pm || '',
+      indusScm: item.indus_scm || '',
+      pm: item.pm || '',
+      survey: item.survey || 'Yes',
+      additionalTransport: item.additional_transport || 'Yes',
+      status: item.status || 'Active'
+    }));
+    if (currentIndusSubpage === 'projects') {
+      currentDataset = [...indusProjectsData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusProjectsData;
+  } catch (err) {
+    console.warn('Error fetching Indus projects:', err);
+    return [];
   }
-];
+}
 
 let currentIndusProductSubpage = 'materials';
 let selectedProductName = 'Product Name';
 
-const indusProductMaterialsData = [
-  {
-    id: "mat-1",
-    materialHead: "Civil Structure",
-    materialCategory: "Tower Steel",
-    materialDescription: "Galvanized Steel Angular Members Grade E250",
-    make: "Tata Steel",
-    type: "Parent",
-    ucf: "1.05",
-    status: "Active"
-  },
-  {
-    id: "mat-2",
-    materialHead: "Electrical & Power",
-    materialCategory: "Power Cable",
-    materialDescription: "4 Core 50 sq mm Armored Aluminium Cable",
-    make: "Polycab",
-    type: "Child",
-    ucf: "1.00",
-    status: "Active"
-  },
-  {
-    id: "mat-3",
-    materialHead: "Civil Structure",
-    materialCategory: "Foundation Bolts",
-    materialDescription: "High Tensile Foundation Anchor Bolts M36 Grade 8.8",
-    make: "Unbrako",
-    type: "Child",
-    ucf: "1.02",
-    status: "In - Active"
-  }
-];
+let indusProductMaterialsData = [];
+let indusProductExpensesData = [];
+let indusProductInfraData = [];
 
-const indusProductExpensesData = [
-  {
-    id: "prod-exp-1",
-    expenseHead: "Site Survey & Soil Test",
-    expenseCategory: "Geotechnical Survey",
-    expenseDescription: "Comprehensive soil boring and SBC testing report",
-    type: "Parent",
-    status: "Active"
-  },
-  {
-    id: "prod-exp-2",
-    expenseHead: "Logistics & Mobilization",
-    expenseCategory: "Crane & Lifting",
-    expenseDescription: "Hydraulic crane rental for tower erection",
-    type: "Child",
-    status: "Active"
-  },
-  {
-    id: "prod-exp-3",
-    expenseHead: "Statutory & Liasoning",
-    expenseCategory: "Local Approvals",
-    expenseDescription: "Municipal clearance and NOC documentation fees",
-    type: "Child",
-    status: "In - Active"
+function getActiveGbpaCustomerName() {
+  if (window.currentCustomerName && String(window.currentCustomerName).trim()) {
+    return String(window.currentCustomerName).trim();
   }
-];
+  if (window.currentCustomerContext) {
+    const c = window.currentCustomerContext;
+    const name = c.customerName || c.customer_name || c.legalName || c.name;
+    if (name && String(name).trim()) return String(name).trim();
+  }
+  return 'Indus Tower Ltd';
+}
+window.getActiveGbpaCustomerName = getActiveGbpaCustomerName;
 
-const indusProductInfraData = [
-  {
-    id: "prod-infra-1",
-    infraCode: "INF-2026-IND-01",
-    infraCategory: "Ground Based Tower",
-    infraDescription: "40M Ground Based Galvanized Lattice Tower Structure",
-    type: "Parent",
-    status: "Active"
-  },
-  {
-    id: "prod-infra-2",
-    infraCode: "INF-2026-IND-02",
-    infraCategory: "DG Power Backup",
-    infraDescription: "15 KVA Silent Diesel Generator with Auto AMF Panel",
-    type: "Child",
-    status: "Active"
-  },
-  {
-    id: "prod-infra-3",
-    infraCode: "INF-2026-IND-03",
-    infraCategory: "Solar Hybrid System",
-    infraDescription: "5KW Rooftop/Ground Solar Photovoltaic Array with MPPT",
-    type: "Child",
-    status: "In - Active"
+async function fetchGbpaMaterials(renderAfter = true) {
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
+      const resp = await NexusApi.indusGbpaMaterials.getAll({
+        customer_name: getActiveGbpaCustomerName(),
+        page: 1,
+        page_size: 500
+      });
+      indusProductMaterialsData = (resp && resp.items) ? resp.items : [];
+    }
+    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'materials') {
+      currentDataset = [...indusProductMaterialsData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusProductMaterialsData;
+  } catch (err) {
+    console.error('Failed to fetch GBPA materials:', err);
+    indusProductMaterialsData = [];
+    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'materials') {
+      currentDataset = [];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA materials from database.', 'Database Error');
+    }
+    return [];
   }
-];
+}
+window.fetchGbpaMaterials = fetchGbpaMaterials;
+
+async function fetchGbpaExpenses(renderAfter = true) {
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
+      const resp = await NexusApi.indusGbpaExpenses.getAll({
+        customer_name: getActiveGbpaCustomerName(),
+        page: 1,
+        page_size: 500
+      });
+      indusProductExpensesData = (resp && resp.items) ? resp.items : [];
+    }
+    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'expenses') {
+      currentDataset = [...indusProductExpensesData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusProductExpensesData;
+  } catch (err) {
+    console.error('Failed to fetch GBPA expenses:', err);
+    indusProductExpensesData = [];
+    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'expenses') {
+      currentDataset = [];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA expenses from database.', 'Database Error');
+    }
+    return [];
+  }
+}
+window.fetchGbpaExpenses = fetchGbpaExpenses;
+
+async function fetchGbpaInfra(renderAfter = true) {
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra) {
+      const resp = await NexusApi.indusGbpaInfra.getAll({
+        customer_name: getActiveGbpaCustomerName(),
+        page: 1,
+        page_size: 500
+      });
+      indusProductInfraData = (resp && resp.items) ? resp.items : [];
+    }
+    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'infra') {
+      currentDataset = [...indusProductInfraData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusProductInfraData;
+  } catch (err) {
+    console.error('Failed to fetch GBPA infrastructure:', err);
+    indusProductInfraData = [];
+    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'infra') {
+      currentDataset = [];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA infrastructure from database.', 'Database Error');
+    }
+    return [];
+  }
+}
+window.fetchGbpaInfra = fetchGbpaInfra;
+
 
 const indusProductRateData = [
   {
@@ -1049,108 +950,14 @@ const indusProductRateData = [
   }
 ];
 
-const indusEshData = [
-  {
-    id: "esh-1",
-    name: "Ramesh Kumar",
-    employeeType: "On-Roll",
-    serviceVendorName: "Indus Towers Internal",
-    aadharNumber: "4532 8901 2345",
-    trainingType: "CHCTE",
-    trainingIdNumber: "TRN-IND-2026-081",
-    trainingAgency: "National Safety Council",
-    expiryDate: "15 - 08 - 2027",
-    status: "Active"
-  },
-  {
-    id: "esh-2",
-    name: "Vikram Sethi",
-    employeeType: "Contract",
-    serviceVendorName: "Apex Telecom Services",
-    aadharNumber: "7821 3490 1122",
-    trainingType: "H-STAG",
-    trainingIdNumber: "TRN-IND-2026-094",
-    trainingAgency: "Global Height Safety Institute",
-    expiryDate: "22 - 11 - 2026",
-    status: "Active"
-  },
-  {
-    id: "esh-3",
-    name: "Anand Rajan",
-    employeeType: "Service Vendor",
-    serviceVendorName: "Delta Power & Infra",
-    aadharNumber: "9012 4432 7865",
-    trainingType: "E-STAG",
-    trainingIdNumber: "TRN-IND-2026-112",
-    trainingAgency: "Energy & Electrical Safety Board",
-    expiryDate: "10 - 05 - 2027",
-    status: "Active"
-  },
-  {
-    id: "esh-4",
-    name: "Pooja Deshmukh",
-    employeeType: "On-Roll",
-    serviceVendorName: "Indus Towers Internal",
-    aadharNumber: "3321 8976 5410",
-    trainingType: "CHCTE",
-    trainingIdNumber: "TRN-IND-2026-135",
-    trainingAgency: "National Safety Council",
-    expiryDate: "30 - 09 - 2026",
-    status: "Active"
-  },
-  {
-    id: "esh-5",
-    name: "Mohammed Farhan",
-    employeeType: "Contract",
-    serviceVendorName: "Star Infra Tech",
-    aadharNumber: "6541 2289 9034",
-    trainingType: "H-STAG",
-    trainingIdNumber: "TRN-IND-2026-148",
-    trainingAgency: "Tower Riggers Academy",
-    expiryDate: "18 - 01 - 2027",
-    status: "In - Active"
-  },
-  {
-    id: "esh-6",
-    name: "Karthik Subramanian",
-    employeeType: "Service Vendor",
-    serviceVendorName: "Vertex Power Solutions",
-    aadharNumber: "8890 1243 6571",
-    trainingType: "E-STAG",
-    trainingIdNumber: "TRN-IND-2026-160",
-    trainingAgency: "Energy & Electrical Safety Board",
-    expiryDate: "14 - 03 - 2027",
-    status: "Active"
-  }
-];
+let indusEshData = [];
+
 
 let selectedProjectType = "Project Type";
 let currentIndusProjectTypeSubpage = "survey"; // 'survey' | 'transport'
 
-let indusProjectSurveyData = [
-  { id: "survey-1", description: "KTN" },
-  { id: "survey-2", description: "KK" },
-  { id: "survey-3", description: "AP" }
-];
-
-let indusProjectTransportData = [
-  {
-    id: "transport-1",
-    itemCode: "ITM-001",
-    itemDescription: "Tower Component – KTN Type A",
-    transportZone: "A",
-    qty: "12",
-    status: "Active"
-  },
-  {
-    id: "transport-2",
-    itemCode: "ITM-002",
-    itemDescription: "Cable Harness Set – KK Grade",
-    transportZone: "B",
-    qty: "8",
-    status: "Active"
-  }
-];
+let indusProjectSurveyData = [];
+let indusProjectTransportData = [];
 
 function openIndusProjectTypeDetails(projectTypeName) {
   selectedProjectType = projectTypeName || "Project Type";
@@ -1163,7 +970,10 @@ function openIndusProjectTypeDetails(projectTypeName) {
   showToast(`Navigated to ${selectedProjectType} / Sub - Project Type`);
 }
 
-function openIndusProductDetails(productName) {
+function openIndusProductDetails(productName, custName) {
+  if (custName && String(custName).trim()) {
+    window.currentCustomerName = String(custName).trim();
+  }
   currentModule = 'indus_towers';
   currentIndusSubpage = 'product_details';
   currentIndusProductSubpage = 'materials';
@@ -1171,6 +981,9 @@ function openIndusProductDetails(productName) {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  if (typeof fetchGbpaMaterials === 'function') fetchGbpaMaterials(true);
+  if (typeof fetchGbpaExpenses === 'function') fetchGbpaExpenses(false);
+  if (typeof fetchGbpaInfra === 'function') fetchGbpaInfra(false);
   showToast(`Opened Product Details for ${selectedProductName}`);
 }
 
@@ -4605,26 +4418,201 @@ function renderApp() {
 // ==========================================================================
 // INDUS TOWERS MODULE RENDERERS
 // ==========================================================================
+async function fetchIndusSites(renderAfter = true) {
+  try {
+    const resp = await NexusApi.indusSites.getAll({ page: 1, page_size: 500 });
+    indusSiteData = (resp && resp.items) ? resp.items : [];
+    if (currentIndusSubpage === 'site') {
+      currentDataset = [...indusSiteData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusSiteData;
+  } catch (err) {
+    console.error('Failed to fetch Indus sites:', err);
+    indusSiteData = [];
+    if (currentIndusSubpage === 'site') {
+      currentDataset = [];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to retrieve site details from database.', 'Database Error');
+    }
+    return [];
+  }
+}
+window.fetchIndusSites = fetchIndusSites;
+
+async function fetchIndusGbpa(renderAfter = true) {
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
+      const resp = await NexusApi.indusGbpa.getAll({ page: 1, page_size: 500 });
+      indusProductsData = (resp && resp.items) ? resp.items : [];
+    }
+    if (currentIndusSubpage === 'products') {
+      currentDataset = [...indusProductsData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusProductsData;
+  } catch (err) {
+    console.error('Failed to fetch Indus GBPA items:', err);
+    indusProductsData = [];
+    if (currentIndusSubpage === 'products') {
+      currentDataset = [];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA records from database.', 'Database Error');
+    }
+    return [];
+  }
+}
+window.fetchIndusGbpa = fetchIndusGbpa;
+
+async function fetchIndusInfra(renderAfter = true) {
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+      const resp = await NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      indusInfraData = (resp && resp.items) ? resp.items : [];
+    }
+    if (currentIndusSubpage === 'infra') {
+      currentDataset = [...indusInfraData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusInfraData;
+  } catch (err) {
+    console.error('Failed to fetch Indus Infra items:', err);
+    indusInfraData = [];
+    if (currentIndusSubpage === 'infra') {
+      currentDataset = [];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to retrieve infrastructure details from database.', 'Database Error');
+    }
+    return [];
+  }
+}
+window.fetchIndusInfra = fetchIndusInfra;
+
+async function fetchIndusEsh(renderAfter = true) {
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusEsh) {
+      const resp = await NexusApi.indusEsh.getAll({ company_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      indusEshData = (resp && resp.items) ? resp.items : [];
+    }
+    if (currentIndusSubpage === 'esh') {
+      currentDataset = [...indusEshData];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    return indusEshData;
+  } catch (err) {
+    console.error('Failed to fetch Indus ESH items:', err);
+    indusEshData = [];
+    if (currentIndusSubpage === 'esh') {
+      currentDataset = [];
+      if (renderAfter && typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(err.message || 'Failed to retrieve ESH records from database.', 'Database Error');
+    }
+    return [];
+  }
+}
+window.fetchIndusEsh = fetchIndusEsh;
+
 function openIndusTowersPage() {
   currentModule = 'indus_towers';
   currentIndusSubpage = 'site';
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  fetchIndusSites(true);
   showToast('Navigated to Indus Towers Ltd');
 }
 
 function loadIndusDataset() {
   if (currentIndusSubpage === 'site') {
     currentDataset = [...indusSiteData];
+    // Trigger async refresh if indusSiteData is empty or needs refresh
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+      NexusApi.indusSites.getAll({ page: 1, page_size: 500 }).then(resp => {
+        if (resp && resp.items) {
+          indusSiteData = resp.items;
+          if (currentIndusSubpage === 'site') {
+            currentDataset = [...indusSiteData];
+            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+          }
+        }
+      }).catch(err => {
+        console.warn('Async loadIndusDataset fetch error:', err);
+      });
+    }
   } else if (currentIndusSubpage === 'products') {
     currentDataset = [...indusProductsData];
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
+      NexusApi.indusGbpa.getAll({ page: 1, page_size: 500 }).then(resp => {
+        if (resp && resp.items) {
+          indusProductsData = resp.items;
+          if (currentIndusSubpage === 'products') {
+            currentDataset = [...indusProductsData];
+            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+          }
+        }
+      }).catch(err => {
+        console.warn('Async loadIndusDataset GBPA fetch error:', err);
+      });
+    }
   } else if (currentIndusSubpage === 'infra') {
     currentDataset = [...indusInfraData];
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+      NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 }).then(resp => {
+        if (resp && resp.items) {
+          indusInfraData = resp.items;
+          if (currentIndusSubpage === 'infra') {
+            currentDataset = [...indusInfraData];
+            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+          }
+        }
+      }).catch(err => {
+        console.warn('Async loadIndusDataset Infra fetch error:', err);
+      });
+    }
   } else if (currentIndusSubpage === 'projects') {
     currentDataset = [...indusProjectsData];
+    if (typeof fetchIndusProjects === 'function') {
+      fetchIndusProjects(true);
+    }
   } else if (currentIndusSubpage === 'esh') {
     currentDataset = [...indusEshData];
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusEsh) {
+      NexusApi.indusEsh.getAll({ company_name: 'Indus Tower Ltd', page: 1, page_size: 500 }).then(resp => {
+        if (resp && resp.items) {
+          indusEshData = resp.items;
+          if (currentIndusSubpage === 'esh') {
+            currentDataset = [...indusEshData];
+            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+          }
+        }
+      }).catch(err => {
+        console.warn('Async loadIndusDataset ESH fetch error:', err);
+      });
+    }
   } else if (currentIndusSubpage === 'project_type_details') {
     if (currentIndusProjectTypeSubpage === 'transport') {
       currentDataset = [...indusProjectTransportData];
@@ -4634,10 +4622,43 @@ function loadIndusDataset() {
   } else if (currentIndusSubpage === 'product_details') {
     if (currentIndusProductSubpage === 'materials') {
       currentDataset = [...indusProductMaterialsData];
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
+        NexusApi.indusGbpaMaterials.getAll({ customer_name: getActiveGbpaCustomerName(), page: 1, page_size: 500 }).then(resp => {
+          if (resp && resp.items) {
+            indusProductMaterialsData = resp.items;
+            if (currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'materials') {
+              currentDataset = [...indusProductMaterialsData];
+              if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+            }
+          }
+        }).catch(err => console.warn('Async loadIndusDataset Materials fetch error:', err));
+      }
     } else if (currentIndusProductSubpage === 'expenses') {
       currentDataset = [...indusProductExpensesData];
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
+        NexusApi.indusGbpaExpenses.getAll({ customer_name: getActiveGbpaCustomerName(), page: 1, page_size: 500 }).then(resp => {
+          if (resp && resp.items) {
+            indusProductExpensesData = resp.items;
+            if (currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'expenses') {
+              currentDataset = [...indusProductExpensesData];
+              if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+            }
+          }
+        }).catch(err => console.warn('Async loadIndusDataset Expenses fetch error:', err));
+      }
     } else if (currentIndusProductSubpage === 'infra') {
       currentDataset = [...indusProductInfraData];
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra) {
+        NexusApi.indusGbpaInfra.getAll({ customer_name: getActiveGbpaCustomerName(), page: 1, page_size: 500 }).then(resp => {
+          if (resp && resp.items) {
+            indusProductInfraData = resp.items;
+            if (currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'infra') {
+              currentDataset = [...indusProductInfraData];
+              if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+            }
+          }
+        }).catch(err => console.warn('Async loadIndusDataset Infra fetch error:', err));
+      }
     } else if (currentIndusProductSubpage === 'rate') {
       currentDataset = [...indusProductRateData];
     }
@@ -5300,6 +5321,13 @@ function renderIndusFooter() {
           currentIndusProductSubpage = spKey;
           activeColumnFilters = {};
           renderApp();
+          if (spKey === 'materials' && typeof fetchGbpaMaterials === 'function') {
+            fetchGbpaMaterials(true);
+          } else if (spKey === 'expenses' && typeof fetchGbpaExpenses === 'function') {
+            fetchGbpaExpenses(true);
+          } else if (spKey === 'infra' && typeof fetchGbpaInfra === 'function') {
+            fetchGbpaInfra(true);
+          }
           showToast(`Switched to Product &bull; ${btn.textContent.trim()}`);
         }
       });
@@ -5334,11 +5362,21 @@ function renderIndusFooter() {
         activeColumnFilters = {};
         updateURL();
         renderApp();
+        if (spKey === 'products' && typeof fetchIndusGbpa === 'function') {
+          fetchIndusGbpa(true);
+        } else if (spKey === 'site' && typeof fetchIndusSites === 'function') {
+          fetchIndusSites(true);
+        } else if (spKey === 'infra' && typeof fetchIndusInfra === 'function') {
+          fetchIndusInfra(true);
+        } else if (spKey === 'esh' && typeof fetchIndusEsh === 'function') {
+          fetchIndusEsh(true);
+        }
         showToast(`Switched to Indus Towers Ltd &bull; ${btn.textContent.trim()}`);
       }
     });
   });
 }
+
 
 // ==========================================================================
 // 3. MASTER MODULE RENDERERS
@@ -10985,19 +11023,28 @@ function applyFiltersAndRender() {
       if (currentIndusProductSubpage === 'materials') {
         // Render Product Details -> Materials Rows
         tbody.innerHTML = filteredDataset.map(row => {
-          const isInactive = (row.status || '').toLowerCase().includes('in');
+          const rowId = row.item_material_id || row.id || '';
+          const mHead = row.material_head || row.materialHead || '';
+          const mCat = row.material_category || row.materialCategory || '';
+          const mDesc = row.material_description || row.materialDescription || '';
+          const mMake = row.company_name || row.companyName || row.make || '';
+          const mType = row.material_type || row.materialType || row.type || '';
+          const mUcf = row.uom || row.ucf || '';
+          const mStatus = row.status || 'Active';
+          const isInactive = (mStatus).toLowerCase().includes('in');
+          const safeId = String(rowId).replace(/'/g, "\\'");
           return `
-            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialHead || '').replace(/"/g, '&quot;')}">
-                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaMaterialCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.materialHead || ''}</a>
+            <tr data-row-id="${rowId}" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${mHead.replace(/"/g, '&quot;')}">
+                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaMaterialCard('${safeId}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${mHead}</a>
               </td>
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialCategory || '').replace(/"/g, '&quot;')}">${row.materialCategory || ''}</td>
-              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">${row.materialDescription || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">${row.make || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.ucf || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${mCat.replace(/"/g, '&quot;')}">${mCat}</td>
+              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${mDesc.replace(/"/g, '&quot;')}">${mDesc}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">${mMake}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${mType}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${mUcf}</td>
               <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${mStatus}</span>
               </td>
             </tr>
           `;
@@ -11005,17 +11052,24 @@ function applyFiltersAndRender() {
       } else if (currentIndusProductSubpage === 'expenses') {
         // Render Product Details -> Expenses Rows
         tbody.innerHTML = filteredDataset.map(row => {
-          const isInactive = (row.status || '').toLowerCase().includes('in');
+          const rowId = row.item_expense_id || row.id || '';
+          const eHead = row.expense_head || row.expenseHead || '';
+          const eCat = row.expense_category || row.expenseCategory || '';
+          const eDesc = row.expense_description || row.expenseDescription || '';
+          const eType = row.expense_type || row.expenseType || row.type || '';
+          const eStatus = row.status || 'Active';
+          const isInactive = (eStatus).toLowerCase().includes('in');
+          const safeId = String(rowId).replace(/'/g, "\\'");
           return `
-            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">
-                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaExpenseCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.expenseHead || ''}</a>
+            <tr data-row-id="${rowId}" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${eHead.replace(/"/g, '&quot;')}">
+                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaExpenseCard('${safeId}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${eHead}</a>
               </td>
-              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseCategory || '').replace(/"/g, '&quot;')}">${row.expenseCategory || ''}</td>
-              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.expenseDescription || '').replace(/"/g, '&quot;')}">${row.expenseDescription || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
+              <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${eCat.replace(/"/g, '&quot;')}">${eCat}</td>
+              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${eDesc.replace(/"/g, '&quot;')}">${eDesc}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${eType}</td>
               <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${eStatus}</span>
               </td>
             </tr>
           `;
@@ -11023,17 +11077,24 @@ function applyFiltersAndRender() {
       } else if (currentIndusProductSubpage === 'infra') {
         // Render Product Details -> Infra Rows
         tbody.innerHTML = filteredDataset.map(row => {
-          const isInactive = (row.status || '').toLowerCase().includes('in');
+          const rowId = row.item_infrastructure_id || row.id || '';
+          const iCode = row.infra_code || row.infraCode || '';
+          const iCat = row.infra_category || row.infraCategory || '';
+          const iDesc = row.infra_description || row.infraDescription || '';
+          const iType = row.infra_type || row.infraType || row.type || '';
+          const iStatus = row.status || 'Active';
+          const isInactive = (iStatus).toLowerCase().includes('in');
+          const safeId = String(rowId).replace(/'/g, "\\'");
           return `
-            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCode || '').replace(/"/g, '&quot;')}">
-                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaProductInfraCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.infraCode || ''}</a>
+            <tr data-row-id="${rowId}" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${iCode.replace(/"/g, '&quot;')}">
+                <a href="#" class="req-link td-link-blue" onclick="openViewGbpaProductInfraCard('${safeId}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${iCode}</a>
               </td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
-              <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraDescription || '').replace(/"/g, '&quot;')}">${row.infraDescription || ''}</td>
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.type || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${iCat.replace(/"/g, '&quot;')}">${iCat}</td>
+              <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${iDesc.replace(/"/g, '&quot;')}">${iDesc}</td>
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${iType}</td>
               <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+                <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${iStatus}</span>
               </td>
             </tr>
           `;
@@ -11094,17 +11155,31 @@ function applyFiltersAndRender() {
       // Render Indus Towers -> ESH (Trainee) Rows
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
+        const rowId = row.id || '';
+        const name = row.name || '';
+        const empType = row.employee_type || row.employeeType || '';
+        const aadhar = row.aadhar_number || row.aadharNumber || '';
+        const trnType = row.training_type || row.trainingType || '';
+        const trnId = row.training_id_number || row.trainingIdNumber || '';
+        const agency = row.training_agency || row.trainingAgency || '';
+        const expDate = row.expiry_date || row.expiryDate || '';
+        const safeName = String(name).replace(/"/g, '&quot;');
+        const safeEmpType = String(empType).replace(/"/g, '&quot;');
+        const safeAadhar = String(aadhar).replace(/"/g, '&quot;');
+        const safeTrnType = String(trnType).replace(/"/g, '&quot;');
+        const safeTrnId = String(trnId).replace(/"/g, '&quot;');
+        const safeAgency = String(agency).replace(/"/g, '&quot;');
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.name || '').replace(/"/g, '&quot;')}">
-              <a href="#" class="req-link td-link-blue" onclick="openViewEshTraineeCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.name || ''}</a>
+          <tr data-row-id="${rowId}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${safeName}">
+              <a href="#" class="req-link td-link-blue" onclick="openViewEshTraineeCard('${rowId}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${name}</a>
             </td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${(row.employeeType || '').replace(/"/g, '&quot;')}">${row.employeeType || ''}</td>
-            <td style="width: 17ch; min-width: 17ch; max-width: 17ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b;" title="${(row.aadharNumber || '').replace(/"/g, '&quot;')}">${row.aadharNumber || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${(row.trainingType || '').replace(/"/g, '&quot;')}">${row.trainingType || ''}</td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${(row.trainingIdNumber || '').replace(/"/g, '&quot;')}">${row.trainingIdNumber || ''}</td>
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.trainingAgency || '').replace(/"/g, '&quot;')}">${row.trainingAgency || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${row.expiryDate || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${safeEmpType}">${empType}</td>
+            <td style="width: 17ch; min-width: 17ch; max-width: 17ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b;" title="${safeAadhar}">${aadhar}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${safeTrnType}">${trnType}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;" title="${safeTrnId}">${trnId}</td>
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${safeAgency}">${agency}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${expDate}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
@@ -11138,16 +11213,25 @@ function applyFiltersAndRender() {
       // Render Indus Towers -> Infra Rows (Matching Uploaded Mockup)
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
+        const rowId = row.item_infrastructure_detail_id || row.id || '';
+        const cat = row.infra_category || row.infraCategory || '';
+        const desc = row.infra_description || row.infraDescription || '';
+        const uom = row.uom || '';
+        const make = row.make || '';
+        const comm = row.commissioning ? (String(row.commissioning).toLowerCase().includes('no') ? 'No' : (String(row.commissioning).toLowerCase().includes('yes') ? 'Yes' : 'Yes')) : 'No';
+        const imap = row.i_map || row.iMap || 'No';
+        const safeCat = String(cat).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeDesc = String(desc).replace(/"/g, '&quot;');
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
-            <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.infraDescription || '').replace(/"/g, '&quot;')}">
-              <a href="#" class="req-link td-link-blue" onclick="handleInfraClick('${row.id}', '${row.infraCategory}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${row.infraDescription || ''}</a>
+          <tr data-row-id="${rowId}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${safeCat}">${cat}</td>
+            <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${safeDesc}">
+              <a href="#" class="req-link td-link-blue" onclick="handleInfraClick('${rowId}', '${safeCat}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${desc}</a>
             </td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.uom || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">${row.make || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${row.commissioning || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.iMap || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${uom}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;">${make}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${comm}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${imap}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
@@ -11158,21 +11242,24 @@ function applyFiltersAndRender() {
       // Render Indus Towers -> Products (GBPA) Rows with Select Radio
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
-        const dispItemName = row.itemName || row.productName || '';
-        const dispItemCode = row.itemCode || '';
-        const dispProductType = row.productType || row.itemType || '';
-        const dispHsnSacType = row.hsnSacType || '';
-        const dispHsnSacCode = row.hsnSacCode || '';
+        const rowKey = row.item_id || row.id || '';
+        const dispItemName = row.item_name || row.itemName || row.productName || '';
+        const dispItemCode = row.item_code || row.itemCode || '';
+        const dispProductType = row.item_type || row.productType || row.itemType || '';
+        const dispHsnSacType = row.hsn_sac || row.hsnSacType || '';
+        const dispHsnSacCode = row.hsn_sac_code || row.hsnSacCode || '';
         const dispUom = row.uom || 'Pcs';
-        const dispRate = row.rate || row.activeRate || '0.00';
-        const isSelected = selectedGbpaRowId === row.id;
+        const dispRate = row.rate !== undefined && row.rate !== null ? row.rate : (row.activeRate || '0.00');
+        const isSelected = String(selectedGbpaRowId) === String(rowKey);
+        const safeItemName = dispItemName.replace(/'/g, "\\'");
+        const safeCustName = (row.customer_name || row.customerName || window.currentCustomerName || 'Indus Tower Ltd').replace(/'/g, "\\'");
         return `
-          <tr data-row-id="${row.id}" id="gbpa-row-${row.id}" class="${isSelected ? 'row-selected-highlight' : ''}" style="border-bottom: 1px solid #e2e8f0; ${isSelected ? 'background-color: rgba(0, 203, 160, 0.12) !important;' : ''}">
+          <tr data-row-id="${rowKey}" id="gbpa-row-${rowKey}" class="${isSelected ? 'row-selected-highlight' : ''}" style="border-bottom: 1px solid #e2e8f0; ${isSelected ? 'background-color: rgba(0, 203, 160, 0.12) !important;' : ''}">
             <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; padding: 10px 6px; vertical-align: middle;">
-              <input type="radio" name="gbpaRowSelect" class="gbpa-row-radio" value="${row.id}" ${isSelected ? 'checked' : ''} onclick="handleGbpaRadioClick(event, '${row.id}')">
+              <input type="radio" name="gbpaRowSelect" class="gbpa-row-radio" value="${rowKey}" ${isSelected ? 'checked' : ''} onclick="handleGbpaRadioClick(event, '${rowKey}')">
             </td>
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${dispItemName.replace(/"/g, '&quot;')}">
-              <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${dispItemName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${dispItemName}</a>
+              <a href="#" class="req-link td-link-blue" onclick="openIndusProductDetails('${safeItemName}', '${safeCustName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${dispItemName}</a>
             </td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${dispItemCode.replace(/"/g, '&quot;')}">${dispItemCode}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${dispProductType}</td>
@@ -11186,22 +11273,34 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
     } else {
       // Render Indus Towers Site Rows
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
+        const rowKey = row.site_id || row.id || '';
+        const siteCodeDisplay = row.site_code || row.siteId || '';
+        const whIdDisplay = row.wh_id || row.whId || '';
+        const siteNameDisplay = row.site_name || row.siteName || '';
+        const districtDisplay = row.district || '';
+        const townDisplay = row.town || '';
+        const latDisplay = row.latitude || '';
+        const longDisplay = row.longitude || '';
+        const transportZoneDisplay = row.transport_zone || row.transportZone || '';
+        const safeSiteName = siteNameDisplay.replace(/'/g, "\\'");
+
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <tr data-row-id="${rowKey}" style="border-bottom: 1px solid #e2e8f0;">
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-              <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${row.id}', '${row.siteName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;" title="View Site Details">${row.siteId || ''}</a>
+              <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${rowKey}', '${safeSiteName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;" title="View Site Details">${siteCodeDisplay}</a>
             </td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.whId || ''}</td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">${row.siteName || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.district || '').replace(/"/g, '&quot;')}">${row.district || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.town || '').replace(/"/g, '&quot;')}">${row.town || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.latitude || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${row.longitude || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${row.transportZone || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${whIdDisplay}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${siteNameDisplay.replace(/"/g, '&quot;')}">${siteNameDisplay}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${districtDisplay.replace(/"/g, '&quot;')}">${districtDisplay}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${townDisplay.replace(/"/g, '&quot;')}">${townDisplay}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${latDisplay}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${longDisplay}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${transportZoneDisplay}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
@@ -11209,6 +11308,7 @@ function applyFiltersAndRender() {
         `;
       }).join('');
     }
+
   } else if (currentModule === 'master') {
     if (currentMasterView === 'hr_policies') {
       const tdC = (w, val) => `<td style="width: ${w}; min-width: ${w}; max-width: ${w}; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500;">${val || ''}</td>`;
@@ -13501,13 +13601,13 @@ function initSideFormEvents() {
   async function handleFormSave() {
     if (currentModule === 'indus_towers') {
       if (currentIndusSubpage === 'projects') {
-        const projectType = document.getElementById('inpProjectType')?.value || "New Site Build";
-        const subProjectType = document.getElementById('inpSubProjectType')?.value || "GBT 40M";
-        const upgradationType = document.getElementById('inpProjectUpgradationType')?.value || "Major";
-        const tat = document.getElementById('inpProjectTat')?.value || "30 Days";
-        const indusPm = document.getElementById('inpIndusPm')?.value || "Rajesh Sharma";
-        const indusScm = document.getElementById('inpIndusScm')?.value || "Anand Verma";
-        const pm = document.getElementById('inpProjectPm')?.value || "Suresh Narayanan";
+        const projectType = document.getElementById('inpProjectType')?.value?.trim();
+        const subProjectType = document.getElementById('inpSubProjectType')?.value?.trim();
+        const upgradationType = document.getElementById('inpProjectUpgradationType')?.value?.trim() || "Major";
+        const tat = document.getElementById('inpProjectTat')?.value?.trim() || "30 Days";
+        const indusPm = document.getElementById('inpIndusPm')?.value?.trim() || "";
+        const indusScm = document.getElementById('inpIndusScm')?.value?.trim() || "";
+        const pm = document.getElementById('inpProjectPm')?.value?.trim() || "";
         const surveyToggle = document.getElementById('inpProjectSurveyToggle');
         const survey = (surveyToggle && surveyToggle.checked) ? "Yes" : "No";
         const transportToggle = document.getElementById('inpProjectTransportToggle');
@@ -13515,25 +13615,72 @@ function initSideFormEvents() {
         const statusToggle = document.getElementById('inpProjectStatusToggle');
         const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
 
-        const newRecord = {
-          id: `indus-proj-${Date.now()}`,
-          projectType,
-          subProjectType,
-          upgradationType,
-          tat,
-          indusPm,
-          indusScm,
-          pm,
-          survey,
-          additionalTransport,
-          status
+        if (!projectType) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup('Please select Project Type', 'Validation Error');
+          } else {
+            showToast('Please select Project Type');
+          }
+          return;
+        }
+
+        if (!subProjectType) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup('Please select Sub - Project Type', 'Validation Error');
+          } else {
+            showToast('Please select Sub - Project Type');
+          }
+          return;
+        }
+
+        const payload = {
+          company_name: 'Indus Tower Ltd',
+          customer_name: 'Indus Tower Ltd',
+          project_type: projectType,
+          sub_project_type: subProjectType,
+          upgradation_type: upgradationType,
+          tat: tat,
+          indus_pm: indusPm,
+          indus_scm: indusScm,
+          pm: pm,
+          survey: survey,
+          additional_transport: additionalTransport,
+          status: status
         };
 
-        indusProjectsData.unshift(newRecord);
-        loadIndusDataset();
-        applyFiltersAndRender();
-        closeSideForm();
-        showToast(`Project ${projectType} successfully saved & added to table!`);
+        if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+          try {
+            await NexusApi.indusProjects.create(payload);
+            await fetchIndusProjects(true);
+            closeSideForm();
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('Project added successfully!', 'Task Completed');
+            } else {
+              showToast(`Project ${projectType} successfully saved & added to table!`);
+            }
+          } catch (err) {
+            console.error('Failed to save project:', err);
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(err.message || 'Failed to save project', 'Error');
+            } else {
+              showToast('Failed to save project');
+            }
+          }
+        } else {
+          const newRecord = {
+            id: `indus-proj-${Date.now()}`,
+            ...payload,
+            projectType,
+            subProjectType,
+            upgradationType,
+            additionalTransport
+          };
+          indusProjectsData.unshift(newRecord);
+          loadIndusDataset();
+          applyFiltersAndRender();
+          closeSideForm();
+          showToast(`Project ${projectType} successfully saved & added to table!`);
+        }
         return;
       }
 
@@ -13603,91 +13750,198 @@ function initSideFormEvents() {
         }
 
         if (currentIndusProductSubpage === 'infra') {
-          const infraCategory = document.getElementById('inpProdInfraCategory')?.value || "230510678";
-          const infraDescription = document.getElementById('inpProdInfraDescription')?.value || "230510678";
-          const infraCode = infraCategory;
+          const infraCode = document.getElementById('inpProdInfraCode')?.value?.trim() || '';
+          const infraCategory = document.getElementById('inpProdInfraCategory')?.value?.trim() || '';
+          const infraDescription = document.getElementById('inpProdInfraDescription')?.value?.trim() || '';
           const typeSelect = document.getElementById('inpProdInfraType');
           const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
           const prodInfraStatusToggle = document.getElementById('inpProdInfraStatusToggle');
           const status = (prodInfraStatusToggle && prodInfraStatusToggle.checked) ? "Active" : "In - Active";
 
-          const newRecord = {
-            id: `prod-infra-${Date.now()}`,
-            infraCode,
-            infraCategory,
-            infraDescription,
-            type,
-            status
+          if (!infraCode) {
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup('Please enter Infra Code.', 'Validation Error');
+            } else {
+              showToast('Please enter Infra Code');
+            }
+            return;
+          }
+
+          if (!infraCategory) {
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup('Please enter Infra Category.', 'Validation Error');
+            } else {
+              showToast('Please enter Infra Category');
+            }
+            return;
+          }
+
+          const payload = {
+            customer_name: getActiveGbpaCustomerName(),
+            infra_code: infraCode,
+            infra_category: infraCategory,
+            infra_description: infraDescription,
+            infra_type: type,
+            status: status,
+            item_name: selectedProductName || null
           };
 
-          indusProductInfraData.push(newRecord);
-          loadIndusDataset();
-          applyFiltersAndRender();
-          closeSideForm();
-          showToast(`Infra ${infraCode} successfully saved & added to table!`);
+          try {
+            if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra) {
+              await NexusApi.indusGbpaInfra.create(payload);
+            }
+            await fetchGbpaInfra(true);
+            closeSideForm();
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('GBPA infrastructure added successfully!', 'Task Completed');
+            } else {
+              showToast('GBPA infrastructure added successfully!');
+            }
+          } catch (err) {
+            console.error('Failed to create GBPA infrastructure:', err);
+            const isConflict = err.isConflict || (err.statusCode === 409) || (err.message && err.message.toLowerCase().includes('already exists'));
+            const errMsg = isConflict
+              ? 'This Infra Code already exists. Please use a unique Infra Code.'
+              : (err.detail || err.message || 'Failed to save GBPA infrastructure.');
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(errMsg, isConflict ? 'Validation Error' : 'Database Error');
+            } else {
+              showToast(errMsg);
+            }
+          }
           return;
         }
 
         if (currentIndusProductSubpage === 'expenses') {
-          const expenseHead = document.getElementById('inpProdExpenseHead')?.value || "230510678";
-          const expenseCategory = document.getElementById('inpProdExpenseCategory')?.value || "230510678";
-          const expenseDescription = document.getElementById('inpProdExpenseDescription')?.value || "230510678";
-          const expenseCode = expenseHead;
+          const expenseHead = document.getElementById('inpProdExpenseHead')?.value?.trim() || '';
+          const expenseCategory = document.getElementById('inpProdExpenseCategory')?.value?.trim() || '';
+          const expenseDescription = document.getElementById('inpProdExpenseDescription')?.value?.trim() || '';
           const typeSelect = document.getElementById('inpProdExpenseType');
           const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
           const prodExpenseStatusToggle = document.getElementById('inpProdExpenseStatusToggle');
           const status = (prodExpenseStatusToggle && prodExpenseStatusToggle.checked) ? "Active" : "In - Active";
 
-          const newRecord = {
-            id: `prod-exp-${Date.now()}`,
-            expenseCode,
-            expenseHead,
-            expenseCategory,
-            expenseDescription,
-            type,
-            status
+          if (!expenseHead) {
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup('Please enter Expense Head.', 'Validation Error');
+            } else {
+              showToast('Please enter Expense Head');
+            }
+            return;
+          }
+
+          if (!expenseCategory) {
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup('Please enter Expense Category.', 'Validation Error');
+            } else {
+              showToast('Please enter Expense Category');
+            }
+            return;
+          }
+
+          const payload = {
+            customer_name: getActiveGbpaCustomerName(),
+            expense_head: expenseHead,
+            expense_category: expenseCategory,
+            expense_description: expenseDescription,
+            expense_type: type,
+            status: status,
+            item_name: selectedProductName || null,
+            expense_code: expenseHead
           };
 
-          indusProductExpensesData.push(newRecord);
-          loadIndusDataset();
-          applyFiltersAndRender();
-          closeSideForm();
-          showToast(`Expense ${expenseCode} successfully saved & added to table!`);
+          try {
+            if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
+              await NexusApi.indusGbpaExpenses.create(payload);
+            }
+            await fetchGbpaExpenses(true);
+            closeSideForm();
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('GBPA expense added successfully!', 'Task Completed');
+            } else {
+              showToast('GBPA expense added successfully!');
+            }
+          } catch (err) {
+            console.error('Failed to create GBPA expense:', err);
+            const errMsg = err.detail || err.message || 'Failed to save GBPA expense.';
+            if (typeof showSvgErrorPopup === 'function') {
+              showSvgErrorPopup(errMsg, 'Database Error');
+            } else {
+              showToast(errMsg);
+            }
+          }
           return;
         }
 
-        const materialHead = document.getElementById('inpMaterialHead')?.value || "230510678";
-        const materialCategory = document.getElementById('inpMaterialCategory')?.value || "230510678";
-        const materialDescription = document.getElementById('inpMaterialDescription')?.value || "230510678";
-        const materialCode = materialHead;
+        const materialHead = document.getElementById('inpMaterialHead')?.value?.trim() || '';
+        const materialCategory = document.getElementById('inpMaterialCategory')?.value?.trim() || '';
+        const materialDescription = document.getElementById('inpMaterialDescription')?.value?.trim() || '';
+        const make = document.getElementById('inpMaterialMake')?.value?.trim() || '';
         const typeSelect = document.getElementById('inpMaterialType');
         const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
+        const ucf = document.getElementById('inpMaterialUcf')?.value?.trim() || '';
         const materialStatusToggle = document.getElementById('inpMaterialStatusToggle');
         const status = (materialStatusToggle && materialStatusToggle.checked) ? "Active" : "In - Active";
 
-        const newRecord = {
-          id: `mat-${Date.now()}`,
-          materialCode,
-          materialHead,
-          materialCategory,
-          materialDescription,
-          type,
-          status
+        if (!materialHead) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup('Please enter Material Head.', 'Validation Error');
+          } else {
+            showToast('Please enter Material Head');
+          }
+          return;
+        }
+
+        if (!materialCategory) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup('Please enter Material Category.', 'Validation Error');
+          } else {
+            showToast('Please enter Material Category');
+          }
+          return;
+        }
+
+        const payload = {
+          customer_name: getActiveGbpaCustomerName(),
+          material_head: materialHead,
+          material_category: materialCategory,
+          material_description: materialDescription,
+          material_type: type,
+          uom: ucf,
+          status: status,
+          company_name: make || null,
+          item_name: selectedProductName || null,
+          material_code: materialHead
         };
 
-        indusProductMaterialsData.push(newRecord);
-        loadIndusDataset();
-        applyFiltersAndRender();
-        closeSideForm();
-        showToast(`Material ${materialCode} successfully saved & added to table!`);
+        try {
+          if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
+            await NexusApi.indusGbpaMaterials.create(payload);
+          }
+          await fetchGbpaMaterials(true);
+          closeSideForm();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('GBPA material added successfully!', 'Task Completed');
+          } else {
+            showToast('GBPA material added successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to create GBPA material:', err);
+          const errMsg = err.detail || err.message || 'Failed to save GBPA material.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errMsg, 'Database Error');
+          } else {
+            showToast(errMsg);
+          }
+        }
         return;
       }
 
       if (currentIndusSubpage === 'infra') {
-        const infraCategory = document.getElementById('inpInfraCategory')?.value || "KTN";
-        const infraDescription = document.getElementById('inpInfraDescription')?.value || "KTN";
-        const uom = document.getElementById('inpInfraUom')?.value || "R/RL-234567";
-        const make = document.getElementById('inpInfraMake')?.value || "R/RL-234567";
+        const infraCategory = document.getElementById('inpInfraCategory')?.value?.trim() || "";
+        const infraDescription = document.getElementById('inpInfraDescription')?.value?.trim() || "";
+        const uom = document.getElementById('inpInfraUom')?.value?.trim() || "";
+        const make = document.getElementById('inpInfraMake')?.value?.trim() || "";
         const commissioningToggle = document.getElementById('inpInfraCommissioningToggle');
         const commissioning = (commissioningToggle && commissioningToggle.checked) ? "Yes" : "No";
         const iMapToggle = document.getElementById('inpInfraIMapToggle');
@@ -13695,8 +13949,18 @@ function initSideFormEvents() {
         const infraStatusToggle = document.getElementById('inpInfraStatusToggle');
         const status = (infraStatusToggle && infraStatusToggle.checked) ? "Active" : "In - Active";
 
-        const newRecord = {
-          id: `indus-infra-${Date.now()}`,
+        if (!infraCategory) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup('Infra Category is required.', 'Validation Error');
+          } else {
+            showToast('Infra Category is required.');
+          }
+          return;
+        }
+
+        const payload = {
+          customerName: 'Indus Tower Ltd',
+          companyName: 'Nexus',
           infraCategory,
           infraDescription,
           uom,
@@ -13706,91 +13970,174 @@ function initSideFormEvents() {
           status
         };
 
-        indusInfraData.push(newRecord);
-        loadIndusDataset();
-        applyFiltersAndRender();
-        closeSideForm();
-        showToast(`Infra Category ${infraCategory} successfully saved & added to table!`);
+        try {
+          if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+            const created = await NexusApi.indusInfra.create(payload);
+            await fetchIndusInfra(true);
+            closeSideForm();
+            const frm = document.getElementById('frmAddInfra');
+            if (frm) frm.reset();
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup('Infrastructure details added successfully!', 'Task Completed');
+            } else {
+              showToast('Infrastructure details added successfully!');
+            }
+          } else {
+            throw new Error('API client not available');
+          }
+        } catch (err) {
+          console.error('Failed to create infra record:', err);
+          const errMsg = err.detail || err.message || 'Failed to add infrastructure details. Please try again.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errMsg, 'Database Error');
+          } else {
+            showToast(errMsg);
+          }
+        }
         return;
       }
 
       if (currentIndusSubpage === 'products') {
-        const itemCode = document.getElementById('inpGbpaItemCode')?.value?.trim() || `ITM-${1000 + indusProductsData.length + 1}`;
-        const productName = document.getElementById('inpGbpaProductName')?.value?.trim() || "New GBPA Item";
-        const productType = document.getElementById('inpGbpaProductType')?.value?.trim() || "Capex";
-        const productDescription = document.getElementById('inpGbpaProductDescription')?.value?.trim() || "";
-        const uom = document.getElementById('inpGbpaUom')?.value?.trim() || "Pcs";
-        const rate = document.getElementById('inpGbpaRate')?.value?.trim() || "0.00";
-        const hsnSacType = document.getElementById('inpGbpaHsnSac')?.value?.trim() || "HSN";
-        const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value?.trim() || "";
-        const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value?.trim() || "90";
-        const budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value?.trim() || rate;
+        const itemCode = document.getElementById('inpGbpaItemCode')?.value?.trim() || '';
+        const productName = document.getElementById('inpGbpaProductName')?.value?.trim() || '';
+        const productType = document.getElementById('inpGbpaProductType')?.value?.trim() || 'Capex';
+        const productDescription = document.getElementById('inpGbpaProductDescription')?.value?.trim() || '';
+        const uom = document.getElementById('inpGbpaUom')?.value?.trim() || 'Pcs';
+        const rate = document.getElementById('inpGbpaRate')?.value?.trim() || '0.00';
+        const hsnSacType = document.getElementById('inpGbpaHsnSac')?.value?.trim() || 'HSN';
+        const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value?.trim() || '';
+        const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value?.trim() || '';
+        const budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value?.trim() || '';
         const statusToggle = document.getElementById('inpGbpaStatusToggle');
-        const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
+        const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
 
-        const newRecord = {
-          id: `gbpa-${Date.now()}`,
-          itemCode,
-          productName,
-          itemName: productName,
-          productType,
-          itemType: productType,
-          productDescription,
-          itemDescription: productDescription,
-          uom,
-          rate,
-          activeRate: rate,
-          hsnSacType,
-          hsnSacCode,
-          budgetPercent,
-          budgetAmount,
-          status
+        if (!itemCode) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup('Please enter Item Code.', 'Validation Error');
+          } else {
+            showToast('Please enter Item Code');
+          }
+          return;
+        }
+
+        if (!productName) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup('Please enter Item Name.', 'Validation Error');
+          } else {
+            showToast('Please enter Item Name');
+          }
+          return;
+        }
+
+        const payload = {
+          company_name: 'Nexus',
+          customer_name: 'Indus Tower Ltd',
+          item_code: itemCode,
+          item_name: productName,
+          item_description: productDescription,
+          item_type: productType,
+          hsn_sac: hsnSacType,
+          hsn_sac_code: hsnSacCode,
+          uom: uom,
+          rate: rate,
+          budget_percentage: budgetPercent,
+          budget_amount: budgetAmount,
+          status: status
         };
 
-        indusProductsData.unshift(newRecord);
-        loadIndusDataset();
-        applyFiltersAndRender();
-        closeSideForm();
-        showToast(`GBPA item ${productName} successfully saved & added to table!`);
+        try {
+          if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
+            await NexusApi.indusGbpa.create(payload);
+          }
+          await fetchIndusGbpa(true);
+          closeSideForm();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('GBPA record added successfully!', 'Task Completed');
+          } else {
+            showToast('GBPA record added successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to create GBPA item:', err);
+          const errMsg = err.detail || err.message || 'Failed to save GBPA item.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errMsg, 'Error Message!');
+          } else {
+            showToast(errMsg);
+          }
+        }
         return;
       }
 
-      const siteId = document.getElementById('inpSiteId')?.value?.trim() || `23051068${indusSiteData.length + 1}`;
-      const whId = document.getElementById('inpSiteWhId')?.value?.trim() || "WH-101";
-      const siteName = document.getElementById('inpSiteName')?.value?.trim() || "New Site";
-      const towerType = document.getElementById('inpSiteTowerType')?.value?.trim() || "GBT";
-      const district = document.getElementById('inpSiteDistrict')?.value?.trim() || "Chennai";
-      const town = document.getElementById('inpSiteTown')?.value?.trim() || "Ambattur";
-      const address = document.getElementById('inpSiteAddress')?.value?.trim() || "";
-      const latitude = document.getElementById('inpSiteLattitude')?.value?.trim() || "13.0827";
-      const longitude = document.getElementById('inpSiteLongtitude')?.value?.trim() || "80.2707";
-      const transportZone = document.getElementById('inpSiteTransportZone')?.value?.trim() || "Zone-A";
-      const siteStatusToggle = document.getElementById('inpSiteStatusToggle');
-      const status = (siteStatusToggle && siteStatusToggle.checked) ? "Active" : "In - Active";
 
-      const newRecord = {
-        id: `indus-${Date.now()}`,
-        siteId,
-        whId,
-        siteName,
-        towerType,
-        district,
-        town,
-        address,
-        latitude,
-        longitude,
-        transportZone,
-        status,
-        contacts: (typeof siteDefaultContacts !== 'undefined' && siteDefaultContacts.length > 0) ? [...siteDefaultContacts] : []
+      const siteCodeVal = document.getElementById('inpSiteId')?.value?.trim() || '';
+      const whIdVal = document.getElementById('inpSiteWhId')?.value?.trim() || '';
+      const siteNameVal = document.getElementById('inpSiteName')?.value?.trim() || '';
+      const towerTypeVal = document.getElementById('inpSiteTowerType')?.value?.trim() || 'GBT';
+      const districtVal = document.getElementById('inpSiteDistrict')?.value?.trim() || '';
+      const townVal = document.getElementById('inpSiteTown')?.value?.trim() || '';
+      const addressVal = document.getElementById('inpSiteAddress')?.value?.trim() || '';
+      const latVal = document.getElementById('inpSiteLattitude')?.value?.trim() || '';
+      const longVal = document.getElementById('inpSiteLongtitude')?.value?.trim() || '';
+      const transportZoneVal = document.getElementById('inpSiteTransportZone')?.value?.trim() || '';
+      const siteStatusToggle = document.getElementById('inpSiteStatusToggle');
+      const statusVal = (siteStatusToggle && siteStatusToggle.checked) ? 'Active' : 'In - Active';
+
+      if (!siteCodeVal) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Site ID.', 'Error Message!');
+        } else {
+          showToast('Please enter Site ID');
+        }
+        return;
+      }
+      if (!siteNameVal) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Site Name.', 'Error Message!');
+        } else {
+          showToast('Please enter Site Name');
+        }
+        return;
+      }
+
+      const payload = {
+        site_code: siteCodeVal,
+        site_name: siteNameVal,
+        wh_id: whIdVal || null,
+        tower_type: towerTypeVal || 'GBT',
+        district: districtVal || null,
+        town: townVal || null,
+        address: addressVal || null,
+        latitude: latVal || null,
+        longitude: longVal || null,
+        transport_zone: transportZoneVal || null,
+        status: statusVal,
+        contacts: (typeof draftSiteContacts !== 'undefined' && draftSiteContacts.length > 0) ? draftSiteContacts : []
       };
 
-      indusSiteData.unshift(newRecord);
-      loadIndusDataset();
-      applyFiltersAndRender();
-      closeSideForm();
-      showToast(`Site ${siteId} successfully saved & added to table!`);
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+        try {
+          const savedSite = await NexusApi.indusSites.create(payload);
+          await fetchIndusSites(true);
+          if (typeof draftSiteContacts !== 'undefined') draftSiteContacts = [];
+          closeSideForm();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Site added successfully!', 'Task Completed');
+          } else {
+            showToast('Site added successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to create site:', err);
+          const errMsg = err.detail || err.message || 'Failed to save site details.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errMsg, 'Error Message!');
+          } else {
+            showToast(errMsg);
+          }
+        }
+      }
       return;
     }
+
 
     const isExpenseCardOpen = document.getElementById('addExpenseCard') && document.getElementById('addExpenseCard').style.display === 'block';
     if (isExpenseCardOpen || (currentModule === 'master' && currentMasterSubpage === 'expenses')) {
@@ -16365,15 +16712,67 @@ function openSideForm() {
       if (currentIndusProductSubpage === 'rate') {
         if (addProductRateCard) addProductRateCard.style.display = 'block';
       } else if (currentIndusProductSubpage === 'infra') {
-        if (addProductInfraCard) addProductInfraCard.style.display = 'block';
+        if (addProductInfraCard) {
+          addProductInfraCard.style.display = 'block';
+          const lblTitle = document.getElementById('lblProductInfraCardTitle');
+          const btnEditToggle = document.getElementById('btnProductInfraCardEditToggle');
+          const btnSaveWrap = document.querySelector('#frmAddProductInfra .form-submit-inside-wrap');
+          if (lblTitle) lblTitle.innerText = 'Add Infra';
+          if (btnEditToggle) btnEditToggle.style.display = 'none';
+          if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+          const frm = document.getElementById('frmAddProductInfra');
+          if (frm) frm.reset();
+          const stToggle = document.getElementById('inpProdInfraStatusToggle');
+          if (stToggle) stToggle.checked = true;
+          setProductInfraFormReadOnly(false);
+          currentViewedProductInfraId = null;
+          isProductInfraFormEditing = false;
+        }
       } else if (currentIndusProductSubpage === 'expenses') {
-        if (addProductExpenseCard) addProductExpenseCard.style.display = 'block';
+        if (addProductExpenseCard) {
+          addProductExpenseCard.style.display = 'block';
+          const lblTitle = document.getElementById('lblProductExpenseCardTitle');
+          const btnEditToggle = document.getElementById('btnProductExpenseCardEditToggle');
+          const btnSaveWrap = document.querySelector('#frmAddProductExpense .form-submit-inside-wrap');
+          if (lblTitle) lblTitle.innerText = 'Add Expense';
+          if (btnEditToggle) btnEditToggle.style.display = 'none';
+          if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+          const frm = document.getElementById('frmAddProductExpense');
+          if (frm) frm.reset();
+          const stToggle = document.getElementById('inpProdExpenseStatusToggle');
+          if (stToggle) stToggle.checked = true;
+          setProductExpenseFormReadOnly(false);
+          currentViewedGbpaExpenseId = null;
+          isGbpaExpenseFormEditing = false;
+        }
       } else {
-        if (addMaterialsCard) addMaterialsCard.style.display = 'block';
+        if (addMaterialsCard) {
+          addMaterialsCard.style.display = 'block';
+          const lblTitle = document.getElementById('lblMaterialsCardTitle');
+          const btnEditToggle = document.getElementById('btnMaterialsCardEditToggle');
+          const btnSaveWrap = document.querySelector('#frmAddMaterials .form-submit-inside-wrap');
+          if (lblTitle) lblTitle.innerText = 'Add Material';
+          if (btnEditToggle) btnEditToggle.style.display = 'none';
+          if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+          const frm = document.getElementById('frmAddMaterials');
+          if (frm) frm.reset();
+          const stToggle = document.getElementById('inpMaterialStatusToggle');
+          if (stToggle) stToggle.checked = true;
+          setMaterialFormReadOnly(false);
+          currentViewedMaterialId = null;
+          isMaterialFormEditing = false;
+        }
       }
     } else if (currentIndusSubpage === 'products') {
       if (addGbpaCard) {
         addGbpaCard.style.display = 'block';
+        const lblTitle = document.getElementById('lblGbpaCardTitle');
+        const btnEditToggle = document.getElementById('btnGbpaCardEditToggle');
+        const btnSaveWrap = document.querySelector('#frmAddGbpa .form-submit-inside-wrap');
+        if (lblTitle) lblTitle.innerText = 'Add GBPA';
+        if (btnEditToggle) btnEditToggle.style.display = 'none';
+        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
+
         const frm = document.getElementById('frmAddGbpa');
         if (frm) frm.reset();
         const typeSelect = document.getElementById('inpGbpaProductType');
@@ -16384,8 +16783,14 @@ function openSideForm() {
         if (hsnSelect) hsnSelect.value = 'HSN';
         const stToggle = document.getElementById('inpGbpaStatusToggle');
         if (stToggle) stToggle.checked = true;
+
+        setGbpaFormReadOnly(false);
+        currentViewedGbpaId = null;
+        window.currentViewedGbpaId = null;
+        isGbpaFormEditing = false;
       }
     } else if (currentIndusSubpage === 'projects') {
+
       if (addProjectCard) {
         addProjectCard.style.display = 'block';
         const lblTitle = document.getElementById('lblProjectCardTitle');
@@ -16444,6 +16849,8 @@ function openSideForm() {
           setSiteFormReadOnly(false);
         }
         currentViewedSiteId = null;
+        if (typeof draftSiteContacts !== 'undefined') draftSiteContacts = [];
+        if (typeof siteCurrentContactsList !== 'undefined') siteCurrentContactsList = [];
         isSiteFormEditing = false;
       }
     } else {
@@ -16940,65 +17347,6 @@ window.openVendorServiceOthersScopeSidePanel = function() {
   renderVendorServiceOthersScopeTable();
   overlay.style.display = 'flex';
   showToast('Other Service Scope details opened');
-};
-
-// Opens Transport Details panel as an overlay over the current View Project card
-// The project card stays mounted in the DOM – no data is cleared
-window.openTransportDetailsSidePanel = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  // Dim/blur the project card but keep it visible (data stays intact)
-  const projectCard = document.getElementById('addProjectCard');
-  if (projectCard) projectCard.classList.add('card-dimmed-blurred');
-
-  // Mark the row so the CSS overlay positioning kicks in
-  const cardsRow = document.querySelector('.side-form-cards-row');
-  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
-
-  // Hide any other popup panels that might be open
-  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
-   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'projectTypeDocSidePanel'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-
-  const transportPanel = document.getElementById('transportDetailsSidePanel');
-  if (transportPanel) transportPanel.style.display = 'block';
-
-  overlay.style.display = 'flex';
-};
-
-// Opens Project Type / Sub - Project Type Document panel as an overlay over the current View Project card
-// The project card stays mounted in the DOM – no data is cleared or deleted
-window.openProjectDocSidePanel = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  // Dim/blur the project card but keep it visible (data stays intact)
-  const projectCard = document.getElementById('addProjectCard');
-  if (projectCard) projectCard.classList.add('card-dimmed-blurred');
-
-  // Mark the row so the CSS overlay positioning kicks in
-  const cardsRow = document.querySelector('.side-form-cards-row');
-  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
-
-  // Hide any other popup panels that might be open
-  ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
-   'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel', 'vendorBankSideCard'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-
-  const projectDocPanel = document.getElementById('projectTypeDocSidePanel');
-  if (projectDocPanel) {
-    projectDocPanel.style.display = 'block';
-    if (typeof renderProjectDocTable === 'function') {
-      renderProjectDocTable();
-    }
-  }
-
-  overlay.style.display = 'flex';
 };
 
 // Opens Vendor Bank Side Card as a child tab next to Add Vendor form
@@ -21653,37 +22001,44 @@ function setSiteFormFullEditable() {
   });
 }
 
-window.handleSiteClick = function(siteId, siteName) {
-  let site = indusSiteData.find(s => s.id === siteId || s.siteName === siteName || s.siteId === siteId);
-  if (!site) {
-    site = {
-      id: siteId || 'site-1',
-      siteId: "230510678",
-      whId: "WH-101",
-      siteName: siteName || "R/RL-234567",
-      towerType: "GBT",
-      district: "Chennai",
-      town: "Ambattur",
-      address: "123 Industrial Area",
-      latitude: "13.0827",
-      longitude: "80.2707",
-      transportZone: "Zone-A",
-      status: "Active"
-    };
+window.handleSiteClick = async function(siteId, siteName) {
+  currentViewedSiteId = window.currentViewedSiteId = siteId;
+  let site = indusSiteData.find(s => String(s.id) === String(siteId) || String(s.site_id) === String(siteId) || s.siteId === siteId || s.site_code === siteId || s.siteName === siteName || s.site_name === siteName);
+
+  if (siteId && typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+    try {
+      const freshSite = await NexusApi.indusSites.getById(siteId);
+      if (freshSite) {
+        site = freshSite;
+        currentViewedSiteId = window.currentViewedSiteId = freshSite.site_id || freshSite.id || siteId;
+      }
+    } catch (err) {
+      console.warn('API fetch failed for site:', siteId, err);
+    }
   }
 
-  currentViewedSiteId = site.id;
+  if (!site) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Site not found in database.', 'Error Message!');
+    } else {
+      showToast('Site not found in database.');
+    }
+    return;
+  }
+
+  currentViewedSiteId = window.currentViewedSiteId = site.site_id || site.id || siteId;
   isSiteFormEditing = false;
   openSideForm();
 
   const cards = document.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(c => c.style.display = 'none');
 
+
   const card = document.getElementById('addSiteCard');
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblSiteCardTitle');
-  if (lblTitle) lblTitle.innerText = site.siteId || '230510678';
+  if (lblTitle) lblTitle.innerText = site.site_code || site.siteId || site.site_name || 'Site Details';
 
   const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
   const btnSiteMsg = document.getElementById('btnSiteCardMessageIcon');
@@ -21698,30 +22053,31 @@ window.handleSiteClick = function(siteId, siteName) {
   const btnSaveWrap = document.querySelector('#frmAddSite .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpSiteId')) document.getElementById('inpSiteId').value = site.siteId || '230510678';
-  if (document.getElementById('inpSiteWhId')) document.getElementById('inpSiteWhId').value = site.whId || 'WH-101';
-  if (document.getElementById('inpSiteName')) document.getElementById('inpSiteName').value = site.siteName || 'R/RL-234567';
-  if (document.getElementById('inpSiteTowerType')) document.getElementById('inpSiteTowerType').value = site.towerType || 'GBT';
-  if (document.getElementById('inpSiteDistrict')) document.getElementById('inpSiteDistrict').value = site.district || 'Chennai';
-  if (document.getElementById('inpSiteTown')) document.getElementById('inpSiteTown').value = site.town || 'Ambattur';
-  if (document.getElementById('inpSiteAddress')) document.getElementById('inpSiteAddress').value = site.address || '123 Industrial Area';
-  if (document.getElementById('inpSiteLattitude')) document.getElementById('inpSiteLattitude').value = site.latitude || '13.0827';
-  if (document.getElementById('inpSiteLongtitude')) document.getElementById('inpSiteLongtitude').value = site.longitude || '80.2707';
-  if (document.getElementById('inpSiteTransportZone')) document.getElementById('inpSiteTransportZone').value = site.transportZone || 'Zone-A';
+  if (document.getElementById('inpSiteId')) document.getElementById('inpSiteId').value = site.site_code || site.siteId || '';
+  if (document.getElementById('inpSiteWhId')) document.getElementById('inpSiteWhId').value = site.wh_id || site.whId || '';
+
+  if (document.getElementById('inpSiteName')) document.getElementById('inpSiteName').value = site.site_name || site.siteName || '';
+  if (document.getElementById('inpSiteTowerType')) document.getElementById('inpSiteTowerType').value = site.tower_type || site.towerType || 'GBT';
+  if (document.getElementById('inpSiteDistrict')) document.getElementById('inpSiteDistrict').value = site.district || '';
+  if (document.getElementById('inpSiteTown')) document.getElementById('inpSiteTown').value = site.town || '';
+  if (document.getElementById('inpSiteAddress')) document.getElementById('inpSiteAddress').value = site.address || '';
+  if (document.getElementById('inpSiteLattitude')) document.getElementById('inpSiteLattitude').value = site.latitude || '';
+  if (document.getElementById('inpSiteLongtitude')) document.getElementById('inpSiteLongtitude').value = site.longitude || '';
+  if (document.getElementById('inpSiteTransportZone')) document.getElementById('inpSiteTransportZone').value = site.transport_zone || site.transportZone || '';
   
   if (document.getElementById('inpSiteStatusToggle')) {
     document.getElementById('inpSiteStatusToggle').checked = !((site.status || '').toLowerCase().includes('in'));
   }
 
   setSiteFormReadOnly(true);
-  showToast(`Viewing site details: ${site.siteId || site.siteName}`);
+  showToast(`Viewing site details: ${site.site_code || site.siteId || site.site_name}`);
 };
 
 // Site Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnSiteCardEditToggle')?.addEventListener('click', () => {
-    let site = indusSiteData.find(s => s.id === currentViewedSiteId);
-    if (!site) site = indusSiteData[0];
+  document.getElementById('btnSiteCardEditToggle')?.addEventListener('click', async () => {
+    const activeSiteId = currentViewedSiteId || window.currentViewedSiteId;
+    if (!activeSiteId) return;
     const imgIcon = document.getElementById('imgSiteCardEditIcon');
 
     if (!isSiteFormEditing) {
@@ -21732,34 +22088,58 @@ document.addEventListener('DOMContentLoaded', () => {
         imgIcon.title = 'Save Changes';
       }
       setSiteFormReadOnly(false, true);
-      const lblTitle = document.getElementById('lblSiteCardTitle');
-      if (lblTitle && site) lblTitle.innerText = site.siteId || '230510678';
       showToast('Edit mode enabled for site details');
     } else {
       // Save Mode
-      if (site) {
-        site.whId = document.getElementById('inpSiteWhId')?.value || site.whId;
-        site.district = document.getElementById('inpSiteDistrict')?.value || site.district;
-        site.latitude = document.getElementById('inpSiteLattitude')?.value || site.latitude;
-        site.longitude = document.getElementById('inpSiteLongtitude')?.value || site.longitude;
-        site.transportZone = document.getElementById('inpSiteTransportZone')?.value || site.transportZone;
-        const statusChk = document.getElementById('inpSiteStatusToggle');
-        if (statusChk) site.status = statusChk.checked ? 'Active' : 'In - Active';
+      const whIdVal = document.getElementById('inpSiteWhId')?.value?.trim() || '';
+      const districtVal = document.getElementById('inpSiteDistrict')?.value?.trim() || '';
+      const latVal = document.getElementById('inpSiteLattitude')?.value?.trim() || '';
+      const longVal = document.getElementById('inpSiteLongtitude')?.value?.trim() || '';
+      const transportZoneVal = document.getElementById('inpSiteTransportZone')?.value?.trim() || '';
+      const statusChk = document.getElementById('inpSiteStatusToggle');
+      const statusVal = (statusChk && statusChk.checked) ? 'Active' : 'In - Active';
+
+      const updatePayload = {
+        wh_id: whIdVal || null,
+        district: districtVal || null,
+        latitude: latVal || null,
+        longitude: longVal || null,
+        transport_zone: transportZoneVal || null,
+        status: statusVal
+      };
+
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+        try {
+          const updated = await NexusApi.indusSites.update(activeSiteId, updatePayload);
+          isSiteFormEditing = false;
+          if (imgIcon) {
+            imgIcon.src = 'icons/Edit.svg';
+            imgIcon.title = 'Edit Info';
+          }
+          setSiteFormReadOnly(true);
+
+          const lblTitle = document.getElementById('lblSiteCardTitle');
+          if (lblTitle && updated) lblTitle.innerText = updated.site_code || updated.siteId || 'Site Details';
+          await fetchIndusSites(true);
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Site details updated successfully!', 'Task Completed');
+          } else {
+            showToast('Site details updated successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to update site:', err);
+          const errMsg = err.detail || err.message || 'Failed to update site details.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errMsg, 'Error Message!');
+          } else {
+            showToast(errMsg);
+          }
+        }
       }
-      isSiteFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
-      }
-      setSiteFormReadOnly(true);
-      const lblTitle = document.getElementById('lblSiteCardTitle');
-      if (lblTitle && site) lblTitle.innerText = site.siteId || '230510678';
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('Site details updated successfully!');
     }
   });
 });
+
 
 window.renderTable = function() {
   if (typeof loadIndusDataset === 'function') loadIndusDataset();
@@ -21822,22 +22202,45 @@ function setInfraFormReadOnly(isReadOnly, isEditMode = false) {
   });
 }
 
-window.handleInfraClick = function(infraId, infraCat) {
-  let infra = indusInfraData.find(i => i.id === infraId || i.infraCategory === infraCat);
-  if (!infra) {
-    infra = {
-      id: infraId || 'infra-1',
-      infraCategory: infraCat || "230510678",
-      infraDescription: "Infra Description Details",
-      uom: "Nos",
-      make: "Dell",
-      commissioning: "Yes",
-      iMap: "Yes",
-      status: "Active"
-    };
+window.handleInfraClick = async function(infraId, infraCat) {
+  let infra = indusInfraData.find(i => String(i.item_infrastructure_detail_id) === String(infraId) || String(i.id) === String(infraId) || (infraCat && (i.infra_category === infraCat || i.infraCategory === infraCat)));
+  
+  if (!infra && infraId && typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+    try {
+      infra = await NexusApi.indusInfra.getById(infraId);
+    } catch (err) {
+      console.warn('Could not fetch infra by ID:', err);
+    }
   }
 
-  currentViewedInfraId = infra.id;
+  if (!infra && infraCat && typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+    try {
+      const resp = await NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', infra_category: infraCat, page: 1, page_size: 5 });
+      if (resp && resp.items && resp.items.length > 0) {
+        infra = resp.items[0];
+      }
+    } catch (err) {
+      console.warn('Could not fetch infra by category:', err);
+    }
+  }
+
+  if (!infra) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Infrastructure record could not be found.', 'Record Not Found');
+    } else {
+      showToast('Infrastructure record could not be found.');
+    }
+    return;
+  }
+
+  currentViewedInfraId = infra.item_infrastructure_detail_id || infra.id || (infraId && !isNaN(Number(infraId)) ? Number(infraId) : null);
+  window.currentViewedInfraId = currentViewedInfraId;
+  
+  const hdnId = document.getElementById('hdnInfraDetailId');
+  if (hdnId && currentViewedInfraId) hdnId.value = currentViewedInfraId;
+  const frmInfra = document.getElementById('frmAddInfra');
+  if (frmInfra && currentViewedInfraId) frmInfra.dataset.infraId = currentViewedInfraId;
+
   isInfraFormEditing = false;
   openSideForm();
 
@@ -21848,7 +22251,7 @@ window.handleInfraClick = function(infraId, infraCat) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblInfraCardTitle');
-  if (lblTitle) lblTitle.innerText = infra.infraCategory || 'Infra Category';
+  if (lblTitle) lblTitle.innerText = infra.infra_category || infra.infraCategory || 'Infra Category';
 
   const btnEditToggle = document.getElementById('btnInfraCardEditToggle');
   const imgEditIcon = document.getElementById('imgInfraCardEditIcon');
@@ -21861,24 +22264,63 @@ window.handleInfraClick = function(infraId, infraCat) {
   const btnSaveWrap = document.querySelector('#frmAddInfra .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpInfraCategory')) document.getElementById('inpInfraCategory').value = infra.infraCategory || '230510678';
-  if (document.getElementById('inpInfraDescription')) document.getElementById('inpInfraDescription').value = infra.infraDescription || 'Infra Description Details';
-  if (document.getElementById('inpInfraUom')) document.getElementById('inpInfraUom').value = infra.uom || 'Nos';
-  if (document.getElementById('inpInfraMake')) document.getElementById('inpInfraMake').value = infra.make || 'Dell';
+  if (document.getElementById('inpInfraCategory')) document.getElementById('inpInfraCategory').value = infra.infra_category || infra.infraCategory || '';
+  if (document.getElementById('inpInfraDescription')) document.getElementById('inpInfraDescription').value = infra.infra_description || infra.infraDescription || '';
+  if (document.getElementById('inpInfraUom')) document.getElementById('inpInfraUom').value = infra.uom || '';
+  if (document.getElementById('inpInfraMake')) document.getElementById('inpInfraMake').value = infra.make || '';
   
-  if (document.getElementById('inpInfraCommissioningToggle')) document.getElementById('inpInfraCommissioningToggle').checked = !((infra.commissioning || '').toLowerCase().includes('no'));
-  if (document.getElementById('inpInfraIMapToggle')) document.getElementById('inpInfraIMapToggle').checked = !((infra.iMap || '').toLowerCase().includes('no'));
-  if (document.getElementById('inpInfraStatusToggle')) document.getElementById('inpInfraStatusToggle').checked = !((infra.status || '').toLowerCase().includes('in'));
+  const commVal = infra.commissioning;
+  const isComm = commVal && !String(commVal).toLowerCase().includes('no') && !String(commVal).toLowerCase().includes('false');
+  if (document.getElementById('inpInfraCommissioningToggle')) document.getElementById('inpInfraCommissioningToggle').checked = Boolean(isComm);
+
+  const iMapVal = infra.i_map || infra.iMap;
+  const isIMap = iMapVal && !String(iMapVal).toLowerCase().includes('no') && !String(iMapVal).toLowerCase().includes('false');
+  if (document.getElementById('inpInfraIMapToggle')) document.getElementById('inpInfraIMapToggle').checked = Boolean(isIMap);
+
+  const statVal = infra.status;
+  const isAct = !statVal || !String(statVal).toLowerCase().includes('in');
+  if (document.getElementById('inpInfraStatusToggle')) document.getElementById('inpInfraStatusToggle').checked = Boolean(isAct);
 
   setInfraFormReadOnly(true);
-  showToast(`Viewing infra details: ${infra.infraCategory || infra.infraDescription}`);
+  showToast(`Viewing infra details: ${infra.infra_category || infra.infraCategory || ''}`);
 };
 
 // Infra Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnInfraCardEditToggle')?.addEventListener('click', () => {
-    let infra = indusInfraData.find(i => i.id === currentViewedInfraId);
-    if (!infra) infra = indusInfraData[0];
+  document.getElementById('btnInfraCardEditToggle')?.addEventListener('click', async () => {
+    let targetId = currentViewedInfraId ||
+                   document.getElementById('hdnInfraDetailId')?.value ||
+                   document.getElementById('frmAddInfra')?.dataset?.infraId;
+
+    if (!targetId || isNaN(Number(targetId))) {
+      const catName = document.getElementById('inpInfraCategory')?.value?.trim() || 
+                      document.getElementById('lblInfraCardTitle')?.innerText?.trim();
+      let found = indusInfraData.find(i => 
+        (i.infra_category && i.infra_category === catName) || 
+        (i.infraCategory && i.infraCategory === catName)
+      );
+      if (found && (found.item_infrastructure_detail_id || found.id)) {
+        targetId = found.item_infrastructure_detail_id || found.id;
+      } else if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+        try {
+          const resp = await NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', infra_category: catName, page: 1, page_size: 5 });
+          if (resp && resp.items && resp.items.length > 0) {
+            targetId = resp.items[0].item_infrastructure_detail_id || resp.items[0].id;
+          }
+        } catch (e) {
+          console.warn('Could not lookup infra record ID:', e);
+        }
+      }
+    }
+
+    if (targetId) {
+      currentViewedInfraId = targetId;
+      window.currentViewedInfraId = targetId;
+      const hdnId = document.getElementById('hdnInfraDetailId');
+      if (hdnId) hdnId.value = targetId;
+    }
+
+    let infra = indusInfraData.find(i => String(i.item_infrastructure_detail_id) === String(targetId) || String(i.id) === String(targetId));
     const imgIcon = document.getElementById('imgInfraCardEditIcon');
 
     if (!isInfraFormEditing) {
@@ -21890,32 +22332,71 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setInfraFormReadOnly(false, true);
       const lblTitle = document.getElementById('lblInfraCardTitle');
-      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
+      if (lblTitle && infra) lblTitle.innerText = infra.infra_category || infra.infraCategory || 'Infra Category';
       showToast('Edit mode enabled for infra details');
     } else {
       // Save Mode
-      if (infra) {
-        infra.infraDescription = document.getElementById('inpInfraDescription')?.value || infra.infraDescription;
-        infra.uom = document.getElementById('inpInfraUom')?.value || infra.uom;
-        infra.make = document.getElementById('inpInfraMake')?.value || infra.make;
-        const commChk = document.getElementById('inpInfraCommissioningToggle');
-        if (commChk) infra.commissioning = commChk.checked ? 'Yes' : 'No';
-        const iMapChk = document.getElementById('inpInfraIMapToggle');
-        if (iMapChk) infra.iMap = iMapChk.checked ? 'Yes' : 'No';
-        const statusChk = document.getElementById('inpInfraStatusToggle');
-        if (statusChk) infra.status = statusChk.checked ? 'Active' : 'In - Active';
+      const infraDescription = document.getElementById('inpInfraDescription')?.value?.trim() || "";
+      const uom = document.getElementById('inpInfraUom')?.value?.trim() || "";
+      const make = document.getElementById('inpInfraMake')?.value?.trim() || "";
+      const commChk = document.getElementById('inpInfraCommissioningToggle');
+      const commissioning = (commChk && commChk.checked) ? "Yes" : "No";
+      const iMapChk = document.getElementById('inpInfraIMapToggle');
+      const iMap = (iMapChk && iMapChk.checked) ? "Yes" : "No";
+      const statusChk = document.getElementById('inpInfraStatusToggle');
+      const status = (statusChk && statusChk.checked) ? "Active" : "In - Active";
+
+      const updatePayload = {
+        infraDescription,
+        uom,
+        make,
+        commissioning,
+        iMap,
+        status
+      };
+
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra && targetId) {
+          const updated = await NexusApi.indusInfra.update(targetId, updatePayload);
+        } else if (targetId) {
+          const res = await fetch(`/api/v1/customer/indus/infra/${targetId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatePayload)
+          });
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            throw new Error(errJson.detail || 'Failed to update infrastructure details.');
+          }
+        } else {
+          throw new Error('Unable to identify the infrastructure record to update. Please reopen the record from the table.');
+        }
+
+        await fetchIndusInfra(true);
+
+        isInfraFormEditing = false;
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        setInfraFormReadOnly(true);
+        const lblTitle = document.getElementById('lblInfraCardTitle');
+        if (lblTitle && infra) lblTitle.innerText = infra.infra_category || infra.infraCategory || 'Infra Category';
+        
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Infrastructure details updated successfully!', 'Task Completed');
+        } else {
+          showToast('Infrastructure details updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update infra details:', err);
+        const errMsg = err.detail || err.message || 'Failed to update infrastructure details. Please try again.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(errMsg, 'Database Error');
+        } else {
+          showToast(errMsg);
+        }
       }
-      isInfraFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
-      }
-      setInfraFormReadOnly(true);
-      const lblTitle = document.getElementById('lblInfraCardTitle');
-      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('Infra details updated successfully!');
     }
   });
 });
@@ -21977,25 +22458,51 @@ function setProjectFormReadOnly(isReadOnly, isEditMode = false) {
   });
 }
 
-window.handleProjectClick = function(projectId, projectType) {
-  let proj = indusProjectsData.find(p => p.id === projectId || p.projectType === projectType);
+window.handleProjectClick = async function(projectId, projectType) {
+  let proj = indusProjectsData.find(p => String(p.id) === String(projectId) || p.projectType === projectType);
+  if (!proj && typeof NexusApi !== 'undefined' && NexusApi.indusProjects && projectId) {
+    try {
+      const res = await NexusApi.indusProjects.getById(projectId);
+      if (res) {
+        proj = {
+          id: res.project_type_id || res.id,
+          projectType: res.project_type || '',
+          subProjectType: res.sub_project_type || '',
+          upgradationType: res.upgradation_type || 'Major',
+          tat: res.tat || '',
+          indusPm: res.indus_pm || '',
+          indusScm: res.indus_scm || '',
+          pm: res.pm || '',
+          survey: res.survey || 'Yes',
+          additionalTransport: res.additional_transport || 'Yes',
+          status: res.status || 'Active'
+        };
+      }
+    } catch (e) {
+      console.warn('Failed to fetch project by id:', e);
+    }
+  }
+
   if (!proj) {
     proj = {
-      id: projectId || 'proj-1',
-      projectType: projectType || "KTN",
-      subProjectType: "KTN",
-      tat: "15 Days",
-      indusPm: "R/RL-234567",
-      indusScm: "R/RL-234567",
-      pm: "R/RL-234567",
-      mis: "R/RL-234567",
-      survey: "Yes",
-      additionalTransport: "Yes",
-      status: "Active"
+      id: projectId || '',
+      projectType: projectType || '',
+      subProjectType: '',
+      upgradationType: 'Major',
+      tat: '',
+      indusPm: '',
+      indusScm: '',
+      pm: '',
+      survey: 'Yes',
+      additionalTransport: 'Yes',
+      status: 'Active'
     };
   }
 
   currentViewedProjectId = proj.id;
+  window.currentViewedProjectId = proj.id;
+  window.currentViewedProjectType = proj.projectType;
+  window.currentViewedSubProjectType = proj.subProjectType;
   isProjectFormEditing = false;
   openSideForm();
 
@@ -22006,7 +22513,7 @@ window.handleProjectClick = function(projectId, projectType) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblProjectCardTitle');
-  if (lblTitle) lblTitle.innerText = proj.projectType || 'KTN';
+  if (lblTitle) lblTitle.innerText = proj.projectType || 'Project Details';
 
   const btnEditToggle = document.getElementById('btnProjectCardEditToggle');
   const btnActivity = document.getElementById('btnProjectActivityIcon');
@@ -22025,13 +22532,14 @@ window.handleProjectClick = function(projectId, projectType) {
   const btnSaveWrap = document.querySelector('#frmAddProject .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpProjectType')) document.getElementById('inpProjectType').value = proj.projectType || 'KTN';
-  if (document.getElementById('inpSubProjectType')) document.getElementById('inpSubProjectType').value = proj.subProjectType || 'KTN';
+  if (document.getElementById('hdnProjectDetailId')) document.getElementById('hdnProjectDetailId').value = proj.id || '';
+  if (document.getElementById('inpProjectType')) document.getElementById('inpProjectType').value = proj.projectType || '';
+  if (document.getElementById('inpSubProjectType')) document.getElementById('inpSubProjectType').value = proj.subProjectType || '';
   if (document.getElementById('inpProjectUpgradationType')) document.getElementById('inpProjectUpgradationType').value = proj.upgradationType || 'Major';
-  if (document.getElementById('inpProjectTat')) document.getElementById('inpProjectTat').value = proj.tat || '15 Days';
-  if (document.getElementById('inpIndusPm')) document.getElementById('inpIndusPm').value = proj.indusPm || 'R/RL-234567';
-  if (document.getElementById('inpIndusScm')) document.getElementById('inpIndusScm').value = proj.indusScm || 'R/RL-234567';
-  if (document.getElementById('inpProjectPm')) document.getElementById('inpProjectPm').value = proj.pm || 'R/RL-234567';
+  if (document.getElementById('inpProjectTat')) document.getElementById('inpProjectTat').value = proj.tat || '';
+  if (document.getElementById('inpIndusPm')) document.getElementById('inpIndusPm').value = proj.indusPm || '';
+  if (document.getElementById('inpIndusScm')) document.getElementById('inpIndusScm').value = proj.indusScm || '';
+  if (document.getElementById('inpProjectPm')) document.getElementById('inpProjectPm').value = proj.pm || '';
 
   if (document.getElementById('inpProjectSurveyToggle')) document.getElementById('inpProjectSurveyToggle').checked = !((proj.survey || '').toLowerCase().includes('no'));
   if (document.getElementById('inpProjectTransportToggle')) document.getElementById('inpProjectTransportToggle').checked = !((proj.additionalTransport || '').toLowerCase().includes('no'));
@@ -22042,14 +22550,20 @@ window.handleProjectClick = function(projectId, projectType) {
 };
 
 // Project Card Edit / Save Toggle Listener
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnProjectCardEditToggle')?.addEventListener('click', () => {
-    let proj = indusProjectsData.find(p => p.id === currentViewedProjectId);
-    if (!proj) proj = indusProjectsData[0];
+let isProjectToggleProcessing = false;
+window.handleProjectCardEditToggle = async function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  if (isProjectToggleProcessing) return;
+  isProjectToggleProcessing = true;
+
+  try {
+    const targetId = currentViewedProjectId || window.currentViewedProjectId || document.getElementById('hdnProjectDetailId')?.value;
+    let proj = indusProjectsData.find(p => String(p.id) === String(targetId));
+    if (!proj && indusProjectsData.length > 0) proj = indusProjectsData[0];
     const imgIcon = document.getElementById('imgProjectCardEditIcon');
 
     if (!isProjectFormEditing) {
-      // Enter Edit Mode
+      // ENTER EDIT MODE (Form becomes editable; Save icon shown; NO popup)
       isProjectFormEditing = true;
       if (imgIcon) {
         imgIcon.src = 'icons/Save.svg';
@@ -22057,38 +22571,119 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setProjectFormReadOnly(false, true);
       const lblTitle = document.getElementById('lblProjectCardTitle');
-      if (lblTitle && proj) lblTitle.innerText = proj.projectType || 'KTN';
+      if (lblTitle && proj) lblTitle.innerText = proj.projectType || 'Project Details';
       showToast('Edit mode enabled for project details');
     } else {
-      // Save Mode
-      if (proj) {
-        proj.subProjectType = document.getElementById('inpSubProjectType')?.value || proj.subProjectType;
-        proj.upgradationType = document.getElementById('inpProjectUpgradationType')?.value || proj.upgradationType;
-        proj.tat = document.getElementById('inpProjectTat')?.value || proj.tat;
-        proj.indusPm = document.getElementById('inpIndusPm')?.value || proj.indusPm;
-        proj.indusScm = document.getElementById('inpIndusScm')?.value || proj.indusScm;
-        proj.pm = document.getElementById('inpProjectPm')?.value || proj.pm;
-        const survChk = document.getElementById('inpProjectSurveyToggle');
-        if (survChk) proj.survey = survChk.checked ? 'Yes' : 'No';
-        const transChk = document.getElementById('inpProjectTransportToggle');
-        if (transChk) proj.additionalTransport = transChk.checked ? 'Yes' : 'No';
-        const statusChk = document.getElementById('inpProjectStatusToggle');
-        if (statusChk) proj.status = statusChk.checked ? 'Active' : 'In - Active';
+      // SAVE MODE (Triggered ONLY when clicking Save icon in Edit mode)
+      const projectType = document.getElementById('inpProjectType')?.value?.trim() || (proj ? proj.projectType : '');
+      const subProjectType = document.getElementById('inpSubProjectType')?.value?.trim() || (proj ? proj.subProjectType : '');
+      const upgradationType = document.getElementById('inpProjectUpgradationType')?.value?.trim() || 'Major';
+      const tat = document.getElementById('inpProjectTat')?.value?.trim() || '';
+      const indusPm = document.getElementById('inpIndusPm')?.value?.trim() || '';
+      const indusScm = document.getElementById('inpIndusScm')?.value?.trim() || '';
+      const pm = document.getElementById('inpProjectPm')?.value?.trim() || '';
+      const survChk = document.getElementById('inpProjectSurveyToggle');
+      const survey = survChk && survChk.checked ? 'Yes' : 'No';
+      const transChk = document.getElementById('inpProjectTransportToggle');
+      const additionalTransport = transChk && transChk.checked ? 'Yes' : 'No';
+      const statusChk = document.getElementById('inpProjectStatusToggle');
+      const status = statusChk && statusChk.checked ? 'Active' : 'In - Active';
+
+      const updatePayload = {
+        project_type: projectType,
+        sub_project_type: subProjectType,
+        upgradation_type: upgradationType,
+        tat: tat,
+        indus_pm: indusPm,
+        indus_scm: indusScm,
+        pm: pm,
+        survey: survey,
+        additional_transport: additionalTransport,
+        status: status
+      };
+
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects && targetId) {
+        try {
+          await NexusApi.indusProjects.update(targetId, updatePayload);
+          await fetchIndusProjects(true);
+          currentDataset = [...indusProjectsData];
+          if (typeof applyFiltersAndRender === 'function') {
+            applyFiltersAndRender();
+          }
+          window.currentViewedSubProjectType = subProjectType;
+          if (proj) {
+            proj.projectType = projectType;
+            proj.subProjectType = subProjectType;
+            proj.upgradationType = upgradationType;
+            proj.tat = tat;
+            proj.indusPm = indusPm;
+            proj.indusScm = indusScm;
+            proj.pm = pm;
+            proj.survey = survey;
+            proj.additionalTransport = additionalTransport;
+            proj.status = status;
+          }
+          isProjectFormEditing = false;
+          if (imgIcon) {
+            imgIcon.src = 'icons/Edit.svg';
+            imgIcon.title = 'Edit Info';
+          }
+          setProjectFormReadOnly(true);
+          const lblTitle = document.getElementById('lblProjectCardTitle');
+          if (lblTitle && proj) lblTitle.innerText = projectType || proj.projectType || 'Project Details';
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Project updated successfully!', 'Task Completed');
+          } else {
+            showToast('Project details updated successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to update project:', err);
+          const errMsg = err.detail || err.message || 'Failed to update project';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errMsg, 'Error');
+          } else {
+            showToast(errMsg);
+          }
+        }
+      } else {
+        if (proj) {
+          proj.projectType = projectType;
+          proj.subProjectType = subProjectType;
+          proj.upgradationType = upgradationType;
+          proj.tat = tat;
+          proj.indusPm = indusPm;
+          proj.indusScm = indusScm;
+          proj.pm = pm;
+          proj.survey = survey;
+          proj.additionalTransport = additionalTransport;
+          proj.status = status;
+        }
+        if (typeof loadIndusDataset === 'function') loadIndusDataset();
+        currentDataset = [...indusProjectsData];
+        if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+        isProjectFormEditing = false;
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        setProjectFormReadOnly(true);
+        const lblTitle = document.getElementById('lblProjectCardTitle');
+        if (lblTitle && proj) lblTitle.innerText = projectType || proj.projectType || 'Project Details';
+
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Project updated successfully!', 'Task Completed');
+        } else {
+          showToast('Project details updated successfully!');
+        }
       }
-      isProjectFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
-      }
-      setProjectFormReadOnly(true);
-      const lblTitle = document.getElementById('lblProjectCardTitle');
-      if (lblTitle && proj) lblTitle.innerText = proj.projectType || 'KTN';
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('Project details updated successfully!');
     }
-  });
-});
+  } finally {
+    setTimeout(() => {
+      isProjectToggleProcessing = false;
+    }, 250);
+  }
+};
 
 // --- GBPA (PRODUCTS) VIEW & EDIT ENGINE ---
 let selectedGbpaRowId = null;
@@ -22134,13 +22729,14 @@ window.handleGbpaRowSelection = function(rowId) {
   });
 };
 
-window.openSelectedGbpaItem = function() {
+window.openSelectedGbpaItem = async function() {
   if (selectedGbpaRowId) {
-    openViewGbpaCard(selectedGbpaRowId);
+    await openViewGbpaCard(selectedGbpaRowId);
   } else {
     showToast('Please select a GBPA row first');
   }
 };
+
 
 function setGbpaFormReadOnly(isReadOnly, isEditMode = false) {
   const form = document.getElementById('frmAddGbpa');
@@ -22196,30 +22792,27 @@ function setGbpaFormReadOnly(isReadOnly, isEditMode = false) {
   });
 }
 
-window.openViewGbpaCard = function(itemId) {
-  let item = indusProductsData.find(p => p.id === itemId || p.itemCode === itemId || p.itemName === itemId || p.productName === itemId);
-  if (!item) {
-    item = indusProductsData[0] || {
-      id: itemId || 'gbpa-1',
-      itemCode: "230510678",
-      itemName: "40M Tubular Tower",
-      productName: "40M Tubular Tower",
-      productType: "Capex",
-      productDescription: "Galvanized steel structure",
-      uom: "Pcs",
-      rate: "450000.00",
-      activeRate: "450000.00",
-      hsnSacType: "HSN",
-      hsnSacCode: "73082019",
-      budgetPercent: "10%",
-      budgetAmount: "45000.00",
-      status: "Active"
-    };
+window.openViewGbpaCard = async function(itemId) {
+  let item = indusProductsData.find(p => String(p.item_id || p.id) === String(itemId) || p.item_code === itemId || p.itemCode === itemId || p.item_name === itemId || p.itemName === itemId || p.productName === itemId);
+  
+  if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa && itemId) {
+    try {
+      const dbItem = await NexusApi.indusGbpa.getById(itemId);
+      if (dbItem) item = dbItem;
+    } catch (e) {
+      console.warn('Could not fetch single GBPA item by ID, using local item:', e);
+    }
   }
 
-  currentViewedGbpaId = item.id;
-  isGbpaFormEditing = false;
-  openSideForm();
+  if (!item) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('GBPA item details not found.', 'Not Found');
+    }
+    return;
+  }
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 
   const cards = document.querySelectorAll('.side-form-card');
   cards.forEach(c => c.style.display = 'none');
@@ -22227,7 +22820,12 @@ window.openViewGbpaCard = function(itemId) {
   const card = document.getElementById('addGbpaCard');
   if (card) card.style.display = 'block';
 
-  const dispTitle = item.itemName || item.productName || 'GBPA Item';
+  const activeId = item.item_id || item.id;
+  currentViewedGbpaId = activeId;
+  window.currentViewedGbpaId = activeId;
+  isGbpaFormEditing = false;
+
+  const dispTitle = item.item_name || item.itemName || item.productName || 'GBPA Item';
   const lblTitle = document.getElementById('lblGbpaCardTitle');
   if (lblTitle) lblTitle.innerText = dispTitle;
 
@@ -22235,6 +22833,7 @@ window.openViewGbpaCard = function(itemId) {
   const imgEditIcon = document.getElementById('imgGbpaCardEditIcon');
   if (btnEditToggle) btnEditToggle.style.display = 'flex';
   if (imgEditIcon) {
+
     imgEditIcon.src = 'icons/Edit.svg';
     imgEditIcon.title = 'Edit Info';
   }
@@ -22242,16 +22841,17 @@ window.openViewGbpaCard = function(itemId) {
   const btnSaveWrap = document.querySelector('#frmAddGbpa .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpGbpaItemCode')) document.getElementById('inpGbpaItemCode').value = item.itemCode || '';
-  if (document.getElementById('inpGbpaProductName')) document.getElementById('inpGbpaProductName').value = item.itemName || item.productName || '';
-  if (document.getElementById('inpGbpaProductType')) document.getElementById('inpGbpaProductType').value = item.productType || item.itemType || 'Capex';
-  if (document.getElementById('inpGbpaProductDescription')) document.getElementById('inpGbpaProductDescription').value = item.productDescription || '';
+  if (document.getElementById('inpGbpaItemCode')) document.getElementById('inpGbpaItemCode').value = item.item_code || item.itemCode || '';
+  if (document.getElementById('inpGbpaProductName')) document.getElementById('inpGbpaProductName').value = item.item_name || item.itemName || item.productName || '';
+  if (document.getElementById('inpGbpaProductType')) document.getElementById('inpGbpaProductType').value = item.item_type || item.productType || item.itemType || 'Capex';
+  if (document.getElementById('inpGbpaProductDescription')) document.getElementById('inpGbpaProductDescription').value = item.item_description || item.productDescription || '';
   if (document.getElementById('inpGbpaUom')) document.getElementById('inpGbpaUom').value = item.uom || 'Pcs';
-  if (document.getElementById('inpGbpaRate')) document.getElementById('inpGbpaRate').value = item.rate || item.activeRate || '0.00';
-  if (document.getElementById('inpGbpaHsnSac')) document.getElementById('inpGbpaHsnSac').value = item.hsnSacType || 'HSN';
-  if (document.getElementById('inpGbpaHsnSacCode')) document.getElementById('inpGbpaHsnSacCode').value = item.hsnSacCode || '';
-  if (document.getElementById('inpGbpaBudgetPercent')) document.getElementById('inpGbpaBudgetPercent').value = item.budgetPercent || '';
-  if (document.getElementById('inpGbpaBudgetAmount')) document.getElementById('inpGbpaBudgetAmount').value = item.budgetAmount || '';
+  const rateVal = item.rate !== undefined && item.rate !== null ? item.rate : (item.activeRate || '0.00');
+  if (document.getElementById('inpGbpaRate')) document.getElementById('inpGbpaRate').value = rateVal;
+  if (document.getElementById('inpGbpaHsnSac')) document.getElementById('inpGbpaHsnSac').value = item.hsn_sac || item.hsnSacType || 'HSN';
+  if (document.getElementById('inpGbpaHsnSacCode')) document.getElementById('inpGbpaHsnSacCode').value = item.hsn_sac_code || item.hsnSacCode || '';
+  if (document.getElementById('inpGbpaBudgetPercent')) document.getElementById('inpGbpaBudgetPercent').value = item.budget_percentage || item.budgetPercent || '';
+  if (document.getElementById('inpGbpaBudgetAmount')) document.getElementById('inpGbpaBudgetAmount').value = item.budget_amount || item.budgetAmount || '';
 
   if (document.getElementById('inpGbpaStatusToggle')) {
     document.getElementById('inpGbpaStatusToggle').checked = !((item.status || '').toLowerCase().includes('in'));
@@ -22263,9 +22863,9 @@ window.openViewGbpaCard = function(itemId) {
 
 // GBPA Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnGbpaCardEditToggle')?.addEventListener('click', () => {
-    let item = indusProductsData.find(p => p.id === currentViewedGbpaId);
-    if (!item) item = indusProductsData[0];
+  document.getElementById('btnGbpaCardEditToggle')?.addEventListener('click', async () => {
+    const activeId = currentViewedGbpaId || window.currentViewedGbpaId;
+    let item = indusProductsData.find(p => String(p.item_id || p.id) === String(activeId));
     const imgIcon = document.getElementById('imgGbpaCardEditIcon');
 
     if (!isGbpaFormEditing) {
@@ -22276,42 +22876,77 @@ document.addEventListener('DOMContentLoaded', () => {
         imgIcon.title = 'Save Changes';
       }
       setGbpaFormReadOnly(false, true);
-      const dispTitle = item?.itemName || item?.productName || 'GBPA Item';
+      const dispTitle = item?.item_name || item?.itemName || item?.productName || 'GBPA Item';
       const lblTitle = document.getElementById('lblGbpaCardTitle');
       if (lblTitle) lblTitle.innerText = dispTitle;
       showToast('Edit mode enabled for GBPA item');
     } else {
-      // Save Mode
-      if (item) {
-        item.itemName = document.getElementById('inpGbpaProductName')?.value || item.itemName;
-        item.productName = item.itemName;
-        item.productType = document.getElementById('inpGbpaProductType')?.value || item.productType;
-        item.productDescription = document.getElementById('inpGbpaProductDescription')?.value || item.productDescription;
-        item.uom = document.getElementById('inpGbpaUom')?.value || item.uom;
-        item.rate = document.getElementById('inpGbpaRate')?.value || item.rate;
-        item.activeRate = item.rate;
-        item.hsnSacType = document.getElementById('inpGbpaHsnSac')?.value || item.hsnSacType;
-        item.hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value || item.hsnSacCode;
-        item.budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value || item.budgetPercent;
-        item.budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value || item.budgetAmount;
-        const statusChk = document.getElementById('inpGbpaStatusToggle');
-        if (statusChk) item.status = statusChk.checked ? 'Active' : 'In - Active';
+      // Save Mode (Persist update to API / DB)
+      const productName = document.getElementById('inpGbpaProductName')?.value?.trim() || '';
+      const productType = document.getElementById('inpGbpaProductType')?.value?.trim() || 'Capex';
+      const productDescription = document.getElementById('inpGbpaProductDescription')?.value?.trim() || '';
+      const uom = document.getElementById('inpGbpaUom')?.value?.trim() || 'Pcs';
+      const rate = document.getElementById('inpGbpaRate')?.value?.trim() || '0.00';
+      const hsnSacType = document.getElementById('inpGbpaHsnSac')?.value?.trim() || 'HSN';
+      const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value?.trim() || '';
+      const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value?.trim() || '';
+      const budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value?.trim() || '';
+      const statusChk = document.getElementById('inpGbpaStatusToggle');
+      const status = (statusChk && statusChk.checked) ? 'Active' : 'In - Active';
+
+      if (!productName) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Item Name.', 'Validation Error');
+        } else {
+          showToast('Please enter Item Name');
+        }
+        return;
       }
-      isGbpaFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
+
+      const updatePayload = {
+        item_name: productName,
+        item_description: productDescription,
+        item_type: productType,
+        hsn_sac: hsnSacType,
+        hsn_sac_code: hsnSacCode,
+        uom: uom,
+        rate: rate,
+        budget_percentage: budgetPercent,
+        budget_amount: budgetAmount,
+        status: status
+      };
+
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa && activeId) {
+          await NexusApi.indusGbpa.update(activeId, updatePayload);
+        }
+        isGbpaFormEditing = false;
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        setGbpaFormReadOnly(true);
+        const lblTitle = document.getElementById('lblGbpaCardTitle');
+        if (lblTitle) lblTitle.innerText = productName;
+        await fetchIndusGbpa(true);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('GBPA record updated successfully!', 'Task Completed');
+        } else {
+          showToast('GBPA record updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update GBPA item:', err);
+        const errMsg = err.detail || err.message || 'Failed to update GBPA item.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(errMsg, 'Error Message!');
+        } else {
+          showToast(errMsg);
+        }
       }
-      setGbpaFormReadOnly(true);
-      const dispTitle = item?.itemName || item?.productName || 'GBPA Item';
-      const lblTitle = document.getElementById('lblGbpaCardTitle');
-      if (lblTitle) lblTitle.innerText = dispTitle;
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('GBPA item details updated successfully!');
     }
   });
 });
+
 
 // --- PROJECT APPROVAL FUNCTIONS ---
 window.openAddProjectApprovalForm = function() {
@@ -22387,22 +23022,25 @@ function setMaterialFormReadOnly(isReadOnly) {
   });
 }
 
-window.openViewGbpaMaterialCard = function(matId) {
-  let mat = indusProductMaterialsData.find(m => m.id === matId || m.materialHead === matId);
+window.openViewGbpaMaterialCard = async function(matId) {
+  let mat = indusProductMaterialsData.find(m => String(m.item_material_id) === String(matId) || String(m.id) === String(matId) || m.material_head === matId || m.materialHead === matId);
+  if (!mat && matId && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
+    try {
+      mat = await NexusApi.indusGbpaMaterials.getById(matId);
+    } catch (err) {
+      console.warn('Could not fetch material by ID from API:', err);
+    }
+  }
   if (!mat) {
-    mat = indusProductMaterialsData[0] || {
-      id: matId || 'mat-1',
-      materialHead: "Tower Structure Mast",
-      materialCategory: "Structure",
-      materialDescription: "Galvanized tubular mast",
-      make: "Apex",
-      type: "Parent",
-      ucf: "100",
-      status: "Active"
-    };
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('GBPA material record not found.', 'Not Found');
+    } else {
+      showToast('GBPA material record not found.');
+    }
+    return;
   }
 
-  currentViewedMaterialId = mat.id;
+  currentViewedMaterialId = mat.item_material_id || mat.id;
   isMaterialFormEditing = false;
   openSideForm();
 
@@ -22412,8 +23050,9 @@ window.openViewGbpaMaterialCard = function(matId) {
   const card = document.getElementById('addMaterialsCard');
   if (card) card.style.display = 'block';
 
+  const headVal = mat.material_head || mat.materialHead || 'Material Head';
   const lblTitle = document.getElementById('lblMaterialsCardTitle');
-  if (lblTitle) lblTitle.innerText = mat.materialHead || 'Material Head';
+  if (lblTitle) lblTitle.innerText = headVal;
 
   const btnEditToggle = document.getElementById('btnMaterialsCardEditToggle');
   const imgEditIcon = document.getElementById('imgMaterialsCardEditIcon');
@@ -22426,26 +23065,26 @@ window.openViewGbpaMaterialCard = function(matId) {
   const btnSaveWrap = document.querySelector('#frmAddMaterials .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpMaterialHead')) document.getElementById('inpMaterialHead').value = mat.materialHead || '';
-  if (document.getElementById('inpMaterialCategory')) document.getElementById('inpMaterialCategory').value = mat.materialCategory || '';
-  if (document.getElementById('inpMaterialDescription')) document.getElementById('inpMaterialDescription').value = mat.materialDescription || '';
-  if (document.getElementById('inpMaterialMake')) document.getElementById('inpMaterialMake').value = mat.make || '';
-  if (document.getElementById('inpMaterialType')) document.getElementById('inpMaterialType').value = mat.type || 'Parent';
-  if (document.getElementById('inpMaterialUcf')) document.getElementById('inpMaterialUcf').value = mat.ucf || '';
+  if (document.getElementById('inpMaterialHead')) document.getElementById('inpMaterialHead').value = mat.material_head || mat.materialHead || '';
+  if (document.getElementById('inpMaterialCategory')) document.getElementById('inpMaterialCategory').value = mat.material_category || mat.materialCategory || '';
+  if (document.getElementById('inpMaterialDescription')) document.getElementById('inpMaterialDescription').value = mat.material_description || mat.materialDescription || '';
+  if (document.getElementById('inpMaterialMake')) document.getElementById('inpMaterialMake').value = mat.company_name || mat.companyName || mat.make || '';
+  if (document.getElementById('inpMaterialType')) document.getElementById('inpMaterialType').value = mat.material_type || mat.materialType || mat.type || 'Parent';
+  if (document.getElementById('inpMaterialUcf')) document.getElementById('inpMaterialUcf').value = mat.uom || mat.ucf || '';
 
   if (document.getElementById('inpMaterialStatusToggle')) {
-    document.getElementById('inpMaterialStatusToggle').checked = !((mat.status || '').toLowerCase().includes('in'));
+    const st = mat.status || 'Active';
+    document.getElementById('inpMaterialStatusToggle').checked = !(st.toLowerCase().includes('in'));
   }
 
   setMaterialFormReadOnly(true);
-  showToast(`Viewing material details: ${mat.materialHead}`);
+  showToast(`Viewing material details: ${headVal}`);
 };
 
 // Material Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnMaterialsCardEditToggle')?.addEventListener('click', () => {
-    let mat = indusProductMaterialsData.find(m => m.id === currentViewedMaterialId);
-    if (!mat) mat = indusProductMaterialsData[0];
+  document.getElementById('btnMaterialsCardEditToggle')?.addEventListener('click', async () => {
+    let mat = indusProductMaterialsData.find(m => String(m.item_material_id) === String(currentViewedMaterialId) || String(m.id) === String(currentViewedMaterialId));
     const imgIcon = document.getElementById('imgMaterialsCardEditIcon');
 
     if (!isMaterialFormEditing) {
@@ -22457,31 +23096,77 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setMaterialFormReadOnly(false);
       const lblTitle = document.getElementById('lblMaterialsCardTitle');
-      if (lblTitle && mat) lblTitle.innerText = mat.materialHead || 'Material Head';
+      if (lblTitle && mat) lblTitle.innerText = mat.material_head || mat.materialHead || 'Material Head';
       showToast('Edit mode enabled for material');
     } else {
       // Save Mode
-      if (mat) {
-        mat.materialHead = document.getElementById('inpMaterialHead')?.value || mat.materialHead;
-        mat.materialCategory = document.getElementById('inpMaterialCategory')?.value || mat.materialCategory;
-        mat.materialDescription = document.getElementById('inpMaterialDescription')?.value || mat.materialDescription;
-        mat.make = document.getElementById('inpMaterialMake')?.value || mat.make;
-        mat.type = document.getElementById('inpMaterialType')?.value || mat.type;
-        mat.ucf = document.getElementById('inpMaterialUcf')?.value || mat.ucf;
-        const statusChk = document.getElementById('inpMaterialStatusToggle');
-        if (statusChk) mat.status = statusChk.checked ? 'Active' : 'In - Active';
+      const materialHead = document.getElementById('inpMaterialHead')?.value?.trim() || '';
+      const materialCategory = document.getElementById('inpMaterialCategory')?.value?.trim() || '';
+      const materialDescription = document.getElementById('inpMaterialDescription')?.value?.trim() || '';
+      const make = document.getElementById('inpMaterialMake')?.value?.trim() || '';
+      const typeSelect = document.getElementById('inpMaterialType');
+      const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
+      const ucf = document.getElementById('inpMaterialUcf')?.value?.trim() || '';
+      const materialStatusToggle = document.getElementById('inpMaterialStatusToggle');
+      const status = (materialStatusToggle && materialStatusToggle.checked) ? "Active" : "In - Active";
+
+      if (!materialHead) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Material Head.', 'Validation Error');
+        } else {
+          showToast('Please enter Material Head');
+        }
+        return;
       }
-      isMaterialFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
+
+      if (!materialCategory) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Material Category.', 'Validation Error');
+        } else {
+          showToast('Please enter Material Category');
+        }
+        return;
       }
-      setMaterialFormReadOnly(true);
-      const lblTitle = document.getElementById('lblMaterialsCardTitle');
-      if (lblTitle && mat) lblTitle.innerText = mat.materialHead || 'Material Head';
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('Material details updated successfully!');
+
+      const updatePayload = {
+        customer_name: getActiveGbpaCustomerName(),
+        material_head: materialHead,
+        material_category: materialCategory,
+        material_description: materialDescription,
+        material_type: type,
+        uom: ucf,
+        status: status,
+        company_name: make || null,
+        material_code: make || materialHead
+      };
+
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials && currentViewedMaterialId) {
+          await NexusApi.indusGbpaMaterials.update(currentViewedMaterialId, updatePayload);
+        }
+        isMaterialFormEditing = false;
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        setMaterialFormReadOnly(true);
+        const lblTitle = document.getElementById('lblMaterialsCardTitle');
+        if (lblTitle) lblTitle.innerText = materialHead;
+        await fetchGbpaMaterials(true);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('GBPA material updated successfully!', 'Task Completed');
+        } else {
+          showToast('GBPA material updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update GBPA material:', err);
+        const errMsg = err.detail || err.message || 'Failed to update GBPA material.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(errMsg, 'Database Error');
+        } else {
+          showToast(errMsg);
+        }
+      }
     }
   });
 });
@@ -22522,20 +23207,25 @@ function setProductExpenseFormReadOnly(isReadOnly) {
   });
 }
 
-window.openViewGbpaExpenseCard = function(expId) {
-  let exp = indusProductExpensesData.find(e => e.id === expId || e.expenseHead === expId);
+window.openViewGbpaExpenseCard = async function(expId) {
+  let exp = indusProductExpensesData.find(e => String(e.item_expense_id) === String(expId) || String(e.id) === String(expId) || e.expense_head === expId || e.expenseHead === expId);
+  if (!exp && expId && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
+    try {
+      exp = await NexusApi.indusGbpaExpenses.getById(expId);
+    } catch (err) {
+      console.warn('Could not fetch expense by ID from API:', err);
+    }
+  }
   if (!exp) {
-    exp = indusProductExpensesData[0] || {
-      id: expId || 'exp-1',
-      expenseHead: "Tower Installation Labour",
-      expenseCategory: "Labour",
-      expenseDescription: "Tower erection charges",
-      type: "Parent",
-      status: "Active"
-    };
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('GBPA expense record not found.', 'Not Found');
+    } else {
+      showToast('GBPA expense record not found.');
+    }
+    return;
   }
 
-  currentViewedGbpaExpenseId = exp.id;
+  currentViewedGbpaExpenseId = exp.item_expense_id || exp.id;
   isGbpaExpenseFormEditing = false;
   openSideForm();
 
@@ -22545,8 +23235,9 @@ window.openViewGbpaExpenseCard = function(expId) {
   const card = document.getElementById('addProductExpenseCard');
   if (card) card.style.display = 'block';
 
+  const headVal = exp.expense_head || exp.expenseHead || 'Expense Head';
   const lblTitle = document.getElementById('lblProductExpenseCardTitle');
-  if (lblTitle) lblTitle.innerText = exp.expenseHead || 'Expense Head';
+  if (lblTitle) lblTitle.innerText = headVal;
 
   const btnEditToggle = document.getElementById('btnProductExpenseCardEditToggle');
   const imgEditIcon = document.getElementById('imgProductExpenseCardEditIcon');
@@ -22559,24 +23250,24 @@ window.openViewGbpaExpenseCard = function(expId) {
   const btnSaveWrap = document.querySelector('#frmAddProductExpense .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpProdExpenseHead')) document.getElementById('inpProdExpenseHead').value = exp.expenseHead || '';
-  if (document.getElementById('inpProdExpenseCategory')) document.getElementById('inpProdExpenseCategory').value = exp.expenseCategory || '';
-  if (document.getElementById('inpProdExpenseDescription')) document.getElementById('inpProdExpenseDescription').value = exp.expenseDescription || '';
-  if (document.getElementById('inpProdExpenseType')) document.getElementById('inpProdExpenseType').value = exp.type || 'Parent';
+  if (document.getElementById('inpProdExpenseHead')) document.getElementById('inpProdExpenseHead').value = exp.expense_head || exp.expenseHead || '';
+  if (document.getElementById('inpProdExpenseCategory')) document.getElementById('inpProdExpenseCategory').value = exp.expense_category || exp.expenseCategory || '';
+  if (document.getElementById('inpProdExpenseDescription')) document.getElementById('inpProdExpenseDescription').value = exp.expense_description || exp.expenseDescription || '';
+  if (document.getElementById('inpProdExpenseType')) document.getElementById('inpProdExpenseType').value = exp.expense_type || exp.expenseType || exp.type || 'Parent';
 
   if (document.getElementById('inpProdExpenseStatusToggle')) {
-    document.getElementById('inpProdExpenseStatusToggle').checked = !((exp.status || '').toLowerCase().includes('in'));
+    const st = exp.status || 'Active';
+    document.getElementById('inpProdExpenseStatusToggle').checked = !(st.toLowerCase().includes('in'));
   }
 
   setProductExpenseFormReadOnly(true);
-  showToast(`Viewing expense details: ${exp.expenseHead}`);
+  showToast(`Viewing expense details: ${headVal}`);
 };
 
 // Expense Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnProductExpenseCardEditToggle')?.addEventListener('click', () => {
-    let exp = indusProductExpensesData.find(e => e.id === currentViewedGbpaExpenseId);
-    if (!exp) exp = indusProductExpensesData[0];
+  document.getElementById('btnProductExpenseCardEditToggle')?.addEventListener('click', async () => {
+    let exp = indusProductExpensesData.find(e => String(e.item_expense_id) === String(currentViewedGbpaExpenseId) || String(e.id) === String(currentViewedGbpaExpenseId));
     const imgIcon = document.getElementById('imgProductExpenseCardEditIcon');
 
     if (!isGbpaExpenseFormEditing) {
@@ -22588,29 +23279,73 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setProductExpenseFormReadOnly(false);
       const lblTitle = document.getElementById('lblProductExpenseCardTitle');
-      if (lblTitle && exp) lblTitle.innerText = exp.expenseHead || 'Expense Head';
+      if (lblTitle && exp) lblTitle.innerText = exp.expense_head || exp.expenseHead || 'Expense Head';
       showToast('Edit mode enabled for expense');
     } else {
       // Save Mode
-      if (exp) {
-        exp.expenseHead = document.getElementById('inpProdExpenseHead')?.value || exp.expenseHead;
-        exp.expenseCategory = document.getElementById('inpProdExpenseCategory')?.value || exp.expenseCategory;
-        exp.expenseDescription = document.getElementById('inpProdExpenseDescription')?.value || exp.expenseDescription;
-        exp.type = document.getElementById('inpProdExpenseType')?.value || exp.type;
-        const statusChk = document.getElementById('inpProdExpenseStatusToggle');
-        if (statusChk) exp.status = statusChk.checked ? 'Active' : 'In - Active';
+      const expenseHead = document.getElementById('inpProdExpenseHead')?.value?.trim() || '';
+      const expenseCategory = document.getElementById('inpProdExpenseCategory')?.value?.trim() || '';
+      const expenseDescription = document.getElementById('inpProdExpenseDescription')?.value?.trim() || '';
+      const typeSelect = document.getElementById('inpProdExpenseType');
+      const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
+      const prodExpenseStatusToggle = document.getElementById('inpProdExpenseStatusToggle');
+      const status = (prodExpenseStatusToggle && prodExpenseStatusToggle.checked) ? "Active" : "In - Active";
+
+      if (!expenseHead) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Expense Head.', 'Validation Error');
+        } else {
+          showToast('Please enter Expense Head');
+        }
+        return;
       }
-      isGbpaExpenseFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
+
+      if (!expenseCategory) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Expense Category.', 'Validation Error');
+        } else {
+          showToast('Please enter Expense Category');
+        }
+        return;
       }
-      setProductExpenseFormReadOnly(true);
-      const lblTitle = document.getElementById('lblProductExpenseCardTitle');
-      if (lblTitle && exp) lblTitle.innerText = exp.expenseHead || 'Expense Head';
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('Expense details updated successfully!');
+
+      const updatePayload = {
+        customer_name: getActiveGbpaCustomerName(),
+        expense_head: expenseHead,
+        expense_category: expenseCategory,
+        expense_description: expenseDescription,
+        expense_type: type,
+        status: status,
+        expense_code: expenseHead
+      };
+
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses && currentViewedGbpaExpenseId) {
+          await NexusApi.indusGbpaExpenses.update(currentViewedGbpaExpenseId, updatePayload);
+        }
+        isGbpaExpenseFormEditing = false;
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        setProductExpenseFormReadOnly(true);
+        const lblTitle = document.getElementById('lblProductExpenseCardTitle');
+        if (lblTitle) lblTitle.innerText = expenseHead;
+        await fetchGbpaExpenses(true);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('GBPA expense updated successfully!', 'Task Completed');
+        } else {
+          showToast('GBPA expense updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update GBPA expense:', err);
+        const errMsg = err.detail || err.message || 'Failed to update GBPA expense.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(errMsg, 'Database Error');
+        } else {
+          showToast(errMsg);
+        }
+      }
     }
   });
 });
@@ -22664,20 +23399,25 @@ function setProductInfraFormReadOnly(isReadOnly, isEditMode = false) {
   });
 }
 
-window.openViewGbpaProductInfraCard = function(prodInfraId) {
-  let infra = indusProductInfraData.find(i => i.id === prodInfraId || i.infraCode === prodInfraId);
+window.openViewGbpaProductInfraCard = async function(prodInfraId) {
+  let infra = indusProductInfraData.find(i => String(i.item_infrastructure_id) === String(prodInfraId) || String(i.id) === String(prodInfraId) || i.infra_code === prodInfraId || i.infraCode === prodInfraId);
+  if (!infra && prodInfraId && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra) {
+    try {
+      infra = await NexusApi.indusGbpaInfra.getById(prodInfraId);
+    } catch (err) {
+      console.warn('Could not fetch infrastructure by ID from API:', err);
+    }
+  }
   if (!infra) {
-    infra = indusProductInfraData[0] || {
-      id: prodInfraId || 'prod-infra-1',
-      infraCode: "230510678",
-      infraCategory: "DG Set",
-      infraDescription: "15kVA Silent Diesel Generator Set",
-      type: "Parent",
-      status: "Active"
-    };
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('GBPA infrastructure record not found.', 'Not Found');
+    } else {
+      showToast('GBPA infrastructure record not found.');
+    }
+    return;
   }
 
-  currentViewedProductInfraId = infra.id;
+  currentViewedProductInfraId = infra.item_infrastructure_id || infra.id;
   isProductInfraFormEditing = false;
   openSideForm();
 
@@ -22687,8 +23427,9 @@ window.openViewGbpaProductInfraCard = function(prodInfraId) {
   const card = document.getElementById('addProductInfraCard');
   if (card) card.style.display = 'block';
 
+  const catVal = infra.infra_category || infra.infraCategory || 'Infra Category';
   const lblTitle = document.getElementById('lblProductInfraCardTitle');
-  if (lblTitle) lblTitle.innerText = infra.infraCategory || 'Infra Category';
+  if (lblTitle) lblTitle.innerText = catVal;
 
   const btnEditToggle = document.getElementById('btnProductInfraCardEditToggle');
   const imgEditIcon = document.getElementById('imgProductInfraCardEditIcon');
@@ -22701,24 +23442,24 @@ window.openViewGbpaProductInfraCard = function(prodInfraId) {
   const btnSaveWrap = document.querySelector('#frmAddProductInfra .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpProdInfraCode')) document.getElementById('inpProdInfraCode').value = infra.infraCode || '';
-  if (document.getElementById('inpProdInfraCategory')) document.getElementById('inpProdInfraCategory').value = infra.infraCategory || '';
-  if (document.getElementById('inpProdInfraDescription')) document.getElementById('inpProdInfraDescription').value = infra.infraDescription || '';
-  if (document.getElementById('inpProdInfraType')) document.getElementById('inpProdInfraType').value = infra.type || 'Parent';
+  if (document.getElementById('inpProdInfraCode')) document.getElementById('inpProdInfraCode').value = infra.infra_code || infra.infraCode || '';
+  if (document.getElementById('inpProdInfraCategory')) document.getElementById('inpProdInfraCategory').value = infra.infra_category || infra.infraCategory || '';
+  if (document.getElementById('inpProdInfraDescription')) document.getElementById('inpProdInfraDescription').value = infra.infra_description || infra.infraDescription || '';
+  if (document.getElementById('inpProdInfraType')) document.getElementById('inpProdInfraType').value = infra.infra_type || infra.infraType || infra.type || 'Parent';
 
   if (document.getElementById('inpProdInfraStatusToggle')) {
-    document.getElementById('inpProdInfraStatusToggle').checked = !((infra.status || '').toLowerCase().includes('in'));
+    const st = infra.status || 'Active';
+    document.getElementById('inpProdInfraStatusToggle').checked = !(st.toLowerCase().includes('in'));
   }
 
   setProductInfraFormReadOnly(true);
-  showToast(`Viewing product infra details: ${infra.infraCategory || infra.infraDescription}`);
+  showToast(`Viewing product infra details: ${catVal}`);
 };
 
 // Product Infra Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnProductInfraCardEditToggle')?.addEventListener('click', () => {
-    let infra = indusProductInfraData.find(i => i.id === currentViewedProductInfraId);
-    if (!infra) infra = indusProductInfraData[0];
+  document.getElementById('btnProductInfraCardEditToggle')?.addEventListener('click', async () => {
+    let infra = indusProductInfraData.find(i => String(i.item_infrastructure_id) === String(currentViewedProductInfraId) || String(i.id) === String(currentViewedProductInfraId));
     const imgIcon = document.getElementById('imgProductInfraCardEditIcon');
 
     if (!isProductInfraFormEditing) {
@@ -22730,27 +23471,57 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setProductInfraFormReadOnly(false, true);
       const lblTitle = document.getElementById('lblProductInfraCardTitle');
-      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
+      if (lblTitle && infra) lblTitle.innerText = infra.infra_category || infra.infraCategory || 'Infra Category';
       showToast('Edit mode enabled for product infra');
     } else {
       // Save Mode
-      if (infra) {
-        infra.infraDescription = document.getElementById('inpProdInfraDescription')?.value || infra.infraDescription;
-        infra.type = document.getElementById('inpProdInfraType')?.value || infra.type;
-        const statusChk = document.getElementById('inpProdInfraStatusToggle');
-        if (statusChk) infra.status = statusChk.checked ? 'Active' : 'In - Active';
+      const infraCode = document.getElementById('inpProdInfraCode')?.value?.trim() || '';
+      const infraCategory = document.getElementById('inpProdInfraCategory')?.value?.trim() || '';
+      const infraDescription = document.getElementById('inpProdInfraDescription')?.value?.trim() || '';
+      const typeSelect = document.getElementById('inpProdInfraType');
+      const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
+      const prodInfraStatusToggle = document.getElementById('inpProdInfraStatusToggle');
+      const status = (prodInfraStatusToggle && prodInfraStatusToggle.checked) ? "Active" : "In - Active";
+
+      const updatePayload = {
+        customer_name: getActiveGbpaCustomerName(),
+        infra_code: infraCode,
+        infra_category: infraCategory,
+        infra_description: infraDescription,
+        infra_type: type,
+        status: status
+      };
+
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra && currentViewedProductInfraId) {
+          await NexusApi.indusGbpaInfra.update(currentViewedProductInfraId, updatePayload);
+        }
+        isProductInfraFormEditing = false;
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        setProductInfraFormReadOnly(true);
+        const lblTitle = document.getElementById('lblProductInfraCardTitle');
+        if (lblTitle) lblTitle.innerText = infraCategory;
+        await fetchGbpaInfra(true);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('GBPA infrastructure updated successfully!', 'Task Completed');
+        } else {
+          showToast('GBPA infrastructure updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update GBPA infrastructure:', err);
+        const isConflict = err.isConflict || (err.statusCode === 409) || (err.message && err.message.toLowerCase().includes('already exists'));
+        const errMsg = isConflict
+          ? 'This Infra Code already exists. Please use a unique Infra Code.'
+          : (err.detail || err.message || 'Failed to update GBPA infrastructure.');
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(errMsg, isConflict ? 'Validation Error' : 'Database Error');
+        } else {
+          showToast(errMsg);
+        }
       }
-      isProductInfraFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
-      }
-      setProductInfraFormReadOnly(true);
-      const lblTitle = document.getElementById('lblProductInfraCardTitle');
-      if (lblTitle && infra) lblTitle.innerText = infra.infraCategory || 'Infra Category';
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('Product Infra details updated successfully!');
     }
   });
 });
@@ -22810,24 +23581,33 @@ function setEshFormReadOnly(isReadOnly, isEditMode = false) {
   });
 }
 
-window.openViewEshTraineeCard = function(traineeId) {
-  let trainee = indusEshData.find(t => t.id === traineeId || t.name === traineeId);
+window.openViewEshTraineeCard = async function(traineeId) {
+  let trainee = indusEshData.find(t => String(t.id) === String(traineeId) || t.name === traineeId);
+  
+  if (!trainee && traineeId && typeof NexusApi !== 'undefined' && NexusApi.indusEsh) {
+    try {
+      trainee = await NexusApi.indusEsh.getById(traineeId);
+    } catch (err) {
+      console.warn('Could not fetch ESH trainee by ID:', err);
+    }
+  }
+
   if (!trainee) {
-    trainee = indusEshData[0] || {
-      id: traineeId || 'esh-1',
-      name: "Ramesh Kumar",
-      employeeType: "On-Roll",
-      serviceVendorName: "Indus Towers Internal",
-      aadharNumber: "4532 8901 2345",
-      trainingType: "CHCTE",
-      trainingIdNumber: "TRN-IND-2026-081",
-      trainingAgency: "National Safety Council",
-      expiryDate: "15 - 08 - 2027",
-      status: "Active"
-    };
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('ESH trainee record could not be found.', 'Record Not Found');
+    } else {
+      showToast('ESH trainee record could not be found.');
+    }
+    return;
   }
 
   currentViewedEshId = trainee.id;
+  window.currentViewedEshId = currentViewedEshId;
+  const hdn = document.getElementById('hdnEshTraineeId');
+  if (hdn && currentViewedEshId) hdn.value = currentViewedEshId;
+  const frm = document.getElementById('frmAddEshTrainee');
+  if (frm && currentViewedEshId) frm.dataset.eshId = currentViewedEshId;
+
   isEshFormEditing = false;
   openSideForm();
 
@@ -22851,14 +23631,23 @@ window.openViewEshTraineeCard = function(traineeId) {
   const btnSaveWrap = document.querySelector('#frmAddEshTrainee .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpEshEmployeeType')) document.getElementById('inpEshEmployeeType').value = trainee.employeeType || 'On-Roll';
-  if (document.getElementById('inpEshServiceVendorName')) document.getElementById('inpEshServiceVendorName').value = trainee.serviceVendorName || '';
-  if (document.getElementById('inpEshEmployeeName')) document.getElementById('inpEshEmployeeName').value = trainee.name || '';
-  if (document.getElementById('inpEshAadharNumber')) document.getElementById('inpEshAadharNumber').value = trainee.aadharNumber || '';
-  if (document.getElementById('inpEshTrainingType')) document.getElementById('inpEshTrainingType').value = trainee.trainingType || 'CHCTE';
-  if (document.getElementById('inpEshTrainingIdNumber')) document.getElementById('inpEshTrainingIdNumber').value = trainee.trainingIdNumber || '';
-  if (document.getElementById('inpEshTrainingAgency')) document.getElementById('inpEshTrainingAgency').value = trainee.trainingAgency || '';
-  if (document.getElementById('inpEshExpiryDate')) document.getElementById('inpEshExpiryDate').value = trainee.expiryDate || '';
+  const empType = trainee.employee_type || trainee.employeeType || 'On-Roll';
+  const vendName = trainee.service_vendor_name || trainee.serviceVendorName || (empType === 'Service Vendor' ? trainee.company_name : '') || '';
+  const empName = trainee.name || '';
+  const aadhar = trainee.aadhar_number || trainee.aadharNumber || '';
+  const trnType = trainee.training_type || trainee.trainingType || 'CHCTE';
+  const trnId = trainee.training_id_number || trainee.trainingIdNumber || '';
+  const agency = trainee.training_agency || trainee.trainingAgency || '';
+  const expDate = trainee.expiry_date || trainee.expiryDate || '';
+
+  if (document.getElementById('inpEshEmployeeType')) document.getElementById('inpEshEmployeeType').value = empType;
+  if (document.getElementById('inpEshServiceVendorName')) document.getElementById('inpEshServiceVendorName').value = vendName;
+  if (document.getElementById('inpEshEmployeeName')) document.getElementById('inpEshEmployeeName').value = empName;
+  if (document.getElementById('inpEshAadharNumber')) document.getElementById('inpEshAadharNumber').value = aadhar;
+  if (document.getElementById('inpEshTrainingType')) document.getElementById('inpEshTrainingType').value = trnType;
+  if (document.getElementById('inpEshTrainingIdNumber')) document.getElementById('inpEshTrainingIdNumber').value = trnId;
+  if (document.getElementById('inpEshTrainingAgency')) document.getElementById('inpEshTrainingAgency').value = agency;
+  if (document.getElementById('inpEshExpiryDate')) document.getElementById('inpEshExpiryDate').value = expDate;
 
   if (document.getElementById('inpEshStatusToggle')) {
     document.getElementById('inpEshStatusToggle').checked = !((trainee.status || '').toLowerCase().includes('in'));
@@ -22867,16 +23656,45 @@ window.openViewEshTraineeCard = function(traineeId) {
   setEshFormReadOnly(true);
   // Apply field visibility based on employee type (Service Vendor shows only vendor name)
   if (typeof updateEshFormByEmployeeType === 'function') {
-    updateEshFormByEmployeeType(trainee.employeeType || 'On-Roll');
+    updateEshFormByEmployeeType(empType);
   }
   showToast(`Viewing trainee details: ${trainee.name}`);
 };
 
 // Trainee Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btnEshTraineeCardEditToggle')?.addEventListener('click', () => {
-    let trainee = indusEshData.find(t => t.id === currentViewedEshId);
-    if (!trainee) trainee = indusEshData[0];
+  document.getElementById('btnEshTraineeCardEditToggle')?.addEventListener('click', async () => {
+    let targetId = currentViewedEshId ||
+                   document.getElementById('hdnEshTraineeId')?.value ||
+                   document.getElementById('frmAddEshTrainee')?.dataset?.eshId;
+
+    if (!targetId || isNaN(Number(targetId))) {
+      const curName = document.getElementById('inpEshEmployeeName')?.value?.trim() ||
+                      document.getElementById('inpEshServiceVendorName')?.value?.trim() ||
+                      document.getElementById('lblEshTraineeCardTitle')?.innerText?.trim();
+      let found = indusEshData.find(t => t.name === curName);
+      if (found && found.id) {
+        targetId = found.id;
+      } else if (typeof NexusApi !== 'undefined' && NexusApi.indusEsh) {
+        try {
+          const resp = await NexusApi.indusEsh.getAll({ company_name: 'Indus Tower Ltd', search: curName, page: 1, page_size: 5 });
+          if (resp && resp.items && resp.items.length > 0) {
+            targetId = resp.items[0].id;
+          }
+        } catch (e) {
+          console.warn('Could not lookup ESH record ID:', e);
+        }
+      }
+    }
+
+    if (targetId) {
+      currentViewedEshId = targetId;
+      window.currentViewedEshId = targetId;
+      const hdn = document.getElementById('hdnEshTraineeId');
+      if (hdn) hdn.value = targetId;
+    }
+
+    let trainee = indusEshData.find(t => String(t.id) === String(targetId));
     const imgIcon = document.getElementById('imgEshTraineeCardEditIcon');
 
     if (!isEshFormEditing) {
@@ -22892,70 +23710,134 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Edit mode enabled for trainee details');
     } else {
       // Save Mode
-      if (trainee) {
-        trainee.employeeType = document.getElementById('inpEshEmployeeType')?.value || trainee.employeeType;
-        trainee.serviceVendorName = document.getElementById('inpEshServiceVendorName')?.value || trainee.serviceVendorName;
-        trainee.name = document.getElementById('inpEshEmployeeName')?.value || trainee.name;
-        trainee.aadharNumber = document.getElementById('inpEshAadharNumber')?.value || trainee.aadharNumber;
-        trainee.trainingType = document.getElementById('inpEshTrainingType')?.value || trainee.trainingType;
-        trainee.trainingIdNumber = document.getElementById('inpEshTrainingIdNumber')?.value || trainee.trainingIdNumber;
-        trainee.trainingAgency = document.getElementById('inpEshTrainingAgency')?.value || trainee.trainingAgency;
-        trainee.expiryDate = document.getElementById('inpEshExpiryDate')?.value || trainee.expiryDate;
-        const statusChk = document.getElementById('inpEshStatusToggle');
-        if (statusChk) trainee.status = statusChk.checked ? 'Active' : 'In - Active';
+      const empType = document.getElementById('inpEshEmployeeType')?.value || 'On-Roll';
+      const vendName = document.getElementById('inpEshServiceVendorName')?.value?.trim() || '';
+      let empName = document.getElementById('inpEshEmployeeName')?.value?.trim() || '';
+      if (empType === 'Service Vendor' && !empName) {
+        empName = vendName;
       }
-      isEshFormEditing = false;
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
+
+      if (!empName) {
+        const msg = empType === 'Service Vendor' ? 'Please enter Service Vendor Name.' : 'Please enter Employee Name.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(msg, 'Validation Error');
+        } else {
+          showToast(msg);
+        }
+        return;
       }
-      setEshFormReadOnly(true);
-      // Reapply field layout based on saved employee type
-      if (trainee && typeof updateEshFormByEmployeeType === 'function') {
-        updateEshFormByEmployeeType(trainee.employeeType || 'On-Roll');
+
+      const aadhar = document.getElementById('inpEshAadharNumber')?.value?.trim() || '';
+      const trnType = document.getElementById('inpEshTrainingType')?.value || 'CHCTE';
+      const trnId = document.getElementById('inpEshTrainingIdNumber')?.value?.trim() || '';
+      const agency = document.getElementById('inpEshTrainingAgency')?.value?.trim() || '';
+      const expDate = document.getElementById('inpEshExpiryDate')?.value?.trim() || '';
+      const statusChk = document.getElementById('inpEshStatusToggle');
+      const status = (statusChk && statusChk.checked) ? 'Active' : 'In - Active';
+
+      const updatePayload = {
+        name: empName,
+        employeeType: empType,
+        serviceVendorName: vendName,
+        companyName: empType === 'Service Vendor' ? (vendName || 'Indus Tower Ltd') : 'Indus Tower Ltd',
+        aadharNumber: aadhar,
+        trainingType: trnType,
+        trainingIdNumber: trnId,
+        trainingAgency: agency,
+        expiryDate: expDate,
+        status: status
+      };
+
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.indusEsh && targetId) {
+          await NexusApi.indusEsh.update(targetId, updatePayload);
+        } else if (targetId) {
+          const res = await fetch(`/api/v1/customer/indus/esh/${targetId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatePayload)
+          });
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            throw new Error(errJson.detail || 'Failed to update ESH details.');
+          }
+        } else {
+          throw new Error('Unable to identify the ESH record to update. Please reopen the record from the table.');
+        }
+
+        await fetchIndusEsh(true);
+
+        isEshFormEditing = false;
+        if (imgIcon) {
+          imgIcon.src = 'icons/Edit.svg';
+          imgIcon.title = 'Edit Info';
+        }
+        setEshFormReadOnly(true);
+        // Reapply field layout based on saved employee type
+        if (typeof updateEshFormByEmployeeType === 'function') {
+          updateEshFormByEmployeeType(empType);
+        }
+        const lblTitle = document.getElementById('lblEshTraineeCardTitle');
+        if (lblTitle) lblTitle.innerText = empName || 'View Trainee';
+        
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('ESH details updated successfully!', 'Task Completed');
+        } else {
+          showToast('ESH details updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update ESH details:', err);
+        const errMsg = err.detail || err.message || 'Failed to update ESH details. Please try again.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(errMsg, 'Database Error');
+        } else {
+          showToast(errMsg);
+        }
       }
-      const lblTitle = document.getElementById('lblEshTraineeCardTitle');
-      if (lblTitle && trainee) lblTitle.innerText = trainee.name || 'View Trainee';
-      loadIndusDataset();
-      applyFiltersAndRender();
-      showToast('Trainee details updated successfully!');
     }
   });
 
   // Add New Trainee Submit Button
-  document.getElementById('btnSubmitEshTrainee')?.addEventListener('click', (e) => {
+  document.getElementById('btnSubmitEshTrainee')?.addEventListener('click', async (e) => {
     e.preventDefault();
     const empType = document.getElementById('inpEshEmployeeType')?.value || 'On-Roll';
     const vendName = document.getElementById('inpEshServiceVendorName')?.value?.trim() || '';
-    let empName = document.getElementById('inpEshEmployeeName')?.value?.trim();
+    let empName = document.getElementById('inpEshEmployeeName')?.value?.trim() || '';
 
     if (empType === 'Service Vendor') {
       if (!vendName) {
-        showToast('Please enter Service Vendor Name');
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Service Vendor Name.', 'Validation Error');
+        } else {
+          showToast('Please enter Service Vendor Name.');
+        }
         return;
       }
-      // Use vendor name as the record name when no employee name
       if (!empName) empName = vendName;
     } else {
       if (!empName) {
-        showToast('Please enter Employee Name');
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Please enter Employee Name.', 'Validation Error');
+        } else {
+          showToast('Please enter Employee Name.');
+        }
         return;
       }
     }
 
     const aadhar = document.getElementById('inpEshAadharNumber')?.value?.trim() || '';
     const trnType = document.getElementById('inpEshTrainingType')?.value || 'CHCTE';
-    const trnId = document.getElementById('inpEshTrainingIdNumber')?.value?.trim() || `TRN-IND-2026-${String(indusEshData.length + 1).padStart(3, '0')}`;
+    const trnId = document.getElementById('inpEshTrainingIdNumber')?.value?.trim() || '';
     const agency = document.getElementById('inpEshTrainingAgency')?.value?.trim() || '';
-    const expDate = document.getElementById('inpEshExpiryDate')?.value?.trim() || '31 - 12 - 2027';
+    const expDate = document.getElementById('inpEshExpiryDate')?.value?.trim() || '';
     const stToggle = document.getElementById('inpEshStatusToggle');
     const status = (stToggle && stToggle.checked) ? 'Active' : 'In - Active';
 
-    const newRecord = {
-      id: `esh-${Date.now()}`,
+    const createPayload = {
       name: empName,
       employeeType: empType,
       serviceVendorName: vendName,
+      companyName: empType === 'Service Vendor' ? (vendName || 'Indus Tower Ltd') : 'Indus Tower Ltd',
       aadharNumber: aadhar,
       trainingType: trnType,
       trainingIdNumber: trnId,
@@ -22964,16 +23846,44 @@ document.addEventListener('DOMContentLoaded', () => {
       status: status
     };
 
-    indusEshData.unshift(newRecord);
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusEsh) {
+        await NexusApi.indusEsh.create(createPayload);
+      } else {
+        const res = await fetch('/api/v1/customer/indus/esh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(createPayload)
+        });
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          throw new Error(errJson.detail || 'Failed to save ESH details.');
+        }
+      }
 
-    const overlay = document.getElementById('sideFormOverlay');
-    if (overlay) overlay.style.display = 'none';
-    const card = document.getElementById('addEshTraineeCard');
-    if (card) card.style.display = 'none';
+      await fetchIndusEsh(true);
 
-    loadIndusDataset();
-    applyFiltersAndRender();
-    showToast('New trainee added successfully!');
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+      const card = document.getElementById('addEshTraineeCard');
+      if (card) card.style.display = 'none';
+      const frm = document.getElementById('frmAddEshTrainee');
+      if (frm) frm.reset();
+
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('ESH details added successfully!', 'Task Completed');
+      } else {
+        showToast('ESH details added successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to create ESH record:', err);
+      const errMsg = err.detail || err.message || 'Failed to add ESH details. Please try again.';
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(errMsg, 'Database Error');
+      } else {
+        showToast(errMsg);
+      }
+    }
   });
 
   // Close ESH Trainee Form Button
@@ -23625,10 +24535,30 @@ function exportToCsv() {
   if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'infra') {
       headers = ["Infra Category", "Infra Description", "Uom", "Make", "Commissioning", "I - Map", "Status"];
-      rows = filteredDataset.map(r => [r.infraCategory, r.infraDescription, r.uom, r.make, r.commissioning, r.iMap, r.status]);
+      rows = filteredDataset.map(r => [
+        r.infra_category || r.infraCategory || '',
+        r.infra_description || r.infraDescription || '',
+        r.uom || '',
+        r.make || '',
+        r.commissioning || '',
+        r.i_map || r.iMap || '',
+        r.status || ''
+      ]);
     } else if (currentIndusSubpage === 'products') {
       headers = ["Item Code", "Product Name", "Product Type", "Product Description", "HSN / SAC Type", "HSN / SAC Code", "Active Rate", "Budget %", "Budget Amount", "Status"];
       rows = filteredDataset.map(r => [r.itemCode, r.productName, r.productType, r.productDescription, r.hsnSacType, r.hsnSacCode, r.activeRate, r.budgetPercent, r.budgetAmount, r.status]);
+    } else if (currentIndusSubpage === 'esh') {
+      headers = ["Name", "Employee Type", "Aadhar Number", "Training Type", "Training ID Number", "Training Agency", "Expiry Date", "Status"];
+      rows = filteredDataset.map(r => [
+        r.name || '',
+        r.employee_type || r.employeeType || '',
+        r.aadhar_number || r.aadharNumber || '',
+        r.training_type || r.trainingType || '',
+        r.training_id_number || r.trainingIdNumber || '',
+        r.training_agency || r.trainingAgency || '',
+        r.expiry_date || r.expiryDate || '',
+        r.status || 'Active'
+      ]);
     } else {
       headers = ["Circle", "Site ID", "WH ID", "Site Name", "District", "Town", "Lattitude", "Longtitude", "Transport Zone", "Status"];
       rows = filteredDataset.map(r => [r.circle, r.siteId, r.whId, r.siteName, r.district, r.town, r.latitude, r.longitude, r.transportZone, r.status]);
@@ -25768,19 +26698,17 @@ window.openViewCustomerCard = function(rowId) {
 // ==========================================================================
 // SITE CONTACT DETAILS POPUP & ADD FORM
 // ==========================================================================
-let siteDefaultContacts = [
-  { id: "SC-01", name: "Suresh Narayanan", designation: "Site Engineer", mobile: "+91 98401 12345", email: "suresh.n@indus.com", status: "Active" },
-  { id: "SC-02", name: "Kavitha Raman", designation: "Operations Officer", mobile: "+91 98402 23456", email: "kavitha.r@indus.com", status: "Active" },
-  { id: "SC-03", name: "Rajesh Kannan", designation: "Field Supervisor", mobile: "+91 98403 34567", email: "rajesh.k@indus.com", status: "Active" },
-  { id: "SC-04", name: "Dinesh Kumar", designation: "Technical Lead", mobile: "+91 98404 45678", email: "dinesh.k@indus.com", status: "In - Active" }
-];
-
+// ==========================================================================
+// SITE CONTACT DETAILS POPUP & ADD FORM
+// ==========================================================================
+let siteCurrentContactsList = [];
+let draftSiteContacts = [];
 let activeSiteContactFilters = {};
 let currentSiteContactFilterCol = null;
 let currentEditingContactId = null;
 let isViewSiteContactEditing = false;
 
-window.openSiteContactModal = function() {
+window.openSiteContactModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -25789,6 +26717,22 @@ window.openSiteContactModal = function() {
   if (legacyContact) legacyContact.style.display = 'none';
   const legacyLocation = document.getElementById('locationDetailsSidePanel');
   if (legacyLocation) legacyLocation.style.display = 'none';
+
+  // Clear filters & stale contact list
+  activeSiteContactFilters = {};
+  siteCurrentContactsList = [];
+
+  const activeSiteId = currentViewedSiteId || window.currentViewedSiteId;
+
+  // Populate from current viewed site synchronously first
+  if (activeSiteId) {
+    const cachedSite = indusSiteData.find(s => String(s.id) === String(activeSiteId) || String(s.site_id) === String(activeSiteId) || s.site_code === activeSiteId || s.siteId === activeSiteId);
+    if (cachedSite && cachedSite.contacts && cachedSite.contacts.length > 0) {
+      siteCurrentContactsList = [...cachedSite.contacts];
+    }
+  } else {
+    siteCurrentContactsList = [...draftSiteContacts];
+  }
 
   // Hide other cards and open Site Contact Details Table Popup
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
@@ -25803,13 +26747,29 @@ window.openSiteContactModal = function() {
   }
   renderSiteContactTable();
   showToast('Opened Site Contact Details');
+
+  // Fetch fresh contacts from API for activeSiteId
+  if (activeSiteId && typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+    try {
+      const resp = await NexusApi.indusSites.getContacts(activeSiteId);
+      if (resp && resp.items) {
+        siteCurrentContactsList = resp.items;
+        renderSiteContactTable();
+      }
+    } catch (err) {
+      console.error('Failed to fetch site contacts:', err);
+    }
+  }
 };
+
+
 
 window.closeSiteContactModal = function() {
   const modal = document.getElementById('siteContactSidePanel');
   if (modal) modal.style.display = 'none';
+  const activeId = currentViewedSiteId || window.currentViewedSiteId;
   const siteCard = document.getElementById('addSiteCard');
-  if (siteCard && (currentViewedSiteId || siteCard.style.display !== 'none')) {
+  if (siteCard && (activeId || siteCard.style.display !== 'none')) {
     siteCard.style.display = 'block';
   } else {
     const overlay = document.getElementById('sideFormOverlay');
@@ -25817,21 +26777,21 @@ window.closeSiteContactModal = function() {
   }
 };
 
+
 window.openEditSiteContactCard = function(contactId) {
   currentEditingContactId = contactId;
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
-  let contact = null;
-  if (currentViewedSiteId) {
-    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
-    if (site && site.contacts) {
-      contact = site.contacts.find(c => c.id === contactId);
-    }
-  }
-  if (!contact) {
-    contact = siteDefaultContacts.find(c => c.id === contactId) || siteDefaultContacts[0];
-  }
+  const contact = siteCurrentContactsList.find(c => c.id === contactId) || {
+    id: contactId,
+    name: '',
+    designation: '',
+    contact: '',
+    contact_number: '',
+    email: '',
+    status: 'Active'
+  };
 
   // Hide all cards except viewSiteContactCard
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
@@ -25857,7 +26817,7 @@ window.openEditSiteContactCard = function(contactId) {
 
     if (inpName) { inpName.value = contact.name || ''; inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
     if (inpDesig) { inpDesig.value = contact.designation || ''; inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
-    if (inpMob) { inpMob.value = contact.mobile || contact.contact || ''; inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
+    if (inpMob) { inpMob.value = contact.mobile || contact.contact || contact.contact_number || ''; inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
     if (inpEmail) { inpEmail.value = contact.email || ''; inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
     if (stToggle) { stToggle.checked = !((contact.status || '').toLowerCase().includes('in')); stToggle.disabled = true; }
 
@@ -25890,7 +26850,7 @@ window.closeViewSiteContactModal = function() {
   }
 };
 
-window.toggleViewSiteContactEdit = function() {
+window.toggleViewSiteContactEdit = async function() {
   const imgIcon = document.getElementById('imgViewSiteContactEditIcon');
   const inpName = document.getElementById('inpViewSiteContactName');
   const inpDesig = document.getElementById('inpViewSiteContactDesig');
@@ -25911,7 +26871,6 @@ window.toggleViewSiteContactEdit = function() {
     }
     showToast('Contact details are now editable');
   } else {
-    isViewSiteContactEditing = false;
     const nameVal = inpName?.value?.trim() || '';
     const desigVal = inpDesig?.value?.trim() || '';
     const mobVal = inpMob?.value?.trim() || '';
@@ -25919,48 +26878,76 @@ window.toggleViewSiteContactEdit = function() {
     const statusVal = (stToggle && stToggle.checked) ? 'Active' : 'In - Active';
 
     if (currentViewedSiteId) {
-      const site = indusSiteData.find(s => s.id === currentViewedSiteId);
-      if (site) {
-        if (!site.contacts) site.contacts = JSON.parse(JSON.stringify(siteDefaultContacts));
-        let c = site.contacts.find(item => item.id === currentEditingContactId);
-        if (!c && site.contacts.length > 0) c = site.contacts[0];
-        if (c) {
-          c.name = nameVal;
-          c.designation = desigVal;
-          c.mobile = mobVal;
-          c.email = emailVal;
-          c.status = statusVal;
+      if (typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+        try {
+          const resp = await NexusApi.indusSites.saveContact(currentViewedSiteId, {
+            id: currentEditingContactId,
+            name: nameVal,
+            designation: desigVal,
+            contact: mobVal,
+            contact_number: mobVal,
+            email: emailVal,
+            status: statusVal
+          });
+          siteCurrentContactsList = (resp && resp.items) ? resp.items : [];
+          isViewSiteContactEditing = false;
+          if (inpName) { inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
+          if (inpDesig) { inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
+          if (inpMob) { inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
+          if (inpEmail) { inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
+          if (stToggle) { stToggle.disabled = true; }
+          if (imgIcon) {
+            imgIcon.src = 'icons/Edit.svg';
+            imgIcon.title = 'Edit Contact';
+          }
+          const lblTitle = document.getElementById('lblViewSiteContactCardTitle');
+          if (lblTitle && nameVal) lblTitle.innerText = nameVal;
+          renderSiteContactTable();
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup('Site contact details updated successfully!', 'Task Completed');
+          } else {
+            showToast('Site contact details updated successfully!');
+          }
+        } catch (err) {
+          console.error('Failed to update contact:', err);
+          const errMsg = err.detail || err.message || 'Failed to update contact.';
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(errMsg, 'Error Message!');
+          } else {
+            showToast(errMsg);
+          }
         }
       }
-    }
-    
-    // Also update default contacts if present
-    if (siteDefaultContacts.length > 0) {
-      let defC = siteDefaultContacts.find(item => item.id === currentEditingContactId);
-      if (!defC) defC = siteDefaultContacts[0];
-      if (defC) {
-        defC.name = nameVal;
-        defC.designation = desigVal;
-        defC.mobile = mobVal;
-        defC.email = emailVal;
-        defC.status = statusVal;
+    } else {
+      // Draft mode for new site
+      let c = draftSiteContacts.find(item => item.id === currentEditingContactId);
+      if (!c) {
+        c = { id: currentEditingContactId || `SC-${Date.now()}`, name: nameVal, designation: desigVal, contact: mobVal, contact_number: mobVal, email: emailVal, status: statusVal };
+        draftSiteContacts.push(c);
+      } else {
+        c.name = nameVal;
+        c.designation = desigVal;
+        c.contact = mobVal;
+        c.contact_number = mobVal;
+        c.email = emailVal;
+        c.status = statusVal;
       }
+      siteCurrentContactsList = [...draftSiteContacts];
+      isViewSiteContactEditing = false;
+      if (inpName) { inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
+      if (inpDesig) { inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
+      if (inpMob) { inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
+      if (inpEmail) { inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
+      if (stToggle) { stToggle.disabled = true; }
+      if (imgIcon) {
+        imgIcon.src = 'icons/Edit.svg';
+        imgIcon.title = 'Edit Contact';
+      }
+      const lblTitle = document.getElementById('lblViewSiteContactCardTitle');
+      if (lblTitle && nameVal) lblTitle.innerText = nameVal;
+      renderSiteContactTable();
+      showToast('Contact draft updated');
     }
-
-    const lblTitle = document.getElementById('lblViewSiteContactCardTitle');
-    if (lblTitle && nameVal) lblTitle.innerText = nameVal;
-
-    if (inpName) { inpName.setAttribute('readonly', 'true'); inpName.setAttribute('disabled', 'true'); inpName.style.background = '#f8fafc'; inpName.style.cursor = 'not-allowed'; }
-    if (inpDesig) { inpDesig.setAttribute('readonly', 'true'); inpDesig.setAttribute('disabled', 'true'); inpDesig.style.background = '#f8fafc'; inpDesig.style.cursor = 'not-allowed'; }
-    if (inpMob) { inpMob.setAttribute('readonly', 'true'); inpMob.setAttribute('disabled', 'true'); inpMob.style.background = '#f8fafc'; inpMob.style.cursor = 'not-allowed'; }
-    if (inpEmail) { inpEmail.setAttribute('readonly', 'true'); inpEmail.setAttribute('disabled', 'true'); inpEmail.style.background = '#f8fafc'; inpEmail.style.cursor = 'not-allowed'; }
-    if (stToggle) { stToggle.disabled = true; }
-    if (imgIcon) {
-      imgIcon.src = 'icons/Edit.svg';
-      imgIcon.title = 'Edit Contact';
-    }
-    renderSiteContactTable();
-    showToast('Site contact details saved & updated successfully!');
   }
 };
 
@@ -25968,18 +26955,7 @@ window.renderSiteContactTable = function() {
   const tbody = document.getElementById('tbodySiteContactDetails');
   if (!tbody) return;
 
-  let activeList = siteDefaultContacts;
-  if (currentViewedSiteId) {
-    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
-    if (site) {
-      if (!site.contacts || site.contacts.length === 0) {
-        site.contacts = JSON.parse(JSON.stringify(siteDefaultContacts));
-      }
-      activeList = site.contacts;
-    }
-  }
-
-  let filtered = [...activeList];
+  let filtered = [...siteCurrentContactsList];
 
   for (const [colKey, allowedSet] of Object.entries(activeSiteContactFilters)) {
     if (allowedSet && allowedSet instanceof Set) {
@@ -25998,7 +26974,7 @@ window.renderSiteContactTable = function() {
           <span style="color: #0454e4; text-decoration: none; cursor: pointer;">${row.name || ''}</span>
         </td>
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.mobile || row.contact || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.mobile || row.contact || row.contact_number || ''}</td>
         <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
@@ -26007,7 +26983,6 @@ window.renderSiteContactTable = function() {
     `;
   }).join('');
 
-  // Update filter button active states
   const btnName = document.getElementById('btnSiteContactNameFilter');
   if (btnName) {
     if (activeSiteContactFilters['name']) btnName.classList.add('has-active-filter');
@@ -26042,7 +27017,7 @@ window.closeAddSiteContactForm = function() {
   if (panel) panel.style.display = 'block';
 };
 
-window.saveSiteContact = function() {
+window.saveSiteContact = async function() {
   const name = document.getElementById('inpSiteContactName')?.value?.trim();
   const desig = document.getElementById('inpSiteContactDesig')?.value?.trim() || '';
   const mobile = document.getElementById('inpSiteContactMobile')?.value?.trim() || '';
@@ -26051,31 +27026,65 @@ window.saveSiteContact = function() {
   const status = isChecked ? 'Active' : 'In - Active';
 
   if (!name) {
-    showToast('Please enter Name');
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter Name.', 'Validation Error');
+    } else {
+      showToast('Please enter Name');
+    }
     return;
   }
 
-  const newId = `SC-${Date.now().toString().slice(-4)}`;
-  const newContact = {
-    id: newId,
-    name: name,
-    designation: desig,
-    mobile: mobile,
-    email: email,
-    status: status
-  };
-
   if (currentViewedSiteId) {
-    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
-    if (site) {
-      if (!site.contacts) site.contacts = [];
-      site.contacts.unshift(newContact);
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+      try {
+        const resp = await NexusApi.indusSites.saveContact(currentViewedSiteId, {
+          name: name,
+          designation: desig,
+          contact: mobile,
+          contact_number: mobile,
+          email: email,
+          status: status
+        });
+        siteCurrentContactsList = (resp && resp.items) ? resp.items : [];
+        renderSiteContactTable();
+        closeAddSiteContactForm();
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Contact added successfully!', 'Task Completed');
+        } else {
+          showToast('Contact added successfully!');
+        }
+      } catch (err) {
+        console.error('Error saving site contact:', err);
+        const errMsg = err.detail || err.message || 'Failed to add contact.';
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(errMsg, 'Error Message!');
+        } else {
+          showToast(errMsg);
+        }
+      }
+    }
+  } else {
+    // Draft mode
+    const newId = `SC-${Date.now().toString().slice(-4)}`;
+    const newContact = {
+      id: newId,
+      name: name,
+      designation: desig,
+      contact: mobile,
+      contact_number: mobile,
+      email: email,
+      status: status
+    };
+    draftSiteContacts.unshift(newContact);
+    siteCurrentContactsList = [...draftSiteContacts];
+    renderSiteContactTable();
+    closeAddSiteContactForm();
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Contact added successfully!', 'Task Completed');
+    } else {
+      showToast('Contact added successfully!');
     }
   }
-  siteDefaultContacts.unshift(newContact);
-  renderSiteContactTable();
-  closeAddSiteContactForm();
-  showToast('Contact added successfully!');
 };
 
 window.openSiteContactFilter = function(colKey, event) {
@@ -26089,13 +27098,8 @@ window.openSiteContactFilter = function(colKey, event) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  let activeList = siteDefaultContacts;
-  if (currentViewedSiteId) {
-    const site = indusSiteData.find(s => s.id === currentViewedSiteId);
-    if (site && site.contacts && site.contacts.length > 0) {
-      activeList = site.contacts;
-    }
-  }
+  let activeList = siteCurrentContactsList;
+
 
   const uniqueValues = Array.from(new Set(activeList.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
@@ -26145,8 +27149,9 @@ window.handleCustomerGstProcess = function() {
 let activeProjectTransportFilters = {};
 let currentProjectTransportFilterCol = null;
 let currentEditingTransportId = null;
+let isTransportInEditMode = false;
 
-window.openTransportDetailsSidePanel = function() {
+window.openTransportDetailsSidePanel = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -26158,7 +27163,7 @@ window.openTransportDetailsSidePanel = function() {
 
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'projectTypeDocSidePanel',
-   'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard'].forEach(id => {
+   'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard', 'addProjectActivityCard', 'projectActivitySidePanel', 'addProjectApprovalCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -26166,10 +27171,44 @@ window.openTransportDetailsSidePanel = function() {
   const tp = document.getElementById('transportDetailsSidePanel');
   if (tp) {
     tp.style.display = 'block';
-    renderProjectTransportTable();
   }
 
   overlay.style.display = 'flex';
+
+  // Data isolation: Clear previous transport data immediately
+  indusProjectTransportData = [];
+  activeProjectTransportFilters = {};
+  const tbody = document.getElementById('tbodyTransportDetails');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 24px;">Loading transport details...</td></tr>`;
+  }
+
+  // Fetch only this project's transports
+  if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+    try {
+      const resp = await NexusApi.indusProjects.getTransports({
+        company_name: 'Indus Tower Ltd',
+        project_type: window.currentViewedProjectType,
+        sub_project_type: window.currentViewedSubProjectType,
+        page: 1,
+        page_size: 500
+      });
+      const items = (resp && (resp.items || resp)) || [];
+      indusProjectTransportData = items.map(item => ({
+        id: item.customer_project_item_id || item.id,
+        itemCode: item.item_code || '',
+        itemDescription: item.item_description || '',
+        transportZone: item.transport_zone || '',
+        qty: item.qty || '',
+        status: item.status || 'Active'
+      }));
+    } catch (err) {
+      console.warn('Failed to load project transports:', err);
+      indusProjectTransportData = [];
+    }
+  }
+
+  renderProjectTransportTable();
 };
 
 window.renderProjectTransportTable = function() {
@@ -26256,7 +27295,7 @@ window.openAddProjectTransportForm = function() {
 };
 
 window.openEditProjectTransportForm = function(id) {
-  const item = indusProjectTransportData.find(t => t.id === id);
+  const item = indusProjectTransportData.find(t => String(t.id) === String(id));
   if (!item) return;
   currentEditingTransportId = id;
   isTransportInEditMode = false;
@@ -26346,7 +27385,7 @@ window.closeAddProjectTransportForm = function() {
   if (tp) tp.style.display = 'block';
 };
 
-window.saveProjectTransportRecord = function() {
+window.saveProjectTransportRecord = async function() {
   const codeVal = document.getElementById('inpProjectTransItemCode')?.value?.trim();
   const descVal = document.getElementById('inpProjectTransItemDesc')?.value?.trim();
   const zoneVal = document.getElementById('inpProjectTransZone')?.value?.trim();
@@ -26355,37 +27394,72 @@ window.saveProjectTransportRecord = function() {
   const statusVal = isActive ? 'Active' : 'In - Active';
 
   if (!codeVal) {
-    showToast('Please enter Item Code');
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter Item Code', 'Validation Error');
+    } else {
+      showToast('Please enter Item Code');
+    }
     return;
   }
 
   if (currentEditingTransportId) {
-    const item = indusProjectTransportData.find(t => t.id === currentEditingTransportId);
-    if (item) {
-      item.itemCode = codeVal;
-      item.itemDescription = descVal || codeVal;
-      item.transportZone = zoneVal || 'A';
-      item.qty = qtyVal || '1';
-      item.status = statusVal;
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+      try {
+        await NexusApi.indusProjects.updateTransport(currentEditingTransportId, {
+          item_code: codeVal,
+          item_description: descVal || codeVal,
+          transport_zone: zoneVal || 'A',
+          qty: qtyVal || '1',
+          status: statusVal
+        });
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Transport details updated successfully!', 'Task Completed');
+        } else {
+          showToast('Transport details updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update transport:', err);
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(err.message || 'Failed to update transport', 'Error');
+        } else {
+          showToast('Failed to update transport');
+        }
+      }
     }
-    showToast(`Transport item "${codeVal}" updated successfully!`);
   } else {
-    const newRecord = {
-      id: `transport-${Date.now()}`,
-      itemCode: codeVal,
-      itemDescription: descVal || codeVal,
-      transportZone: zoneVal || 'A',
-      qty: qtyVal || '1',
-      status: statusVal
-    };
-    indusProjectTransportData.unshift(newRecord);
-    showToast(`Additional Transport "${codeVal}" added successfully!`);
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+      try {
+        await NexusApi.indusProjects.createTransport({
+          company_name: 'Indus Tower Ltd',
+          customer_name: 'Indus Tower Ltd',
+          project_type: window.currentViewedProjectType,
+          sub_project_type: window.currentViewedSubProjectType,
+          item_code: codeVal,
+          item_description: descVal || codeVal,
+          transport_zone: zoneVal || 'A',
+          qty: qtyVal || '1',
+          status: statusVal
+        });
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Transport details added successfully!', 'Task Completed');
+        } else {
+          showToast('Transport details added successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to create transport:', err);
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(err.message || 'Failed to create transport', 'Error');
+        } else {
+          showToast('Failed to create transport');
+        }
+      }
+    }
   }
 
   currentEditingTransportId = null;
   isTransportInEditMode = false;
-  renderProjectTransportTable();
   closeAddProjectTransportForm();
+  await openTransportDetailsSidePanel();
 };
 
 window.openProjectTransportFilter = function(colKey, event) {
@@ -26435,15 +27509,12 @@ window.openProjectTransportFilter = function(colKey, event) {
   if (searchInput) searchInput.focus();
 };
 
-let indusProjectActivityData = [
-  { id: "act-1", stage: "KTN", activity: "Site Survey & Soil Analysis", days: "2" },
-  { id: "act-2", stage: "KK", activity: "Civil Foundation & Tower Assembly", days: "5" }
-];
+let indusProjectActivityData = [];
 let activeProjectActivityFilters = {};
 let currentProjectActivityFilterCol = null;
 let currentEditingActivityId = null;
 
-window.openProjectActivitySidePanel = function() {
+window.openProjectActivitySidePanel = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -26455,7 +27526,7 @@ window.openProjectActivitySidePanel = function() {
 
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'projectTypeDocSidePanel',
-   'transportDetailsSidePanel', 'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard', 'addProjectActivityCard'].forEach(id => {
+   'transportDetailsSidePanel', 'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard', 'addProjectActivityCard', 'addProjectApprovalCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -26463,10 +27534,42 @@ window.openProjectActivitySidePanel = function() {
   const ap = document.getElementById('projectActivitySidePanel');
   if (ap) {
     ap.style.display = 'block';
-    renderProjectActivityTable();
   }
 
   overlay.style.display = 'flex';
+
+  // Data isolation: Clear previous activity data immediately
+  indusProjectActivityData = [];
+  activeProjectActivityFilters = {};
+  const tbody = document.getElementById('tbodyProjectActivityDetails');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 24px;">Loading activity details...</td></tr>`;
+  }
+
+  // Fetch only this project's activities
+  if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+    try {
+      const resp = await NexusApi.indusProjects.getActivities({
+        company_name: 'Indus Tower Ltd',
+        project_type: window.currentViewedProjectType,
+        sub_project_type: window.currentViewedSubProjectType,
+        page: 1,
+        page_size: 500
+      });
+      const items = (resp && (resp.items || resp)) || [];
+      indusProjectActivityData = items.map(item => ({
+        id: item.id,
+        stage: item.stage || '',
+        activity: item.activity || '',
+        days: item.days || '0'
+      }));
+    } catch (err) {
+      console.warn('Failed to load project activities:', err);
+      indusProjectActivityData = [];
+    }
+  }
+
+  renderProjectActivityTable();
 };
 
 window.renderProjectActivityTable = function() {
@@ -26526,7 +27629,7 @@ window.openAddProjectActivityForm = function() {
 };
 
 window.openEditProjectActivityForm = function(id) {
-  const item = indusProjectActivityData.find(t => t.id === id);
+  const item = indusProjectActivityData.find(t => String(t.id) === String(id));
   if (!item) return;
   currentEditingActivityId = id;
 
@@ -26559,42 +27662,80 @@ window.closeAddProjectActivityForm = function() {
   if (ap) ap.style.display = 'block';
 };
 
-window.saveProjectActivityRecord = function() {
+window.saveProjectActivityRecord = async function() {
   const stageVal = document.getElementById('inpProjectActivityStage')?.value?.trim();
   const actVal = document.getElementById('inpProjectActivityName')?.value?.trim();
   const daysVal = document.getElementById('inpProjectActivityDays')?.value?.trim();
 
   if (!stageVal) {
-    showToast('Please select a Stage');
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please select a Stage', 'Validation Error');
+    } else {
+      showToast('Please select a Stage');
+    }
     return;
   }
   if (!actVal) {
-    showToast('Please enter Activity description');
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter Activity description', 'Validation Error');
+    } else {
+      showToast('Please enter Activity description');
+    }
     return;
   }
 
   if (currentEditingActivityId) {
-    const item = indusProjectActivityData.find(t => t.id === currentEditingActivityId);
-    if (item) {
-      item.stage = stageVal;
-      item.activity = actVal;
-      item.days = daysVal || '0';
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+      try {
+        await NexusApi.indusProjects.updateActivity(currentEditingActivityId, {
+          stage: stageVal,
+          activity: actVal,
+          days: daysVal || '0'
+        });
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Activity details updated successfully!', 'Task Completed');
+        } else {
+          showToast('Activity details updated successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to update activity:', err);
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(err.message || 'Failed to update activity', 'Error');
+        } else {
+          showToast('Failed to update activity');
+        }
+      }
     }
-    showToast(`Activity "${actVal}" updated successfully!`);
   } else {
-    const newRecord = {
-      id: `act-${Date.now()}`,
-      stage: stageVal,
-      activity: actVal,
-      days: daysVal || '0'
-    };
-    indusProjectActivityData.unshift(newRecord);
-    showToast(`Activity "${actVal}" added successfully!`);
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+      try {
+        await NexusApi.indusProjects.createActivity({
+          company_name: 'Indus Tower Ltd',
+          project_type: window.currentViewedProjectType,
+          sub_project_type: window.currentViewedSubProjectType,
+          stage: stageVal,
+          activity: actVal,
+          days: daysVal || '0'
+        });
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup('Activity details added successfully!', 'Task Completed');
+        } else {
+          showToast('Activity details added successfully!');
+        }
+      } catch (err) {
+        console.error('Failed to create activity:', err);
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup(err.message || 'Failed to create activity', 'Error');
+        } else {
+          showToast('Failed to create activity');
+        }
+      }
+    }
   }
 
   currentEditingActivityId = null;
-  renderProjectActivityTable();
   closeAddProjectActivityForm();
+  await openProjectActivitySidePanel();
 };
 
 window.openProjectActivityFilter = function(colKey, event) {
@@ -26647,15 +27788,11 @@ window.openProjectActivityFilter = function(colKey, event) {
 // ==========================================================================
 // APPROVAL HISTORY DATASET & HANDLERS
 // ==========================================================================
-let indusProjectDocData = [
-  { id: "doc-1", description: "Soil Test & Structural Clearance Report approved by Chief Engineer." },
-  { id: "doc-2", description: "Environmental Compliance & Green Tribunal clearance granted." },
-  { id: "doc-3", description: "Municipal Tower Erection & Foundation NOC issued." }
-];
+let indusProjectDocData = [];
 let activeProjectDocFilters = {};
 let currentProjectDocFilterCol = null;
 
-window.openProjectDocSidePanel = function() {
+window.openProjectDocSidePanel = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -26667,7 +27804,7 @@ window.openProjectDocSidePanel = function() {
 
   ['contactDetailsSidePanel', 'locationDetailsSidePanel', 'bankDetailsSidePanel',
    'salaryDetailsSidePanel', 'assetDetailsSidePanel', 'transportDetailsSidePanel',
-   'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard', 'addProjectActivityCard', 'projectActivitySidePanel'].forEach(id => {
+   'vendorBankSideCard', 'addProjectTransportCard', 'addProjectTypeCard', 'addProjectActivityCard', 'projectActivitySidePanel', 'addProjectApprovalCard'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -26675,10 +27812,39 @@ window.openProjectDocSidePanel = function() {
   const dp = document.getElementById('projectTypeDocSidePanel');
   if (dp) {
     dp.style.display = 'block';
-    renderProjectDocTable();
   }
 
   overlay.style.display = 'flex';
+
+  // Data isolation: Clear previous approval data immediately
+  indusProjectDocData = [];
+  activeProjectDocFilters = {};
+  const tbody = document.getElementById('tbodyProjectDocDetails');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td style="text-align: center; color: #94a3b8; padding: 24px;">Loading approval history...</td></tr>`;
+  }
+
+  // Fetch only this project's approval history
+  if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+    try {
+      const resp = await NexusApi.indusProjects.getApprovals({
+        company_name: 'Indus Tower Ltd',
+        sub_project_type: window.currentViewedSubProjectType,
+        page: 1,
+        page_size: 500
+      });
+      const items = (resp && (resp.items || resp)) || [];
+      indusProjectDocData = items.map(item => ({
+        id: item.sub_project_type_detail_id || item.id,
+        description: item.description || item.observation || item.remarks || ''
+      }));
+    } catch (err) {
+      console.warn('Failed to load project approvals:', err);
+      indusProjectDocData = [];
+    }
+  }
+
+  renderProjectDocTable();
 };
 
 window.renderProjectDocTable = function() {
@@ -26718,15 +27884,65 @@ window.renderProjectDocTable = function() {
 };
 
 window.openAddProjectApprovalForm = function() {
-  const newDesc = prompt('Enter Approval History Description:');
-  if (newDesc && newDesc.trim()) {
-    indusProjectDocData.unshift({
-      id: `doc-${Date.now()}`,
-      description: newDesc.trim()
-    });
-    renderProjectDocTable();
-    showToast('Approval History added successfully!');
+  const dp = document.getElementById('projectTypeDocSidePanel');
+  if (dp) dp.style.display = 'none';
+
+  const addCard = document.getElementById('addProjectApprovalCard');
+  if (addCard) {
+    addCard.style.display = 'block';
+    const titleEl = document.getElementById('lblProjectApprovalCardTitle');
+    if (titleEl) titleEl.innerText = 'Add Approval';
+    const frm = document.getElementById('frmAddProjectApproval');
+    if (frm) frm.reset();
+    const txt = document.getElementById('inpProjectApprovalDesc');
+    if (txt) setTimeout(() => txt.focus(), 50);
   }
+};
+
+window.closeAddProjectApprovalForm = function() {
+  const addCard = document.getElementById('addProjectApprovalCard');
+  if (addCard) addCard.style.display = 'none';
+
+  const dp = document.getElementById('projectTypeDocSidePanel');
+  if (dp) dp.style.display = 'block';
+};
+
+window.saveProjectApprovalRecord = async function() {
+  const descVal = document.getElementById('inpProjectApprovalDesc')?.value?.trim();
+  if (!descVal) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter an approval description', 'Validation Error');
+    } else {
+      showToast('Please enter an approval description');
+    }
+    return;
+  }
+
+  if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
+    try {
+      await NexusApi.indusProjects.createApproval({
+        company_name: 'Indus Tower Ltd',
+        customer_name: 'Indus Tower Ltd',
+        sub_project_type: window.currentViewedSubProjectType,
+        description: descVal
+      });
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Approval history added successfully!', 'Task Completed');
+      } else {
+        showToast('Approval History added successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to create approval:', err);
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || 'Failed to create approval', 'Error');
+      } else {
+        showToast('Failed to create approval');
+      }
+    }
+  }
+
+  closeAddProjectApprovalForm();
+  await openProjectDocSidePanel();
 };
 
 window.openProjectDocFilter = function(colKey, event) {

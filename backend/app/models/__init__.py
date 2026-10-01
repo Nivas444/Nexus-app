@@ -16,6 +16,19 @@ from app.models.company import (
     CompanyHoliday
 )
 from app.models.hr_compliance import HRCompliance
+from app.models.indus_site import IndusSiteDetails
+from app.models.indus_gbpa import IndusCustomerGbpa
+from app.models.indus_gbpa_material import IndusCustomerGbpaMaterial
+from app.models.indus_gbpa_expense import IndusCustomerGbpaExpense
+from app.models.indus_gbpa_infra import IndusCustomerGbpaInfra
+from app.models.indus_infra import IndusCustomerInfra
+from app.models.indus_esh import IndusEshDetails
+from app.models.indus_project import (
+    IndusCustomerProjectType,
+    IndusCustomerProjectTypeActivity,
+    IndusCustomerProjectsTypeAdditionalTransport,
+    IndusCustomerProjectTypeSupply
+)
 
 __all__ = [
     "CompanyExpense",
@@ -35,5 +48,19 @@ __all__ = [
     "CompanyBankAccount",
     "CompanyOfficeLocation",
     "CompanyHoliday",
-    "HRCompliance"
+    "HRCompliance",
+    "IndusSiteDetails",
+    "IndusCustomerGbpa",
+    "IndusCustomerGbpaMaterial",
+    "IndusCustomerGbpaExpense",
+    "IndusCustomerGbpaInfra",
+    "IndusCustomerInfra",
+    "IndusEshDetails",
+    "IndusCustomerProjectType",
+    "IndusCustomerProjectTypeActivity",
+    "IndusCustomerProjectsTypeAdditionalTransport",
+    "IndusCustomerProjectTypeSupply"
 ]
+
+
+

@@ -80,6 +80,51 @@
   const NexusApi = {
     baseUrl: API_BASE_URL,
 
+    auth: {
+      async login(email, password) {
+        return await request('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password })
+        });
+      },
+
+      async me(token) {
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        return await request('/auth/me', {
+          method: 'GET',
+          headers
+        });
+      },
+
+      getStoredUser() {
+        try {
+          const raw = sessionStorage.getItem('nexus_user');
+          if (!raw) return null;
+          if (raw.startsWith('{')) {
+            return JSON.parse(raw);
+          }
+          return { email: raw, role: sessionStorage.getItem('nexus_role') || 'Admin', name: raw };
+        } catch (e) {
+          return null;
+        }
+      },
+
+      getUserRole() {
+        const user = this.getStoredUser();
+        if (user && user.role) return user.role;
+        const role = sessionStorage.getItem('nexus_role');
+        if (role) return role;
+        return 'Admin';
+      },
+
+      logout() {
+        sessionStorage.removeItem('nexus_user');
+        sessionStorage.removeItem('nexus_role');
+        sessionStorage.removeItem('nexus_token');
+        window.location.href = 'index.html';
+      }
+    },
+
     expenses: {
       /**
        * Fetch expenses with optional search, filters, pagination

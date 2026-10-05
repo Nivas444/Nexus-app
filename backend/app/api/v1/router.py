@@ -13,8 +13,10 @@ from app.api.v1.indus_gbpa_subpages import router as indus_gbpa_subpages_router
 from app.api.v1.indus_infra import router as indus_infra_router
 from app.api.v1.indus_esh import router as indus_esh_router
 from app.api.v1.indus_project import router as indus_project_router
+from app.api.v1.auth import router as auth_router
 
 api_router = APIRouter()
+api_router.include_router(auth_router)
 api_router.include_router(expenses_router)
 api_router.include_router(products_router)
 api_router.include_router(customers_router)

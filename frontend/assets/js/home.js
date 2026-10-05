@@ -3623,6 +3623,86 @@ let currentProjectDetailTab = ''; // 'expenses', 'materials', 'infra', 'dpr', 'b
 let currentMasterView = 'main'; // 'main' | 'hr_policies'
 let currentCompanyHrTab = 'epf'; // 'epf' | 'esi' | 'pt' | 'lwf' | 'tds' | 'leave' | 'bonus' | 'medical_insurance'
 
+let commercialWorklistData = [
+  {
+    id: "cw-1",
+    customerName: "Indus Towers Ltd",
+    date: "12/08/2026",
+    poNo: "4500128934",
+    projectId: "PRJ-2026-001",
+    siteId: "IN-123456",
+    siteName: "Guindy Hub",
+    ageing: "12 Days",
+    selected: false
+  },
+  {
+    id: "cw-2",
+    customerName: "Bharti Airtel Ltd",
+    date: "14/08/2026",
+    poNo: "4500128935",
+    projectId: "PRJ-2026-002",
+    siteId: "IN-123457",
+    siteName: "Ambattur Central",
+    ageing: "18 Days",
+    selected: false
+  },
+  {
+    id: "cw-3",
+    customerName: "Reliance Jio Infocomm",
+    date: "16/08/2026",
+    poNo: "4500128936",
+    projectId: "PRJ-2026-003",
+    siteId: "IN-123458",
+    siteName: "Madurai Depot",
+    ageing: "24 Days",
+    selected: false
+  },
+  {
+    id: "cw-4",
+    customerName: "Vodafone Idea Ltd",
+    date: "18/08/2026",
+    poNo: "4500128937",
+    projectId: "PRJ-2026-004",
+    siteId: "IN-123459",
+    siteName: "Coimbatore Hub",
+    ageing: "32 Days",
+    selected: false
+  },
+  {
+    id: "cw-5",
+    customerName: "ATC India Pvt Ltd",
+    date: "20/08/2026",
+    poNo: "4500128938",
+    projectId: "PRJ-2026-005",
+    siteId: "IN-123460",
+    siteName: "Chennai North",
+    ageing: "45 Days",
+    selected: false
+  },
+  {
+    id: "cw-6",
+    customerName: "Indus Towers Ltd",
+    date: "22/08/2026",
+    poNo: "4500128939",
+    projectId: "PRJ-2026-006",
+    siteId: "IN-123461",
+    siteName: "Salem South",
+    ageing: "15 Days",
+    selected: false
+  },
+  {
+    id: "cw-7",
+    customerName: "Bharti Airtel Ltd",
+    date: "24/08/2026",
+    poNo: "4500128940",
+    projectId: "PRJ-2026-007",
+    siteId: "IN-123462",
+    siteName: "Trichy Central",
+    ageing: "28 Days",
+    selected: false
+  }
+];
+
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
 
@@ -3636,6 +3716,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewParam = params.get('view');
   const subpageParam = params.get('subpage');
   const tabParam = params.get('tab');
+  const role = getAuthenticatedUserRole();
 
   if (moduleParam === 'master') {
     currentModule = 'master';
@@ -3644,7 +3725,12 @@ document.addEventListener('DOMContentLoaded', () => {
       currentCompanyHrTab = subpageParam || 'epf';
     } else {
       currentMasterView = 'main';
-      currentMasterSubpage = subpageParam || 'employee';
+      if (role === 'Commercial Manager') {
+        const allowedMaster = ['customer', 'products', 'expenses'];
+        currentMasterSubpage = allowedMaster.includes(subpageParam) ? subpageParam : 'customer';
+      } else {
+        currentMasterSubpage = subpageParam || 'employee';
+      }
     }
   } else if (moduleParam === 'indus_towers') {
     currentModule = 'indus_towers';
@@ -3762,23 +3848,33 @@ document.addEventListener('DOMContentLoaded', () => {
       currentAccountsView = 'main';
       currentAccountsSubpage = subpageParam || 'sales';
     }
-  } else if (moduleParam) {
-    currentModule = moduleParam;
-    if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
-      currentWorklistView = viewParam;
+  } else if (moduleParam === 'profile') {
+    currentModule = 'profile';
+  } else if (moduleParam === 'worklist' || moduleParam) {
+    currentModule = 'worklist';
+    const role = getAuthenticatedUserRole();
+    if (role === 'Commercial Manager') {
+      const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'];
+      currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
     } else {
-      currentWorklistView = 'payment';
+      if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
+        currentWorklistView = viewParam;
+      } else {
+        currentWorklistView = 'payment';
+      }
     }
   } else {
-    // Default after login is Worklist -> Payment
+    // Default after login
     currentModule = 'worklist';
-    if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') {
-      currentWorklistView = viewParam;
+    const role = getAuthenticatedUserRole();
+    if (role === 'Commercial Manager') {
+      currentWorklistView = 'new_project';
     } else {
-      currentWorklistView = 'payment';
+      currentWorklistView = (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') ? viewParam : 'payment';
     }
   }
 
+  applyRoleBasedNavigation();
   initNavEventListeners();
   initExcelFilterSystem();
   initSideFormEvents();
@@ -3786,8 +3882,76 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================================================
-// 1. TOP NAVBAR MODULE NAVIGATION
+// 1. TOP NAVBAR MODULE NAVIGATION & ROLE-BASED ACCESS
 // ==========================================================================
+function getAuthenticatedUserRole() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.getUserRole === 'function') {
+    return NexusApi.auth.getUserRole();
+  }
+  try {
+    const raw = sessionStorage.getItem('nexus_user');
+    if (raw && raw.startsWith('{')) {
+      const u = JSON.parse(raw);
+      return u.role || 'Admin';
+    }
+    return sessionStorage.getItem('nexus_role') || 'Admin';
+  } catch (e) {
+    return 'Admin';
+  }
+}
+
+function applyRoleBasedNavigation() {
+  const role = getAuthenticatedUserRole();
+
+  const navMaster = document.getElementById('navBtnMaster');
+  const navProjects = document.getElementById('navBtnProjects');
+  const navAccounts = document.getElementById('navBtnAccounts');
+  const navAdmin = document.getElementById('navBtnAdmin');
+  const navWorklist = document.getElementById('navBtnWorklist');
+  const navPurchase = document.getElementById('navBtnPurchase');
+  const navInventory = document.getElementById('navBtnInventory');
+  const navProfile = document.getElementById('navBtnProfile');
+  const btnSignout = document.getElementById('btnPowerOff');
+
+  if (role === 'Commercial Manager') {
+    // Exactly 5 items visible for Commercial Manager:
+    // 1. Master, 2. Home (Projects), 3. Worklist, 4. Profile, 5. Signout
+    if (navMaster) navMaster.style.display = 'inline-flex';
+    if (navProjects) navProjects.style.display = 'inline-flex';
+    if (navWorklist) navWorklist.style.display = 'inline-flex';
+    if (navProfile) navProfile.style.display = 'inline-flex';
+    if (btnSignout) btnSignout.style.display = 'inline-flex';
+
+    // Hide Admin-only navigation items
+    if (navAccounts) navAccounts.style.display = 'none';
+    if (navAdmin) navAdmin.style.display = 'none';
+    if (navPurchase) navPurchase.style.display = 'none';
+    if (navInventory) navInventory.style.display = 'none';
+
+    // Route Protection: If currentModule is restricted for Commercial Manager, redirect to Worklist
+    const allowedModules = ['master', 'indus_towers', 'projects', 'worklist', 'profile'];
+    if (!allowedModules.includes(currentModule)) {
+      if (typeof showToast === 'function') {
+        showToast('Access Restricted: Commercial Manager role does not have permission for this module.', 'warning');
+      }
+      currentModule = 'worklist';
+      currentWorklistView = 'new_project';
+      updateURL();
+    }
+  } else {
+    // Admin role: All 9 navigation items are visible and accessible
+    if (navMaster) navMaster.style.display = 'inline-flex';
+    if (navProjects) navProjects.style.display = 'inline-flex';
+    if (navAccounts) navAccounts.style.display = 'inline-flex';
+    if (navAdmin) navAdmin.style.display = 'inline-flex';
+    if (navWorklist) navWorklist.style.display = 'inline-flex';
+    if (navPurchase) navPurchase.style.display = 'inline-flex';
+    if (navInventory) navInventory.style.display = 'inline-flex';
+    if (navProfile) navProfile.style.display = 'inline-flex';
+    if (btnSignout) btnSignout.style.display = 'inline-flex';
+  }
+}
+
 function initNavEventListeners() {
   document.querySelectorAll('.nav-icon-item[data-module]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -3797,9 +3961,35 @@ function initNavEventListeners() {
       }
     });
   });
+
+  const btnSignout = document.getElementById('btnPowerOff');
+  if (btnSignout) {
+    btnSignout.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.logout === 'function') {
+        NexusApi.auth.logout();
+      } else {
+        sessionStorage.removeItem('nexus_user');
+        sessionStorage.removeItem('nexus_role');
+        sessionStorage.removeItem('nexus_token');
+        localStorage.removeItem('nexus_user');
+        localStorage.removeItem('nexus_role');
+        window.location.href = 'index.html';
+      }
+    });
+  }
 }
 
 function switchModule(moduleName) {
+  const role = getAuthenticatedUserRole();
+  if (role === 'Commercial Manager') {
+    const allowedModules = ['master', 'indus_towers', 'projects', 'worklist', 'profile'];
+    if (!allowedModules.includes(moduleName)) {
+      showToast(`Access Restricted: Commercial Manager does not have permission to access ${moduleName}.`, 'warning');
+      return;
+    }
+  }
+
   if (currentModule === moduleName) return;
 
   currentModule = moduleName;
@@ -3811,7 +4001,7 @@ function switchModule(moduleName) {
   } else if (moduleName === 'indus_towers') {
     currentIndusSubpage = 'site';
   } else if (moduleName === 'worklist') {
-    currentWorklistView = 'payment';
+    currentWorklistView = (role === 'Commercial Manager') ? 'new_project' : 'payment';
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
     currentProjectsView = 'main';
@@ -4076,20 +4266,28 @@ function goBackSubpage() {
       showToast('Returned to Worklist');
     }
   } else if (currentModule === 'worklist') {
-    if (currentWorklistView === 'po_rfq_compare') {
-      currentWorklistView = 'po_supplier';
-      showToast('Returned to Supplier Details');
-    } else if (currentWorklistView === 'po_supplier') {
-      isPoSupplierEditing = false;
-      currentWorklistView = 'po';
-      showToast('Returned to PO Page');
-    } else if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
-      isProjectPaymentEditing = false;
-      currentWorklistView = 'payment';
-      showToast('Returned to Payment Page');
+    const role = getAuthenticatedUserRole();
+    if (role === 'Commercial Manager') {
+      currentModule = 'projects';
+      currentProjectsSubpage = 'projects';
+      currentProjectsView = 'main';
+      showToast('Returned to Projects');
     } else {
-      currentModule = 'master';
-      currentMasterSubpage = 'customer';
+      if (currentWorklistView === 'po_rfq_compare') {
+        currentWorklistView = 'po_supplier';
+        showToast('Returned to Supplier Details');
+      } else if (currentWorklistView === 'po_supplier') {
+        isPoSupplierEditing = false;
+        currentWorklistView = 'po';
+        showToast('Returned to PO Page');
+      } else if (currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
+        isProjectPaymentEditing = false;
+        currentWorklistView = 'payment';
+        showToast('Returned to Payment Page');
+      } else {
+        currentModule = 'master';
+        currentMasterSubpage = 'customer';
+      }
     }
   } else {
     currentModule = 'indus_towers';
@@ -4107,6 +4305,7 @@ const universalBackBtnHtml = `
 `;
 
 function renderApp() {
+  applyRoleBasedNavigation();
   const bannerTitle = document.getElementById('pageBannerTitle');
 
   // Update Navbar Active Tab
@@ -4400,6 +4599,9 @@ function renderApp() {
     renderAccountsToolbar();
     renderAccountsTableHead();
     renderAccountsFooter();
+  } else if (currentModule === 'profile') {
+    renderProfileModule();
+    return;
   } else {
     const titleMap = {
       accounts: 'Accounts',
@@ -5430,6 +5632,11 @@ function renderIndusFooter() {
 // 3. MASTER MODULE RENDERERS
 // ==========================================================================
 function loadMasterDataset() {
+  const role = getAuthenticatedUserRole();
+  if (role === 'Commercial Manager' && (currentMasterSubpage === 'employee' || currentMasterSubpage === 'vendor')) {
+    currentMasterSubpage = 'customer';
+  }
+
   if (currentMasterSubpage === 'employee') {
     currentDataset = [...masterEmployeeData];
     if (typeof loadMasterEmployeesFromApi === 'function') {
@@ -5785,13 +5992,20 @@ function renderMasterFooter() {
   footer.style.marginTop = 'auto';
   footer.style.padding = '24px';
 
-  const subpages = [
-    { key: 'employee', label: 'Employee' },
-    { key: 'customer', label: 'Customer' },
-    { key: 'vendor', label: 'Vendor' },
-    { key: 'products', label: 'Products' },
-    { key: 'expenses', label: 'Expenses' }
-  ];
+  const role = getAuthenticatedUserRole();
+  const subpages = (role === 'Commercial Manager')
+    ? [
+        { key: 'customer', label: 'Customer' },
+        { key: 'products', label: 'Products' },
+        { key: 'expenses', label: 'Expenses' }
+      ]
+    : [
+        { key: 'employee', label: 'Employee' },
+        { key: 'customer', label: 'Customer' },
+        { key: 'vendor', label: 'Vendor' },
+        { key: 'products', label: 'Products' },
+        { key: 'expenses', label: 'Expenses' }
+      ];
 
   footer.innerHTML = `
     <div class="segmented-toggle-group master-segmented-group">
@@ -10314,6 +10528,13 @@ function renderAccountsFooter() {
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
+  const role = getAuthenticatedUserRole();
+  if (role === 'Commercial Manager') {
+    currentDataset = commercialWorklistData.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    return;
+  }
+
   if (currentWorklistView === 'project_payment') {
     currentDataset = worklistProjectPaymentItems;
   } else if (currentWorklistView === 'purchase_payment') {
@@ -10345,9 +10566,77 @@ function loadWorklistDataset() {
   }
 }
 
+window.toggleCommercialWorklistRowSelect = function(rowId) {
+  const rowInCur = currentDataset.find(r => String(r.id) === String(rowId));
+  const rowInComm = commercialWorklistData.find(r => String(r.id) === String(rowId));
+  const newSelected = rowInCur ? !rowInCur.selected : true;
+  if (rowInCur) rowInCur.selected = newSelected;
+  if (rowInComm) rowInComm.selected = newSelected;
+  applyFiltersAndRender();
+  updateCommercialWorklistDeleteBtnVisibility();
+};
+
+window.updateCommercialWorklistDeleteBtnVisibility = function() {
+  const hasSelected = currentDataset.some(r => r.selected);
+  const deleteBtn = document.getElementById('btnCommercialWorklistDelete');
+  if (deleteBtn) {
+    deleteBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+};
+
 function renderWorklistToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
+
+  const role = getAuthenticatedUserRole();
+  if (role === 'Commercial Manager') {
+    const hasSelected = currentDataset.some(r => r.selected);
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: inline-flex; align-items: center;">
+          ${universalBackBtnHtml}
+        </div>
+      </div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnCommercialWorklistDelete" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'inline-flex' : 'none'}; cursor: pointer;">
+          <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnCommercialWorklistBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Worklist')">
+          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+          <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+        </button>
+      </div>
+    `;
+
+    document.getElementById('btnCommercialWorklistDelete')?.addEventListener('click', () => {
+      const selectedCount = currentDataset.filter(r => r.selected).length;
+      if (selectedCount > 0) {
+        commercialWorklistData = commercialWorklistData.filter(r => !r.selected);
+        currentDataset = commercialWorklistData.map(item => ({ ...item }));
+        applyFiltersAndRender();
+        updateCommercialWorklistDeleteBtnVisibility();
+        showToast(`Deleted ${selectedCount} record${selectedCount > 1 ? 's' : ''} successfully.`);
+      } else {
+        showToast('No record selected to delete.');
+      }
+    });
+
+    document.getElementById('btnCommercialWorklistRefresh')?.addEventListener('click', () => {
+      const btn = document.getElementById('btnCommercialWorklistRefresh');
+      const img = btn ? btn.querySelector('img') : null;
+      if (img) img.classList.add('spin-refresh-icon');
+      activeColumnFilters = {};
+      showToast('Refreshing page data...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 250);
+    });
+
+    initWorklistToolbarEvents();
+    return;
+  }
 
   const hasSelected = currentDataset.some(r => r.selected);
 
@@ -10693,6 +10982,70 @@ function renderWorklistFooter() {
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
+  const role = getAuthenticatedUserRole();
+  if (role === 'Commercial Manager') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        <button type="button" class="segmented-btn ${currentWorklistView === 'new_project' ? 'active' : ''}" id="btnToggleNewProject">
+          New project
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'jms' ? 'active' : ''}" id="btnToggleJms">
+          JMS
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'po_amend' ? 'active' : ''}" id="btnTogglePoAmend">
+          PO Amend
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'wcc' ? 'active' : ''}" id="btnToggleWcc">
+          WCC
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'invoice' ? 'active' : ''}" id="btnToggleInvoice">
+          Invoice
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'receivable' ? 'active' : ''}" id="btnToggleReceivable">
+          Receivable
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'email' ? 'active' : ''}" id="btnToggleEmail">
+          E-mail
+        </button>
+      </div>
+    `;
+
+    const commercialTabs = [
+      { id: 'btnToggleNewProject', view: 'new_project', label: 'New project' },
+      { id: 'btnToggleJms', view: 'jms', label: 'JMS' },
+      { id: 'btnTogglePoAmend', view: 'po_amend', label: 'PO Amend' },
+      { id: 'btnToggleWcc', view: 'wcc', label: 'WCC' },
+      { id: 'btnToggleInvoice', view: 'invoice', label: 'Invoice' },
+      { id: 'btnToggleReceivable', view: 'receivable', label: 'Receivable' },
+      { id: 'btnToggleEmail', view: 'email', label: 'E-mail' }
+    ];
+
+    commercialTabs.forEach(tab => {
+      document.getElementById(tab.id)?.addEventListener('click', () => {
+        if (currentWorklistView !== tab.view) {
+          currentWorklistView = tab.view;
+          activeColumnFilters = {};
+          updateURL();
+          renderApp();
+          showToast(`Switched to Worklist &bull; ${tab.label}`);
+        }
+      });
+    });
+    return;
+  }
+
   if (currentWorklistView === 'po_rfq_compare') {
     footer.innerHTML = '';
     footer.style.display = 'none';
@@ -10771,6 +11124,61 @@ function renderWorklistFooter() {
 function renderWorklistTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
+
+  const role = getAuthenticatedUserRole();
+  if (role === 'Commercial Manager') {
+    thead.innerHTML = `
+      <tr>
+        <th class="th-select" style="width: 60px; text-align: center; vertical-align: middle;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>Select</span>
+          </div>
+        </th>
+        <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>Customer Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 140px; min-width: 140px; text-align: center; vertical-align: middle; white-space: nowrap;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>Date</span>
+          </div>
+        </th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>PO No</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: center; vertical-align: middle;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>Project ID</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>Site ID</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>Site Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center; vertical-align: middle;">
+          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+            <span>Ageing</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+    return;
+  }
 
   if (currentWorklistView === 'project_payment') {
     thead.innerHTML = `
@@ -11009,6 +11417,64 @@ function initWorklistToolbarEvents() {
 // 5. TABLE BODY RENDERING (Clean Text Badges in Table)
 // ==========================================================================
 function applyFiltersAndRender() {
+  const tbody = document.getElementById('worklistTableBody');
+  if (!tbody) return;
+
+  const role = getAuthenticatedUserRole();
+  if (currentModule === 'worklist' && role === 'Commercial Manager') {
+    filteredDataset = currentDataset.filter(row => {
+      for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+        const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+        if (!allowedSet.has(cellVal)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    if (filteredDataset.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = filteredDataset.map(row => {
+      const isSelected = !!row.selected;
+      return `
+        <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
+          <td class="td-select td-center" style="text-align: center; vertical-align: middle;">
+            <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleCommercialWorklistRowSelect('${row.id}')" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
+          </td>
+          <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; vertical-align: middle;">
+            ${row.customerName || ''}
+          </td>
+          <td class="td-center" style="width: 140px; min-width: 140px; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            ${row.date || ''}
+          </td>
+          <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            ${row.poNo || ''}
+          </td>
+          <td style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #0454e4; font-weight: 500; vertical-align: middle;">
+            ${row.projectId || ''}
+          </td>
+          <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            ${row.siteId || ''}
+          </td>
+          <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;">
+            ${row.siteName || ''}
+          </td>
+          <td class="td-center" style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            ${row.ageing || ''}
+          </td>
+        </tr>
+      `;
+    }).join('');
+    return;
+  }
+
   filteredDataset = currentDataset.filter(row => {
     for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
       const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
@@ -11018,9 +11484,6 @@ function applyFiltersAndRender() {
     }
     return true;
   });
-
-  const tbody = document.getElementById('worklistTableBody');
-  if (!tbody) return;
 
   if (currentWorklistView === 'po_rfq_compare') {
     tbody.innerHTML = `
@@ -12466,6 +12929,64 @@ function renderPlaceholderModule() {
   if (thead) thead.innerHTML = '<tr><th>Module Overview</th><th>Status</th></tr>';
   if (tbody) tbody.innerHTML = `<tr><td colspan="2" class="empty-data-row">${currentModule.toUpperCase()} Module content will be configured here.</td></tr>`;
   if (footer) footer.innerHTML = '';
+}
+
+function renderProfileModule() {
+  const bannerTitle = document.getElementById('pageBannerTitle');
+  const thead = document.getElementById('worklistTableHead');
+  const tbody = document.getElementById('worklistTableBody');
+  const toolbar = document.getElementById('worklistToolbar');
+  const footer = document.getElementById('worklistFooterBar');
+
+  if (bannerTitle) bannerTitle.textContent = "Profile";
+  if (toolbar) toolbar.innerHTML = `<div class="toolbar-left">${universalBackBtnHtml}</div><div class="toolbar-right"></div>`;
+  if (footer) footer.innerHTML = '';
+
+  const user = (typeof NexusApi !== 'undefined' && NexusApi.auth) ? NexusApi.auth.getStoredUser() : null;
+  const role = user ? (user.role || 'Admin') : (sessionStorage.getItem('nexus_role') || 'Admin');
+  const email = user ? (user.email || (role === 'Admin' ? 'admin@nexus.com' : 'commercial@nexus.com')) : (role === 'Admin' ? 'admin@nexus.com' : 'commercial@nexus.com');
+  const name = user ? (user.name || (role === 'Admin' ? 'Admin User' : 'Commercial Manager')) : (role === 'Admin' ? 'Admin User' : 'Commercial Manager');
+  const permissionsText = role === 'Admin' ? 'Full System Administrator Access (All Modules)' : 'Role-Based Access: Master, Home / Projects, Worklist, Profile';
+
+  if (thead) {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 12px 18px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">Attribute</th>
+        <th style="text-align: left !important; padding: 12px 18px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">User Details</th>
+      </tr>
+    `;
+  }
+
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr>
+        <td style="font-weight: 600; color: #334155; padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0;">Full Name</td>
+        <td style="color: #0f172a; padding: 14px 18px; font-weight: 600; border: 1px solid #e2e8f0;">${name}</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 600; color: #334155; padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0;">Email Address</td>
+        <td style="color: #0f172a; padding: 14px 18px; border: 1px solid #e2e8f0;">${email}</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 600; color: #334155; padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0;">Assigned Role</td>
+        <td style="padding: 14px 18px; border: 1px solid #e2e8f0;">
+          <span class="status-badge status-active" style="padding: 4px 12px; font-size: 0.9rem; font-weight: 700;">${role}</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-weight: 600; color: #334155; padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0;">Access Scope</td>
+        <td style="color: #475569; padding: 14px 18px; border: 1px solid #e2e8f0;">${permissionsText}</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 600; color: #334155; padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0;">Organization</td>
+        <td style="color: #475569; padding: 14px 18px; border: 1px solid #e2e8f0;">Nexus ERP Ecosystem</td>
+      </tr>
+      <tr>
+        <td style="font-weight: 600; color: #334155; padding: 14px 18px; background: #f8fafc; border: 1px solid #e2e8f0;">Account Status</td>
+        <td style="padding: 14px 18px; border: 1px solid #e2e8f0; color: #16a34a; font-weight: 700;">Active</td>
+      </tr>
+    `;
+  }
 }
 
 // ==========================================================================
@@ -28381,6 +28902,11 @@ window.downloadBulkCsvTemplate = function() {
   const page = (currentBulkUploadPageName || 'Employee').trim();
   const pageLower = page.toLowerCase();
   let templateFileName = '';
+
+  if (pageLower === 'worklist') {
+    showToast('Template download for Worklist is not available yet.');
+    return;
+  }
 
   if (pageLower === 'employee') {
     templateFileName = 'Company_Employee-Template.xlsx';

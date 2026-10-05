@@ -17,8 +17,11 @@ def test_get_expenses_list_empty_or_populated(client: TestClient):
     assert isinstance(data["items"], list)
 
 def test_create_and_get_capex_expense(client: TestClient):
+    import time
+    ts = int(time.time() * 1000)
+    exp_name = f"Test Tower Maintenance {ts}"
     payload = {
-        "expenseName": "Test Tower Maintenance 2026",
+        "expenseName": exp_name,
         "expenseCategory": "Direct Operations",
         "expenseSubCategory": "Civil Works",
         "expenseHead": "Capex",
@@ -30,7 +33,7 @@ def test_create_and_get_capex_expense(client: TestClient):
     create_res = client.post("/api/v1/master/expenses", json=payload)
     assert create_res.status_code == 201
     created_data = create_res.json()
-    assert created_data["expense_name"] == "Test Tower Maintenance 2026"
+    assert created_data["expense_name"] == exp_name
     assert created_data["expense_head"] == "Capex"
     assert created_data["depreciation"] is True
     assert created_data["gst_rate"] == 18.0
@@ -43,7 +46,7 @@ def test_create_and_get_capex_expense(client: TestClient):
     assert get_res.status_code == 200
     got_data = get_res.json()
     assert got_data["expense_id"] == expense_id
-    assert got_data["expense_name"] == "Test Tower Maintenance 2026"
+    assert got_data["expense_name"] == exp_name
 
     # Clean up test record
     delete_res = client.delete(f"/api/v1/master/expenses/{expense_id}")

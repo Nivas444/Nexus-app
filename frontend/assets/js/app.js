@@ -247,9 +247,10 @@ function initFormSubmission() {
   const loginForm = document.getElementById('loginForm');
   const usernameInput = document.getElementById('usernameInput');
   const passwordInput = document.getElementById('passwordInput');
+  const btnSubmit = document.getElementById('btnLoginSubmit');
 
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const username = usernameInput ? usernameInput.value.trim() : '';
@@ -257,25 +258,73 @@ function initFormSubmission() {
 
       if (!username) {
         showToast('Please enter your username or email', 'warning');
-        usernameInput.focus();
+        if (usernameInput) usernameInput.focus();
         return;
       }
 
       if (!password) {
         showToast('Please enter your password', 'warning');
-        passwordInput.focus();
+        if (passwordInput) passwordInput.focus();
         return;
       }
 
-      // Simulate authentication
-      showToast('Authenticating with Nexus...', 'info');
-      
-      // Store simulated user session
-      sessionStorage.setItem('nexus_user', username);
+      if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.style.opacity = '0.7';
+      }
 
-      setTimeout(() => {
-        window.location.href = 'home.html?module=worklist&view=payment';
-      }, 1000);
+      showToast('Authenticating with Nexus ERP...', 'info');
+
+      try {
+        let authResult = null;
+        if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.login === 'function') {
+          authResult = await NexusApi.auth.login(username, password);
+        } else {
+          const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: username, password: password })
+          });
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.detail || 'Invalid email or password');
+          }
+          authResult = await response.json();
+        }
+
+        if (authResult && authResult.user) {
+          const user = authResult.user;
+          sessionStorage.setItem('nexus_user', JSON.stringify(user));
+          sessionStorage.setItem('nexus_role', user.role);
+          sessionStorage.setItem('nexus_token', user.token || '');
+
+          showToast(`Welcome ${user.name}! Logging in as ${user.role}...`, 'success');
+
+          setTimeout(() => {
+            if (user.role === 'Commercial Manager') {
+              window.location.href = 'home.html?module=worklist&view=new_project';
+            } else {
+              window.location.href = 'home.html?module=worklist&view=payment';
+            }
+          }, 700);
+        } else {
+          throw new Error('Authentication response was invalid.');
+        }
+
+      } catch (err) {
+        console.error('Login error:', err);
+        const errMsg = err.detail || err.message || 'Invalid email or password';
+        showToast(errMsg, 'error');
+        if (passwordInput) {
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } finally {
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.style.opacity = '1';
+        }
+      }
     });
   }
 }
@@ -292,12 +341,18 @@ function showToast(message, type = 'success') {
     document.body.appendChild(toast);
   }
 
+  const isError = type === 'error' || type === 'warning';
+  const iconColor = isError ? '#ef4444' : '#10b981';
+
+  toast.style.borderColor = isError ? '#ef4444' : '#10b981';
   toast.innerHTML = `
-    <svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-      <path d="m9 12 2 2 4-4"/>
+    <svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      ${isError
+        ? '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>'
+        : '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>'
+      }
     </svg>
-    <span>${message}</span>
+    <span style="color: #1e293b; font-weight: 600;">${message}</span>
   `;
 
   toast.classList.add('show');

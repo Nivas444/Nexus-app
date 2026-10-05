@@ -4677,7 +4677,7 @@ function renderIndusToolbar() {
         <div class="toolbar-right">
           <!-- Green CSV Upload Icon -->
           <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-            <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+            <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
           </button>
           <!-- Orange Bulk Upload Icon -->
           <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -4741,7 +4741,7 @@ function renderIndusToolbar() {
       <div class="toolbar-right">
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="Upload CSV / Excel" aria-label="Upload CSV">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
         <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Trainee" aria-label="Add Trainee">
@@ -4770,7 +4770,7 @@ function renderIndusToolbar() {
         </button>
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -4802,7 +4802,7 @@ function renderIndusToolbar() {
       <div class="toolbar-right">
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -4833,7 +4833,7 @@ function renderIndusToolbar() {
       <div class="toolbar-right">
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -4864,7 +4864,7 @@ function renderIndusToolbar() {
     <div class="toolbar-right">
       <!-- Green CSV Upload Icon -->
       <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-        <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
       </button>
       <!-- Blue Add (+) Button -->
       <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Record" aria-label="Add Record">
@@ -5469,7 +5469,7 @@ function renderMasterToolbar() {
       <div class="toolbar-right">
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -5501,7 +5501,7 @@ function renderMasterToolbar() {
       <div class="toolbar-right">
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -5524,7 +5524,7 @@ function renderMasterToolbar() {
       <div class="toolbar-right">
         <!-- Green CSV Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
         <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New ${currentMasterSubpage === 'vendor' ? 'Vendor' : 'Record'}" aria-label="Add Record">
@@ -7753,7 +7753,7 @@ function renderProjectsToolbar() {
           <img src="icons/invoice.svg?v=20260915" alt="Invoice" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnBoqUploadCsv" title="Upload CSV / Excel" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerBoqFileUpload(); return false;">
-          <img src="icons/CSV upload.svg?v=20260915" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          <img src="icons/CSV download.svg?v=20260915" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
@@ -8999,7 +8999,7 @@ function renderAdminToolbar() {
         </button>
         <!-- CSV / Excel Upload Button -->
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnAdminCsv" data-tooltip="Upload CSV / Excel" aria-label="Upload CSV / Excel">
-          <img src="icons/CSV upload.svg" alt="Upload CSV / Excel" class="toolbar-icon-img" width="30" height="30">
+          <img src="icons/CSV download.svg" alt="Upload CSV / Excel" class="toolbar-icon-img" width="30" height="30">
         </button>
       </div>
     `;
@@ -9051,7 +9051,7 @@ function renderAdminToolbar() {
       <input type="file" id="adminFileInput" accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
       <!-- CSV / Excel Upload Button -->
       <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnAdminCsv" data-tooltip="Upload CSV / Excel" aria-label="Upload CSV / Excel">
-        <img src="icons/CSV upload.svg" alt="Upload" class="toolbar-icon-img" width="30" height="30">
+        <img src="icons/CSV download.svg" alt="Upload" class="toolbar-icon-img" width="30" height="30">
       </button>
     </div>
   `;
@@ -9643,7 +9643,7 @@ function renderAccountsToolbar() {
           <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/PDF Upload.svg';">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsTdsReceivableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV upload.svg';">
+          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV download.svg';">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsTdsReceivableClose" title="Close" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAccountsTdsPage(); return false;">
           <img src="icons/Cancel.svg" alt="Close" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -9666,7 +9666,7 @@ function renderAccountsToolbar() {
           <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/PDF Upload.svg';">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsTdsPayableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV upload.svg';">
+          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV download.svg';">
         </button>
       </div>
     `;
@@ -9689,7 +9689,7 @@ function renderAccountsToolbar() {
           <img src="icons/PDF Upload.svg" alt="PDF Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsTdsCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          <img src="icons/CSV download.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
@@ -9701,7 +9701,7 @@ function renderAccountsToolbar() {
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsPurchaseCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          <img src="icons/CSV download.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
@@ -9724,7 +9724,7 @@ function renderAccountsToolbar() {
           <img src="icons/PDF Upload.svg" alt="PDF Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsGstCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          <img src="icons/CSV download.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
@@ -9736,7 +9736,7 @@ function renderAccountsToolbar() {
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsBankCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          <img src="icons/CSV download.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
@@ -9748,7 +9748,7 @@ function renderAccountsToolbar() {
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnAccountsReceiptCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          <img src="icons/CSV download.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
@@ -9762,7 +9762,7 @@ function renderAccountsToolbar() {
         <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block; object-fit: contain;">
       </button>
       <button type="button" class="tool-btn" id="btnAccountsCsvUpload" title="CSV Upload" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-        <img src="icons/CSV upload.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        <img src="icons/CSV download.svg" alt="CSV Upload" style="width: 28px; height: 28px; display: block; object-fit: contain;">
       </button>
     </div>
   `;
@@ -10680,7 +10680,7 @@ function renderWorklistToolbar() {
           <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="28" height="28">
+          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="28" height="28">
         </button>
       </div>
     `;

@@ -28078,99 +28078,8 @@ let currentBulkUploadPageName = 'Employee';
 let activeBulkUploadFilters = {};
 let currentBulkUploadFilterCol = null;
 
-// Initial bulk upload history records mapped by page/module
-let bulkUploadHistoryData = [
-  {
-    id: 'blk-1',
-    page: 'Employee',
-    started: '05/10/2026 09:30:15',
-    completed: '05/10/2026 09:30:20',
-    totalCount: '45',
-    validCount: '45',
-    invalidCount: '0',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-2',
-    page: 'Employee',
-    started: '04/10/2026 14:12:00',
-    completed: '04/10/2026 14:12:08',
-    totalCount: '30',
-    validCount: '28',
-    invalidCount: '2',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-3',
-    page: 'Products',
-    started: '05/10/2026 08:45:10',
-    completed: '05/10/2026 08:45:16',
-    totalCount: '120',
-    validCount: '118',
-    invalidCount: '2',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-5',
-    page: 'Expense',
-    started: '03/10/2026 16:05:40',
-    completed: '03/10/2026 16:05:44',
-    totalCount: '60',
-    validCount: '60',
-    invalidCount: '0',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-6',
-    page: 'GBPA',
-    started: '05/10/2026 10:00:12',
-    completed: '05/10/2026 10:00:18',
-    totalCount: '80',
-    validCount: '80',
-    invalidCount: '0',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-7',
-    page: 'Infra',
-    started: '04/10/2026 15:22:30',
-    completed: '04/10/2026 15:22:35',
-    totalCount: '40',
-    validCount: '40',
-    invalidCount: '0',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-8',
-    page: 'Site',
-    started: '05/10/2026 09:10:00',
-    completed: '05/10/2026 09:10:05',
-    totalCount: '95',
-    validCount: '92',
-    invalidCount: '3',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-10',
-    page: 'Materials',
-    started: '05/10/2026 11:00:20',
-    completed: '05/10/2026 11:00:25',
-    totalCount: '65',
-    validCount: '65',
-    invalidCount: '0',
-    status: 'Completed'
-  },
-  {
-    id: 'blk-11',
-    page: 'Expenses',
-    started: '05/10/2026 11:15:10',
-    completed: '05/10/2026 11:15:15',
-    totalCount: '35',
-    validCount: '35',
-    invalidCount: '0',
-    status: 'Completed'
-  }
-];
+// Initial bulk upload history records mapped by page/module (empty by default)
+let bulkUploadHistoryData = [];
 
 function renderBulkUploadTable() {
   const tbody = document.getElementById('tbodyBulkUploadDetails');
@@ -28191,18 +28100,9 @@ function renderBulkUploadTable() {
   });
 
   if (pageRecords.length === 0) {
-    pageRecords = [
-      {
-        id: `blk-${Date.now()}`,
-        page: currentBulkUploadPageName,
-        started: '05/10/2026 09:00:00',
-        completed: '05/10/2026 09:00:05',
-        totalCount: '15',
-        validCount: '15',
-        invalidCount: '0',
-        status: 'Completed'
-      }
-    ];
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 22px; font-size: 0.9rem;">No upload logs found for ${currentBulkUploadPageName}.</td></tr>`;
+    updateBulkUploadFilterBtnStates();
+    return;
   }
 
   let filtered = pageRecords.filter(row => {
@@ -28214,7 +28114,7 @@ function renderBulkUploadTable() {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching upload logs found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px; font-size: 0.9rem;">No matching upload logs found.</td></tr>`;
     updateBulkUploadFilterBtnStates();
     return;
   }
@@ -28222,13 +28122,23 @@ function renderBulkUploadTable() {
   tbody.innerHTML = filtered.map(row => {
     const isCompleted = (row.status || '').toLowerCase() === 'completed';
     const isFailed = (row.status || '').toLowerCase() === 'failed';
+    const invalidNum = Number(row.invalidCount) || 0;
+    const invalidCellContent = invalidNum > 0
+      ? `<span onclick="downloadBulkUploadErrors('${row.id}')"
+               title="Click to download ${invalidNum} error(s) report (.csv / .xlsx format)"
+               style="color: #dc2626; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 2px 8px; border-radius: 4px; background: rgba(220, 38, 38, 0.08); transition: all 0.2s ease;">
+           ${row.invalidCount}
+           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+         </span>`
+      : `<span style="color: #64748b; font-weight: 600; cursor: default;">${row.invalidCount}</span>`;
+
     return `
       <tr>
         <td class="td-center" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">${row.started}</td>
         <td class="td-center" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">${row.completed}</td>
         <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">${row.totalCount}</td>
         <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; color: #16a34a; font-weight: 600;">${row.validCount}</td>
-        <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; color: ${Number(row.invalidCount) > 0 ? '#dc2626' : '#64748b'}; font-weight: 600;">${row.invalidCount}</td>
+        <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">${invalidCellContent}</td>
         <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
           <span class="status-badge ${isCompleted ? 'status-active' : (isFailed ? 'status-inactive' : 'status-progress')}" style="padding: 4px 10px; font-size: 0.85rem;">${row.status}</span>
         </td>
@@ -28238,6 +28148,81 @@ function renderBulkUploadTable() {
 
   updateBulkUploadFilterBtnStates();
 }
+
+window.downloadBulkUploadErrors = function(logId) {
+  const log = bulkUploadHistoryData.find(r => String(r.id) === String(logId));
+  if (!log) {
+    showToast('Upload log record not found.');
+    return;
+  }
+  const count = Number(log.invalidCount) || 0;
+  if (count <= 0) {
+    showToast('No error records found for this upload batch.');
+    return;
+  }
+
+  const pageName = log.page || 'Bulk_Upload';
+  const errors = Array.isArray(log.errors) && log.errors.length > 0 ? log.errors : [];
+
+  function escapeCsv(val) {
+    if (val === null || val === undefined) return '""';
+    const str = String(val).replace(/"/g, '""');
+    return `"${str}"`;
+  }
+
+  const csvRows = [];
+  csvRows.push(['Row Number', 'Module', 'Error Reason / Description', 'Offending Field / Details'].map(escapeCsv).join(','));
+
+  if (errors.length === 0) {
+    csvRows.push([
+      escapeCsv('N/A'),
+      escapeCsv(pageName),
+      escapeCsv(log.status || 'Validation error encountered during upload'),
+      escapeCsv('Please check source file columns, types and required fields.')
+    ].join(','));
+  } else {
+    errors.forEach((errItem, idx) => {
+      let rowNum = 'N/A';
+      let errMsg = typeof errItem === 'object' ? JSON.stringify(errItem) : String(errItem || '');
+      let fieldDetails = '';
+
+      const rowMatch = errMsg.match(/^Row\s+(\d+)\s*:\s*(.*)$/i);
+      if (rowMatch) {
+        rowNum = rowMatch[1];
+        errMsg = rowMatch[2];
+      } else {
+        rowNum = String(idx + 1);
+      }
+
+      const fieldMatch = errMsg.match(/\[(.*?)\]|field ['"](.*?)['"]|for field\s+([a-zA-Z0-9_]+)/i);
+      if (fieldMatch) {
+        fieldDetails = fieldMatch[1] || fieldMatch[2] || fieldMatch[3] || '';
+      }
+
+      csvRows.push([
+        escapeCsv(rowNum),
+        escapeCsv(pageName),
+        escapeCsv(errMsg),
+        escapeCsv(fieldDetails)
+      ].join(','));
+    });
+  }
+
+  const csvString = '\uFEFF' + csvRows.join('\r\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const cleanPageName = pageName.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const fileName = `${cleanPageName}_Upload_Errors_${Date.now()}.csv`;
+  link.setAttribute('href', url);
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showToast(`Downloaded error report: ${fileName}`);
+};
 
 function updateBulkUploadFilterBtnStates() {
   const btn = document.getElementById('btnBulkUploadStatusFilter');
@@ -28274,24 +28259,29 @@ window.openBulkUploadStatusFilter = function(event) {
     return p === curPage;
   });
 
-  const uniqueValues = Array.from(new Set(pageRecords.map(r => String(r.status || ''))))
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  if (pageRecords.length === 0) {
+    if (chkList) chkList.innerHTML = '<div style="padding: 12px; color: #94a3b8; font-size: 0.85rem; text-align: center;">No status available</div>';
+    if (chkSelectAll) chkSelectAll.checked = false;
+  } else {
+    const uniqueValues = Array.from(new Set(pageRecords.map(r => String(r.status || ''))))
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  const activeSet = activeBulkUploadFilters['status'];
+    const activeSet = activeBulkUploadFilters['status'];
 
-  chkList.innerHTML = uniqueValues.map(val => {
-    const isChecked = activeSet ? activeSet.has(val) : true;
-    const displayLabel = val === '' ? '(Blanks)' : val;
-    return `
-      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
-        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
-        <span class="chk-label">${displayLabel}</span>
-      </label>
-    `;
-  }).join('');
+    chkList.innerHTML = uniqueValues.map(val => {
+      const isChecked = activeSet ? activeSet.has(val) : true;
+      const displayLabel = val === '' ? '(Blanks)' : val;
+      return `
+        <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+          <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+          <span class="chk-label">${displayLabel}</span>
+        </label>
+      `;
+    }).join('');
 
-  if (chkSelectAll) {
-    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+    if (chkSelectAll) {
+      chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+    }
   }
 
   const targetBtn = event ? event.currentTarget : document.getElementById('btnBulkUploadStatusFilter');
@@ -28493,10 +28483,11 @@ window.handleBulkCsvFileSelected = async function(input) {
     const pad = (n) => String(n).padStart(2, '0');
     const startedStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-    let total = 50;
-    let valid = 50;
+    let total = 0;
+    let valid = 0;
     let invalid = 0;
     let uploadStatus = 'Completed';
+    let errorDetails = [];
 
     try {
       const pageKey = (currentBulkUploadPageName || '').trim().toLowerCase();
@@ -28553,10 +28544,16 @@ window.handleBulkCsvFileSelected = async function(input) {
       }
 
       if (result) {
-        total = result.imported_count || result.total_count || 1;
-        valid = result.imported_count || 1;
-        invalid = (result.errors && result.errors.length) || result.error_count || 0;
-        showToast(`Bulk upload successful: ${valid} records processed!`);
+        const imported = result.imported_count !== undefined ? result.imported_count : (result.total_count || 1);
+        errorDetails = Array.isArray(result.errors) ? result.errors : [];
+        const errCount = result.error_count !== undefined ? result.error_count : errorDetails.length;
+        const totalCalc = result.total_count !== undefined ? result.total_count : (imported + errCount);
+
+        total = totalCalc || imported;
+        valid = imported;
+        invalid = errCount;
+        uploadStatus = (invalid > 0 && valid === 0) ? 'Failed' : (invalid > 0 ? 'Completed with Errors' : 'Completed');
+        showToast(`Bulk upload processed: ${valid} valid, ${invalid} invalid records.`);
       } else {
         try {
           const text = await file.text();
@@ -28567,8 +28564,8 @@ window.handleBulkCsvFileSelected = async function(input) {
             invalid = 0;
           }
         } catch (e) {
-          total = 25;
-          valid = 25;
+          total = 1;
+          valid = 1;
           invalid = 0;
         }
       }
@@ -28576,9 +28573,45 @@ window.handleBulkCsvFileSelected = async function(input) {
     } catch (err) {
       console.error('Bulk upload error:', err);
       uploadStatus = 'Failed';
-      showToast(`Bulk upload failed: ${err.message || err}`);
+      const errMsg = err.message || String(err);
+
+      if (err.response && err.response.data && err.response.data.detail) {
+        const d = err.response.data.detail;
+        if (Array.isArray(d)) {
+          errorDetails = d.map(item => typeof item === 'object' ? (item.msg || JSON.stringify(item)) : String(item));
+        } else if (typeof d === 'string') {
+          errorDetails = d.split('; ').map(s => s.trim()).filter(Boolean);
+        }
+      } else if (errMsg) {
+        errorDetails = [errMsg];
+      }
+
+      total = errorDetails.length || 1;
+      valid = 0;
+      invalid = total;
+
+      const completedDate = new Date();
+      const completedStr = `${pad(completedDate.getDate())}/${pad(completedDate.getMonth() + 1)}/${completedDate.getFullYear()} ${pad(completedDate.getHours())}:${pad(completedDate.getMinutes())}:${pad(completedDate.getSeconds())}`;
+
+      const failedLog = {
+        id: `blk-${Date.now()}`,
+        page: currentBulkUploadPageName,
+        started: startedStr,
+        completed: completedStr,
+        totalCount: String(total),
+        validCount: String(valid),
+        invalidCount: String(invalid),
+        status: 'Failed',
+        errors: errorDetails
+      };
+
+      bulkUploadHistoryData.unshift(failedLog);
+      closeAddBulkUploadModal();
+      renderBulkUploadTable();
+
+      showToast(`Bulk upload failed: ${errMsg}`);
       if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup(err.message || err, 'Bulk Upload Error');
+        showSvgErrorPopup(errMsg, 'Bulk Upload Error');
       }
       input.value = '';
       if (triggerBtn) {
@@ -28600,7 +28633,8 @@ window.handleBulkCsvFileSelected = async function(input) {
       totalCount: String(total),
       validCount: String(valid),
       invalidCount: String(invalid),
-      status: uploadStatus
+      status: uploadStatus,
+      errors: errorDetails
     };
 
     bulkUploadHistoryData.unshift(newLog);

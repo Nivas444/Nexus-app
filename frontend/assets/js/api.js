@@ -77,33 +77,73 @@
     }
   }
 
+  const FRONTEND_USERS_CONFIG = [
+    {
+      email: 'admin@nexus.com',
+      aliases: ['admin', 'admin@nexus.com'],
+      password: 'admin123',
+      name: 'Administrator',
+      role: 'Admin',
+      department: 'Executive Management',
+      phone: '+91 98765 43210',
+      location: 'Chennai, India'
+    },
+    {
+      email: 'commercial@nexus.com',
+      aliases: ['commercial', 'commercial@nexus.com'],
+      password: 'commercial123',
+      name: 'Commercial Manager',
+      role: 'Commercial Manager',
+      department: 'Commercial Operations',
+      phone: '+91 98765 00002',
+      location: 'Chennai, India'
+    }
+  ];
+
   const NexusApi = {
     baseUrl: API_BASE_URL,
 
     auth: {
       async login(email, password) {
-        return await request('/auth/login', {
-          method: 'POST',
-          body: JSON.stringify({ email, password })
-        });
+        const normalized = (email || '').trim().toLowerCase();
+        const user = FRONTEND_USERS_CONFIG.find(u => 
+          u.email.toLowerCase() === normalized || 
+          (u.aliases && u.aliases.includes(normalized))
+        );
+        if (!user || user.password !== password) {
+          const err = new Error('Invalid email or password');
+          err.status = 401;
+          err.detail = 'Invalid email or password';
+          throw err;
+        }
+        const profile = {
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          department: user.department,
+          phone: user.phone,
+          location: user.location
+        };
+        sessionStorage.setItem('nexus_user', JSON.stringify(profile));
+        sessionStorage.setItem('nexus_role', profile.role);
+        localStorage.setItem('nexus_user', JSON.stringify(profile));
+        localStorage.setItem('nexus_role', profile.role);
+        return { success: true, user: profile };
       },
 
-      async me(token) {
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        return await request('/auth/me', {
-          method: 'GET',
-          headers
-        });
+      async me() {
+        return this.getStoredUser();
       },
 
       getStoredUser() {
         try {
-          const raw = sessionStorage.getItem('nexus_user');
+          const raw = sessionStorage.getItem('nexus_user') || localStorage.getItem('nexus_user');
           if (!raw) return null;
           if (raw.startsWith('{')) {
             return JSON.parse(raw);
           }
-          return { email: raw, role: sessionStorage.getItem('nexus_role') || 'Admin', name: raw };
+          const role = sessionStorage.getItem('nexus_role') || localStorage.getItem('nexus_role') || 'Admin';
+          return { email: raw, role, name: raw };
         } catch (e) {
           return null;
         }
@@ -112,7 +152,7 @@
       getUserRole() {
         const user = this.getStoredUser();
         if (user && user.role) return user.role;
-        const role = sessionStorage.getItem('nexus_role');
+        const role = sessionStorage.getItem('nexus_role') || localStorage.getItem('nexus_role');
         if (role) return role;
         return 'Admin';
       },
@@ -121,6 +161,8 @@
         sessionStorage.removeItem('nexus_user');
         sessionStorage.removeItem('nexus_role');
         sessionStorage.removeItem('nexus_token');
+        localStorage.removeItem('nexus_user');
+        localStorage.removeItem('nexus_role');
         window.location.href = 'index.html';
       }
     },

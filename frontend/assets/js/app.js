@@ -241,8 +241,31 @@ function initModals() {
 }
 
 /* --------------------------------------------------------------------------
-   5. FORM SUBMISSION & NAVIGATION
+   5. FRONTEND AUTHENTICATION & NAVIGATION
    -------------------------------------------------------------------------- */
+const FRONTEND_AUTH_USERS = [
+  {
+    email: 'admin@nexus.com',
+    aliases: ['admin', 'admin@nexus.com'],
+    password: 'admin123',
+    name: 'Administrator',
+    role: 'Admin',
+    department: 'Executive Management',
+    phone: '+91 98765 43210',
+    location: 'Chennai, India'
+  },
+  {
+    email: 'commercial@nexus.com',
+    aliases: ['commercial', 'commercial@nexus.com'],
+    password: 'commercial123',
+    name: 'Commercial Manager',
+    role: 'Commercial Manager',
+    department: 'Commercial Operations',
+    phone: '+91 98765 00002',
+    location: 'Chennai, India'
+  }
+];
+
 function initFormSubmission() {
   const loginForm = document.getElementById('loginForm');
   const usernameInput = document.getElementById('usernameInput');
@@ -250,7 +273,7 @@ function initFormSubmission() {
   const btnSubmit = document.getElementById('btnLoginSubmit');
 
   if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
       const username = usernameInput ? usernameInput.value.trim() : '';
@@ -273,58 +296,49 @@ function initFormSubmission() {
         btnSubmit.style.opacity = '0.7';
       }
 
-      showToast('Authenticating with Nexus ERP...', 'info');
+      // Frontend-only authentication check
+      const normalizedInput = username.toLowerCase();
+      const matchedUser = FRONTEND_AUTH_USERS.find(u => 
+        u.email.toLowerCase() === normalizedInput || 
+        (u.aliases && u.aliases.includes(normalizedInput))
+      );
 
-      try {
-        let authResult = null;
-        if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.login === 'function') {
-          authResult = await NexusApi.auth.login(username, password);
-        } else {
-          const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: username, password: password })
-          });
-          if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            throw new Error(errData.detail || 'Invalid email or password');
-          }
-          authResult = await response.json();
-        }
-
-        if (authResult && authResult.user) {
-          const user = authResult.user;
-          sessionStorage.setItem('nexus_user', JSON.stringify(user));
-          sessionStorage.setItem('nexus_role', user.role);
-          sessionStorage.setItem('nexus_token', user.token || '');
-
-          showToast(`Welcome ${user.name}! Logging in as ${user.role}...`, 'success');
-
-          setTimeout(() => {
-            if (user.role === 'Commercial Manager') {
-              window.location.href = 'home.html?module=worklist&view=new_project';
-            } else {
-              window.location.href = 'home.html?module=worklist&view=payment';
-            }
-          }, 700);
-        } else {
-          throw new Error('Authentication response was invalid.');
-        }
-
-      } catch (err) {
-        console.error('Login error:', err);
-        const errMsg = err.detail || err.message || 'Invalid email or password';
-        showToast(errMsg, 'error');
+      if (!matchedUser || matchedUser.password !== password) {
+        showToast('Invalid email or password', 'error');
         if (passwordInput) {
           passwordInput.value = '';
           passwordInput.focus();
         }
-      } finally {
         if (btnSubmit) {
           btnSubmit.disabled = false;
           btnSubmit.style.opacity = '1';
         }
+        return;
       }
+
+      const userProfile = {
+        email: matchedUser.email,
+        name: matchedUser.name,
+        role: matchedUser.role,
+        department: matchedUser.department,
+        phone: matchedUser.phone,
+        location: matchedUser.location
+      };
+
+      sessionStorage.setItem('nexus_user', JSON.stringify(userProfile));
+      sessionStorage.setItem('nexus_role', userProfile.role);
+      localStorage.setItem('nexus_user', JSON.stringify(userProfile));
+      localStorage.setItem('nexus_role', userProfile.role);
+
+      showToast(`Welcome ${userProfile.name}! Logging in as ${userProfile.role}...`, 'success');
+
+      setTimeout(() => {
+        if (userProfile.role === 'Commercial Manager') {
+          window.location.href = 'home.html?module=worklist&view=new_project';
+        } else {
+          window.location.href = 'home.html?module=worklist&view=payment';
+        }
+      }, 700);
     });
   }
 }

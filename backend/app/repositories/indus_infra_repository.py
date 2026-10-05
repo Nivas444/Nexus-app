@@ -215,3 +215,13 @@ class IndusInfraRepository:
         except Exception:
             self.db.rollback()
             raise
+
+    def bulk_create(self, items: List[IndusCustomerInfra]) -> List[IndusCustomerInfra]:
+        try:
+            self.db.add_all(items)
+            self.db.commit()
+            return items
+        except Exception:
+            self.db.rollback()
+            raise
+

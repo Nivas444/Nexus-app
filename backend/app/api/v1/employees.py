@@ -193,3 +193,19 @@ def download_employee_document(
             "Cache-Control": "no-cache, no-store, must-revalidate"
         }
     )
+
+
+# ----------------- Bulk Upload Endpoint -----------------
+
+@router.post("/master/employees/bulk-upload", summary="Bulk Upload Employees via Excel or CSV")
+@router.post("/employees/bulk-upload", summary="Bulk Upload Employees (Alias)", include_in_schema=False)
+async def bulk_upload_employees(
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV file containing employee records"),
+    db: Session = Depends(get_db)
+):
+    """
+    Upload and parse Excel (.xlsx/.xls) or CSV file to bulk-insert employee records into PostgreSQL `company_employee_details`.
+    """
+    content = await file.read()
+    service = EmployeeService(db)
+    return service.process_bulk_upload(content, file.filename or "")

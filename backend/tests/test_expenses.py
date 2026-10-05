@@ -83,9 +83,11 @@ def test_get_nonexistent_expense_404(client: TestClient):
     assert response.status_code == 404
 
 def test_update_expense(client: TestClient):
+    import time
+    ts = int(time.time() * 1000)
     # 1. Create
     payload = {
-        "expenseName": "Original Expense Name",
+        "expenseName": f"Original Expense Name {ts}",
         "expenseCategory": "Material Procurement",
         "expenseHead": "Capex",
         "gst": "18%",
@@ -97,7 +99,7 @@ def test_update_expense(client: TestClient):
 
     # 2. Update
     update_payload = {
-        "expenseName": "Updated Expense Name",
+        "expenseName": f"Updated Expense Name {ts}",
         "expenseCategory": "Human Resources",
         "expenseHead": "Opex",
         "gst": "5%",
@@ -106,7 +108,7 @@ def test_update_expense(client: TestClient):
     update_res = client.put(f"/api/v1/master/expenses/{exp_id}", json=update_payload)
     assert update_res.status_code == 200
     updated = update_res.json()
-    assert updated["expense_name"] == "Updated Expense Name"
+    assert updated["expense_name"] == f"Updated Expense Name {ts}"
     assert updated["expense_category"] == "Human Resources"
     assert updated["expense_head"] == "Opex"
     assert updated["gst_rate"] == 5.0
@@ -116,9 +118,11 @@ def test_update_expense(client: TestClient):
     client.delete(f"/api/v1/master/expenses/{exp_id}")
 
 def test_patch_status_toggle(client: TestClient):
+    import time
+    ts = int(time.time() * 1000)
     # 1. Create
     payload = {
-        "expenseName": "Status Toggle Test",
+        "expenseName": f"Status Toggle Test {ts}",
         "status": "Active"
     }
     res = client.post("/api/v1/master/expenses", json=payload)

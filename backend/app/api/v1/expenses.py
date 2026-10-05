@@ -114,14 +114,14 @@ def delete_expense(
     service = ExpenseService(db)
     return service.delete_expense(expense_id)
 
-@router.post("/bulk-upload", summary="Bulk Upload Expenses via CSV")
+@router.post("/bulk-upload", summary="Bulk Upload Expenses via Excel or CSV")
 async def bulk_upload_expenses(
-    file: UploadFile = File(..., description="CSV file containing expense records"),
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV file containing expense records"),
     db: Session = Depends(get_db)
 ):
     """
-    Upload and parse CSV file to bulk-insert records into PostgreSQL `company_expenses`.
+    Upload and parse Excel or CSV file to bulk-insert records into PostgreSQL `company_expenses`.
     """
     content = await file.read()
     service = ExpenseService(db)
-    return service.process_bulk_csv(content)
+    return service.process_bulk_upload(content, file.filename or "")

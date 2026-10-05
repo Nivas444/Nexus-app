@@ -1,4 +1,7 @@
 import re
+import io
+import csv
+import openpyxl
 from datetime import datetime, date
 from decimal import Decimal
 from typing import List, Optional, Tuple, Dict, Any
@@ -492,3 +495,241 @@ class EmployeeService:
                 detail=f"No '{doc_type_canonical}' PDF document found for employee #{employee_id}."
             )
         return doc.file_name, doc.mime_type, bytes(doc.file_data)
+
+    def process_bulk_upload(self, file_content: bytes, filename: str = "", upload_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Parses Excel (.xlsx/.xls) or CSV content and bulk-inserts employee records
+        into PostgreSQL `company_employee_details` table with full transaction safety,
+        official template structure validation, DOB/DOJ date validation, and idempotent retry support.
+        """
+        if not file_content:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty."
+            )
+
+        rows_dict_list: List[Dict[str, Any]] = []
+        raw_headers: List[str] = []
+        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
+
+        if is_excel:
+            try:
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                sheet = wb.active
+                if sheet is None:
+                    raise ValueError("Excel file contains no active sheet.")
+                
+                for col in range(1, sheet.max_column + 1):
+                    val = sheet.cell(1, col).value
+                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
+
+                for row_idx in range(2, sheet.max_row + 1):
+                    row_data = {}
+                    has_data = False
+                    for col_idx, header in enumerate(raw_headers, start=1):
+                        cell_val = sheet.cell(row_idx, col_idx).value
+                        if cell_val is not None and str(cell_val).strip():
+                            has_data = True
+                        row_data[header] = cell_val
+                    if has_data:
+                        rows_dict_list.append(row_data)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
+                )
+        else:
+            try:
+                try:
+                    decoded = file_content.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    decoded = file_content.decode("latin-1")
+                
+                reader = csv.DictReader(io.StringIO(decoded))
+                raw_headers = reader.fieldnames or []
+                for r in reader:
+                    if any(v and str(v).strip() for v in r.values()):
+                        rows_dict_list.append(r)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read CSV file: {str(e)}"
+                )
+
+        # 1. Structure & Official Header Validation
+        def normalize_header(h: str) -> str:
+            s = re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
+            if s == "martialstatus":
+                s = "maritalstatus"
+            if s in ("drivinglicense", "drivinglicence", "dl"):
+                s = "drivinglicence"
+            if s in ("email", "emailaddress", "emailid"):
+                s = "emailid"
+            if s in ("aadhaarnumber", "aadharnumber", "aadhaar", "aadhar"):
+                s = "aadharnumber"
+            if s.startswith("esiipnumber") or s.startswith("esicode") or s.startswith("esi"):
+                s = "esiipnumber"
+            if s.startswith("epfuan") or s.startswith("epf"):
+                s = "epfuan"
+            if s.startswith("previousexperience") or s.startswith("prevexp"):
+                s = "previousexperience"
+            return s
+
+        norm_headers = [normalize_header(h) for h in raw_headers if h is not None]
+        required_canonical = ["employeetype", "employeename", "employeeid", "dob", "doj", "status"]
+        for req in required_canonical:
+            if req not in norm_headers:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid Employee Upload Template. Please use the official Employee Upload Template."
+                )
+
+        if not rows_dict_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No employee data rows found in uploaded file."
+            )
+
+        new_records: List[CompanyEmployee] = []
+        row_errors: List[str] = []
+        seen_codes: set = set()
+        incoming_codes: List[str] = []
+
+        for idx, row in enumerate(rows_dict_list, start=2):
+            try:
+                def get_val(*keys: str, default: Any = None) -> Any:
+                    for k in keys:
+                        if k in row and row[k] is not None:
+                            return row[k]
+                        k_norm = normalize_header(k)
+                        for rk, rv in row.items():
+                            if rv is not None and normalize_header(rk) == k_norm:
+                                return rv
+                    return default
+
+                emp_name = str(get_val("Employee Name", "EmployeeName", "Name", default="") or "").strip()
+                emp_code = str(get_val("Employee ID", "Employee Code", "EmployeeID", "EmployeeCode", "ID", default="") or "").strip()
+                emp_type_raw = str(get_val("Employee Type", "EmployeeType", default="On-Roll") or "On-Roll").strip()
+                emp_type = "Contract" if "contract" in emp_type_raw.lower() else "On-Roll"
+
+                if not emp_name:
+                    row_errors.append(f"Row {idx}: Missing Employee Name")
+                    continue
+
+                if not emp_code:
+                    emp_code = f"EMP-{idx:04d}"
+
+                if emp_code in seen_codes:
+                    row_errors.append(f"Row {idx}: Duplicate Employee ID '{emp_code}' within the uploaded file")
+                    continue
+                seen_codes.add(emp_code)
+                incoming_codes.append(emp_code)
+
+                # Dates
+                dob_raw = get_val("DOB", "Date of Birth", "Birth Date")
+                doj_raw = get_val("DOJ", "Date of Joining", "Joining Date")
+                dob_date = parse_date_field(dob_raw)
+                doj_date = parse_date_field(doj_raw)
+
+                # Experience
+                prev_exp_raw = get_val("Previous Experience", "PreviousExperience", "Prev Exp")
+                prev_exp = parse_experience_field(prev_exp_raw)
+
+                # Other text fields
+                address = str(get_val("Address", default="") or "").strip() or None
+                mobile = str(get_val("Mobile Number", "MobileNumber", "Mobile", "Contact Number", default="") or "").strip() or None
+                email = str(get_val("E - Mail ID", "E-Mail ID", "Email", "Email ID", default="") or "").strip() or None
+                blood_group = str(get_val("Blood Group", "BloodGroup", default="A+") or "A+").strip()
+                marital_status = str(get_val("Martial Status", "Marital Status", "MaritalStatus", default="Single") or "Single").strip()
+                designation = str(get_val("Designation", default="") or "").strip() or None
+                qualification = str(get_val("Qualification", default="") or "").strip() or None
+                pan = str(get_val("PAN Number", "PAN", default="") or "").strip() or None
+                aadhaar = str(get_val("Aadhar Number", "Aadhaar Number", "Aadhar", "Aadhaar", default="") or "").strip() or None
+                dl = str(get_val("Driving Licence", "Driving License", "DL Number", default="") or "").strip() or None
+                passport = str(get_val("Passport Number", "Passport", default="") or "").strip() or None
+
+                epf_uan = str(get_val("EPF UAN", "EPF", "UAN", default="") or "").strip() or None
+                esi_code = str(get_val("ESI IP Number  ", "ESI IP Number", "ESI Code", "ESI", default="") or "").strip() or None
+
+                geo_attendance_raw = get_val("Geo Attendance", "GeoAttendance", default=False)
+                if isinstance(geo_attendance_raw, bool):
+                    geo_attendance = geo_attendance_raw
+                else:
+                    geo_attendance = str(geo_attendance_raw or "").strip().lower() in ("yes", "true", "1", "y")
+
+                status_raw = get_val("Status", default="Active")
+                status_val = parse_status_field(status_raw)
+
+                emp_record = CompanyEmployee(
+                    company_name="Nexus",
+                    employee_type=emp_type,
+                    employee_name=emp_name,
+                    employee_code=emp_code,
+                    address=address,
+                    mobile_number=mobile,
+                    email=email,
+                    dob=dob_date,
+                    blood_group=blood_group,
+                    marital_status=marital_status,
+                    doj=doj_date,
+                    designation=designation,
+                    previous_experience=prev_exp,
+                    qualification=qualification,
+                    pan_number=pan,
+                    aadhaar_number=aadhaar,
+                    dl_number=dl,
+                    passport_number=passport,
+                    epf_available=bool(epf_uan),
+                    epf_uan=epf_uan,
+                    esi_code_available=bool(esi_code),
+                    esi_code=esi_code,
+                    geo_attendance=geo_attendance,
+                    status=status_val
+                )
+                new_records.append(emp_record)
+            except Exception as row_ex:
+                row_errors.append(f"Row {idx}: {str(row_ex)}")
+
+        if not new_records and row_errors:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to process records: {'; '.join(row_errors[:5])}"
+            )
+
+        # 2. Idempotent Retry Check: If all incoming employee codes already exist in DB
+        if incoming_codes:
+            existing_count = self.repository.db.query(CompanyEmployee).filter(
+                CompanyEmployee.employee_code.in_(incoming_codes)
+            ).count()
+            if existing_count == len(incoming_codes):
+                # All records from this batch already exist -> Safe retry return
+                return {
+                    "success": True,
+                    "imported_count": len(incoming_codes),
+                    "is_retry": True,
+                    "message": "Upload already processed. No duplicate records created.",
+                    "errors": []
+                }
+
+        # 3. Atomic Database Insertion
+        try:
+            self.repository.bulk_create(new_records)
+        except IntegrityError as ie:
+            self.repository.db.rollback()
+            err_msg = str(ie.orig) if hasattr(ie, 'orig') else str(ie)
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Duplicate Employee record conflict during bulk upload: {err_msg}"
+            )
+        except Exception as e:
+            self.repository.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error during bulk insert: {str(e)}"
+            )
+
+        return {
+            "success": True,
+            "imported_count": len(new_records),
+            "errors": row_errors
+        }

@@ -15,9 +15,11 @@ def parse_status_field(val: Any) -> str:
     return "Active"
 
 def parse_date_field(val: Any) -> Optional[date]:
-    """Helper to parse date from string (YYYY-MM-DD or DD - MM - YYYY)."""
+    """Helper to parse date from string (YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY)."""
     if not val:
         return None
+    if isinstance(val, datetime):
+        return val.date()
     if isinstance(val, date):
         return val
     if isinstance(val, str):
@@ -33,6 +35,12 @@ def parse_date_field(val: Any) -> Optional[date]:
         try:
             cleaned = val.replace(" ", "")
             return datetime.strptime(cleaned, "%d-%m-%Y").date()
+        except ValueError:
+            pass
+        # Try DD/MM/YYYY or DD / MM / YYYY
+        try:
+            cleaned = val.replace(" ", "")
+            return datetime.strptime(cleaned, "%d/%m/%Y").date()
         except ValueError:
             pass
         try:

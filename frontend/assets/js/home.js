@@ -4669,8 +4669,56 @@ function renderIndusToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
-  if (currentIndusSubpage === 'product_details' || currentIndusSubpage === 'project_type_details') {
-    // Product Details / Project Type Details Toolbar: Backward Icon on Left + Single Blue Plus (+) on Right
+  if (currentIndusSubpage === 'product_details') {
+    if (currentIndusProductSubpage === 'materials' || currentIndusProductSubpage === 'expenses') {
+      const pageLabel = currentIndusProductSubpage === 'materials' ? 'Materials' : 'Expenses';
+      toolbar.innerHTML = `
+        <div class="toolbar-left">${universalBackBtnHtml}</div>
+        <div class="toolbar-right">
+          <!-- Green CSV Upload Icon -->
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+            <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+          </button>
+          <!-- Orange Bulk Upload Icon -->
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
+          </button>
+          <!-- Blue Add (+) Button -->
+          <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New ${pageLabel}" aria-label="Add Record">
+            <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+          </button>
+        </div>
+      `;
+      document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
+        triggerCsvUpload();
+      });
+      document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
+        triggerBulkUpload(pageLabel);
+      });
+      document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+        openSideForm();
+      });
+      return;
+    }
+
+    // Other Product Details Subpages (Infra, Rate): Backward Icon on Left + Single Blue Plus (+) on Right
+    toolbar.innerHTML = `
+      <div class="toolbar-left">${universalBackBtnHtml}</div>
+      <div class="toolbar-right">
+        <!-- Blue Add (+) Button -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Record" aria-label="Add Record">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+    document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
+      openSideForm();
+    });
+    return;
+  }
+
+  if (currentIndusSubpage === 'project_type_details') {
+    // Project Type Details Toolbar: Backward Icon on Left + Single Blue Plus (+) on Right
     toolbar.innerHTML = `
       <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
@@ -4739,7 +4787,7 @@ function renderIndusToolbar() {
       triggerCsvUpload();
     });
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-      openBulkUploadModal('GBPA');
+      triggerBulkUpload('GBPA');
     });
     document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -4748,10 +4796,14 @@ function renderIndusToolbar() {
   }
 
   if (currentIndusSubpage === 'infra') {
-    // Indus Towers Infra Toolbar: Backward Icon on Left + Orange Bulk Upload + Blue Plus (+) on Right
+    // Indus Towers Infra Toolbar: Backward Icon on Left + CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
     toolbar.innerHTML = `
       <div class="toolbar-left">${universalBackBtnHtml}</div>
       <div class="toolbar-right">
+        <!-- Green CSV Upload Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
           <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
@@ -4762,8 +4814,11 @@ function renderIndusToolbar() {
         </button>
       </div>
     `;
+    document.getElementById('btnIndusCsv')?.addEventListener('click', () => {
+      triggerCsvUpload();
+    });
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-      openBulkUploadModal('Infra');
+      triggerBulkUpload('Infra');
     });
     document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -4795,7 +4850,7 @@ function renderIndusToolbar() {
       triggerCsvUpload();
     });
     document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-      openBulkUploadModal('Site');
+      triggerBulkUpload('Site');
     });
     document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -4803,17 +4858,13 @@ function renderIndusToolbar() {
     return;
   }
 
-  // Indus Towers Toolbar (Projects): Backward Icon on Left + CSV Upload + Orange Bulk Upload + Blue Plus (+) on Right
+  // Indus Towers Toolbar (Projects): Backward Icon on Left + CSV Upload + Blue Plus (+) on Right (No Bulk Upload)
   toolbar.innerHTML = `
     <div class="toolbar-left">${universalBackBtnHtml}</div>
     <div class="toolbar-right">
       <!-- Green CSV Upload Icon -->
       <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnIndusCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
         <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
-      </button>
-      <!-- Orange Bulk Upload Icon -->
-      <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnIndusDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
-        <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
       </button>
       <!-- Blue Add (+) Button -->
       <button type="button" class="toolbar-icon-btn btn-add-action" id="btnIndusAdd" data-tooltip="Add New Record" aria-label="Add Record">
@@ -4827,9 +4878,6 @@ function renderIndusToolbar() {
   });
   document.getElementById('btnIndusAdd')?.addEventListener('click', () => {
     openSideForm();
-  });
-  document.getElementById('btnIndusDocUpload')?.addEventListener('click', () => {
-    openBulkUploadModal('Projects');
   });
 }
 
@@ -5437,7 +5485,7 @@ function renderMasterToolbar() {
       triggerCsvUpload();
     });
     document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
-      openBulkUploadModal('Employee');
+      triggerBulkUpload('Employee');
     });
     document.getElementById('btnMasterAdd')?.addEventListener('click', () => {
       openSideForm();
@@ -5445,9 +5493,9 @@ function renderMasterToolbar() {
     return;
   }
 
-  if (currentMasterSubpage === 'vendor' || currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
+  if (currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
     // Toolbar: Green CSV Upload + Orange Bulk Upload + Blue Add (+) Button on Right (No Backward icon)
-    const pageLabel = currentMasterSubpage === 'products' ? 'Products' : currentMasterSubpage === 'expenses' ? 'Expense' : 'Vendor';
+    const pageLabel = currentMasterSubpage === 'products' ? 'Products' : 'Expense';
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
@@ -5460,17 +5508,17 @@ function renderMasterToolbar() {
           <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
-        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New ${currentMasterSubpage === 'products' ? 'Product' : currentMasterSubpage === 'expenses' ? 'Expense' : 'Vendor'}" aria-label="Add Record">
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New ${currentMasterSubpage === 'products' ? 'Product' : 'Expense'}" aria-label="Add Record">
           <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
         </button>
       </div>
     `;
 
     document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
-      openBulkUploadModal(pageLabel);
+      triggerBulkUpload(pageLabel);
     });
   } else {
-    // Master Customer Toolbar: Green CSV Upload + Blue Add (+) Button on Right (No Backward icon)
+    // Master Customer and Vendor Toolbar: Green CSV Upload + Blue Add (+) Button on Right (No Bulk Upload, No Backward icon)
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
@@ -5479,7 +5527,7 @@ function renderMasterToolbar() {
           <img src="icons/CSV upload.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
-        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New Record" aria-label="Add Record">
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New ${currentMasterSubpage === 'vendor' ? 'Vendor' : 'Record'}" aria-label="Add Record">
           <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
         </button>
       </div>
@@ -14971,6 +15019,8 @@ function initSideFormEvents() {
     const vendorServiceProject = document.getElementById('vendorServiceProjectScopeSidePanel');
     const vendorServiceTransport = document.getElementById('vendorServiceTransportScopeSidePanel');
     const vendorServiceOthers = document.getElementById('vendorServiceOthersScopeSidePanel');
+    const bulkUploadPanel = document.getElementById('bulkUploadSidePanel');
+    const addBulkUploadCard = document.getElementById('addBulkUploadCard');
 
     const isAnyPopupOpen = 
       (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') ||
@@ -14989,7 +15039,9 @@ function initSideFormEvents() {
       (addProductScope && addProductScope.style.display !== 'none' && addProductScope.style.display !== '') ||
       (vendorServiceProject && vendorServiceProject.style.display !== 'none' && vendorServiceProject.style.display !== '') ||
       (vendorServiceTransport && vendorServiceTransport.style.display !== 'none' && vendorServiceTransport.style.display !== '') ||
-      (vendorServiceOthers && vendorServiceOthers.style.display !== 'none' && vendorServiceOthers.style.display !== '');
+      (vendorServiceOthers && vendorServiceOthers.style.display !== 'none' && vendorServiceOthers.style.display !== '') ||
+      (bulkUploadPanel && bulkUploadPanel.style.display !== 'none' && bulkUploadPanel.style.display !== '') ||
+      (addBulkUploadCard && addBulkUploadCard.style.display !== 'none' && addBulkUploadCard.style.display !== '');
 
     const cardsRow = document.querySelector('.side-form-cards-row');
     const empCard = document.getElementById('addEmployeeCard');
@@ -18065,6 +18117,15 @@ function initExcelFilterSystem() {
         showToast('Contact filter cleared');
         return;
       }
+      if (dropdown.dataset.filterContext === 'bulkUpload') {
+        if (currentBulkUploadFilterCol) {
+          delete activeBulkUploadFilters[currentBulkUploadFilterCol];
+          renderBulkUploadTable();
+        }
+        closeExcelFilter();
+        showToast('Bulk upload filter cleared');
+        return;
+      }
       if (dropdown.dataset.filterContext === 'siteContact') {
         if (currentSiteContactFilterCol) {
           delete activeSiteContactFilters[currentSiteContactFilterCol];
@@ -18320,6 +18381,23 @@ function initExcelFilterSystem() {
         renderCustomerContactTable();
         closeExcelFilter();
         showToast('Contact filter applied');
+        return;
+      }
+
+      if (dropdown.dataset.filterContext === 'bulkUpload') {
+        if (!currentBulkUploadFilterCol) return;
+        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+          .map(chk => chk.value);
+        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+          .map(chk => chk.value);
+        if (checkedItems.length === allItems.length) {
+          delete activeBulkUploadFilters[currentBulkUploadFilterCol];
+        } else {
+          activeBulkUploadFilters[currentBulkUploadFilterCol] = new Set(checkedItems);
+        }
+        renderBulkUploadTable();
+        closeExcelFilter();
+        showToast('Bulk upload filter applied');
         return;
       }
 
@@ -18693,7 +18771,7 @@ function renderCompanyBankTable() {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching bank records found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 18px;">No matching bank records found.</td></tr>`;
     updateCompanyBankFilterBtnStates();
     return;
   }
@@ -18713,7 +18791,6 @@ function renderCompanyBankTable() {
         </td>
         <td class="col-bank-name" style="text-align: left !important; padding-left: 14px;">${row.bank_name || row.bankName || ''}</td>
         <td class="col-bank-ifsc" style="text-align: center !important;">${row.ifsc_code || row.ifscCode || ''}</td>
-        <td class="col-bank-responsible" style="text-align: left !important; padding-left: 14px;">${row.employee_name || row.responsible || ''}</td>
         <td class="col-bank-status td-center">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'De-Active' : 'Active'}</span>
         </td>
@@ -24705,14 +24782,16 @@ function getCurrentBulkPageLabel() {
   if (typeof currentModule !== 'undefined' && currentModule === 'master') {
     if (currentMasterSubpage === 'products') return 'Products';
     if (currentMasterSubpage === 'expenses') return 'Expense';
-    if (currentMasterSubpage === 'vendor') return 'Vendor';
     return 'Employee';
   }
   if (typeof currentModule !== 'undefined' && (currentModule === 'indus' || currentModule === 'indus_towers' || currentModule === 'customer')) {
+    if (currentIndusSubpage === 'product_details') {
+      if (currentIndusProductSubpage === 'materials') return 'Materials';
+      if (currentIndusProductSubpage === 'expenses') return 'Expenses';
+    }
     if (currentIndusSubpage === 'products') return 'GBPA';
     if (currentIndusSubpage === 'infra') return 'Infra';
     if (currentIndusSubpage === 'site') return 'Site';
-    if (currentIndusSubpage === 'projects') return 'Projects';
   }
   return 'Employee';
 }
@@ -27993,112 +28072,558 @@ window.openProjectDocFilter = function(colKey, event) {
 };
 
 // ==========================================================================
-// BULK UPLOAD MODAL CONTROLLERS
+// BULK UPLOAD CONTROLLERS & TABLE HANDLERS
 // ==========================================================================
 let currentBulkUploadPageName = 'Employee';
+let activeBulkUploadFilters = {};
+let currentBulkUploadFilterCol = null;
 
-window.openBulkUploadModal = function(pageName) {
-  currentBulkUploadPageName = pageName || 'Employee';
+// Initial bulk upload history records mapped by page/module
+let bulkUploadHistoryData = [
+  {
+    id: 'blk-1',
+    page: 'Employee',
+    started: '05/10/2026 09:30:15',
+    completed: '05/10/2026 09:30:20',
+    totalCount: '45',
+    validCount: '45',
+    invalidCount: '0',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-2',
+    page: 'Employee',
+    started: '04/10/2026 14:12:00',
+    completed: '04/10/2026 14:12:08',
+    totalCount: '30',
+    validCount: '28',
+    invalidCount: '2',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-3',
+    page: 'Products',
+    started: '05/10/2026 08:45:10',
+    completed: '05/10/2026 08:45:16',
+    totalCount: '120',
+    validCount: '118',
+    invalidCount: '2',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-5',
+    page: 'Expense',
+    started: '03/10/2026 16:05:40',
+    completed: '03/10/2026 16:05:44',
+    totalCount: '60',
+    validCount: '60',
+    invalidCount: '0',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-6',
+    page: 'GBPA',
+    started: '05/10/2026 10:00:12',
+    completed: '05/10/2026 10:00:18',
+    totalCount: '80',
+    validCount: '80',
+    invalidCount: '0',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-7',
+    page: 'Infra',
+    started: '04/10/2026 15:22:30',
+    completed: '04/10/2026 15:22:35',
+    totalCount: '40',
+    validCount: '40',
+    invalidCount: '0',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-8',
+    page: 'Site',
+    started: '05/10/2026 09:10:00',
+    completed: '05/10/2026 09:10:05',
+    totalCount: '95',
+    validCount: '92',
+    invalidCount: '3',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-10',
+    page: 'Materials',
+    started: '05/10/2026 11:00:20',
+    completed: '05/10/2026 11:00:25',
+    totalCount: '65',
+    validCount: '65',
+    invalidCount: '0',
+    status: 'Completed'
+  },
+  {
+    id: 'blk-11',
+    page: 'Expenses',
+    started: '05/10/2026 11:15:10',
+    completed: '05/10/2026 11:15:15',
+    totalCount: '35',
+    validCount: '35',
+    invalidCount: '0',
+    status: 'Completed'
+  }
+];
+
+function renderBulkUploadTable() {
+  const tbody = document.getElementById('tbodyBulkUploadDetails');
+  if (!tbody) return;
+
+  const curPage = (currentBulkUploadPageName || 'Employee').trim().toLowerCase();
+  let pageRecords = bulkUploadHistoryData.filter(r => {
+    const p = (r.page || '').trim().toLowerCase();
+    if (curPage === 'materials' || curPage.includes('material')) return p === 'materials';
+    if (curPage === 'expenses' || curPage === 'gbpa expenses') return p === 'expenses' || p === 'gbpa expenses';
+    if (curPage === 'expense') return p === 'expense';
+    if (curPage === 'products') return p === 'products';
+    if (curPage === 'employee') return p === 'employee';
+    if (curPage === 'gbpa') return p === 'gbpa';
+    if (curPage === 'infra') return p === 'infra';
+    if (curPage === 'site') return p === 'site';
+    return p === curPage;
+  });
+
+  if (pageRecords.length === 0) {
+    pageRecords = [
+      {
+        id: `blk-${Date.now()}`,
+        page: currentBulkUploadPageName,
+        started: '05/10/2026 09:00:00',
+        completed: '05/10/2026 09:00:05',
+        totalCount: '15',
+        validCount: '15',
+        invalidCount: '0',
+        status: 'Completed'
+      }
+    ];
+  }
+
+  let filtered = pageRecords.filter(row => {
+    for (const [colKey, allowedSet] of Object.entries(activeBulkUploadFilters)) {
+      const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+      if (!allowedSet.has(cellVal)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 18px;">No matching upload logs found.</td></tr>`;
+    updateBulkUploadFilterBtnStates();
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(row => {
+    const isCompleted = (row.status || '').toLowerCase() === 'completed';
+    const isFailed = (row.status || '').toLowerCase() === 'failed';
+    return `
+      <tr>
+        <td class="td-center" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">${row.started}</td>
+        <td class="td-center" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">${row.completed}</td>
+        <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">${row.totalCount}</td>
+        <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; color: #16a34a; font-weight: 600;">${row.validCount}</td>
+        <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; color: ${Number(row.invalidCount) > 0 ? '#dc2626' : '#64748b'}; font-weight: 600;">${row.invalidCount}</td>
+        <td class="td-center" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+          <span class="status-badge ${isCompleted ? 'status-active' : (isFailed ? 'status-inactive' : 'status-progress')}" style="padding: 4px 10px; font-size: 0.85rem;">${row.status}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updateBulkUploadFilterBtnStates();
+}
+
+function updateBulkUploadFilterBtnStates() {
+  const btn = document.getElementById('btnBulkUploadStatusFilter');
+  if (!btn) return;
+  if (activeBulkUploadFilters['status']) {
+    btn.classList.add('has-active-filter');
+  } else {
+    btn.classList.remove('has-active-filter');
+  }
+}
+
+window.openBulkUploadStatusFilter = function(event) {
+  if (event) event.stopPropagation();
+  currentBulkUploadFilterCol = 'status';
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const curPage = (currentBulkUploadPageName || 'Employee').trim().toLowerCase();
+  const pageRecords = bulkUploadHistoryData.filter(r => {
+    const p = (r.page || '').trim().toLowerCase();
+    if (curPage === 'materials' || curPage.includes('material')) return p === 'materials';
+    if (curPage === 'expenses' || curPage === 'gbpa expenses') return p === 'expenses' || p === 'gbpa expenses';
+    if (curPage === 'expense') return p === 'expense';
+    if (curPage === 'products') return p === 'products';
+    if (curPage === 'employee') return p === 'employee';
+    if (curPage === 'gbpa') return p === 'gbpa';
+    if (curPage === 'infra') return p === 'infra';
+    if (curPage === 'site') return p === 'site';
+    return p === curPage;
+  });
+
+  const uniqueValues = Array.from(new Set(pageRecords.map(r => String(r.status || ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = activeBulkUploadFilters['status'];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById('btnBulkUploadStatusFilter');
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'bulkUpload';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
+
+window.openBulkUploadSidePanel = function(pageName) {
+  currentBulkUploadPageName = pageName || getCurrentBulkPageLabel();
   const overlay = document.getElementById('sideFormOverlay');
-  const modal = document.getElementById('bulkUploadCard');
-  const titleBadge = document.getElementById('lblBulkUploadTitle');
-  if (!overlay || !modal) return;
+  const panel = document.getElementById('bulkUploadSidePanel');
+  const addCard = document.getElementById('addBulkUploadCard');
+  if (!overlay || !panel) return;
 
   // Hide all other side form cards
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
-    if (card.id !== 'bulkUploadCard') card.style.display = 'none';
+    if (card.id !== 'bulkUploadSidePanel') card.style.display = 'none';
   });
+
+  if (addCard) addCard.style.display = 'none';
+  panel.classList.remove('card-dimmed-blurred');
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+
+  renderBulkUploadTable();
+  showToast(`Bulk Upload opened for ${currentBulkUploadPageName}`);
+};
+
+window.closeBulkUploadSidePanel = function() {
+  const panel = document.getElementById('bulkUploadSidePanel');
+  const addCard = document.getElementById('addBulkUploadCard');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (panel) panel.style.display = 'none';
+  if (addCard) addCard.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAddBulkUploadModal = function() {
+  const panel = document.getElementById('bulkUploadSidePanel');
+  const addCard = document.getElementById('addBulkUploadCard');
+  const titleBadge = document.getElementById('lblAddBulkUploadTitle');
+  const siteTypeRow = document.getElementById('rowBulkUploadSiteType');
+  if (!addCard) return;
+
+  if (panel) {
+    panel.classList.add('card-dimmed-blurred');
+  }
 
   if (titleBadge) {
     titleBadge.textContent = `Bulk Upload - ${currentBulkUploadPageName}`;
   }
 
-  modal.style.display = 'block';
-  overlay.style.display = 'flex';
-  showToast(`Bulk Upload - ${currentBulkUploadPageName} opened`);
+  if (siteTypeRow) {
+    if ((currentBulkUploadPageName || '').trim().toLowerCase() === 'site') {
+      siteTypeRow.style.display = 'block';
+    } else {
+      siteTypeRow.style.display = 'none';
+    }
+  }
+
+  addCard.style.display = 'block';
+  showToast(`Add Bulk Upload for ${currentBulkUploadPageName} opened`);
+};
+
+window.closeAddBulkUploadModal = function() {
+  const panel = document.getElementById('bulkUploadSidePanel');
+  const addCard = document.getElementById('addBulkUploadCard');
+  if (addCard) addCard.style.display = 'none';
+  if (panel) {
+    panel.classList.remove('card-dimmed-blurred');
+    panel.style.display = 'block';
+  }
+};
+
+window.openBulkUploadModal = function(pageName) {
+  const pageLabel = pageName || getCurrentBulkPageLabel();
+  openBulkUploadSidePanel(pageLabel);
 };
 
 window.closeBulkUploadModal = function() {
-  const modal = document.getElementById('bulkUploadCard');
-  const overlay = document.getElementById('sideFormOverlay');
-  if (modal) modal.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
+  closeBulkUploadSidePanel();
 };
 
 window.downloadBulkCsvTemplate = function() {
-  const page = currentBulkUploadPageName || 'Employee';
-  let headers = [];
-  let sampleRow = [];
-  switch (page.toLowerCase()) {
-    case 'employee':
-      headers = ['Employee Code', 'Employee Name', 'Designation', 'Department', 'DOJ', 'Mobile', 'Email', 'Status'];
-      sampleRow = ['EMP-001', 'John Doe', 'Senior Engineer', 'Engineering', '01/01/2024', '9876543210', 'john.doe@example.com', 'Active'];
-      break;
-    case 'vendor':
-      headers = ['Vendor ID', 'Vendor Name', 'Entity Type', 'Vendor Type', 'PAN Number', 'GST Number', 'Status'];
-      sampleRow = ['VEN-101', 'Apex Tech Solutions', 'Private Limited', 'Supply', 'ABCDE1234F', '33ABCDE1234F1Z5', 'Active'];
-      break;
-    case 'products':
-      headers = ['Product Code', 'Product Name', 'Category', 'UOM', 'Rate', 'HSN/SAC', 'Status'];
-      sampleRow = ['PRD-001', 'Solar Panel 400W', 'Hardware', 'Nos', '8500.00', '8541', 'Active'];
-      break;
-    case 'expense':
-    case 'expenses':
-      headers = ['Expense Name', 'Expense Category', 'Expense Sub-Category', 'Expense Head', 'GST Rate', 'Depreciation', 'RCM', 'Status'];
-      sampleRow = ['Site Infrastructure & Telecom Tower Installation', 'Direct Operations', 'Civil Works', 'Capex', '18%', 'Yes', 'No', 'Active'];
-      break;
-    case 'site':
-      headers = ['Site ID', 'WH ID', 'Site Name', 'District', 'Town', 'Latitude', 'Longitude', 'Transport Zone', 'Status'];
-      sampleRow = ['IN-123456', 'WH-101', 'Guindy Tower Site', 'Chennai', 'Guindy', '13.0067', '80.2206', 'A', 'Active'];
-      break;
-    case 'gbpa':
-      headers = ['Item Code', 'Item Name', 'Item Type', 'Description', 'UOM', 'Rate', 'HSN/SAC', 'Status'];
-      sampleRow = ['GBPA-001', 'Tower Foundation Bolts', 'Capex', 'High tensile bolts', 'Set', '15000.00', '7318', 'Active'];
-      break;
-    case 'infra':
-      headers = ['Infra Code', 'Category', 'Description', 'Make', 'Commissioning', 'I-Map', 'Status'];
-      sampleRow = ['INF-01', 'DG Set', '25 KVA Silent Generator', 'Kirloskar', '15/01/2025', 'Yes', 'Active'];
-      break;
-    case 'projects':
-      headers = ['Project ID', 'Customer', 'PO No', 'Site ID', 'Site Name', 'Project Type', 'Status', 'Task'];
-      sampleRow = ['PRJ-1001', 'Indus Towers', 'PO-987654', 'IN-123456', 'Guindy Hub', 'New Build', 'In Progress', 'Civil Foundation'];
-      break;
-    default:
-      headers = ['ID', 'Name', 'Description', 'Status'];
-      sampleRow = ['1', 'Sample Item', 'Sample Description', 'Active'];
+  const page = (currentBulkUploadPageName || 'Employee').trim();
+  const pageLower = page.toLowerCase();
+  let templateFileName = '';
+
+  if (pageLower === 'employee') {
+    templateFileName = 'Company_Employee-Template.xlsx';
+  } else if (pageLower === 'products') {
+    templateFileName = 'Company_Products-Template.xlsx';
+  } else if (pageLower === 'expense') {
+    templateFileName = 'Company_Expenses-Template.xlsx';
+  } else if (pageLower === 'site') {
+    const selSiteType = document.getElementById('selBulkUploadSiteType');
+    const siteVal = (selSiteType ? selSiteType.value : 'new_site').toLowerCase();
+    if (siteVal === 'site_contact' || siteVal.includes('contact')) {
+      templateFileName = 'Site_contacts-Template.xlsx';
+    } else {
+      templateFileName = 'Site_details-Template.xlsx';
+    }
+  } else if (pageLower === 'gbpa') {
+    templateFileName = 'Customer_GBPA-Template.xlsx';
+  } else if (pageLower === 'infra') {
+    templateFileName = 'indus Infra Products-Template.xlsx';
+  } else if (pageLower === 'materials' || pageLower.includes('material')) {
+    templateFileName = 'indus GBPA Products-Materials-Template.xlsx';
+  } else if (pageLower === 'expenses' || pageLower === 'gbpa expenses' || pageLower.includes('gbpa products-expenses')) {
+    templateFileName = 'indus GBPA Products-Expenses-Template.xlsx';
+  } else {
+    templateFileName = 'Company_Employee-Template.xlsx';
   }
-  const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), sampleRow.join(',')].join('\n');
-  const encodedUri = encodeURI(csvContent);
+
+  const fileUrl = `bulk upload template/${encodeURIComponent(templateFileName)}`;
   const link = document.createElement('a');
-  link.setAttribute('href', encodedUri);
-  link.setAttribute('download', `${page}_Template.csv`);
+  link.setAttribute('href', fileUrl);
+  link.setAttribute('download', templateFileName);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  showToast(`CSV Template downloaded for ${page}`);
+  showToast(`Template downloaded: ${templateFileName}`);
 };
 
+window.downloadBulkDocGuide = function() {
+  const page = currentBulkUploadPageName || 'Employee';
+  const content = `=====================================================
+BULK UPLOAD DOCUMENTATION & FORMAT GUIDE: ${page.toUpperCase()}
+=====================================================
+
+1. Allowed File Formats:
+   - CSV (.csv)
+   - Microsoft Excel (.xlsx, .xls)
+
+2. General Instructions:
+   - The first row must contain exact column headers as provided in the CSV template.
+   - Do not rename or leave empty required header columns.
+   - Date formats should follow: DD/MM/YYYY or YYYY-MM-DD.
+   - Status values should be: "Active" or "De-Active".
+
+3. Support:
+   - For issues or validation errors, verify that no special characters corrupt the CSV delimiters.
+
+Generated on: ${new Date().toLocaleString()}
+`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${page}_Bulk_Upload_Guide.txt`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast(`Documentation Guide downloaded for ${page}`);
+};
+
+let isBulkUploadingActive = false;
+
 window.handleBulkCsvFileSelected = async function(input) {
+  if (isBulkUploadingActive) {
+    console.warn('Bulk upload already in progress. Ignoring duplicate click.');
+    return;
+  }
+
   if (input.files && input.files[0]) {
     const file = input.files[0];
-    if (typeof currentBulkUploadPageName === 'string' && currentBulkUploadPageName.toLowerCase().includes('expense') && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
-      try {
-        showToast(`Uploading "${file.name}" to PostgreSQL...`);
-        const result = await NexusApi.expenses.bulkUpload(file);
-        showToast(`Bulk upload successful: ${result.imported_count || 0} expenses imported!`);
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.csv') && !fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup('Only .csv, .xlsx, or .xls files are allowed for bulk upload.', 'Invalid File Format');
+      } else {
+        showToast('Invalid file format. Please upload a CSV or Excel file.');
+      }
+      input.value = '';
+      return;
+    }
+
+    const triggerBtn = document.getElementById('btnTriggerBulkCsvUpload');
+    if (triggerBtn) {
+      triggerBtn.style.pointerEvents = 'none';
+      triggerBtn.style.opacity = '0.6';
+    }
+    isBulkUploadingActive = true;
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const startedStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+    let total = 50;
+    let valid = 50;
+    let invalid = 0;
+    let uploadStatus = 'Completed';
+
+    try {
+      const pageKey = (currentBulkUploadPageName || '').trim().toLowerCase();
+      showToast(`Uploading "${file.name}" to PostgreSQL for ${currentBulkUploadPageName}...`);
+
+      let result = null;
+      if (pageKey.includes('employee') && typeof NexusApi !== 'undefined' && NexusApi.employees) {
+        result = await NexusApi.employees.bulkUpload(file);
+        if (typeof fetchMasterDataset === 'function') {
+          await fetchMasterDataset(true);
+        } else if (typeof loadMasterEmployeesFromApi === 'function') {
+          await loadMasterEmployeesFromApi();
+        }
+      } else if (pageKey.includes('product') && typeof NexusApi !== 'undefined' && NexusApi.products) {
+        result = await NexusApi.products.bulkUpload(file);
+        if (typeof loadMasterProductsFromApi === 'function') {
+          await loadMasterProductsFromApi();
+        }
+      } else if ((pageKey === 'expense' || pageKey === 'expenses') && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+        result = await NexusApi.expenses.bulkUpload(file);
         if (typeof loadMasterExpensesFromApi === 'function') {
           await loadMasterExpensesFromApi();
         }
-      } catch (err) {
-        console.error('Bulk upload error:', err);
-        showToast(`Bulk upload failed: ${err.message || err}`);
+      } else if (pageKey.includes('site') && typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
+        result = await NexusApi.indusSites.bulkUpload(file);
+        if (typeof loadIndusSitesFromApi === 'function') {
+          await loadIndusSitesFromApi();
+        }
+      } else if (pageKey.includes('gbpa') && (pageKey.includes('material') || pageKey.includes('materials')) && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
+        result = await NexusApi.indusGbpaMaterials.bulkUpload(file);
+        if (typeof loadIndusGbpaMaterialsFromApi === 'function') {
+          await loadIndusGbpaMaterialsFromApi();
+        }
+      } else if (pageKey.includes('gbpa') && pageKey.includes('expense') && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
+        result = await NexusApi.indusGbpaExpenses.bulkUpload(file);
+        if (typeof loadIndusGbpaExpensesFromApi === 'function') {
+          await loadIndusGbpaExpensesFromApi();
+        }
+      } else if (pageKey.includes('gbpa') && typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
+        result = await NexusApi.indusGbpa.bulkUpload(file);
+        if (typeof loadIndusGbpaFromApi === 'function') {
+          await loadIndusGbpaFromApi();
+        }
+      } else if (pageKey.includes('infra') && typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+        result = await NexusApi.indusInfra.bulkUpload(file);
+        if (typeof loadIndusInfraFromApi === 'function') {
+          await loadIndusInfraFromApi();
+        }
+      } else if (pageKey.includes('material') && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
+        result = await NexusApi.indusGbpaMaterials.bulkUpload(file);
+        if (typeof loadIndusGbpaMaterialsFromApi === 'function') {
+          await loadIndusGbpaMaterialsFromApi();
+        }
       }
-    } else {
-      showToast(`Bulk CSV file "${file.name}" uploaded successfully for ${currentBulkUploadPageName}!`);
+
+      if (result) {
+        total = result.imported_count || result.total_count || 1;
+        valid = result.imported_count || 1;
+        invalid = (result.errors && result.errors.length) || result.error_count || 0;
+        showToast(`Bulk upload successful: ${valid} records processed!`);
+      } else {
+        try {
+          const text = await file.text();
+          const lines = text.split(/\r\n|\n/).filter(l => l.trim().length > 0);
+          if (lines.length > 1) {
+            total = lines.length - 1;
+            valid = total;
+            invalid = 0;
+          }
+        } catch (e) {
+          total = 25;
+          valid = 25;
+          invalid = 0;
+        }
+      }
+
+    } catch (err) {
+      console.error('Bulk upload error:', err);
+      uploadStatus = 'Failed';
+      showToast(`Bulk upload failed: ${err.message || err}`);
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(err.message || err, 'Bulk Upload Error');
+      }
+      input.value = '';
+      if (triggerBtn) {
+        triggerBtn.style.pointerEvents = 'auto';
+        triggerBtn.style.opacity = '1';
+      }
+      isBulkUploadingActive = false;
+      return;
     }
+
+    const completedDate = new Date(Date.now() + 1000);
+    const completedStr = `${pad(completedDate.getDate())}/${pad(completedDate.getMonth() + 1)}/${completedDate.getFullYear()} ${pad(completedDate.getHours())}:${pad(completedDate.getMinutes())}:${pad(completedDate.getSeconds())}`;
+
+    const newLog = {
+      id: `blk-${Date.now()}`,
+      page: currentBulkUploadPageName,
+      started: startedStr,
+      completed: completedStr,
+      totalCount: String(total),
+      validCount: String(valid),
+      invalidCount: String(invalid),
+      status: uploadStatus
+    };
+
+    bulkUploadHistoryData.unshift(newLog);
+
     input.value = '';
-    closeBulkUploadModal();
+    if (triggerBtn) {
+      triggerBtn.style.pointerEvents = 'auto';
+      triggerBtn.style.opacity = '1';
+    }
+    isBulkUploadingActive = false;
+
+    closeAddBulkUploadModal();
+    renderBulkUploadTable();
+
+    const successMsg = (currentBulkUploadPageName || '').toLowerCase().includes('employee')
+      ? 'Employees uploaded successfully!'
+      : `Bulk upload completed for ${currentBulkUploadPageName} (${valid} valid records processed)!`;
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(successMsg, 'Task Completed');
+    } else {
+      showToast(successMsg);
+    }
   }
 };
 

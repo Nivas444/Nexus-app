@@ -308,63 +308,167 @@ class ExpenseService:
         self.repository.delete(exp)
         return {"success": True, "message": f"Expense {expense_id} deleted successfully."}
 
-    def process_bulk_csv(self, file_content: bytes) -> Dict[str, Any]:
-        """Parses CSV content and bulk-inserts records into company_expenses."""
-        try:
-            decoded = file_content.decode("utf-8-sig")
-        except UnicodeDecodeError:
-            decoded = file_content.decode("latin-1")
+    def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
+        """Parses Excel (.xlsx/.xls) or CSV content and bulk-inserts records into company_expenses."""
+        if not file_content:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty."
+            )
 
-        reader = csv.DictReader(io.StringIO(decoded))
+        rows_dict_list: List[Dict[str, Any]] = []
+        raw_headers: List[str] = []
+        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
+
+        if is_excel:
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                sheet = wb.active
+                if sheet is None:
+                    raise ValueError("Excel file contains no active sheet.")
+                
+                for col in range(1, sheet.max_column + 1):
+                    val = sheet.cell(1, col).value
+                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
+
+                for row_idx in range(2, sheet.max_row + 1):
+                    row_data = {}
+                    has_data = False
+                    for col_idx, header in enumerate(raw_headers, start=1):
+                        cell_val = sheet.cell(row_idx, col_idx).value
+                        if cell_val is not None and str(cell_val).strip():
+                            has_data = True
+                        row_data[header] = cell_val
+                    if has_data:
+                        rows_dict_list.append(row_data)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
+                )
+        else:
+            try:
+                try:
+                    decoded = file_content.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    decoded = file_content.decode("latin-1")
+                
+                reader = csv.DictReader(io.StringIO(decoded))
+                raw_headers = reader.fieldnames or []
+                for r in reader:
+                    if any(v and str(v).strip() for v in r.values()):
+                        rows_dict_list.append(r)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read CSV file: {str(e)}"
+                )
+
+        # Template Header Validation
+        import re
+        def norm(h: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
+
+        norm_headers = [norm(h) for h in raw_headers if h is not None]
+        # Match either Company Expenses template headers or generic expense headers
+        has_expense_head = any("head" in nh for nh in norm_headers)
+        has_expense_desc_or_name = any("expense" in nh or "desc" in nh or "name" in nh for nh in norm_headers)
+
+        if not (has_expense_head and has_expense_desc_or_name):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid Expense Upload Template. Please use the official Expense Upload Template."
+            )
+
+        if not rows_dict_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No expense data rows found in uploaded file."
+            )
+
         new_records: List[CompanyExpense] = []
         row_errors: List[str] = []
+        incoming_names: List[str] = []
 
-        for idx, row in enumerate(reader, start=2):
+        for idx, row in enumerate(rows_dict_list, start=2):
             try:
-                # Flexible header matching
-                exp_name = row.get("Expense Name") or row.get("ExpenseName") or row.get("Description") or row.get("Name")
-                if not exp_name or not exp_name.strip():
-                    continue
+                def get_val(*keys: str, default: Any = None) -> Any:
+                    for k in keys:
+                        if k in row and row[k] is not None:
+                            return row[k]
+                        k_norm = norm(k)
+                        for rk, rv in row.items():
+                            if rv is not None and norm(rk) == k_norm:
+                                return rv
+                    return default
 
-                category = row.get("Expense Category") or row.get("Category") or "Direct Operations"
-                sub_category = row.get("Expense Sub-Category") or row.get("Sub-Category") or row.get("Description") or ""
-                head = row.get("Expense Head") or row.get("Head") or "Capex"
-                gst_val = row.get("GST Rate") or row.get("GST") or "18%"
+                exp_name = str(get_val("Expense Description", "Expense Name", "Description", "ExpenseDescription", "ExpenseName", "Name", default="") or "").strip()
+                if not exp_name:
+                    exp_type = str(get_val("Expense Type", "Type", default="") or "").strip()
+                    exp_name = exp_type or f"Expense Item {idx}"
+
+                category = str(get_val("Expense Categry", "Expense Category", "Category", default="Direct Operations") or "Direct Operations").strip()
+                sub_category = str(get_val("Expense Type", "Expense Sub-Category", "Sub-Category", default="") or "").strip()
+                head = str(get_val("Accounts Head", "Expense Head", "Head", default="Capex") or "Capex").strip()
+                gst_val = get_val("GST", "GST Rate", default="18%")
                 gst_num = parse_percentage_to_numeric(gst_val) or Decimal("18.00")
-                rcm_val = parse_boolean_field(row.get("RCM", "No"))
-                status_val = parse_status_field(row.get("Status", "Active"))
-                exp_code = row.get("Expense Code") or row.get("Expense ID") or f"EXP-{head[:3].upper()}-{idx:03d}"
-                sac_code = row.get("SAC Code") or row.get("SAC") or "998313"
+                rcm_val = parse_boolean_field(get_val("RCM", default="No"))
+                status_val = parse_status_field(get_val("Status", default="Active"))
+                exp_code = str(get_val("Expense Code", "Expense ID", "Code", default="") or "").strip() or f"EXP-{head[:3].upper()}-{idx:04d}"
+                sac_code = str(get_val("SAC Code", "SAC", default="998313") or "998313").strip()
+                uom = str(get_val("Uom", "UOM", default="Nos") or "Nos").strip()
 
-                is_deprec = (head.lower() == "capex") and parse_boolean_field(row.get("Depreciation", "No"))
+                is_deprec = (head.lower() == "capex") and parse_boolean_field(get_val("Depreciation", default="No"))
 
                 record = CompanyExpense(
-                    expense_name=exp_name.strip(),
-                    expense_category=category.strip(),
-                    expense_description=sub_category.strip() or exp_name.strip(),
-                    expense_head=head.strip(),
+                    expense_name=exp_name,
+                    expense_category=category,
+                    expense_description=sub_category or exp_name,
+                    expense_head=head,
                     depreciation=is_deprec,
                     gst_rate=gst_num,
                     rcm=rcm_val,
                     status=status_val,
-                    expense_code=exp_code.strip(),
-                    sac_code=sac_code.strip(),
-                    uom=row.get("UOM", "Nos").strip(),
+                    expense_code=exp_code,
+                    sac_code=sac_code,
+                    uom=uom,
                     company_name="Nexus",
                     industry="Telecom"
                 )
                 new_records.append(record)
+                incoming_names.append(exp_name)
             except Exception as e:
                 row_errors.append(f"Row {idx}: {str(e)}")
 
         if not new_records and row_errors:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to parse CSV. Errors: {'; '.join(row_errors[:5])}"
+                detail=f"Failed to parse records: {'; '.join(row_errors[:5])}"
             )
 
-        if new_records:
+        # Idempotency check: if all incoming expense names already exist in DB
+        if incoming_names:
+            existing_count = self.repository.db.query(CompanyExpense).filter(
+                CompanyExpense.expense_name.in_(incoming_names)
+            ).count()
+            if existing_count == len(incoming_names):
+                return {
+                    "success": True,
+                    "imported_count": len(incoming_names),
+                    "is_retry": True,
+                    "message": "Upload already processed. No duplicate records created.",
+                    "errors": []
+                }
+
+        try:
             self.repository.bulk_create(new_records)
+        except Exception as e:
+            self.repository.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error during bulk insert: {str(e)}"
+            )
 
         return {
             "success": True,

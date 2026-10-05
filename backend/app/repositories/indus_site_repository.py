@@ -103,3 +103,9 @@ class IndusSiteRepository:
         self.db.delete(site)
         self.db.commit()
         return True
+
+    def bulk_create(self, items: List[IndusSiteDetails]) -> List[IndusSiteDetails]:
+        self.db.add_all(items)
+        self.db.commit()
+        return items
+

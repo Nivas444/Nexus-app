@@ -236,8 +236,21 @@
         return await request(`/master/products/${productId}`, {
           method: 'DELETE'
         });
+      },
+
+      /**
+       * Bulk upload products from Excel or CSV
+       */
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/master/products/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
       }
     },
+
 
     employees: {
       /**
@@ -346,6 +359,18 @@
        */
       getDocumentUrl(employeeId, documentType) {
         return `${API_BASE_URL}/master/employees/${employeeId}/documents/${documentType}`;
+      },
+
+      /**
+       * Bulk upload employees from Excel or CSV
+       */
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/master/employees/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
       }
     },
 
@@ -769,6 +794,18 @@
        */
       getDocumentUrl(employeeId, documentType) {
         return `${API_BASE_URL}/master/employees/${employeeId}/documents/${documentType}`;
+      },
+
+      /**
+       * Bulk upload employees from Excel or CSV
+       */
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/master/employees/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
       }
     },
 
@@ -1081,6 +1118,14 @@
           method: 'POST',
           body: JSON.stringify(payload)
         });
+      },
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/customer/indus/sites/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
       }
     },
 
@@ -1110,6 +1155,14 @@
         return await request(`/customer/indus/gbpa/${itemId}`, {
           method: 'PUT',
           body: JSON.stringify(payload)
+        });
+      },
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/customer/indus/gbpa/bulk-upload', {
+          method: 'POST',
+          body: formData
         });
       }
     },
@@ -1144,6 +1197,14 @@
       },
       async delete(materialId) {
         return await request(`/customer/indus/gbpa/materials/${materialId}`, { method: 'DELETE' });
+      },
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/customer/indus/gbpa/materials/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
       }
     },
 
@@ -1177,6 +1238,14 @@
       },
       async delete(expenseId) {
         return await request(`/customer/indus/gbpa/expenses/${expenseId}`, { method: 'DELETE' });
+      },
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/customer/indus/gbpa/expenses/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
       }
     },
 
@@ -1244,8 +1313,17 @@
       },
       async delete(infraId) {
         return await request(`/customer/indus/infra/${infraId}`, { method: 'DELETE' });
+      },
+      async bulkUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/customer/indus/infra/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
       }
     },
+
 
     indusEsh: {
       async getAll(params = {}) {

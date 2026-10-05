@@ -348,3 +348,208 @@ class IndusSiteService:
             total=len(contacts),
             items=contacts
         )
+
+    def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
+        """Parses Excel or CSV content and bulk-inserts or updates records in indus_site_details."""
+        import io
+        import csv
+        import re
+
+        if not file_content:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty."
+            )
+
+        rows_dict_list = []
+        raw_headers = []
+        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
+
+        if is_excel:
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                sheet = wb.active
+                if sheet is None:
+                    raise ValueError("Excel file contains no active sheet.")
+                
+                for col in range(1, sheet.max_column + 1):
+                    val = sheet.cell(1, col).value
+                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
+
+                for row_idx in range(2, sheet.max_row + 1):
+                    row_data = {}
+                    has_data = False
+                    for col_idx, header in enumerate(raw_headers, start=1):
+                        cell_val = sheet.cell(row_idx, col_idx).value
+                        if cell_val is not None and str(cell_val).strip():
+                            has_data = True
+                        row_data[header] = cell_val
+                    if has_data:
+                        rows_dict_list.append(row_data)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
+                )
+        else:
+            try:
+                try:
+                    decoded = file_content.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    decoded = file_content.decode("latin-1")
+                
+                reader = csv.DictReader(io.StringIO(decoded))
+                raw_headers = reader.fieldnames or []
+                for r in reader:
+                    if any(v and str(v).strip() for v in r.values()):
+                        rows_dict_list.append(r)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read CSV file: {str(e)}"
+                )
+
+        def norm(h: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
+
+        norm_headers = [norm(h) for h in raw_headers if h is not None]
+        # Must have site id / site code or site name or fse / aom
+        has_site_structure = any("siteid" in nh or "sitecode" in nh or "sitename" in nh for nh in norm_headers) and any("towertype" in nh or "district" in nh or "town" in nh or "fse" in nh or "aom" in nh or "transport" in nh for nh in norm_headers)
+
+        if not has_site_structure:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid Site Upload Template. Please use the official Site Upload Template."
+            )
+
+        if not rows_dict_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No Site data rows found in uploaded file."
+            )
+
+        new_records = []
+        row_errors = []
+        incoming_codes = []
+
+        for idx, row in enumerate(rows_dict_list, start=2):
+            try:
+                def get_val(*keys: str, default: Any = None) -> Any:
+                    for k in keys:
+                        if k in row and row[k] is not None:
+                            return row[k]
+                        k_norm = norm(k)
+                        for rk, rv in row.items():
+                            if rv is not None and norm(rk) == k_norm:
+                                return rv
+                    return default
+
+                cust_name = str(get_val("Customer", default="Indus Tower Ltd") or "Indus Tower Ltd").strip()
+                site_code = str(get_val("Site ID", "SiteID", "Site Code", default="") or "").strip()
+                wh_id = str(get_val("WH ID", "WHID", "Warehouse ID", default="") or "").strip()
+                site_name = str(get_val("Site Name", "SiteName", default="") or "").strip()
+                
+                if not site_code and not site_name:
+                    site_code = f"SITE-{idx:04d}"
+                    site_name = f"Site {idx}"
+                elif not site_name:
+                    site_name = f"Site {site_code}"
+                elif not site_code:
+                    site_code = f"SITE-{idx:04d}"
+
+                tower_type = str(get_val("Tower Type", "TowerType", default="GBT") or "GBT").strip()
+                district = str(get_val("District", default="") or "").strip()
+                town = str(get_val("Town", default="") or "").strip()
+                address = str(get_val("Site Address", "Address", default="") or "").strip()
+                
+                lat_raw = get_val("Lattitude", "Latitude", default=None)
+                long_raw = get_val("Longtitude", "Longitude", default=None)
+                lat_val = None
+                long_val = None
+                if lat_raw is not None and str(lat_raw).strip():
+                    try:
+                        lat_val = float(str(lat_raw).strip())
+                    except Exception:
+                        pass
+                if long_raw is not None and str(long_raw).strip():
+                    try:
+                        long_val = float(str(long_raw).strip())
+                    except Exception:
+                        pass
+
+                transport_zone = str(get_val("Transport Zone", "TransportZone", default="") or "").strip()
+                fse_name = str(get_val("FSE Name", "FSEName", "FSE", default="") or "").strip()
+                aom_name = str(get_val("AOM Name", "AOMName", "AOM", default="") or "").strip()
+
+                # Check if site already exists in database
+                existing_site = self.repo.get_by_code(site_code)
+                if existing_site:
+                    # Update contact or fields
+                    if fse_name:
+                        existing_site.fse_name = fse_name
+                    if aom_name:
+                        existing_site.aom_name = aom_name
+                    if wh_id:
+                        existing_site.wh_id = wh_id
+                    if tower_type:
+                        existing_site.tower_type = tower_type
+                    if district:
+                        existing_site.district = district
+                    if town:
+                        existing_site.town = town
+                    if address:
+                        existing_site.address = address
+                    if lat_val is not None:
+                        existing_site.latitude = lat_val
+                    if long_val is not None:
+                        existing_site.longitude = long_val
+                    if transport_zone:
+                        existing_site.transport_zone = transport_zone
+                    self.db.commit()
+                else:
+                    site_record = IndusSiteDetails(
+                        company_name="Nexus",
+                        customer_name=cust_name,
+                        site_code=site_code,
+                        wh_id=wh_id if wh_id else None,
+                        site_name=site_name,
+                        tower_type=tower_type,
+                        district=district if district else None,
+                        town=town if town else None,
+                        address=address if address else None,
+                        latitude=lat_val,
+                        longitude=long_val,
+                        transport_zone=transport_zone if transport_zone else None,
+                        fse_name=fse_name if fse_name else None,
+                        aom_name=aom_name if aom_name else None,
+                        status="Active"
+                    )
+                    new_records.append(site_record)
+
+                incoming_codes.append(site_code)
+            except Exception as e:
+                row_errors.append(f"Row {idx}: {str(e)}")
+
+        if not new_records and not incoming_codes and row_errors:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to parse records: {'; '.join(row_errors[:5])}"
+            )
+
+        if new_records:
+            try:
+                self.repo.bulk_create(new_records)
+            except Exception as e:
+                self.db.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Database error during bulk insert: {str(e)}"
+                )
+
+        return {
+            "success": True,
+            "imported_count": len(incoming_codes),
+            "errors": row_errors
+        }
+

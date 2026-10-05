@@ -329,3 +329,171 @@ class ProductService:
             )
         self.repository.delete(prod)
         return {"success": True, "message": f"Product {material_id} deleted successfully."}
+
+    def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
+        """Parses Excel or CSV content and bulk-inserts records into company_products."""
+        if not file_content:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty."
+            )
+
+        rows_dict_list: List[Dict[str, Any]] = []
+        raw_headers: List[str] = []
+        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
+
+        if is_excel:
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                sheet = wb.active
+                if sheet is None:
+                    raise ValueError("Excel file contains no active sheet.")
+                
+                for col in range(1, sheet.max_column + 1):
+                    val = sheet.cell(1, col).value
+                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
+
+                for row_idx in range(2, sheet.max_row + 1):
+                    row_data = {}
+                    has_data = False
+                    for col_idx, header in enumerate(raw_headers, start=1):
+                        cell_val = sheet.cell(row_idx, col_idx).value
+                        if cell_val is not None and str(cell_val).strip():
+                            has_data = True
+                        row_data[header] = cell_val
+                    if has_data:
+                        rows_dict_list.append(row_data)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
+                )
+        else:
+            try:
+                try:
+                    decoded = file_content.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    decoded = file_content.decode("latin-1")
+                
+                reader = csv.DictReader(io.StringIO(decoded))
+                raw_headers = reader.fieldnames or []
+                for r in reader:
+                    if any(v and str(v).strip() for v in r.values()):
+                        rows_dict_list.append(r)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read CSV file: {str(e)}"
+                )
+
+        # Template Header Validation
+        import re
+        def norm(h: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
+
+        norm_headers = [norm(h) for h in raw_headers if h is not None]
+        has_material_or_product = any("material" in nh or "product" in nh for nh in norm_headers)
+
+        if not has_material_or_product:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid Products Upload Template. Please use the official Products Upload Template."
+            )
+
+        if not rows_dict_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No product data rows found in uploaded file."
+            )
+
+        new_records: List[CompanyProduct] = []
+        row_errors: List[str] = []
+        incoming_heads: List[str] = []
+
+        for idx, row in enumerate(rows_dict_list, start=2):
+            try:
+                def get_val(*keys: str, default: Any = None) -> Any:
+                    for k in keys:
+                        if k in row and row[k] is not None:
+                            return row[k]
+                        k_norm = norm(k)
+                        for rk, rv in row.items():
+                            if rv is not None and norm(rk) == k_norm:
+                                return rv
+                    return default
+
+                mat_head = str(get_val("Material Head", "Product Head", "Head", "Name", default="") or "").strip()
+                if not mat_head:
+                    mat_head = f"Product Item {idx}"
+
+                category = str(get_val("Material Categry", "Material Category", "Category", default="Tower Infrastructure") or "Tower Infrastructure").strip()
+                mat_code = str(get_val("Material Code", "Product Code", "Code", default="") or "").strip() or f"PRD-{idx:04d}"
+                mat_desc = str(get_val("Material Description", "Description", default="") or "").strip() or mat_head
+                uom = str(get_val("Uom", "UOM", default="Nos") or "Nos").strip()
+                sale_uom = str(get_val("Sale Uom", "Sale UOM", default="Nos") or "Nos").strip()
+                
+                gst_val = parse_numeric_field(get_val("GST Rate", "GST", default="18%")) or Decimal("18.00")
+                ucf_val = parse_numeric_field(get_val("UCF", default="1.00")) or Decimal("1.00")
+                msq_val = parse_numeric_field(get_val("MSQ", default="100")) or Decimal("100")
+                moq_val = parse_numeric_field(get_val("MOQ", default="50")) or Decimal("50")
+                margin_val = parse_numeric_field(get_val("Margin", default="5%")) or Decimal("5.00")
+                oh_val = parse_numeric_field(get_val("OH", default="2%")) or Decimal("2.00")
+                status_val = parse_status_field(get_val("Status", default="Active"))
+
+                prod_record = CompanyProduct(
+                    product_name=mat_head,
+                    material_head=mat_head,
+                    material_category=category,
+                    material_code=mat_code,
+                    material_description=mat_desc,
+                    uom=uom,
+                    sale_uom=sale_uom,
+                    gst_rate=gst_val,
+                    ucf=ucf_val,
+                    msq=msq_val,
+                    moq=moq_val,
+                    profit=margin_val,
+                    oh=oh_val,
+                    status=status_val,
+                    company_name="Nexus"
+                )
+                new_records.append(prod_record)
+                incoming_heads.append(mat_head)
+            except Exception as e:
+                row_errors.append(f"Row {idx}: {str(e)}")
+
+        if not new_records and row_errors:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to parse records: {'; '.join(row_errors[:5])}"
+            )
+
+        # Idempotency check: if all incoming material heads already exist in DB
+        if incoming_heads:
+            existing_count = self.repository.db.query(CompanyProduct).filter(
+                CompanyProduct.material_head.in_(incoming_heads)
+            ).count()
+            if existing_count == len(incoming_heads):
+                return {
+                    "success": True,
+                    "imported_count": len(incoming_heads),
+                    "is_retry": True,
+                    "message": "Upload already processed. No duplicate records created.",
+                    "errors": []
+                }
+
+        try:
+            self.repository.bulk_create(new_records)
+        except Exception as e:
+            self.repository.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error during bulk insert: {str(e)}"
+            )
+
+        return {
+            "success": True,
+            "imported_count": len(new_records),
+            "errors": row_errors
+        }

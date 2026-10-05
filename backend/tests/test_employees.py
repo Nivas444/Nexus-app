@@ -255,3 +255,20 @@ def test_pdf_upload_reject_corrupted_pdf():
     )
     assert upload_res.status_code == 400
     assert "valid pdf header" in upload_res.json()["detail"].lower()
+
+def test_bulk_upload_employees_csv():
+    import uuid
+    suffix = uuid.uuid4().hex[:6]
+    csv_content = f"""Employee Type,Employee Name,Employee ID,Address,Mobile Number,E - Mail ID,DOB,Blood Group,Martial Status,DOJ,Designation,Previous Experience,Qualification,PAN Number,Aadhar Number,Driving Licence,Passport Number,EPF UAN,ESI IP Number  ,Geo Attendance,Status
+On-Roll,Bulk Test User 1,EMP-BULK-A-{suffix},Sector 1 Chennai,9876500111,bulk1_{suffix}@nexus.com,15/05/1990,A+,Single,01/01/2024,Engineer,02 - 00,B.E,ABCDE1111F,123456789001,DL-01-1111,Z1111111,100111111111,3100111111,Yes,Active
+Contract,Bulk Test User 2,EMP-BULK-B-{suffix},Sector 2 Chennai,9876500222,bulk2_{suffix}@nexus.com,20/08/1995,B+,Married,15/02/2024,Technician,01 - 06,Diploma,ABCDE2222F,123456789002,DL-02-2222,Z2222222,100222222222,3100222222,No,Active
+"""
+    file_bytes = io.BytesIO(csv_content.encode("utf-8"))
+    upload_res = client.post(
+        "/api/v1/master/employees/bulk-upload",
+        files={"file": ("test_employees.csv", file_bytes, "text/csv")}
+    )
+    assert upload_res.status_code == 200
+    data = upload_res.json()
+    assert data["success"] is True
+    assert data["imported_count"] == 2

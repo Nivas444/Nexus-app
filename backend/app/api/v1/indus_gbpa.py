@@ -98,3 +98,21 @@ def delete_gbpa(
     service = IndusGbpaService(db)
     return service.delete_gbpa(item_id)
 
+from fastapi import File, UploadFile
+
+@router.post("/customer/indus/gbpa/bulk-upload", summary="Bulk Upload GBPA Items")
+@router.post("/customer/indus/products/bulk-upload", summary="Bulk Upload GBPA Items (Products Alias)", include_in_schema=False)
+@router.post("/indus/gbpa/bulk-upload", summary="Bulk Upload GBPA Items (Direct Alias)", include_in_schema=False)
+@router.post("/indus/products/bulk-upload", summary="Bulk Upload GBPA Items (Direct Products Alias)", include_in_schema=False)
+async def bulk_upload_gbpa(
+    file: UploadFile = File(..., description="Official Indus GBPA Excel (.xlsx/.xls) or CSV template file"),
+    db: Session = Depends(get_db)
+):
+    """
+    Bulk import GBPA items into `indus_customer_gbpa` with template structure validation and idempotency retry safety.
+    """
+    content = await file.read()
+    service = IndusGbpaService(db)
+    return service.process_bulk_upload(content, filename=file.filename or "")
+
+

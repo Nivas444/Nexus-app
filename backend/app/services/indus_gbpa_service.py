@@ -227,3 +227,177 @@ class IndusGbpaService:
             )
         return {"success": True, "message": f"GBPA Item {item_id} deleted successfully."}
 
+    def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
+        """Parses Excel or CSV content and bulk-inserts records into indus_customer_gbpa."""
+        import io
+        import csv
+        import re
+
+        if not file_content:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty."
+            )
+
+        rows_dict_list = []
+        raw_headers = []
+        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
+
+        if is_excel:
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                sheet = wb.active
+                if sheet is None:
+                    raise ValueError("Excel file contains no active sheet.")
+                
+                for col in range(1, sheet.max_column + 1):
+                    val = sheet.cell(1, col).value
+                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
+
+                for row_idx in range(2, sheet.max_row + 1):
+                    row_data = {}
+                    has_data = False
+                    for col_idx, header in enumerate(raw_headers, start=1):
+                        cell_val = sheet.cell(row_idx, col_idx).value
+                        if cell_val is not None and str(cell_val).strip():
+                            has_data = True
+                        row_data[header] = cell_val
+                    if has_data:
+                        rows_dict_list.append(row_data)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
+                )
+        else:
+            try:
+                try:
+                    decoded = file_content.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    decoded = file_content.decode("latin-1")
+                
+                reader = csv.DictReader(io.StringIO(decoded))
+                raw_headers = reader.fieldnames or []
+                for r in reader:
+                    if any(v and str(v).strip() for v in r.values()):
+                        rows_dict_list.append(r)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read CSV file: {str(e)}"
+                )
+
+        def norm(h: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
+
+        norm_headers = [norm(h) for h in raw_headers if h is not None]
+        # Must have item code/name and rate/hsn/sac/budget
+        has_gbpa_structure = any("itemcode" in nh or "itemname" in nh for nh in norm_headers) and any("rate" in nh or "hsn" in nh or "budget" in nh for nh in norm_headers)
+
+        if not has_gbpa_structure:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid GBPA Upload Template. Please use the official GBPA Upload Template."
+            )
+
+        if not rows_dict_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No GBPA data rows found in uploaded file."
+            )
+
+        new_records = []
+        row_errors = []
+        incoming_codes = []
+
+        for idx, row in enumerate(rows_dict_list, start=2):
+            try:
+                def get_val(*keys: str, default: Any = None) -> Any:
+                    for k in keys:
+                        if k in row and row[k] is not None:
+                            return row[k]
+                        k_norm = norm(k)
+                        for rk, rv in row.items():
+                            if rv is not None and norm(rk) == k_norm:
+                                return rv
+                    return default
+
+                cust_name = str(get_val("Customer", default="Indus Tower Ltd") or "Indus Tower Ltd").strip()
+                item_code = str(get_val("Item Code", "ItemCode", default="") or "").strip()
+                item_name = str(get_val("Item Name", "ItemName", default="") or "").strip()
+                if not item_code and not item_name:
+                    item_code = f"GBPA-{idx:04d}"
+                    item_name = f"GBPA Item {idx}"
+                elif not item_name:
+                    item_name = item_code
+                elif not item_code:
+                    item_code = f"GBPA-{idx:04d}"
+
+                item_type = str(get_val("ItemType", "Item Type", default="Capex") or "Capex").strip()
+                item_desc = str(get_val("Item Description", "Description", default="") or "").strip() or item_name
+                uom = str(get_val("Uom", "UOM", default="Pcs") or "Pcs").strip()
+                
+                rate_val = _parse_numeric(get_val("Rate", default="0"))
+                hsn_sac = str(get_val("HSN / SAC", "HSN/SAC", "HSN_SAC", default="HSN") or "HSN").strip()
+                hsn_sac_code = str(get_val("HSN / SAC Code", "HSN/SAC Code", "HSN Code", default="") or "").strip()
+                
+                budget_pct = _parse_numeric(get_val("Budget (%)", "Budget %", "Budget Percentage", default=None))
+                budget_amt = _parse_numeric(get_val("Budget (₹)", "Budget Amount", "Budget Rs", default=None))
+
+                gbpa_record = IndusCustomerGbpa(
+                    company_name="Nexus",
+                    customer_name=cust_name,
+                    item_code=item_code,
+                    item_name=item_name,
+                    item_description=item_desc,
+                    item_type=item_type,
+                    hsn_sac=hsn_sac,
+                    hsn_sac_code=hsn_sac_code if hsn_sac_code else None,
+                    uom=uom,
+                    rate=rate_val,
+                    budget_percentage=budget_pct,
+                    budget_amount=budget_amt,
+                    status="Active"
+                )
+                new_records.append(gbpa_record)
+                incoming_codes.append(item_code)
+            except Exception as e:
+                row_errors.append(f"Row {idx}: {str(e)}")
+
+        if not new_records and row_errors:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to parse records: {'; '.join(row_errors[:5])}"
+            )
+
+        # Idempotency check: if all incoming item_codes already exist in DB
+        if incoming_codes:
+            existing_count = self.db.query(IndusCustomerGbpa).filter(
+                IndusCustomerGbpa.item_code.in_(incoming_codes)
+            ).count()
+            if existing_count == len(incoming_codes):
+                return {
+                    "success": True,
+                    "imported_count": len(incoming_codes),
+                    "is_retry": True,
+                    "message": "Upload already processed. No duplicate records created.",
+                    "errors": []
+                }
+
+        try:
+            self.repo.bulk_create(new_records)
+        except Exception as e:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error during bulk insert: {str(e)}"
+            )
+
+        return {
+            "success": True,
+            "imported_count": len(new_records),
+            "errors": row_errors
+        }
+
+

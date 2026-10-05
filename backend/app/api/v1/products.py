@@ -99,3 +99,16 @@ def delete_product(
     """
     service = ProductService(db)
     return service.delete_product(product_id)
+
+
+@router.post("/bulk-upload", summary="Bulk Upload Products via Excel or CSV")
+async def bulk_upload_products(
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV file containing product records"),
+    db: Session = Depends(get_db)
+):
+    """
+    Upload and parse Excel or CSV file to bulk-insert records into PostgreSQL `company_products`.
+    """
+    content = await file.read()
+    service = ProductService(db)
+    return service.process_bulk_upload(content, file.filename or "")

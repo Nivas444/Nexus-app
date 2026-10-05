@@ -124,3 +124,20 @@ def save_site_contact(
     """
     service = IndusSiteService(db)
     return service.save_site_contact(site_id, payload)
+
+from fastapi import File, UploadFile
+
+@router.post("/customer/indus/sites/bulk-upload", summary="Bulk Upload Indus Sites")
+@router.post("/master/indus/sites/bulk-upload", summary="Bulk Upload Indus Sites (Master Alias)", include_in_schema=False)
+@router.post("/indus/sites/bulk-upload", summary="Bulk Upload Indus Sites (Direct Alias)", include_in_schema=False)
+async def bulk_upload_sites(
+    file: UploadFile = File(..., description="Official Indus Site Excel (.xlsx/.xls) or CSV template file"),
+    db: Session = Depends(get_db)
+):
+    """
+    Bulk import Indus Site Details or Contacts into `indus_site_details` with template structure validation and idempotency retry safety.
+    """
+    content = await file.read()
+    service = IndusSiteService(db)
+    return service.process_bulk_upload(content, filename=file.filename or "")
+

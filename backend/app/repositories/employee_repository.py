@@ -110,6 +110,11 @@ class EmployeeRepository:
         self.db.refresh(db_emp)
         return db_emp
 
+    def bulk_create(self, records: List[CompanyEmployee]) -> List[CompanyEmployee]:
+        self.db.add_all(records)
+        self.db.commit()
+        return records
+
     def update(self, db_emp: CompanyEmployee, update_data: dict) -> CompanyEmployee:
         for key, value in update_data.items():
             if hasattr(db_emp, key):

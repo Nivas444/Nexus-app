@@ -93,6 +93,19 @@ def delete_material(
     service = GbpaMaterialsService(db)
     return service.delete_material(material_id)
 
+from fastapi import File, UploadFile
+
+@router.post("/customer/indus/gbpa/materials/bulk-upload", summary="Bulk Upload GBPA Materials")
+@router.post("/customer/gbpa/materials/bulk-upload", summary="Bulk Upload GBPA Materials (Alias)", include_in_schema=False)
+@router.post("/indus/gbpa/materials/bulk-upload", summary="Bulk Upload GBPA Materials (Direct Alias)", include_in_schema=False)
+async def bulk_upload_materials(
+    file: UploadFile = File(..., description="Official Indus GBPA Materials Excel (.xlsx/.xls) or CSV template file"),
+    db: Session = Depends(get_db)
+):
+    content = await file.read()
+    service = GbpaMaterialsService(db)
+    return service.process_bulk_upload(content, filename=file.filename or "")
+
 
 # =========================================================================
 # 2. EXPENSES ENDPOINTS
@@ -161,6 +174,18 @@ def delete_expense(
 ):
     service = GbpaExpensesService(db)
     return service.delete_expense(expense_id)
+
+@router.post("/customer/indus/gbpa/expenses/bulk-upload", summary="Bulk Upload GBPA Expenses")
+@router.post("/customer/gbpa/expenses/bulk-upload", summary="Bulk Upload GBPA Expenses (Alias)", include_in_schema=False)
+@router.post("/indus/gbpa/expenses/bulk-upload", summary="Bulk Upload GBPA Expenses (Direct Alias)", include_in_schema=False)
+async def bulk_upload_expenses(
+    file: UploadFile = File(..., description="Official Indus GBPA Expenses Excel (.xlsx/.xls) or CSV template file"),
+    db: Session = Depends(get_db)
+):
+    content = await file.read()
+    service = GbpaExpensesService(db)
+    return service.process_bulk_upload(content, filename=file.filename or "")
+
 
 
 # =========================================================================

@@ -240,6 +240,165 @@ class GbpaMaterialsService:
             )
         return {"success": True, "message": f"Material {material_id} deleted successfully."}
 
+    def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
+        """Parses Excel or CSV content and bulk-inserts records into indus_customer_gpba_materials."""
+        import io
+        import csv
+        import re
+
+        if not file_content:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty."
+            )
+
+        rows_dict_list = []
+        raw_headers = []
+        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
+
+        if is_excel:
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                sheet = wb.active
+                if sheet is None:
+                    raise ValueError("Excel file contains no active sheet.")
+                
+                for col in range(1, sheet.max_column + 1):
+                    val = sheet.cell(1, col).value
+                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
+
+                for row_idx in range(2, sheet.max_row + 1):
+                    row_data = {}
+                    has_data = False
+                    for col_idx, header in enumerate(raw_headers, start=1):
+                        cell_val = sheet.cell(row_idx, col_idx).value
+                        if cell_val is not None and str(cell_val).strip():
+                            has_data = True
+                        row_data[header] = cell_val
+                    if has_data:
+                        rows_dict_list.append(row_data)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
+                )
+        else:
+            try:
+                try:
+                    decoded = file_content.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    decoded = file_content.decode("latin-1")
+                
+                reader = csv.DictReader(io.StringIO(decoded))
+                raw_headers = reader.fieldnames or []
+                for r in reader:
+                    if any(v and str(v).strip() for v in r.values()):
+                        rows_dict_list.append(r)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read CSV file: {str(e)}"
+                )
+
+        def norm(h: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
+
+        norm_headers = [norm(h) for h in raw_headers if h is not None]
+        # Must have material head/code and material category/type
+        has_mat_structure = any("materialhead" in nh or "materialcode" in nh or "material" in nh for nh in norm_headers) and any("materialcategry" in nh or "category" in nh or "materialtype" in nh or "type" in nh for nh in norm_headers)
+
+        if not has_mat_structure:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid GBPA Materials Upload Template. Please use the official GBPA Materials Upload Template."
+            )
+
+        if not rows_dict_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No GBPA Material data rows found in uploaded file."
+            )
+
+        new_records = []
+        row_errors = []
+        incoming_codes = []
+
+        for idx, row in enumerate(rows_dict_list, start=2):
+            try:
+                def get_val(*keys: str, default: Any = None) -> Any:
+                    for k in keys:
+                        if k in row and row[k] is not None:
+                            return row[k]
+                        k_norm = norm(k)
+                        for rk, rv in row.items():
+                            if rv is not None and norm(rk) == k_norm:
+                                return rv
+                    return default
+
+                cust_name = resolve_customer_name(self.db, str(get_val("Customer", default="Indus Tower Ltd") or "Indus Tower Ltd"))
+                item_code = str(get_val("Item Code", "ItemCode", default="") or "").strip()
+                mat_head = str(get_val("Material Head", "MaterialHead", "Head", default="") or "").strip()
+                mat_cat = str(get_val("Material Categry", "Material Category", "Category", default="Material") or "Material").strip()
+                mat_type = str(get_val("Material Type", "MaterialType", "Type", default="Parent") or "Parent").strip()
+                mat_code = str(get_val("Material Code", "MaterialCode", default="") or "").strip() or f"MAT-{idx:04d}"
+                mat_desc = str(get_val("Material Description", "Description", default="") or "").strip() or mat_head
+
+                if not mat_head:
+                    mat_head = f"Material Item {idx}"
+
+                mat_record = IndusCustomerGbpaMaterial(
+                    company_name="Nexus",
+                    customer_name=cust_name,
+                    item_code=item_code if item_code else None,
+                    material_head=mat_head,
+                    material_category=mat_cat,
+                    material_type=mat_type,
+                    material_code=mat_code,
+                    material_description=mat_desc,
+                    uom="Nos",
+                    status="Active"
+                )
+                new_records.append(mat_record)
+                incoming_codes.append(mat_code)
+            except Exception as e:
+                row_errors.append(f"Row {idx}: {str(e)}")
+
+        if not new_records and row_errors:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to parse records: {'; '.join(row_errors[:5])}"
+            )
+
+        # Idempotency check: if all incoming material_codes already exist in DB
+        if incoming_codes:
+            existing_count = self.db.query(IndusCustomerGbpaMaterial).filter(
+                IndusCustomerGbpaMaterial.material_code.in_(incoming_codes)
+            ).count()
+            if existing_count == len(incoming_codes):
+                return {
+                    "success": True,
+                    "imported_count": len(incoming_codes),
+                    "is_retry": True,
+                    "message": "Upload already processed. No duplicate records created.",
+                    "errors": []
+                }
+
+        try:
+            self.repo.bulk_create(new_records)
+        except Exception as e:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error during bulk insert: {str(e)}"
+            )
+
+        return {
+            "success": True,
+            "imported_count": len(new_records),
+            "errors": row_errors
+        }
+
 
 # =========================================================================
 # 2. EXPENSES SERVICE
@@ -401,6 +560,166 @@ class GbpaExpensesService:
                 detail=f"GBPA Expense with ID {expense_id} not found."
             )
         return {"success": True, "message": f"Expense {expense_id} deleted successfully."}
+
+    def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
+        """Parses Excel or CSV content and bulk-inserts records into indus_customer_gbpa_expenses."""
+        import io
+        import csv
+        import re
+
+        if not file_content:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded file is empty."
+            )
+
+        rows_dict_list = []
+        raw_headers = []
+        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
+
+        if is_excel:
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                sheet = wb.active
+                if sheet is None:
+                    raise ValueError("Excel file contains no active sheet.")
+                
+                for col in range(1, sheet.max_column + 1):
+                    val = sheet.cell(1, col).value
+                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
+
+                for row_idx in range(2, sheet.max_row + 1):
+                    row_data = {}
+                    has_data = False
+                    for col_idx, header in enumerate(raw_headers, start=1):
+                        cell_val = sheet.cell(row_idx, col_idx).value
+                        if cell_val is not None and str(cell_val).strip():
+                            has_data = True
+                        row_data[header] = cell_val
+                    if has_data:
+                        rows_dict_list.append(row_data)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
+                )
+        else:
+            try:
+                try:
+                    decoded = file_content.decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    decoded = file_content.decode("latin-1")
+                
+                reader = csv.DictReader(io.StringIO(decoded))
+                raw_headers = reader.fieldnames or []
+                for r in reader:
+                    if any(v and str(v).strip() for v in r.values()):
+                        rows_dict_list.append(r)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to read CSV file: {str(e)}"
+                )
+
+        def norm(h: str) -> str:
+            return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
+
+        norm_headers = [norm(h) for h in raw_headers if h is not None]
+        # Must have expense head/code and expense category/type
+        has_exp_structure = any("expensehead" in nh or "expensecode" in nh or "expense" in nh for nh in norm_headers) and any("expensecategry" in nh or "category" in nh or "expensetype" in nh or "type" in nh for nh in norm_headers)
+
+        if not has_exp_structure:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid GBPA Expenses Upload Template. Please use the official GBPA Expenses Upload Template."
+            )
+
+        if not rows_dict_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No GBPA Expense data rows found in uploaded file."
+            )
+
+        new_records = []
+        row_errors = []
+        incoming_codes = []
+
+        for idx, row in enumerate(rows_dict_list, start=2):
+            try:
+                def get_val(*keys: str, default: Any = None) -> Any:
+                    for k in keys:
+                        if k in row and row[k] is not None:
+                            return row[k]
+                        k_norm = norm(k)
+                        for rk, rv in row.items():
+                            if rv is not None and norm(rk) == k_norm:
+                                return rv
+                    return default
+
+                cust_name = resolve_customer_name(self.db, str(get_val("Customer", default="Indus Tower Ltd") or "Indus Tower Ltd"))
+                item_code = str(get_val("Item Code", "ItemCode", default="") or "").strip()
+                exp_head = str(get_val("Expense Head", "ExpenseHead", "Head", default="") or "").strip()
+                exp_cat = str(get_val("Expense Categry", "Expense Category", "Category", default="Expense") or "Expense").strip()
+                exp_type = str(get_val("Expense Type", "ExpenseType", "Type", default="Parent") or "Parent").strip()
+                exp_code = str(get_val("Expense Code", "ExpenseCode", default="") or "").strip() or f"EXP-{idx:04d}"
+                exp_desc = str(get_val("Expense Description", "Description", default="") or "").strip() or exp_head
+
+                if not exp_head:
+                    exp_head = f"Expense Item {idx}"
+
+                exp_record = IndusCustomerGbpaExpense(
+                    company_name="Nexus",
+                    customer_name=cust_name,
+                    item_code=item_code if item_code else None,
+                    expense_head=exp_head,
+                    expense_category=exp_cat,
+                    expense_type=exp_type,
+                    expense_code=exp_code,
+                    expense_description=exp_desc,
+                    uom="Nos",
+                    status="Active"
+                )
+                new_records.append(exp_record)
+                incoming_codes.append(exp_code)
+            except Exception as e:
+                row_errors.append(f"Row {idx}: {str(e)}")
+
+        if not new_records and row_errors:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to parse records: {'; '.join(row_errors[:5])}"
+            )
+
+        # Idempotency check: if all incoming expense_codes already exist in DB
+        if incoming_codes:
+            existing_count = self.db.query(IndusCustomerGbpaExpense).filter(
+                IndusCustomerGbpaExpense.expense_code.in_(incoming_codes)
+            ).count()
+            if existing_count == len(incoming_codes):
+                return {
+                    "success": True,
+                    "imported_count": len(incoming_codes),
+                    "is_retry": True,
+                    "message": "Upload already processed. No duplicate records created.",
+                    "errors": []
+                }
+
+        try:
+            self.repo.bulk_create(new_records)
+        except Exception as e:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error during bulk insert: {str(e)}"
+            )
+
+        return {
+            "success": True,
+            "imported_count": len(new_records),
+            "errors": row_errors
+        }
+
 
 
 # =========================================================================

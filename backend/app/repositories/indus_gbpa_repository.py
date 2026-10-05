@@ -111,3 +111,8 @@ class IndusGbpaRepository:
         self.db.commit()
         return True
 
+    def bulk_create(self, items: List[IndusCustomerGbpa]) -> List[IndusCustomerGbpa]:
+        self.db.add_all(items)
+        self.db.commit()
+        return items
+

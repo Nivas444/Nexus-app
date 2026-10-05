@@ -2076,6 +2076,7 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 #addOfficeLocationCard,
 #viewBankCard,
 #viewOfficeLocationCard,
+#addBulkUploadCard,
 #bulkUploadCard {
   position: fixed !important;
   top: 50% !important;

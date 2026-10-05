@@ -89,3 +89,19 @@ def delete_infra(
     """
     service = IndusInfraService(db)
     return service.delete_infra(item_id)
+
+from fastapi import File, UploadFile
+
+@router.post("/customer/indus/infra/bulk-upload", summary="Bulk Upload Indus Infrastructure")
+@router.post("/indus/infra/bulk-upload", summary="Bulk Upload Indus Infrastructure (Direct Alias)", include_in_schema=False)
+async def bulk_upload_infra(
+    file: UploadFile = File(..., description="Official Indus Infra Excel (.xlsx/.xls) or CSV template file"),
+    db: Session = Depends(get_db)
+):
+    """
+    Bulk import Indus Infrastructure items into `indus_customer_infra` with template structure validation and idempotency retry safety.
+    """
+    content = await file.read()
+    service = IndusInfraService(db)
+    return service.process_bulk_upload(content, filename=file.filename or "")
+

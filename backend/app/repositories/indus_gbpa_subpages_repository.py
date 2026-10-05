@@ -99,6 +99,15 @@ class GbpaMaterialsRepository:
             self.db.rollback()
             raise
 
+    def bulk_create(self, items: List[IndusCustomerGbpaMaterial]) -> List[IndusCustomerGbpaMaterial]:
+        try:
+            self.db.add_all(items)
+            self.db.commit()
+            return items
+        except Exception:
+            self.db.rollback()
+            raise
+
 
 # =========================================================================
 # 2. EXPENSES REPOSITORY
@@ -193,6 +202,16 @@ class GbpaExpensesRepository:
         except Exception:
             self.db.rollback()
             raise
+
+    def bulk_create(self, items: List[IndusCustomerGbpaExpense]) -> List[IndusCustomerGbpaExpense]:
+        try:
+            self.db.add_all(items)
+            self.db.commit()
+            return items
+        except Exception:
+            self.db.rollback()
+            raise
+
 
 
 # =========================================================================

@@ -4054,15 +4054,25 @@ window.backToJmsList = function() {
 window.copyJmsDetailInfo = function(elementId) {
   const el = document.getElementById(elementId);
   const text = el ? el.textContent.trim() : '';
-  if (text) {
+  let toCopy = text;
+  if (elementId === 'lblJmsDetailSiteInfo' || elementId.includes('Site') || elementId.includes('site')) {
+    toCopy = text.split('/')[0].trim();
+  } else if (elementId === 'lblJmsDetailProjectInfo' || elementId.includes('Project') || elementId.includes('project')) {
+    toCopy = text.split('/')[0].trim();
+  } else if (elementId === 'lblJmsDetailPoInfo' || elementId.includes('BannerPo') || elementId.includes('PoInfo')) {
+    toCopy = text.split('(')[0].trim();
+  } else {
+    toCopy = text.split('/')[0].split('(')[0].trim();
+  }
+  if (toCopy) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        showToast(`Copied to clipboard: ${text}`);
+      navigator.clipboard.writeText(toCopy).then(() => {
+        showToast(`Copied: ${toCopy}`);
       }).catch(() => {
-        showToast(`Copied: ${text}`);
+        showToast(`Copied: ${toCopy}`);
       });
     } else {
-      showToast(`Copied: ${text}`);
+      showToast(`Copied: ${toCopy}`);
     }
   }
 };
@@ -4070,13 +4080,20 @@ window.copyJmsDetailInfo = function(elementId) {
 window.toggleJmsDetailRowSelect = function(lineId) {
   const row = currentDataset.find(r => String(r.id) === String(lineId));
   if (row) {
-    const isCurrentlyChecked = Boolean(row.selected || row.highlighted);
-    row.selected = !isCurrentlyChecked;
-    if (!row.selected) {
-      row.highlighted = false;
-    }
+    const isCurrentlySelected = Boolean(row.selected);
+    currentDataset.forEach(r => {
+      if (String(r.id) === String(lineId)) {
+        r.selected = !isCurrentlySelected;
+        if (!r.selected && r.highlighted) {
+          r.highlighted = false;
+        }
+      } else {
+        r.selected = false;
+      }
+    });
     applyFiltersAndRender();
     updateJmsDetailActionIcons();
+    renderWorklistFooter();
   }
 };
 
@@ -4099,12 +4116,50 @@ window.highlightSelectedJmsDetailRows = function() {
   }
 };
 
+let isJmsDetailEditMode = false;
+
 window.editSelectedJmsDetailRow = function() {
   const selectedRow = currentDataset.find(r => r.selected || r.highlighted);
-  if (selectedRow) {
-    showToast(`Editing line ${selectedRow.lineNo}: ${selectedRow.itemName}`);
-  } else {
+  if (!selectedRow) {
     showToast('Please select a row to edit.');
+    return;
+  }
+  isJmsDetailEditMode = !isJmsDetailEditMode;
+  const btnEdit = document.getElementById('btnJmsDetailEdit');
+  const imgEdit = btnEdit ? btnEdit.querySelector('img') : null;
+  if (imgEdit) {
+    imgEdit.src = isJmsDetailEditMode ? 'icons/Save.svg' : 'icons/Edit.svg';
+  }
+  if (btnEdit) {
+    btnEdit.title = isJmsDetailEditMode ? 'Save' : 'Edit';
+  }
+  applyFiltersAndRender();
+  if (!isJmsDetailEditMode) {
+    showToast('Qty and Amount saved successfully!');
+  } else {
+    showToast(`Editing line ${selectedRow.lineNo}: Qty is now editable in the table.`);
+  }
+};
+
+window.updateJmsDetailRowQty = function(rowId, val) {
+  const row = currentDataset.find(r => String(r.id) === String(rowId));
+  if (row) {
+    const num = Math.max(0, parseFloat(val) || 0);
+    row.rawQty = num;
+    row.qty = num.toFixed(2);
+    const rateVal = (row.rawRate !== undefined && !isNaN(Number(row.rawRate)))
+      ? Number(row.rawRate)
+      : (parseFloat(String(row.rate || 0).replace(/[^0-9.-]+/g, '')) || 0);
+    const amt = num * rateVal;
+    row.rawAmount = amt;
+    row.amount = amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+    // Update dynamic summation in toolbar
+    const totalAmountEl = document.getElementById('lblJmsDetailTotalAmount');
+    if (totalAmountEl) {
+      totalAmountEl.textContent = formatJmsSum(calculateJmsTotalSum(currentDataset));
+    }
+    applyFiltersAndRender();
   }
 };
 
@@ -4198,6 +4253,7 @@ const defaultPoAmendItems = [
     poNo: "4500128934",
     poStatus: "Amend Requested",
     projectId: "PRJ-2026-001",
+    siteId: "IN-123456",
     siteName: "Guindy Hub",
     projectType: "New Build",
     subProjectType: "Civil",
@@ -4212,6 +4268,7 @@ const defaultPoAmendItems = [
     poNo: "4500128935",
     poStatus: "Revision Pending",
     projectId: "PRJ-2026-002",
+    siteId: "IN-123457",
     siteName: "Velachery Site",
     projectType: "Upgrade",
     subProjectType: "Electrical",
@@ -4226,6 +4283,7 @@ const defaultPoAmendItems = [
     poNo: "4500128936",
     poStatus: "Under Review",
     projectId: "PRJ-2026-003",
+    siteId: "IN-123458",
     siteName: "OMR Tower",
     projectType: "Maintenance",
     subProjectType: "Telecom",
@@ -4240,6 +4298,7 @@ const defaultPoAmendItems = [
     poNo: "4500128937",
     poStatus: "Amend Requested",
     projectId: "PRJ-2026-004",
+    siteId: "IN-123459",
     siteName: "Tambaram Junction",
     projectType: "New Build",
     subProjectType: "Civil",
@@ -4254,6 +4313,7 @@ const defaultPoAmendItems = [
     poNo: "4500128938",
     poStatus: "Revision Pending",
     projectId: "PRJ-2026-005",
+    siteId: "IN-123460",
     siteName: "Ambattur Estate",
     projectType: "Upgrade",
     subProjectType: "Optical Fiber",
@@ -4268,6 +4328,7 @@ const defaultPoAmendItems = [
     poNo: "4500128939",
     poStatus: "Under Review",
     projectId: "PRJ-2026-006",
+    siteId: "IN-123461",
     siteName: "Anna Nagar Central",
     projectType: "New Build",
     subProjectType: "Tower Erection",
@@ -4295,6 +4356,7 @@ function syncCommercialPoAmendDataWithNewProject() {
       poNo: np.poNo || existing.poNo || "4500128934",
       poStatus: assignedStatus,
       projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      siteId: np.siteId || existing.siteId || "IN-123456",
       siteName: np.siteName || existing.siteName || "Guindy Hub",
       projectType: np.projectType || existing.projectType || "New Build",
       subProjectType: np.subProjectType || existing.subProjectType || "Civil",
@@ -4366,6 +4428,249 @@ window.exportPoAmendToCsv = function() {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
   showToast('PO Amend CSV downloaded successfully!');
+};
+
+// ==========================================================================
+// COMMERCIAL MANAGER: PO AMENDMENT DETAIL SUBPAGE & MODAL POPUPS
+// ==========================================================================
+let selectedPoAmendRowId = null;
+let currentPoAmendSubpageType = 'to_be_submit'; // 'to_be_submit' | 'pending_with_indus'
+let poAmendDetailItemsMap = {};
+
+function getDefaultPoAmendDetailItems(poNo, baseAmt) {
+  const parsedAmt = baseAmt || 245000;
+  const item1 = Math.round(parsedAmt * 0.55);
+  const item2 = Math.max(0, parsedAmt - item1);
+
+  return [
+    {
+      id: `poamend-line-${Date.now()}-1`,
+      selected: false,
+      highlighted: false,
+      amendmentType: "Change QTY",
+      lineNo: "10",
+      itemCode: "ITEM-IND-CIVIL-001",
+      itemName: "Civil Foundation & Tower Anchor Bolts",
+      uom: "Set",
+      qty: "3.00",
+      rawQty: 3,
+      rate: formatJmsSum(Math.round(item1 / 3)),
+      rawRate: Math.round(item1 / 3),
+      amount: formatJmsSum(item1),
+      rawAmount: item1
+    },
+    {
+      id: `poamend-line-${Date.now()}-2`,
+      selected: false,
+      highlighted: false,
+      amendmentType: "Additional",
+      lineNo: "", // Open editable box where user enters line no
+      itemCode: "ITEM-IND-ELEC-009",
+      itemName: "Additional Electrical Grounding & Surge Protector Kit",
+      uom: "Nos",
+      qty: "2.00",
+      rawQty: 2,
+      rate: formatJmsSum(Math.round(item2 / 2)),
+      rawRate: Math.round(item2 / 2),
+      amount: formatJmsSum(item2),
+      rawAmount: item2
+    }
+  ];
+}
+
+function getPoAmendDetailItems(rowId) {
+  const key = rowId || selectedPoAmendRowId || 'default';
+  if (!poAmendDetailItemsMap[key]) {
+    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(key)) || (defaultPoAmendItems && defaultPoAmendItems[0]);
+    const rawAmt = parentRow ? (parentRow.rawAmount || 245000) : 245000;
+    poAmendDetailItemsMap[key] = getDefaultPoAmendDetailItems(parentRow ? parentRow.poNo : '', rawAmt);
+  }
+  return poAmendDetailItemsMap[key];
+}
+
+function calculatePoAmendDetailTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawAmount !== undefined && !isNaN(Number(r.rawAmount))) {
+      sum += Number(r.rawAmount);
+    } else if (r.amount) {
+      const parsed = parseFloat(String(r.amount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculatePoAmendDetailTotalSum = calculatePoAmendDetailTotalSum;
+
+window.openPoAmendDetailPage = function(rowId, poNo, task) {
+  selectedPoAmendRowId = rowId;
+  const taskStr = String(task || '').trim().toLowerCase();
+  currentPoAmendSubpageType = taskStr.includes('pending') ? 'pending_with_indus' : 'to_be_submit';
+  currentWorklistView = 'po_amend_detail';
+  activeColumnFilters = {};
+  loadWorklistDataset();
+  updateURL();
+  renderApp();
+  showToast(`Opened PO Amendment Detail for ${poNo || 'PO'}`);
+};
+
+window.backToPoAmendList = function() {
+  currentWorklistView = 'po_amend';
+  activeColumnFilters = {};
+  loadWorklistDataset();
+  updateURL();
+  renderApp();
+  showToast('Returned to PO Amend list');
+};
+
+window.togglePoAmendDetailRowSelect = function(lineId) {
+  const row = currentDataset.find(r => String(r.id) === String(lineId));
+  if (row) {
+    const isCurrentlySelected = Boolean(row.selected);
+    currentDataset.forEach(r => {
+      if (String(r.id) === String(lineId)) {
+        r.selected = !isCurrentlySelected;
+      } else {
+        r.selected = false;
+      }
+    });
+    applyFiltersAndRender();
+    updatePoAmendDetailActionIcons();
+    renderWorklistFooter();
+  }
+};
+
+window.updatePoAmendDetailLineNo = function(lineId, val) {
+  const row = currentDataset.find(r => String(r.id) === String(lineId));
+  if (row) {
+    row.lineNo = val;
+  }
+};
+
+window.approveSelectedPoAmendDetailRow = function() {
+  let count = 0;
+  currentDataset.forEach(r => {
+    if (r.selected) {
+      r.highlighted = true;
+      count++;
+    }
+  });
+  if (count > 0) {
+    applyFiltersAndRender();
+    updatePoAmendDetailActionIcons();
+    renderWorklistFooter();
+    showToast('Saved entered value and highlighted row!');
+  } else {
+    showToast('Please select a row first.');
+  }
+};
+
+window.updatePoAmendDetailActionIcons = function() {
+  const hasSelected = currentDataset.some(r => r.selected);
+  const btnTick = document.getElementById('btnPoAmendDetailApproveTick');
+  if (btnTick) {
+    btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+};
+
+window.exportPoAmendDetailToPdf = function() {
+  showToast('Downloading PO Amendment PDF...');
+};
+
+// Modals: PO Amendment ID & PO Amendment Status
+window.openPoAmendIdModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendIdPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  const inpRef = document.getElementById('inpPoAmendRefId');
+  if (inpRef) inpRef.value = '';
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closePoAmendIdModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendIdPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitPoAmendIdModal = function() {
+  const inpRef = document.getElementById('inpPoAmendRefId');
+  const refVal = inpRef ? inpRef.value.trim() : '';
+
+  closePoAmendIdModal();
+
+  if (selectedPoAmendRowId) {
+    const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
+    if (parentRow) {
+      parentRow.task = "Pending with Indus";
+      parentRow.poStatus = "Under Review";
+    }
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`PO Amendment ${refVal ? `(${refVal}) ` : ''}submitted successfully!`, 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+
+  setTimeout(() => {
+    backToPoAmendList();
+  }, 1200);
+};
+
+window.openPoAmendStatusModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendStatusPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  const inpRev = document.getElementById('inpPoAmendRevisionNo');
+  if (inpRev) inpRev.value = '';
+
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpPoAmendApprovedDate', 'btnPoAmendApprovedDateCalendar');
+  }
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closePoAmendStatusModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendStatusPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitPoAmendStatusModal = function() {
+  const inpRev = document.getElementById('inpPoAmendRevisionNo');
+  const revVal = inpRev ? inpRev.value.trim() : '';
+
+  closePoAmendStatusModal();
+
+  if (selectedPoAmendRowId) {
+    const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
+    if (parentRow) {
+      parentRow.task = "Amend Approved";
+      parentRow.poStatus = "Approved";
+    }
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`PO Amendment status ${revVal ? `(Rev ${revVal}) ` : ''}updated successfully!`, 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+
+  setTimeout(() => {
+    backToPoAmendList();
+  }, 1200);
 };
 
 const defaultWccItems = [
@@ -5137,10 +5442,18 @@ function goBackSubpage() {
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
     if (role === 'Commercial Manager') {
-      currentModule = 'projects';
-      currentProjectsSubpage = 'projects';
-      currentProjectsView = 'main';
-      showToast('Returned to Projects');
+      if (currentWorklistView === 'po_amend_detail') {
+        currentWorklistView = 'po_amend';
+        showToast('Returned to PO Amend list');
+      } else if (currentWorklistView === 'jms_detail') {
+        currentWorklistView = 'jms';
+        showToast('Returned to JMS list');
+      } else {
+        currentModule = 'projects';
+        currentProjectsSubpage = 'projects';
+        currentProjectsView = 'main';
+        showToast('Returned to Projects');
+      }
     } else {
       if (currentWorklistView === 'po_rfq_compare') {
         currentWorklistView = 'po_supplier';
@@ -5295,6 +5608,37 @@ function renderApp() {
             <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
               <span id="lblJmsDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${parentRow ? `${parentRow.siteId} / ${parentRow.siteName}` : 'IN-123456 / Guindy Hub'}</span>
               <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblJmsDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'po_amend_detail') {
+        const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(selectedPoAmendRowId)) || (typeof defaultPoAmendItems !== 'undefined' && defaultPoAmendItems[0]);
+        const pId = parentRow ? (parentRow.projectId || 'PRJ-2026-001') : 'PRJ-2026-001';
+        const pType = parentRow ? (parentRow.projectType || 'New Build') : 'New Build';
+        const subType = parentRow ? (parentRow.subProjectType || 'Civil') : 'Civil';
+        const pPo = parentRow ? (parentRow.poNo || '4500128934') : '4500128934';
+        const sId = parentRow ? (parentRow.siteId || 'IN-123456') : 'IN-123456';
+        const sName = parentRow ? (parentRow.siteName || 'Guindy Hub') : 'Guindy Hub';
+
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div class="banner-left-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblPoAmendDetailBannerProject" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pId} / ${pType} / ${subType}</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblPoAmendDetailBannerProject')" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+            <div class="banner-center-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblPoAmendDetailBannerPo" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pPo} (0-Opex)</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblPoAmendDetailBannerPo')" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+            <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblPoAmendDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${sId} / ${sName}</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblPoAmendDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
@@ -11443,6 +11787,10 @@ function loadWorklistDataset() {
       const parentId = selectedJmsRowId || 'jms-1';
       currentDataset = getJmsDetailItems(parentId);
       filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'po_amend_detail') {
+      const parentId = selectedPoAmendRowId || 'poamend-1';
+      currentDataset = getPoAmendDetailItems(parentId);
+      filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
       filteredDataset = [];
@@ -11510,6 +11858,7 @@ function renderWorklistToolbar() {
     const isPoAmend = currentWorklistView === 'po_amend';
     const isWcc = currentWorklistView === 'wcc';
     const isJmsDetail = currentWorklistView === 'jms_detail';
+    const isPoAmendDetail = currentWorklistView === 'po_amend_detail';
     const hasSelected = isNewProject && currentDataset.some(r => r.selected);
 
     if (isJms) {
@@ -11582,9 +11931,9 @@ function renderWorklistToolbar() {
             <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
             <span id="lblJmsDetailTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
           </div>
-          <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px;" title="Payable Amount">
-            <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
-            <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">1,85,000.00</span>
+          <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px; cursor: pointer;" title="Payable Amount - Click to view Expense Details" onclick="openExpensesSummaryModal()">
+            <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle; cursor: pointer;">
+            <span id="lblJmsDetailPayableAmount" style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">1,85,000.00</span>
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
@@ -11608,6 +11957,35 @@ function renderWorklistToolbar() {
           </button>
           <button type="button" class="toolbar-icon-btn" id="btnJmsDetailEdit" data-tooltip="Edit Line" aria-label="Edit Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="editSelectedJmsDetailRow()">
             <img src="icons/Edit.svg" alt="Edit" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else if (isPoAmendDetail) {
+      const initialTotalFormatted = formatJmsSum(calculatePoAmendDetailTotalSum(currentDataset));
+      const hasSelectedRow = currentDataset.some(r => r.selected);
+      const isToBeSubmit = currentPoAmendSubpageType === 'to_be_submit';
+
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <button type="button" class="toolbar-icon-btn" onclick="backToPoAmendList()" title="Go Back" style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center;">
+            <img src="icons/Backward.svg" alt="Go Back" width="28" height="28">
+          </button>
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 4px;" title="Total Sum of Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblPoAmendDetailTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          ${isToBeSubmit ? `
+          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf()">
+            <img src="icons/PDF download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          ` : ''}
+          <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="approveSelectedPoAmendDetailRow()">
+            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPoAmendDetailRefresh" data-tooltip="Refresh to JMS Page" aria-label="Refresh" style="cursor: pointer;" onclick="backToJmsList()">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
           </button>
         </div>
       `;
@@ -12007,6 +12385,20 @@ function renderWorklistFooter() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Commercial Manager') {
+    if (currentWorklistView === 'jms_detail' || currentWorklistView === 'po_amend_detail') {
+      footer.style.display = 'none';
+      footer.innerHTML = '';
+      return;
+    }
+
+    const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 7;
+    const jmsCount = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData)) ? commercialJmsData.length : 7;
+    const poAmendCount = (typeof commercialPoAmendData !== 'undefined' && Array.isArray(commercialPoAmendData)) ? commercialPoAmendData.length : 7;
+    const wccCount = (typeof commercialWccData !== 'undefined' && Array.isArray(commercialWccData)) ? commercialWccData.length : 7;
+    const invoiceCount = (typeof commercialInvoiceData !== 'undefined' && Array.isArray(commercialInvoiceData)) ? commercialInvoiceData.length : newProjectCount;
+    const receivableCount = (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData)) ? commercialReceivableData.length : newProjectCount;
+    const emailCount = (typeof commercialEmailData !== 'undefined' && Array.isArray(commercialEmailData)) ? commercialEmailData.length : newProjectCount;
+
     footer.style.display = 'flex';
     footer.style.justifyContent = 'flex-start';
     footer.style.alignItems = 'center';
@@ -12016,55 +12408,34 @@ function renderWorklistFooter() {
     footer.innerHTML = `
       <div class="segmented-toggle-group">
         <button type="button" class="segmented-btn ${currentWorklistView === 'new_project' ? 'active' : ''}" id="btnToggleNewProject">
-          New project
+          New project (${newProjectCount})
         </button>
         <div class="segmented-divider"></div>
         <button type="button" class="segmented-btn ${currentWorklistView === 'jms' ? 'active' : ''}" id="btnToggleJms">
-          JMS
+          JMS (${jmsCount})
         </button>
         <div class="segmented-divider"></div>
         <button type="button" class="segmented-btn ${currentWorklistView === 'po_amend' ? 'active' : ''}" id="btnTogglePoAmend">
-          PO Amend
+          PO Amend (${poAmendCount})
         </button>
         <div class="segmented-divider"></div>
         <button type="button" class="segmented-btn ${currentWorklistView === 'wcc' ? 'active' : ''}" id="btnToggleWcc">
-          WCC
+          WCC (${wccCount})
         </button>
         <div class="segmented-divider"></div>
         <button type="button" class="segmented-btn ${currentWorklistView === 'invoice' ? 'active' : ''}" id="btnToggleInvoice">
-          Invoice
+          Invoice (${invoiceCount})
         </button>
         <div class="segmented-divider"></div>
         <button type="button" class="segmented-btn ${currentWorklistView === 'receivable' ? 'active' : ''}" id="btnToggleReceivable">
-          Receivable
+          Receivable (${receivableCount})
         </button>
         <div class="segmented-divider"></div>
         <button type="button" class="segmented-btn ${currentWorklistView === 'email' ? 'active' : ''}" id="btnToggleEmail">
-          E-mail
+          E-mail (${emailCount})
         </button>
       </div>
     `;
-
-        if (currentWorklistView === 'jms_detail') {
-      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
-      if (allHighlighted) {
-        footer.style.display = 'flex';
-        footer.style.justifyContent = 'center';
-        footer.style.alignItems = 'center';
-        footer.style.width = '100%';
-        footer.style.marginTop = '16px';
-        footer.style.padding = '16px';
-        footer.innerHTML = `
-          <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="submitJmsDetail()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit JMS Validation">
-            <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
-          </button>
-        `;
-      } else {
-        footer.style.display = 'none';
-        footer.innerHTML = '';
-      }
-      return;
-    }
 
     const commercialTabs = [
       { id: 'btnToggleNewProject', view: 'new_project', label: 'New project' },
@@ -12173,49 +12544,57 @@ function renderWorklistTableHead() {
   if (role === 'Commercial Manager') {
     if (currentWorklistView === 'new_project') {
       thead.innerHTML = `
-        <tr>
-          <th class="th-select" style="width: 60px; text-align: center; vertical-align: middle;">
+        <tr class="master-view-header">
+          <!-- 1. Select: 60px, center -->
+          <th class="th-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; text-align: center;">
               <span>Select</span>
             </div>
           </th>
-          <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+          <!-- 2. Customer Name: 25ch, center header, has filter -->
+          <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Customer Name</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
             </div>
           </th>
-          <th style="width: 140px; min-width: 140px; text-align: center; vertical-align: middle; white-space: nowrap;">
+          <!-- 3. Date: 140px, center header, no filter -->
+          <th style="width: 140px; min-width: 140px; max-width: 140px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; text-align: center;">
               <span>Date</span>
             </div>
           </th>
-          <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+          <!-- 4. PO No: 15ch, center header, has filter -->
+          <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>PO No</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
             </div>
           </th>
-          <th style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: center; vertical-align: middle;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+          <!-- 5. Project ID: 20ch, center header, has filter -->
+          <th style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Project ID</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
             </div>
           </th>
-          <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+          <!-- 6. Site ID: 15ch, center header, has filter -->
+          <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Site ID</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
             </div>
           </th>
-          <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+          <!-- 7. Site Name: 25ch, center header, has filter -->
+          <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Site Name</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
             </div>
           </th>
-          <th style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center; vertical-align: middle;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+          <!-- 8. Ageing: 10ch, center header, has filter -->
+          <th style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Ageing</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
             </div>
@@ -12507,6 +12886,51 @@ function renderWorklistTableHead() {
         </tr>
       `;
       rebindFilterButtons();
+    } else if (currentWorklistView === 'po_amend_detail') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 60px, center -->
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Select</span>
+          </th>
+          <!-- 2. Amendment Type: 15ch, center -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Amendment Type</span>
+          </th>
+          <!-- 3. Line No: 10ch, center -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Line No</span>
+          </th>
+          <!-- 4. Item Code: 30ch, center header -->
+          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Item Code</span>
+          </th>
+          <!-- 5. Item Name: 40ch, center header, with filter -->
+          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Item Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. UOM: 10ch, center header -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>UOM</span>
+          </th>
+          <!-- 7. Qty: 10ch, center header -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Qty</span>
+          </th>
+          <!-- 8. Rate: 10ch, center header -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Rate</span>
+          </th>
+          <!-- 9. Amount: 15ch, center header -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
     } else {
       thead.innerHTML = '';
     }
@@ -12785,28 +13209,36 @@ function applyFiltersAndRender() {
         const isSelected = !!row.selected;
         return `
           <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
-            <td class="td-select td-center" style="text-align: center; vertical-align: middle;">
+            <!-- 1. Select: 60px & center -->
+            <td class="td-select td-center" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
               <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleCommercialWorklistRowSelect('${row.id}')" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
             </td>
-            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; vertical-align: middle;">
+            <!-- 2. Customer Name: 25ch & left -->
+            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
               ${row.customerName || ''}
             </td>
-            <td class="td-center" style="width: 140px; min-width: 140px; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            <!-- 3. Date: 140px & center -->
+            <td class="td-center" style="width: 140px; min-width: 140px; max-width: 140px; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.date || ''}
             </td>
-            <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            <!-- 4. PO No: 15ch & center -->
+            <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               <a href="#" class="po-no-link" onclick="openCommercialPoModal('${row.id}'); return false;" style="color: #0454e4; font-weight: 500; text-decoration: none; cursor: pointer;" title="Open PO Details">${row.poNo || ''}</a>
             </td>
-            <td style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1e293b; font-weight: 500; vertical-align: middle;">
+            <!-- 5. Project ID: 20ch & left -->
+            <td style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1e293b; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
               ${row.projectId || ''}
             </td>
-            <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            <!-- 6. Site ID: 15ch & center -->
+            <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.siteId || ''}
             </td>
-            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;">
+            <!-- 7. Site Name: 25ch & left -->
+            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.siteName || ''}
             </td>
-            <td class="td-center" style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+            <!-- 8. Ageing: 10ch & center -->
+            <td class="td-center" style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.ageing || ''}
             </td>
           </tr>
@@ -12953,7 +13385,7 @@ function applyFiltersAndRender() {
             </td>
             <!-- 2. PO No: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-              <span style="color: #0454e4; font-weight: 500;">${row.poNo || ''}</span>
+              <span onclick="openPoAmendDetailPage('${row.id}', '${row.poNo}', '${row.task}')" style="color: #0454e4; font-weight: 600; cursor: pointer; text-decoration: none;" title="Open PO Amendment Detail">${row.poNo || ''}</span>
             </td>
             <!-- 3. PO Status: 20ch & center -->
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
@@ -13115,14 +13547,22 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
+
+      let rowsHtml = filteredDataset.map(row => {
         const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
         const isChecked = Boolean(row.selected || row.highlighted);
+        const isRowEditable = Boolean(typeof isJmsDetailEditMode !== 'undefined' && isJmsDetailEditMode && (row.selected || row.highlighted));
+        
+        const qtyCellHtml = isRowEditable
+          ? `<input type="number" step="1" min="0" value="${row.rawQty !== undefined ? row.rawQty : (parseFloat(row.qty) || 0)}" onchange="updateJmsDetailRowQty('${row.id}', this.value)" style="width: 72px; height: 28px; text-align: right; border: 1px solid #000000; border-radius: 4px; padding: 2px 6px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
+          : (row.qty || '');
+
         return `
           <tr data-row-id="${row.id}" style="${rowBgStyle}">
-            <!-- 1. Select: Circle radio button -->
+            <!-- 1. Select: Circle radio button (Green when checked) -->
             <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
-              <div class="circular-radio-btn" onclick="toggleJmsDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#0454e4' : '#94a3b8'}; background: ${isChecked ? '#0454e4' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
+              <div class="circular-radio-btn" onclick="toggleJmsDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
                 ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
               </div>
             </td>
@@ -13146,9 +13586,9 @@ function applyFiltersAndRender() {
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.rate || ''}
             </td>
-            <!-- 7. Qty: 10ch & right -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-              ${row.qty || ''}
+            <!-- 7. Qty: 10ch & right (Editable when in edit mode) -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 6px 6px;">
+              ${qtyCellHtml}
             </td>
             <!-- 8. Amount: 15ch & right -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
@@ -13157,6 +13597,117 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
+      if (allHighlighted) {
+        rowsHtml += `
+          <tr id="rowJmsDetailSubmitAction" style="background: transparent; border: none;">
+            <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none; background: transparent;">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="openJmsSelectWorkTypeModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit JMS Validation">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = rowsHtml;
+      return;
+    }
+
+    if (currentWorklistView === 'po_amend_detail') {
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible amount column
+      const totalAmountEl = document.getElementById('lblPoAmendDetailTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculatePoAmendDetailTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
+
+      let rowsHtml = filteredDataset.map(row => {
+        const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
+        const isChecked = Boolean(row.selected);
+        const isAdditional = (row.amendmentType || '').toLowerCase().includes('additional');
+
+        const lineNoCellHtml = isAdditional
+          ? `<input type="text" value="${row.lineNo || ''}" placeholder="" oninput="updatePoAmendDetailLineNo('${row.id}', this.value)" ${row.selected ? '' : 'readonly'} style="width: 72px; height: 28px; text-align: center; border: 1.5px solid ${row.selected ? '#00cba0' : '#94a3b8'}; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: ${row.selected ? '#ffffff' : '#f8fafc'}; color: #0f172a; cursor: ${row.selected ? 'text' : 'not-allowed'}; box-sizing: border-box;" title="${row.selected ? 'Edit Line No' : 'Select row to edit Line No'}">`
+          : (row.lineNo || '');
+
+        return `
+          <tr data-row-id="${row.id}" style="${rowBgStyle}">
+            <!-- 1. Select: Circle radio button (Green when checked, single selection) -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <div class="circular-radio-btn" onclick="togglePoAmendDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
+                ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+              </div>
+            </td>
+            <!-- 2. Amendment Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; font-weight: 600; color: #0f172a;">
+              ${row.amendmentType || ''}
+            </td>
+            <!-- 3. Line No: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 6px 6px;">
+              ${lineNoCellHtml}
+            </td>
+            <!-- 4. Item Code: 30ch & left -->
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.itemCode || ''}
+            </td>
+            <!-- 5. Item Name: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.itemName || ''}
+            </td>
+            <!-- 6. UOM: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.uom || ''}
+            </td>
+            <!-- 7. Qty: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.qty || ''}
+            </td>
+            <!-- 8. Rate: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.rate || ''}
+            </td>
+            <!-- 9. Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.amount || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (allHighlighted) {
+        rowsHtml += `
+          <tr id="rowPoAmendDetailSubmitAction" style="background: transparent; border: none;">
+            <td colspan="9" style="text-align: center; padding: 24px 0 16px 0; border: none; background: transparent;">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="${currentPoAmendSubpageType === 'pending_with_indus' ? 'openPoAmendStatusModal()' : 'openPoAmendIdModal()'}" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = rowsHtml;
       return;
     }
 
@@ -32153,4 +32704,70 @@ window.closeJmsAddLineItemsModal = function() {
 window.saveJmsAddLineItems = function() {
   showToast('Line items saved successfully.');
   closeJmsAddLineItemsModal();
+};
+
+// ==========================================
+// SELECT WORK TYPE MODAL (JMS Detail Subpage)
+// ==========================================
+window.openJmsSelectWorkTypeModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('selectWorkTypePanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeJmsSelectWorkTypeModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('selectWorkTypePanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.toggleWorkTypeSwitch = function(type) {
+  const mapping = {
+    civil: { chk: 'chkWorkTypeCivil', wrap: 'btnToggleCivilWorksWrapper', knob: 'knobWorkTypeCivil' },
+    electrical: { chk: 'chkWorkTypeElectrical', wrap: 'btnToggleElectricalWorksWrapper', knob: 'knobWorkTypeElectrical' },
+    service: { chk: 'chkWorkTypeService', wrap: 'btnToggleServiceWorksWrapper', knob: 'knobWorkTypeService' },
+    eb: { chk: 'chkWorkTypeEb', wrap: 'btnToggleEbWorksWrapper', knob: 'knobWorkTypeEb' }
+  };
+
+  const item = mapping[type];
+  if (!item) return;
+  const chk = document.getElementById(item.chk);
+  const wrap = document.getElementById(item.wrap);
+  const knob = document.getElementById(item.knob);
+  if (!chk || !wrap || !knob) return;
+
+  chk.checked = !chk.checked;
+  if (chk.checked) {
+    wrap.style.backgroundColor = '#10b981'; // Green when activated
+    knob.style.transform = 'translateX(26px)';
+  } else {
+    wrap.style.backgroundColor = '#ef4444'; // Red when deactivated
+    knob.style.transform = 'translateX(0px)';
+  }
+};
+
+window.submitWorkTypeSelection = function() {
+  closeJmsSelectWorkTypeModal();
+
+  if (selectedJmsRowId) {
+    const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
+    if (parentRow) {
+      parentRow.task = "JMS to be process";
+    }
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+
+  setTimeout(() => {
+    backToJmsList();
+  }, 1200);
 };

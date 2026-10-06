@@ -3143,6 +3143,12 @@ td.col-master-vendor-status {
   color: #dc2626 !important;
 }
 
+#poAmendStatusPanel .side-form-close-btn:hover,
+#poAmendIdPanel .side-form-close-btn:hover {
+  transform: none !important;
+  color: #dc2626 !important;
+}
+
 .side-form-top-icons {
   display: flex;
   align-items: center;

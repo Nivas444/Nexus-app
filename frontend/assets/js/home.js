@@ -3633,6 +3633,10 @@ let commercialWorklistData = [
     siteId: "IN-123456",
     siteName: "Guindy Hub",
     ageing: "12 Days",
+    projectType: "Run project",
+    subProjectType: "Civil",
+    poType: "Opex",
+    raBill: true,
     selected: false
   },
   {
@@ -3644,6 +3648,10 @@ let commercialWorklistData = [
     siteId: "IN-123457",
     siteName: "Ambattur Central",
     ageing: "18 Days",
+    projectType: "New Build",
+    subProjectType: "Electrical",
+    poType: "Capex",
+    raBill: true,
     selected: false
   },
   {
@@ -3655,6 +3663,10 @@ let commercialWorklistData = [
     siteId: "IN-123458",
     siteName: "Madurai Depot",
     ageing: "24 Days",
+    projectType: "O&M",
+    subProjectType: "Telecom",
+    poType: "Opex",
+    raBill: false,
     selected: false
   },
   {
@@ -3666,6 +3678,10 @@ let commercialWorklistData = [
     siteId: "IN-123459",
     siteName: "Coimbatore Hub",
     ageing: "32 Days",
+    projectType: "Energy",
+    subProjectType: "Maintenance",
+    poType: "Capex",
+    raBill: true,
     selected: false
   },
   {
@@ -3677,6 +3693,10 @@ let commercialWorklistData = [
     siteId: "IN-123460",
     siteName: "Chennai North",
     ageing: "45 Days",
+    projectType: "Safety",
+    subProjectType: "Installation",
+    poType: "Opex",
+    raBill: true,
     selected: false
   },
   {
@@ -3688,6 +3708,10 @@ let commercialWorklistData = [
     siteId: "IN-123461",
     siteName: "Salem South",
     ageing: "15 Days",
+    projectType: "Colo",
+    subProjectType: "Survey",
+    poType: "Capex",
+    raBill: false,
     selected: false
   },
   {
@@ -3699,9 +3723,854 @@ let commercialWorklistData = [
     siteId: "IN-123462",
     siteName: "Trichy Central",
     ageing: "28 Days",
+    projectType: "New Build",
+    subProjectType: "Upgrade",
+    poType: "Opex",
+    raBill: true,
     selected: false
   }
 ];
+
+// ==========================================================================
+// COMMERCIAL MANAGER: JMS DATASET & REPLICATION
+// ==========================================================================
+const defaultJmsItems = [
+  {
+    id: "cw-1",
+    date: "12/08/2026",
+    poNo: "4500128934",
+    projectId: "PRJ-2026-001",
+    siteName: "Guindy Hub",
+    siteId: "IN-123456",
+    projectType: "Run project",
+    subProjectType: "Civil",
+    supportRequired: "Site Survey Documentation",
+    pendingWith: "Project Manager",
+    remarks: "Pending site verification",
+    task: "JMS to be validate",
+    ageing: "12 Days",
+    amount: "₹ 2,45,000.00",
+    rawAmount: 245000
+  },
+  {
+    id: "cw-2",
+    date: "14/08/2026",
+    poNo: "4500128935",
+    projectId: "PRJ-2026-002",
+    siteName: "Ambattur Central",
+    siteId: "IN-123457",
+    projectType: "New Build",
+    subProjectType: "Electrical",
+    supportRequired: "Power Connection Clearance",
+    pendingWith: "Site Engineer",
+    remarks: "Awaiting test results",
+    task: "JMS to be process",
+    ageing: "18 Days",
+    amount: "₹ 3,80,000.00",
+    rawAmount: 380000
+  },
+  {
+    id: "cw-3",
+    date: "16/08/2026",
+    poNo: "4500128936",
+    projectId: "PRJ-2026-003",
+    siteName: "Madurai Depot",
+    siteId: "IN-123458",
+    projectType: "O&M",
+    subProjectType: "Telecom",
+    supportRequired: "Telecom NOC Approval",
+    pendingWith: "Quality Lead",
+    remarks: "Documents submitted",
+    task: "Commercial approval pending",
+    ageing: "24 Days",
+    amount: "₹ 1,95,000.00",
+    rawAmount: 195000
+  },
+  {
+    id: "cw-4",
+    date: "18/08/2026",
+    poNo: "4500128937",
+    projectId: "PRJ-2026-004",
+    siteName: "Coimbatore Hub",
+    siteId: "IN-123459",
+    projectType: "Energy",
+    subProjectType: "Maintenance",
+    supportRequired: "Structural Stability Report",
+    pendingWith: "Commercial Lead",
+    remarks: "In review with team",
+    task: "JMS to be validate",
+    ageing: "32 Days",
+    amount: "₹ 4,50,000.00",
+    rawAmount: 450000
+  },
+  {
+    id: "cw-5",
+    date: "20/08/2026",
+    poNo: "4500128938",
+    projectId: "PRJ-2026-005",
+    siteName: "Chennai North",
+    siteId: "IN-123460",
+    projectType: "Safety",
+    subProjectType: "Installation",
+    supportRequired: "Foundation Quality Check",
+    pendingWith: "Operations Lead",
+    remarks: "Site readiness confirmed",
+    task: "JMS to be process",
+    ageing: "45 Days",
+    amount: "₹ 3,20,000.00",
+    rawAmount: 320000
+  },
+  {
+    id: "cw-6",
+    date: "22/08/2026",
+    poNo: "4500128939",
+    projectId: "PRJ-2026-006",
+    siteName: "Salem South",
+    siteId: "IN-123461",
+    projectType: "Colo",
+    subProjectType: "Survey",
+    supportRequired: "Civil Quality Inspection",
+    pendingWith: "Technical Auditor",
+    remarks: "Pre-audit complete",
+    task: "Commercial approval pending",
+    ageing: "15 Days",
+    amount: "₹ 2,75,000.00",
+    rawAmount: 275000
+  },
+  {
+    id: "cw-7",
+    date: "24/08/2026",
+    poNo: "4500128940",
+    projectId: "PRJ-2026-007",
+    siteName: "Trichy Central",
+    siteId: "IN-123462",
+    projectType: "New Build",
+    subProjectType: "Upgrade",
+    supportRequired: "Soil Testing Certification",
+    pendingWith: "Survey Lead",
+    remarks: "Initial survey logged",
+    task: "JMS to be validate",
+    ageing: "28 Days",
+    amount: "₹ 5,10,000.00",
+    rawAmount: 510000
+  }
+];
+
+let commercialJmsData = [...defaultJmsItems];
+
+function syncCommercialJmsDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  commercialJmsData = commercialWorklistData.map((np, idx) => {
+    const existing = commercialJmsData.find(j => String(j.id) === String(np.id) || j.poNo === np.poNo) || defaultJmsItems[idx % defaultJmsItems.length];
+    const taskOptions = ["JMS to be validate", "JMS to be process", "Commercial approval pending"];
+    const assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
+    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    return {
+      id: np.id || `jms-${idx + 1}`,
+      date: np.date || existing.date || "12/08/2026",
+      poNo: np.poNo || existing.poNo || "4500128934",
+      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      siteName: np.siteName || existing.siteName || "Guindy Hub",
+      siteId: np.siteId || existing.siteId || "IN-123456",
+      projectType: np.projectType || existing.projectType || "New Build",
+      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
+      supportRequired: existing.supportRequired || "Site Survey Documentation",
+      pendingWith: existing.pendingWith || "Project Manager",
+      remarks: existing.remarks || "Pending verification",
+      task: assignedTask,
+      ageing: np.ageing || existing.ageing || "12 Days",
+      amount: formatIndianCurrency(rawAmt),
+      rawAmount: rawAmt
+    };
+  });
+}
+
+function formatIndianCurrency(num) {
+  const n = Number(num) || 0;
+  return '₹ ' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+window.formatIndianCurrency = formatIndianCurrency;
+
+function formatJmsSum(num) {
+  const n = Number(num) || 0;
+  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+window.formatJmsSum = formatJmsSum;
+
+function calculateJmsTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawAmount !== undefined && !isNaN(Number(r.rawAmount))) {
+      sum += Number(r.rawAmount);
+    } else if (r.amount) {
+      const parsed = parseFloat(String(r.amount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculateJmsTotalSum = calculateJmsTotalSum;
+
+window.exportJmsToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialJmsData || []);
+  const headers = [
+    "Date",
+    "PO No",
+    "Project ID",
+    "Site Name",
+    "Site ID",
+    "Project Type",
+    "Sub-Project Type",
+    "Support Required",
+    "Pending With",
+    "Remarks",
+    "Task",
+    "Ageing",
+    "Amount"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => [
+    escapeCsv(r.date),
+    escapeCsv(r.poNo),
+    escapeCsv(r.projectId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.siteId),
+    escapeCsv(r.projectType),
+    escapeCsv(r.subProjectType),
+    escapeCsv(r.supportRequired),
+    escapeCsv(r.pendingWith),
+    escapeCsv(r.remarks),
+    escapeCsv(r.task),
+    escapeCsv(r.ageing),
+    escapeCsv(r.amount)
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `JMS_Worklist_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('JMS CSV downloaded successfully!');
+};
+
+let selectedJmsRowId = null;
+let jmsDetailItemsMap = {};
+
+function getDefaultJmsLineItems(poNo, baseAmt) {
+  const parsedAmt = baseAmt || 245000;
+  const item1 = Math.round(parsedAmt * 0.4);
+  const item2 = Math.round(parsedAmt * 0.35);
+  const item3 = Math.max(0, parsedAmt - item1 - item2);
+
+  return [
+    {
+      id: `jmsline-${Date.now()}-1`,
+      lineNo: "10",
+      itemCode: "ITEM-IND-CIVIL-001",
+      itemName: "Civil Foundation & Tower Anchor Bolts",
+      uom: "Set",
+      rate: formatJmsSum(Math.round(item1 / 2)),
+      rawRate: Math.round(item1 / 2),
+      qty: "2.00",
+      rawQty: 2,
+      amount: formatJmsSum(item1),
+      rawAmount: item1,
+      selected: false,
+      highlighted: false
+    },
+    {
+      id: `jmsline-${Date.now()}-2`,
+      lineNo: "20",
+      itemCode: "ITEM-IND-ELEC-004",
+      itemName: "Electrical Power Distribution & Earthing Kit",
+      uom: "Nos",
+      rate: formatJmsSum(item2),
+      rawRate: item2,
+      qty: "1.00",
+      rawQty: 1,
+      amount: formatJmsSum(item2),
+      rawAmount: item2,
+      selected: false,
+      highlighted: false
+    },
+    {
+      id: `jmsline-${Date.now()}-3`,
+      lineNo: "30",
+      itemCode: "ITEM-IND-TEL-008",
+      itemName: "Telecom Antenna Mount Clamps & Fixtures",
+      uom: "Mtr",
+      rate: formatJmsSum(Math.round(item3 / 10)),
+      rawRate: Math.round(item3 / 10),
+      qty: "10.00",
+      rawQty: 10,
+      amount: formatJmsSum(item3),
+      rawAmount: item3,
+      selected: false,
+      highlighted: false
+    }
+  ];
+}
+
+function getJmsDetailItems(rowId) {
+  if (!jmsDetailItemsMap[rowId]) {
+    const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(rowId)) || (defaultJmsItems && defaultJmsItems[0]);
+    const rawAmt = parentRow ? (parentRow.rawAmount || 245000) : 245000;
+    jmsDetailItemsMap[rowId] = getDefaultJmsLineItems(parentRow ? parentRow.poNo : '', rawAmt);
+  }
+  return jmsDetailItemsMap[rowId];
+}
+
+window.openJmsDetailPage = function(rowId) {
+  selectedJmsRowId = rowId;
+  currentWorklistView = 'jms_detail';
+  activeColumnFilters = {};
+  loadWorklistDataset();
+  updateURL();
+  renderApp();
+  showToast('Opening JMS Detail validation page...');
+};
+
+window.backToJmsList = function() {
+  currentWorklistView = 'jms';
+  activeColumnFilters = {};
+  loadWorklistDataset();
+  updateURL();
+  renderApp();
+  showToast('Returned to JMS list');
+};
+
+window.copyJmsDetailInfo = function(elementId) {
+  const el = document.getElementById(elementId);
+  const text = el ? el.textContent.trim() : '';
+  if (text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied to clipboard: ${text}`);
+      }).catch(() => {
+        showToast(`Copied: ${text}`);
+      });
+    } else {
+      showToast(`Copied: ${text}`);
+    }
+  }
+};
+
+window.toggleJmsDetailRowSelect = function(lineId) {
+  const row = currentDataset.find(r => String(r.id) === String(lineId));
+  if (row) {
+    const isCurrentlyChecked = Boolean(row.selected || row.highlighted);
+    row.selected = !isCurrentlyChecked;
+    if (!row.selected) {
+      row.highlighted = false;
+    }
+    applyFiltersAndRender();
+    updateJmsDetailActionIcons();
+  }
+};
+
+window.highlightSelectedJmsDetailRows = function() {
+  let count = 0;
+  currentDataset.forEach(r => {
+    if (r.selected || r.highlighted) {
+      r.highlighted = true;
+      r.selected = true;
+      count++;
+    }
+  });
+  if (count > 0) {
+    applyFiltersAndRender();
+    updateJmsDetailActionIcons();
+    renderWorklistFooter();
+    showToast(`Validated and highlighted ${count} row${count > 1 ? 's' : ''}!`);
+  } else {
+    showToast('Please select a row first.');
+  }
+};
+
+window.editSelectedJmsDetailRow = function() {
+  const selectedRow = currentDataset.find(r => r.selected || r.highlighted);
+  if (selectedRow) {
+    showToast(`Editing line ${selectedRow.lineNo}: ${selectedRow.itemName}`);
+  } else {
+    showToast('Please select a row to edit.');
+  }
+};
+
+window.addJmsDetailRow = function() {
+  const nextLineNo = (currentDataset.length + 1) * 10;
+  const newRow = {
+    id: `jmsline-${Date.now()}`,
+    lineNo: String(nextLineNo),
+    itemCode: `ITEM-IND-NEW-${String(nextLineNo).padStart(3, '0')}`,
+    itemName: "New Verified Installation Material",
+    uom: "Nos",
+    rate: "25,000.00",
+    rawRate: 25000,
+    qty: "1.00",
+    rawQty: 1,
+    amount: "25,000.00",
+    rawAmount: 25000,
+    selected: false,
+    highlighted: false
+  };
+  currentDataset.push(newRow);
+  if (selectedJmsRowId && jmsDetailItemsMap[selectedJmsRowId]) {
+    jmsDetailItemsMap[selectedJmsRowId] = currentDataset;
+  }
+  applyFiltersAndRender();
+  renderWorklistToolbar();
+  renderWorklistFooter();
+  showToast(`Added Line ${nextLineNo}`);
+};
+
+window.updateJmsDetailActionIcons = function() {
+  const hasSelected = currentDataset.some(r => r.selected || r.highlighted);
+  const btnTick = document.getElementById('btnJmsDetailApproveTick');
+  const btnEdit = document.getElementById('btnJmsDetailEdit');
+  if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+};
+
+window.submitJmsDetail = function() {
+  if (selectedJmsRowId) {
+    const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
+    if (parentRow) {
+      parentRow.task = "JMS to be process";
+    }
+  }
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Validation Completed');
+  } else {
+    showToast('JMS validation submitted successfully!');
+  }
+  setTimeout(() => {
+    backToJmsList();
+  }, 1200);
+};
+
+window.exportJmsDetailToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (currentDataset || []);
+  const headers = ["Line No", "Item Code", "Item Name", "UOM", "Rate", "Qty", "Amount"];
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+  const rows = data.map(r => [
+    escapeCsv(r.lineNo),
+    escapeCsv(r.itemCode),
+    escapeCsv(r.itemName),
+    escapeCsv(r.uom),
+    escapeCsv(r.rate),
+    escapeCsv(r.qty),
+    escapeCsv(r.amount)
+  ].join(','));
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `JMS_Detail_${selectedJmsRowId || 'PO'}_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('JMS Detail CSV downloaded successfully!');
+};
+
+
+const defaultPoAmendItems = [
+  {
+    id: "poamend-1",
+    date: "12/08/2026",
+    poNo: "4500128934",
+    poStatus: "Amend Requested",
+    projectId: "PRJ-2026-001",
+    siteName: "Guindy Hub",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    task: "To be submit",
+    ageing: "12 Days",
+    amount: "2,45,000.00",
+    rawAmount: 245000
+  },
+  {
+    id: "poamend-2",
+    date: "10/08/2026",
+    poNo: "4500128935",
+    poStatus: "Revision Pending",
+    projectId: "PRJ-2026-002",
+    siteName: "Velachery Site",
+    projectType: "Upgrade",
+    subProjectType: "Electrical",
+    task: "Pending with Indus",
+    ageing: "14 Days",
+    amount: "1,80,000.00",
+    rawAmount: 180000
+  },
+  {
+    id: "poamend-3",
+    date: "05/08/2026",
+    poNo: "4500128936",
+    poStatus: "Under Review",
+    projectId: "PRJ-2026-003",
+    siteName: "OMR Tower",
+    projectType: "Maintenance",
+    subProjectType: "Telecom",
+    task: "To be submit",
+    ageing: "19 Days",
+    amount: "3,20,000.00",
+    rawAmount: 320000
+  },
+  {
+    id: "poamend-4",
+    date: "01/08/2026",
+    poNo: "4500128937",
+    poStatus: "Amend Requested",
+    projectId: "PRJ-2026-004",
+    siteName: "Tambaram Junction",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    task: "Pending with Indus",
+    ageing: "23 Days",
+    amount: "4,10,000.00",
+    rawAmount: 410000
+  },
+  {
+    id: "poamend-5",
+    date: "28/07/2026",
+    poNo: "4500128938",
+    poStatus: "Revision Pending",
+    projectId: "PRJ-2026-005",
+    siteName: "Ambattur Estate",
+    projectType: "Upgrade",
+    subProjectType: "Optical Fiber",
+    task: "To be submit",
+    ageing: "26 Days",
+    amount: "7,10,000.00",
+    rawAmount: 710000
+  },
+  {
+    id: "poamend-6",
+    date: "25/07/2026",
+    poNo: "4500128939",
+    poStatus: "Under Review",
+    projectId: "PRJ-2026-006",
+    siteName: "Anna Nagar Central",
+    projectType: "New Build",
+    subProjectType: "Tower Erection",
+    task: "Pending with Indus",
+    ageing: "28 Days",
+    amount: "5,10,000.00",
+    rawAmount: 510000
+  }
+];
+
+let commercialPoAmendData = [...defaultPoAmendItems];
+
+function syncCommercialPoAmendDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  commercialPoAmendData = commercialWorklistData.map((np, idx) => {
+    const existing = commercialPoAmendData.find(p => String(p.id) === String(np.id) || p.poNo === np.poNo) || defaultPoAmendItems[idx % defaultPoAmendItems.length];
+    const taskOptions = ["To be submit", "Pending with Indus"];
+    const assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
+    const statusOptions = ["Amend Requested", "Under Review", "Revision Pending"];
+    const assignedStatus = (existing && existing.poStatus) ? existing.poStatus : statusOptions[idx % statusOptions.length];
+    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    return {
+      id: np.id || `poamend-${idx + 1}`,
+      date: np.date || existing.date || "12/08/2026",
+      poNo: np.poNo || existing.poNo || "4500128934",
+      poStatus: assignedStatus,
+      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      siteName: np.siteName || existing.siteName || "Guindy Hub",
+      projectType: np.projectType || existing.projectType || "New Build",
+      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
+      task: assignedTask,
+      ageing: np.ageing || existing.ageing || "12 Days",
+      amount: formatJmsSum(rawAmt),
+      rawAmount: rawAmt
+    };
+  });
+}
+
+function calculatePoAmendTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawAmount !== undefined && !isNaN(Number(r.rawAmount))) {
+      sum += Number(r.rawAmount);
+    } else if (r.amount) {
+      const parsed = parseFloat(String(r.amount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculatePoAmendTotalSum = calculatePoAmendTotalSum;
+
+window.exportPoAmendToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialPoAmendData || []);
+  const headers = [
+    "Date",
+    "PO No",
+    "PO Status",
+    "Project ID",
+    "Site Name",
+    "Project Type",
+    "Sub-Project Type",
+    "Task",
+    "Ageing",
+    "Amount"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => [
+    escapeCsv(r.date),
+    escapeCsv(r.poNo),
+    escapeCsv(r.poStatus),
+    escapeCsv(r.projectId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.projectType),
+    escapeCsv(r.subProjectType),
+    escapeCsv(r.task),
+    escapeCsv(r.ageing),
+    escapeCsv(r.amount)
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `PO_Amend_Worklist_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('PO Amend CSV downloaded successfully!');
+};
+
+const defaultWccItems = [
+  {
+    id: "wcc-1",
+    date: "12/08/2026",
+    poNo: "4500128934",
+    projectId: "PRJ-2026-001",
+    siteName: "Guindy Hub",
+    siteId: "IN-123456",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    supportRequired: "Civil Work Completion Certificate",
+    pendingWith: "Project Manager",
+    remarks: "WCC submitted for verification",
+    task: "To be submit",
+    ageing: "12 Days",
+    amount: "2,45,000.00",
+    rawAmount: 245000
+  },
+  {
+    id: "wcc-2",
+    date: "10/08/2026",
+    poNo: "4500128935",
+    projectId: "PRJ-2026-002",
+    siteName: "Velachery Site",
+    siteId: "IN-123457",
+    projectType: "Upgrade",
+    subProjectType: "Electrical",
+    supportRequired: "Electrical Testing Signoff",
+    pendingWith: "Quality Lead",
+    remarks: "Pending sign-off from Indus",
+    task: "Pending with Indus",
+    ageing: "14 Days",
+    amount: "1,80,000.00",
+    rawAmount: 180000
+  },
+  {
+    id: "wcc-3",
+    date: "05/08/2026",
+    poNo: "4500128936",
+    projectId: "PRJ-2026-003",
+    siteName: "OMR Tower",
+    siteId: "IN-123458",
+    projectType: "Maintenance",
+    subProjectType: "Telecom",
+    supportRequired: "Tower Commissioning Audit",
+    pendingWith: "Commercial Team",
+    remarks: "Clarification needed on punch points",
+    task: "Rejected",
+    ageing: "19 Days",
+    amount: "3,20,000.00",
+    rawAmount: 320000
+  },
+  {
+    id: "wcc-4",
+    date: "01/08/2026",
+    poNo: "4500128937",
+    projectId: "PRJ-2026-004",
+    siteName: "Tambaram Junction",
+    siteId: "IN-123459",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    supportRequired: "Earth Pit Testing Report",
+    pendingWith: "Site Engineer",
+    remarks: "Ready for submission",
+    task: "To be submit",
+    ageing: "23 Days",
+    amount: "4,10,000.00",
+    rawAmount: 410000
+  },
+  {
+    id: "wcc-5",
+    date: "28/07/2026",
+    poNo: "4500128938",
+    projectId: "PRJ-2026-005",
+    siteName: "Ambattur Estate",
+    siteId: "IN-123460",
+    projectType: "Upgrade",
+    subProjectType: "Optical Fiber",
+    supportRequired: "OTDR Trace Reports",
+    pendingWith: "Operations Manager",
+    remarks: "Submitted to Indus portal",
+    task: "Pending with Indus",
+    ageing: "26 Days",
+    amount: "7,10,000.00",
+    rawAmount: 710000
+  },
+  {
+    id: "wcc-6",
+    date: "25/07/2026",
+    poNo: "4500128939",
+    projectId: "PRJ-2026-006",
+    siteName: "Anna Nagar Central",
+    siteId: "IN-123461",
+    projectType: "New Build",
+    subProjectType: "Tower Erection",
+    supportRequired: "Structural Stability Certificate",
+    pendingWith: "Survey Lead",
+    remarks: "Discrepancy in photo proof",
+    task: "Rejected",
+    ageing: "28 Days",
+    amount: "5,10,000.00",
+    rawAmount: 510000
+  }
+];
+
+let commercialWccData = [...defaultWccItems];
+
+function syncCommercialWccDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  commercialWccData = commercialWorklistData.map((np, idx) => {
+    const existing = commercialWccData.find(w => String(w.id) === String(np.id) || w.poNo === np.poNo) || defaultWccItems[idx % defaultWccItems.length];
+    const taskOptions = ["To be submit", "Pending with Indus", "Rejected"];
+    const assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
+    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    return {
+      id: np.id || `wcc-${idx + 1}`,
+      date: np.date || existing.date || "12/08/2026",
+      poNo: np.poNo || existing.poNo || "4500128934",
+      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      siteName: np.siteName || existing.siteName || "Guindy Hub",
+      siteId: np.siteId || existing.siteId || "IN-123456",
+      projectType: np.projectType || existing.projectType || "New Build",
+      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
+      supportRequired: existing.supportRequired || "Civil Work Completion Certificate",
+      pendingWith: existing.pendingWith || "Project Manager",
+      remarks: existing.remarks || "Pending verification",
+      task: assignedTask,
+      ageing: np.ageing || existing.ageing || "12 Days",
+      amount: formatJmsSum(rawAmt),
+      rawAmount: rawAmt
+    };
+  });
+}
+
+function calculateWccTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawAmount !== undefined && !isNaN(Number(r.rawAmount))) {
+      sum += Number(r.rawAmount);
+    } else if (r.amount) {
+      const parsed = parseFloat(String(r.amount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculateWccTotalSum = calculateWccTotalSum;
+
+window.exportWccToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialWccData || []);
+  const headers = [
+    "Date",
+    "PO No",
+    "Project ID",
+    "Site Name",
+    "Site ID",
+    "Project Type",
+    "Sub-Project Type",
+    "Support Required",
+    "Pending With",
+    "Remarks",
+    "Task",
+    "Ageing",
+    "Amount"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => [
+    escapeCsv(r.date),
+    escapeCsv(r.poNo),
+    escapeCsv(r.projectId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.siteId),
+    escapeCsv(r.projectType),
+    escapeCsv(r.subProjectType),
+    escapeCsv(r.supportRequired),
+    escapeCsv(r.pendingWith),
+    escapeCsv(r.remarks),
+    escapeCsv(r.task),
+    escapeCsv(r.ageing),
+    escapeCsv(r.amount)
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `WCC_Worklist_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('WCC CSV downloaded successfully!');
+};
+
+
 
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
@@ -4405,6 +5274,30 @@ function renderApp() {
         bannerTitle.innerHTML = `
           <div class="project-payment-banner-content">
             <div class="banner-left-title">${selectedRfqNo || 'RFQ # :'}</div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'jms_detail') {
+        const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId)) || (typeof defaultJmsItems !== 'undefined' && defaultJmsItems[0]);
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div class="banner-left-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblJmsDetailBannerProject" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${parentRow ? `${parentRow.projectId} / ${parentRow.projectType} / ${parentRow.subProjectType}` : 'PRJ-2026-001 / Run project / Civil'}</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblJmsDetailBannerProject')" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+            <div class="banner-center-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblJmsDetailBannerPo" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${parentRow ? `${parentRow.poNo} (0-Opex)` : '4500128934 (0-Opex)'}</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblJmsDetailBannerPo')" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+            <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblJmsDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${parentRow ? `${parentRow.siteId} / ${parentRow.siteName}` : 'IN-123456 / Guindy Hub'}</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblJmsDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
           </div>
         `;
       } else {
@@ -10529,9 +11422,31 @@ function renderAccountsFooter() {
 // ==========================================================================
 function loadWorklistDataset() {
   const role = getAuthenticatedUserRole();
-  if (role === 'Commercial Manager') {
-    currentDataset = commercialWorklistData.map(item => ({ ...item }));
-    filteredDataset = [...currentDataset];
+  const isCommercialView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'].includes(currentWorklistView);
+  if (isCommercialView) {
+    if (currentWorklistView === 'new_project') {
+      currentDataset = commercialWorklistData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'jms') {
+      syncCommercialJmsDataWithNewProject();
+      currentDataset = commercialJmsData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'po_amend') {
+      syncCommercialPoAmendDataWithNewProject();
+      currentDataset = commercialPoAmendData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'wcc') {
+      syncCommercialWccDataWithNewProject();
+      currentDataset = commercialWccData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'jms_detail') {
+      const parentId = selectedJmsRowId || 'jms-1';
+      currentDataset = getJmsDetailItems(parentId);
+      filteredDataset = [...currentDataset];
+    } else {
+      currentDataset = [];
+      filteredDataset = [];
+    }
     return;
   }
 
@@ -10590,38 +11505,146 @@ function renderWorklistToolbar() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Commercial Manager') {
-    const hasSelected = currentDataset.some(r => r.selected);
-    toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
-        <div style="display: inline-flex; align-items: center;">
-          ${universalBackBtnHtml}
-        </div>
-      </div>
-      <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
-        <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnCommercialWorklistDelete" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'inline-flex' : 'none'}; cursor: pointer;">
-          <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
-        </button>
-        <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnCommercialWorklistBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Worklist')">
-          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
-        </button>
-        <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
-          <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
-        </button>
-      </div>
-    `;
+    const isNewProject = currentWorklistView === 'new_project';
+    const isJms = currentWorklistView === 'jms';
+    const isPoAmend = currentWorklistView === 'po_amend';
+    const isWcc = currentWorklistView === 'wcc';
+    const isJmsDetail = currentWorklistView === 'jms_detail';
+    const hasSelected = isNewProject && currentDataset.some(r => r.selected);
 
-    document.getElementById('btnCommercialWorklistDelete')?.addEventListener('click', () => {
-      const selectedCount = currentDataset.filter(r => r.selected).length;
-      if (selectedCount > 0) {
-        commercialWorklistData = commercialWorklistData.filter(r => !r.selected);
-        currentDataset = commercialWorklistData.map(item => ({ ...item }));
-        applyFiltersAndRender();
-        updateCommercialWorklistDeleteBtnVisibility();
-        showToast(`Deleted ${selectedCount} record${selectedCount > 1 ? 's' : ''} successfully.`);
-      } else {
-        showToast('No record selected to delete.');
-      }
-    });
+    if (isJms) {
+      const initialTotalFormatted = formatJmsSum(calculateJmsTotalSum(currentDataset));
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 8px;" title="Total Sum of Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblJmsTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnJmsCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportJmsToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else if (isPoAmend) {
+      const initialTotalFormatted = formatJmsSum(calculatePoAmendTotalSum(currentDataset));
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Sum of Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblPoAmendTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnPoAmendCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportPoAmendToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnPoAmendBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('PO Amend')">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else if (isWcc) {
+      const initialTotalFormatted = formatJmsSum(calculateWccTotalSum(currentDataset));
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Sum of Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblWccTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWccCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportWccToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnWccBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('WCC')">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else if (isJmsDetail) {
+      const initialTotalFormatted = formatJmsSum(calculateJmsTotalSum(currentDataset));
+      const hasSelectedRow = currentDataset.some(r => r.selected || r.highlighted);
+
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <button type="button" class="toolbar-icon-btn" onclick="backToJmsList()" title="Go Back" style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center;">
+            <img src="icons/Backward.svg" alt="Go Back" width="28" height="28">
+          </button>
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 4px;" title="Total Sum of Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblJmsDetailTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+          <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px;" title="Payable Amount">
+            <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+            <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">1,85,000.00</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-add-action" id="btnJmsDetailAdd" data-tooltip="Add Item" aria-label="Add Item" style="cursor: pointer;" onclick="openJmsAddLineItemsModal()">
+            <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnJmsDetailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportJmsDetailToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnJmsDetailPoFilter" data-tooltip="PO Filter" aria-label="PO Filter" style="cursor: pointer;" onclick="openJmsPoReconciliationModal()">
+            <img src="icons/po filter.svg" alt="PO Filter" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnJmsDetailMaterialFilter" data-tooltip="Material Filter" aria-label="Material Filter" style="cursor: pointer;" onclick="openJmsMaterialReconciliationModal()">
+            <img src="icons/po filter.svg" alt="Material Filter" class="toolbar-icon-img" width="28" height="28" style="filter: invert(32%) sepia(98%) saturate(1831%) hue-rotate(209deg) brightness(96%) contrast(97%);">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnJmsDetailDoc" data-tooltip="Documents" aria-label="Documents" style="cursor: pointer;" onclick="openJmsDocumentsModal()">
+            <img src="icons/red doc.svg" alt="Documents" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnJmsDetailApproveTick" data-tooltip="Approve Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="highlightSelectedJmsDetailRows()">
+            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnJmsDetailEdit" data-tooltip="Edit Line" aria-label="Edit Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="editSelectedJmsDetailRow()">
+            <img src="icons/Edit.svg" alt="Edit" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          ${isNewProject ? `
+          <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnCommercialWorklistDelete" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'inline-flex' : 'none'}; cursor: pointer;">
+            <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnCommercialWorklistBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('New project')">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          ` : ''}
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    }
+
+    if (isNewProject) {
+      document.getElementById('btnCommercialWorklistDelete')?.addEventListener('click', () => {
+        const selectedCount = currentDataset.filter(r => r.selected).length;
+        if (selectedCount > 0) {
+          commercialWorklistData = commercialWorklistData.filter(r => !r.selected);
+          currentDataset = commercialWorklistData.map(item => ({ ...item }));
+          applyFiltersAndRender();
+          updateCommercialWorklistDeleteBtnVisibility();
+          showToast(`Deleted ${selectedCount} record${selectedCount > 1 ? 's' : ''} successfully.`);
+        } else {
+          showToast('No record selected to delete.');
+        }
+      });
+    }
 
     document.getElementById('btnCommercialWorklistRefresh')?.addEventListener('click', () => {
       const btn = document.getElementById('btnCommercialWorklistRefresh');
@@ -11022,6 +12045,27 @@ function renderWorklistFooter() {
       </div>
     `;
 
+        if (currentWorklistView === 'jms_detail') {
+      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
+      if (allHighlighted) {
+        footer.style.display = 'flex';
+        footer.style.justifyContent = 'center';
+        footer.style.alignItems = 'center';
+        footer.style.width = '100%';
+        footer.style.marginTop = '16px';
+        footer.style.padding = '16px';
+        footer.innerHTML = `
+          <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="submitJmsDetail()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit JMS Validation">
+            <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+          </button>
+        `;
+      } else {
+        footer.style.display = 'none';
+        footer.innerHTML = '';
+      }
+      return;
+    }
+
     const commercialTabs = [
       { id: 'btnToggleNewProject', view: 'new_project', label: 'New project' },
       { id: 'btnToggleJms', view: 'jms', label: 'JMS' },
@@ -11127,56 +12171,345 @@ function renderWorklistTableHead() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Commercial Manager') {
-    thead.innerHTML = `
-      <tr>
-        <th class="th-select" style="width: 60px; text-align: center; vertical-align: middle;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-            <span>Select</span>
-          </div>
-        </th>
-        <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-            <span>Customer Name</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
-          </div>
-        </th>
-        <th style="width: 140px; min-width: 140px; text-align: center; vertical-align: middle; white-space: nowrap;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+    if (currentWorklistView === 'new_project') {
+      thead.innerHTML = `
+        <tr>
+          <th class="th-select" style="width: 60px; text-align: center; vertical-align: middle;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Customer Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 140px; min-width: 140px; text-align: center; vertical-align: middle; white-space: nowrap;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Date</span>
+            </div>
+          </th>
+          <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: center; vertical-align: middle;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center; vertical-align: middle;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+    } else if (currentWorklistView === 'jms') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Date: 12ch, center, no filter -->
+          <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Date</span>
-          </div>
-        </th>
-        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-            <span>PO No</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
-          </div>
-        </th>
-        <th style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: center; vertical-align: middle;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-            <span>Project ID</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
-          </div>
-        </th>
-        <th style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center; vertical-align: middle;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-            <span>Site ID</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
-          </div>
-        </th>
-        <th style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: center; vertical-align: middle;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-            <span>Site Name</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
-          </div>
-        </th>
-        <th style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center; vertical-align: middle;">
-          <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+          </th>
+          <!-- 2. PO No: 15ch, center, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Project ID: 20ch, left, has filter -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Site Name: 25ch, left, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site ID: 15ch, center, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Project Type: 15ch, center, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Sub-Project Type: 25ch, left, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Support Required: 35ch, left, has filter -->
+          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Support Required</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['supportRequired'] ? 'has-active-filter' : ''}" data-filter-col="supportRequired" title="Filter Support Required">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Pending With: 20ch, left, has filter -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Pending With</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['pendingWith'] ? 'has-active-filter' : ''}" data-filter-col="pendingWith" title="Filter Pending With">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. Remarks: 25ch, left, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Remarks</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['remarks'] ? 'has-active-filter' : ''}" data-filter-col="remarks" title="Filter Remarks">&#9660;</button>
+            </div>
+          </th>
+          <!-- 11. Task: 35ch, left, has filter -->
+          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Task</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['task'] ? 'has-active-filter' : ''}" data-filter-col="task" title="Filter Task">&#9660;</button>
+            </div>
+          </th>
+          <!-- 12. Ageing: 10ch, center, no filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Ageing</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
-          </div>
-        </th>
-      </tr>
-    `;
+          </th>
+          <!-- 13. Amount: 15ch, right, no filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+    } else if (currentWorklistView === 'po_amend') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Date: 12ch, center, no filter -->
+          <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Date</span>
+          </th>
+          <!-- 2. PO No: 15ch, center, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. PO Status: 20ch, center, has filter -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poStatus'] ? 'has-active-filter' : ''}" data-filter-col="poStatus" title="Filter PO Status">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 20ch, center header, has filter -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site Name: 25ch, center header, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Project Type: 15ch, center header, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Sub-Project Type: 25ch, center header, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Task: 20ch, center header, has filter -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Task</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['task'] ? 'has-active-filter' : ''}" data-filter-col="task" title="Filter Task">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Ageing: 10ch, center, no filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Ageing</span>
+          </th>
+          <!-- 10. Amount: 15ch, center header, no filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+    } else if (currentWorklistView === 'wcc') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Date: 12ch, center, no filter -->
+          <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Date</span>
+          </th>
+          <!-- 2. PO No: 15ch, center, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Project ID: 20ch, left content, has filter -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Site Name: 25ch, left content, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site ID: 15ch, center content, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Project Type: 15ch, center content, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Sub-Project Type: 25ch, left content, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Support Required: 35ch, left content, has filter -->
+          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Support Required</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['supportRequired'] ? 'has-active-filter' : ''}" data-filter-col="supportRequired" title="Filter Support Required">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Pending With: 20ch, left content, has filter -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Pending With</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['pendingWith'] ? 'has-active-filter' : ''}" data-filter-col="pendingWith" title="Filter Pending With">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. Remarks: 25ch, left content, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Remarks</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['remarks'] ? 'has-active-filter' : ''}" data-filter-col="remarks" title="Filter Remarks">&#9660;</button>
+            </div>
+          </th>
+          <!-- 11. Task: 35ch, left content, has filter -->
+          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Task</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['task'] ? 'has-active-filter' : ''}" data-filter-col="task" title="Filter Task">&#9660;</button>
+            </div>
+          </th>
+          <!-- 12. Ageing: 10ch, center, no filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Ageing</span>
+          </th>
+          <!-- 13. Amount: 15ch, center header, no filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+    } else if (currentWorklistView === 'jms_detail') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 60px, center -->
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Select</span>
+          </th>
+          <!-- 2. Line No: 10ch, center -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Line No</span>
+          </th>
+          <!-- 3. Item Code: 30ch, center header, 30ch&left content -->
+          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Item Code</span>
+          </th>
+          <!-- 4. Item Name: 40ch, center header, 40ch&left content, with filter -->
+          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Item Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. UOM: 10ch, center header, 10ch&right content -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>UOM</span>
+          </th>
+          <!-- 6. Rate: 10ch, center header, 10ch&right content -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Rate</span>
+          </th>
+          <!-- 7. Qty: 10ch, center header, 10ch&right content -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Qty</span>
+          </th>
+          <!-- 8. Amount: 15ch, center header, 15ch&right content -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+    } else {
+      thead.innerHTML = '';
+    }
     return;
   }
 
@@ -11421,57 +12754,413 @@ function applyFiltersAndRender() {
   if (!tbody) return;
 
   const role = getAuthenticatedUserRole();
-  if (currentModule === 'worklist' && role === 'Commercial Manager') {
-    filteredDataset = currentDataset.filter(row => {
-      for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
-        const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
-        if (!allowedSet.has(cellVal)) {
-          return false;
-        }
-      }
-      return true;
-    });
+  const isCommercialWorklistView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'].includes(currentWorklistView);
 
-    if (filteredDataset.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
-        </tr>
-      `;
+  if (currentModule === 'worklist' && isCommercialWorklistView) {
+    if (currentWorklistView === 'new_project') {
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.customerName)) {
+        currentDataset = commercialWorklistData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isSelected = !!row.selected;
+        return `
+          <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
+            <td class="td-select td-center" style="text-align: center; vertical-align: middle;">
+              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleCommercialWorklistRowSelect('${row.id}')" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
+            </td>
+            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; vertical-align: middle;">
+              ${row.customerName || ''}
+            </td>
+            <td class="td-center" style="width: 140px; min-width: 140px; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+              ${row.date || ''}
+            </td>
+            <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+              <a href="#" class="po-no-link" onclick="openCommercialPoModal('${row.id}'); return false;" style="color: #0454e4; font-weight: 500; text-decoration: none; cursor: pointer;" title="Open PO Details">${row.poNo || ''}</a>
+            </td>
+            <td style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1e293b; font-weight: 500; vertical-align: middle;">
+              ${row.projectId || ''}
+            </td>
+            <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+              ${row.siteId || ''}
+            </td>
+            <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;">
+              ${row.siteName || ''}
+            </td>
+            <td class="td-center" style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
       return;
     }
 
-    tbody.innerHTML = filteredDataset.map(row => {
-      const isSelected = !!row.selected;
-      return `
-        <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
-          <td class="td-select td-center" style="text-align: center; vertical-align: middle;">
-            <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleCommercialWorklistRowSelect('${row.id}')" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
-          </td>
-          <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; vertical-align: middle;">
-            ${row.customerName || ''}
-          </td>
-          <td class="td-center" style="width: 140px; min-width: 140px; text-align: center !important; white-space: nowrap; vertical-align: middle;">
-            ${row.date || ''}
-          </td>
-          <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
-            ${row.poNo || ''}
-          </td>
-          <td style="width: 20ch; max-width: 20ch; min-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #0454e4; font-weight: 500; vertical-align: middle;">
-            ${row.projectId || ''}
-          </td>
-          <td class="td-center" style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
-            ${row.siteId || ''}
-          </td>
-          <td style="width: 25ch; max-width: 25ch; min-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;">
-            ${row.siteName || ''}
-          </td>
-          <td class="td-center" style="width: 10ch; max-width: 10ch; min-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle;">
-            ${row.ageing || ''}
-          </td>
-        </tr>
-      `;
-    }).join('');
+    if (currentWorklistView === 'jms') {
+      syncCommercialJmsDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.task)) {
+        currentDataset = commercialJmsData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible amount column
+      const totalAmountEl = document.getElementById('lblJmsTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculateJmsTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="13" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Date: 12ch & center -->
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.date || ''}
+            </td>
+            <!-- 2. PO No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${(String(row.task || '').trim().toLowerCase().includes('validate')) ? `
+                <a href="javascript:void(0)" onclick="openJmsDetailPage('${row.id}')" style="color: #0454e4; font-weight: 500; text-decoration: none; cursor: pointer;" title="Open JMS Detail Validation">${row.poNo || ''}</a>
+              ` : `
+                <span style="color: #0454e4; font-weight: 500;">${row.poNo || ''}</span>
+              `}
+            </td>
+            <!-- 3. Project ID: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 4. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.siteName || ''}
+            </td>
+            <!-- 5. Site ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 6. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 7. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 8. Support Required: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
+              ${row.supportRequired || ''}
+            </td>
+            <!-- 9. Pending With: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.pendingWith || ''}
+            </td>
+            <!-- 10. Remarks: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.remarks || ''}
+            </td>
+            <!-- 11. Task: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
+              <span style="color: #0f172a; font-weight: 400; font-size: 0.92rem;">
+                ${row.task || ''}
+              </span>
+            </td>
+            <!-- 12. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 13. Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.amount || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'po_amend') {
+      syncCommercialPoAmendDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.poStatus)) {
+        currentDataset = commercialPoAmendData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible amount column
+      const totalAmountEl = document.getElementById('lblPoAmendTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculatePoAmendTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Date: 12ch & center -->
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.date || ''}
+            </td>
+            <!-- 2. PO No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              <span style="color: #0454e4; font-weight: 500;">${row.poNo || ''}</span>
+            </td>
+            <!-- 3. PO Status: 20ch & center -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.poStatus || ''}
+            </td>
+            <!-- 4. Project ID: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.siteName || ''}
+            </td>
+            <!-- 6. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 7. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 8. Task: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              <span style="color: #0f172a; font-weight: 400; font-size: 0.92rem;">
+                ${row.task || ''}
+              </span>
+            </td>
+            <!-- 9. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 10. Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.amount || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'wcc') {
+      syncCommercialWccDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.supportRequired)) {
+        currentDataset = commercialWccData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible amount column
+      const totalAmountEl = document.getElementById('lblWccTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculateWccTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="13" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Date: 12ch & center -->
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.date || ''}
+            </td>
+            <!-- 2. PO No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              <span style="color: #0454e4; font-weight: 500;">${row.poNo || ''}</span>
+            </td>
+            <!-- 3. Project ID: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 4. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.siteName || ''}
+            </td>
+            <!-- 5. Site ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 6. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 7. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 8. Support Required: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
+              ${row.supportRequired || ''}
+            </td>
+            <!-- 9. Pending With: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.pendingWith || ''}
+            </td>
+            <!-- 10. Remarks: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.remarks || ''}
+            </td>
+            <!-- 11. Task: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
+              <span style="color: #0f172a; font-weight: 400; font-size: 0.92rem;">
+                ${row.task || ''}
+              </span>
+            </td>
+            <!-- 12. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 13. Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.amount || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'jms_detail') {
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible amount column
+      const totalAmountEl = document.getElementById('lblJmsDetailTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculateJmsTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
+        const isChecked = Boolean(row.selected || row.highlighted);
+        return `
+          <tr data-row-id="${row.id}" style="${rowBgStyle}">
+            <!-- 1. Select: Circle radio button -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <div class="circular-radio-btn" onclick="toggleJmsDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#0454e4' : '#94a3b8'}; background: ${isChecked ? '#0454e4' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
+                ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+              </div>
+            </td>
+            <!-- 2. Line No: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.lineNo || ''}
+            </td>
+            <!-- 3. Item Code: 30ch & left -->
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.itemCode || ''}
+            </td>
+            <!-- 4. Item Name: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.itemName || ''}
+            </td>
+            <!-- 5. UOM: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.uom || ''}
+            </td>
+            <!-- 6. Rate: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.rate || ''}
+            </td>
+            <!-- 7. Qty: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.qty || ''}
+            </td>
+            <!-- 8. Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.amount || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    tbody.innerHTML = '';
     return;
   }
 
@@ -15701,8 +17390,14 @@ function initSideFormEvents() {
       bankPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
-        const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
-        if (window.loadEmployeeBankData) window.loadEmployeeBankData(activeEmp);
+        const activeEmp = currentViewedEmpId;
+        if (activeEmp && window.loadEmployeeBankData) {
+          window.loadEmployeeBankData(activeEmp);
+        } else {
+          companyBankData = [];
+          activeCompanyBankFilters = {};
+          renderCompanyBankTable();
+        }
         showToast('Bank details opened');
       } else {
         showToast('Bank details closed');
@@ -15721,8 +17416,13 @@ function initSideFormEvents() {
       salaryPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
-        const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
-        if (window.loadEmployeeSalaryData) window.loadEmployeeSalaryData(activeEmp);
+        const activeEmp = currentViewedEmpId;
+        if (activeEmp && window.loadEmployeeSalaryData) {
+          window.loadEmployeeSalaryData(activeEmp);
+        } else {
+          const tbodySal = document.getElementById('tbodySalaryDetails');
+          if (tbodySal) tbodySal.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #64748b; padding: 18px;">No salary structure records found.</td></tr>`;
+        }
         showToast('Salary Details opened');
       } else {
         showToast('Salary Details closed');
@@ -15741,8 +17441,15 @@ function initSideFormEvents() {
       assetPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
-        const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
-        if (window.loadEmployeeAssetData) window.loadEmployeeAssetData(activeEmp);
+        const activeEmp = currentViewedEmpId;
+        if (activeEmp && window.loadEmployeeAssetData) {
+          window.loadEmployeeAssetData(activeEmp);
+        } else {
+          const tbodyAsset = document.getElementById('tbodyAssetDetails');
+          if (tbodyAsset) tbodyAsset.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 18px;">No asset records found.</td></tr>`;
+          const lblTotal = document.getElementById('lblAssetTotalAmt');
+          if (lblTotal) lblTotal.innerText = '0.00';
+        }
         showToast('Asset Details opened');
       } else {
         showToast('Asset Details closed');
@@ -17489,6 +19196,15 @@ function openSideForm() {
       setEmployeeFormReadOnly(false);
       currentViewedEmpId = null;
       isEmployeeFormEditing = false;
+      companyBankData = [];
+      activeCompanyBankFilters = {};
+      renderCompanyBankTable();
+      const tbodyAsset = document.getElementById('tbodyAssetDetails');
+      if (tbodyAsset) tbodyAsset.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; padding: 18px;">No asset records found.</td></tr>`;
+      const lblAssetTot = document.getElementById('lblAssetTotalAmt');
+      if (lblAssetTot) lblAssetTot.innerText = '0.00';
+      const tbodySal = document.getElementById('tbodySalaryDetails');
+      if (tbodySal) tbodySal.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #64748b; padding: 18px;">No salary structure records found.</td></tr>`;
       const curEmpType = document.getElementById('inpEmpType')?.value || 'On-Roll';
       if (typeof updateEmployeeFormLayout === 'function') {
         updateEmployeeFormLayout('add', curEmpType);
@@ -28857,26 +30573,49 @@ window.openAddBulkUploadModal = function() {
   const addCard = document.getElementById('addBulkUploadCard');
   const titleBadge = document.getElementById('lblAddBulkUploadTitle');
   const siteTypeRow = document.getElementById('rowBulkUploadSiteType');
+  const selUploadType = document.getElementById('selBulkUploadSiteType');
   if (!addCard) return;
 
   if (panel) {
     panel.classList.add('card-dimmed-blurred');
   }
 
+  const role = getAuthenticatedUserRole();
+  let displayName = currentBulkUploadPageName || 'Employee';
+  const pageNorm = displayName.trim().toLowerCase();
+
+  if (pageNorm === 'new project' || pageNorm === 'worklist' || (role === 'Commercial Manager' && currentModule === 'worklist')) {
+    displayName = 'New project';
+  }
+
   if (titleBadge) {
-    titleBadge.textContent = `Bulk Upload - ${currentBulkUploadPageName}`;
+    titleBadge.textContent = `Bulk Upload - ${displayName}`;
   }
 
   if (siteTypeRow) {
-    if ((currentBulkUploadPageName || '').trim().toLowerCase() === 'site') {
+    if (displayName === 'New project') {
       siteTypeRow.style.display = 'block';
+      if (selUploadType) {
+        selUploadType.innerHTML = `
+          <option value="projects" selected>Projects</option>
+          <option value="po">PO</option>
+        `;
+      }
+    } else if (pageNorm === 'site') {
+      siteTypeRow.style.display = 'block';
+      if (selUploadType) {
+        selUploadType.innerHTML = `
+          <option value="new_site" selected>New Site</option>
+          <option value="site_contact">Site Contact</option>
+        `;
+      }
     } else {
       siteTypeRow.style.display = 'none';
     }
   }
 
   addCard.style.display = 'block';
-  showToast(`Add Bulk Upload for ${currentBulkUploadPageName} opened`);
+  showToast(`Add Bulk Upload for ${displayName} opened`);
 };
 
 window.closeAddBulkUploadModal = function() {
@@ -28903,8 +30642,8 @@ window.downloadBulkCsvTemplate = function() {
   const pageLower = page.toLowerCase();
   let templateFileName = '';
 
-  if (pageLower === 'worklist') {
-    showToast('Template download for Worklist is not available yet.');
+  if (pageLower === 'worklist' || pageLower === 'new project') {
+    showToast('Template download for New project is not available yet.');
     return;
   }
 
@@ -29416,9 +31155,1002 @@ document.addEventListener('keydown', (e) => {
     if (succOverlay && succOverlay.style.display === 'flex') {
       succOverlay.style.display = 'none';
     }
+    const poCard = document.getElementById('commercialPoDetailCard');
+    if (poCard && poCard.style.display === 'block') {
+      closeCommercialPoModal();
+    }
   }
 });
 
+// ==========================================================================
+// COMMERCIAL MANAGER: PO DETAIL MODAL CONTROLLER
+// ==========================================================================
+let activeCommercialPoRowId = null;
 
+function getCommercialPoTypeSuffix(val) {
+  const norm = (val || '').trim().toLowerCase();
+  if (norm.includes('capex')) return '0-Capex';
+  if (norm.includes('opex')) return '0-Opex';
+  return `0-${val || 'Opex'}`;
+}
 
+function updateCommercialPoHeaderBadges() {
+  const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+  const inpProjId = document.getElementById('inpPoDetailProjectId');
+  const selProjType = document.getElementById('selPoDetailProjectType');
+  const selSubProjType = document.getElementById('selPoDetailSubProjectType');
+  const selPoType = document.getElementById('selPoDetailPoType');
 
+  const lblProjectInfo = document.getElementById('lblPoHeaderProjectInfo');
+  const lblPoInfo = document.getElementById('lblPoHeaderPoInfo');
+  const lblSiteInfo = document.getElementById('lblPoHeaderSiteInfo');
+
+  const projId = (inpProjId ? inpProjId.value.trim() : '') || (row ? row.projectId : '') || 'Project ID';
+  const projType = (selProjType ? selProjType.value : '') || (row ? (row.projectType || 'New Build') : 'Project Type');
+  const subProjType = (selSubProjType ? selSubProjType.value : '') || (row ? (row.subProjectType || 'Civil') : 'Sub-Project Type');
+
+  if (lblProjectInfo) {
+    lblProjectInfo.textContent = `${projId} / ${projType} / ${subProjType}`;
+  }
+
+  const poNo = (row ? row.poNo : '') || '4500128934';
+  const poTypeVal = selPoType ? selPoType.value : (row ? (row.poType || 'Opex') : 'Opex');
+  const poSuffix = getCommercialPoTypeSuffix(poTypeVal);
+
+  if (lblPoInfo) {
+    lblPoInfo.textContent = `${poNo} (${poSuffix})`;
+  }
+
+  const siteId = (row ? row.siteId : '') || 'Site ID';
+  let siteName = (row ? row.siteName : '') || '';
+
+  // Look up matched site name from indusSiteData if available
+  if (typeof indusSiteData !== 'undefined' && Array.isArray(indusSiteData) && indusSiteData.length > 0) {
+    const matchedSite = indusSiteData.find(s =>
+      String(s.site_id) === String(siteId) ||
+      String(s.site_code) === String(siteId) ||
+      String(s.siteId) === String(siteId) ||
+      String(s.id) === String(siteId) ||
+      s.siteName === siteName ||
+      s.site_name === siteName
+    );
+    if (matchedSite) {
+      siteName = matchedSite.site_name || matchedSite.siteName || siteName;
+    }
+  }
+
+  if (lblSiteInfo) {
+    lblSiteInfo.textContent = `${siteId} / ${siteName || 'Site Name'}`;
+  }
+}
+
+window.toggleRaBillSwitch = function() {
+  const chk = document.getElementById('chkPoDetailRaBill');
+  const wrapper = document.getElementById('btnToggleRaBillWrapper');
+  const knob = document.getElementById('knobPoDetailRaBill');
+  if (!chk || !wrapper || !knob) return;
+
+  chk.checked = !chk.checked;
+  if (chk.checked) {
+    wrapper.style.backgroundColor = '#10b981'; // Active -> Green
+    knob.style.transform = 'translateX(26px)';
+  } else {
+    wrapper.style.backgroundColor = '#ef4444'; // Deactive -> Red
+    knob.style.transform = 'translateX(0px)';
+  }
+};
+
+window.setRaBillSwitchState = function(isActive) {
+  const chk = document.getElementById('chkPoDetailRaBill');
+  const wrapper = document.getElementById('btnToggleRaBillWrapper');
+  const knob = document.getElementById('knobPoDetailRaBill');
+  if (!chk || !wrapper || !knob) return;
+
+  chk.checked = !!isActive;
+  if (chk.checked) {
+    wrapper.style.backgroundColor = '#10b981'; // Active -> Green
+    knob.style.transform = 'translateX(26px)';
+  } else {
+    wrapper.style.backgroundColor = '#ef4444'; // Deactive -> Red
+    knob.style.transform = 'translateX(0px)';
+  }
+};
+
+// ==========================================================================
+// COMMERCIAL MANAGER: INDUS TOWER SITE & PO VALIDATION
+// ==========================================================================
+const defaultIndusSitesFallback = [
+  { site_code: "IN-123456", site_name: "Guindy Hub", customer_name: "Indus Tower Ltd" },
+  { site_code: "IN-123457", site_name: "Ambattur Central", customer_name: "Indus Tower Ltd" },
+  { site_code: "IN-123458", site_name: "Madurai Depot", customer_name: "Indus Tower Ltd" },
+  { site_code: "IN-123459", site_name: "Coimbatore Hub", customer_name: "Indus Tower Ltd" },
+  { site_code: "IN-123460", site_name: "Chennai North", customer_name: "Indus Tower Ltd" },
+  { site_code: "IN-123461", site_name: "Salem South", customer_name: "Indus Tower Ltd" },
+  { site_code: "IN-123462", site_name: "Trichy Central", customer_name: "Indus Tower Ltd" }
+];
+
+function getRegisteredIndusSitesList() {
+  if (typeof indusSiteData !== 'undefined' && Array.isArray(indusSiteData) && indusSiteData.length > 0) {
+    return indusSiteData;
+  }
+  return defaultIndusSitesFallback;
+}
+window.getRegisteredIndusSitesList = getRegisteredIndusSitesList;
+
+function validateCommercialPoAllocation(row, proposedChanges = {}) {
+  const rowId = row ? row.id : null;
+  const targetSiteId = ((proposedChanges.siteId !== undefined ? proposedChanges.siteId : (row ? row.siteId : '')) || '').trim();
+  const targetSiteName = ((proposedChanges.siteName !== undefined ? proposedChanges.siteName : (row ? row.siteName : '')) || '').trim();
+  const targetPoNo = ((proposedChanges.poNo !== undefined ? proposedChanges.poNo : (row ? row.poNo : '')) || '').trim();
+
+  // 1. Validate Site ID presence in Indus Tower Site Master (from Admin login)
+  if (!targetSiteId) {
+    return {
+      valid: false,
+      title: "Missing Site ID!",
+      message: "Site ID is required and must exist in the Indus Tower Site Master."
+    };
+  }
+
+  const registeredSites = getRegisteredIndusSitesList();
+  const matchingSite = registeredSites.find(s => {
+    const code = (s.site_code || s.siteCode || s.site_id || s.siteId || s.id || '').trim().toLowerCase();
+    return code === targetSiteId.toLowerCase();
+  });
+
+  if (!matchingSite) {
+    return {
+      valid: false,
+      title: "Site ID Not Found!",
+      message: `Site ID "${targetSiteId}" does not exist in the Indus Tower Site Master. Please ensure the site is registered under Indus Tower.`
+    };
+  }
+
+  // 2. Validate Site ID and Site Name consistency
+  const regSiteName = (matchingSite.site_name || matchingSite.siteName || '').trim();
+  if (regSiteName && targetSiteName) {
+    const normReg = regSiteName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normTarget = targetSiteName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (normReg !== normTarget && !normReg.includes(normTarget) && !normTarget.includes(normReg)) {
+      return {
+        valid: false,
+        title: "Site Name Mismatch!",
+        message: `Site ID "${targetSiteId}" is registered as "${regSiteName}" in Indus Tower, but "${targetSiteName}" was found. Both Site ID and Site Name must match.`
+      };
+    }
+  }
+
+  // 3. Validate Unique PO Number Allocation to Site ID (e.g. PO No A allocated ONLY to Site ID A)
+  if (targetPoNo) {
+    const allRows = typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : [];
+    for (const other of allRows) {
+      if (rowId && String(other.id) === String(rowId)) continue; // skip current record
+
+      const otherPo = (other.poNo || '').trim();
+      const otherSite = (other.siteId || '').trim();
+
+      if (otherPo.toLowerCase() === targetPoNo.toLowerCase()) {
+        if (otherSite.toLowerCase() !== targetSiteId.toLowerCase()) {
+          return {
+            valid: false,
+            title: "PO Allocation Conflict!",
+            message: `PO No "${targetPoNo}" is already allocated to Site ID "${otherSite}". A PO Number can only be allocated to a single unique Site ID.`
+          };
+        } else {
+          return {
+            valid: false,
+            title: "Duplicate PO Number!",
+            message: `PO No "${targetPoNo}" is already assigned to Site ID "${otherSite}". Duplicate PO numbers are not permitted.`
+          };
+        }
+      }
+    }
+  }
+
+  return { valid: true, matchingSite };
+}
+window.validateCommercialPoAllocation = validateCommercialPoAllocation;
+
+window.openCommercialPoModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  const poCard = document.getElementById('commercialPoDetailCard');
+  if (!poCard || !overlay) return;
+
+  activeCommercialPoRowId = rowId;
+
+  // Try to pre-fetch Indus sites if not already loaded
+  if (typeof indusSiteData !== 'undefined' && indusSiteData.length === 0 && typeof fetchIndusSites === 'function') {
+    fetchIndusSites(false).then(() => {
+      updateCommercialPoHeaderBadges();
+    }).catch(() => {});
+  }
+
+  const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(rowId))
+    || (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(rowId));
+
+  if (row) {
+    const validation = validateCommercialPoAllocation(row);
+    if (!validation.valid) {
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(validation.message, validation.title);
+      } else {
+        showToast(validation.message);
+      }
+      return;
+    }
+  }
+
+  const inpProjId = document.getElementById('inpPoDetailProjectId');
+  const inpDate = document.getElementById('inpPoDetailDate');
+  const selProjType = document.getElementById('selPoDetailProjectType');
+  const selSubProjType = document.getElementById('selPoDetailSubProjectType');
+  const selPoType = document.getElementById('selPoDetailPoType');
+
+  if (row) {
+    if (inpProjId) inpProjId.value = row.projectId || '';
+    if (inpDate) inpDate.value = row.date || '12 - 08 - 2026';
+    if (selProjType) selProjType.value = row.projectType || 'New Build';
+    if (selSubProjType) selSubProjType.value = row.subProjectType || 'Civil';
+    if (selPoType) selPoType.value = row.poType || 'Opex';
+    setRaBillSwitchState(row.raBill !== false);
+  } else {
+    setRaBillSwitchState(true);
+  }
+
+  updateCommercialPoHeaderBadges();
+
+  // Hide all other side form cards in overlay
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'commercialPoDetailCard') card.style.display = 'none';
+  });
+
+  poCard.classList.remove('card-dimmed-blurred');
+  poCard.style.display = 'block';
+  overlay.style.display = 'flex';
+
+  showToast(`Opened PO details for ${row ? row.poNo : ''}`);
+};
+
+window.closeCommercialPoModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const poCard = document.getElementById('commercialPoDetailCard');
+  if (poCard) poCard.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  activeCommercialPoRowId = null;
+};
+
+// Initialize event listeners for PO Detail modal once DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  // Real-time updates for header badges
+  ['selPoDetailProjectType', 'selPoDetailSubProjectType', 'selPoDetailPoType'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', updateCommercialPoHeaderBadges);
+    }
+  });
+
+  const inpProjId = document.getElementById('inpPoDetailProjectId');
+  if (inpProjId) {
+    inpProjId.addEventListener('input', updateCommercialPoHeaderBadges);
+  }
+
+  // Calendar attachment
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpPoDetailDate', 'btnPoDetailCalendarTrigger');
+  }
+
+  // Copy buttons in header
+  const btnCopyProj = document.getElementById('btnCopyProjectInfo');
+  if (btnCopyProj) {
+    btnCopyProj.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const txt = document.getElementById('lblPoHeaderProjectInfo')?.textContent || '';
+      if (txt && navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(() => {
+          showToast(`Copied: ${txt}`);
+        }).catch(() => {
+          showToast(`Copied: ${txt}`);
+        });
+      } else {
+        showToast(`Copied: ${txt}`);
+      }
+    });
+  }
+
+  const btnCopyPo = document.getElementById('btnCopyPoInfo');
+  if (btnCopyPo) {
+    btnCopyPo.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const txt = document.getElementById('lblPoHeaderPoInfo')?.textContent || '';
+      if (txt && navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(() => {
+          showToast(`Copied: ${txt}`);
+        }).catch(() => {
+          showToast(`Copied: ${txt}`);
+        });
+      } else {
+        showToast(`Copied: ${txt}`);
+      }
+    });
+  }
+
+  const btnCopySite = document.getElementById('btnCopySiteInfo');
+  if (btnCopySite) {
+    btnCopySite.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const txt = document.getElementById('lblPoHeaderSiteInfo')?.textContent || '';
+      if (txt && navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(() => {
+          showToast(`Copied: ${txt}`);
+        }).catch(() => {
+          showToast(`Copied: ${txt}`);
+        });
+      } else {
+        showToast(`Copied: ${txt}`);
+      }
+    });
+  }
+
+  // Save button in header
+  const btnSave = document.getElementById('btnSaveCommercialPo');
+  if (btnSave) {
+    btnSave.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!activeCommercialPoRowId) return;
+
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const curRow = (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+
+      const inpProj = document.getElementById('inpPoDetailProjectId');
+      const inpDt = document.getElementById('inpPoDetailDate');
+      const selPrType = document.getElementById('selPoDetailProjectType');
+      const selSubPrType = document.getElementById('selPoDetailSubProjectType');
+      const selPType = document.getElementById('selPoDetailPoType');
+      const chkRaVal = document.getElementById('chkPoDetailRaBill');
+
+      const projVal = inpProj ? inpProj.value.trim() : '';
+      const dtVal = inpDt ? inpDt.value.trim() : '';
+      const prTypeVal = selPrType ? selPrType.value : '';
+      const subPrTypeVal = selSubPrType ? selSubPrType.value : '';
+      const pTypeVal = selPType ? selPType.value : '';
+      const raVal = chkRaVal ? chkRaVal.checked : true;
+
+      // Validate Site ID consistency and PO No allocation
+      if (row) {
+        const validation = validateCommercialPoAllocation(row, {
+          projectId: projVal,
+          date: dtVal,
+          projectType: prTypeVal,
+          subProjectType: subPrTypeVal,
+          poType: pTypeVal,
+          raBill: raVal
+        });
+
+        if (!validation.valid) {
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(validation.message, validation.title);
+          } else {
+            showToast(validation.message);
+          }
+          return;
+        }
+      }
+
+      if (row) {
+        if (projVal) row.projectId = projVal;
+        if (dtVal) row.date = dtVal;
+        if (prTypeVal) row.projectType = prTypeVal;
+        if (subPrTypeVal) row.subProjectType = subPrTypeVal;
+        if (pTypeVal) row.poType = pTypeVal;
+        row.raBill = raVal;
+      }
+
+      if (curRow) {
+        if (projVal) curRow.projectId = projVal;
+        if (dtVal) curRow.date = dtVal;
+        if (prTypeVal) curRow.projectType = prTypeVal;
+        if (subPrTypeVal) curRow.subProjectType = subPrTypeVal;
+        if (pTypeVal) curRow.poType = pTypeVal;
+        curRow.raBill = raVal;
+      }
+
+      closeCommercialPoModal();
+      currentWorklistView = 'new_project';
+      if (typeof loadWorklistDataset === 'function') {
+        loadWorklistDataset();
+      }
+      if (typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('PO details saved successfully!', 'Task Completed');
+      } else {
+        showToast('PO details saved successfully!');
+      }
+    });
+  }
+});
+
+// ==========================================
+// JMS DOCUMENTS POPUP & ADD DOCUMENT MODALS
+// ==========================================
+let jmsDocumentsMap = {};
+
+function getDefaultJmsDocuments(key) {
+  return [
+    {
+      id: `jmsdoc-${Date.now()}-1`,
+      docType: 'STN Document',
+      docDetails: 'Site Transfer Note Sign-off',
+      docName: 'STN_Document_Signed.pdf',
+      selected: false
+    },
+    {
+      id: `jmsdoc-${Date.now()}-2`,
+      docType: 'Commissioning Report',
+      docDetails: 'Site Commissioning & Handover',
+      docName: 'Commissioning_Report_v1.pdf',
+      selected: false
+    },
+    {
+      id: `jmsdoc-${Date.now()}-3`,
+      docType: 'Approved JMS',
+      docDetails: 'Approved Joint Measurement Sheet',
+      docName: 'Approved_JMS_Copy.pdf',
+      selected: false
+    }
+  ];
+}
+
+function getJmsDocuments(rowId) {
+  const key = rowId || (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) || 'default';
+  if (!jmsDocumentsMap[key]) {
+    jmsDocumentsMap[key] = getDefaultJmsDocuments(key);
+  }
+  return jmsDocumentsMap[key];
+}
+
+window.openJmsDocumentsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('jmsDocumentsPanel');
+  const addCard = document.getElementById('addJmsDocumentCard');
+  if (!overlay || !panel) return;
+
+  // Hide all other side cards in overlay
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  renderJmsDocumentsTable();
+  if (addCard) addCard.style.display = 'none';
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeJmsDocumentsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('jmsDocumentsPanel');
+  const addCard = document.getElementById('addJmsDocumentCard');
+  if (panel) panel.style.display = 'none';
+  if (addCard) addCard.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.renderJmsDocumentsTable = function() {
+  const tbody = document.getElementById('tbodyJmsDocuments');
+  const btnDelete = document.getElementById('btnJmsDocDelete');
+  if (!tbody) return;
+
+  const docs = getJmsDocuments(typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default');
+  const hasSelected = docs.some(d => d.selected);
+  if (btnDelete) {
+    btnDelete.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+
+  if (docs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 36px; color: #64748b; font-size: 0.95rem;">No documents added yet. Click + to add a document.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = docs.map(doc => {
+    return `
+      <tr data-doc-id="${doc.id}" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;">
+        <!-- 1. Select: Circle radio button -->
+        <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+          <div class="circular-radio-btn" onclick="toggleJmsDocumentSelect('${doc.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${doc.selected ? '#0454e4' : '#94a3b8'}; background: ${doc.selected ? '#0454e4' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${doc.selected ? 'Unselect' : 'Select'}">
+            ${doc.selected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+          </div>
+        </td>
+        <!-- 2. Document Type: 20ch & left -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #1e293b;" title="${(doc.docType || '').replace(/"/g, '&quot;')}">
+          ${doc.docType || ''}
+        </td>
+        <!-- 3. Document Details: 20ch & left -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #475569;" title="${(doc.docDetails || '').replace(/"/g, '&quot;')}">
+          ${doc.docDetails || ''}
+        </td>
+        <!-- 4. Document Name: 20ch & center -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500;" title="${(doc.docName || '').replace(/"/g, '&quot;')}">
+          <span style="color: #0454e4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;" onclick="showToast('Viewing ${doc.docName}')">${doc.docName || ''}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.toggleJmsDocumentSelect = function(docId) {
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const docs = getJmsDocuments(key);
+  const doc = docs.find(d => String(d.id) === String(docId));
+  if (doc) {
+    doc.selected = !doc.selected;
+    renderJmsDocumentsTable();
+  }
+};
+
+window.deleteSelectedJmsDocuments = function() {
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const docs = getJmsDocuments(key);
+  const countBefore = docs.length;
+  jmsDocumentsMap[key] = docs.filter(d => !d.selected);
+  const deletedCount = countBefore - jmsDocumentsMap[key].length;
+  renderJmsDocumentsTable();
+  if (deletedCount > 0) {
+    showToast(`Deleted ${deletedCount} document${deletedCount > 1 ? 's' : ''}`);
+  } else {
+    showToast('Please select at least one document to delete.');
+  }
+};
+
+window.openAddJmsDocumentModal = function() {
+  const panel = document.getElementById('jmsDocumentsPanel');
+  const addCard = document.getElementById('addJmsDocumentCard');
+  if (panel) panel.style.display = 'none';
+  if (addCard) {
+    // Reset form
+    const selType = document.getElementById('inpJmsDocType');
+    const inpDetails = document.getElementById('inpJmsDocDetails');
+    const inpName = document.getElementById('inpJmsDocName');
+    if (selType) selType.value = '';
+    if (inpDetails) inpDetails.value = '';
+    if (inpName) inpName.value = '';
+    addCard.style.display = 'block';
+  }
+};
+
+window.closeAddJmsDocumentModal = function() {
+  const panel = document.getElementById('jmsDocumentsPanel');
+  const addCard = document.getElementById('addJmsDocumentCard');
+  if (addCard) addCard.style.display = 'none';
+  if (panel) panel.style.display = 'block';
+};
+
+window.triggerJmsDocPdfUpload = function() {
+  const filePicker = document.getElementById('inpJmsDocPdfFilePicker');
+  if (filePicker) filePicker.click();
+};
+
+window.handleJmsDocPdfFileSelected = function(input) {
+  if (input && input.files && input.files[0]) {
+    const file = input.files[0];
+    const inpName = document.getElementById('inpJmsDocName');
+    const inpDetails = document.getElementById('inpJmsDocDetails');
+    if (inpName) inpName.value = file.name;
+    if (inpDetails && !inpDetails.value) {
+      const typeVal = document.getElementById('inpJmsDocType') ? document.getElementById('inpJmsDocType').value : 'Document';
+      inpDetails.value = `${typeVal} Upload`;
+    }
+    showToast(`PDF selected: ${file.name}`);
+  }
+};
+
+window.saveJmsDocument = function() {
+  const selType = document.getElementById('inpJmsDocType');
+  const inpDetails = document.getElementById('inpJmsDocDetails');
+  const inpName = document.getElementById('inpJmsDocName');
+
+  const docType = selType ? selType.value : 'STN Document';
+  const docDetails = inpDetails ? (inpDetails.value.trim() || `${docType} Details`) : `${docType} Details`;
+  let docName = inpName ? inpName.value.trim() : '';
+  if (!docName) {
+    docName = `${docType.replace(/\s+/g, '_')}_${Date.now().toString().slice(-4)}.pdf`;
+  } else if (!docName.toLowerCase().endsWith('.pdf')) {
+    docName += '.pdf';
+  }
+
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const docs = getJmsDocuments(key);
+  const newDoc = {
+    id: `jmsdoc-${Date.now()}`,
+    docType: docType,
+    docDetails: docDetails,
+    docName: docName,
+    selected: false
+  };
+  docs.push(newDoc);
+  jmsDocumentsMap[key] = docs;
+
+  closeAddJmsDocumentModal();
+  renderJmsDocumentsTable();
+  showToast(`Document "${docName}" added successfully!`);
+};
+
+// ==========================================
+// PO RECONCILIATION MODAL TAB
+// ==========================================
+let jmsPoReconMap = {};
+let isPoReconEditMode = false;
+
+function getDefaultPoReconData(key) {
+  return [
+    {
+      id: `porecon-1`,
+      selected: false,
+      lineNo: '10',
+      itemCode: 'INDUS-MAT-400192',
+      itemName: 'Supply of 40M 4L GI Ground Based Tower Material',
+      uom: 'EA',
+      rate: 45000.00,
+      jmsQty: 2,
+      poQty: 2,
+      poDifferenceQty: 0, // <= 0
+      amount: 90000.00
+    },
+    {
+      id: `porecon-2`,
+      selected: false,
+      lineNo: '20',
+      itemCode: 'INDUS-SRV-200841',
+      itemName: 'Foundation Civil Work & Excavation with Concrete 1:2:4',
+      uom: 'M3',
+      rate: 25000.00,
+      jmsQty: 3,
+      poQty: 2,
+      poDifferenceQty: -1, // <= 0
+      amount: 50000.00
+    }
+  ];
+}
+
+function getPoReconData(rowId) {
+  const key = rowId || (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) || 'default';
+  if (!jmsPoReconMap[key]) {
+    jmsPoReconMap[key] = getDefaultPoReconData(key);
+  }
+  // Filter rows where poDifferenceQty <= 0
+  return jmsPoReconMap[key].filter(r => (Number(r.poDifferenceQty) <= 0));
+}
+
+window.openJmsPoReconciliationModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poReconciliationPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  isPoReconEditMode = false;
+  const editIcon = document.getElementById('imgPoReconEditIcon');
+  if (editIcon) editIcon.src = 'icons/Edit.svg';
+
+  renderPoReconciliationTable();
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closePoReconciliationModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poReconciliationPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  isPoReconEditMode = false;
+};
+
+window.togglePoReconEditMode = function() {
+  isPoReconEditMode = !isPoReconEditMode;
+  const editIcon = document.getElementById('imgPoReconEditIcon');
+  if (editIcon) {
+    editIcon.src = isPoReconEditMode ? 'icons/Save.svg' : 'icons/Edit.svg';
+  }
+  renderPoReconciliationTable();
+  if (!isPoReconEditMode) {
+    showToast('PO QTY updated and saved successfully!');
+  } else {
+    showToast('Edit mode enabled. Update PO QTY in the table.');
+  }
+};
+
+window.updatePoReconQty = function(rowId, val) {
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const data = getPoReconData(key);
+  const row = data.find(r => String(r.id) === String(rowId));
+  if (row) {
+    const num = Math.max(0, parseFloat(val) || 0);
+    row.poQty = num;
+    row.poDifferenceQty = num - Number(row.jmsQty || 0);
+    row.amount = num * Number(row.rate || 0);
+    renderPoReconciliationTable();
+  }
+};
+
+window.togglePoReconSelect = function(rowId) {
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const data = getPoReconData(key);
+  const row = data.find(r => String(r.id) === String(rowId));
+  if (row) {
+    row.selected = !row.selected;
+    renderPoReconciliationTable();
+  }
+};
+
+window.renderPoReconciliationTable = function() {
+  const tbody = document.getElementById('tbodyPoReconciliation');
+  const lblTotal = document.getElementById('lblPoReconTotalAmount');
+  if (!tbody) return;
+
+  const data = getPoReconData(typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default');
+  
+  // Calculate dynamic total summation
+  const totalAmount = data.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  if (lblTotal) {
+    lblTotal.textContent = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  if (data.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 36px; color: #64748b; font-size: 0.95rem;">No PO reconciliation discrepancies found.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = data.map(row => {
+    return `
+      <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;">
+        <!-- 1. Line No: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
+          ${row.lineNo || ''}
+        </td>
+        <!-- 2. Item Code: 30ch & left -->
+        <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;" title="${(row.itemCode || '').replace(/"/g, '&quot;')}">
+          ${row.itemCode || ''}
+        </td>
+        <!-- 3. Item Name: 40ch & left -->
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #334155;" title="${(row.itemName || '').replace(/"/g, '&quot;')}">
+          ${row.itemName || ''}
+        </td>
+        <!-- 4. UOM: 10ch & right/center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b;">
+          ${row.uom || ''}
+        </td>
+        <!-- 5. Rate: 10ch & right -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
+          ${Number(row.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 6. JMS QTY: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 600;">
+          ${row.jmsQty || 0}
+        </td>
+        <!-- 7. PO QTY: 10ch & center (Editable when in edit mode) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px; color: #1e293b; font-weight: 600;">
+          ${isPoReconEditMode ? `
+            <input type="number" step="1" min="0" value="${row.poQty || 0}" onchange="updatePoReconQty('${row.id}', this.value)" style="width: 68px; height: 28px; text-align: center; border: 1px solid #000000; border-radius: 4px; padding: 2px 4px; font-weight: 500; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">
+          ` : `
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0;">${row.poQty || 0}</span>
+          `}
+        </td>
+        <!-- 8. Amount: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 700;">
+          ${Number(row.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+// ==========================================
+// MATERIAL RECONCILIATION MODAL TAB
+// ==========================================
+let jmsMaterialReconMap = {};
+let isMaterialReconEditMode = false;
+
+function getDefaultMaterialReconData(key) {
+  return [
+    {
+      id: `matrecon-1`,
+      selected: false,
+      lineNo: '10',
+      itemCode: 'INDUS-MAT-100234',
+      itemName: 'Feeder Cable Clamp 7/8 inch Single Run Double Way',
+      uom: 'NOS',
+      rate: 1200.00,
+      jmsQty: 50,
+      materialShortageQty: 10,
+      materialDifferenceQty: 10, // > 0
+      poQty: 50,
+      amount: 60000.00
+    },
+    {
+      id: `matrecon-2`,
+      selected: false,
+      lineNo: '20',
+      itemCode: 'INDUS-MAT-300451',
+      itemName: 'Outdoor Weatherproof Power Distribution Box 3-Phase',
+      uom: 'SET',
+      rate: 35000.00,
+      jmsQty: 2,
+      materialShortageQty: 1,
+      materialDifferenceQty: 1, // > 0
+      poQty: 2,
+      amount: 70000.00
+    }
+  ];
+}
+
+function getMaterialReconData(rowId) {
+  const key = rowId || (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) || 'default';
+  if (!jmsMaterialReconMap[key]) {
+    jmsMaterialReconMap[key] = getDefaultMaterialReconData(key);
+  }
+  // Filter rows where materialDifferenceQty > 0
+  return jmsMaterialReconMap[key].filter(r => (Number(r.materialDifferenceQty) > 0));
+}
+
+window.openJmsMaterialReconciliationModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('materialReconciliationPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  isMaterialReconEditMode = false;
+  const editIcon = document.getElementById('imgMaterialReconEditIcon');
+  if (editIcon) editIcon.src = 'icons/Edit.svg';
+
+  renderMaterialReconciliationTable();
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeMaterialReconciliationModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('materialReconciliationPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  isMaterialReconEditMode = false;
+};
+
+window.toggleMaterialReconEditMode = function() {
+  isMaterialReconEditMode = !isMaterialReconEditMode;
+  const editIcon = document.getElementById('imgMaterialReconEditIcon');
+  if (editIcon) {
+    editIcon.src = isMaterialReconEditMode ? 'icons/Save.svg' : 'icons/Edit.svg';
+  }
+  renderMaterialReconciliationTable();
+  if (!isMaterialReconEditMode) {
+    showToast('Material Shortage QTY updated and saved successfully!');
+  } else {
+    showToast('Edit mode enabled. Update Material Shortage QTY in the table.');
+  }
+};
+
+window.updateMaterialReconShortageQty = function(rowId, val) {
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const data = getMaterialReconData(key);
+  const row = data.find(r => String(r.id) === String(rowId));
+  if (row) {
+    const num = Math.max(0, parseFloat(val) || 0);
+    row.materialShortageQty = num;
+    row.materialDifferenceQty = num;
+    renderMaterialReconciliationTable();
+  }
+};
+
+window.toggleMaterialReconSelect = function(rowId) {
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const data = getMaterialReconData(key);
+  const row = data.find(r => String(r.id) === String(rowId));
+  if (row) {
+    row.selected = !row.selected;
+    renderMaterialReconciliationTable();
+  }
+};
+
+window.renderMaterialReconciliationTable = function() {
+  const tbody = document.getElementById('tbodyMaterialReconciliation');
+  const lblTotal = document.getElementById('lblMaterialReconTotalAmount');
+  if (!tbody) return;
+
+  const data = getMaterialReconData(typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default');
+  
+  // Calculate dynamic total summation
+  const totalAmount = data.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+  if (lblTotal) {
+    lblTotal.textContent = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  if (data.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 36px; color: #64748b; font-size: 0.95rem;">No material shortage discrepancies found.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = data.map(row => {
+    return `
+      <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;">
+        <!-- 1. Line No: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
+          ${row.lineNo || ''}
+        </td>
+        <!-- 2. Item Code: 30ch & left -->
+        <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;" title="${(row.itemCode || '').replace(/"/g, '&quot;')}">
+          ${row.itemCode || ''}
+        </td>
+        <!-- 3. Item Name: 40ch & left -->
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #334155;" title="${(row.itemName || '').replace(/"/g, '&quot;')}">
+          ${row.itemName || ''}
+        </td>
+        <!-- 4. UOM: 10ch & right/center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b;">
+          ${row.uom || ''}
+        </td>
+        <!-- 5. Rate: 10ch & right -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
+          ${Number(row.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 6. JMS QTY: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 600;">
+          ${row.jmsQty || 0}
+        </td>
+        <!-- 7. Material Shortage QTY: 20ch & center (Editable when in edit mode) -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px; color: #dc2626; font-weight: 700;">
+          ${isMaterialReconEditMode ? `
+            <input type="number" step="1" min="0" value="${row.materialShortageQty || 0}" onchange="updateMaterialReconShortageQty('${row.id}', this.value)" style="width: 68px; height: 28px; text-align: center; border: 1px solid #000000; border-radius: 4px; padding: 2px 4px; font-weight: 500; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">
+          ` : `
+            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0;">${row.materialShortageQty || 0}</span>
+          `}
+        </td>
+        <!-- 8. Amount: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 700;">
+          ${Number(row.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+// ==========================================
+// ADD LINE ITEMS MODAL (JMS Detail Subpage)
+// ==========================================
+window.openJmsAddLineItemsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('addJmsLineItemsPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  const inpSearch = document.getElementById('inpJmsAddLineItemsSearch');
+  if (inpSearch) inpSearch.value = '';
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeJmsAddLineItemsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('addJmsLineItemsPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.saveJmsAddLineItems = function() {
+  showToast('Line items saved successfully.');
+  closeJmsAddLineItemsModal();
+};

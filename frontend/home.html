@@ -5183,7 +5183,7 @@
 
         <!-- Bulk Upload Table Side Panel (Opened when clicking Bulk Upload Toolbar Icon) -->
         <div class="side-form-card side-contact-popup" id="bulkUploadSidePanel"
-          style="display: none; width: 880px; max-width: 96vw;">
+          style="display: none; width: 1040px; max-width: 96vw;">
           <!-- Header Ribbon Badge: Bulk Upload + Top Right Icons: Add (+), Close -->
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
@@ -5203,37 +5203,37 @@
           </div>
 
           <!-- Table Container -->
-          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: hidden;">
             <table class="contact-custom-table" id="tblBulkUploadPopup"
               style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
                 <tr class="master-view-header">
-                  <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                  <th style="width: 22ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
                     <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
                       <span>Started</span>
                     </div>
                   </th>
-                  <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                  <th style="width: 22ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
                     <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
                       <span>Completed</span>
                     </div>
                   </th>
-                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                  <th style="width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
                     <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
                       <span>Total Count</span>
                     </div>
                   </th>
-                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                  <th style="width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
                     <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
                       <span>Valid Count</span>
                     </div>
                   </th>
-                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                  <th style="width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
                     <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
                       <span>Invalid Count</span>
                     </div>
                   </th>
-                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                  <th style="width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
                     <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 6px;">
                       <span>Status</span>
                       <button type="button" class="contact-th-filter-btn" id="btnBulkUploadStatusFilter" data-filter-col="status" onclick="openBulkUploadStatusFilter(event)" title="Filter Status">▼</button>
@@ -5246,6 +5246,121 @@
               </tbody>
             </table>
           </div>
+        </div>
+
+        <!-- Commercial Manager: PO Detail Modal Card (Extended Tab Width, Rounded Corners & Clean Header Icons) -->
+        <div class="side-form-card" id="commercialPoDetailCard" style="display: none; width: 1100px; max-width: 96vw; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);">
+          <!-- Header Ribbon Badge with 3 Badges + Copy Buttons & Top Right Save, Close Icons -->
+          <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0; margin-bottom: 24px; box-sizing: border-box;">
+            <div class="side-form-title-badge" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 42px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 20px; margin: 0; white-space: nowrap; flex-shrink: 0;">
+              <!-- Badge 1: Project ID / Project Type / Sub-Project Type -->
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                <span id="lblPoHeaderProjectInfo">Project ID / Project Type / Sub-Project Type</span>
+                <button type="button" id="btnCopyProjectInfo" title="Copy Project info" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="16" height="16" style="filter: brightness(0) invert(1);">
+                </button>
+              </div>
+              <!-- Badge 2: PO No (0-Opex) -->
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                <span id="lblPoHeaderPoInfo">PO No (0-Opex)</span>
+                <button type="button" id="btnCopyPoInfo" title="Copy PO info" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="16" height="16" style="filter: brightness(0) invert(1);">
+                </button>
+              </div>
+              <!-- Badge 3: Site ID / Site Name -->
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                <span id="lblPoHeaderSiteInfo">Site ID / Site Name</span>
+                <button type="button" id="btnCopySiteInfo" title="Copy Site info" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="16" height="16" style="filter: brightness(0) invert(1);">
+                </button>
+              </div>
+            </div>
+
+            <!-- Top Right Icons: Save & Close placed cleanly with margin in corner -->
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 16px; margin-left: auto; padding-right: 20px; flex-shrink: 0; z-index: 20;">
+              <button type="button" class="side-top-icon-btn" id="btnSaveCommercialPo" title="Save PO Details" style="background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Save.svg" alt="Save" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseCommercialPoCard" onclick="closeCommercialPoModal()" aria-label="Close form" style="color: #ef4444; font-size: 34px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmCommercialPoDetail" onsubmit="event.preventDefault();" style="padding: 4px 28px 32px 28px; display: flex; flex-direction: column; gap: 18px;">
+            <!-- 1. Project ID -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="font-weight: 700; color: #0f172a; font-size: 0.95rem; width: 150px; min-width: 150px;">Project ID</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpPoDetailProjectId" placeholder="Project ID" readonly style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 2. PO Date with Google Calendar Icon -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="font-weight: 700; color: #0f172a; font-size: 0.95rem; width: 150px; min-width: 150px;">PO Date</label>
+              <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpPoDetailDate" placeholder="DD - MM - YYYY" value="12 - 08 - 2026" readonly style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 46px 0 14px; font-size: 0.95rem; background: #ffffff; cursor: pointer; color: #0f172a;">
+                <div id="btnPoDetailCalendarTrigger" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Project Type -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="font-weight: 700; color: #0f172a; font-size: 0.95rem; width: 150px; min-width: 150px;">Project Type</label>
+              <div style="flex: 1;">
+                <select class="form-input-control" id="selPoDetailProjectType" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="" disabled>Select Project Type</option>
+                  <option value="New Build" selected>New Build</option>
+                  <option value="Run project">Run project</option>
+                  <option value="O&M">O&M</option>
+                  <option value="Energy">Energy</option>
+                  <option value="Safety">Safety</option>
+                  <option value="Colo">Colo</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Sub-Project Type -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="font-weight: 700; color: #0f172a; font-size: 0.95rem; width: 150px; min-width: 150px;">Sub-Project Type</label>
+              <div style="flex: 1;">
+                <select class="form-input-control" id="selPoDetailSubProjectType" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="" disabled>Select Sub-Project Type</option>
+                  <option value="Civil" selected>Civil</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="Telecom">Telecom</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Installation">Installation</option>
+                  <option value="Survey">Survey</option>
+                  <option value="Upgrade">Upgrade</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. PO Type -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="font-weight: 700; color: #0f172a; font-size: 0.95rem; width: 150px; min-width: 150px;">PO Type</label>
+              <div style="flex: 1;">
+                <select class="form-input-control" id="selPoDetailPoType" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="Capex">Capex</option>
+                  <option value="Opex" selected>Opex</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. RA Bill -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <label style="font-weight: 700; color: #0f172a; font-size: 0.95rem; width: 150px; min-width: 150px;">RA Bill</label>
+              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                <div id="btnToggleRaBillWrapper" style="position: relative; width: 54px; height: 28px; border-radius: 28px; background-color: #10b981; cursor: pointer; transition: background-color 0.25s ease; display: inline-flex; align-items: center; padding: 3px; box-sizing: border-box;" onclick="toggleRaBillSwitch()" title="Toggle RA Bill">
+                  <input type="checkbox" id="chkPoDetailRaBill" checked style="display: none;">
+                  <div id="knobPoDetailRaBill" style="width: 22px; height: 22px; border-radius: 50%; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.25); transition: transform 0.25s ease; transform: translateX(26px);"></div>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
 
         <!-- Add Bulk Upload Modal Card (Opened from (+) icon inside Bulk Upload Table) -->
@@ -5285,6 +5400,300 @@
                 <img src="icons/CSV upload.svg" alt="CSV Upload" width="60" height="60" style="width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0, 203, 160, 0.25)); transition: transform 0.2s ease;">
                 <span style="font-size: 0.95rem; font-weight: 600; color: #475569;">Click to Upload CSV / Excel</span>
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- JMS Documents Table Side Panel (Opened when clicking Documents Toolbar Icon in JMS Detail) -->
+        <div class="side-form-card side-contact-popup" id="jmsDocumentsPanel"
+          style="display: none; width: 880px; max-width: 96vw;">
+          <!-- Header Ribbon Badge: Documents + Top Right Icons: Add (+), Delete, Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblJmsDocumentsPanelTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Documents
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnJmsDocAdd" onclick="openAddJmsDocumentModal()" title="Add Document"
+                style="background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Add.svg" alt="Add" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnJmsDocDelete" onclick="deleteSelectedJmsDocuments()" title="Delete Selected Document"
+                style="background: none; border: none; cursor: pointer; padding: 2px; display: none; align-items: center; justify-content: center;">
+                <img src="icons/Delete.svg" alt="Delete" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseJmsDocumentsPanel"
+                onclick="closeJmsDocumentsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblJmsDocumentsPopup"
+              style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <!-- Select: 60px, center header -->
+                  <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Select</span>
+                  </th>
+                  <!-- Document Type: 20ch, center header -->
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Document Type</span>
+                  </th>
+                  <!-- Document Details: 20ch, center header -->
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Document Details</span>
+                  </th>
+                  <!-- Document Name: 20ch, center header -->
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Document Name</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyJmsDocuments">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add JMS Document Card (Opened when clicking + icon in Documents modal) -->
+        <div class="side-form-card" id="addJmsDocumentCard" style="display: none; width: 500px; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); overflow: hidden;">
+          <!-- Header Ribbon Badge: Add Documents + Top Right Icons: PDF Upload, Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; height: 50px; margin-bottom: 16px;">
+            <div class="side-form-title-badge" id="lblAddJmsDocumentTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 36px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 24px) 100%, 0 100%); height: 50px; display: flex; align-items: center; margin: 0;">
+              Add Documents
+            </div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
+              <button type="button" class="side-top-icon-btn" id="btnJmsDocPdfUpload" title="Upload PDF Document" onclick="triggerJmsDocPdfUpload()" style="background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/PDF Upload.svg" alt="PDF Upload" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddJmsDocCard" onclick="closeAddJmsDocumentModal()" aria-label="Close form" style="color: #ef4444; font-size: 30px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body (Horizontal Rows: Label Left, Input Right) -->
+          <form class="side-form-body" id="frmAddJmsDocument" onsubmit="event.preventDefault(); saveJmsDocument();" style="padding: 0 24px 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <!-- Hidden PDF File Picker -->
+            <input type="file" id="inpJmsDocPdfFilePicker" accept=".pdf,application/pdf" style="display: none;" onchange="handleJmsDocPdfFileSelected(this)">
+
+            <!-- 1. Document Type (Horizontal Row) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="inpJmsDocType" style="font-weight: 500; color: #1e293b; font-size: 0.9rem; min-width: 140px; text-align: left; margin: 0;">Document Type</label>
+              <div style="flex: 1; position: relative;">
+                <select class="form-input-control" id="inpJmsDocType" style="width: 100%; height: 36px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 32px 0 12px; font-size: 0.88rem; color: #1e293b; background: #ffffff; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                  <option value="" disabled selected hidden></option>
+                  <option value="STN Document">STN Document</option>
+                  <option value="SRN Document">SRN Document</option>
+                  <option value="Commissioning Report">Commissioning Report</option>
+                  <option value="PTW Document">PTW Document</option>
+                  <option value="Approved JMS">Approved JMS</option>
+                  <option value="Additional Activity Approval">Additional Activity Approval</option>
+                  <option value="Drawing">Drawing</option>
+                  <option value="CAM Document">CAM Document</option>
+                </select>
+                <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #2563eb; display: flex; align-items: center;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Document Details (Horizontal Row) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="inpJmsDocDetails" style="font-weight: 500; color: #1e293b; font-size: 0.9rem; min-width: 140px; text-align: left; margin: 0;">Document Details</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpJmsDocDetails" placeholder="" style="width: 100%; height: 36px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.88rem; color: #1e293b; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- 3. Document Name (Horizontal Row) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="inpJmsDocName" style="font-weight: 500; color: #1e293b; font-size: 0.9rem; min-width: 140px; text-align: left; margin: 0;">Document Name</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpJmsDocName" placeholder="" style="width: 100%; height: 36px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.88rem; color: #1e293b; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- PO Reconciliation Table Side Panel (Opened when clicking PO Filter Toolbar Icon in JMS Detail) -->
+        <div class="side-form-card side-contact-popup" id="poReconciliationPanel"
+          style="display: none; width: 1100px; max-width: 96vw;">
+          <!-- Header Ribbon Badge: PO Reconciliation + Summation + Edit/Save, Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPoReconPanelTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              PO Reconciliation
+            </div>
+            <!-- Summation Metric with dynamic sum value on left of icons -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: 20px;" title="Total Sum of Amount">
+              <img src="icons/summation.svg" alt="Summation" width="26" height="26" style="vertical-align: middle;">
+              <span id="lblPoReconTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">0.00</span>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnPoReconEditToggle" onclick="togglePoReconEditMode()" title="Edit PO QTY"
+                style="background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img id="imgPoReconEditIcon" src="icons/Edit.svg" alt="Edit" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePoReconciliationPanel"
+                onclick="closePoReconciliationModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPoReconciliationPopup"
+              style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <!-- 1. Line No: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Line No</span>
+                  </th>
+                  <!-- 2. Item Code: 30ch, center header -->
+                  <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Item Code</span>
+                  </th>
+                  <!-- 3. Item Name: 40ch, center header -->
+                  <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Item Name</span>
+                  </th>
+                  <!-- 4. UOM: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>UOM</span>
+                  </th>
+                  <!-- 5. Rate: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Rate</span>
+                  </th>
+                  <!-- 6. JMS QTY: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>JMS QTY</span>
+                  </th>
+                  <!-- 7. PO QTY: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>PO QTY</span>
+                  </th>
+                  <!-- 8. Amount: 15ch, center header -->
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPoReconciliation">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Material Reconciliation Table Side Panel (Opened when clicking Material Filter Toolbar Icon in JMS Detail) -->
+        <div class="side-form-card side-contact-popup" id="materialReconciliationPanel"
+          style="display: none; width: 1150px; max-width: 96vw;">
+          <!-- Header Ribbon Badge: Material Reconciliation + Summation + Edit/Save, Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblMaterialReconPanelTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Material Reconciliation
+            </div>
+            <!-- Summation Metric with dynamic sum value on left of icons -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: 20px;" title="Total Sum of Amount">
+              <img src="icons/summation.svg" alt="Summation" width="26" height="26" style="vertical-align: middle;">
+              <span id="lblMaterialReconTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">0.00</span>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnMaterialReconEditToggle" onclick="toggleMaterialReconEditMode()" title="Edit Material Shortage QTY"
+                style="background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img id="imgMaterialReconEditIcon" src="icons/Edit.svg" alt="Edit" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseMaterialReconciliationPanel"
+                onclick="closeMaterialReconciliationModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblMaterialReconciliationPopup"
+              style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <!-- 1. Line No: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Line No</span>
+                  </th>
+                  <!-- 2. Item Code: 30ch, center header -->
+                  <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Item Code</span>
+                  </th>
+                  <!-- 3. Item Name: 40ch, center header -->
+                  <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Item Name</span>
+                  </th>
+                  <!-- 4. UOM: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>UOM</span>
+                  </th>
+                  <!-- 5. Rate: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Rate</span>
+                  </th>
+                  <!-- 6. JMS QTY: 10ch, center header -->
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>JMS QTY</span>
+                  </th>
+                  <!-- 7. Material Shortage QTY: 20ch, center header -->
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Material Shortage QTY</span>
+                  </th>
+                  <!-- 8. Amount: 15ch, center header -->
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyMaterialReconciliation">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Line Items Side Panel (Opened when clicking + Toolbar Icon in JMS Detail) -->
+        <div class="side-form-card" id="addJmsLineItemsPanel" style="display: none; width: 440px;">
+          <!-- Header Ribbon Badge: Add Line Items + Save, Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblAddJmsLineItemsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 48px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 32px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Line Items
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnAddJmsLineItemsSave" onclick="saveJmsAddLineItems()" title="Save Line Items"
+                style="background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Save.svg" alt="Save" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddJmsLineItemsPanel"
+                onclick="closeJmsAddLineItemsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <div class="side-form-body" style="padding: 12px 20px 24px 20px;">
+            <div style="position: relative; width: 100%;">
+              <input type="text" id="inpJmsAddLineItemsSearch" placeholder=""
+                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 40px 6px 14px; font-size: 0.95rem; outline: none; transition: border-color 0.2s ease;">
+              <img src="icons/Search.svg" alt="Search" width="22" height="22"
+                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
             </div>
           </div>
         </div>

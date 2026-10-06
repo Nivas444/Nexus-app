@@ -3636,7 +3636,7 @@ let commercialWorklistData = [
     projectType: "Run project",
     subProjectType: "Civil",
     poType: "Opex",
-    raBill: true,
+    raBill: false,
     selected: false
   },
   {
@@ -3651,7 +3651,7 @@ let commercialWorklistData = [
     projectType: "New Build",
     subProjectType: "Electrical",
     poType: "Capex",
-    raBill: true,
+    raBill: false,
     selected: false
   },
   {
@@ -3681,7 +3681,7 @@ let commercialWorklistData = [
     projectType: "Energy",
     subProjectType: "Maintenance",
     poType: "Capex",
-    raBill: true,
+    raBill: false,
     selected: false
   },
   {
@@ -3696,7 +3696,7 @@ let commercialWorklistData = [
     projectType: "Safety",
     subProjectType: "Installation",
     poType: "Opex",
-    raBill: true,
+    raBill: false,
     selected: false
   },
   {
@@ -3726,7 +3726,7 @@ let commercialWorklistData = [
     projectType: "New Build",
     subProjectType: "Upgrade",
     poType: "Opex",
-    raBill: true,
+    raBill: false,
     selected: false
   }
 ];
@@ -4886,6 +4886,11 @@ let currentFilterColumn = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
+  const isStandalone = params.get('standalone') === 'true';
+  if (isStandalone) {
+    window.isStandaloneMode = true;
+    document.body.classList.add('standalone-mode');
+  }
   const moduleParam = params.get('module');
   const viewParam = params.get('view');
   const subpageParam = params.get('subpage');
@@ -5358,6 +5363,10 @@ function updateURL() {
 // 2. MAIN APPLICATION RENDERER & BACK NAVIGATION
 // ==========================================================================
 function goBackSubpage() {
+  if (window.isStandaloneMode) {
+    window.close();
+    return;
+  }
   if (currentModule === 'admin') {
     if (currentAdminView === 'attendance' || currentAdminView === 'salary_detail' || currentAdminView === 'epf' || currentAdminView === 'esi' || currentAdminView === 'pt' || currentAdminView === 'lwf') {
       closeAdminSalaryDetailPage();
@@ -5489,6 +5498,14 @@ const universalBackBtnHtml = `
 function renderApp() {
   applyRoleBasedNavigation();
   const bannerTitle = document.getElementById('pageBannerTitle');
+
+  if (window.isStandaloneMode) {
+    document.body.classList.add('standalone-mode');
+    const navbar = document.querySelector('.navbar');
+    if (navbar) navbar.style.setProperty('display', 'none', 'important');
+    const footerBar = document.getElementById('worklistFooterBar');
+    if (footerBar) footerBar.style.setProperty('display', 'none', 'important');
+  }
 
   // Update Navbar Active Tab
   document.querySelectorAll('.nav-icon-item').forEach(btn => {
@@ -9004,12 +9021,7 @@ window.openProjectDetailPage = function(projId, customerName) {
 };
 
 window.openProjectExpensesPage = function() {
-  currentModule = 'projects';
-  currentProjectsView = 'project_expenses';
-  activeColumnFilters = {};
-  updateURL();
-  renderApp();
-  showToast('Opened Project Expenses Page');
+  window.open('home.html?module=projects&view=project_expenses&standalone=true', '_blank');
 };
 
 window.openProjectMaterialPage = function() {
@@ -11931,10 +11943,10 @@ function renderWorklistToolbar() {
             <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
             <span id="lblJmsDetailTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
           </div>
-          <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px; cursor: pointer;" title="Payable Amount - Click to view Expense Details" onclick="openExpensesSummaryModal()">
-            <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle; cursor: pointer;">
-            <span id="lblJmsDetailPayableAmount" style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">1,85,000.00</span>
-          </div>
+            <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px;" title="Payable Amount">
+              <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
+              <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">1,85,000.00</span>
+            </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
           <button type="button" class="toolbar-icon-btn btn-add-action" id="btnJmsDetailAdd" data-tooltip="Add Item" aria-label="Add Item" style="cursor: pointer;" onclick="openJmsAddLineItemsModal()">
@@ -12889,43 +12901,43 @@ function renderWorklistTableHead() {
     } else if (currentWorklistView === 'po_amend_detail') {
       thead.innerHTML = `
         <tr class="master-view-header">
-          <!-- 1. Select: 60px, center -->
-          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 1. Select: 50px, center -->
+          <th style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
             <span>Select</span>
           </th>
-          <!-- 2. Amendment Type: 15ch, center -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 2. Amendment Type: 14%, center -->
+          <th style="width: 14%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Amendment Type</span>
           </th>
-          <!-- 3. Line No: 10ch, center -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 3. Line No: 8%, center -->
+          <th style="width: 8%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
             <span>Line No</span>
           </th>
-          <!-- 4. Item Code: 30ch, center header -->
-          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <!-- 4. Item Code: 18%, center header -->
+          <th style="width: 18%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Item Code</span>
           </th>
-          <!-- 5. Item Name: 40ch, center header, with filter -->
-          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <!-- 5. Item Name: 26%, center header, with filter -->
+          <th style="width: 26%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Item Name</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
             </div>
           </th>
-          <!-- 6. UOM: 10ch, center header -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 6. UOM: 6%, center header -->
+          <th style="width: 6%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
             <span>UOM</span>
           </th>
-          <!-- 7. Qty: 10ch, center header -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 7. Qty: 8%, center header -->
+          <th style="width: 8%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
             <span>Qty</span>
           </th>
-          <!-- 8. Rate: 10ch, center header -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 8. Rate: 9%, center header -->
+          <th style="width: 9%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
             <span>Rate</span>
           </th>
-          <!-- 9. Amount: 15ch, center header -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <!-- 9. Amount: 11%, center header -->
+          <th style="width: 11%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Amount</span>
           </th>
         </tr>
@@ -13176,6 +13188,29 @@ function initWorklistToolbarEvents() {
 function applyFiltersAndRender() {
   const tbody = document.getElementById('worklistTableBody');
   if (!tbody) return;
+
+  const tableContainer = document.querySelector('.table-container-full');
+  const worklistTableEl = document.getElementById('worklistTable');
+  if (tableContainer) {
+    if (currentWorklistView === 'po_amend_detail') {
+      tableContainer.style.overflowX = 'hidden';
+      tableContainer.style.width = '100%';
+    } else {
+      tableContainer.style.overflowX = 'auto';
+      tableContainer.style.width = '';
+    }
+  }
+  if (worklistTableEl) {
+    if (currentWorklistView === 'po_amend_detail') {
+      worklistTableEl.style.minWidth = '0';
+      worklistTableEl.style.width = '100%';
+      worklistTableEl.style.tableLayout = 'fixed';
+    } else {
+      worklistTableEl.style.minWidth = '';
+      worklistTableEl.style.width = '100%';
+      worklistTableEl.style.tableLayout = '';
+    }
+  }
 
   const role = getAuthenticatedUserRole();
   const isCommercialWorklistView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'].includes(currentWorklistView);
@@ -13554,9 +13589,12 @@ function applyFiltersAndRender() {
         const isChecked = Boolean(row.selected || row.highlighted);
         const isRowEditable = Boolean(typeof isJmsDetailEditMode !== 'undefined' && isJmsDetailEditMode && (row.selected || row.highlighted));
         
+        const rawNum = row.rawQty !== undefined ? parseFloat(row.rawQty) : (parseFloat(row.qty) || 20);
+        const formattedQty = isNaN(rawNum) ? '20.00' : rawNum.toFixed(2);
+
         const qtyCellHtml = isRowEditable
-          ? `<input type="number" step="1" min="0" value="${row.rawQty !== undefined ? row.rawQty : (parseFloat(row.qty) || 0)}" onchange="updateJmsDetailRowQty('${row.id}', this.value)" style="width: 72px; height: 28px; text-align: right; border: 1px solid #000000; border-radius: 4px; padding: 2px 6px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
-          : (row.qty || '');
+          ? `<input type="number" step="0.01" min="0" value="${formattedQty}" onchange="updateJmsDetailRowQty('${row.id}', this.value)" style="width: 76px; height: 28px; text-align: right; border: 1.5px solid #0454e4; border-radius: 4px; padding: 2px 6px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
+          : formattedQty;
 
         return `
           <tr data-row-id="${row.id}" style="${rowBgStyle}">
@@ -13578,15 +13616,15 @@ function applyFiltersAndRender() {
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.itemName || ''}
             </td>
-            <!-- 5. UOM: 10ch & right -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 5. UOM: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.uom || ''}
             </td>
             <!-- 6. Rate: 10ch & right -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.rate || ''}
             </td>
-            <!-- 7. Qty: 10ch & right (Editable when in edit mode) -->
+            <!-- 7. Qty: 10ch & right (Editable when in edit mode with decimals) -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 6px 6px;">
               ${qtyCellHtml}
             </td>
@@ -13600,8 +13638,8 @@ function applyFiltersAndRender() {
 
       if (allHighlighted) {
         rowsHtml += `
-          <tr id="rowJmsDetailSubmitAction" style="background: transparent; border: none;">
-            <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none; background: transparent;">
+          <tr id="rowJmsDetailSubmitAction" style="background: transparent; border: none !important;">
+            <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
               <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="openJmsSelectWorkTypeModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit JMS Validation">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
@@ -13641,54 +13679,64 @@ function applyFiltersAndRender() {
       }
 
       const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
+      const isToBeSubmitTask = (currentPoAmendSubpageType === 'to_be_submit') || (typeof currentPoAmendParentTask !== 'undefined' && String(currentPoAmendParentTask).toLowerCase().includes('to be submit'));
 
       let rowsHtml = filteredDataset.map(row => {
         const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
         const isChecked = Boolean(row.selected);
         const isAdditional = (row.amendmentType || '').toLowerCase().includes('additional');
 
-        const lineNoCellHtml = isAdditional
-          ? `<input type="text" value="${row.lineNo || ''}" placeholder="" oninput="updatePoAmendDetailLineNo('${row.id}', this.value)" ${row.selected ? '' : 'readonly'} style="width: 72px; height: 28px; text-align: center; border: 1.5px solid ${row.selected ? '#00cba0' : '#94a3b8'}; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: ${row.selected ? '#ffffff' : '#f8fafc'}; color: #0f172a; cursor: ${row.selected ? 'text' : 'not-allowed'}; box-sizing: border-box;" title="${row.selected ? 'Edit Line No' : 'Select row to edit Line No'}">`
-          : (row.lineNo || '');
+        let lineNoCellHtml = row.lineNo || '';
+        if (isToBeSubmitTask && isAdditional) {
+          lineNoCellHtml = `
+            <button type="button" onclick="copyPoAmendItemCode('${(row.itemCode || '').replace(/'/g, "\\'")}'); event.stopPropagation();" title="Copy Item Code: ${row.itemCode || ''}" style="background: none; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; justify-content: center;">
+              <img src="icons/Copy (1).svg" alt="Copy Item Code" width="18" height="18">
+            </button>
+          `;
+        } else if (isAdditional) {
+          lineNoCellHtml = `
+            <input type="text" class="po-amend-line-input" value="${row.lineNo || ''}" onclick="event.stopPropagation();" oninput="updatePoAmendDetailLineNo('${row.id}', this.value)" style="width: 58px; text-align: center; border: 1.5px solid #00cba0; border-radius: 4px; padding: 3px 4px; font-size: 0.9rem; font-family: inherit; font-weight: 600; background: #ffffff; color: #0f172a; outline: none;" />
+          `;
+        }
 
         return `
           <tr data-row-id="${row.id}" style="${rowBgStyle}">
             <!-- 1. Select: Circle radio button (Green when checked, single selection) -->
-            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+            <td style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; padding: 10px 4px;">
               <div class="circular-radio-btn" onclick="togglePoAmendDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
                 ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
               </div>
             </td>
-            <!-- 2. Amendment Type: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; font-weight: 600; color: #0f172a;">
+            <!-- 2. Amendment Type: 14% & center -->
+            <td style="width: 14%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; font-weight: 600; color: #0f172a;">
               ${row.amendmentType || ''}
             </td>
-            <!-- 3. Line No: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 6px 6px;">
+            <!-- 3. Line No: 8% & center -->
+            <td style="width: 8%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 4px 4px;">
               ${lineNoCellHtml}
             </td>
-            <!-- 4. Item Code: 30ch & left -->
-            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+            <!-- 4. Item Code: 18% & left -->
+            <td style="width: 18%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.itemCode || ''}
             </td>
-            <!-- 5. Item Name: 40ch & left -->
-            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+            <!-- 5. Item Name: 26% & left -->
+            <td style="width: 26%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.itemName || ''}
             </td>
-            <!-- 6. UOM: 10ch & right -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 6. UOM: 6% & center -->
+            <td style="width: 6%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 4px;">
               ${row.uom || ''}
             </td>
-            <!-- 7. Qty: 10ch & right -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 7. Qty: 8% & right -->
+            <td style="width: 8%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.qty || ''}
             </td>
-            <!-- 8. Rate: 10ch & right -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 8. Rate: 9% & right -->
+            <td style="width: 9%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.rate || ''}
             </td>
-            <!-- 9. Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+            <!-- 9. Amount: 11% & right -->
+            <td style="width: 11%; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
               ${row.amount || ''}
             </td>
           </tr>
@@ -13697,8 +13745,8 @@ function applyFiltersAndRender() {
 
       if (allHighlighted) {
         rowsHtml += `
-          <tr id="rowPoAmendDetailSubmitAction" style="background: transparent; border: none;">
-            <td colspan="9" style="text-align: center; padding: 24px 0 16px 0; border: none; background: transparent;">
+          <tr id="rowPoAmendDetailSubmitAction" style="background: transparent; border: none !important;">
+            <td colspan="9" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
               <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="${currentPoAmendSubpageType === 'pending_with_indus' ? 'openPoAmendStatusModal()' : 'openPoAmendIdModal()'}" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
@@ -31619,9 +31667,16 @@ window.handleIndusLogoRevert = function() {
 };
 
 // ─── NEXUS SVG ERROR POPUP CONTROLLER ─────────────────────────────────────────
+let svgErrorPopupAutoCloseTimer = null;
+
 window.showSvgErrorPopup = function(message, title = "Error Message!") {
   const overlay = document.getElementById('nexusErrorPopupOverlay');
   if (!overlay) return;
+
+  if (svgErrorPopupAutoCloseTimer) {
+    clearTimeout(svgErrorPopupAutoCloseTimer);
+    svgErrorPopupAutoCloseTimer = null;
+  }
 
   const titleEl = document.getElementById('svgErrorPopupTitle');
   if (titleEl) {
@@ -31670,9 +31725,18 @@ window.showSvgErrorPopup = function(message, title = "Error Message!") {
   }
 
   overlay.style.display = 'flex';
+
+  // Auto-dismiss after 3 seconds without user interruption
+  svgErrorPopupAutoCloseTimer = setTimeout(() => {
+    closeSvgErrorPopup();
+  }, 3000);
 };
 
 window.closeSvgErrorPopup = function() {
+  if (svgErrorPopupAutoCloseTimer) {
+    clearTimeout(svgErrorPopupAutoCloseTimer);
+    svgErrorPopupAutoCloseTimer = null;
+  }
   const overlay = document.getElementById('nexusErrorPopupOverlay');
   if (overlay) {
     overlay.style.display = 'none';
@@ -31683,9 +31747,16 @@ window.closeSvgErrorPopup = function() {
 };
 
 // ─── NEXUS SVG SUCCESS POPUP CONTROLLER ───────────────────────────────────────
+let svgSuccessPopupAutoCloseTimer = null;
+
 window.showSvgSuccessPopup = function(message, title = "Task Completed") {
   const overlay = document.getElementById('nexusSuccessPopupOverlay');
   if (!overlay) return;
+
+  if (svgSuccessPopupAutoCloseTimer) {
+    clearTimeout(svgSuccessPopupAutoCloseTimer);
+    svgSuccessPopupAutoCloseTimer = null;
+  }
 
   const titleEl = document.getElementById('svgSuccessPopupTitle');
   if (titleEl) {
@@ -31734,9 +31805,18 @@ window.showSvgSuccessPopup = function(message, title = "Task Completed") {
   }
 
   overlay.style.display = 'flex';
+
+  // Auto-dismiss after 3 seconds without user interruption
+  svgSuccessPopupAutoCloseTimer = setTimeout(() => {
+    closeSvgSuccessPopup();
+  }, 3000);
 };
 
 window.closeSvgSuccessPopup = function() {
+  if (svgSuccessPopupAutoCloseTimer) {
+    clearTimeout(svgSuccessPopupAutoCloseTimer);
+    svgSuccessPopupAutoCloseTimer = null;
+  }
   const overlay = document.getElementById('nexusSuccessPopupOverlay');
   if (overlay) {
     overlay.style.display = 'none';
@@ -31994,9 +32074,9 @@ window.openCommercialPoModal = function(rowId) {
     if (selProjType) selProjType.value = row.projectType || 'New Build';
     if (selSubProjType) selSubProjType.value = row.subProjectType || 'Civil';
     if (selPoType) selPoType.value = row.poType || 'Opex';
-    setRaBillSwitchState(row.raBill !== false);
+    setRaBillSwitchState(Boolean(row.raBill === true));
   } else {
-    setRaBillSwitchState(true);
+    setRaBillSwitchState(false);
   }
 
   updateCommercialPoHeaderBadges();
@@ -32042,21 +32122,23 @@ document.addEventListener('DOMContentLoaded', () => {
     attachNexusCalendar('inpPoDetailDate', 'btnPoDetailCalendarTrigger');
   }
 
-  // Copy buttons in header
+  // Copy buttons in header: Only respective ID alone is copied
   const btnCopyProj = document.getElementById('btnCopyProjectInfo');
   if (btnCopyProj) {
     btnCopyProj.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const txt = document.getElementById('lblPoHeaderProjectInfo')?.textContent || '';
-      if (txt && navigator.clipboard) {
-        navigator.clipboard.writeText(txt).then(() => {
-          showToast(`Copied: ${txt}`);
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const inpProj = document.getElementById('inpPoDetailProjectId');
+      const projId = (inpProj ? inpProj.value.trim() : '') || (row ? row.projectId : '') || '';
+      if (projId && navigator.clipboard) {
+        navigator.clipboard.writeText(projId).then(() => {
+          showToast(`Copied Project ID: ${projId}`);
         }).catch(() => {
-          showToast(`Copied: ${txt}`);
+          showToast(`Copied Project ID: ${projId}`);
         });
-      } else {
-        showToast(`Copied: ${txt}`);
+      } else if (projId) {
+        showToast(`Copied Project ID: ${projId}`);
       }
     });
   }
@@ -32066,15 +32148,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyPo.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const txt = document.getElementById('lblPoHeaderPoInfo')?.textContent || '';
-      if (txt && navigator.clipboard) {
-        navigator.clipboard.writeText(txt).then(() => {
-          showToast(`Copied: ${txt}`);
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const poNo = (row ? row.poNo : '') || '';
+      if (poNo && navigator.clipboard) {
+        navigator.clipboard.writeText(poNo).then(() => {
+          showToast(`Copied PO No: ${poNo}`);
         }).catch(() => {
-          showToast(`Copied: ${txt}`);
+          showToast(`Copied PO No: ${poNo}`);
         });
-      } else {
-        showToast(`Copied: ${txt}`);
+      } else if (poNo) {
+        showToast(`Copied PO No: ${poNo}`);
       }
     });
   }
@@ -32084,15 +32167,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopySite.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const txt = document.getElementById('lblPoHeaderSiteInfo')?.textContent || '';
-      if (txt && navigator.clipboard) {
-        navigator.clipboard.writeText(txt).then(() => {
-          showToast(`Copied: ${txt}`);
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const siteId = (row ? row.siteId : '') || '';
+      if (siteId && navigator.clipboard) {
+        navigator.clipboard.writeText(siteId).then(() => {
+          showToast(`Copied Site ID: ${siteId}`);
         }).catch(() => {
-          showToast(`Copied: ${txt}`);
+          showToast(`Copied Site ID: ${siteId}`);
         });
-      } else {
-        showToast(`Copied: ${txt}`);
+      } else if (siteId) {
+        showToast(`Copied Site ID: ${siteId}`);
       }
     });
   }
@@ -32278,8 +32362,8 @@ window.renderJmsDocumentsTable = function() {
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #475569;" title="${(doc.docDetails || '').replace(/"/g, '&quot;')}">
           ${doc.docDetails || ''}
         </td>
-        <!-- 4. Document Name: 20ch & center -->
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500;" title="${(doc.docName || '').replace(/"/g, '&quot;')}">
+        <!-- 4. Document Name: 20ch & left -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500;" title="${(doc.docName || '').replace(/"/g, '&quot;')}">
           <span style="color: #0454e4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;" onclick="showToast('Viewing ${doc.docName}')">${doc.docName || ''}</span>
         </td>
       </tr>
@@ -32461,20 +32545,20 @@ window.togglePoReconEditMode = function() {
   }
   renderPoReconciliationTable();
   if (!isPoReconEditMode) {
-    showToast('PO QTY updated and saved successfully!');
+    showToast('JMS QTY updated and saved successfully!');
   } else {
-    showToast('Edit mode enabled. Update PO QTY in the table.');
+    showToast('Edit mode enabled. Update JMS QTY in the table.');
   }
 };
 
-window.updatePoReconQty = function(rowId, val) {
+window.updatePoReconJmsQty = function(rowId, val) {
   const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
   const data = getPoReconData(key);
   const row = data.find(r => String(r.id) === String(rowId));
   if (row) {
     const num = Math.max(0, parseFloat(val) || 0);
-    row.poQty = num;
-    row.poDifferenceQty = num - Number(row.jmsQty || 0);
+    row.jmsQty = num;
+    row.poDifferenceQty = Number(row.poQty || 0) - num;
     row.amount = num * Number(row.rate || 0);
     renderPoReconciliationTable();
   }
@@ -32513,6 +32597,13 @@ window.renderPoReconciliationTable = function() {
   }
 
   tbody.innerHTML = data.map(row => {
+    const jmsQtyVal = (parseFloat(row.jmsQty) || 0).toFixed(2);
+    const poQtyVal = (parseFloat(row.poQty) || 0).toFixed(2);
+
+    const jmsQtyCellHtml = isPoReconEditMode
+      ? `<input type="number" step="0.01" min="0" value="${jmsQtyVal}" onchange="updatePoReconJmsQty('${row.id}', this.value)" style="width: 76px; height: 28px; text-align: center; border: 1.5px solid #0454e4; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
+      : `<span style="font-weight: 600; color: #1e293b;">${jmsQtyVal}</span>`;
+
     return `
       <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;">
         <!-- 1. Line No: 10ch & center -->
@@ -32527,25 +32618,21 @@ window.renderPoReconciliationTable = function() {
         <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #334155;" title="${(row.itemName || '').replace(/"/g, '&quot;')}">
           ${row.itemName || ''}
         </td>
-        <!-- 4. UOM: 10ch & right/center -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b;">
+        <!-- 4. UOM: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b;">
           ${row.uom || ''}
         </td>
         <!-- 5. Rate: 10ch & right -->
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
           ${Number(row.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
-        <!-- 6. JMS QTY: 10ch & center -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 600;">
-          ${row.jmsQty || 0}
+        <!-- 6. JMS QTY: 10ch & center (Editable when in edit mode) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px;">
+          ${jmsQtyCellHtml}
         </td>
-        <!-- 7. PO QTY: 10ch & center (Editable when in edit mode) -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px; color: #1e293b; font-weight: 600;">
-          ${isPoReconEditMode ? `
-            <input type="number" step="1" min="0" value="${row.poQty || 0}" onchange="updatePoReconQty('${row.id}', this.value)" style="width: 68px; height: 28px; text-align: center; border: 1px solid #000000; border-radius: 4px; padding: 2px 4px; font-weight: 500; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">
-          ` : `
-            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0;">${row.poQty || 0}</span>
-          `}
+        <!-- 7. PO QTY: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
+          ${poQtyVal}
         </td>
         <!-- 8. Amount: 15ch & right -->
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 700;">
@@ -32635,20 +32722,20 @@ window.toggleMaterialReconEditMode = function() {
   }
   renderMaterialReconciliationTable();
   if (!isMaterialReconEditMode) {
-    showToast('Material Shortage QTY updated and saved successfully!');
+    showToast('JMS QTY updated and saved successfully!');
   } else {
-    showToast('Edit mode enabled. Update Material Shortage QTY in the table.');
+    showToast('Edit mode enabled. Update JMS QTY in the table.');
   }
 };
 
-window.updateMaterialReconShortageQty = function(rowId, val) {
+window.updateMaterialReconJmsQty = function(rowId, val) {
   const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
   const data = getMaterialReconData(key);
   const row = data.find(r => String(r.id) === String(rowId));
   if (row) {
     const num = Math.max(0, parseFloat(val) || 0);
-    row.materialShortageQty = num;
-    row.materialDifferenceQty = num;
+    row.jmsQty = num;
+    row.amount = num * Number(row.rate || 0);
     renderMaterialReconciliationTable();
   }
 };
@@ -32686,6 +32773,13 @@ window.renderMaterialReconciliationTable = function() {
   }
 
   tbody.innerHTML = data.map(row => {
+    const jmsQtyVal = (parseFloat(row.jmsQty) || 0).toFixed(2);
+    const shortageVal = (parseFloat(row.materialShortageQty) || 0).toFixed(2);
+
+    const jmsQtyCellHtml = isMaterialReconEditMode
+      ? `<input type="number" step="0.01" min="0" value="${jmsQtyVal}" onchange="updateMaterialReconJmsQty('${row.id}', this.value)" style="width: 76px; height: 28px; text-align: center; border: 1.5px solid #0454e4; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
+      : `<span style="font-weight: 600; color: #1e293b;">${jmsQtyVal}</span>`;
+
     return `
       <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; transition: background 0.15s ease;">
         <!-- 1. Line No: 10ch & center -->
@@ -32700,25 +32794,21 @@ window.renderMaterialReconciliationTable = function() {
         <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #334155;" title="${(row.itemName || '').replace(/"/g, '&quot;')}">
           ${row.itemName || ''}
         </td>
-        <!-- 4. UOM: 10ch & right/center -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b;">
+        <!-- 4. UOM: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b;">
           ${row.uom || ''}
         </td>
         <!-- 5. Rate: 10ch & right -->
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
           ${Number(row.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
-        <!-- 6. JMS QTY: 10ch & center -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 600;">
-          ${row.jmsQty || 0}
+        <!-- 6. JMS QTY: 10ch & center (Editable when in edit mode) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px;">
+          ${jmsQtyCellHtml}
         </td>
-        <!-- 7. Material Shortage QTY: 20ch & center (Editable when in edit mode) -->
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px; color: #dc2626; font-weight: 700;">
-          ${isMaterialReconEditMode ? `
-            <input type="number" step="1" min="0" value="${row.materialShortageQty || 0}" onchange="updateMaterialReconShortageQty('${row.id}', this.value)" style="width: 68px; height: 28px; text-align: center; border: 1px solid #000000; border-radius: 4px; padding: 2px 4px; font-weight: 500; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">
-          ` : `
-            <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #f8fafc; border: 1px solid #e2e8f0;">${row.materialShortageQty || 0}</span>
-          `}
+        <!-- 7. Material Shortage QTY: 20ch & center -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #dc2626; font-weight: 700;">
+          ${shortageVal}
         </td>
         <!-- 8. Amount: 15ch & right -->
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 700;">
@@ -32820,5 +32910,129 @@ window.submitWorkTypeSelection = function() {
 
   setTimeout(() => {
     backToJmsList();
+  }, 1200);
+};
+
+// ==========================================
+// PO AMENDMENT DETAIL SUBMISSION MODALS & HELPERS
+// ==========================================
+window.copyPoAmendItemCode = function(code) {
+  if (!code) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => {
+      showToast(`Copied Item Code: ${code}`);
+    }).catch(() => {
+      showToast(`Copied Item Code: ${code}`);
+    });
+  } else {
+    showToast(`Copied Item Code: ${code}`);
+  }
+};
+
+window.openPoAmendIdModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendIdPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+  const inpRef = document.getElementById('inpPoAmendRefId');
+  if (inpRef) inpRef.value = '';
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closePoAmendIdModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendIdPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitPoAmendIdModal = function() {
+  const inpRef = document.getElementById('inpPoAmendRefId');
+  const refId = inpRef ? inpRef.value.trim() : '';
+  if (!refId) {
+    showToast('Please enter Ref. ID');
+    return;
+  }
+
+  closePoAmendIdModal();
+
+  if (selectedPoAmendRowId) {
+    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(selectedPoAmendRowId));
+    if (parentRow) {
+      parentRow.task = 'pending with indus';
+    }
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('PO Amendment Ref. ID submitted successfully!', 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+
+  setTimeout(() => {
+    backToPoAmendList();
+  }, 1200);
+};
+
+window.openPoAmendStatusModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendStatusPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+  const inpRev = document.getElementById('inpPoAmendRevisionNo');
+  const inpDate = document.getElementById('inpPoAmendApprovedDate');
+  if (inpRev) inpRev.value = '';
+  if (inpDate) inpDate.value = '12 - 08 - 2026';
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpPoAmendApprovedDate', 'btnPoAmendApprovedDateCalendar');
+  }
+};
+
+window.closePoAmendStatusModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('poAmendStatusPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitPoAmendStatusModal = function() {
+  const inpRev = document.getElementById('inpPoAmendRevisionNo');
+  const revNo = inpRev ? inpRev.value.trim() : '';
+  if (!revNo) {
+    showToast('Please enter Revision No');
+    return;
+  }
+
+  closePoAmendStatusModal();
+
+  if (selectedPoAmendRowId) {
+    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(selectedPoAmendRowId));
+    if (parentRow) {
+      parentRow.task = 'Approved';
+    }
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('PO Amendment status updated successfully!', 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+
+  // After submit, task completion pop should come and led to WCC page automatically
+  setTimeout(() => {
+    currentModule = 'worklist';
+    currentWorklistView = 'wcc';
+    activeColumnFilters = {};
+    updateURL();
+    renderApp();
+    showToast('Navigated to WCC Worklist');
   }, 1200);
 };

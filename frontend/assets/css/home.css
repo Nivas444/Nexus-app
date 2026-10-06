@@ -5098,3 +5098,18 @@ td.col-loc-incharge {
   cursor: pointer !important;
   color: #0f172a !important;
 }
+
+/* Standalone View Mode (Opened in isolated browser tab) */
+body.standalone-mode .navbar,
+body.standalone-mode .worklist-footer-bar {
+  display: none !important;
+}
+
+body.standalone-mode .worklist-banner {
+  margin-top: 0 !important;
+}
+
+body.standalone-mode .worklist-main-full {
+  height: calc(100vh - 54px) !important;
+  margin-top: 0 !important;
+}

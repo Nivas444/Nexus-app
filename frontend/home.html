@@ -5354,9 +5354,9 @@
             <div style="display: flex; align-items: center; gap: 20px;">
               <label style="font-weight: 700; color: #0f172a; font-size: 0.95rem; width: 150px; min-width: 150px;">RA Bill</label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <div id="btnToggleRaBillWrapper" style="position: relative; width: 54px; height: 28px; border-radius: 28px; background-color: #10b981; cursor: pointer; transition: background-color 0.25s ease; display: inline-flex; align-items: center; padding: 3px; box-sizing: border-box;" onclick="toggleRaBillSwitch()" title="Toggle RA Bill">
-                  <input type="checkbox" id="chkPoDetailRaBill" checked style="display: none;">
-                  <div id="knobPoDetailRaBill" style="width: 22px; height: 22px; border-radius: 50%; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.25); transition: transform 0.25s ease; transform: translateX(26px);"></div>
+                <div id="btnToggleRaBillWrapper" style="position: relative; width: 54px; height: 28px; border-radius: 28px; background-color: #ef4444; cursor: pointer; transition: background-color 0.25s ease; display: inline-flex; align-items: center; padding: 3px; box-sizing: border-box;" onclick="toggleRaBillSwitch()" title="Toggle RA Bill">
+                  <input type="checkbox" id="chkPoDetailRaBill" style="display: none;">
+                  <div id="knobPoDetailRaBill" style="width: 22px; height: 22px; border-radius: 50%; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.25); transition: transform 0.25s ease; transform: translateX(0px);"></div>
                 </div>
               </div>
             </div>
@@ -5661,6 +5661,67 @@
                 </tr>
               </thead>
               <tbody id="tbodyMaterialReconciliation">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- JMS Project Expenses / Payable Modal Tab (Opened when clicking red payable value in JMS detail) -->
+        <div class="side-form-card side-contact-popup" id="jmsPayableExpensesPanel"
+          style="display: none; width: 1050px; max-width: 96vw;">
+          <!-- Header Ribbon Badge: Project Expenses + Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblJmsPayableExpensesTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Project Expenses
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseJmsPayableExpensesPanel"
+                onclick="closeJmsPayableExpensesModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="contact-table-wrap" style="padding: 0 16px 20px 16px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblJmsPayableExpensesPopup"
+              style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Expense Type</span>
+                  </th>
+                  <th rowspan="2" style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+                    <span>Item Name</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>UOM</span>
+                  </th>
+                  <th rowspan="2" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Qty</span>
+                  </th>
+                  <th colspan="4" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 8px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+                    <span>PO</span>
+                  </th>
+                  <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+                    <span>Budget</span>
+                  </th>
+                  <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+                    <span>Used</span>
+                  </th>
+                  <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+                    <span>Available</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyJmsPayableExpenses">
                 <!-- Dynamically rendered -->
               </tbody>
             </table>

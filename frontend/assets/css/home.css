@@ -5076,3 +5076,25 @@ td.col-loc-incharge {
     opacity: 1;
   }
 }
+
+/* Bulk Upload Select dropdown-arrow styling */
+#selBulkUploadSiteType,
+#addBulkUploadCard select.form-input-control,
+#addBulkUploadCard select {
+  width: 100% !important;
+  height: 42px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  padding: 0 42px 0 14px !important;
+  font-size: 0.95rem !important;
+  background-color: #ffffff !important;
+  background-image: url('../../icons/dropdown-arrow.svg') !important;
+  background-repeat: no-repeat !important;
+  background-position: right 16px center !important;
+  background-size: 16px auto !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  cursor: pointer !important;
+  color: #0f172a !important;
+}

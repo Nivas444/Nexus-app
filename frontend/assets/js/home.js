@@ -27567,6 +27567,15 @@ function triggerPdfUpload(targetInput) {
 }
 
 function getCurrentBulkPageLabel() {
+  if (typeof currentModule !== 'undefined' && currentModule === 'worklist') {
+    if (typeof currentWorklistView !== 'undefined') {
+      if (currentWorklistView === 'po_amend' || currentWorklistView === 'po_amend_detail') return 'PO Amend';
+      if (currentWorklistView === 'wcc') return 'WCC';
+      if (currentWorklistView === 'new_project') return 'New project';
+      if (currentWorklistView === 'jms' || currentWorklistView === 'jms_detail') return 'JMS';
+    }
+    return 'New project';
+  }
   if (typeof currentModule !== 'undefined' && currentModule === 'master') {
     if (currentMasterSubpage === 'products') return 'Products';
     if (currentMasterSubpage === 'expenses') return 'Expense';
@@ -27580,6 +27589,11 @@ function getCurrentBulkPageLabel() {
     if (currentIndusSubpage === 'products') return 'GBPA';
     if (currentIndusSubpage === 'infra') return 'Infra';
     if (currentIndusSubpage === 'site') return 'Site';
+  }
+  if (typeof currentWorklistView !== 'undefined') {
+    if (currentWorklistView === 'po_amend' || currentWorklistView === 'po_amend_detail') return 'PO Amend';
+    if (currentWorklistView === 'wcc') return 'WCC';
+    if (currentWorklistView === 'new_project') return 'New project';
   }
   return 'Employee';
 }
@@ -27609,6 +27623,13 @@ document.addEventListener('click', (e) => {
 
   const bulkBtn = e.target.closest('.btn-doc-upload-action, #btnIndusDocUpload, #btnMasterDocUpload');
   if (bulkBtn) {
+    const onclickAttr = bulkBtn.getAttribute('onclick') || '';
+    const match = onclickAttr.match(/openBulkUploadModal\(['"]([^'"]+)['"]\)/);
+    if (match && match[1]) {
+      e.preventDefault();
+      openBulkUploadModal(match[1]);
+      return;
+    }
     e.preventDefault();
     triggerBulkUpload();
     return;
@@ -31132,10 +31153,20 @@ window.openAddBulkUploadModal = function() {
   }
 
   const role = getAuthenticatedUserRole();
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlView = urlParams.get('view') || '';
+  const urlModule = urlParams.get('module') || '';
+  const activeView = (typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : urlView;
+  const activeModule = (typeof currentModule !== 'undefined' && currentModule) ? currentModule : urlModule;
+
   let displayName = currentBulkUploadPageName || 'Employee';
   const pageNorm = displayName.trim().toLowerCase();
 
-  if (pageNorm === 'new project' || pageNorm === 'worklist' || (role === 'Commercial Manager' && currentModule === 'worklist')) {
+  if (activeView === 'po_amend' || activeView === 'po_amend_detail' || pageNorm === 'po amend' || pageNorm === 'po amendment') {
+    displayName = 'PO Amendment';
+  } else if (activeView === 'wcc' || pageNorm === 'wcc') {
+    displayName = 'WCC';
+  } else if (activeView === 'new_project' || pageNorm === 'new project' || (activeModule === 'worklist' && (pageNorm === 'worklist' || pageNorm === 'employee'))) {
     displayName = 'New project';
   }
 
@@ -31144,7 +31175,17 @@ window.openAddBulkUploadModal = function() {
   }
 
   if (siteTypeRow) {
-    if (displayName === 'New project') {
+    if (displayName === 'PO Amendment') {
+      siteTypeRow.style.display = 'none';
+    } else if (displayName === 'WCC') {
+      siteTypeRow.style.display = 'block';
+      if (selUploadType) {
+        selUploadType.innerHTML = `
+          <option value="wcc_status" selected>WCC status</option>
+          <option value="support_required">support required</option>
+        `;
+      }
+    } else if (displayName === 'New project') {
       siteTypeRow.style.display = 'block';
       if (selUploadType) {
         selUploadType.innerHTML = `
@@ -31195,6 +31236,16 @@ window.downloadBulkCsvTemplate = function() {
 
   if (pageLower === 'worklist' || pageLower === 'new project') {
     showToast('Template download for New project is not available yet.');
+    return;
+  }
+  if (pageLower === 'po amend' || pageLower === 'po amendment') {
+    showToast('Template download for PO Amendment is not available yet.');
+    return;
+  }
+  if (pageLower === 'wcc') {
+    const selSiteType = document.getElementById('selBulkUploadSiteType');
+    const typeVal = selSiteType ? selSiteType.value : 'wcc_status';
+    showToast(`Template download for WCC (${typeVal === 'wcc_status' ? 'WCC status' : 'support required'}) is not available yet.`);
     return;
   }
 

@@ -5208,6 +5208,688 @@ window.exportWccDetailToCsv = function() {
   showToast('WCC Detail CSV downloaded successfully!');
 };
 
+// ==========================================================================
+// COMMERCIAL MANAGER: INVOICE DATA & MODAL POPUPS
+// ==========================================================================
+const defaultInvoiceItems = [
+  {
+    id: "inv-1",
+    invoiceNo: "INV-2026-00101",
+    date: "12/08/2026",
+    poNo: "4500128934",
+    projectId: "PRJ-2026-001",
+    siteId: "IN-123456",
+    siteName: "Guindy Hub",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    ersNo: "ERS-IND-8801",
+    irnNo: "IRN9832470123985472",
+    amount: "2,45,000.00",
+    rawAmount: 245000
+  },
+  {
+    id: "inv-2",
+    invoiceNo: "INV-2026-00102",
+    date: "10/08/2026",
+    poNo: "4500128935",
+    projectId: "PRJ-2026-002",
+    siteId: "IN-123457",
+    siteName: "Velachery Site",
+    projectType: "Upgrade",
+    subProjectType: "Electrical",
+    ersNo: "ERS-IND-8802",
+    irnNo: "IRN9832470123985473",
+    amount: "1,80,000.00",
+    rawAmount: 180000
+  },
+  {
+    id: "inv-3",
+    invoiceNo: "INV-2026-00103",
+    date: "05/08/2026",
+    poNo: "4500128936",
+    projectId: "PRJ-2026-003",
+    siteId: "IN-123458",
+    siteName: "OMR Tower",
+    projectType: "Maintenance",
+    subProjectType: "Telecom",
+    ersNo: "ERS-IND-8803",
+    irnNo: "IRN9832470123985474",
+    amount: "3,20,000.00",
+    rawAmount: 320000
+  },
+  {
+    id: "inv-4",
+    invoiceNo: "INV-2026-00104",
+    date: "01/08/2026",
+    poNo: "4500128937",
+    projectId: "PRJ-2026-004",
+    siteId: "IN-123459",
+    siteName: "Tambaram Junction",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    ersNo: "ERS-IND-8804",
+    irnNo: "IRN9832470123985475",
+    amount: "4,10,000.00",
+    rawAmount: 410000
+  },
+  {
+    id: "inv-5",
+    invoiceNo: "INV-2026-00105",
+    date: "28/07/2026",
+    poNo: "4500128938",
+    projectId: "PRJ-2026-005",
+    siteId: "IN-123460",
+    siteName: "Ambattur Estate",
+    projectType: "Upgrade",
+    subProjectType: "Optical Fiber",
+    ersNo: "ERS-IND-8805",
+    irnNo: "IRN9832470123985476",
+    amount: "7,10,000.00",
+    rawAmount: 710000
+  },
+  {
+    id: "inv-6",
+    invoiceNo: "INV-2026-00106",
+    date: "25/07/2026",
+    poNo: "4500128939",
+    projectId: "PRJ-2026-006",
+    siteId: "IN-123461",
+    siteName: "Anna Nagar Central",
+    projectType: "New Build",
+    subProjectType: "Tower Erection",
+    ersNo: "ERS-IND-8806",
+    irnNo: "IRN9832470123985477",
+    amount: "5,10,000.00",
+    rawAmount: 510000
+  }
+];
+
+let commercialInvoiceData = [...defaultInvoiceItems];
+
+function syncCommercialInvoiceDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  commercialInvoiceData = commercialWorklistData.map((np, idx) => {
+    const existing = commercialInvoiceData.find(inv => String(inv.id) === String(np.id) || inv.poNo === np.poNo) || defaultInvoiceItems[idx % defaultInvoiceItems.length];
+    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    return {
+      id: np.id || `inv-${idx + 1}`,
+      invoiceNo: existing.invoiceNo || `INV-2026-00${101 + idx}`,
+      date: existing.date || np.date || "12/08/2026",
+      poNo: np.poNo || existing.poNo || "4500128934",
+      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      siteId: np.siteId || existing.siteId || "IN-123456",
+      siteName: np.siteName || existing.siteName || "Guindy Hub",
+      projectType: np.projectType || existing.projectType || "New Build",
+      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
+      ersNo: existing.ersNo || `ERS-IND-880${idx + 1}`,
+      irnNo: existing.irnNo || `IRN98324701239854${72 + idx}`,
+      amount: formatJmsSum(rawAmt),
+      rawAmount: rawAmt
+    };
+  });
+}
+
+function calculateInvoiceTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawAmount !== undefined && !isNaN(Number(r.rawAmount))) {
+      sum += Number(r.rawAmount);
+    } else if (r.amount) {
+      const parsed = parseFloat(String(r.amount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculateInvoiceTotalSum = calculateInvoiceTotalSum;
+
+window.exportInvoiceToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialInvoiceData || []);
+  const headers = [
+    "Invoice No",
+    "Date",
+    "PO No",
+    "Project ID",
+    "Site ID",
+    "Site Name",
+    "Project Type",
+    "Sub-Project Type"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => [
+    escapeCsv(r.invoiceNo),
+    escapeCsv(r.date),
+    escapeCsv(r.poNo),
+    escapeCsv(r.projectId),
+    escapeCsv(r.siteId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.projectType),
+    escapeCsv(r.subProjectType)
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Invoice_Worklist_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Invoice CSV downloaded successfully!');
+};
+
+let selectedInvoiceRowId = null;
+
+window.openInvoiceDetailModal = function(rowId) {
+  selectedInvoiceRowId = rowId;
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('invoiceDetailPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) || (commercialInvoiceData || []).find(r => String(r.id) === String(rowId)) || defaultInvoiceItems[0];
+
+  const inpErs = document.getElementById('inpInvoiceModalErsNo');
+  if (inpErs) inpErs.value = row.ersNo || '';
+
+  const inpInvNo = document.getElementById('inpInvoiceModalInvoiceNo');
+  if (inpInvNo) inpInvNo.value = row.invoiceNo || '';
+
+  const inpDate = document.getElementById('inpInvoiceModalDate');
+  if (inpDate) inpDate.value = row.date || '12/08/2026';
+
+  const inpIrn = document.getElementById('inpInvoiceModalIrnNo');
+  if (inpIrn) inpIrn.value = row.irnNo || '';
+
+  const inpDesc = document.getElementById('inpInvoiceModalDescription');
+  if (inpDesc) {
+    inpDesc.value = `${row.poNo || '4500128934'} / ${row.projectId || 'PRJ-2026-001'} / ${row.projectType || 'New Build'} / ${row.subProjectType || 'Civil'}`;
+  }
+
+  const lblAmt = document.getElementById('lblInvoiceModalTotalAmount');
+  if (lblAmt) lblAmt.textContent = row.amount || '2,45,000.00';
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeInvoiceDetailModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('invoiceDetailPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.refreshInvoiceModalDetails = function() {
+  if (selectedInvoiceRowId) {
+    openInvoiceDetailModal(selectedInvoiceRowId);
+    showToast('Invoice details refreshed');
+  }
+};
+
+window.downloadInvoiceModalPdf = function() {
+  showToast('Downloading Invoice PDF...');
+};
+
+window.copyInvoiceFieldValue = function(inputId) {
+  const el = document.getElementById(inputId);
+  const text = el ? (el.value || el.textContent || '').trim() : '';
+  if (text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied: ${text}`);
+      }).catch(() => {
+        showToast(`Copied: ${text}`);
+      });
+    } else {
+      showToast(`Copied: ${text}`);
+    }
+  }
+};
+
+window.submitInvoiceModal = function() {
+  const row = (currentDataset || []).find(r => String(r.id) === String(selectedInvoiceRowId)) || (commercialInvoiceData || []).find(r => String(r.id) === String(selectedInvoiceRowId));
+  const inpErs = document.getElementById('inpInvoiceModalErsNo');
+  const inpIrn = document.getElementById('inpInvoiceModalIrnNo');
+  if (row) {
+    if (inpErs) row.ersNo = inpErs.value.trim();
+    if (inpIrn) row.irnNo = inpIrn.value.trim();
+  }
+
+  closeInvoiceDetailModal();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Invoice submitted successfully!', 'Task Completed');
+  } else {
+    showToast('Invoice submitted successfully!');
+  }
+};
+
+let selectedInvoiceDueDateRowId = null;
+
+window.openInvoiceDueDateModal = function(rowId) {
+  selectedInvoiceDueDateRowId = rowId;
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('invoiceDueDatePanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) || (commercialInvoiceData || []).find(r => String(r.id) === String(rowId)) || defaultInvoiceItems[0];
+
+  const inpDue = document.getElementById('inpInvoiceDueDate');
+  const btnCal = document.getElementById('btnInvoiceDueDateCalendar');
+  if (inpDue) {
+    const rawDate = row.date || '12/08/2026';
+    inpDue.value = rawDate.includes('/') ? rawDate.split('/').join(' - ') : rawDate;
+
+    inpDue.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof openNexusCalendar === 'function') {
+        openNexusCalendar(inpDue, btnCal || inpDue);
+      }
+    };
+  }
+
+  if (btnCal && inpDue) {
+    btnCal.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof openNexusCalendar === 'function') {
+        openNexusCalendar(inpDue, btnCal);
+      }
+    };
+  }
+
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpInvoiceDueDate', 'btnInvoiceDueDateCalendar');
+  }
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeInvoiceDueDateModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('invoiceDueDatePanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitInvoiceDueDateModal = function() {
+  const inpDue = document.getElementById('inpInvoiceDueDate');
+  let selectedVal = inpDue ? inpDue.value.trim() : '';
+  if (selectedVal.includes(' - ')) {
+    selectedVal = selectedVal.split(' - ').join('/');
+  }
+
+  if (selectedInvoiceDueDateRowId && selectedVal) {
+    const rowInCurrent = (currentDataset || []).find(r => String(r.id) === String(selectedInvoiceDueDateRowId));
+    if (rowInCurrent) rowInCurrent.date = selectedVal;
+
+    const rowInCommercial = (commercialInvoiceData || []).find(r => String(r.id) === String(selectedInvoiceDueDateRowId));
+    if (rowInCommercial) rowInCommercial.date = selectedVal;
+  }
+
+  closeInvoiceDueDateModal();
+  applyFiltersAndRender();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`Due Date updated to ${selectedVal || 'new date'}!`, 'Task Completed');
+  } else {
+    showToast(`Due Date updated to ${selectedVal}!`);
+  }
+};
+
+// ==========================================================================
+// COMMERCIAL MANAGER: RECEIVABLE DATA & EXPORT
+// ==========================================================================
+const defaultReceivableItems = [
+  {
+    id: "rec-1",
+    customerName: "Indus Towers Limited",
+    invoiceNo: "INV-2026-00101",
+    invoiceDate: "12/08/2026",
+    dueDate: "27/08/2026",
+    invoiceAmount: "2,45,000.00",
+    rawInvoiceAmount: 245000,
+    deduction: "5,000.00",
+    rawDeduction: 5000,
+    receivedAmount: "1,40,000.00",
+    rawReceivedAmount: 140000,
+    receivable: "1,00,000.00",
+    rawReceivable: 100000,
+    ageing: "15 Days"
+  },
+  {
+    id: "rec-2",
+    customerName: "Indus Towers Limited",
+    invoiceNo: "INV-2026-00102",
+    invoiceDate: "10/08/2026",
+    dueDate: "25/08/2026",
+    invoiceAmount: "1,80,000.00",
+    rawInvoiceAmount: 180000,
+    deduction: "2,000.00",
+    rawDeduction: 2000,
+    receivedAmount: "1,00,000.00",
+    rawReceivedAmount: 100000,
+    receivable: "78,000.00",
+    rawReceivable: 78000,
+    ageing: "17 Days"
+  },
+  {
+    id: "rec-3",
+    customerName: "Bharti Airtel Ltd",
+    invoiceNo: "INV-2026-00103",
+    invoiceDate: "05/08/2026",
+    dueDate: "20/08/2026",
+    invoiceAmount: "3,20,000.00",
+    rawInvoiceAmount: 320000,
+    deduction: "10,000.00",
+    rawDeduction: 10000,
+    receivedAmount: "2,10,000.00",
+    rawReceivedAmount: 210000,
+    receivable: "1,00,000.00",
+    rawReceivable: 100000,
+    ageing: "22 Days"
+  },
+  {
+    id: "rec-4",
+    customerName: "Reliance Jio Infocomm",
+    invoiceNo: "INV-2026-00104",
+    invoiceDate: "01/08/2026",
+    dueDate: "16/08/2026",
+    invoiceAmount: "4,10,000.00",
+    rawInvoiceAmount: 410000,
+    deduction: "15,000.00",
+    rawDeduction: 15000,
+    receivedAmount: "2,45,000.00",
+    rawReceivedAmount: 245000,
+    receivable: "1,50,000.00",
+    rawReceivable: 150000,
+    ageing: "26 Days"
+  },
+  {
+    id: "rec-5",
+    customerName: "Vodafone Idea Limited",
+    invoiceNo: "INV-2026-00105",
+    invoiceDate: "28/07/2026",
+    dueDate: "12/08/2026",
+    invoiceAmount: "7,10,000.00",
+    rawInvoiceAmount: 710000,
+    deduction: "20,000.00",
+    rawDeduction: 20000,
+    receivedAmount: "4,90,000.00",
+    rawReceivedAmount: 490000,
+    receivable: "2,00,000.00",
+    rawReceivable: 200000,
+    ageing: "30 Days"
+  },
+  {
+    id: "rec-6",
+    customerName: "American Tower Corp",
+    invoiceNo: "INV-2026-00106",
+    invoiceDate: "25/07/2026",
+    dueDate: "09/08/2026",
+    invoiceAmount: "5,10,000.00",
+    rawInvoiceAmount: 510000,
+    deduction: "10,000.00",
+    rawDeduction: 10000,
+    receivedAmount: "3,50,000.00",
+    rawReceivedAmount: 350000,
+    receivable: "1,50,000.00",
+    rawReceivable: 150000,
+    ageing: "33 Days"
+  }
+];
+
+let commercialReceivableData = [...defaultReceivableItems];
+
+function syncCommercialReceivableDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  commercialReceivableData = commercialWorklistData.map((np, idx) => {
+    const existing = commercialReceivableData.find(rec => String(rec.id) === String(np.id)) || defaultReceivableItems[idx % defaultReceivableItems.length];
+    const rawInvAmt = existing ? (existing.rawInvoiceAmount || 245000) : 245000;
+    const rawDed = existing ? (existing.rawDeduction || 5000) : 5000;
+    const rawRecv = existing ? (existing.rawReceivedAmount || 140000) : 140000;
+    const rawReceivable = Math.max(0, rawInvAmt - rawDed - rawRecv);
+    return {
+      id: np.id || `rec-${idx + 1}`,
+      customerName: np.customerName || existing.customerName || "Indus Towers Limited",
+      invoiceNo: existing.invoiceNo || `INV-2026-00${101 + idx}`,
+      invoiceDate: existing.invoiceDate || np.date || "12/08/2026",
+      dueDate: existing.dueDate || "27/08/2026",
+      invoiceAmount: formatJmsSum(rawInvAmt),
+      rawInvoiceAmount: rawInvAmt,
+      deduction: formatJmsSum(rawDed),
+      rawDeduction: rawDed,
+      receivedAmount: formatJmsSum(rawRecv),
+      rawReceivedAmount: rawRecv,
+      receivable: formatJmsSum(rawReceivable),
+      rawReceivable: rawReceivable,
+      ageing: np.ageing || existing.ageing || "15 Days"
+    };
+  });
+}
+
+function calculateReceivableTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawReceivable !== undefined && !isNaN(Number(r.rawReceivable))) {
+      sum += Number(r.rawReceivable);
+    } else if (r.receivable) {
+      const parsed = parseFloat(String(r.receivable).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculateReceivableTotalSum = calculateReceivableTotalSum;
+
+window.exportReceivableToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialReceivableData || []);
+  const headers = [
+    "Customer Name",
+    "Invoice No",
+    "Invoice Date",
+    "Due Date",
+    "Invoice Amount",
+    "Deduction",
+    "Received Amount",
+    "Receivable",
+    "Ageing"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => [
+    escapeCsv(r.customerName),
+    escapeCsv(r.invoiceNo),
+    escapeCsv(r.invoiceDate),
+    escapeCsv(r.dueDate),
+    escapeCsv(r.invoiceAmount),
+    escapeCsv(r.deduction),
+    escapeCsv(r.receivedAmount),
+    escapeCsv(r.receivable),
+    escapeCsv(r.ageing)
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Receivable_Worklist_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Receivable CSV downloaded successfully!');
+};
+
+// ==========================================================================
+// COMMERCIAL MANAGER: PO TO BE OPEN DATA & EXPORT
+// ==========================================================================
+const defaultPoToBeOpenItems = [
+  {
+    id: "ptbo-1",
+    poNo: "4500128934",
+    projectId: "PRJ-2026-001",
+    siteId: "IN-123456",
+    siteName: "Guindy Hub",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    expenseAmount: "1,45,000.00",
+    rawExpenseAmount: 145000
+  },
+  {
+    id: "ptbo-2",
+    poNo: "4500128935",
+    projectId: "PRJ-2026-002",
+    siteId: "IN-123457",
+    siteName: "Velachery Site",
+    projectType: "Upgrade",
+    subProjectType: "Electrical",
+    expenseAmount: "95,000.00",
+    rawExpenseAmount: 95000
+  },
+  {
+    id: "ptbo-3",
+    poNo: "4500128936",
+    projectId: "PRJ-2026-003",
+    siteId: "IN-123458",
+    siteName: "OMR Tower",
+    projectType: "Maintenance",
+    subProjectType: "Telecom",
+    expenseAmount: "1,80,000.00",
+    rawExpenseAmount: 180000
+  },
+  {
+    id: "ptbo-4",
+    poNo: "4500128937",
+    projectId: "PRJ-2026-004",
+    siteId: "IN-123459",
+    siteName: "Tambaram Junction",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    expenseAmount: "2,20,000.00",
+    rawExpenseAmount: 220000
+  },
+  {
+    id: "ptbo-5",
+    poNo: "4500128938",
+    projectId: "PRJ-2026-005",
+    siteId: "IN-123460",
+    siteName: "Ambattur Estate",
+    projectType: "Upgrade",
+    subProjectType: "Optical Fiber",
+    expenseAmount: "3,10,000.00",
+    rawExpenseAmount: 310000
+  },
+  {
+    id: "ptbo-6",
+    poNo: "4500128939",
+    projectId: "PRJ-2026-006",
+    siteId: "IN-123461",
+    siteName: "Anna Nagar Central",
+    projectType: "New Build",
+    subProjectType: "Tower Erection",
+    expenseAmount: "2,75,000.00",
+    rawExpenseAmount: 275000
+  }
+];
+
+let commercialPoToBeOpenData = [...defaultPoToBeOpenItems];
+
+function syncCommercialPoToBeOpenDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  commercialPoToBeOpenData = commercialWorklistData.map((np, idx) => {
+    const existing = commercialPoToBeOpenData.find(pt => String(pt.id) === String(np.id) || pt.poNo === np.poNo) || defaultPoToBeOpenItems[idx % defaultPoToBeOpenItems.length];
+    const rawAmt = existing ? (existing.rawExpenseAmount || 145000) : 145000;
+    return {
+      id: np.id || `ptbo-${idx + 1}`,
+      poNo: np.poNo || existing.poNo || "4500128934",
+      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      siteId: np.siteId || existing.siteId || "IN-123456",
+      siteName: np.siteName || existing.siteName || "Guindy Hub",
+      projectType: np.projectType || existing.projectType || "New Build",
+      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
+      expenseAmount: formatJmsSum(rawAmt),
+      rawExpenseAmount: rawAmt
+    };
+  });
+}
+
+function calculatePoToBeOpenTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawExpenseAmount !== undefined && !isNaN(Number(r.rawExpenseAmount))) {
+      sum += Number(r.rawExpenseAmount);
+    } else if (r.expenseAmount) {
+      const parsed = parseFloat(String(r.expenseAmount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculatePoToBeOpenTotalSum = calculatePoToBeOpenTotalSum;
+
+window.exportPoToBeOpenToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialPoToBeOpenData || []);
+  const headers = [
+    "PO No",
+    "Project ID",
+    "Site ID",
+    "Site Name",
+    "Project Type",
+    "Sub-Project Type",
+    "Expense Amount"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => [
+    escapeCsv(r.poNo),
+    escapeCsv(r.projectId),
+    escapeCsv(r.siteId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.projectType),
+    escapeCsv(r.subProjectType),
+    escapeCsv(r.expenseAmount)
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `PO_To_Be_Open_Worklist_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('PO to be Open CSV downloaded successfully!');
+};
+
 
 
 let currentDataset = [...poData];
@@ -5366,7 +6048,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentModule = 'worklist';
     const role = getAuthenticatedUserRole();
     if (role === 'Commercial Manager') {
-      const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
+      const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
     } else {
       if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
@@ -12145,7 +12827,7 @@ function renderAccountsFooter() {
 // ==========================================================================
 function loadWorklistDataset() {
   const role = getAuthenticatedUserRole();
-  const isCommercialView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'].includes(currentWorklistView);
+  const isCommercialView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email'].includes(currentWorklistView);
   if (isCommercialView) {
     if (currentWorklistView === 'new_project') {
       currentDataset = commercialWorklistData.map(item => ({ ...item }));
@@ -12173,6 +12855,18 @@ function loadWorklistDataset() {
     } else if (currentWorklistView === 'wcc_detail') {
       const parentId = selectedWccRowId || 'wcc-1';
       currentDataset = getWccDetailItems(parentId);
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'invoice') {
+      syncCommercialInvoiceDataWithNewProject();
+      currentDataset = commercialInvoiceData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'receivable') {
+      syncCommercialReceivableDataWithNewProject();
+      currentDataset = commercialReceivableData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'po_to_be_open') {
+      syncCommercialPoToBeOpenDataWithNewProject();
+      currentDataset = commercialPoToBeOpenData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
@@ -12240,6 +12934,9 @@ function renderWorklistToolbar() {
     const isJms = currentWorklistView === 'jms';
     const isPoAmend = currentWorklistView === 'po_amend';
     const isWcc = currentWorklistView === 'wcc';
+    const isInvoice = currentWorklistView === 'invoice';
+    const isReceivable = currentWorklistView === 'receivable';
+    const isPoToBeOpen = currentWorklistView === 'po_to_be_open';
     const isJmsDetail = currentWorklistView === 'jms_detail';
     const isPoAmendDetail = currentWorklistView === 'po_amend_detail';
     const isWccDetail = currentWorklistView === 'wcc_detail';
@@ -12296,6 +12993,63 @@ function renderWorklistToolbar() {
           </button>
           <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnWccBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('WCC')">
             <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else if (isInvoice) {
+      const initialTotalFormatted = formatJmsSum(calculateInvoiceTotalSum(currentDataset));
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 8px;" title="Total Sum of Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblInvoiceTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnInvoiceCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportInvoiceToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else if (isReceivable) {
+      const initialTotalFormatted = formatJmsSum(calculateReceivableTotalSum(currentDataset));
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 8px;" title="Total Sum of Receivable">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblReceivableTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnReceivableBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Receivable')">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnReceivableCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportReceivableToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
+    } else if (isPoToBeOpen) {
+      const initialTotalFormatted = formatJmsSum(calculatePoToBeOpenTotalSum(currentDataset));
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 8px;" title="Total Sum of Expense Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblPoToBeOpenTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnPoToBeOpenCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportPoToBeOpenToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
           </button>
           <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
             <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
@@ -12807,6 +13561,7 @@ function renderWorklistFooter() {
     const wccCount = (typeof commercialWccData !== 'undefined' && Array.isArray(commercialWccData)) ? commercialWccData.length : 7;
     const invoiceCount = (typeof commercialInvoiceData !== 'undefined' && Array.isArray(commercialInvoiceData)) ? commercialInvoiceData.length : newProjectCount;
     const receivableCount = (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData)) ? commercialReceivableData.length : newProjectCount;
+    const poToBeOpenCount = (typeof commercialPoToBeOpenData !== 'undefined' && Array.isArray(commercialPoToBeOpenData)) ? commercialPoToBeOpenData.length : newProjectCount;
     const emailCount = (typeof commercialEmailData !== 'undefined' && Array.isArray(commercialEmailData)) ? commercialEmailData.length : newProjectCount;
 
     footer.style.display = 'flex';
@@ -12841,6 +13596,10 @@ function renderWorklistFooter() {
           Receivable (${receivableCount})
         </button>
         <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'po_to_be_open' ? 'active' : ''}" id="btnTogglePoToBeOpen">
+          PO to be Open (${poToBeOpenCount})
+        </button>
+        <div class="segmented-divider"></div>
         <button type="button" class="segmented-btn ${currentWorklistView === 'email' ? 'active' : ''}" id="btnToggleEmail">
           E-mail (${emailCount})
         </button>
@@ -12854,6 +13613,7 @@ function renderWorklistFooter() {
       { id: 'btnToggleWcc', view: 'wcc', label: 'WCC' },
       { id: 'btnToggleInvoice', view: 'invoice', label: 'Invoice' },
       { id: 'btnToggleReceivable', view: 'receivable', label: 'Receivable' },
+      { id: 'btnTogglePoToBeOpen', view: 'po_to_be_open', label: 'PO to be Open' },
       { id: 'btnToggleEmail', view: 'email', label: 'E-mail' }
     ];
 
@@ -13420,6 +14180,177 @@ function renderWorklistTableHead() {
           </tr>
         `;
       }
+      rebindFilterButtons();
+    } else if (currentWorklistView === 'invoice') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Invoice No: 20ch, center header, filter enabled -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Invoice No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceNo'] ? 'has-active-filter' : ''}" data-filter-col="invoiceNo" title="Filter Invoice No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 2. Date: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Date</span>
+          </th>
+          <!-- 3. PO No: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 20ch, center header, filter enabled -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site ID: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Site Name: 25ch, center header, filter enabled -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Project Type: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Sub-Project Type: 25ch, center header, filter enabled -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+    } else if (currentWorklistView === 'receivable') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Customer Name: 20ch, center header, filter enabled -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Customer Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 2. Invoice No: 20ch, center header, filter enabled -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Invoice No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceNo'] ? 'has-active-filter' : ''}" data-filter-col="invoiceNo" title="Filter Invoice No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Invoice Date: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Invoice Date</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceDate'] ? 'has-active-filter' : ''}" data-filter-col="invoiceDate" title="Filter Invoice Date">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Due Date: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Due Date</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['dueDate'] ? 'has-active-filter' : ''}" data-filter-col="dueDate" title="Filter Due Date">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Invoice Amount: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Invoice Amount</span>
+          </th>
+          <!-- 6. Deduction: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Deduction</span>
+          </th>
+          <!-- 7. Received Amount: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Received Amount</span>
+          </th>
+          <!-- 8. Receivable: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Receivable</span>
+          </th>
+          <!-- 9. Ageing: 10ch, center header, filter enabled -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+    } else if (currentWorklistView === 'po_to_be_open') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. PO No: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 2. Project ID: 20ch, center header, filter enabled -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Site ID: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Site Name: 25ch, center header, filter enabled -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Project Type: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Sub-Project Type: 25ch, center header, filter enabled -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Expense Amount: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Expense Amount</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseAmount'] ? 'has-active-filter' : ''}" data-filter-col="expenseAmount" title="Filter Expense Amount">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
       rebindFilterButtons();
     } else {
       thead.innerHTML = '';
@@ -14372,6 +15303,222 @@ function applyFiltersAndRender() {
       }
 
       tbody.innerHTML = rowsHtml;
+      return;
+    }
+
+    if (currentWorklistView === 'invoice') {
+      syncCommercialInvoiceDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.invoiceNo)) {
+        currentDataset = commercialInvoiceData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible amount column
+      const totalAmountEl = document.getElementById('lblInvoiceTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculateInvoiceTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Invoice No: 20ch & center, clickable to open Invoice Tab -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              <span onclick="openInvoiceDetailModal('${row.id}')" style="color: #0454e4; font-weight: 600; cursor: pointer; text-decoration: none;" title="Open Invoice Detail">${row.invoiceNo || ''}</span>
+            </td>
+            <!-- 2. Date: 15ch & center, clickable to open Invoice Due Date Tab -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              <span onclick="openInvoiceDueDateModal('${row.id}')" style="color: #0454e4; font-weight: 600; cursor: pointer; text-decoration: none;" title="Set Due Date">${row.date || ''}</span>
+            </td>
+            <!-- 3. PO No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.poNo || ''}
+            </td>
+            <!-- 4. Project ID: 20ch & center -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Site ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 6. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.siteName || ''}
+            </td>
+            <!-- 7. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 8. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.subProjectType || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'receivable') {
+      syncCommercialReceivableDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.receivable !== undefined)) {
+        currentDataset = commercialReceivableData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible receivable column
+      const totalAmountEl = document.getElementById('lblReceivableTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculateReceivableTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Customer Name: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.customerName || ''}
+            </td>
+            <!-- 2. Invoice No: 20ch & center -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.invoiceNo || ''}
+            </td>
+            <!-- 3. Invoice Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.invoiceDate || ''}
+            </td>
+            <!-- 4. Due Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.dueDate || ''}
+            </td>
+            <!-- 5. Invoice Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.invoiceAmount || ''}
+            </td>
+            <!-- 6. Deduction: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.deduction || ''}
+            </td>
+            <!-- 7. Received Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.receivedAmount || ''}
+            </td>
+            <!-- 8. Receivable: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 600; color: #0454e4; vertical-align: middle; padding: 10px 8px;">
+              ${row.receivable || ''}
+            </td>
+            <!-- 9. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'po_to_be_open') {
+      syncCommercialPoToBeOpenDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.expenseAmount !== undefined)) {
+        currentDataset = commercialPoToBeOpenData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible expense amount column
+      const totalAmountEl = document.getElementById('lblPoToBeOpenTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculatePoToBeOpenTotalSum(filteredDataset));
+      }
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. PO No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.poNo || ''}
+            </td>
+            <!-- 2. Project ID: 20ch & center -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 3. Site ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 4. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.siteName || ''}
+            </td>
+            <!-- 5. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 6. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 7. Expense Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 600; color: #0454e4; vertical-align: middle; padding: 10px 8px;">
+              ${row.expenseAmount || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
       return;
     }
 
@@ -19593,6 +20740,9 @@ function initSideFormEvents() {
   // Attach to WCC modal date inputs
   attachNexusCalendar('inpWccReceiptDate', 'btnWccReceiptDateCalendar');
   attachNexusCalendar('inpWccDate', 'btnWccDateCalendar');
+
+  // Attach to Invoice Due Date modal input
+  attachNexusCalendar('inpInvoiceDueDate', 'btnInvoiceDueDateCalendar');
 
   const setupHrEditToggle = (btnId, name) => {
     const btn = document.getElementById(btnId);
@@ -28262,6 +29412,8 @@ function getCurrentBulkPageLabel() {
     if (currentWorklistView === 'po_amend' || currentWorklistView === 'po_amend_detail') return 'PO Amend';
     if (currentWorklistView === 'wcc') return 'WCC';
     if (currentWorklistView === 'new_project') return 'New project';
+    if (currentWorklistView === 'receivable') return 'Receivable';
+    if (currentWorklistView === 'po_to_be_open') return 'PO to be Open';
   }
   return 'Employee';
 }
@@ -31836,6 +32988,10 @@ window.openAddBulkUploadModal = function() {
     displayName = 'WCC';
   } else if (activeView === 'new_project' || pageNorm === 'new project' || (activeModule === 'worklist' && (pageNorm === 'worklist' || pageNorm === 'employee'))) {
     displayName = 'New project';
+  } else if (activeView === 'receivable' || pageNorm === 'receivable') {
+    displayName = 'Receivable';
+  } else if (activeView === 'po_to_be_open' || pageNorm === 'po to be open' || pageNorm === 'po_to_be_open') {
+    displayName = 'PO to be Open';
   }
 
   if (titleBadge) {
@@ -31845,6 +33001,15 @@ window.openAddBulkUploadModal = function() {
   if (siteTypeRow) {
     if (displayName === 'PO Amendment') {
       siteTypeRow.style.display = 'none';
+    } else if (displayName === 'Receivable') {
+      siteTypeRow.style.display = 'block';
+      if (selUploadType) {
+        selUploadType.innerHTML = `
+          <option value="invoice_status" selected>Invoice status</option>
+          <option value="indus_payment_status">Indus Payment Status</option>
+          <option value="treds_payment_status">TREDS Payment Status</option>
+        `;
+      }
     } else if (displayName === 'WCC') {
       siteTypeRow.style.display = 'block';
       if (selUploadType) {

@@ -6026,6 +6026,140 @@
           </div>
         </div>
 
+        <!-- Invoice Detail Modal Tab (Opened when clicking Invoice No) -->
+        <div class="side-form-card" id="invoiceDetailPanel" style="display: none; width: 440px; max-width: 95vw;">
+          <!-- Header Ribbon Badge: Invoice + PDF/Refresh + Close -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblInvoiceDetailTitle">Invoice</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+              <button type="button" class="side-top-icon-btn" id="btnInvoiceModalPdf" title="Upload PDF" onclick="downloadInvoiceModalPdf()" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/PDF Upload.svg" alt="PDF Upload" width="22" height="22">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnInvoiceModalRefresh" title="Refresh" onclick="refreshInvoiceModalDetails()" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Refresh.svg" alt="Refresh" width="22" height="22">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseInvoiceDetailPanel"
+                onclick="closeInvoiceDetailModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Left-aligned summation row separate from header design -->
+          <div style="padding: 12px 24px 0 24px; display: flex; align-items: center; justify-content: flex-start;">
+            <div class="metric-item metric-total" style="display: inline-flex; align-items: center; gap: 8px;" title="Invoice Amount">
+              <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle;">
+              <span id="lblInvoiceModalTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">2,45,000.00</span>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <div class="side-form-body" style="padding: 14px 24px 24px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <!-- 1. ERS No (Typeable) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="inpInvoiceModalErsNo" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">ERS No</label>
+              <input type="text" class="form-input-control" id="inpInvoiceModalErsNo" placeholder="Enter ERS No"
+                style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+            </div>
+
+            <!-- 2. Invoice No (With Copy Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Invoice No</label>
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control" id="inpInvoiceModalInvoiceNo" value="" readonly
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; background: #f8fafc; outline: none; box-sizing: border-box; font-weight: 600;">
+                <button type="button" class="btn-banner-copy" onclick="copyInvoiceFieldValue('inpInvoiceModalInvoiceNo')" title="Copy Invoice No"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Invoice Date (With Copy Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Invoice Date</label>
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control" id="inpInvoiceModalDate" value="" readonly
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; background: #f8fafc; outline: none; box-sizing: border-box;">
+                <button type="button" class="btn-banner-copy" onclick="copyInvoiceFieldValue('inpInvoiceModalDate')" title="Copy Invoice Date"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. IRN No (With Copy Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="inpInvoiceModalIrnNo" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">IRN No</label>
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control" id="inpInvoiceModalIrnNo" placeholder="Enter IRN No"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+                <button type="button" class="btn-banner-copy" onclick="copyInvoiceFieldValue('inpInvoiceModalIrnNo')" title="Copy IRN No"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <!-- 5. Invoice Description (Shows PO No / Project ID / Project Type / Sub-Project Type with Copy Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Invoice Description</label>
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control" id="inpInvoiceModalDescription" value="" readonly
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.88rem; color: #1e293b; background: #f8fafc; outline: none; box-sizing: border-box;">
+                <button type="button" class="btn-banner-copy" onclick="copyInvoiceFieldValue('inpInvoiceModalDescription')" title="Copy Description"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <!-- Submit Button Below Fields -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+              <button type="button" id="btnSubmitInvoiceModal" onclick="submitInvoiceModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Submit Invoice">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice Due Date Modal Tab (Opened when clicking Date column) -->
+        <div class="side-form-card" id="invoiceDueDatePanel" style="display: none; width: 440px; max-width: 95vw;">
+          <!-- Header Ribbon Badge: Invoice Due Date + Close -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblInvoiceDueDateTitle">Invoice Due Date</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseInvoiceDueDatePanel"
+                onclick="closeInvoiceDueDateModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <div class="side-form-body" style="padding: 16px 24px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Due Date (With Calendar Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="inpInvoiceDueDate" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Due Date</label>
+              <div class="form-input-wrap with-action-badge" style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpInvoiceDueDate"
+                  placeholder="DD - MM - YYYY" value="12 - 08 - 2026" readonly
+                  style="cursor: pointer; background: #ffffff; width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnInvoiceDueDateCalendar"
+                  title="Select Date" aria-label="Select Date"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- Centered Submit Icon Below Fields -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+              <button type="button" id="btnSubmitInvoiceDueDate" onclick="submitInvoiceDueDateModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Update Due Date">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- 8. Add Salary Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addSalaryCard" style="display: none; width: 440px;">
           <!-- Header Ribbon Badge: Add Salary -->

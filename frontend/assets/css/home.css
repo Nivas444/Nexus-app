@@ -3150,7 +3150,11 @@ td.col-master-vendor-status {
 #wccReceiptNoPanel .side-form-close-btn:hover,
 #btnCloseWccReceiptNoPanel:hover,
 #wccSubmissionPanel .side-form-close-btn:hover,
-#btnCloseWccSubmissionPanel:hover {
+#btnCloseWccSubmissionPanel:hover,
+#invoiceDetailPanel .side-form-close-btn:hover,
+#btnCloseInvoiceDetailPanel:hover,
+#invoiceDueDatePanel .side-form-close-btn:hover,
+#btnCloseInvoiceDueDatePanel:hover {
   transform: none !important;
   color: #dc2626 !important;
 }

@@ -3781,7 +3781,7 @@ const defaultJmsItems = [
     supportRequired: "Telecom NOC Approval",
     pendingWith: "Quality Lead",
     remarks: "Documents submitted",
-    task: "Commercial approval pending",
+    task: "commercial approval to be submit",
     ageing: "24 Days",
     amount: "₹ 1,95,000.00",
     rawAmount: 195000
@@ -3798,7 +3798,7 @@ const defaultJmsItems = [
     supportRequired: "Structural Stability Report",
     pendingWith: "Commercial Lead",
     remarks: "In review with team",
-    task: "JMS to be validate",
+    task: "commercial approval pending",
     ageing: "32 Days",
     amount: "₹ 4,50,000.00",
     rawAmount: 450000
@@ -3832,7 +3832,7 @@ const defaultJmsItems = [
     supportRequired: "Civil Quality Inspection",
     pendingWith: "Technical Auditor",
     remarks: "Pre-audit complete",
-    task: "Commercial approval pending",
+    task: "commercial approval to be submit",
     ageing: "15 Days",
     amount: "₹ 2,75,000.00",
     rawAmount: 275000
@@ -3849,7 +3849,7 @@ const defaultJmsItems = [
     supportRequired: "Soil Testing Certification",
     pendingWith: "Survey Lead",
     remarks: "Initial survey logged",
-    task: "JMS to be validate",
+    task: "commercial approval pending",
     ageing: "28 Days",
     amount: "₹ 5,10,000.00",
     rawAmount: 510000
@@ -3862,7 +3862,7 @@ function syncCommercialJmsDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
   commercialJmsData = commercialWorklistData.map((np, idx) => {
     const existing = commercialJmsData.find(j => String(j.id) === String(np.id) || j.poNo === np.poNo) || defaultJmsItems[idx % defaultJmsItems.length];
-    const taskOptions = ["JMS to be validate", "JMS to be process", "Commercial approval pending"];
+    const taskOptions = ["JMS to be validate", "JMS to be process", "commercial approval to be submit", "commercial approval pending"];
     const assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
     const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
     return {
@@ -4202,7 +4202,32 @@ window.handleJmsDetailSubmitClick = function() {
   const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId));
   const taskStr = parentRow && parentRow.task ? parentRow.task.trim().toLowerCase() : '';
   
-  if (taskStr.includes('process') || taskStr.includes('commercial') || taskStr.includes('pending')) {
+  if (taskStr === 'jms to be process' || taskStr.includes('process')) {
+    // When user highlighted all rows and click submit, the respective row should disappear from table where task 'jms to be process'
+    if (selectedJmsRowId) {
+      const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId));
+      if (idx !== -1) {
+        commercialJmsData.splice(idx, 1);
+      }
+      if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
+        const cIdx = currentDataset.findIndex(r => String(r.id) === String(selectedJmsRowId));
+        if (cIdx !== -1) {
+          currentDataset.splice(cIdx, 1);
+        }
+      }
+    }
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('JMS processed successfully and submitted!', 'Task Completed');
+    } else {
+      showToast('Task completed successfully!');
+    }
+    setTimeout(() => {
+      backToJmsList();
+    }, 1200);
+    return;
+  }
+
+  if (taskStr.includes('commercial') || taskStr.includes('pending')) {
     openJmsSelectWorkTypeModal();
   } else {
     submitJmsDetail();
@@ -4213,7 +4238,15 @@ window.submitJmsDetail = function() {
   if (selectedJmsRowId) {
     const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
     if (parentRow) {
-      parentRow.task = "JMS to be process";
+      const taskStr = (parentRow.task || '').toLowerCase();
+      if (taskStr === 'jms to be process' || taskStr.includes('process')) {
+        const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId));
+        if (idx !== -1) {
+          commercialJmsData.splice(idx, 1);
+        }
+      } else {
+        parentRow.task = "JMS to be process";
+      }
     }
   }
   if (typeof showSvgSuccessPopup === 'function') {
@@ -4516,7 +4549,13 @@ window.calculatePoAmendDetailTotalSum = calculatePoAmendDetailTotalSum;
 
 window.openPoAmendDetailPage = function(rowId, poNo, task) {
   selectedPoAmendRowId = rowId;
-  const taskStr = String(task || '').trim().toLowerCase();
+  let parentTask = task;
+  if (!parentTask && typeof commercialPoAmendData !== 'undefined') {
+    const pRow = commercialPoAmendData.find(r => String(r.id) === String(rowId));
+    if (pRow) parentTask = pRow.task;
+  }
+  window.currentPoAmendParentTask = parentTask;
+  const taskStr = String(parentTask || '').trim().toLowerCase();
   currentPoAmendSubpageType = taskStr.includes('pending') ? 'pending_with_indus' : 'to_be_submit';
   currentWorklistView = 'po_amend_detail';
   activeColumnFilters = {};
@@ -4586,7 +4625,25 @@ window.updatePoAmendDetailActionIcons = function() {
 };
 
 window.exportPoAmendDetailToPdf = function() {
-  showToast('Downloading PO Amendment PDF...');
+  const rowId = selectedPoAmendRowId || 'PO';
+  const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(rowId)) || {};
+  const reportText = `PO AMENDMENT DETAIL REPORT\n\n` +
+    `PO Number: ${parentRow.poNo || '4500128934'}\n` +
+    `Project ID: ${parentRow.projectId || 'PRJ-2026-001'}\n` +
+    `Site: ${parentRow.siteName || 'Guindy Hub'} (${parentRow.siteId || 'IN-123456'})\n` +
+    `Date: ${parentRow.date || '12/08/2026'}\n` +
+    `Task: ${parentRow.task || 'To be submit'}\n` +
+    `Total Amount: ₹ ${parentRow.amount || '2,45,000.00'}\n`;
+  const blob = new Blob([reportText], { type: 'application/pdf;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `PO_Amendment_${parentRow.poNo || rowId}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('PO Amendment PDF downloaded successfully!');
 };
 
 // Modals: PO Amendment ID & PO Amendment Status
@@ -5431,10 +5488,7 @@ window.closeInvoiceDetailModal = function() {
 };
 
 window.refreshInvoiceModalDetails = function() {
-  if (selectedInvoiceRowId) {
-    openInvoiceDetailModal(selectedInvoiceRowId);
-    showToast('Invoice details refreshed');
-  }
+  // when user click the refresh in that tab nothing should happen for now
 };
 
 window.downloadInvoiceModalPdf = function() {
@@ -5890,7 +5944,357 @@ window.exportPoToBeOpenToCsv = function() {
   showToast('PO to be Open CSV downloaded successfully!');
 };
 
+// ==========================================================================
+// COMMERCIAL MANAGER: RECEIVABLE MODAL TABS (Invoice Amount, Deduction, Received Amount)
+// ==========================================================================
+let selectedReceivableRowId = null;
 
+function calculateReceivableTotalInvoiceAmountSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawInvoiceAmount !== undefined && !isNaN(Number(r.rawInvoiceAmount))) {
+      sum += Number(r.rawInvoiceAmount);
+    } else if (r.invoiceAmount) {
+      const parsed = parseFloat(String(r.invoiceAmount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculateReceivableTotalInvoiceAmountSum = calculateReceivableTotalInvoiceAmountSum;
+
+function calculateReceivableTotalDeductionSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawDeduction !== undefined && !isNaN(Number(r.rawDeduction))) {
+      sum += Number(r.rawDeduction);
+    } else if (r.deduction) {
+      const parsed = parseFloat(String(r.deduction).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculateReceivableTotalDeductionSum = calculateReceivableTotalDeductionSum;
+
+window.openReceivableInvoiceAmountModal = function(rowId) {
+  selectedReceivableRowId = rowId;
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('receivableInvoiceAmountPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) || (commercialReceivableData || []).find(r => String(r.id) === String(rowId)) || defaultReceivableItems[0];
+
+  const lblTotal = document.getElementById('lblReceivableInvoiceAmountModalTotal');
+  if (lblTotal) {
+    lblTotal.textContent = formatJmsSum(calculateReceivableTotalInvoiceAmountSum(filteredDataset && filteredDataset.length > 0 ? filteredDataset : commercialReceivableData));
+  }
+
+  const rawAmt = row.rawInvoiceAmount || 245000;
+  const basicAmt = (rawAmt / 1.18).toFixed(2);
+  const gstEach = ((rawAmt - (rawAmt / 1.18)) / 2).toFixed(2);
+
+  const inpBasic = document.getElementById('inpRecvInvBasicAmt');
+  if (inpBasic) inpBasic.value = Number(basicAmt).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpCgst = document.getElementById('inpRecvInvCgst');
+  if (inpCgst) inpCgst.value = Number(gstEach).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpSgst = document.getElementById('inpRecvInvSgst');
+  if (inpSgst) inpSgst.value = Number(gstEach).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpIgst = document.getElementById('inpRecvInvIgst');
+  if (inpIgst) inpIgst.value = "0.00";
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeReceivableInvoiceAmountModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('receivableInvoiceAmountPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitReceivableInvoiceAmountModal = function() {
+  closeReceivableInvoiceAmountModal();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Invoice Amount details updated successfully!', 'Task Completed');
+  } else {
+    showToast('Invoice Amount details updated successfully!');
+  }
+};
+
+window.openReceivableDeductionModal = function(rowId) {
+  selectedReceivableRowId = rowId;
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('receivableDeductionPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) || (commercialReceivableData || []).find(r => String(r.id) === String(rowId)) || defaultReceivableItems[0];
+
+  const lblTotal = document.getElementById('lblReceivableDeductionModalTotal');
+  if (lblTotal) {
+    lblTotal.textContent = formatJmsSum(calculateReceivableTotalDeductionSum(filteredDataset && filteredDataset.length > 0 ? filteredDataset : commercialReceivableData));
+  }
+
+  const rawDed = row.rawDeduction || 5000;
+  const tds = (rawDed * 0.50).toFixed(2);
+  const dn = (rawDed * 0.25).toFixed(2);
+  const discount = (rawDed * 0.15).toFixed(2);
+  const tredsFee = (rawDed * 0.10).toFixed(2);
+
+  const inpTds = document.getElementById('inpRecvDedTds');
+  if (inpTds) inpTds.value = Number(tds).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpDn = document.getElementById('inpRecvDedDn');
+  if (inpDn) inpDn.value = Number(dn).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpDiscount = document.getElementById('inpRecvDedDiscount');
+  if (inpDiscount) inpDiscount.value = Number(discount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpTreds = document.getElementById('inpRecvDedTredsFee');
+  if (inpTreds) inpTreds.value = Number(tredsFee).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeReceivableDeductionModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('receivableDeductionPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitReceivableDeductionModal = function() {
+  closeReceivableDeductionModal();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Deduction details updated successfully!', 'Task Completed');
+  } else {
+    showToast('Deduction details updated successfully!');
+  }
+};
+
+window.openReceivableReceivedAmountModal = function(rowId) {
+  selectedReceivableRowId = rowId;
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('receivableReceivedAmountPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) || (commercialReceivableData || []).find(r => String(r.id) === String(rowId)) || defaultReceivableItems[0];
+  const tbody = document.getElementById('tbodyReceivableReceivedAmountBreakdown');
+
+  const rawRecv = row.rawReceivedAmount || 140000;
+  const part1 = rawRecv * 0.60;
+  const part2 = rawRecv * 0.40;
+
+  if (tbody) {
+    tbody.innerHTML = `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #1e293b;">${row.dueDate || '18/08/2026'}</td>
+        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 600; color: #1e293b;">₹ ${Number(part1).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      </tr>
+      <tr>
+        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #1e293b;">${row.invoiceDate || '12/08/2026'}</td>
+        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 600; color: #1e293b;">₹ ${Number(part2).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      </tr>
+    `;
+  }
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeReceivableReceivedAmountModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('receivableReceivedAmountPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+// ==========================================================================
+// COMMERCIAL MANAGER: EMAIL DATA & EXPORT
+// ==========================================================================
+const defaultEmailItems = [
+  {
+    id: "em-1",
+    date: "12/08/2026",
+    fromTo: "commercial@nexus.com / client@indus.com",
+    projectId: "PRJ-2026-001",
+    poNo: "4500128934",
+    siteId: "IN-123456",
+    siteName: "Guindy Hub",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    subject: "PO Amendment & Work Completion Certificate Submission - Guindy Hub",
+    status: "Sent"
+  },
+  {
+    id: "em-2",
+    date: "10/08/2026",
+    fromTo: "billing@nexus.com / finance@airtel.in",
+    projectId: "PRJ-2026-002",
+    poNo: "4500128935",
+    siteId: "IN-123457",
+    siteName: "Ambattur Central",
+    projectType: "New Build",
+    subProjectType: "Electrical",
+    subject: "Invoice & IRN Submission for July Billing Cycle Approval",
+    status: "Delivered"
+  },
+  {
+    id: "em-3",
+    date: "08/08/2026",
+    fromTo: "operations@nexus.com / support@jio.com",
+    projectId: "PRJ-2026-003",
+    poNo: "4500128936",
+    siteId: "IN-123458",
+    siteName: "Madurai Depot",
+    projectType: "O&M",
+    subProjectType: "Telecom",
+    subject: "Joint Measurement Sheet (JMS) Reconciliation Report and Discrepancies",
+    status: "Pending"
+  },
+  {
+    id: "em-4",
+    date: "05/08/2026",
+    fromTo: "commercial@nexus.com / projectlead@indus.com",
+    projectId: "PRJ-2026-004",
+    poNo: "4500128937",
+    siteId: "IN-123459",
+    siteName: "Coimbatore Hub",
+    projectType: "Energy",
+    subProjectType: "Maintenance",
+    subject: "Structural Stability and Foundation Quality Verification Certificate",
+    status: "Sent"
+  },
+  {
+    id: "em-5",
+    date: "01/08/2026",
+    fromTo: "billing@nexus.com / accounts@vi.com",
+    projectId: "PRJ-2026-005",
+    poNo: "4500128938",
+    siteId: "IN-123460",
+    siteName: "Chennai North",
+    projectType: "Safety",
+    subProjectType: "Installation",
+    subject: "Payment Advice & Outstanding Receivable Follow-up Notice",
+    status: "Delivered"
+  },
+  {
+    id: "em-6",
+    date: "28/07/2026",
+    fromTo: "admin@nexus.com / vendor@atc.in",
+    projectId: "PRJ-2026-006",
+    poNo: "4500128939",
+    siteId: "IN-123461",
+    siteName: "Salem South",
+    projectType: "Colo",
+    subProjectType: "Survey",
+    subject: "Material Shortage Notice and Site Handover Verification",
+    status: "Pending"
+  },
+  {
+    id: "em-7",
+    date: "25/07/2026",
+    fromTo: "commercial@nexus.com / billing@indus.com",
+    projectId: "PRJ-2026-007",
+    poNo: "4500128940",
+    siteId: "IN-123462",
+    siteName: "Trichy Central",
+    projectType: "New Build",
+    subProjectType: "Upgrade",
+    subject: "Soil Testing Certification & Initial Survey Log Submission",
+    status: "Sent"
+  }
+];
+
+let commercialEmailData = [...defaultEmailItems];
+
+function syncCommercialEmailDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  commercialEmailData = commercialWorklistData.map((np, idx) => {
+    const existing = commercialEmailData.find(em => String(em.id) === String(np.id)) || defaultEmailItems[idx % defaultEmailItems.length];
+    return {
+      id: np.id || `em-${idx + 1}`,
+      date: np.date || existing.date || "12/08/2026",
+      fromTo: existing.fromTo || "commercial@nexus.com / client@indus.com",
+      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      poNo: np.poNo || existing.poNo || "4500128934",
+      siteId: np.siteId || existing.siteId || "IN-123456",
+      siteName: np.siteName || existing.siteName || "Guindy Hub",
+      projectType: np.projectType || existing.projectType || "New Build",
+      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
+      subject: existing.subject || "Work Completion & Invoice Submission Status",
+      status: existing.status || (idx % 2 === 0 ? "Sent" : "Delivered")
+    };
+  });
+}
+
+window.exportEmailToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialEmailData || []);
+  const headers = [
+    "Date",
+    "From/To",
+    "Project ID",
+    "PO No",
+    "Site ID",
+    "Site Name",
+    "Project Type",
+    "Sub-Project Type",
+    "Subject",
+    "Status"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => [
+    escapeCsv(r.date),
+    escapeCsv(r.fromTo),
+    escapeCsv(r.projectId),
+    escapeCsv(r.poNo),
+    escapeCsv(r.siteId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.projectType),
+    escapeCsv(r.subProjectType),
+    escapeCsv(r.subject),
+    escapeCsv(r.status)
+  ].join(','));
+
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Email_Worklist_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Email CSV downloaded successfully!');
+};
+
+window.openCommercialEmailPage = function() {
+  currentWorklistView = 'email';
+  activeColumnFilters = {};
+  if (typeof updateURL === 'function') updateURL();
+  if (typeof renderApp === 'function') renderApp();
+  showToast('Switched to Worklist • E-mail');
+};
 
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
@@ -12937,6 +13341,7 @@ function renderWorklistToolbar() {
     const isInvoice = currentWorklistView === 'invoice';
     const isReceivable = currentWorklistView === 'receivable';
     const isPoToBeOpen = currentWorklistView === 'po_to_be_open';
+    const isEmail = currentWorklistView === 'email';
     const isJmsDetail = currentWorklistView === 'jms_detail';
     const isPoAmendDetail = currentWorklistView === 'po_amend_detail';
     const isWccDetail = currentWorklistView === 'wcc_detail';
@@ -13056,6 +13461,18 @@ function renderWorklistToolbar() {
           </button>
         </div>
       `;
+    } else if (isEmail) {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnEmailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportEmailToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
     } else if (isJmsDetail) {
       const initialTotalFormatted = formatJmsSum(calculateJmsTotalSum(currentDataset));
       const hasSelectedRow = currentDataset.some(r => r.selected || r.highlighted);
@@ -13116,7 +13533,7 @@ function renderWorklistToolbar() {
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
           ${isToBeSubmit ? `
           <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf()">
-            <img src="icons/PDF download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
           </button>
           ` : ''}
           <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="approveSelectedPoAmendDetailRow()">
@@ -14352,6 +14769,76 @@ function renderWorklistTableHead() {
         </tr>
       `;
       rebindFilterButtons();
+    } else if (currentWorklistView === 'email') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Date: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Date</span>
+          </th>
+          <!-- 2. From/To: 25ch, center header, filter enabled -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>From/To</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['fromTo'] ? 'has-active-filter' : ''}" data-filter-col="fromTo" title="Filter From/To">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Project ID: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. PO No: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site ID: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Site Name: 25ch, center header, filter enabled -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Project Type: 15ch, center header, filter enabled -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Sub-Project Type: 25ch, center header, filter enabled -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Subject: 50ch, center header, filter enabled -->
+          <th style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Subject</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subject'] ? 'has-active-filter' : ''}" data-filter-col="subject" title="Filter Subject">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. Status: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Status</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
     } else {
       thead.innerHTML = '';
     }
@@ -15428,20 +15915,20 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.dueDate || ''}
             </td>
-            <!-- 5. Invoice Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
-              ${row.invoiceAmount || ''}
+            <!-- 5. Invoice Amount: 15ch & right, clickable to open Invoice Amount Modal -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
+              <span onclick="openReceivableInvoiceAmountModal('${row.id}')" style="color: #0454e4; font-weight: 500; cursor: pointer;" title="View Invoice Amount Breakdown">${row.invoiceAmount || ''}</span>
             </td>
-            <!-- 6. Deduction: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
-              ${row.deduction || ''}
+            <!-- 6. Deduction: 15ch & right, clickable to open Deduction Modal -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
+              <span onclick="openReceivableDeductionModal('${row.id}')" style="color: #0454e4; font-weight: 500; cursor: pointer;" title="View Deduction Breakdown">${row.deduction || ''}</span>
             </td>
-            <!-- 7. Received Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
-              ${row.receivedAmount || ''}
+            <!-- 7. Received Amount: 15ch & right, clickable to open Received Amount Modal -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
+              <span onclick="openReceivableReceivedAmountModal('${row.id}')" style="color: #0454e4; font-weight: 500; cursor: pointer;" title="View Received Amount Breakdown">${row.receivedAmount || ''}</span>
             </td>
-            <!-- 8. Receivable: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 600; color: #0454e4; vertical-align: middle; padding: 10px 8px;">
+            <!-- 8. Receivable: 15ch & right, Regular Black Font Color -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
               ${row.receivable || ''}
             </td>
             <!-- 9. Ageing: 10ch & center -->
@@ -15515,6 +16002,80 @@ function applyFiltersAndRender() {
             <!-- 7. Expense Amount: 15ch & right -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 600; color: #0454e4; vertical-align: middle; padding: 10px 8px;">
               ${row.expenseAmount || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'email') {
+      syncCommercialEmailDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.fromTo !== undefined)) {
+        currentDataset = commercialEmailData.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.date || ''}
+            </td>
+            <!-- 2. From/To: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;" title="${row.fromTo || ''}">
+              ${row.fromTo || ''}
+            </td>
+            <!-- 3. Project ID: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 4. PO No: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.poNo || ''}
+            </td>
+            <!-- 5. Site ID: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 6. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;" title="${row.siteName || ''}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 7. Project Type: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 8. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;" title="${row.subProjectType || ''}">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 9. Subject: 50ch & left -->
+            <td style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;" title="${row.subject || ''}">
+              ${row.subject || ''}
+            </td>
+            <!-- 10. Status: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #000000; font-weight: 500;">
+              ${row.status || 'Sent'}
             </td>
           </tr>
         `;
@@ -33008,6 +33569,7 @@ window.openAddBulkUploadModal = function() {
           <option value="invoice_status" selected>Invoice status</option>
           <option value="indus_payment_status">Indus Payment Status</option>
           <option value="treds_payment_status">TREDS Payment Status</option>
+          <option value="invoice_payment">Invoice Payment</option>
         `;
       }
     } else if (displayName === 'WCC') {
@@ -34386,7 +34948,7 @@ window.renderPoReconciliationTable = function() {
     const poQtyVal = (parseFloat(row.poQty) || 0).toFixed(2);
 
     const jmsQtyCellHtml = isPoReconEditMode
-      ? `<input type="number" step="0.01" min="0" value="${jmsQtyVal}" onchange="updatePoReconJmsQty('${row.id}', this.value)" style="width: 76px; height: 28px; text-align: center; border: 1.5px solid #0454e4; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
+      ? `<input type="number" step="0.01" min="0" value="${jmsQtyVal}" onchange="updatePoReconJmsQty('${row.id}', this.value)" style="width: 76px; height: 28px; text-align: right; border: 1.5px solid #0454e4; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
       : `<span style="font-weight: 600; color: #1e293b;">${jmsQtyVal}</span>`;
 
     return `
@@ -34411,12 +34973,12 @@ window.renderPoReconciliationTable = function() {
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
           ${Number(row.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
-        <!-- 6. JMS QTY: 10ch & center (Editable when in edit mode) -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px;">
+        <!-- 6. JMS QTY: 10ch & right (Editable when in edit mode) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px;">
           ${jmsQtyCellHtml}
         </td>
-        <!-- 7. PO QTY: 10ch & center -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
+        <!-- 7. PO QTY: 10ch & right -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
           ${poQtyVal}
         </td>
         <!-- 8. Amount: 15ch & right -->
@@ -34562,7 +35124,7 @@ window.renderMaterialReconciliationTable = function() {
     const shortageVal = (parseFloat(row.materialShortageQty) || 0).toFixed(2);
 
     const jmsQtyCellHtml = isMaterialReconEditMode
-      ? `<input type="number" step="0.01" min="0" value="${jmsQtyVal}" onchange="updateMaterialReconJmsQty('${row.id}', this.value)" style="width: 76px; height: 28px; text-align: center; border: 1.5px solid #0454e4; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
+      ? `<input type="number" step="0.01" min="0" value="${jmsQtyVal}" onchange="updateMaterialReconJmsQty('${row.id}', this.value)" style="width: 76px; height: 28px; text-align: right; border: 1.5px solid #0454e4; border-radius: 4px; padding: 2px 4px; font-weight: 600; font-size: 0.9rem; outline: none; background: #ffffff; color: #000000; box-shadow: none;">`
       : `<span style="font-weight: 600; color: #1e293b;">${jmsQtyVal}</span>`;
 
     return `
@@ -34587,12 +35149,12 @@ window.renderMaterialReconciliationTable = function() {
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
           ${Number(row.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
-        <!-- 6. JMS QTY: 10ch & center (Editable when in edit mode) -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px;">
+        <!-- 6. JMS QTY: 10ch & right (Editable when in edit mode) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 6px 4px;">
           ${jmsQtyCellHtml}
         </td>
-        <!-- 7. Material Shortage QTY: 20ch & center -->
-        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #dc2626; font-weight: 700;">
+        <!-- 7. Material Shortage QTY: 20ch & right -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 6px; color: #dc2626; font-weight: 700;">
           ${shortageVal}
         </td>
         <!-- 8. Amount: 15ch & right -->
@@ -34684,8 +35246,17 @@ window.submitWorkTypeSelection = function() {
     const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
     if (parentRow) {
       const taskStr = (parentRow.task || '').toLowerCase();
-      if (taskStr.includes('process')) {
-        parentRow.task = "Commercial approval pending";
+      if (taskStr === 'jms to be process' || taskStr.includes('process')) {
+        const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId));
+        if (idx !== -1) {
+          commercialJmsData.splice(idx, 1);
+        }
+        if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
+          const cIdx = currentDataset.findIndex(r => String(r.id) === String(selectedJmsRowId));
+          if (cIdx !== -1) {
+            currentDataset.splice(cIdx, 1);
+          }
+        }
       } else if (taskStr.includes('commercial') || taskStr.includes('pending')) {
         parentRow.task = "Commercial approved";
       } else {

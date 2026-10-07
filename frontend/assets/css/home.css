@@ -3144,7 +3144,13 @@ td.col-master-vendor-status {
 }
 
 #poAmendStatusPanel .side-form-close-btn:hover,
-#poAmendIdPanel .side-form-close-btn:hover {
+#poAmendIdPanel .side-form-close-btn:hover,
+#selectWorkTypePanel .side-form-close-btn:hover,
+#btnCloseSelectWorkTypePanel:hover,
+#wccReceiptNoPanel .side-form-close-btn:hover,
+#btnCloseWccReceiptNoPanel:hover,
+#wccSubmissionPanel .side-form-close-btn:hover,
+#btnCloseWccSubmissionPanel:hover {
   transform: none !important;
   color: #dc2626 !important;
 }

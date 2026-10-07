@@ -5762,16 +5762,12 @@
         <!-- Select Work Type Modal Tab (Opened upon submitting validated JMS lines) -->
         <div class="side-form-card" id="selectWorkTypePanel" style="display: none; width: 440px; max-width: 95vw;">
           <!-- Header Ribbon Badge: Select Work Type + Close -->
-          <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
-            <div class="side-form-title-badge" id="lblSelectWorkTypeTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 48px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 32px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Select Work Type
-            </div>
-            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblSelectWorkTypeTitle">Select Work Type</div>
+            <div class="side-header-top-icons">
               <button type="button" class="side-form-close-btn" id="btnCloseSelectWorkTypePanel"
                 onclick="closeJmsSelectWorkTypeModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 
@@ -5888,6 +5884,142 @@
             <!-- Submit Button Below Fields -->
             <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
               <button type="button" id="btnSubmitPoAmendStatus" onclick="submitPoAmendStatusModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Submit PO Amendment Status">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WCC Receipt No Modal Tab (Opened when clicking PO No with task 'pending with indus') -->
+        <div class="side-form-card" id="wccReceiptNoPanel" style="display: none; width: 440px; max-width: 95vw;">
+          <!-- Header Ribbon Badge: Receipt No + Close -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblWccReceiptNoTitle">Receipt No</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseWccReceiptNoPanel"
+                onclick="closeWccReceiptNoModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <div class="side-form-body" style="padding: 16px 24px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="inpWccReceiptNo" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Receipt No</label>
+              <input type="text" class="form-input-control" id="inpWccReceiptNo" placeholder="Enter Receipt No"
+                style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="inpWccReceiptDate" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Receipt Date</label>
+              <div class="form-input-wrap with-action-badge" style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpWccReceiptDate"
+                  placeholder="DD - MM - YYYY" value="06 - 10 - 2026" readonly
+                  style="cursor: pointer; background: #ffffff; width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnWccReceiptDateCalendar"
+                  title="Select Date" aria-label="Select Date"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label for="inpWccErsNo" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">ERS No</label>
+              <input type="text" class="form-input-control" id="inpWccErsNo" placeholder="Enter ERS No"
+                style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+            </div>
+
+            <!-- Submit Button Below Fields -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+              <button type="button" id="btnSubmitWccReceiptNo" onclick="submitWccReceiptNoModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Submit Receipt">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WCC Modal Tab (Opened upon submitting validated WCC lines in 'to be submit') -->
+        <div class="side-form-card" id="wccSubmissionPanel" style="display: none; width: 440px; max-width: 95vw;">
+          <!-- Header Ribbon Badge: WCC + PDF Upload/Download + Close -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblWccSubmissionTitle">WCC</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnWccSubmissionPdf" title="Upload PDF" onclick="triggerWccPdfUpload()" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/PDF Upload.svg" alt="PDF Upload" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseWccSubmissionPanel"
+                onclick="closeWccSubmissionModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <div class="side-form-body" style="padding: 16px 24px 24px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <!-- 1. Start Date (With Copy Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Start Date</label>
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control" id="inpWccStartDate" value="12/08/2026" readonly
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; background: #f8fafc; outline: none; box-sizing: border-box;">
+                <button type="button" class="btn-banner-copy" onclick="copyWccFieldValue('inpWccStartDate')" title="Copy Start Date"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Completion Date (With Copy Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">Completion Date</label>
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control" id="inpWccCompletionDate" value="24/08/2026" readonly
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; background: #f8fafc; outline: none; box-sizing: border-box;">
+                <button type="button" class="btn-banner-copy" onclick="copyWccFieldValue('inpWccCompletionDate')" title="Copy Completion Date"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. WCC Amount (With Copy Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">WCC Amount</label>
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control" id="inpWccAmount" value="2,45,000.00" readonly
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; background: #f8fafc; outline: none; box-sizing: border-box; font-weight: 600;">
+                <button type="button" class="btn-banner-copy" onclick="copyWccFieldValue('inpWccAmount')" title="Copy WCC Amount"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                  <img src="icons/Copy (1).svg" alt="Copy" width="18" height="18">
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. WCC No (Typeable) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="inpWccNo" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">WCC No</label>
+              <input type="text" class="form-input-control" id="inpWccNo" placeholder="Enter WCC No"
+                style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+            </div>
+
+            <!-- 5. WCC Date (With Calendar Icon) -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <label for="inpWccDate" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0;">WCC Date</label>
+              <div class="form-input-wrap with-action-badge" style="position: relative; display: flex; align-items: center; width: 100%;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpWccDate"
+                  placeholder="DD - MM - YYYY" value="06 - 10 - 2026" readonly
+                  style="cursor: pointer; background: #ffffff; width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnWccDateCalendar"
+                  title="Select Date" aria-label="Select Date"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" class="input-pdf-icon" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- Submit Button Below Fields -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+              <button type="button" id="btnSubmitWccModal" onclick="submitWccModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Submit WCC">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </div>

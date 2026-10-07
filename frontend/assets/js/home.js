@@ -4198,6 +4198,17 @@ window.updateJmsDetailActionIcons = function() {
   if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
 };
 
+window.handleJmsDetailSubmitClick = function() {
+  const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId));
+  const taskStr = parentRow && parentRow.task ? parentRow.task.trim().toLowerCase() : '';
+  
+  if (taskStr.includes('process') || taskStr.includes('commercial') || taskStr.includes('pending')) {
+    openJmsSelectWorkTypeModal();
+  } else {
+    submitJmsDetail();
+  }
+};
+
 window.submitJmsDetail = function() {
   if (selectedJmsRowId) {
     const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
@@ -4206,9 +4217,9 @@ window.submitJmsDetail = function() {
     }
   }
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Validation Completed');
+    showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Task Completed');
   } else {
-    showToast('JMS validation submitted successfully!');
+    showToast('Task completed successfully!');
   }
   setTimeout(() => {
     backToJmsList();
@@ -4875,6 +4886,328 @@ window.exportWccToCsv = function() {
   showToast('WCC CSV downloaded successfully!');
 };
 
+// ==========================================================================
+// COMMERCIAL MANAGER: WCC DETAIL SUBPAGE & MODAL POPUPS
+// ==========================================================================
+let selectedWccRowId = null;
+let currentWccSubpageType = 'to_be_submit'; // 'to_be_submit' | 'rejected'
+let wccDetailItemsMap = {};
+
+function getDefaultWccDetailItems(poNo, baseAmt) {
+  const parsedAmt = baseAmt || 245000;
+  const item1 = Math.round(parsedAmt * 0.45);
+  const item2 = Math.round(parsedAmt * 0.35);
+  const item3 = Math.max(0, parsedAmt - item1 - item2);
+
+  return [
+    {
+      id: `wccline-${Date.now()}-1`,
+      lineNo: "10",
+      itemCode: "ITEM-IND-CIVIL-001",
+      itemName: "Civil Foundation & Tower Anchor Bolts",
+      uom: "Set",
+      rate: formatJmsSum(Math.round(item1 / 2)),
+      rawRate: Math.round(item1 / 2),
+      qty: "2.00",
+      rawQty: 2,
+      amount: formatJmsSum(item1),
+      rawAmount: item1,
+      selected: false,
+      highlighted: false
+    },
+    {
+      id: `wccline-${Date.now()}-2`,
+      lineNo: "20",
+      itemCode: "ITEM-IND-ELEC-004",
+      itemName: "Electrical Power Distribution & Earthing Kit",
+      uom: "Nos",
+      rate: formatJmsSum(item2),
+      rawRate: item2,
+      qty: "1.00",
+      rawQty: 1,
+      amount: formatJmsSum(item2),
+      rawAmount: item2,
+      selected: false,
+      highlighted: false
+    },
+    {
+      id: `wccline-${Date.now()}-3`,
+      lineNo: "30",
+      itemCode: "ITEM-IND-TEL-008",
+      itemName: "Telecom Antenna Mount Clamps & Fixtures",
+      uom: "Mtr",
+      rate: formatJmsSum(Math.round(item3 / 10)),
+      rawRate: Math.round(item3 / 10),
+      qty: "10.00",
+      rawQty: 10,
+      amount: formatJmsSum(item3),
+      rawAmount: item3,
+      selected: false,
+      highlighted: false
+    }
+  ];
+}
+
+function getWccDetailItems(rowId) {
+  const key = rowId || selectedWccRowId || 'default';
+  if (!wccDetailItemsMap[key]) {
+    const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(key)) || (defaultWccItems && defaultWccItems[0]);
+    const rawAmt = parentRow ? (parentRow.rawAmount || 245000) : 245000;
+    wccDetailItemsMap[key] = getDefaultWccDetailItems(parentRow ? parentRow.poNo : '', rawAmt);
+  }
+  return wccDetailItemsMap[key];
+}
+
+function calculateWccDetailTotalSum(dataset) {
+  const list = dataset || filteredDataset || currentDataset || [];
+  let sum = 0;
+  list.forEach(r => {
+    if (r.rawAmount !== undefined && !isNaN(Number(r.rawAmount))) {
+      sum += Number(r.rawAmount);
+    } else if (r.amount) {
+      const parsed = parseFloat(String(r.amount).replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(parsed)) sum += parsed;
+    }
+  });
+  return sum;
+}
+window.calculateWccDetailTotalSum = calculateWccDetailTotalSum;
+
+window.handleWccPoNoClick = function(rowId, poNo, task) {
+  selectedWccRowId = rowId;
+  const taskStr = String(task || '').trim().toLowerCase();
+  
+  if (taskStr.includes('pending') || taskStr.includes('indus')) {
+    openWccReceiptNoModal();
+  } else if (taskStr.includes('reject')) {
+    openWccDetailPage(rowId, poNo, 'rejected');
+  } else {
+    openWccDetailPage(rowId, poNo, 'to_be_submit');
+  }
+};
+
+window.openWccDetailPage = function(rowId, poNo, subpageType) {
+  selectedWccRowId = rowId;
+  currentWccSubpageType = subpageType || 'to_be_submit';
+  currentWorklistView = 'wcc_detail';
+  activeColumnFilters = {};
+  loadWorklistDataset();
+  updateURL();
+  renderApp();
+  showToast(`Opened WCC Detail (${currentWccSubpageType === 'rejected' ? 'Rejected' : 'To Be Submitted'})`);
+};
+
+window.backToWccList = function() {
+  currentWorklistView = 'wcc';
+  activeColumnFilters = {};
+  loadWorklistDataset();
+  updateURL();
+  renderApp();
+  showToast('Returned to WCC list');
+};
+
+window.toggleWccDetailRowSelect = function(lineId) {
+  const row = currentDataset.find(r => String(r.id) === String(lineId));
+  if (row) {
+    const isCurrentlySelected = Boolean(row.selected);
+    currentDataset.forEach(r => {
+      if (String(r.id) === String(lineId)) {
+        r.selected = !isCurrentlySelected;
+        if (!r.selected && r.highlighted) {
+          r.highlighted = false;
+        }
+      } else {
+        r.selected = false;
+      }
+    });
+    applyFiltersAndRender();
+    updateWccDetailActionIcons();
+    renderWorklistFooter();
+  }
+};
+
+window.highlightSelectedWccDetailRows = function() {
+  let count = 0;
+  currentDataset.forEach(r => {
+    if (r.selected || r.highlighted) {
+      r.highlighted = true;
+      r.selected = true;
+      count++;
+    }
+  });
+  if (count > 0) {
+    applyFiltersAndRender();
+    updateWccDetailActionIcons();
+    renderWorklistFooter();
+    showToast(`Validated and highlighted ${count} row${count > 1 ? 's' : ''}!`);
+  } else {
+    showToast('Please select a row first.');
+  }
+};
+
+window.updateWccDetailActionIcons = function() {
+  const hasSelected = currentDataset.some(r => r.selected || r.highlighted);
+  const btnTick = document.getElementById('btnWccDetailApproveTick');
+  if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+};
+
+window.openWccReceiptNoModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('wccReceiptNoPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  const inpRec = document.getElementById('inpWccReceiptNo');
+  if (inpRec) inpRec.value = '';
+  const inpErs = document.getElementById('inpWccErsNo');
+  if (inpErs) inpErs.value = '';
+
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpWccReceiptDate', 'btnWccReceiptDateCalendar');
+  }
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeWccReceiptNoModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('wccReceiptNoPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitWccReceiptNoModal = function() {
+  const inpRec = document.getElementById('inpWccReceiptNo');
+  const recVal = inpRec ? inpRec.value.trim() : '';
+
+  closeWccReceiptNoModal();
+
+  if (selectedWccRowId) {
+    const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+    if (parentRow) {
+      parentRow.task = "WCC Approved";
+    }
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`Receipt ${recVal ? `(${recVal}) ` : ''}submitted successfully!`, 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+
+  setTimeout(() => {
+    backToWccList();
+  }, 1200);
+};
+
+window.openWccSubmissionModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('wccSubmissionPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(selectedWccRowId)) || (defaultWccItems && defaultWccItems[0]);
+
+  const inpStart = document.getElementById('inpWccStartDate');
+  if (inpStart) inpStart.value = parentRow ? (parentRow.date || '12/08/2026') : '12/08/2026';
+
+  const inpComp = document.getElementById('inpWccCompletionDate');
+  if (inpComp) inpComp.value = '24/08/2026';
+
+  const inpAmt = document.getElementById('inpWccAmount');
+  if (inpAmt) inpAmt.value = parentRow ? (parentRow.amount || '2,45,000.00') : '2,45,000.00';
+
+  const inpNo = document.getElementById('inpWccNo');
+  if (inpNo) inpNo.value = '';
+
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpWccDate', 'btnWccDateCalendar');
+  }
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeWccSubmissionModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('wccSubmissionPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.triggerWccPdfUpload = function() {
+  showToast('Upload/Download WCC PDF clicked');
+};
+
+window.submitWccModal = function() {
+  closeWccSubmissionModal();
+
+  if (selectedWccRowId) {
+    const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+    if (parentRow) {
+      parentRow.task = "Pending with Indus";
+    }
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('WCC details submitted successfully!', 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+
+  setTimeout(() => {
+    backToWccList();
+  }, 1200);
+};
+
+window.copyWccFieldValue = function(inputId) {
+  const el = document.getElementById(inputId);
+  const text = el ? (el.value || el.textContent || '').trim() : '';
+  if (text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied: ${text}`);
+      }).catch(() => {
+        showToast(`Copied: ${text}`);
+      });
+    } else {
+      showToast(`Copied: ${text}`);
+    }
+  }
+};
+
+window.exportWccDetailToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (currentDataset || []);
+  const headers = ["Line No", "Item Code", "Item Name", "UOM", "Rate", "Qty", "Amount"];
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+  const rows = data.map(r => [
+    escapeCsv(r.lineNo),
+    escapeCsv(r.itemCode),
+    escapeCsv(r.itemName),
+    escapeCsv(r.uom),
+    escapeCsv(r.rate),
+    escapeCsv(r.qty),
+    escapeCsv(r.amount)
+  ].join(','));
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `WCC_Detail_${selectedWccRowId || 'PO'}_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('WCC Detail CSV downloaded successfully!');
+};
+
 
 
 let currentDataset = [...poData];
@@ -5033,7 +5366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentModule = 'worklist';
     const role = getAuthenticatedUserRole();
     if (role === 'Commercial Manager') {
-      const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'];
+      const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
     } else {
       if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
@@ -5457,6 +5790,9 @@ function goBackSubpage() {
       } else if (currentWorklistView === 'jms_detail') {
         currentWorklistView = 'jms';
         showToast('Returned to JMS list');
+      } else if (currentWorklistView === 'wcc_detail') {
+        currentWorklistView = 'wcc';
+        showToast('Returned to WCC list');
       } else {
         currentModule = 'projects';
         currentProjectsSubpage = 'projects';
@@ -5656,6 +5992,37 @@ function renderApp() {
             <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
               <span id="lblPoAmendDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${sId} / ${sName}</span>
               <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblPoAmendDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (currentWorklistView === 'wcc_detail') {
+        const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(selectedWccRowId)) || (typeof defaultWccItems !== 'undefined' && defaultWccItems[0]);
+        const pId = parentRow ? (parentRow.projectId || 'PRJ-2026-001') : 'PRJ-2026-001';
+        const pType = parentRow ? (parentRow.projectType || 'New Build') : 'New Build';
+        const subType = parentRow ? (parentRow.subProjectType || 'Civil') : 'Civil';
+        const pPo = parentRow ? (parentRow.poNo || '4500128934') : '4500128934';
+        const sId = parentRow ? (parentRow.siteId || 'IN-123456') : 'IN-123456';
+        const sName = parentRow ? (parentRow.siteName || 'Guindy Hub') : 'Guindy Hub';
+
+        bannerTitle.innerHTML = `
+          <div class="project-payment-banner-content" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div class="banner-left-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblWccDetailBannerProject" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pId} / ${pType} / ${subType}</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblWccDetailBannerProject')" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+            <div class="banner-center-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblWccDetailBannerPo" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pPo} (0-Opex)</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblWccDetailBannerPo')" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+              </button>
+            </div>
+            <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
+              <span id="lblWccDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${sId} / ${sName}</span>
+              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblWccDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
@@ -11803,6 +12170,10 @@ function loadWorklistDataset() {
       const parentId = selectedPoAmendRowId || 'poamend-1';
       currentDataset = getPoAmendDetailItems(parentId);
       filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'wcc_detail') {
+      const parentId = selectedWccRowId || 'wcc-1';
+      currentDataset = getWccDetailItems(parentId);
+      filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
       filteredDataset = [];
@@ -11871,6 +12242,7 @@ function renderWorklistToolbar() {
     const isWcc = currentWorklistView === 'wcc';
     const isJmsDetail = currentWorklistView === 'jms_detail';
     const isPoAmendDetail = currentWorklistView === 'po_amend_detail';
+    const isWccDetail = currentWorklistView === 'wcc_detail';
     const hasSelected = isNewProject && currentDataset.some(r => r.selected);
 
     if (isJms) {
@@ -11943,9 +12315,9 @@ function renderWorklistToolbar() {
             <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
             <span id="lblJmsDetailTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
           </div>
-            <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px;" title="Payable Amount">
-              <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
-              <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">1,85,000.00</span>
+            <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px; cursor: pointer;" title="Payable Amount (Open Project Expenses)" onclick="openProjectExpensesPage()">
+              <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle; cursor: pointer;">
+              <span id="lblJmsDetailPayableAmount" style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px; cursor: pointer; text-decoration: underline;">1,85,000.00</span>
             </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
@@ -11999,6 +12371,32 @@ function renderWorklistToolbar() {
           <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPoAmendDetailRefresh" data-tooltip="Refresh to JMS Page" aria-label="Refresh" style="cursor: pointer;" onclick="backToJmsList()">
             <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
           </button>
+        </div>
+      `;
+    } else if (isWccDetail) {
+      const initialTotalFormatted = formatJmsSum(calculateWccDetailTotalSum(currentDataset));
+      const hasSelectedRow = currentDataset.some(r => r.selected || r.highlighted);
+      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
+
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          <button type="button" class="toolbar-icon-btn" onclick="backToWccList()" title="Go Back" style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center;">
+            <img src="icons/Backward.svg" alt="Go Back" width="28" height="28">
+          </button>
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 4px;" title="Total Sum of Amount">
+            <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
+            <span id="lblWccDetailTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWccDetailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportWccDetailToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          ${isToBeSubmit ? `
+          <button type="button" class="toolbar-icon-btn" id="btnWccDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="highlightSelectedWccDetailRows()">
+            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          ` : ''}
         </div>
       `;
     } else {
@@ -12397,7 +12795,7 @@ function renderWorklistFooter() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Commercial Manager') {
-    if (currentWorklistView === 'jms_detail' || currentWorklistView === 'po_amend_detail') {
+    if (currentWorklistView === 'jms_detail' || currentWorklistView === 'po_amend_detail' || currentWorklistView === 'wcc_detail') {
       footer.style.display = 'none';
       footer.innerHTML = '';
       return;
@@ -12943,6 +13341,86 @@ function renderWorklistTableHead() {
         </tr>
       `;
       rebindFilterButtons();
+    } else if (currentWorklistView === 'wcc_detail') {
+      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
+      if (isToBeSubmit) {
+        thead.innerHTML = `
+          <tr class="master-view-header">
+            <!-- 1. Select: 60px, center -->
+            <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>Select</span>
+            </th>
+            <!-- 2. Line No: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>Line No</span>
+            </th>
+            <!-- 3. Item Code: 30ch, center -->
+            <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+              <span>Item Code</span>
+            </th>
+            <!-- 4. Item Name: 40ch, center with filter -->
+            <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+              <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+                <span>Item Name</span>
+                <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
+              </div>
+            </th>
+            <!-- 5. UOM: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>UOM</span>
+            </th>
+            <!-- 6. Qty: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>Qty</span>
+            </th>
+            <!-- 7. Rate: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>Rate</span>
+            </th>
+            <!-- 8. Amount: 15ch, center -->
+            <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+              <span>Amount</span>
+            </th>
+          </tr>
+        `;
+      } else {
+        thead.innerHTML = `
+          <tr class="master-view-header">
+            <!-- 1. Line No: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>Line No</span>
+            </th>
+            <!-- 2. Item Code: 30ch, center -->
+            <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+              <span>Item Code</span>
+            </th>
+            <!-- 3. Item Name: 40ch, center with filter -->
+            <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+              <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+                <span>Item Name</span>
+                <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
+              </div>
+            </th>
+            <!-- 4. UOM: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>UOM</span>
+            </th>
+            <!-- 5. Qty: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>Qty</span>
+            </th>
+            <!-- 6. Rate: 10ch, center -->
+            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+              <span>Rate</span>
+            </th>
+            <!-- 7. Amount: 15ch, center -->
+            <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+              <span>Amount</span>
+            </th>
+          </tr>
+        `;
+      }
+      rebindFilterButtons();
     } else {
       thead.innerHTML = '';
     }
@@ -13322,10 +13800,10 @@ function applyFiltersAndRender() {
             </td>
             <!-- 2. PO No: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-              ${(String(row.task || '').trim().toLowerCase().includes('validate')) ? `
+              ${row.poNo ? `
                 <a href="javascript:void(0)" onclick="openJmsDetailPage('${row.id}')" style="color: #0454e4; font-weight: 500; text-decoration: none; cursor: pointer;" title="Open JMS Detail Validation">${row.poNo || ''}</a>
               ` : `
-                <span style="color: #0454e4; font-weight: 500;">${row.poNo || ''}</span>
+                <span style="color: #0454e4; font-weight: 500;">-</span>
               `}
             </td>
             <!-- 3. Project ID: 20ch & left -->
@@ -13502,7 +13980,7 @@ function applyFiltersAndRender() {
             </td>
             <!-- 2. PO No: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-              <span style="color: #0454e4; font-weight: 500;">${row.poNo || ''}</span>
+              <span onclick="handleWccPoNoClick('${row.id}', '${row.poNo}', '${row.task}')" style="color: #0454e4; font-weight: 600; cursor: pointer; text-decoration: none;" title="Open WCC Item">${row.poNo || ''}</span>
             </td>
             <!-- 3. Project ID: 20ch & left -->
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
@@ -13640,7 +14118,7 @@ function applyFiltersAndRender() {
         rowsHtml += `
           <tr id="rowJmsDetailSubmitAction" style="background: transparent; border: none !important;">
             <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
-              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="openJmsSelectWorkTypeModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit JMS Validation">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="handleJmsDetailSubmitClick()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit JMS Validation">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </td>
@@ -13749,6 +14227,144 @@ function applyFiltersAndRender() {
             <td colspan="9" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
               <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="${currentPoAmendSubpageType === 'pending_with_indus' ? 'openPoAmendStatusModal()' : 'openPoAmendIdModal()'}" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = rowsHtml;
+      return;
+    }
+
+    if (currentWorklistView === 'wcc_detail') {
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Dynamically recompute sum of visible amount column
+      const totalAmountEl = document.getElementById('lblWccDetailTotalAmount');
+      if (totalAmountEl) {
+        totalAmountEl.textContent = formatJmsSum(calculateWccDetailTotalSum(filteredDataset));
+      }
+
+      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
+      const colSpanCount = isToBeSubmit ? 8 : 7;
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="${colSpanCount}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
+
+      let rowsHtml = filteredDataset.map(row => {
+        const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
+        const isChecked = Boolean(row.selected || row.highlighted);
+
+        if (isToBeSubmit) {
+          return `
+            <tr data-row-id="${row.id}" style="${rowBgStyle}">
+              <!-- 1. Select: Circle radio button (Green when checked) -->
+              <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+                <div class="circular-radio-btn" onclick="toggleWccDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
+                  ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+                </div>
+              </td>
+              <!-- 2. Line No: 10ch & center -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.lineNo || ''}
+              </td>
+              <!-- 3. Item Code: 30ch & left -->
+              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemCode || ''}
+              </td>
+              <!-- 4. Item Name: 40ch & left -->
+              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemName || ''}
+              </td>
+              <!-- 5. UOM: 10ch & center -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.uom || ''}
+              </td>
+              <!-- 6. Qty: 10ch & right -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.qty || ''}
+              </td>
+              <!-- 7. Rate: 10ch & right -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.rate || ''}
+              </td>
+              <!-- 8. Amount: 15ch & right -->
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+                ${row.amount || ''}
+              </td>
+            </tr>
+          `;
+        } else {
+          // 'rejected': No Select column
+          return `
+            <tr data-row-id="${row.id}" style="${rowBgStyle}">
+              <!-- 1. Line No: 10ch & center -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.lineNo || ''}
+              </td>
+              <!-- 2. Item Code: 30ch & left -->
+              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemCode || ''}
+              </td>
+              <!-- 3. Item Name: 40ch & left -->
+              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemName || ''}
+              </td>
+              <!-- 4. UOM: 10ch & center -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.uom || ''}
+              </td>
+              <!-- 5. Qty: 10ch & right -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.qty || ''}
+              </td>
+              <!-- 6. Rate: 10ch & right -->
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.rate || ''}
+              </td>
+              <!-- 7. Amount: 15ch & right -->
+              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+                ${row.amount || ''}
+              </td>
+            </tr>
+          `;
+        }
+      }).join('');
+
+      if (isToBeSubmit && allHighlighted) {
+        rowsHtml += `
+          <tr id="rowWccDetailSubmitAction" style="background: transparent; border: none !important;">
+            <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWccDetailSubmit" aria-label="Submit" onclick="openWccSubmissionModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit WCC Details">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </td>
+          </tr>
+        `;
+      } else if (!isToBeSubmit) {
+        // 'rejected': Centered Refresh icon leading to JMS page
+        rowsHtml += `
+          <tr id="rowWccRejectedRefreshAction" style="background: transparent; border: none !important;">
+            <td colspan="7" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
+              <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnWccRejectedRefresh" aria-label="Go to JMS Page" onclick="backToJmsList()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Go to JMS Page">
+                <img src="icons/Refresh.svg" alt="Refresh" width="36" height="36">
               </button>
             </td>
           </tr>
@@ -18973,6 +19589,10 @@ function initSideFormEvents() {
 
   attachNexusCalendar('inpMedFromDate', 'btnMedFromDateCalendar');
   attachNexusCalendar('inpMedToDate', 'btnMedToDateCalendar');
+
+  // Attach to WCC modal date inputs
+  attachNexusCalendar('inpWccReceiptDate', 'btnWccReceiptDateCalendar');
+  attachNexusCalendar('inpWccDate', 'btnWccDateCalendar');
 
   const setupHrEditToggle = (btnId, name) => {
     const btn = document.getElementById(btnId);
@@ -32898,7 +33518,14 @@ window.submitWorkTypeSelection = function() {
   if (selectedJmsRowId) {
     const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
     if (parentRow) {
-      parentRow.task = "JMS to be process";
+      const taskStr = (parentRow.task || '').toLowerCase();
+      if (taskStr.includes('process')) {
+        parentRow.task = "Commercial approval pending";
+      } else if (taskStr.includes('commercial') || taskStr.includes('pending')) {
+        parentRow.task = "Commercial approved";
+      } else {
+        parentRow.task = "JMS to be process";
+      }
     }
   }
 

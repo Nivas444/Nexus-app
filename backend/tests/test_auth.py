@@ -34,6 +34,22 @@ def test_commercial_manager_login_success():
     assert "worklist" in data["user"]["permissions"]
     assert "projects" in data["user"]["permissions"]
 
+def test_project_manager_login_success():
+    resp = client.post("/api/v1/auth/login", json={
+        "email": "project@nexus.com",
+        "password": "project123"
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert data["user"]["email"] == "project@nexus.com"
+    assert data["user"]["role"] == "Project Manager"
+    assert data["user"]["name"] == "Project Manager"
+    assert "token" in data["user"]
+    assert "worklist" in data["user"]["permissions"]
+    assert "projects" in data["user"]["permissions"]
+    assert "profile" in data["user"]["permissions"]
+
 def test_login_invalid_password():
     resp = client.post("/api/v1/auth/login", json={
         "email": "commercial@nexus.com",

@@ -4916,10 +4916,10 @@ window.exportWccToCsv = function() {
     "Site ID",
     "Project Type",
     "Sub-Project Type",
+    "Task",
     "Support Required",
     "Pending With",
     "Remarks",
-    "Task",
     "Ageing",
     "Amount"
   ];
@@ -4937,10 +4937,10 @@ window.exportWccToCsv = function() {
     escapeCsv(r.siteId),
     escapeCsv(r.projectType),
     escapeCsv(r.subProjectType),
+    escapeCsv(r.task),
     escapeCsv(r.supportRequired),
     escapeCsv(r.pendingWith),
     escapeCsv(r.remarks),
-    escapeCsv(r.task),
     escapeCsv(r.ageing),
     escapeCsv(r.amount)
   ].join(','));
@@ -6470,7 +6470,10 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (moduleParam === 'worklist' || moduleParam) {
     currentModule = 'worklist';
     const role = getAuthenticatedUserRole();
-    if (role === 'Commercial Manager') {
+    if (role === 'Project Manager') {
+      const pmViews = ['new_project', 'project_update', 'payment', 'materials', 'jms', 'email'];
+      currentWorklistView = pmViews.includes(viewParam) ? viewParam : 'new_project';
+    } else if (role === 'Commercial Manager') {
       const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
     } else {
@@ -6484,7 +6487,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default after login
     currentModule = 'worklist';
     const role = getAuthenticatedUserRole();
-    if (role === 'Commercial Manager') {
+    if (role === 'Project Manager') {
+      currentWorklistView = 'new_project';
+    } else if (role === 'Commercial Manager') {
       currentWorklistView = 'new_project';
     } else {
       currentWorklistView = (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') ? viewParam : 'payment';
@@ -6530,7 +6535,37 @@ function applyRoleBasedNavigation() {
   const navProfile = document.getElementById('navBtnProfile');
   const btnSignout = document.getElementById('btnPowerOff');
 
-  if (role === 'Commercial Manager') {
+  if (role === 'Project Manager') {
+    // Exactly 4 items visible for Project Manager in order:
+    // 1. Worklist, 2. Home (Projects), 3. Profile, 4. Sign Out
+    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '1'; }
+    if (navProjects) { navProjects.style.display = 'inline-flex'; navProjects.style.order = '2'; }
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
+
+    // Hide unauthorized navigation items
+    if (navMaster) navMaster.style.display = 'none';
+    if (navAccounts) navAccounts.style.display = 'none';
+    if (navAdmin) navAdmin.style.display = 'none';
+    if (navPurchase) navPurchase.style.display = 'none';
+    if (navInventory) navInventory.style.display = 'none';
+
+    // Route Protection: If currentModule is restricted for Project Manager, redirect to Worklist
+    const allowedModules = ['worklist', 'projects', 'profile'];
+    if (!allowedModules.includes(currentModule)) {
+      if (typeof showToast === 'function') {
+        showToast('Access Restricted: Project Manager role does not have permission for this module.', 'warning');
+      }
+      currentModule = 'worklist';
+      currentWorklistView = 'new_project';
+      updateURL();
+    }
+  } else if (role === 'Commercial Manager') {
+    // Reset order
+    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
+      if (btn) btn.style.order = '';
+    });
+
     // Exactly 5 items visible for Commercial Manager:
     // 1. Master, 2. Home (Projects), 3. Worklist, 4. Profile, 5. Signout
     if (navMaster) navMaster.style.display = 'inline-flex';
@@ -6557,15 +6592,12 @@ function applyRoleBasedNavigation() {
     }
   } else {
     // Admin role: All 9 navigation items are visible and accessible
-    if (navMaster) navMaster.style.display = 'inline-flex';
-    if (navProjects) navProjects.style.display = 'inline-flex';
-    if (navAccounts) navAccounts.style.display = 'inline-flex';
-    if (navAdmin) navAdmin.style.display = 'inline-flex';
-    if (navWorklist) navWorklist.style.display = 'inline-flex';
-    if (navPurchase) navPurchase.style.display = 'inline-flex';
-    if (navInventory) navInventory.style.display = 'inline-flex';
-    if (navProfile) navProfile.style.display = 'inline-flex';
-    if (btnSignout) btnSignout.style.display = 'inline-flex';
+    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
+      if (btn) {
+        btn.style.display = 'inline-flex';
+        btn.style.order = '';
+      }
+    });
   }
 }
 
@@ -6599,10 +6631,20 @@ function initNavEventListeners() {
 
 function switchModule(moduleName) {
   const role = getAuthenticatedUserRole();
-  if (role === 'Commercial Manager') {
+  if (role === 'Project Manager') {
+    const allowedModules = ['worklist', 'projects', 'profile'];
+    if (!allowedModules.includes(moduleName)) {
+      if (typeof showToast === 'function') {
+        showToast(`Access Restricted: Project Manager does not have permission to access ${moduleName}.`, 'warning');
+      }
+      return;
+    }
+  } else if (role === 'Commercial Manager') {
     const allowedModules = ['master', 'indus_towers', 'projects', 'worklist', 'profile'];
     if (!allowedModules.includes(moduleName)) {
-      showToast(`Access Restricted: Commercial Manager does not have permission to access ${moduleName}.`, 'warning');
+      if (typeof showToast === 'function') {
+        showToast(`Access Restricted: Commercial Manager does not have permission to access ${moduleName}.`, 'warning');
+      }
       return;
     }
   }
@@ -6618,7 +6660,7 @@ function switchModule(moduleName) {
   } else if (moduleName === 'indus_towers') {
     currentIndusSubpage = 'site';
   } else if (moduleName === 'worklist') {
-    currentWorklistView = (role === 'Commercial Manager') ? 'new_project' : 'payment';
+    currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
     currentProjectsView = 'main';
@@ -6850,7 +6892,7 @@ function goBackSubpage() {
       showToast('Returned to Projects List');
     } else {
       currentModule = 'worklist';
-      currentWorklistView = 'payment';
+      currentWorklistView = (getAuthenticatedUserRole() === 'Project Manager' || getAuthenticatedUserRole() === 'Commercial Manager') ? 'new_project' : 'payment';
       showToast('Returned to Worklist');
     }
   } else if (currentModule === 'inventory') {
@@ -6886,9 +6928,19 @@ function goBackSubpage() {
       currentModule = 'worklist';
       showToast('Returned to Worklist');
     }
+  } else if (currentModule === 'profile') {
+    const role = getAuthenticatedUserRole();
+    currentModule = 'worklist';
+    currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
+    showToast('Returned to Worklist');
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
-    if (role === 'Commercial Manager') {
+    if (role === 'Project Manager') {
+      currentModule = 'projects';
+      currentProjectsSubpage = 'projects';
+      currentProjectsView = 'main';
+      showToast('Returned to Projects / Home');
+    } else if (role === 'Commercial Manager') {
       if (currentWorklistView === 'po_amend_detail') {
         currentWorklistView = 'po_amend';
         showToast('Returned to PO Amend list');
@@ -13250,6 +13302,20 @@ function renderAccountsFooter() {
 // ==========================================================================
 function loadWorklistDataset() {
   const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager') {
+    if (currentWorklistView === 'new_project') {
+      currentDataset = commercialWorklistData.map(item => ({
+        ...item,
+        submitDate: item.submitDate || item.date || ''
+      }));
+      filteredDataset = [...currentDataset];
+    } else {
+      currentDataset = [];
+      filteredDataset = [];
+    }
+    return;
+  }
+
   const isCommercialView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email'].includes(currentWorklistView);
   if (isCommercialView) {
     if (currentWorklistView === 'new_project') {
@@ -13352,6 +13418,14 @@ function renderWorklistToolbar() {
   if (!toolbar) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;"></div>
+    `;
+    return;
+  }
+
   if (role === 'Commercial Manager') {
     const isNewProject = currentWorklistView === 'new_project';
     const isJms = currentWorklistView === 'jms';
@@ -13987,6 +14061,64 @@ function renderWorklistFooter() {
   if (!footer) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        <button type="button" class="segmented-btn ${currentWorklistView === 'new_project' ? 'active' : ''}" id="btnTogglePmNewProject">
+          New Project
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'project_update' ? 'active' : ''}" id="btnTogglePmProjectUpdate">
+          Project Update
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'payment' ? 'active' : ''}" id="btnTogglePmPayment">
+          Payment
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'materials' ? 'active' : ''}" id="btnTogglePmMaterials">
+          Materials
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'jms' ? 'active' : ''}" id="btnTogglePmJms">
+          JMS
+        </button>
+        <div class="segmented-divider"></div>
+        <button type="button" class="segmented-btn ${currentWorklistView === 'email' ? 'active' : ''}" id="btnTogglePmEmail">
+          Email
+        </button>
+      </div>
+    `;
+
+    const pmTabs = [
+      { id: 'btnTogglePmNewProject', view: 'new_project', label: 'New Project' },
+      { id: 'btnTogglePmProjectUpdate', view: 'project_update', label: 'Project Update' },
+      { id: 'btnTogglePmPayment', view: 'payment', label: 'Payment' },
+      { id: 'btnTogglePmMaterials', view: 'materials', label: 'Materials' },
+      { id: 'btnTogglePmJms', view: 'jms', label: 'JMS' },
+      { id: 'btnTogglePmEmail', view: 'email', label: 'Email' }
+    ];
+
+    pmTabs.forEach(tab => {
+      document.getElementById(tab.id)?.addEventListener('click', () => {
+        if (currentWorklistView !== tab.view) {
+          currentWorklistView = tab.view;
+          activeColumnFilters = {};
+          updateURL();
+          renderApp();
+          showToast(`Switched to Worklist • ${tab.label}`);
+        }
+      });
+    });
+    return;
+  }
+
   if (role === 'Commercial Manager') {
     if (currentWorklistView === 'jms_detail' || currentWorklistView === 'po_amend_detail' || currentWorklistView === 'wcc_detail') {
       footer.style.display = 'none';
@@ -14161,6 +14293,74 @@ function renderWorklistTableHead() {
   }
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager') {
+    if (currentWorklistView === 'new_project') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Site Name: 25ch, center header, NO filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Site Name</span>
+            </div>
+          </th>
+          <!-- 2. Submit Date: 15ch, center header, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Submit Date</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['submitDate'] ? 'has-active-filter' : ''}" data-filter-col="submitDate" title="Filter Submit Date">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. PO No: 15ch, center header, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PO No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, center header, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site ID: 15ch, center header, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Project Type: 15ch, center header, has filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Sub-Project Type: 25ch, center header, has filter -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Ageing: 10ch, center header, NO filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Ageing</span>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    } else {
+      thead.innerHTML = '';
+      return;
+    }
+  }
+
   if (role === 'Commercial Manager') {
     if (currentWorklistView === 'new_project') {
       thead.innerHTML = `
@@ -14422,22 +14622,29 @@ function renderWorklistTableHead() {
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
             </div>
           </th>
+          <!-- 7. Task -->
+          <th style="${isWccColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 12%; min-width: 110px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Task</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['task'] ? 'has-active-filter' : ''}" data-filter-col="task" title="Filter Task">&#9660;</button>
+            </div>
+          </th>
           ${isWccColumnsExpanded ? `
-          <!-- 7. Support Required -->
+          <!-- 8. Support Required -->
           <th style="width: 220px; min-width: 220px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Support Required</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['supportRequired'] ? 'has-active-filter' : ''}" data-filter-col="supportRequired" title="Filter Support Required">&#9660;</button>
             </div>
           </th>
-          <!-- 8. Pending With -->
+          <!-- 9. Pending With -->
           <th style="width: 150px; min-width: 150px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Pending With</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['pendingWith'] ? 'has-active-filter' : ''}" data-filter-col="pendingWith" title="Filter Pending With">&#9660;</button>
             </div>
           </th>
-          <!-- 9. Remarks -->
+          <!-- 10. Remarks -->
           <th style="width: 180px; min-width: 180px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Remarks</span>
@@ -14445,13 +14652,6 @@ function renderWorklistTableHead() {
             </div>
           </th>
           ` : ''}
-          <!-- Task -->
-          <th style="${isWccColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 12%; min-width: 110px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Task</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['task'] ? 'has-active-filter' : ''}" data-filter-col="task" title="Filter Task">&#9660;</button>
-            </div>
-          </th>
           <!-- Ageing -->
           <th style="${isWccColumnsExpanded ? 'width: 80px; min-width: 80px;' : 'width: 6%; min-width: 60px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Ageing</span>
@@ -15140,6 +15340,100 @@ function applyFiltersAndRender() {
   }
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager') {
+    if (currentWorklistView === 'new_project') {
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.siteName)) {
+        currentDataset = commercialWorklistData.map(item => ({
+          ...item,
+          submitDate: item.submitDate || item.date || ''
+        }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : (colKey === 'submitDate' ? (row.submitDate || row.date || '') : ''));
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const submitDateVal = row.submitDate || row.date || '';
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 2. Submit Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${submitDateVal}
+            </td>
+            <!-- 3. PO No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.poNo || ''}
+            </td>
+            <!-- 4. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Site ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 6. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 7. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.subProjectType || '').replace(/"/g, '&quot;')}">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 8. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    const titles = {
+      project_update: 'Project Update',
+      payment: 'Payment',
+      materials: 'Materials',
+      jms: 'JMS',
+      email: 'Email'
+    };
+    const activeTitle = titles[currentWorklistView] || 'New Project';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="12" class="empty-data-row" style="text-align: center; padding: 72px 24px; border: none;">
+          <div style="max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
+            <div style="width: 56px; height: 56px; border-radius: 12px; background: rgba(4, 84, 228, 0.08); display: flex; align-items: center; justify-content: center;">
+              <img src="icons/Worklist.svg" alt="${activeTitle}" width="32" height="32" style="opacity: 0.85;">
+            </div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; letter-spacing: -0.2px;">${activeTitle}</div>
+            <div style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">This section is currently being configured for Project Manager operations.</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
   const isCommercialWorklistView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'].includes(currentWorklistView);
 
   if (currentModule === 'worklist' && isCommercialWorklistView) {
@@ -15449,26 +15743,26 @@ function applyFiltersAndRender() {
             <td style="${isWccColumnsExpanded ? 'width: 160px; min-width: 160px;' : 'width: 14%;'} text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.subProjectType || ''}
             </td>
-            ${isWccColumnsExpanded ? `
-            <!-- 7. Support Required -->
-            <td style="width: 220px; min-width: 220px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
-              ${row.supportRequired || ''}
-            </td>
-            <!-- 8. Pending With -->
-            <td style="width: 150px; min-width: 150px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-              ${row.pendingWith || ''}
-            </td>
-            <!-- 9. Remarks -->
-            <td style="width: 180px; min-width: 180px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-              ${row.remarks || ''}
-            </td>
-            ` : ''}
-            <!-- Task -->
+            <!-- 7. Task -->
             <td style="${isWccColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 12%;'} text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
               <span style="color: #0f172a; font-weight: 400; font-size: 0.92rem;">
                 ${row.task || ''}
               </span>
             </td>
+            ${isWccColumnsExpanded ? `
+            <!-- 8. Support Required -->
+            <td style="width: 220px; min-width: 220px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
+              ${row.supportRequired || ''}
+            </td>
+            <!-- 9. Pending With -->
+            <td style="width: 150px; min-width: 150px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.pendingWith || ''}
+            </td>
+            <!-- 10. Remarks -->
+            <td style="width: 180px; min-width: 180px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.remarks || ''}
+            </td>
+            ` : ''}
             <!-- Ageing -->
             <td style="${isWccColumnsExpanded ? 'width: 80px; min-width: 80px;' : 'width: 6%;'} text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.ageing || ''}
@@ -17587,9 +17881,13 @@ function renderProfileModule() {
 
   const user = (typeof NexusApi !== 'undefined' && NexusApi.auth) ? NexusApi.auth.getStoredUser() : null;
   const role = user ? (user.role || 'Admin') : (sessionStorage.getItem('nexus_role') || 'Admin');
-  const email = user ? (user.email || (role === 'Admin' ? 'admin@nexus.com' : 'commercial@nexus.com')) : (role === 'Admin' ? 'admin@nexus.com' : 'commercial@nexus.com');
-  const name = user ? (user.name || (role === 'Admin' ? 'Admin User' : 'Commercial Manager')) : (role === 'Admin' ? 'Admin User' : 'Commercial Manager');
-  const permissionsText = role === 'Admin' ? 'Full System Administrator Access (All Modules)' : 'Role-Based Access: Master, Home / Projects, Worklist, Profile';
+  const email = user ? (user.email || (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : 'commercial@nexus.com'))) : (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : 'commercial@nexus.com'));
+  const name = user ? (user.name || (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : 'Commercial Manager'))) : (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : 'Commercial Manager'));
+  const permissionsText = role === 'Admin'
+    ? 'Full System Administrator Access (All Modules)'
+    : (role === 'Project Manager'
+      ? 'Role-Based Access: Worklist, Home / Projects, Profile'
+      : 'Role-Based Access: Master, Home / Projects, Worklist, Profile');
 
   if (thead) {
     thead.innerHTML = `
@@ -25121,6 +25419,9 @@ function getColumnDisplayName(colKey) {
     type: "Type",
     ucf: "UCF",
     tat: "TAT",
+    submitDate: "Submit Date",
+    poNo: "PO No",
+    projectId: "Project ID",
     projectType: "Project Type",
     subProjectType: "Sub - Project Type",
     indusPm: "Indus PM",

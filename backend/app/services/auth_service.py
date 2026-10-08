@@ -23,6 +23,15 @@ USERS_DATABASE: Dict[str, Dict[str, Any]] = {
         "password": "commercial123",
         "role": "Commercial Manager",
         "permissions": ["master", "projects", "worklist", "profile"]
+    },
+    "project@nexus.com": {
+        "id": "usr-proj-03",
+        "email": "project@nexus.com",
+        "username": "project",
+        "name": "Project Manager",
+        "password": "project123",
+        "role": "Project Manager",
+        "permissions": ["worklist", "projects", "profile"]
     }
 }
 

@@ -3912,19 +3912,45 @@ function calculateJmsTotalSum(dataset) {
 }
 window.calculateJmsTotalSum = calculateJmsTotalSum;
 
+let isJmsColumnsExpanded = false;
+window.isJmsColumnsExpanded = isJmsColumnsExpanded;
+
+window.toggleJmsExtraColumns = function() {
+  isJmsColumnsExpanded = !isJmsColumnsExpanded;
+  window.isJmsColumnsExpanded = isJmsColumnsExpanded;
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+  if (typeof renderWorklistTableHead === 'function') {
+    renderWorklistTableHead();
+  }
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+};
+
 window.exportJmsToCsv = function() {
   const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (commercialJmsData || []);
-  const headers = [
-    "Date",
+  const headers = isJmsColumnsExpanded ? [
     "PO No",
     "Project ID",
     "Site Name",
     "Site ID",
     "Project Type",
     "Sub-Project Type",
+    "Task",
     "Support Required",
     "Pending With",
     "Remarks",
+    "Ageing",
+    "Amount"
+  ] : [
+    "PO No",
+    "Project ID",
+    "Site Name",
+    "Site ID",
+    "Project Type",
+    "Sub-Project Type",
     "Task",
     "Ageing",
     "Amount"
@@ -3936,21 +3962,36 @@ window.exportJmsToCsv = function() {
     return `"${s}"`;
   };
 
-  const rows = data.map(r => [
-    escapeCsv(r.date),
-    escapeCsv(r.poNo),
-    escapeCsv(r.projectId),
-    escapeCsv(r.siteName),
-    escapeCsv(r.siteId),
-    escapeCsv(r.projectType),
-    escapeCsv(r.subProjectType),
-    escapeCsv(r.supportRequired),
-    escapeCsv(r.pendingWith),
-    escapeCsv(r.remarks),
-    escapeCsv(r.task),
-    escapeCsv(r.ageing),
-    escapeCsv(r.amount)
-  ].join(','));
+  const rows = data.map(r => {
+    if (isJmsColumnsExpanded) {
+      return [
+        escapeCsv(r.poNo),
+        escapeCsv(r.projectId),
+        escapeCsv(r.siteName),
+        escapeCsv(r.siteId),
+        escapeCsv(r.projectType),
+        escapeCsv(r.subProjectType),
+        escapeCsv(r.task),
+        escapeCsv(r.supportRequired),
+        escapeCsv(r.pendingWith),
+        escapeCsv(r.remarks),
+        escapeCsv(r.ageing),
+        escapeCsv(r.amount)
+      ].join(',');
+    } else {
+      return [
+        escapeCsv(r.poNo),
+        escapeCsv(r.projectId),
+        escapeCsv(r.siteName),
+        escapeCsv(r.siteId),
+        escapeCsv(r.projectType),
+        escapeCsv(r.subProjectType),
+        escapeCsv(r.task),
+        escapeCsv(r.ageing),
+        escapeCsv(r.amount)
+      ].join(',');
+    }
+  });
 
   const csvContent = [headers.join(','), ...rows].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -10056,6 +10097,165 @@ window.closeProjectInfoModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+// ==========================================================================
+// PROJECT MANAGER PROJECT DETAILS MODAL CONTROLLER
+// ==========================================================================
+let isPmProjectEditing = false;
+let activePmModalRow = null;
+
+window.openPmProjectDetailsModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'pmProjectDetailsModal') card.style.display = 'none';
+  });
+
+  const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(rowId)) ||
+              (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(rowId)) || {
+                projectId: 'PRJ-2026-001',
+                projectType: 'New Build',
+                subProjectType: 'Civil',
+                poNo: '4500128934',
+                poType: 'Opex',
+                siteId: 'IN-123456',
+                siteName: 'Guindy Hub'
+              };
+
+  activePmModalRow = row;
+
+  // Header Texts
+  const pId = row.projectId || 'PRJ-2026-001';
+  const pType = row.projectType || 'New Build';
+  const subType = row.subProjectType || 'Civil';
+  const poNum = row.poNo || '4500128934';
+  const poCategory = (row.poType === 'Capex') ? '0-Capex' : '0-Opex';
+  const sId = row.siteId || 'IN-123456';
+  const sName = row.siteName || 'Site Name';
+
+  const lblProject = document.getElementById('lblPmHeaderProjectInfo');
+  if (lblProject) lblProject.textContent = `${pId} / ${pType} / ${subType}`;
+
+  const lblPo = document.getElementById('lblPmHeaderPoInfo');
+  if (lblPo) lblPo.textContent = `${poNum} (${poCategory})`;
+
+  const lblSite = document.getElementById('lblPmHeaderSiteInfo');
+  if (lblSite) lblSite.textContent = `${sId} / ${sName}`;
+
+  // Check if New Build
+  const isNewBuild = (pType || '').trim().toLowerCase() === 'new build';
+  const newBuildLayout = document.getElementById('pmNewBuildLayout');
+  const nonNewBuildLayout = document.getElementById('pmNonNewBuildLayout');
+  const modal = document.getElementById('pmProjectDetailsModal');
+
+  if (modal) {
+    if (isNewBuild) {
+      if (newBuildLayout) newBuildLayout.style.display = 'grid';
+      if (nonNewBuildLayout) nonNewBuildLayout.style.display = 'none';
+      modal.style.width = '1260px';
+    } else {
+      if (newBuildLayout) newBuildLayout.style.display = 'none';
+      if (nonNewBuildLayout) nonNewBuildLayout.style.display = 'grid';
+      modal.style.width = '1040px';
+    }
+  }
+
+  // Reset Edit State (Read-only initially)
+  isPmProjectEditing = false;
+  const imgEdit = document.getElementById('imgPmProjectEditIcon');
+  if (imgEdit) imgEdit.src = 'icons/Edit.svg';
+  const btnEdit = document.getElementById('btnPmProjectEditToggle');
+  if (btnEdit) btnEdit.title = 'Edit Fields';
+
+  const selects = document.querySelectorAll('#pmProjectDetailsModal select');
+  selects.forEach(sel => {
+    sel.disabled = true;
+  });
+
+  // Reset all toggles to Deactive (unchecked / Red state) and lock them
+  const toggleSwitches = document.querySelectorAll('#pmProjectDetailsModal .pm-project-toggle-switch');
+  toggleSwitches.forEach(sw => {
+    sw.classList.add('disabled');
+    const chk = sw.querySelector('input[type="checkbox"]');
+    if (chk) {
+      chk.checked = false;
+      chk.disabled = true;
+    }
+  });
+
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closePmProjectModal = function() {
+  const modal = document.getElementById('pmProjectDetailsModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  activePmModalRow = null;
+};
+
+window.copyPmHeaderValue = function(fieldKey, label) {
+  if (!activePmModalRow) return;
+  let textToCopy = '';
+  if (fieldKey === 'projectId') {
+    textToCopy = activePmModalRow.projectId || 'PRJ-2026-001';
+  } else if (fieldKey === 'poNo') {
+    textToCopy = activePmModalRow.poNo || '4500128934';
+  } else if (fieldKey === 'siteId') {
+    textToCopy = activePmModalRow.siteId || 'IN-123456';
+  }
+
+  if (textToCopy) {
+    if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast(`Copied ${label}: ${textToCopy}`);
+      }).catch(() => {
+        showToast(`Copied ${label}: ${textToCopy}`);
+      });
+    } else {
+      showToast(`Copied ${label}: ${textToCopy}`);
+    }
+  }
+};
+
+window.togglePmProjectEdit = function() {
+  isPmProjectEditing = !isPmProjectEditing;
+  const selects = document.querySelectorAll('#pmProjectDetailsModal select');
+  const toggleSwitches = document.querySelectorAll('#pmProjectDetailsModal .pm-project-toggle-switch');
+  const imgEdit = document.getElementById('imgPmProjectEditIcon');
+  const btnEdit = document.getElementById('btnPmProjectEditToggle');
+
+  if (isPmProjectEditing) {
+    selects.forEach(sel => {
+      sel.disabled = false;
+    });
+    toggleSwitches.forEach(sw => {
+      sw.classList.remove('disabled');
+      const chk = sw.querySelector('input[type="checkbox"]');
+      if (chk) chk.disabled = false;
+    });
+    if (imgEdit) imgEdit.src = 'icons/Save.svg';
+    if (btnEdit) btnEdit.title = 'Save Changes';
+    showToast('Fields and toggles are now editable');
+  } else {
+    selects.forEach(sel => {
+      sel.disabled = true;
+    });
+    toggleSwitches.forEach(sw => {
+      sw.classList.add('disabled');
+      const chk = sw.querySelector('input[type="checkbox"]');
+      if (chk) chk.disabled = true;
+    });
+    if (imgEdit) imgEdit.src = 'icons/Edit.svg';
+    if (btnEdit) btnEdit.title = 'Edit Fields';
+    showToast('Project details saved successfully');
+  }
+};
+
 window.openPoCapexModal = function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -13450,6 +13650,9 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-collapse-action" id="btnJmsToggleColumns" data-tooltip="${isJmsColumnsExpanded ? 'Hide Extra Columns' : 'Show Extra Columns'}" aria-label="Toggle Columns" style="cursor: pointer;" onclick="toggleJmsExtraColumns()">
+            <img src="icons/Collapse.svg" alt="Toggle Columns" class="toolbar-icon-img" id="imgJmsCollapseIcon" width="28" height="28" style="transform: ${isJmsColumnsExpanded ? 'rotate(-90deg)' : 'rotate(90deg)'}; transition: transform 0.2s ease;">
+          </button>
           <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnJmsCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportJmsToCsv()">
             <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
           </button>
@@ -14286,6 +14489,9 @@ function renderWorklistTableHead() {
     if (currentWorklistView === 'wcc') {
       tableEl.style.minWidth = isWccColumnsExpanded ? '1600px' : '100%';
       tableEl.style.width = '100%';
+    } else if (currentWorklistView === 'jms') {
+      tableEl.style.minWidth = isJmsColumnsExpanded ? '1600px' : '100%';
+      tableEl.style.width = '100%';
     } else {
       tableEl.style.minWidth = '';
       tableEl.style.width = '';
@@ -14425,86 +14631,84 @@ function renderWorklistTableHead() {
     } else if (currentWorklistView === 'jms') {
       thead.innerHTML = `
         <tr class="master-view-header">
-          <!-- 1. Date: 12ch, center, no filter -->
-          <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-            <span>Date</span>
-          </th>
-          <!-- 2. PO No: 15ch, center, has filter -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 1. PO No -->
+          <th style="${isJmsColumnsExpanded ? 'width: 120px; min-width: 120px;' : 'width: 11%; min-width: 100px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>PO No</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['poNo'] ? 'has-active-filter' : ''}" data-filter-col="poNo" title="Filter PO No">&#9660;</button>
             </div>
           </th>
-          <!-- 3. Project ID: 20ch, left, has filter -->
-          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <!-- 2. Project ID -->
+          <th style="${isJmsColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 13%; min-width: 110px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Project ID</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
             </div>
           </th>
-          <!-- 4. Site Name: 25ch, left, has filter -->
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <!-- 3. Site Name -->
+          <th style="${isJmsColumnsExpanded ? 'width: 170px; min-width: 170px;' : 'width: 16%; min-width: 130px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Site Name</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
             </div>
           </th>
-          <!-- 5. Site ID: 15ch, center, has filter -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 4. Site ID -->
+          <th style="${isJmsColumnsExpanded ? 'width: 110px; min-width: 110px;' : 'width: 10%; min-width: 90px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Site ID</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
             </div>
           </th>
-          <!-- 6. Project Type: 15ch, center, has filter -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <!-- 5. Project Type -->
+          <th style="${isJmsColumnsExpanded ? 'width: 120px; min-width: 120px;' : 'width: 11%; min-width: 100px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Project Type</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
             </div>
           </th>
-          <!-- 7. Sub-Project Type: 25ch, left, has filter -->
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <!-- 6. Sub-Project Type -->
+          <th style="${isJmsColumnsExpanded ? 'width: 160px; min-width: 160px;' : 'width: 14%; min-width: 120px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Sub-Project Type</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
             </div>
           </th>
-          <!-- 8. Support Required: 35ch, left, has filter -->
-          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Support Required</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['supportRequired'] ? 'has-active-filter' : ''}" data-filter-col="supportRequired" title="Filter Support Required">&#9660;</button>
-            </div>
-          </th>
-          <!-- 9. Pending With: 20ch, left, has filter -->
-          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Pending With</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['pendingWith'] ? 'has-active-filter' : ''}" data-filter-col="pendingWith" title="Filter Pending With">&#9660;</button>
-            </div>
-          </th>
-          <!-- 10. Remarks: 25ch, left, has filter -->
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Remarks</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['remarks'] ? 'has-active-filter' : ''}" data-filter-col="remarks" title="Filter Remarks">&#9660;</button>
-            </div>
-          </th>
-          <!-- 11. Task: 35ch, left, has filter -->
-          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
+          <!-- 7. Task -->
+          <th style="${isJmsColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 12%; min-width: 110px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Task</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['task'] ? 'has-active-filter' : ''}" data-filter-col="task" title="Filter Task">&#9660;</button>
             </div>
           </th>
-          <!-- 12. Ageing: 10ch, center, no filter -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          ${isJmsColumnsExpanded ? `
+          <!-- 8. Support Required -->
+          <th style="width: 220px; min-width: 220px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Support Required</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['supportRequired'] ? 'has-active-filter' : ''}" data-filter-col="supportRequired" title="Filter Support Required">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Pending With -->
+          <th style="width: 150px; min-width: 150px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Pending With</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['pendingWith'] ? 'has-active-filter' : ''}" data-filter-col="pendingWith" title="Filter Pending With">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. Remarks -->
+          <th style="width: 180px; min-width: 180px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Remarks</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['remarks'] ? 'has-active-filter' : ''}" data-filter-col="remarks" title="Filter Remarks">&#9660;</button>
+            </div>
+          </th>
+          ` : ''}
+          <!-- Ageing -->
+          <th style="${isJmsColumnsExpanded ? 'width: 80px; min-width: 80px;' : 'width: 6%; min-width: 60px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Ageing</span>
           </th>
-          <!-- 13. Amount: 15ch, right, no filter -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+          <!-- Amount -->
+          <th style="${isJmsColumnsExpanded ? 'width: 110px; min-width: 110px;' : 'width: 7%; min-width: 80px;'} text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <span>Amount</span>
           </th>
         </tr>
@@ -15372,9 +15576,9 @@ function applyFiltersAndRender() {
         const submitDateVal = row.submitDate || row.date || '';
         return `
           <tr data-row-id="${row.id}">
-            <!-- 1. Site Name: 25ch & left -->
+            <!-- 1. Site Name: 25ch & left (Clickable to open PM Project Details Tab Modal) -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
-              ${row.siteName || ''}
+              <a href="#" class="site-name-modal-trigger clickable-project-link" onclick="openPmProjectDetailsModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.siteName || ''}</a>
             </td>
             <!-- 2. Submit Date: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
@@ -15525,10 +15729,11 @@ function applyFiltersAndRender() {
         totalAmountEl.textContent = formatJmsSum(calculateJmsTotalSum(filteredDataset));
       }
 
+      const totalColsCount = isJmsColumnsExpanded ? 12 : 9;
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="13" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+            <td colspan="${totalColsCount}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
           </tr>
         `;
         return;
@@ -15537,62 +15742,60 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => {
         return `
           <tr data-row-id="${row.id}">
-            <!-- 1. Date: 12ch & center -->
-            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-              ${row.date || ''}
-            </td>
-            <!-- 2. PO No: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 1. PO No -->
+            <td style="${isJmsColumnsExpanded ? 'width: 120px; min-width: 120px;' : 'width: 11%;'} text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.poNo ? `
                 <a href="javascript:void(0)" onclick="openJmsDetailPage('${row.id}')" style="color: #0454e4; font-weight: 500; text-decoration: none; cursor: pointer;" title="Open JMS Detail Validation">${row.poNo || ''}</a>
               ` : `
                 <span style="color: #0454e4; font-weight: 500;">-</span>
               `}
             </td>
-            <!-- 3. Project ID: 20ch & left -->
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+            <!-- 2. Project ID -->
+            <td style="${isJmsColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 13%;'} text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.projectId || ''}
             </td>
-            <!-- 4. Site Name: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+            <!-- 3. Site Name -->
+            <td style="${isJmsColumnsExpanded ? 'width: 170px; min-width: 170px;' : 'width: 16%;'} text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.siteName || ''}
             </td>
-            <!-- 5. Site ID: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 4. Site ID -->
+            <td style="${isJmsColumnsExpanded ? 'width: 110px; min-width: 110px;' : 'width: 10%;'} text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.siteId || ''}
             </td>
-            <!-- 6. Project Type: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 5. Project Type -->
+            <td style="${isJmsColumnsExpanded ? 'width: 120px; min-width: 120px;' : 'width: 11%;'} text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.projectType || ''}
             </td>
-            <!-- 7. Sub-Project Type: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+            <!-- 6. Sub-Project Type -->
+            <td style="${isJmsColumnsExpanded ? 'width: 160px; min-width: 160px;' : 'width: 14%;'} text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.subProjectType || ''}
             </td>
-            <!-- 8. Support Required: 35ch & left -->
-            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
-              ${row.supportRequired || ''}
-            </td>
-            <!-- 9. Pending With: 20ch & left -->
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-              ${row.pendingWith || ''}
-            </td>
-            <!-- 10. Remarks: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-              ${row.remarks || ''}
-            </td>
-            <!-- 11. Task: 35ch & left -->
-            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
+            <!-- 7. Task -->
+            <td style="${isJmsColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 12%;'} text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
               <span style="color: #0f172a; font-weight: 400; font-size: 0.92rem;">
                 ${row.task || ''}
               </span>
             </td>
-            <!-- 12. Ageing: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            ${isJmsColumnsExpanded ? `
+            <!-- 8. Support Required -->
+            <td style="width: 220px; min-width: 220px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
+              ${row.supportRequired || ''}
+            </td>
+            <!-- 9. Pending With -->
+            <td style="width: 150px; min-width: 150px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.pendingWith || ''}
+            </td>
+            <!-- 10. Remarks -->
+            <td style="width: 180px; min-width: 180px; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.remarks || ''}
+            </td>
+            ` : ''}
+            <!-- Ageing -->
+            <td style="${isJmsColumnsExpanded ? 'width: 80px; min-width: 80px;' : 'width: 6%;'} text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.ageing || ''}
             </td>
-            <!-- 13. Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+            <!-- Amount -->
+            <td style="${isJmsColumnsExpanded ? 'width: 110px; min-width: 110px;' : 'width: 7%;'} text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
               ${row.amount || ''}
             </td>
           </tr>

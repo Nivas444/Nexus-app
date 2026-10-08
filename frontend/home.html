@@ -3683,12 +3683,409 @@
                       class="project-info-toggle-slider"></span></label>
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Service
-                    Contract</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
+                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Service Contract</span>
+                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Manager Project Details Modal Tab -->
+        <div class="side-form-card pm-project-details-card" id="pmProjectDetailsModal" style="display: none;">
+          <!-- Default Header Ribbon: Slanted Green Title Badge & Action Icons & Red Close Button -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblPmHeaderSlantedBadge">
+              <!-- 1. Left: Project ID / Project Type / Sub-Project Type + Copy Icon (Left aligned) -->
+              <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span id="lblPmHeaderProjectInfo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Project ID / Project Type / Sub-Project Type</span>
+                <button type="button" class="btn-pm-copy" id="btnPmCopyProjectId" onclick="copyPmHeaderValue('projectId', 'Project ID')" title="Copy Project ID" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; flex-shrink: 0;">
+                  <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 17px; height: 17px; display: block;">
+                </button>
+              </div>
+              <!-- 2. Center: PO No (0-Opex) + Copy Icon (Center aligned) -->
+              <div id="lblPmHeaderPoInfoWrap">
+                <span id="lblPmHeaderPoInfo">PO No (0-Opex)</span>
+                <button type="button" class="btn-pm-copy" id="btnPmCopyPoNo" onclick="copyPmHeaderValue('poNo', 'PO No')" title="Copy PO No" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; flex-shrink: 0;">
+                  <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 17px; height: 17px; display: block;">
+                </button>
+              </div>
+              <!-- 3. Right: Site ID / Site Name + Copy Icon (Right aligned) -->
+              <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span id="lblPmHeaderSiteInfo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Site ID / Site Name</span>
+                <button type="button" class="btn-pm-copy" id="btnPmCopySiteId" onclick="copyPmHeaderValue('siteId', 'Site ID')" title="Copy Site ID" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; flex-shrink: 0;">
+                  <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 17px; height: 17px; display: block;">
+                </button>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px; padding-right: 18px; margin-left: auto;">
+              <!-- Edit / Save Action Toggle Button -->
+              <button type="button" id="btnPmProjectEditToggle" onclick="togglePmProjectEdit()" title="Edit Fields" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Edit.svg" id="imgPmProjectEditIcon" alt="Edit" style="width: 26px; height: 26px; display: block;">
+              </button>
+
+              <!-- Red Close Button -->
+              <button type="button" class="side-form-close-btn" id="btnClosePmProjectDetailsModal" onclick="closePmProjectModal()" aria-label="Close">&times;</button>
+            </div>
+          </div>
+
+          <div class="pm-project-details-body">
+            <!-- 1. Layout for NEW BUILD (3 Columns: 6 inputs, 6 toggles, 6 toggles) -->
+            <div id="pmNewBuildLayout" style="display: grid; grid-template-columns: 1.35fr 1fr 1fr; column-gap: 36px; row-gap: 16px; margin-bottom: 24px; align-items: start;">
+              <!-- Column 1: 6 Dropdown Fields -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">District</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmDistrictSelect" class="pm-custom-select" disabled>
+                      <option value="R/RL-234567">R/RL-234567</option>
+                      <option value="Chennai">Chennai</option>
+                      <option value="Madurai">Madurai</option>
+                      <option value="Coimbatore">Coimbatore</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">Town</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmTownSelect" class="pm-custom-select" disabled>
+                      <option value="R/RL-234567">R/RL-234567</option>
+                      <option value="Guindy">Guindy</option>
+                      <option value="Ambattur">Ambattur</option>
+                      <option value="Central">Central</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">Tower Type</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmTowerTypeSelect" class="pm-custom-select" disabled>
+                      <option value=""></option>
+                      <option value="GBT">GBT</option>
+                      <option value="RTT">RTT</option>
+                      <option value="Monopole">Monopole</option>
+                      <option value="Pole">Pole</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">Tower Height</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmTowerHeightSelect" class="pm-custom-select" disabled>
+                      <option value=""></option>
+                      <option value="30m">30m</option>
+                      <option value="40m">40m</option>
+                      <option value="50m">50m</option>
+                      <option value="60m">60m</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">SBC</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmSbcSelect" class="pm-custom-select" disabled>
+                      <option value=""></option>
+                      <option value="10 t/m2">10 t/m2</option>
+                      <option value="15 t/m2">15 t/m2</option>
+                      <option value="20 t/m2">20 t/m2</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">Wind Speed</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmWindSpeedSelect" class="pm-custom-select" disabled>
+                      <option value=""></option>
+                      <option value="39 m/s">39 m/s</option>
+                      <option value="44 m/s">44 m/s</option>
+                      <option value="47 m/s">47 m/s</option>
+                      <option value="50 m/s">50 m/s</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Column 2: 6 Middle Toggles -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Site Survey</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmSiteSurvey">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">TSP Materials</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmTspMaterials">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Quality Audit</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmQualityAudit">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">STN</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmStn">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Civil Works</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmCivilWorks">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">PTW</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmPtw">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Column 3: 6 Right Toggles -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">SRN</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmSrn">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Electrical Works</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmElectricalWorks">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Additional Approval</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmAdditionalApproval">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">CAM</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmCam">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Pole Mounts</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmPoleMounts">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Service Contract</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmServiceContract">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Layout for NON-NEW BUILD (7 x 7 Grid: 2 Columns of 7 Rows) -->
+            <div id="pmNonNewBuildLayout" style="display: none; grid-template-columns: 1.25fr 1fr; column-gap: 48px; row-gap: 14px; margin-bottom: 24px; align-items: start;">
+              <!-- Left Column: 7 Items (District, Town + 5 Toggles) -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <!-- 1. District -->
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">District</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmNonNbDistrictSelect" class="pm-custom-select" disabled>
+                      <option value="R/RL-234567">R/RL-234567</option>
+                      <option value="Chennai">Chennai</option>
+                      <option value="Madurai">Madurai</option>
+                      <option value="Coimbatore">Coimbatore</option>
+                    </select>
+                  </div>
+                </div>
+                <!-- 2. Town -->
+                <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                  <label class="pm-field-label">Town</label>
+                  <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                    <select id="pmNonNbTownSelect" class="pm-custom-select" disabled>
+                      <option value="R/RL-234567">R/RL-234567</option>
+                      <option value="Guindy">Guindy</option>
+                      <option value="Ambattur">Ambattur</option>
+                      <option value="Central">Central</option>
+                    </select>
+                  </div>
+                </div>
+                <!-- 3. Site Survey -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Site Survey</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbSiteSurvey">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 4. TSP Materials -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">TSP Materials</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbTspMaterials">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 5. Quality Audit -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Quality Audit</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbQualityAudit">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 6. STN -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">STN</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbStn">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 7. Civil Works -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Civil Works</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbCivilWorks">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: 7 Items (7 Toggles) -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <!-- 1. PTW -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">PTW</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbPtw">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 2. SRN -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">SRN</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbSrn">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 3. Electrical Works -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Electrical Works</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbElectricalWorks">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 4. Additional Approval -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Additional Approval</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbAdditionalApproval">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 5. CAM -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">CAM</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbCam">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 6. Pole Mounts -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Pole Mounts</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbPoleMounts">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <!-- 7. Service Contract -->
+                <div class="pm-toggle-row">
+                  <span class="pm-field-label">Service Contract</span>
+                  <div class="pm-toggle-switch-wrapper">
+                    <label class="pm-project-toggle-switch">
+                      <input type="checkbox" id="chkPmNonNbServiceContract">
+                      <span class="pm-project-toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Container: Planning BOQ -->
+            <div id="pmPlanningBoqBox" style="border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 22px 16px; text-align: center; color: #cbd5e1; font-weight: 600; font-size: 1.05rem; letter-spacing: 0.5px; user-select: none;">
+              Planning BOQ
             </div>
           </div>
         </div>

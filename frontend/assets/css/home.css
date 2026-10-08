@@ -5161,7 +5161,7 @@ body.standalone-mode .worklist-main-full {
   width: 100% !important;
   height: 38px !important;
   background-color: #e2e8f0;
-  border: 1px solid #cbd5e1 !important;
+  border: 1px solid #000000 !important;
   border-radius: 8px !important;
   padding: 0 32px 0 14px !important;
   font-size: 0.92rem !important;
@@ -5182,7 +5182,7 @@ body.standalone-mode .worklist-main-full {
 .pm-custom-select:not(:disabled) {
   background-color: #ffffff !important;
   cursor: pointer !important;
-  border-color: #3b82f6 !important;
+  border-color: #000000 !important;
 }
 
 .pm-custom-select:disabled {
@@ -5190,6 +5190,107 @@ body.standalone-mode .worklist-main-full {
   color: #334155 !important;
   cursor: default !important;
   opacity: 1 !important;
+  border-color: #000000 !important;
+}
+
+.pm-custom-select:focus,
+.pm-custom-select:active {
+  border-color: #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.pm-custom-select.pm-no-dropdown,
+.pm-no-dropdown {
+  background-image: none !important;
+  padding-right: 14px !important;
+  border-color: #000000 !important;
+  cursor: default !important;
+}
+
+.pm-project-details-body input,
+.pm-project-details-body select,
+.pm-project-details-body textarea {
+  border: 1px solid #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.pm-project-details-body input:focus,
+.pm-project-details-body select:focus,
+.pm-project-details-body textarea:focus {
+  border-color: #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#pmPlanningBoqBox {
+  text-align: center !important;
+  border: 1.5px solid #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#pmPlanningBoqBox:focus {
+  border-color: #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#pmPlanningBoqBox::placeholder {
+  text-align: center !important;
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  font-size: 1.05rem !important;
+  letter-spacing: 0.5px !important;
+}
+
+#pmAddMountDetailsModal input,
+#pmAddMountDetailsModal select,
+#pmAddSurveyItemsModal input,
+#pmAddSurveyItemsModal textarea,
+#pmAddCivilWorksModal select,
+#pmAddCivilWorksModal input,
+#pmAddStnMaterialsModal input,
+#pmAddStnMaterialsModal select,
+#pmAddSrnMaterialsModal input,
+#pmAddSrnMaterialsModal select,
+#pmAddCamMaterialsModal input,
+#pmAddCamMaterialsModal select {
+  border: 1px solid #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#pmAddMountDetailsModal input:focus,
+#pmAddMountDetailsModal select:focus,
+#pmAddSurveyItemsModal input:focus,
+#pmAddSurveyItemsModal textarea:focus,
+#pmAddCivilWorksModal select:focus,
+#pmAddCivilWorksModal input:focus,
+#pmAddStnMaterialsModal input:focus,
+#pmAddStnMaterialsModal select:focus,
+#pmAddSrnMaterialsModal input:focus,
+#pmAddSrnMaterialsModal select:focus,
+#pmAddCamMaterialsModal input:focus,
+#pmAddCamMaterialsModal select:focus {
+  border: 1px solid #000000 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#pmAddCivilWorksModal .pm-field-label {
+  min-width: 150px !important;
+  width: 150px !important;
+  flex-shrink: 0 !important;
+}
+
+#pmAddStnMaterialsModal .pm-field-label,
+#pmAddSrnMaterialsModal .pm-field-label,
+#pmAddCamMaterialsModal .pm-field-label {
+  min-width: 140px !important;
+  width: 140px !important;
+  flex-shrink: 0 !important;
 }
 
 .pm-project-toggle-switch {
@@ -5285,4 +5386,33 @@ body.standalone-mode .worklist-main-full {
   gap: 8px !important;
   white-space: nowrap !important;
   transform: translateX(20px) !important; /* Slightly moved to the right for true optical centering */
+}
+
+/* PM Custom Circle Radio Button */
+.pm-circle-radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #94a3b8;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+  position: relative;
+  background: #ffffff;
+  display: inline-block;
+  margin: 0 auto;
+  accent-color: #00cba0;
+}
+
+.pm-circle-radio:checked {
+  border-color: #00cba0 !important;
+  background-color: #00cba0 !important;
+  box-shadow: inset 0 0 0 3px #ffffff !important;
+}
+
+.pm-circle-radio:hover {
+  border-color: #00cba0 !important;
 }

@@ -3554,144 +3554,7 @@
           </div>
         </div>
 
-        <!-- Project Info Modal Tab (R/RL-234567 / New Build / With DG) -->
-        <div class="side-form-card project-info-modal-card" id="projectInfoModal" style="display: none;">
-          <!-- Header Ribbon: Slanted Green Title Badge & Red Close Button -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblProjectInfoTitle">R/RL-234567 / New Build / With DG</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseProjectInfoModal"
-              onclick="closeProjectInfoModal()" aria-label="Close">&times;</button>
-          </div>
-
-          <div class="project-info-modal-body">
-            <!-- Section 1: District, Town, Upgradation Type, Planning BOQ (Viewable Only) -->
-            <div class="project-info-card-box">
-              <div
-                style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; column-gap: 36px; align-items: center; margin-bottom: 18px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                  <label style="min-width: 60px; font-size: 0.95rem; font-weight: 500; color: #1e293b;">District</label>
-                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
-                    style="flex: 1; width: 100%;">
-                </div>
-                <div style="display: flex; align-items: center; gap: 14px;">
-                  <label style="min-width: 50px; font-size: 0.95rem; font-weight: 500; color: #1e293b;">Town</label>
-                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
-                    style="flex: 1; width: 100%;">
-                </div>
-                <div style="display: flex; align-items: center; gap: 14px;">
-                  <label
-                    style="min-width: 135px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Upgradation
-                    Type</label>
-                  <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
-                    style="flex: 1; width: 100%;">
-                </div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 18px;">
-                <label
-                  style="min-width: 105px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Planning
-                  BOQ</label>
-                <input type="text" class="project-info-field-input" value="R/RL-234567" readonly
-                  style="flex: 1; width: 100%;">
-              </div>
-            </div>
-
-            <!-- Section 2: Tower specs (Viewable Only) and Toggle items (Deactivated Red State) -->
-            <div class="project-info-card-box" style="margin-top: 18px;">
-              <!-- Row 1: 4 input specs -->
-              <div
-                style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 36px; row-gap: 20px; align-items: center; margin-bottom: 22px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                  <span style="min-width: 85px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Type</span>
-                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
-                </div>
-                <div style="display: flex; align-items: center; gap: 14px;">
-                  <span style="min-width: 95px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Tower Height</span>
-                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
-                </div>
-                <div style="display: flex; align-items: center; gap: 14px;">
-                  <span style="min-width: 45px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">SBC</span>
-                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
-                </div>
-                <div style="display: flex; align-items: center; gap: 14px;">
-                  <span style="min-width: 85px; font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Wind Speed</span>
-                  <input type="text" class="project-info-field-input" readonly style="flex: 1; width: 100%;">
-                </div>
-              </div>
-
-              <!-- Toggles: 3 rows of 4 columns (Deactivated / Red State) -->
-              <div
-                style="display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 40px; row-gap: 18px; align-items: center;">
-                <!-- Row 2 -->
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Site Survey</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">STN</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">SRN</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">CAM</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-
-                <!-- Row 3 -->
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">TSP Materials</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Civil Works</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Electrical Works</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Pole Mounts</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-
-                <!-- Row 4 -->
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Quality Audit</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">PTW</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Additional
-                    Approval</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span
-                      class="project-info-toggle-slider"></span></label>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <span style="font-size: 0.95rem; font-weight: 500; color: #1e293b; white-space: nowrap;">Service Contract</span>
-                  <label class="project-info-toggle-switch"><input type="checkbox"><span class="project-info-toggle-slider"></span></label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Project Manager Project Details Modal Tab -->
+        <!-- Project Details Modal Tab (Used for R/RL-234567 / New Build / With DG and PM New Project) -->
         <div class="side-form-card pm-project-details-card" id="pmProjectDetailsModal" style="display: none;">
           <!-- Default Header Ribbon: Slanted Green Title Badge & Action Icons & Red Close Button -->
           <div class="side-form-header">
@@ -3720,9 +3583,9 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 14px; padding-right: 18px; margin-left: auto;">
-              <!-- Edit / Save Action Toggle Button -->
-              <button type="button" id="btnPmProjectEditToggle" onclick="togglePmProjectEdit()" title="Edit Fields" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
-                <img src="icons/Edit.svg" id="imgPmProjectEditIcon" alt="Edit" style="width: 26px; height: 26px; display: block;">
+              <!-- Save Action Button -->
+              <button type="button" id="btnPmProjectSubmit" onclick="savePmProjectDetails()" title="Save Project Details" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" id="imgPmProjectSubmitIcon" alt="Save" style="width: 26px; height: 26px; display: block;">
               </button>
 
               <!-- Red Close Button -->
@@ -3738,7 +3601,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">District</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmDistrictSelect" class="pm-custom-select" disabled>
+                    <select id="pmDistrictSelect" class="pm-custom-select pm-no-dropdown" disabled>
                       <option value="R/RL-234567">R/RL-234567</option>
                       <option value="Chennai">Chennai</option>
                       <option value="Madurai">Madurai</option>
@@ -3750,7 +3613,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">Town</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmTownSelect" class="pm-custom-select" disabled>
+                    <select id="pmTownSelect" class="pm-custom-select pm-no-dropdown" disabled>
                       <option value="R/RL-234567">R/RL-234567</option>
                       <option value="Guindy">Guindy</option>
                       <option value="Ambattur">Ambattur</option>
@@ -3762,7 +3625,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">Tower Type</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmTowerTypeSelect" class="pm-custom-select" disabled>
+                    <select id="pmTowerTypeSelect" class="pm-custom-select">
                       <option value=""></option>
                       <option value="GBT">GBT</option>
                       <option value="RTT">RTT</option>
@@ -3775,7 +3638,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">Tower Height</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmTowerHeightSelect" class="pm-custom-select" disabled>
+                    <select id="pmTowerHeightSelect" class="pm-custom-select">
                       <option value=""></option>
                       <option value="30m">30m</option>
                       <option value="40m">40m</option>
@@ -3788,7 +3651,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">SBC</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmSbcSelect" class="pm-custom-select" disabled>
+                    <select id="pmSbcSelect" class="pm-custom-select">
                       <option value=""></option>
                       <option value="10 t/m2">10 t/m2</option>
                       <option value="15 t/m2">15 t/m2</option>
@@ -3800,7 +3663,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">Wind Speed</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmWindSpeedSelect" class="pm-custom-select" disabled>
+                    <select id="pmWindSpeedSelect" class="pm-custom-select">
                       <option value=""></option>
                       <option value="39 m/s">39 m/s</option>
                       <option value="44 m/s">44 m/s</option>
@@ -3817,7 +3680,7 @@
                   <span class="pm-field-label">Site Survey</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmSiteSurvey">
+                      <input type="checkbox" id="chkPmSiteSurvey" onchange="handlePmToggleChange('siteSurvey', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3844,7 +3707,7 @@
                   <span class="pm-field-label">STN</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmStn">
+                      <input type="checkbox" id="chkPmStn" onchange="handlePmToggleChange('stn', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3853,7 +3716,7 @@
                   <span class="pm-field-label">Civil Works</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmCivilWorks">
+                      <input type="checkbox" id="chkPmCivilWorks" onchange="handlePmToggleChange('civilWorks', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3862,7 +3725,7 @@
                   <span class="pm-field-label">PTW</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmPtw">
+                      <input type="checkbox" id="chkPmPtw" onchange="handlePmToggleChange('ptw', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3875,7 +3738,7 @@
                   <span class="pm-field-label">SRN</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmSrn">
+                      <input type="checkbox" id="chkPmSrn" onchange="handlePmToggleChange('srn', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3902,7 +3765,7 @@
                   <span class="pm-field-label">CAM</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmCam">
+                      <input type="checkbox" id="chkPmCam" onchange="handlePmToggleChange('cam', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3911,7 +3774,7 @@
                   <span class="pm-field-label">Pole Mounts</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmPoleMounts">
+                      <input type="checkbox" id="chkPmPoleMounts" onchange="handlePmToggleChange('poleMounts', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3936,7 +3799,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">District</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmNonNbDistrictSelect" class="pm-custom-select" disabled>
+                    <select id="pmNonNbDistrictSelect" class="pm-custom-select pm-no-dropdown" disabled>
                       <option value="R/RL-234567">R/RL-234567</option>
                       <option value="Chennai">Chennai</option>
                       <option value="Madurai">Madurai</option>
@@ -3948,7 +3811,7 @@
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
                   <label class="pm-field-label">Town</label>
                   <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                    <select id="pmNonNbTownSelect" class="pm-custom-select" disabled>
+                    <select id="pmNonNbTownSelect" class="pm-custom-select pm-no-dropdown" disabled>
                       <option value="R/RL-234567">R/RL-234567</option>
                       <option value="Guindy">Guindy</option>
                       <option value="Ambattur">Ambattur</option>
@@ -3961,7 +3824,7 @@
                   <span class="pm-field-label">Site Survey</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmNonNbSiteSurvey">
+                      <input type="checkbox" id="chkPmNonNbSiteSurvey" onchange="handlePmToggleChange('siteSurvey', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -3991,7 +3854,7 @@
                   <span class="pm-field-label">STN</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmNonNbStn">
+                      <input type="checkbox" id="chkPmNonNbStn" onchange="handlePmToggleChange('stn', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -4001,7 +3864,7 @@
                   <span class="pm-field-label">Civil Works</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmNonNbCivilWorks">
+                      <input type="checkbox" id="chkPmNonNbCivilWorks" onchange="handlePmToggleChange('civilWorks', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -4015,7 +3878,7 @@
                   <span class="pm-field-label">PTW</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmNonNbPtw">
+                      <input type="checkbox" id="chkPmNonNbPtw" onchange="handlePmToggleChange('ptw', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -4025,7 +3888,7 @@
                   <span class="pm-field-label">SRN</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmNonNbSrn">
+                      <input type="checkbox" id="chkPmNonNbSrn" onchange="handlePmToggleChange('srn', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -4055,7 +3918,7 @@
                   <span class="pm-field-label">CAM</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmNonNbCam">
+                      <input type="checkbox" id="chkPmNonNbCam" onchange="handlePmToggleChange('cam', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -4065,7 +3928,7 @@
                   <span class="pm-field-label">Pole Mounts</span>
                   <div class="pm-toggle-switch-wrapper">
                     <label class="pm-project-toggle-switch">
-                      <input type="checkbox" id="chkPmNonNbPoleMounts">
+                      <input type="checkbox" id="chkPmNonNbPoleMounts" onchange="handlePmToggleChange('poleMounts', this)">
                       <span class="pm-project-toggle-slider"></span>
                     </label>
                   </div>
@@ -4083,9 +3946,685 @@
               </div>
             </div>
 
-            <!-- Bottom Container: Planning BOQ -->
-            <div id="pmPlanningBoqBox" style="border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 22px 16px; text-align: center; color: #cbd5e1; font-weight: 600; font-size: 1.05rem; letter-spacing: 0.5px; user-select: none;">
-              Planning BOQ
+            <!-- Bottom Container: Planning BOQ as Typebox -->
+            <div style="width: 100%; margin-top: 10px;">
+              <textarea id="pmPlanningBoqBox" placeholder="Planning BOQ" style="width: 100%; min-height: 80px; height: 80px; border: 1.5px solid #000000; border-radius: 10px; padding: 14px 16px; color: #1e293b; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.5px; resize: none; font-family: inherit; box-sizing: border-box; outline: none;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. PTW Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="pmPtwModal"
+          style="display: none; width: 480px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmPtwTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              PTW</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" id="btnPmSavePtw" onclick="savePmPtwDetails()" title="Save PTW" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmPtwModal"
+                onclick="closePmPtwModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 16px 28px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <div class="pm-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0;">
+              <span class="pm-field-label" style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Excavation</span>
+              <div class="pm-toggle-switch-wrapper" style="flex: 1; display: flex; justify-content: center;">
+                <label class="pm-project-toggle-switch">
+                  <input type="checkbox" id="chkPmPtwExcavation">
+                  <span class="pm-project-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="pm-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0;">
+              <span class="pm-field-label" style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Electrical</span>
+              <div class="pm-toggle-switch-wrapper" style="flex: 1; display: flex; justify-content: center;">
+                <label class="pm-project-toggle-switch">
+                  <input type="checkbox" id="chkPmPtwElectrical">
+                  <span class="pm-project-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="pm-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0;">
+              <span class="pm-field-label" style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Height</span>
+              <div class="pm-toggle-switch-wrapper" style="flex: 1; display: flex; justify-content: center;">
+                <label class="pm-project-toggle-switch">
+                  <input type="checkbox" id="chkPmPtwHeight">
+                  <span class="pm-project-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div class="pm-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0;">
+              <span class="pm-field-label" style="font-size: 0.95rem; font-weight: 500; color: #1e293b;">Material</span>
+              <div class="pm-toggle-switch-wrapper" style="flex: 1; display: flex; justify-content: center;">
+                <label class="pm-project-toggle-switch">
+                  <input type="checkbox" id="chkPmPtwMaterial">
+                  <span class="pm-project-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Pole Mount Details Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="pmPoleMountDetailsModal"
+          style="display: none; width: 760px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmPoleMountTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Pole mount details</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnPmAddMountDetailsTrigger" onclick="openPmAddMountDetailsModal()" title="Add Mount Details" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmPoleMountDetailsModal"
+                onclick="closePmPoleMountDetailsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPmPoleMountDetails" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Mount type</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Sector</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Height</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Azimuth</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPmPoleMountDetails">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+            <!-- Save/Submit icon centered below table -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+              <button type="button" id="btnPmSubmitPoleMountDetails" onclick="submitPmPoleMountDetails()" title="Submit Pole Mount Details" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Submit.svg" alt="Submit" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Mount Details Sub-Modal -->
+        <div class="side-form-card side-contact-popup" id="pmAddMountDetailsModal"
+          style="display: none; width: 480px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmAddMountDetailsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Mount details</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" id="btnPmSaveMountDetails" onclick="savePmNewMountDetail()" title="Save Mount Details" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddMountDetailsModal"
+                onclick="closePmAddMountDetailsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 16px 28px 24px 28px; display: flex; flex-direction: column; gap: 14px;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <label class="pm-field-label">Mount type</label>
+              <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                <select id="inpPmNewMountType" class="pm-custom-select">
+                  <option value="GSM">GSM</option>
+                  <option value="MW">MW</option>
+                </select>
+              </div>
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <label class="pm-field-label">Sector</label>
+              <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                <select id="inpPmNewMountSector" class="pm-custom-select">
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </div>
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <label class="pm-field-label">Height</label>
+              <input type="text" id="inpPmNewMountHeight" class="form-input-control" placeholder="e.g. 30m" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <label class="pm-field-label">Azimuth</label>
+              <input type="text" id="inpPmNewMountAzimuth" class="form-input-control" placeholder="e.g. 120°" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Survey Report Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="pmSurveyReportModal"
+          style="display: none; width: 760px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmSurveyReportTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Survey report</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnPmAddSurveyItemTrigger" onclick="openPmAddSurveyItemsModal()" title="Add Survey Items" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmSurveyReportModal"
+                onclick="closePmSurveyReportModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPmSurveyReport" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 100%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 12px;">
+                    <span>Description</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPmSurveyReport">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Survey Items Sub-Modal -->
+        <div class="side-form-card side-contact-popup" id="pmAddSurveyItemsModal"
+          style="display: none; width: 680px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmAddSurveyItemsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add survey items</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" id="btnPmSaveSurveyItem" onclick="savePmNewSurveyItem()" title="Save Survey Item" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddSurveyItemsModal"
+                onclick="closePmAddSurveyItemsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 18px 28px 24px 28px;">
+            <div class="pm-field-row" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 110px; width: 110px; padding-top: 6px;">Description</label>
+              <textarea id="inpPmNewSurveyDescription" class="form-input-control" placeholder="Enter survey item description..." style="flex: 1; min-height: 80px; height: 80px; border: 1px solid #000000; border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; resize: none; font-family: inherit; box-sizing: border-box; outline: none;"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Civil Works Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="pmCivilWorksModal"
+          style="display: none; width: 760px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmCivilWorksTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Civil works</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnPmDeleteCivilWork" onclick="deletePmSelectedCivilWork()" title="Delete Selected Work" style="display: none; background: transparent; border: none; cursor: pointer; padding: 2px; align-items: center;">
+                <img src="icons/Delete.svg" alt="Delete" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnPmAddCivilWorkTrigger" onclick="openPmAddCivilWorksModal()" title="Add Civil Works" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmCivilWorksModal"
+                onclick="closePmCivilWorksModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPmCivilWorks" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 6px;">
+                    <span>Select</span>
+                  </th>
+                  <th style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 12px;">
+                    <span>Work details</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPmCivilWorks">
+                <!-- Dynamic Rows with circular radio buttons -->
+              </tbody>
+            </table>
+            <!-- Save/Submit icon centered below table -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+              <button type="button" id="btnPmSubmitCivilWorks" onclick="submitPmCivilWorksDetails()" title="Submit Civil Works" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Submit.svg" alt="Submit" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Civil Works Sub-Modal -->
+        <div class="side-form-card side-contact-popup" id="pmAddCivilWorksModal"
+          style="display: none; width: 680px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmAddCivilWorksTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add civil works</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <input type="file" id="inpPmCivilWorkPdfFile" accept=".pdf,application/pdf" style="display: none;" onchange="handlePmCivilWorkPdfSelected(this)">
+              <button type="button" id="btnPmCivilWorkPdfUpload" onclick="triggerPmCivilWorkPdfUpload()" title="Upload Drawing PDF" style="display: none; background: transparent; border: none; cursor: pointer; padding: 4px; align-items: center;">
+                <img src="icons/PDF Upload.svg" alt="Upload PDF" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" id="btnPmSaveCivilWork" onclick="savePmNewCivilWork()" title="Save Civil Work" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddCivilWorksModal"
+                onclick="closePmAddCivilWorksModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 18px 28px 24px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 150px; width: 150px; flex-shrink: 0; white-space: nowrap;">Foundation name</label>
+              <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                <select id="inpPmNewCivilFoundationName" class="pm-custom-select">
+                  <option value="Tower Foundation">Tower Foundation</option>
+                  <option value="DG Foundation">DG Foundation</option>
+                  <option value="OD Bed Foundation">OD Bed Foundation</option>
+                  <option value="Shelter Foundation">Shelter Foundation</option>
+                  <option value="AC Foundation">AC Foundation</option>
+                  <option value="Civil Rectification">Civil Rectification</option>
+                  <option value="Backfilling">Backfilling</option>
+                </select>
+              </div>
+            </div>
+            <div class="pm-toggle-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <span class="pm-field-label" style="min-width: 150px; width: 150px; flex-shrink: 0; white-space: nowrap;">Drawing</span>
+              <div class="pm-toggle-switch-wrapper" style="flex: 1; display: flex; justify-content: flex-start; padding-left: 2px;">
+                <label class="pm-project-toggle-switch">
+                  <input type="checkbox" id="chkPmNewCivilDrawing" onchange="handlePmCivilDrawingToggle(this)">
+                  <span class="pm-project-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div id="lblPmCivilWorkAttachedFile" style="display: none; font-size: 0.85rem; color: #0454e4; font-weight: 500; text-align: left; padding-left: 168px;"></div>
+          </div>
+        </div>
+
+        <!-- 5. STN Materials Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="pmStnMaterialsModal"
+          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmStnMaterialsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              STN Materials</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnPmEditStnMaterial" onclick="editPmSelectedStnMaterial()" title="Edit STN Material" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: none; align-items: center;">
+                <img src="icons/Edit.svg" alt="Edit" style="width: 22px; height: 22px; display: block;">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnPmAddStnMaterialTrigger" onclick="openPmAddStnMaterialsModal()" title="Add STN Materials" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmStnMaterialsModal"
+                onclick="closePmStnMaterialsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPmStnMaterials" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 6px;">
+                    <span>Select</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>BOQ No</span>
+                  </th>
+                  <th style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>BOQ Date</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Item Category</span>
+                  </th>
+                  <th style="width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Infra Description</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Installation Type</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Make</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>UOM</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Qty</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPmStnMaterials">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+            <!-- Submit icon centered below table -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+              <button type="button" id="btnPmSubmitStnMaterials" onclick="submitPmStnMaterialsDetails()" title="Submit STN Materials" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Submit.svg" alt="Submit" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add STN Materials Sub-Modal -->
+        <div class="side-form-card side-contact-popup" id="pmAddStnMaterialsModal"
+          style="display: none; width: 680px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmAddStnMaterialsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add STN Materials</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" id="btnPmSaveStnMaterial" onclick="savePmNewStnMaterial()" title="Save STN Material" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddStnMaterialsModal"
+                onclick="closePmAddStnMaterialsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 18px 28px 24px 28px; display: flex; flex-direction: column; gap: 14px;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ No</label>
+              <input type="text" id="inpPmStnBoqNo" class="form-input-control" placeholder="Enter BOQ No" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ Date</label>
+              <input type="text" id="inpPmStnBoqDate" class="form-input-control" placeholder="DD-MM-YYYY" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Item Category</label>
+              <input type="text" id="inpPmStnItemCategory" class="form-input-control" placeholder="Enter Item Category" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Description</label>
+              <input type="text" id="inpPmStnInfraDesc" class="form-input-control" placeholder="Enter Infra Description" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Installation Type</label>
+              <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                <select id="inpPmStnInstallationType" class="pm-custom-select">
+                  <option value="Additional">Additional</option>
+                  <option value="Replacement">Replacement</option>
+                </select>
+              </div>
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Make</label>
+              <input type="text" id="inpPmStnMake" class="form-input-control" placeholder="Enter Make" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">UOM</label>
+              <input type="text" id="inpPmStnUom" class="form-input-control" placeholder="Enter UOM (e.g. Nos, Mtr)" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Qty</label>
+              <input type="text" id="inpPmStnQty" class="form-input-control" placeholder="Enter Quantity" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. SRN Materials Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="pmSrnMaterialsModal"
+          style="display: none; width: 1040px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmSrnMaterialsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              SRN Materials</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnPmEditSrnMaterial" onclick="editPmSelectedSrnMaterial()" title="Edit SRN Material" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: none; align-items: center;">
+                <img src="icons/Edit.svg" alt="Edit" style="width: 22px; height: 22px; display: block;">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnPmAddSrnMaterialTrigger" onclick="openPmAddSrnMaterialsModal()" title="Add SRN Materials" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmSrnMaterialsModal"
+                onclick="closePmSrnMaterialsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPmSrnMaterials" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 6px;">
+                    <span>Select</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>BOQ No</span>
+                  </th>
+                  <th style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>BOQ Date</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Item Category</span>
+                  </th>
+                  <th style="width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Infra Description</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Make</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>UOM</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Qty</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPmSrnMaterials">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+            <!-- Submit icon centered below table -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+              <button type="button" id="btnPmSubmitSrnMaterials" onclick="submitPmSrnMaterialsDetails()" title="Submit SRN Materials" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Submit.svg" alt="Submit" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add SRN Materials Sub-Modal -->
+        <div class="side-form-card side-contact-popup" id="pmAddSrnMaterialsModal"
+          style="display: none; width: 680px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmAddSrnMaterialsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add SRN Materials</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" id="btnPmSaveSrnMaterial" onclick="savePmNewSrnMaterial()" title="Save SRN Material" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddSrnMaterialsModal"
+                onclick="closePmAddSrnMaterialsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 18px 28px 24px 28px; display: flex; flex-direction: column; gap: 14px;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Parent code no</label>
+              <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                <select id="inpPmSrnParentCodeNo" class="pm-custom-select">
+                  <option value=""></option>
+                </select>
+              </div>
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ No</label>
+              <input type="text" id="inpPmSrnBoqNo" class="form-input-control" placeholder="Enter BOQ No" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ Date</label>
+              <input type="text" id="inpPmSrnBoqDate" class="form-input-control" placeholder="DD-MM-YYYY" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Item Category</label>
+              <input type="text" id="inpPmSrnItemCategory" class="form-input-control" placeholder="Enter Item Category" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Description</label>
+              <input type="text" id="inpPmSrnInfraDesc" class="form-input-control" placeholder="Enter Infra Description" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Make</label>
+              <input type="text" id="inpPmSrnMake" class="form-input-control" placeholder="Enter Make" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">UOM</label>
+              <input type="text" id="inpPmSrnUom" class="form-input-control" placeholder="Enter UOM (e.g. Nos, Mtr)" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Qty</label>
+              <input type="text" id="inpPmSrnQty" class="form-input-control" placeholder="Enter Quantity" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. CAM Materials Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="pmCamMaterialsModal"
+          style="display: none; width: 1160px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmCamMaterialsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              CAM Materials</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnPmEditCamMaterial" onclick="editPmSelectedCamMaterial()" title="Edit CAM Material" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: none; align-items: center;">
+                <img src="icons/Edit.svg" alt="Edit" style="width: 22px; height: 22px; display: block;">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnPmAddCamMaterialTrigger" onclick="openPmAddCamMaterialsModal()" title="Add CAM Materials" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmCamMaterialsModal"
+                onclick="closePmCamMaterialsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblPmCamMaterials" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 6px;">
+                    <span>Select</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>BOQ No</span>
+                  </th>
+                  <th style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>BOQ Date</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Item Category</span>
+                  </th>
+                  <th style="width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Infra Description</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Site ID</span>
+                  </th>
+                  <th style="width: 25ch; min-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Site Name</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Make</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>UOM</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
+                    <span>Qty</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPmCamMaterials">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+            <!-- Submit icon centered below table -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+              <button type="button" id="btnPmSubmitCamMaterials" onclick="submitPmCamMaterialsDetails()" title="Submit CAM Materials" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Submit.svg" alt="Submit" style="width: 28px; height: 28px; display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add CAM Materials Sub-Modal -->
+        <div class="side-form-card side-contact-popup" id="pmAddCamMaterialsModal"
+          style="display: none; width: 680px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPmAddCamMaterialsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add CAM Materials</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" id="btnPmSaveCamMaterial" onclick="savePmNewCamMaterial()" title="Save CAM Material" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 26px; height: 26px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddCamMaterialsModal"
+                onclick="closePmAddCamMaterialsModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 18px 28px 24px 28px; display: flex; flex-direction: column; gap: 14px;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ No</label>
+              <input type="text" id="inpPmCamBoqNo" class="form-input-control" placeholder="Enter BOQ No" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ Date</label>
+              <input type="text" id="inpPmCamBoqDate" class="form-input-control" placeholder="DD-MM-YYYY" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Item Category</label>
+              <input type="text" id="inpPmCamItemCategory" class="form-input-control" placeholder="Enter Item Category" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Description</label>
+              <input type="text" id="inpPmCamInfraDesc" class="form-input-control" placeholder="Enter Infra Description" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Site ID</label>
+              <input type="text" id="inpPmCamSiteId" class="form-input-control" placeholder="Enter Site ID" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Site Name</label>
+              <input type="text" id="inpPmCamSiteName" class="form-input-control" placeholder="Enter Site Name" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Make</label>
+              <input type="text" id="inpPmCamMake" class="form-input-control" placeholder="Enter Make" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">UOM</label>
+              <input type="text" id="inpPmCamUom" class="form-input-control" placeholder="Enter UOM (e.g. Nos, Mtr)" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Qty</label>
+              <input type="text" id="inpPmCamQty" class="form-input-control" placeholder="Enter Quantity" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
             </div>
           </div>
         </div>
@@ -4093,19 +4632,17 @@
         <!-- PO Capex Modal Tab (PO No - Revision No (Capex)) -->
         <div class="side-form-card project-info-modal-card" id="poCapexModal"
           style="display: none; width: 1240px; max-width: 96vw;">
-          <!-- Header Ribbon: Slanted Green Title Badge & Red Close Button -->
-          <div class="side-form-header">
+          <!-- Header Ribbon: Slanted Green Title Badge, Summation Total & Red Close Button -->
+          <div class="side-form-header" style="display: flex; align-items: center; justify-content: space-between;">
             <div class="side-form-title-badge" id="lblPoCapexTitle">PO No - Revision No (Capex)</div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 18px;">
+              <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block;">
+              <span id="lblPoCapexTotalAmount" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">2,21,000.00</span>
+            </div>
             <button type="button" class="side-form-close-btn" id="btnClosePoCapexModal" onclick="closePoCapexModal()"
               aria-label="Close">&times;</button>
           </div>
-
-          <!-- Toolbar with Blue Sigma Sum Symbol -->
-          <div style="padding: 14px 28px 10px; display: flex; align-items: center;">
-            <span
-              style="color: #2563eb; font-size: 1.75rem; font-weight: 700; font-family: sans-serif; cursor: pointer; line-height: 1; user-select: none;"
-              title="Summary">Σ</span>
-          </div>
+          <div style="height: 14px;"></div>
 
           <!-- Table Container with Centered Headers and Exact Content Alignments/Widths -->
           <div class="contact-table-wrap" style="padding: 0 28px 24px; overflow-x: auto;">

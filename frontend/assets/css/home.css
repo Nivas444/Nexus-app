@@ -5226,13 +5226,14 @@ body.standalone-mode .worklist-main-full {
 
 #pmPlanningBoqBox {
   text-align: center !important;
-  border: 1.5px solid #000000 !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
   outline: none !important;
   box-shadow: none !important;
 }
 
 #pmPlanningBoqBox:focus {
-  border-color: #000000 !important;
+  border-color: #94a3b8 !important;
   outline: none !important;
   box-shadow: none !important;
 }

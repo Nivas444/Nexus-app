@@ -7619,23 +7619,39 @@ function renderApp() {
           </div>
         `;
       } else if (currentProjectsView === 'details' || currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor') {
+        const activeRow = window.activePmProjectRow ||
+          (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore.find(r => String(r.id) === String(selectedProjectId)) : null) ||
+          (typeof projectsMainData !== 'undefined' ? projectsMainData.find(r => String(r.id) === String(selectedProjectId)) : null) ||
+          (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData.find(r => String(r.id) === String(selectedProjectId)) : null) || {};
+
+        const pProjId = activeRow.projectId || 'R/RL-234567';
+        const pProjType = activeRow.projectType || 'New Build';
+        const pSubProjType = activeRow.subProjectType || 'With DG';
+        const pPo = activeRow.poNo || '230510678';
+        const sId = activeRow.siteId || 'IN-123456';
+        const sName = activeRow.siteName || 'Guindy';
+
+        const projStr = `${pProjId} / ${pProjType} / ${pSubProjType}`;
+        const poStr = pPo.includes('(') ? pPo : `${pPo} / ( 0 - Capex )`;
+        const siteStr = `${sId} / ${sName}`;
+
         bannerTitle.innerHTML = `
           <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openProjectInfoModal(); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Details">R/RL-234567 / New Build / With DG</a>
-              <button type="button" class="btn-banner-copy" onclick="copyBannerText('R/RL-234567 / New Build / With DG', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+              <a href="#" onclick="openProjectInfoModal('${activeRow.id || ''}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Details">${projStr}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${projStr}', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openPoCapexModal('230510678 / ( 0 - Capex )'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Capex PO Details">230510678 / ( 0 - Capex )</a>
-              <button type="button" class="btn-banner-copy" onclick="copyBannerText('230510678 / ( 0 - Capex )', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+              <a href="#" onclick="openPoCapexModal('${poStr}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Capex PO Details">${poStr}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${poStr}', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openSiteInfoModal('Site ID / Site Name'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Site Details">IN-123456 / Guindy</a>
-              <button type="button" class="btn-banner-copy" onclick="copyBannerText('IN-123456 / Guindy', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+              <a href="#" onclick="openSiteInfoModal('${siteStr}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Site Details">${siteStr}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${siteStr}', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
@@ -10472,6 +10488,7 @@ let pmProjectFeatureSettings = {
   additionalApproval: false,
   serviceContract: false,
   stn: false,
+  srn: false,
   cam: false
 };
 try {
@@ -10588,6 +10605,11 @@ window.openPmProjectDetailsModal = function(rowId) {
   if (chkStn) chkStn.checked = !!pmProjectFeatureSettings.stn;
   if (chkNonNbStn) chkNonNbStn.checked = !!pmProjectFeatureSettings.stn;
 
+  const chkSrn = document.getElementById('chkPmSrn');
+  const chkNonNbSrn = document.getElementById('chkPmNonNbSrn');
+  if (chkSrn) chkSrn.checked = !!pmProjectFeatureSettings.srn;
+  if (chkNonNbSrn) chkNonNbSrn.checked = !!pmProjectFeatureSettings.srn;
+
   const chkCam = document.getElementById('chkPmCam');
   const chkNonNbCam = document.getElementById('chkPmNonNbCam');
   if (chkCam) chkCam.checked = !!pmProjectFeatureSettings.cam;
@@ -10642,12 +10664,14 @@ window.savePmProjectDetails = function() {
   const isAddApprove = !!(document.getElementById('chkPmAdditionalApproval')?.checked || document.getElementById('chkPmNonNbAdditionalApproval')?.checked);
   const isService = !!(document.getElementById('chkPmServiceContract')?.checked || document.getElementById('chkPmNonNbServiceContract')?.checked);
   const isStn = !!(document.getElementById('chkPmStn')?.checked || document.getElementById('chkPmNonNbStn')?.checked);
+  const isSrn = !!(document.getElementById('chkPmSrn')?.checked || document.getElementById('chkPmNonNbSrn')?.checked);
   const isCam = !!(document.getElementById('chkPmCam')?.checked || document.getElementById('chkPmNonNbCam')?.checked);
 
   pmProjectFeatureSettings.tspMaterials = isTsp;
   pmProjectFeatureSettings.additionalApproval = isAddApprove;
   pmProjectFeatureSettings.serviceContract = isService;
   pmProjectFeatureSettings.stn = isStn;
+  pmProjectFeatureSettings.srn = isSrn;
   pmProjectFeatureSettings.cam = isCam;
   try {
     localStorage.setItem('pmProjectFeatureSettings', JSON.stringify(pmProjectFeatureSettings));
@@ -10655,13 +10679,14 @@ window.savePmProjectDetails = function() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
-    if (isStn || isCam) {
-      if (['project_update', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+    const isSrnOrCam = isSrn || isCam;
+    if (isSrnOrCam) {
+      if (currentWorklistView === 'project_update') {
         currentWorklistView = 'yts';
       }
     } else {
-      if (['yts', 'hold', 'nr'].includes(currentWorklistView)) {
-        currentWorklistView = 'wip';
+      if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+        currentWorklistView = 'project_update';
       }
     }
   }
@@ -11929,6 +11954,129 @@ window.closePoCapexModal = function() {
   }
 };
 
+let siteInfoDataStore = [
+  { id: 'site-mem-1', name: 'Rajesh Kumar', designation: 'Site Engineer', contact: '+91 9876543210', email: 'rajesh.k@telecom.in', status: 'Active', selected: false },
+  { id: 'site-mem-2', name: 'Anand Sundaram', designation: 'Project Manager', contact: '+91 9845012345', email: 'anand.s@telecom.in', status: 'Active', selected: false },
+  { id: 'site-mem-3', name: 'Vignesh R', designation: 'Safety Officer', contact: '+91 9712345678', email: 'vignesh.r@telecom.in', status: 'Active', selected: false }
+];
+
+window.renderSiteInfoTable = function() {
+  const tbody = document.getElementById('tblSiteInfoBody');
+  if (!tbody) return;
+  const deleteBtn = document.getElementById('btnDeleteSiteInfoRow');
+  const hasSelected = siteInfoDataStore.some(r => r.selected);
+  if (deleteBtn) deleteBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+
+  if (siteInfoDataStore.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">No site contact records.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = siteInfoDataStore.map(row => {
+    return `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+          <div class="circular-radio-btn" onclick="toggleSiteInfoRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${row.selected ? '#008744' : '#94a3b8'}; background: ${row.selected ? '#008744' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${row.selected ? 'Unselect' : 'Select'}">
+            ${row.selected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+          </div>
+        </td>
+        <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${row.name || ''}</td>
+        <td style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${row.designation || ''}</td>
+        <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${row.contact || ''}</td>
+        <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${row.email || ''}</td>
+        <td style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">${row.status || 'Active'}</td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.toggleSiteInfoRowSelect = function(rowId) {
+  const row = siteInfoDataStore.find(r => String(r.id) === String(rowId));
+  if (row) {
+    row.selected = !row.selected;
+  }
+  renderSiteInfoTable();
+};
+
+window.deleteSelectedSiteInfoRows = function() {
+  const selectedCount = siteInfoDataStore.filter(r => r.selected).length;
+  if (selectedCount === 0) {
+    showToast('No record selected to delete.');
+    return;
+  }
+  siteInfoDataStore = siteInfoDataStore.filter(r => !r.selected);
+  renderSiteInfoTable();
+  showToast(`Deleted ${selectedCount} contact record${selectedCount > 1 ? 's' : ''} successfully.`);
+};
+
+window.openAddSiteModal = function() {
+  const modal = document.getElementById('addSiteModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (modal) {
+    const parentCard = document.getElementById('siteInfoModal');
+    if (parentCard) parentCard.classList.add('card-dimmed-blurred');
+    if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+    modal.style.display = 'flex';
+    if (overlay) overlay.style.display = 'flex';
+  }
+};
+
+window.closeAddSiteModal = function() {
+  const modal = document.getElementById('addSiteModal');
+  if (modal) modal.style.display = 'none';
+  const parentCard = document.getElementById('siteInfoModal');
+  if (parentCard) parentCard.classList.remove('card-dimmed-blurred');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+};
+
+window.saveNewSiteDetails = function() {
+  const selFsm = document.getElementById('selAddSiteFsm');
+  const selAom = document.getElementById('selAddSiteAom');
+  const fsmVal = selFsm ? selFsm.value : '';
+  const aomVal = selAom ? selAom.value : '';
+
+  if (!fsmVal && !aomVal) {
+    showToast('Please select at least one FSM or AOM option.');
+    return;
+  }
+
+  if (fsmVal) {
+    const parts = fsmVal.split(' - ');
+    const name = parts[0] || 'FSM Contact';
+    const contact = (fsmVal.match(/\+91\s?\d{10}/) || ['+91 9845112233'])[0];
+    siteInfoDataStore.unshift({
+      id: 'site-fsm-' + Date.now(),
+      name: name,
+      designation: 'FSM',
+      contact: contact,
+      email: name.toLowerCase().replace(/\s+/g, '.') + '@telecom.in',
+      status: 'Active',
+      selected: false
+    });
+  }
+
+  if (aomVal) {
+    const parts = aomVal.split(' - ');
+    const name = parts[0] || 'AOM Contact';
+    const contact = (aomVal.match(/\+91\s?\d{10}/) || ['+91 9845012345'])[0];
+    siteInfoDataStore.unshift({
+      id: 'site-aom-' + Date.now(),
+      name: name,
+      designation: 'AOM',
+      contact: contact,
+      email: name.toLowerCase().replace(/\s+/g, '.') + '@telecom.in',
+      status: 'Active',
+      selected: false
+    });
+  }
+
+  renderSiteInfoTable();
+  closeAddSiteModal();
+  showToast('Site contact details updated successfully.');
+};
+
 window.openSiteInfoModal = function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -11948,6 +12096,7 @@ window.openSiteInfoModal = function(titleText) {
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
+    renderSiteInfoTable();
   }
 };
 
@@ -11967,6 +12116,255 @@ window.closeSiteInfoModal = function() {
   } else {
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
+  }
+};
+
+// ==========================================================================
+// PROJECT PLAN & MEMBERS MODAL CONTROLLERS
+// ==========================================================================
+window.openProjectPlanModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'pmProjectPlanModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('pmProjectPlanModal');
+  if (modal) {
+    const selType = document.getElementById('selPmPlanType');
+    if (selType) selType.value = '';
+    const rowAct = document.getElementById('rowPmPlanActivity');
+    if (rowAct) rowAct.style.display = 'none';
+    const rowMove = document.getElementById('rowPmPlanMoveTo');
+    if (rowMove) rowMove.style.display = 'none';
+    const rowWh = document.getElementById('rowPmPlanWhLocation');
+    if (rowWh) rowWh.style.display = 'none';
+    const rowIwh = document.getElementById('rowPmPlanIwhLocation');
+    if (rowIwh) rowIwh.style.display = 'none';
+
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closePmProjectPlanModal = function() {
+  const modal = document.getElementById('pmProjectPlanModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.handlePmPlanTypeChange = function(typeVal) {
+  const rowAct = document.getElementById('rowPmPlanActivity');
+  const rowMove = document.getElementById('rowPmPlanMoveTo');
+  const selMove = document.getElementById('selPmPlanMoveTo');
+  const rowWh = document.getElementById('rowPmPlanWhLocation');
+  const rowIwh = document.getElementById('rowPmPlanIwhLocation');
+
+  if (typeVal === 'Project') {
+    if (rowAct) rowAct.style.display = 'flex';
+    if (rowMove) rowMove.style.display = 'none';
+    if (rowWh) rowWh.style.display = 'none';
+    if (rowIwh) rowIwh.style.display = 'none';
+  } else if (typeVal === 'STN') {
+    if (rowAct) rowAct.style.display = 'none';
+    if (rowMove) {
+      rowMove.style.display = 'flex';
+      if (selMove) {
+        selMove.innerHTML = `
+          <option value="" disabled selected>Select Move to</option>
+          <option value="WH">WH</option>
+          <option value="Site">Site</option>
+        `;
+      }
+    }
+    if (rowWh) rowWh.style.display = 'none';
+    if (rowIwh) rowIwh.style.display = 'none';
+  } else if (typeVal === 'SRN') {
+    if (rowAct) rowAct.style.display = 'none';
+    if (rowMove) {
+      rowMove.style.display = 'flex';
+      if (selMove) {
+        selMove.innerHTML = `
+          <option value="" disabled selected>Select Move to</option>
+          <option value="I-WH">I-WH</option>
+          <option value="Site">Site</option>
+        `;
+      }
+    }
+    if (rowWh) rowWh.style.display = 'none';
+    if (rowIwh) rowIwh.style.display = 'none';
+  } else {
+    if (rowAct) rowAct.style.display = 'none';
+    if (rowMove) rowMove.style.display = 'none';
+    if (rowWh) rowWh.style.display = 'none';
+    if (rowIwh) rowIwh.style.display = 'none';
+  }
+};
+
+window.handlePmPlanMoveToChange = function(moveToVal) {
+  const rowWh = document.getElementById('rowPmPlanWhLocation');
+  const rowIwh = document.getElementById('rowPmPlanIwhLocation');
+  if (moveToVal === 'WH') {
+    if (rowWh) rowWh.style.display = 'flex';
+    if (rowIwh) rowIwh.style.display = 'none';
+  } else if (moveToVal === 'I-WH') {
+    if (rowIwh) rowIwh.style.display = 'flex';
+    if (rowWh) rowWh.style.display = 'none';
+  } else {
+    if (rowWh) rowWh.style.display = 'none';
+    if (rowIwh) rowIwh.style.display = 'none';
+  }
+};
+
+window.submitPmProjectPlan = function() {
+  const selType = document.getElementById('selPmPlanType');
+  const planVal = selType ? selType.value : '';
+  if (!planVal) {
+    showToast('Please select an option in Project Plan.');
+    return;
+  }
+  closePmProjectPlanModal();
+  openPmMembersModal();
+};
+
+let pmMembersDataStore = [
+  { id: 'mem-1', name: 'Karthik Raja', designation: 'Supervisor', contact: '+91 9840123456', status: 'Active', selected: false },
+  { id: 'mem-2', name: 'Priya Sharma', designation: 'Technician', contact: '+91 9845112233', status: 'Active', selected: false },
+  { id: 'mem-3', name: 'Suresh Kumar', designation: 'Service Vendor', contact: '+91 9876543210', status: 'Active', selected: false }
+];
+
+window.renderPmMembersTable = function() {
+  const tbody = document.getElementById('tblMembersBody');
+  if (!tbody) return;
+
+  if (pmMembersDataStore.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">No members assigned.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = pmMembersDataStore.map(row => {
+    return `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+          <div class="circular-radio-btn" onclick="togglePmMemberSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${row.selected ? '#008744' : '#94a3b8'}; background: ${row.selected ? '#008744' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${row.selected ? 'Unselect' : 'Select'}">
+            ${row.selected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+          </div>
+        </td>
+        <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${row.name || ''}</td>
+        <td style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${row.designation || ''}</td>
+        <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${row.contact || ''}</td>
+        <td style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">${row.status || 'Active'}</td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.togglePmMemberSelect = function(memId) {
+  const row = pmMembersDataStore.find(r => String(r.id) === String(memId));
+  if (row) {
+    row.selected = !row.selected;
+  }
+  renderPmMembersTable();
+};
+
+window.openPmMembersModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'pmMembersModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('pmMembersModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+    renderPmMembersTable();
+  }
+};
+
+window.closePmMembersModal = function() {
+  const modal = document.getElementById('pmMembersModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openAddMemberModal = function() {
+  const modal = document.getElementById('pmAddMemberModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!modal) return;
+
+  const parentCard = document.getElementById('pmMembersModal');
+  if (parentCard) parentCard.classList.add('card-dimmed-blurred');
+
+  const selEmp = document.getElementById('selMemberEmployeeName');
+  if (selEmp) {
+    let empNames = [];
+    if (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData) && masterEmployeeData.length > 0) {
+      empNames = masterEmployeeData.map(e => e.employeeName || e.employee_name || e.name).filter(Boolean);
+    }
+    if (empNames.length === 0) {
+      empNames = ['Karthik Raja', 'Priya Sharma', 'Suresh Kumar', 'Deepa Venkat', 'Arun Prasath', 'Meena Kumari'];
+    }
+    selEmp.innerHTML = empNames.map((name, i) => `<option value="${name}" ${i === 0 ? 'selected' : ''}>${name}</option>`).join('');
+  }
+
+  modal.style.display = 'block';
+  if (overlay) overlay.style.display = 'flex';
+};
+
+window.closeAddMemberModal = function() {
+  const modal = document.getElementById('pmAddMemberModal');
+  if (modal) modal.style.display = 'none';
+  const parentCard = document.getElementById('pmMembersModal');
+  if (parentCard) parentCard.classList.remove('card-dimmed-blurred');
+};
+
+window.saveNewMember = function() {
+  const selDesig = document.getElementById('selMemberDesignation');
+  const selName = document.getElementById('selMemberEmployeeName');
+  const designation = selDesig ? selDesig.value : 'Supervisor';
+  const name = selName ? selName.value : 'Karthik Raja';
+
+  pmMembersDataStore.unshift({
+    id: 'mem-' + Date.now(),
+    name: name,
+    designation: designation,
+    contact: '+91 984' + Math.floor(1000000 + Math.random() * 9000000),
+    status: 'Active',
+    selected: false
+  });
+
+  renderPmMembersTable();
+  closeAddMemberModal();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Member added and task completed successfully!', 'Task Completed', () => {
+      closePmMembersModal();
+      closePmProjectPlanModal();
+    });
+  } else {
+    showToast('Member added successfully.');
+    closePmMembersModal();
+    closePmProjectPlanModal();
+  }
+};
+
+window.submitMembersTask = function() {
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Project plan and member assignments submitted successfully!', 'Task Completed', () => {
+      closePmMembersModal();
+      closePmProjectPlanModal();
+    });
+  } else {
+    showToast('Task completed successfully.');
+    closePmMembersModal();
+    closePmProjectPlanModal();
   }
 };
 
@@ -12400,6 +12798,39 @@ window.openProjectDetailPage = function(projId, customerName) {
   updateURL();
   renderApp();
   showToast(`Opened Project: ${selectedProjectCustomer}`);
+};
+
+window.openPmSiteProjectLandingPage = function(rowId) {
+  let row = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(rowId));
+  if (!row && typeof commercialWorklistData !== 'undefined') {
+    row = commercialWorklistData.find(r => String(r.id) === String(rowId));
+  }
+  if (!row && typeof projectsMainData !== 'undefined') {
+    row = projectsMainData.find(r => String(r.id) === String(rowId));
+  }
+  if (!row) {
+    row = {
+      id: rowId,
+      projectId: 'PRJ-2026-001',
+      projectType: 'Run project',
+      subProjectType: 'Civil',
+      poNo: '4500128934',
+      siteId: 'IN-123456',
+      siteName: 'Guindy Hub'
+    };
+  }
+
+  window.activePmProjectRow = row;
+  selectedProjectId = row.id || rowId;
+  window.lastPmWorklistView = currentWorklistView; // keeps YTS / WIP / HOLD / NR
+
+  currentModule = 'projects';
+  currentProjectsView = 'details';
+  currentProjectDetailTab = '';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast(`Opened Project: ${row.siteName || row.projectId}`);
 };
 
 window.openProjectExpensesPage = function() {
@@ -13189,7 +13620,7 @@ function renderProjectsFooter() {
   }
 
   // In all customer content subpages: Expenses, Material, Infra, DPR, BOQ, Additional Approve, Service vendor
-  const detailTabs = [
+  let detailTabs = [
     { key: 'expenses', label: 'Expenses' }
   ];
   if (pmProjectFeatureSettings.tspMaterials) {
@@ -15258,12 +15689,107 @@ window.toggleCommercialWorklistRowSelect = function(rowId) {
   updateCommercialWorklistDeleteBtnVisibility();
 };
 
-window.updateCommercialWorklistDeleteBtnVisibility = function() {
-  const hasSelected = currentDataset.some(r => r.selected);
-  const deleteBtn = document.getElementById('btnCommercialWorklistDelete');
-  if (deleteBtn) {
-    deleteBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+window.togglePmStatusRowSelect = function(rowId) {
+  const row = currentDataset.find(r => String(r.id) === String(rowId));
+  if (row) {
+    row.selected = !row.selected;
   }
+  const storeRow = pmStatusDataStore.find(r => String(r.id) === String(rowId));
+  if (storeRow) {
+    storeRow.selected = row ? row.selected : !storeRow.selected;
+  }
+  applyFiltersAndRender();
+  renderWorklistToolbar();
+};
+
+window.toggleSelectAllPmStatus = function(selectAll) {
+  currentDataset.forEach(r => {
+    r.selected = selectAll;
+    const storeRow = pmStatusDataStore.find(sr => String(sr.id) === String(r.id));
+    if (storeRow) storeRow.selected = selectAll;
+  });
+  applyFiltersAndRender();
+  renderWorklistToolbar();
+};
+
+window.editSelectedPmRow = function() {
+  const selectedRows = currentDataset.filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    showToast('Please select a row to edit.');
+    return;
+  }
+  showToast(`Edit mode activated for ${selectedRows.length} record(s).`);
+};
+
+window.sendMailPmWorklist = function() {
+  const selectedRows = currentDataset.filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    showToast('Please select a row to send mail.');
+    return;
+  }
+  showToast(`Mail notification queued for ${selectedRows.length} selected site(s).`);
+};
+
+window.exportPmWorklistToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (pmStatusDataStore || []);
+  const headers = isPmColumnsExpanded ? [
+    "Site Name", "Status", "Project ID", "Site ID", "Project Type", "Sub-Project Type", "STN", "SRN", "CAM", "Materials", "Support Required", "Pending With", "Remarks", "Ageing"
+  ] : [
+    "Site Name", "Status", "Project ID", "Site ID", "Project Type", "Sub-Project Type", "STN", "SRN", "CAM", "Materials", "Ageing"
+  ];
+
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const rows = data.map(r => {
+    if (isPmColumnsExpanded) {
+      return [
+        escapeCsv(r.siteName),
+        escapeCsv(r.status),
+        escapeCsv(r.projectId),
+        escapeCsv(r.siteId),
+        escapeCsv(r.projectType),
+        escapeCsv(r.subProjectType),
+        escapeCsv(r.stn),
+        escapeCsv(r.srn),
+        escapeCsv(r.cam),
+        escapeCsv(r.materials),
+        escapeCsv(r.supportRequired),
+        escapeCsv(r.pendingWith),
+        escapeCsv(r.remarks),
+        escapeCsv(r.ageing)
+      ].join(',');
+    } else {
+      return [
+        escapeCsv(r.siteName),
+        escapeCsv(r.status),
+        escapeCsv(r.projectId),
+        escapeCsv(r.siteId),
+        escapeCsv(r.projectType),
+        escapeCsv(r.subProjectType),
+        escapeCsv(r.stn),
+        escapeCsv(r.srn),
+        escapeCsv(r.cam),
+        escapeCsv(r.materials),
+        escapeCsv(r.ageing)
+      ].join(',');
+    }
+  });
+
+  const csvContent = "\uFEFF" + [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  const statusName = (currentWorklistView || 'PM_Worklist').toUpperCase();
+  link.setAttribute('download', `${statusName}_Export_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast(`${statusName} CSV exported successfully.`);
 };
 
 function renderWorklistToolbar() {
@@ -15273,11 +15799,23 @@ function renderWorklistToolbar() {
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
     if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+      const hasSelected = currentDataset.some(r => r.selected);
+      const viewUpper = currentWorklistView.toUpperCase();
       toolbar.innerHTML = `
-        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
-          ${universalBackBtnHtml}
-        </div>
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-edit-action" id="btnPmWorklistEdit" data-tooltip="Edit Selected" aria-label="Edit Selected" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'};" onclick="editSelectedPmRow()">
+            <img src="icons/Edit.svg" alt="Edit" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-mail-action" id="btnPmWorklistMail" data-tooltip="Send Mail" aria-label="Send Mail" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'};" onclick="sendMailPmWorklist()">
+            <img src="icons/mail.svg" alt="Mail" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnPmWorklistCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportPmWorklistToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnPmWorklistBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('${viewUpper}')">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+          </button>
           <button type="button" class="toolbar-icon-btn btn-collapse-action" id="btnPmToggleColumns" data-tooltip="${isPmColumnsExpanded ? 'Hide Extra Columns' : 'Show Extra Columns'}" aria-label="Toggle Columns" style="cursor: pointer;" onclick="togglePmExtraColumns()">
             <img src="icons/Collapse.svg" alt="Toggle Columns" class="toolbar-icon-img" id="imgPmCollapseIcon" width="28" height="28" style="transform: ${isPmColumnsExpanded ? 'rotate(-90deg)' : 'rotate(90deg)'}; transition: transform 0.2s ease;">
           </button>
@@ -15938,58 +16476,6 @@ function renderWorklistFooter() {
     footer.style.marginTop = 'auto';
     footer.style.padding = '24px';
 
-    if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
-      const detailTabs = [
-        { key: 'expenses', label: 'Expenses' }
-      ];
-      if (pmProjectFeatureSettings.tspMaterials) {
-        detailTabs.push({ key: 'material', label: 'Material' });
-      }
-      detailTabs.push({ key: 'infra', label: 'Infra' });
-      detailTabs.push({ key: 'dpr', label: 'DPR' });
-      detailTabs.push({ key: 'boq', label: 'BOQ' });
-      if (pmProjectFeatureSettings.additionalApproval) {
-        detailTabs.push({ key: 'additional_approve', label: 'Additional Approve' });
-      }
-      if (pmProjectFeatureSettings.serviceContract) {
-        detailTabs.push({ key: 'service_vendor', label: 'Service vendor' });
-      }
-
-      footer.innerHTML = `
-        <div class="segmented-toggle-group">
-          ${detailTabs.map((tab, idx) => `
-            <button type="button" class="segmented-btn" data-pm-worklist-tab="${tab.key}">
-              ${tab.label}
-            </button>
-            ${idx < detailTabs.length - 1 ? '<div class="segmented-divider"></div>' : ''}
-          `).join('')}
-        </div>
-      `;
-
-      footer.querySelectorAll('.segmented-btn[data-pm-worklist-tab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const tabKey = btn.getAttribute('data-pm-worklist-tab');
-          window.lastPmWorklistView = currentWorklistView;
-          if (tabKey === 'expenses') {
-            openProjectExpensesPage();
-          } else if (tabKey === 'material' || tabKey === 'materials') {
-            openProjectMaterialPage();
-          } else if (tabKey === 'infra') {
-            openProjectInfraPage();
-          } else if (tabKey === 'dpr') {
-            openProjectDprPage();
-          } else if (tabKey === 'boq') {
-            openProjectBoqPage();
-          } else if (tabKey === 'additional_approve' || tabKey === 'approvals' || tabKey === 'additional_approvals') {
-            openProjectApprovalsPage();
-          } else if (tabKey === 'service_vendor' || tabKey === 'service_vendors') {
-            openProjectServiceVendorPage();
-          }
-        });
-      });
-      return;
-    }
-
     const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 7;
     const ytsCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'YTS').length : 2;
     const wipCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'WIP').length : 3;
@@ -16275,7 +16761,7 @@ function renderWorklistTableHead() {
       `;
       rebindFilterButtons();
       return;
-    } else if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+    } else if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
       thead.innerHTML = `
         <tr class="master-view-header">
           <!-- 1. Select: 60px, center, no filter -->
@@ -17403,9 +17889,9 @@ function applyFiltersAndRender() {
         const submitDateVal = row.submitDate || row.date || '';
         return `
           <tr data-row-id="${row.id}">
-            <!-- 1. Site Name: 25ch & left (Clickable to open PM Project Details Tab Modal) -->
+            <!-- 1. Site Name: 25ch & left (Clickable to open PM Project Details Modal) -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
-              <a href="#" class="site-name-modal-trigger clickable-project-link" onclick="openPmProjectDetailsModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.siteName || ''}</a>
+              <a href="#" class="site-name-modal-trigger clickable-project-link" onclick="openPmProjectDetailsModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: none !important; font-weight: 500; cursor: pointer;">${row.siteName || ''}</a>
             </td>
             <!-- 2. Submit Date: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
@@ -17439,9 +17925,9 @@ function applyFiltersAndRender() {
         `;
       }).join('');
       return;
-    } else if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
-      const targetStatus = currentWorklistView.toUpperCase();
-      currentDataset = (pmStatusDataStore || []).filter(r => r.status === targetStatus);
+    } else if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
+      const targetStatus = currentWorklistView === 'project_update' ? 'WIP' : currentWorklistView.toUpperCase();
+      currentDataset = (pmStatusDataStore || []).filter(r => currentWorklistView === 'project_update' ? true : r.status === targetStatus);
 
       filteredDataset = currentDataset.filter(row => {
         for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
@@ -17473,9 +17959,9 @@ function applyFiltersAndRender() {
                 ${row.selected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
               </div>
             </td>
-            <!-- 2. Site Name: 25ch & left (Clickable to open PM Project Details Modal) -->
+            <!-- 2. Site Name: 25ch & left (Clickable to open PM Project Landing Page) -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
-              <a href="#" class="site-name-modal-trigger clickable-project-link" onclick="openPmProjectDetailsModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.siteName || ''}</a>
+              <a href="#" class="site-name-modal-trigger clickable-project-link" onclick="openPmSiteProjectLandingPage('${row.id}'); return false;" style="color: #0454e4; text-decoration: none !important; font-weight: 500; cursor: pointer;">${row.siteName || ''}</a>
             </td>
             <!-- 3. Status: 10ch & center -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
@@ -36018,7 +36504,9 @@ window.openAddBulkUploadModal = function() {
   let displayName = currentBulkUploadPageName || 'Employee';
   const pageNorm = displayName.trim().toLowerCase();
 
-  if (activeView === 'po_amend' || activeView === 'po_amend_detail' || pageNorm === 'po amend' || pageNorm === 'po amendment') {
+  if (['yts', 'wip', 'hold', 'nr'].includes(activeView) || ['yts', 'wip', 'hold', 'nr'].includes(pageNorm)) {
+    displayName = (['yts', 'wip', 'hold', 'nr'].includes(activeView) ? activeView : pageNorm).toUpperCase();
+  } else if (activeView === 'po_amend' || activeView === 'po_amend_detail' || pageNorm === 'po amend' || pageNorm === 'po amendment') {
     displayName = 'PO Amendment';
   } else if (activeView === 'wcc' || pageNorm === 'wcc') {
     displayName = 'WCC';
@@ -36035,7 +36523,17 @@ window.openAddBulkUploadModal = function() {
   }
 
   if (siteTypeRow) {
-    if (displayName === 'PO Amendment') {
+    if (['YTS', 'WIP', 'HOLD', 'NR'].includes(displayName)) {
+      siteTypeRow.style.display = 'block';
+      if (selUploadType) {
+        selUploadType.innerHTML = `
+          <option value="support_required_remarks" selected>Support Required & Remarks</option>
+          <option value="stn_boq">STN BOQ</option>
+          <option value="srn_boq">SRN BOQ</option>
+          <option value="cam_boq">CAM BOQ</option>
+        `;
+      }
+    } else if (displayName === 'PO Amendment') {
       siteTypeRow.style.display = 'none';
     } else if (displayName === 'Receivable') {
       siteTypeRow.style.display = 'block';
@@ -36687,7 +37185,9 @@ function getCommercialPoTypeSuffix(val) {
 }
 
 function updateCommercialPoHeaderBadges() {
-  const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+  const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+    || (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+    || (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(activeCommercialPoRowId));
   const inpProjId = document.getElementById('inpPoDetailProjectId');
   const selProjType = document.getElementById('selPoDetailProjectType');
   const selSubProjType = document.getElementById('selPoDetailSubProjectType');
@@ -36878,6 +37378,7 @@ window.openCommercialPoModal = function(rowId) {
   }
 
   const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(rowId))
+    || (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(rowId))
     || (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(rowId));
 
   if (row) {
@@ -36958,7 +37459,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyProj.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+        || (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+        || (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(activeCommercialPoRowId));
       const inpProj = document.getElementById('inpPoDetailProjectId');
       const projId = (inpProj ? inpProj.value.trim() : '') || (row ? row.projectId : '') || '';
       if (projId && navigator.clipboard) {
@@ -36978,7 +37481,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyPo.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+        || (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+        || (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(activeCommercialPoRowId));
       const poNo = (row ? row.poNo : '') || '';
       if (poNo && navigator.clipboard) {
         navigator.clipboard.writeText(poNo).then(() => {
@@ -36997,7 +37502,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopySite.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+        || (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+        || (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(activeCommercialPoRowId));
       const siteId = (row ? row.siteId : '') || '';
       if (siteId && navigator.clipboard) {
         navigator.clipboard.writeText(siteId).then(() => {
@@ -37018,7 +37525,8 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       if (!activeCommercialPoRowId) return;
 
-      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId));
+      const row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(activeCommercialPoRowId))
+        || (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(activeCommercialPoRowId));
       const curRow = (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(activeCommercialPoRowId));
 
       const inpProj = document.getElementById('inpPoDetailProjectId');

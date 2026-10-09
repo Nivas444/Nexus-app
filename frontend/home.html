@@ -3583,13 +3583,13 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 14px; padding-right: 18px; margin-left: auto;">
-              <!-- Save Action Button -->
-              <button type="button" id="btnPmProjectSubmit" onclick="savePmProjectDetails()" title="Save Project Details" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
-                <img src="icons/Save.svg" id="imgPmProjectSubmitIcon" alt="Save" style="width: 26px; height: 26px; display: block;">
+              <!-- Edit Action Button (Blue Pencil) -->
+              <button type="button" id="btnPmProjectEdit" onclick="enablePmProjectEditing()" title="Edit Project Details" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
               </button>
 
               <!-- Red Close Button -->
-              <button type="button" class="side-form-close-btn" id="btnClosePmProjectDetailsModal" onclick="closePmProjectModal()" aria-label="Close">&times;</button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmProjectDetailsModal" onclick="closePmProjectModal()" aria-label="Close" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
 
@@ -3948,7 +3948,14 @@
 
             <!-- Bottom Container: Planning BOQ as Typebox -->
             <div style="width: 100%; margin-top: 10px;">
-              <textarea id="pmPlanningBoqBox" placeholder="Planning BOQ" style="width: 100%; min-height: 80px; height: 80px; border: 1.5px solid #000000; border-radius: 10px; padding: 14px 16px; color: #1e293b; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.5px; resize: none; font-family: inherit; box-sizing: border-box; outline: none;"></textarea>
+              <textarea id="pmPlanningBoqBox" placeholder="Planning BOQ" style="width: 100%; min-height: 70px; height: 70px; border: 1px solid #d1d5db; border-radius: 8px; padding: 14px 16px; color: #94a3b8; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.5px; resize: none; font-family: inherit; box-sizing: border-box; outline: none; text-align: center; background: #ffffff;"></textarea>
+            </div>
+
+            <!-- Bottom Centered Green Checkmark Save Button -->
+            <div style="width: 100%; display: flex; justify-content: center; margin-top: 18px; margin-bottom: 2px;">
+              <button type="button" id="btnPmProjectSubmit" onclick="savePmProjectDetails()" title="Save Project Details" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                <img src="icons/Save.svg" id="imgPmProjectSubmitIcon" alt="Save" style="width: 36px; height: 36px; display: block;">
+              </button>
             </div>
           </div>
         </div>
@@ -4752,90 +4759,261 @@
 
         <!-- Site Info Modal Tab (Site ID / Site Name) -->
         <div class="side-form-card project-info-modal-card" id="siteInfoModal"
-          style="display: none; width: 1080px; max-width: 96vw;">
-          <!-- Header Ribbon: Slanted Green Title Badge & Red Close Button -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblSiteInfoTitle">Site ID / Site Name</div>
-            <button type="button" class="side-form-close-btn" id="btnCloseSiteInfoModal" onclick="closeSiteInfoModal()"
-              aria-label="Close">&times;</button>
+          style="display: none; width: 1140px; max-width: 96vw;">
+          <!-- Header Ribbon: Slanted Green Title Badge, + Icon, Delete Icon & Red Close Button -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblSiteInfoTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Site ID / Site Name
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnAddSiteInfoRow" title="Add Site" onclick="openAddSiteModal()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" width="28" height="28">
+              </button>
+              <button type="button" class="toolbar-icon-btn" id="btnDeleteSiteInfoRow" title="Delete Selected" onclick="deleteSelectedSiteInfoRows()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: none; align-items: center;">
+                <img src="icons/Delete.svg" alt="Delete" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseSiteInfoModal" onclick="closeSiteInfoModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
           </div>
+          <div style="height: 14px;"></div>
 
           <!-- Table Container with Centered Headers and Exact Content Alignments/Widths -->
-          <div class="contact-table-wrap" style="padding: 24px 28px 24px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 28px 24px; overflow-x: auto;">
             <table class="projects-custom-table" id="tblSiteInfoItems" style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <th
-                    style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Select</span>
+                  </th>
+                  <th style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Name</th>
-                  <th
-                    style="text-align: center; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Designation</th>
-                  <th
-                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Contact Number</th>
-                  <th
-                    style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     E - Mail</th>
-                  <th
-                    style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Status</th>
                 </tr>
               </thead>
               <tbody id="tblSiteInfoBody">
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td
-                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    Rajesh Kumar</td>
-                  <td
-                    style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    Site Engineer</td>
-                  <td
-                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
-                    +91 9876543210</td>
-                  <td
-                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    rajesh.k@telecom.in</td>
-                  <td
-                    style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">
-                    Active</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td
-                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    Anand Sundaram</td>
-                  <td
-                    style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    Project Manager</td>
-                  <td
-                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
-                    +91 9845012345</td>
-                  <td
-                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    anand.s@telecom.in</td>
-                  <td
-                    style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">
-                    Active</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td
-                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    Vignesh R</td>
-                  <td
-                    style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    Safety Officer</td>
-                  <td
-                    style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
-                    +91 9712345678</td>
-                  <td
-                    style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">
-                    vignesh.r@telecom.in</td>
-                  <td
-                    style="text-align: left; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">
-                    Active</td>
-                </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- Add Site Modal Tab (FSM & AOM Dropdowns) -->
+        <div class="side-form-card side-contact-popup" id="addSiteModal"
+          style="display: none; width: 480px !important; max-width: 96vw; background: #ffffff; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblAddSiteTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Site
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSaveSiteModal" title="Save" onclick="saveNewSiteDetails()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAddSiteModal" onclick="closeAddSiteModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 10px 28px 24px; display: flex; flex-direction: column; gap: 18px;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 60px; font-weight: 600; color: #334155; font-size: 0.95rem; text-align: left;">FSM</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selAddSiteFsm" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="" disabled selected>Select FSM</option>
+                  <option value="Suresh Kumar - FSM (+91 9845112233)">Suresh Kumar (FSM - Chennai South)</option>
+                  <option value="Praveen Raj - FSM (+91 9876543210)">Praveen Raj (FSM - Chennai Central)</option>
+                  <option value="Ramesh Babu - FSM (+91 9811223344)">Ramesh Babu (FSM - Guindy Zone)</option>
+                </select>
+              </div>
+            </div>
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 60px; font-weight: 600; color: #334155; font-size: 0.95rem; text-align: left;">AOM</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selAddSiteAom" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="" disabled selected>Select AOM</option>
+                  <option value="Anand Sundaram - AOM (+91 9845012345)">Anand Sundaram (AOM - Area Operations Manager)</option>
+                  <option value="Karthik Raja - AOM (+91 9840123456)">Karthik Raja (AOM - Tamil Nadu Region)</option>
+                  <option value="Vignesh R - AOM (+91 9712345678)">Vignesh R (AOM - South Operations)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Plan Modal Tab -->
+        <div class="side-form-card project-info-modal-card" id="pmProjectPlanModal"
+          style="display: none; width: 560px; max-width: 96vw;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmProjectPlanTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Project plan
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnClosePmProjectPlanModal" onclick="closePmProjectPlanModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 10px 28px 24px; display: flex; flex-direction: column; gap: 18px;">
+            <!-- Select field (STN / SRN / Project) -->
+            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Select</label>
+              <select id="selPmPlanType" class="form-input-control" onchange="handlePmPlanTypeChange(this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <option value="" disabled selected>Select option</option>
+                <option value="STN">STN</option>
+                <option value="SRN">SRN</option>
+                <option value="Project">Project</option>
+              </select>
+            </div>
+
+            <!-- Activity field (When Project selected) -->
+            <div id="rowPmPlanActivity" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Activity</label>
+              <select id="selPmPlanActivity" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <option value="Survey to be complete" selected>Survey to be complete</option>
+                <option value="MIR to be raise">MIR to be raise</option>
+                <option value="Project to be complete">Project to be complete</option>
+              </select>
+            </div>
+
+            <!-- Move to field (When STN or SRN selected) -->
+            <div id="rowPmPlanMoveTo" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Move to</label>
+              <select id="selPmPlanMoveTo" class="form-input-control" onchange="handlePmPlanMoveToChange(this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <!-- Dynamically populated options -->
+              </select>
+            </div>
+
+            <!-- WH Location field (When STN -> WH selected) -->
+            <div id="rowPmPlanWhLocation" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">WH Location</label>
+              <select id="selPmPlanWhLocation" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <option value="Central WH (Guindy Hub)" selected>Central WH (Guindy Hub)</option>
+                <option value="North Regional WH (Ambattur)">North Regional WH (Ambattur)</option>
+                <option value="South Regional WH (Tambaram)">South Regional WH (Tambaram)</option>
+                <option value="Coimbatore Hub WH">Coimbatore Hub WH</option>
+              </select>
+            </div>
+
+            <!-- I-WH Location field (When SRN -> I-WH selected) -->
+            <div id="rowPmPlanIwhLocation" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">I-WH Location</label>
+              <select id="selPmPlanIwhLocation" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <option value="I-WH Guindy Intermediate Hub" selected>I-WH Guindy Intermediate Hub</option>
+                <option value="I-WH Ambattur Logistics Point">I-WH Ambattur Logistics Point</option>
+                <option value="I-WH Sriperumbudur Depot">I-WH Sriperumbudur Depot</option>
+                <option value="I-WH Madurai Transit Point">I-WH Madurai Transit Point</option>
+              </select>
+            </div>
+
+            <!-- Submit icon below the last field as center -->
+            <div style="display: flex; justify-content: center; margin-top: 14px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSubmitPmProjectPlan" onclick="submitPmProjectPlan()"
+                title="Proceed to Members" style="display: inline-flex; align-items: center; justify-content: center; background: #008744; border: none; border-radius: 8px; padding: 8px 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 135, 68, 0.25); transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="28" height="28" style="filter: brightness(0) invert(1);">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Members Modal Tab -->
+        <div class="side-form-card project-info-modal-card" id="pmMembersModal"
+          style="display: none; width: 1080px; max-width: 96vw;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmMembersTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Members
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnAddMemberBtn" title="Add Member" onclick="openAddMemberModal()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmMembersModal" onclick="closePmMembersModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div class="contact-table-wrap" style="padding: 0 28px 16px; overflow-x: auto;">
+            <table class="projects-custom-table" id="tblMembersItems" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #8c9399;">
+                  <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                    <span>Select</span>
+                  </th>
+                  <th style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Name</th>
+                  <th style="text-align: center; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Designation</th>
+                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Contact Number</th>
+                  <th style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                    Status</th>
+                </tr>
+              </thead>
+              <tbody id="tblMembersBody">
+                <!-- Dynamically populated members rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Submit icon below last row as centered -->
+          <div style="display: flex; justify-content: center; padding: 12px 0 24px;">
+            <button type="button" class="toolbar-icon-btn" id="btnSubmitMembersFinal" onclick="submitMembersTask()"
+              title="Submit Members Task" style="display: inline-flex; align-items: center; justify-content: center; background: #008744; border: none; border-radius: 8px; padding: 8px 24px; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 135, 68, 0.25); transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="28" height="28" style="filter: brightness(0) invert(1);">
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Members Modal Tab -->
+        <div class="side-form-card project-info-modal-card" id="pmAddMemberModal"
+          style="display: none; width: 520px; max-width: 96vw;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmAddMemberTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Members
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSaveMemberBtn" title="Save" onclick="saveNewMember()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddMemberModal" onclick="closeAddMemberModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 10px 28px 24px; display: flex; flex-direction: column; gap: 20px;">
+            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Select Designation</label>
+              <select id="selMemberDesignation" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <option value="Supervisor" selected>Supervisor</option>
+                <option value="Technician">Technician</option>
+                <option value="Service Vendor">Service Vendor</option>
+              </select>
+            </div>
+            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Name</label>
+              <select id="selMemberEmployeeName" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <!-- Populated dynamically from masterEmployeeData -->
+              </select>
+            </div>
           </div>
         </div>
 

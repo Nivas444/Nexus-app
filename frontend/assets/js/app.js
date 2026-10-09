@@ -320,8 +320,9 @@ function showToast(message, type = 'success') {
 
   const isError = type === 'error' || type === 'warning';
   const iconColor = isError ? '#ef4444' : '#10b981';
+  const textColor = isError ? '#fca5a5' : '#10b981';
 
-  toast.style.borderColor = isError ? '#ef4444' : '#10b981';
+  toast.style.borderColor = iconColor;
   toast.innerHTML = `
     <svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       ${isError
@@ -329,7 +330,7 @@ function showToast(message, type = 'success') {
         : '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>'
       }
     </svg>
-    <span style="color: #1e293b; font-weight: 600;">${message}</span>
+    <span style="color: ${textColor}; font-weight: 600; font-size: 0.95rem;">${message}</span>
   `;
 
   toast.classList.add('show');

@@ -7,6 +7,54 @@
 // DATASETS
 // ==========================================================================
 
+// Top-level initialization of popup & sideform datasets to ensure availability on initial DOM load
+var companyBankData = [];
+var activeCompanyBankFilters = {};
+var currentCompanyBankFilterCol = null;
+var companyHolidaysData = [];
+var activeCompanyHolidaysFilters = {};
+var currentCompanyHolidaysFilterCol = null;
+var companyLocationData = [];
+var activeCompanyLocationFilters = {};
+var currentCompanyLocationFilterCol = null;
+var activeContactFilters = {};
+var currentContactFilterCol = null;
+var activeSupplyScopeFilters = {};
+var currentSupplyScopeFilterCol = null;
+var activeServiceProjectScopeFilters = {};
+var currentServiceProjectScopeFilterCol = null;
+var activeServiceTransportScopeFilters = {};
+var currentServiceTransportScopeFilterCol = null;
+var activeServiceOthersScopeFilters = {};
+var currentServiceOthersScopeFilterCol = null;
+var subProjectTypeReportData = [];
+var vehicleReportData = [];
+var otherServiceReportData = [];
+var paymentHistoryReportData = [];
+var boqDetailData = [];
+var customerLocationData = [];
+var activeCustomerLocFilters = {};
+var currentCustomerLocFilterCol = null;
+var customerContactData = [];
+var activeCustomerContactFilters = {};
+var currentCustomerContactFilterCol = null;
+var siteCurrentContactsList = [];
+var draftSiteContacts = [];
+var activeSiteContactFilters = {};
+var currentSiteContactFilterCol = null;
+var activeProjectTransportFilters = {};
+var currentProjectTransportFilterCol = null;
+var indusProjectActivityData = [];
+var activeProjectActivityFilters = {};
+var currentProjectActivityFilterCol = null;
+var indusProjectDocData = [];
+var activeProjectDocFilters = {};
+var currentProjectDocFilterCol = null;
+var bulkUploadHistoryData = [];
+var activeBulkUploadFilters = {};
+var currentBulkUploadFilterCol = null;
+var currentBulkUploadPageName = "";
+
 // Master -> Employee Sub-Page Dataset (Loaded dynamically from PostgreSQL via FastAPI)
 let masterEmployeeData = [];
 
@@ -3731,6 +3779,288 @@ let commercialWorklistData = [
   }
 ];
 
+let pmStatusDataStore = [
+  // YTS (Yet to Start) Records
+  {
+    id: "pm-status-1",
+    siteName: "Guindy Hub",
+    status: "YTS",
+    projectId: "PRJ-2026-001",
+    siteId: "IN-123456",
+    projectType: "Run project",
+    subProjectType: "Civil",
+    stn: "STN-4401",
+    srn: "SRN-8801",
+    cam: "CAM-101",
+    materials: "Dispatched",
+    supportRequired: "Tower foundation clearance",
+    pendingWith: "Civil Contractor",
+    remarks: "Survey report uploaded",
+    ageing: "3 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-5",
+    siteName: "Chennai North",
+    status: "YTS",
+    projectId: "PRJ-2026-005",
+    siteId: "IN-123460",
+    projectType: "Safety",
+    subProjectType: "Installation",
+    stn: "STN-4405",
+    srn: "SRN-8805",
+    cam: "CAM-105",
+    materials: "Dispatched",
+    supportRequired: "PTW clearance certificate",
+    pendingWith: "Safety Officer",
+    remarks: "Site survey scheduled",
+    ageing: "2 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-8",
+    siteName: "Vellore Fort Hub",
+    status: "YTS",
+    projectId: "PRJ-2026-008",
+    siteId: "IN-123463",
+    projectType: "New Build",
+    subProjectType: "Telecom",
+    stn: "STN-4408",
+    srn: "SRN-8808",
+    cam: "CAM-108",
+    materials: "Dispatched",
+    supportRequired: "Tower material gate entry",
+    pendingWith: "Site Engineer",
+    remarks: "Awaiting site access",
+    ageing: "1 Day",
+    selected: false
+  },
+  {
+    id: "pm-status-9",
+    siteName: "Tirunelveli Junction",
+    status: "YTS",
+    projectId: "PRJ-2026-009",
+    siteId: "IN-123464",
+    projectType: "Run project",
+    subProjectType: "Electrical",
+    stn: "STN-4409",
+    srn: "SRN-8809",
+    cam: "CAM-109",
+    materials: "Pending",
+    supportRequired: "EB Line layout drawing",
+    pendingWith: "EB Department",
+    remarks: "Initial inspection pending",
+    ageing: "4 Days",
+    selected: false
+  },
+
+  // WIP (Work in Progress) Records
+  {
+    id: "pm-status-2",
+    siteName: "Ambattur Central",
+    status: "WIP",
+    projectId: "PRJ-2026-002",
+    siteId: "IN-123457",
+    projectType: "New Build",
+    subProjectType: "Electrical",
+    stn: "STN-4402",
+    srn: "SRN-8802",
+    cam: "CAM-102",
+    materials: "Delivered",
+    supportRequired: "DG Power backup approval",
+    pendingWith: "EB Department",
+    remarks: "Civil works in progress",
+    ageing: "7 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-6",
+    siteName: "Salem Junction",
+    status: "WIP",
+    projectId: "PRJ-2026-006",
+    siteId: "IN-123461",
+    projectType: "New Build",
+    subProjectType: "Telecom",
+    stn: "STN-4406",
+    srn: "SRN-8806",
+    cam: "CAM-106",
+    materials: "Delivered",
+    supportRequired: "Pole mount structural stability",
+    pendingWith: "Structural Engineer",
+    remarks: "Pole mount installation ongoing",
+    ageing: "5 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-7",
+    siteName: "Trichy Tower Base",
+    status: "WIP",
+    projectId: "PRJ-2026-007",
+    siteId: "IN-123462",
+    projectType: "Run project",
+    subProjectType: "Civil",
+    stn: "STN-4407",
+    srn: "SRN-8807",
+    cam: "CAM-107",
+    materials: "Delivered",
+    supportRequired: "Concrete curing inspection",
+    pendingWith: "Quality Auditor",
+    remarks: "Curing day 4/7",
+    ageing: "4 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-10",
+    siteName: "Erode Central",
+    status: "WIP",
+    projectId: "PRJ-2026-010",
+    siteId: "IN-123465",
+    projectType: "O&M",
+    subProjectType: "Civil",
+    stn: "STN-4410",
+    srn: "SRN-8810",
+    cam: "CAM-110",
+    materials: "Delivered",
+    supportRequired: "OD Bed foundation signoff",
+    pendingWith: "Civil Lead",
+    remarks: "Excavation completed",
+    ageing: "6 Days",
+    selected: false
+  },
+
+  // HOLD Records
+  {
+    id: "pm-status-3",
+    siteName: "Madurai Depot",
+    status: "HOLD",
+    projectId: "PRJ-2026-003",
+    siteId: "IN-123458",
+    projectType: "O&M",
+    subProjectType: "Telecom",
+    stn: "STN-4403",
+    srn: "SRN-8803",
+    cam: "CAM-103",
+    materials: "Pending",
+    supportRequired: "Landlord access permission",
+    pendingWith: "Property Owner",
+    remarks: "Access dispute resolution pending",
+    ageing: "14 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-11",
+    siteName: "Thanjavur South",
+    status: "HOLD",
+    projectId: "PRJ-2026-011",
+    siteId: "IN-123466",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    stn: "STN-4411",
+    srn: "SRN-8811",
+    cam: "CAM-111",
+    materials: "Pending",
+    supportRequired: "Right of Way municipal approval",
+    pendingWith: "Municipal Corp",
+    remarks: "Awaiting town planning NOC",
+    ageing: "18 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-12",
+    siteName: "Dindigul Bypass",
+    status: "HOLD",
+    projectId: "PRJ-2026-012",
+    siteId: "IN-123467",
+    projectType: "Energy",
+    subProjectType: "Maintenance",
+    stn: "STN-4412",
+    srn: "SRN-8812",
+    cam: "CAM-112",
+    materials: "Pending",
+    supportRequired: "Transformer power supply sanction",
+    pendingWith: "Electricity Board",
+    remarks: "Pending transformer installation",
+    ageing: "12 Days",
+    selected: false
+  },
+
+  // NR (Not Required / Non-Recoverable) Records
+  {
+    id: "pm-status-4",
+    siteName: "Coimbatore Hub",
+    status: "NR",
+    projectId: "PRJ-2026-004",
+    siteId: "IN-123459",
+    projectType: "Energy",
+    subProjectType: "Maintenance",
+    stn: "STN-4404",
+    srn: "SRN-8804",
+    cam: "CAM-104",
+    materials: "Not Required",
+    supportRequired: "Awaiting replacement solar panels",
+    pendingWith: "Warehouse Manager",
+    remarks: "Material replacement requested",
+    ageing: "21 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-13",
+    siteName: "Hosur Industrial Zone",
+    status: "NR",
+    projectId: "PRJ-2026-013",
+    siteId: "IN-123468",
+    projectType: "Run project",
+    subProjectType: "Electrical",
+    stn: "STN-4413",
+    srn: "SRN-8813",
+    cam: "CAM-113",
+    materials: "Not Required",
+    supportRequired: "Obsolete battery disposal signoff",
+    pendingWith: "SCM Department",
+    remarks: "Battery upgrade canceled by customer",
+    ageing: "28 Days",
+    selected: false
+  },
+  {
+    id: "pm-status-14",
+    siteName: "Nagercoil Town",
+    status: "NR",
+    projectId: "PRJ-2026-014",
+    siteId: "IN-123469",
+    projectType: "Safety",
+    subProjectType: "Installation",
+    stn: "STN-4414",
+    srn: "SRN-8814",
+    cam: "CAM-114",
+    materials: "Not Required",
+    supportRequired: "Site decommission documentation",
+    pendingWith: "Operations Lead",
+    remarks: "Site merged with adjacent tower",
+    ageing: "35 Days",
+    selected: false
+  }
+];
+
+
+window.toggleSelectAllPmStatus = function(isChecked) {
+  if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
+    currentDataset.forEach(row => { row.selected = isChecked; });
+  }
+  if (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) {
+    pmStatusDataStore.forEach(row => { row.selected = isChecked; });
+  }
+  applyFiltersAndRender();
+};
+
+window.togglePmStatusRowSelect = function(rowId) {
+  const rowInCur = (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(rowId));
+  if (rowInCur) rowInCur.selected = !rowInCur.selected;
+  const rowInStore = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(rowId));
+  if (rowInStore) rowInStore.selected = !rowInStore.selected;
+  applyFiltersAndRender();
+};
+
+
 // ==========================================================================
 // COMMERCIAL MANAGER: JMS DATASET & REPLICATION
 // ==========================================================================
@@ -3918,6 +4248,23 @@ window.isJmsColumnsExpanded = isJmsColumnsExpanded;
 window.toggleJmsExtraColumns = function() {
   isJmsColumnsExpanded = !isJmsColumnsExpanded;
   window.isJmsColumnsExpanded = isJmsColumnsExpanded;
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+  if (typeof renderWorklistTableHead === 'function') {
+    renderWorklistTableHead();
+  }
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+};
+
+let isPmColumnsExpanded = false;
+window.isPmColumnsExpanded = isPmColumnsExpanded;
+
+window.togglePmExtraColumns = function() {
+  isPmColumnsExpanded = !isPmColumnsExpanded;
+  window.isPmColumnsExpanded = isPmColumnsExpanded;
   if (typeof renderWorklistToolbar === 'function') {
     renderWorklistToolbar();
   }
@@ -6512,8 +6859,13 @@ document.addEventListener('DOMContentLoaded', () => {
     currentModule = 'worklist';
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
-      const pmViews = ['new_project', 'project_update', 'payment', 'materials', 'jms', 'email'];
-      currentWorklistView = pmViews.includes(viewParam) ? viewParam : 'new_project';
+      const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'materials', 'jms', 'email'];
+      if (viewParam === 'project_update') {
+        const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
+        currentWorklistView = isStnOrCam ? 'yts' : 'wip';
+      } else {
+        currentWorklistView = pmViews.includes(viewParam) ? viewParam : 'new_project';
+      }
     } else if (role === 'Commercial Manager') {
       const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
@@ -7138,23 +7490,31 @@ function renderApp() {
         `;
       } else if (currentWorklistView === 'jms_detail') {
         const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId)) || (typeof defaultJmsItems !== 'undefined' && defaultJmsItems[0]);
+        const pId = parentRow ? (parentRow.projectId || 'PRJ-2026-001') : 'PRJ-2026-001';
+        const pType = parentRow ? (parentRow.projectType || 'Run project') : 'Run project';
+        const subType = parentRow ? (parentRow.subProjectType || 'Civil') : 'Civil';
+        const pPo = parentRow ? (parentRow.poNo || '4500128934') : '4500128934';
+        const sId = parentRow ? (parentRow.siteId || 'IN-123456') : 'IN-123456';
+        const sName = parentRow ? (parentRow.siteName || 'Guindy Hub') : 'Guindy Hub';
+        const rId = parentRow && parentRow.id ? parentRow.id : '';
+
         bannerTitle.innerHTML = `
-          <div class="project-payment-banner-content" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
-            <div class="banner-left-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblJmsDetailBannerProject" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${parentRow ? `${parentRow.projectId} / ${parentRow.projectType} / ${parentRow.subProjectType}` : 'PRJ-2026-001 / Run project / Civil'}</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblJmsDetailBannerProject')" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+          <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openProjectInfoModal('${rId}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Project Details">${pId} / ${pType} / ${subType}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pId} / ${pType} / ${subType}', event)" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
-            <div class="banner-center-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblJmsDetailBannerPo" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${parentRow ? `${parentRow.poNo} (0-Opex)` : '4500128934 (0-Opex)'}</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblJmsDetailBannerPo')" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openPoCapexModal('${pPo} (0-Opex)'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open PO Details">${pPo} (0-Opex)</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pPo} (0-Opex)', event)" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
-            <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblJmsDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${parentRow ? `${parentRow.siteId} / ${parentRow.siteName}` : 'IN-123456 / Guindy Hub'}</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblJmsDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openSiteInfoModal('${sId} / ${sName}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Site Details">${sId} / ${sName}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${sId} / ${sName}', event)" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
@@ -7168,24 +7528,25 @@ function renderApp() {
         const pPo = parentRow ? (parentRow.poNo || '4500128934') : '4500128934';
         const sId = parentRow ? (parentRow.siteId || 'IN-123456') : 'IN-123456';
         const sName = parentRow ? (parentRow.siteName || 'Guindy Hub') : 'Guindy Hub';
+        const rId = parentRow && parentRow.id ? parentRow.id : '';
 
         bannerTitle.innerHTML = `
-          <div class="project-payment-banner-content" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
-            <div class="banner-left-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblPoAmendDetailBannerProject" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pId} / ${pType} / ${subType}</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblPoAmendDetailBannerProject')" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+          <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openProjectInfoModal('${rId}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Project Details">${pId} / ${pType} / ${subType}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pId} / ${pType} / ${subType}', event)" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
-            <div class="banner-center-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblPoAmendDetailBannerPo" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pPo} (0-Opex)</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblPoAmendDetailBannerPo')" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openPoCapexModal('${pPo} (0-Opex)'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open PO Details">${pPo} (0-Opex)</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pPo} (0-Opex)', event)" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
-            <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblPoAmendDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${sId} / ${sName}</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblPoAmendDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openSiteInfoModal('${sId} / ${sName}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Site Details">${sId} / ${sName}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${sId} / ${sName}', event)" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
@@ -7199,24 +7560,25 @@ function renderApp() {
         const pPo = parentRow ? (parentRow.poNo || '4500128934') : '4500128934';
         const sId = parentRow ? (parentRow.siteId || 'IN-123456') : 'IN-123456';
         const sName = parentRow ? (parentRow.siteName || 'Guindy Hub') : 'Guindy Hub';
+        const rId = parentRow && parentRow.id ? parentRow.id : '';
 
         bannerTitle.innerHTML = `
-          <div class="project-payment-banner-content" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
-            <div class="banner-left-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblWccDetailBannerProject" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pId} / ${pType} / ${subType}</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblWccDetailBannerProject')" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+          <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openProjectInfoModal('${rId}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Project Details">${pId} / ${pType} / ${subType}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pId} / ${pType} / ${subType}', event)" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
-            <div class="banner-center-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblWccDetailBannerPo" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${pPo} (0-Opex)</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblWccDetailBannerPo')" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openPoCapexModal('${pPo} (0-Opex)'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open PO Details">${pPo} (0-Opex)</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pPo} (0-Opex)', event)" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
-            <div class="banner-right-title" style="display: flex; align-items: center; gap: 8px;">
-              <span id="lblWccDetailBannerSite" style="font-weight: 700; color: #ffffff; font-size: 1.05rem;">${sId} / ${sName}</span>
-              <button type="button" class="btn-banner-copy" onclick="copyJmsDetailInfo('lblWccDetailBannerSite')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+            <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+              <a href="#" onclick="openSiteInfoModal('${sId} / ${sName}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Site Details">${sId} / ${sName}</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${sId} / ${sName}', event)" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
@@ -7249,19 +7611,19 @@ function renderApp() {
         bannerTitle.innerHTML = `
           <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openProjectInfoModal(); return false;" class="banner-clickable-link banner-title-underline" style="text-decoration: underline; text-underline-offset: 3px; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Details">R/RL-234567 / New Build / With DG</a>
+              <a href="#" onclick="openProjectInfoModal(); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Details">R/RL-234567 / New Build / With DG</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('R/RL-234567 / New Build / With DG', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openPoCapexModal('230510678 / ( 0 - Capex )'); return false;" class="banner-clickable-link banner-title-underline" style="text-decoration: underline; text-underline-offset: 3px; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Capex PO Details">230510678 / ( 0 - Capex )</a>
+              <a href="#" onclick="openPoCapexModal('230510678 / ( 0 - Capex )'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Capex PO Details">230510678 / ( 0 - Capex )</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('230510678 / ( 0 - Capex )', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 10px;">
-              <a href="#" onclick="openSiteInfoModal('Site ID / Site Name'); return false;" class="banner-clickable-link banner-title-underline" style="text-decoration: underline; text-underline-offset: 3px; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Site Details">IN-123456 / Guindy</a>
+              <a href="#" onclick="openSiteInfoModal('Site ID / Site Name'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.12rem; cursor: pointer;" title="Open Site Details">IN-123456 / Guindy</a>
               <button type="button" class="btn-banner-copy" onclick="copyBannerText('IN-123456 / Guindy', event)" title="Copy" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 22px; height: 22px; display: block;">
               </button>
@@ -10094,6 +10456,20 @@ window.closeProjectInfoModal = function() {
 // ==========================================================================
 let activePmModalRow = null;
 
+let pmProjectFeatureSettings = {
+  tspMaterials: false,
+  additionalApproval: false,
+  serviceContract: false,
+  stn: false,
+  cam: false
+};
+try {
+  const savedSettings = localStorage.getItem('pmProjectFeatureSettings');
+  if (savedSettings) {
+    pmProjectFeatureSettings = Object.assign(pmProjectFeatureSettings, JSON.parse(savedSettings));
+  }
+} catch(e) {}
+
 window.openPmProjectDetailsModal = function(rowId) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -10171,7 +10547,7 @@ window.openPmProjectDetailsModal = function(rowId) {
     sel.disabled = false;
   });
 
-  // Toggles are active/editable by default
+  // Toggles are active/editable by default and populate saved settings
   const toggleSwitches = document.querySelectorAll('#pmProjectDetailsModal .pm-project-toggle-switch');
   toggleSwitches.forEach(sw => {
     sw.classList.remove('disabled');
@@ -10180,6 +10556,31 @@ window.openPmProjectDetailsModal = function(rowId) {
       chk.disabled = false;
     }
   });
+
+  const chkTsp = document.getElementById('chkPmTspMaterials');
+  const chkNonNbTsp = document.getElementById('chkPmNonNbTspMaterials');
+  if (chkTsp) chkTsp.checked = !!pmProjectFeatureSettings.tspMaterials;
+  if (chkNonNbTsp) chkNonNbTsp.checked = !!pmProjectFeatureSettings.tspMaterials;
+
+  const chkAdd = document.getElementById('chkPmAdditionalApproval');
+  const chkNonNbAdd = document.getElementById('chkPmNonNbAdditionalApproval');
+  if (chkAdd) chkAdd.checked = !!pmProjectFeatureSettings.additionalApproval;
+  if (chkNonNbAdd) chkNonNbAdd.checked = !!pmProjectFeatureSettings.additionalApproval;
+
+  const chkService = document.getElementById('chkPmServiceContract');
+  const chkNonNbService = document.getElementById('chkPmNonNbServiceContract');
+  if (chkService) chkService.checked = !!pmProjectFeatureSettings.serviceContract;
+  if (chkNonNbService) chkNonNbService.checked = !!pmProjectFeatureSettings.serviceContract;
+
+  const chkStn = document.getElementById('chkPmStn');
+  const chkNonNbStn = document.getElementById('chkPmNonNbStn');
+  if (chkStn) chkStn.checked = !!pmProjectFeatureSettings.stn;
+  if (chkNonNbStn) chkNonNbStn.checked = !!pmProjectFeatureSettings.stn;
+
+  const chkCam = document.getElementById('chkPmCam');
+  const chkNonNbCam = document.getElementById('chkPmNonNbCam');
+  if (chkCam) chkCam.checked = !!pmProjectFeatureSettings.cam;
+  if (chkNonNbCam) chkNonNbCam.checked = !!pmProjectFeatureSettings.cam;
 
   if (modal) {
     modal.style.display = 'block';
@@ -10191,7 +10592,13 @@ window.closePmProjectModal = function() {
   const modal = document.getElementById('pmProjectDetailsModal');
   const overlay = document.getElementById('sideFormOverlay');
   if (modal) modal.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
+  if (activeCommercialPoRowId) {
+    const commModal = document.getElementById('commercialPoDetailCard');
+    if (commModal) commModal.style.display = 'block';
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    if (overlay) overlay.style.display = 'none';
+  }
   activePmModalRow = null;
 };
 
@@ -10220,11 +10627,44 @@ window.copyPmHeaderValue = function(fieldKey, label) {
 };
 
 window.savePmProjectDetails = function() {
+  const isTsp = !!(document.getElementById('chkPmTspMaterials')?.checked || document.getElementById('chkPmNonNbTspMaterials')?.checked);
+  const isAddApprove = !!(document.getElementById('chkPmAdditionalApproval')?.checked || document.getElementById('chkPmNonNbAdditionalApproval')?.checked);
+  const isService = !!(document.getElementById('chkPmServiceContract')?.checked || document.getElementById('chkPmNonNbServiceContract')?.checked);
+  const isStn = !!(document.getElementById('chkPmStn')?.checked || document.getElementById('chkPmNonNbStn')?.checked);
+  const isCam = !!(document.getElementById('chkPmCam')?.checked || document.getElementById('chkPmNonNbCam')?.checked);
+
+  pmProjectFeatureSettings.tspMaterials = isTsp;
+  pmProjectFeatureSettings.additionalApproval = isAddApprove;
+  pmProjectFeatureSettings.serviceContract = isService;
+  pmProjectFeatureSettings.stn = isStn;
+  pmProjectFeatureSettings.cam = isCam;
+  try {
+    localStorage.setItem('pmProjectFeatureSettings', JSON.stringify(pmProjectFeatureSettings));
+  } catch(e) {}
+
+  const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager') {
+    if (isStn || isCam) {
+      if (['project_update', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+        currentWorklistView = 'yts';
+      }
+    } else {
+      if (['yts', 'hold', 'nr'].includes(currentWorklistView)) {
+        currentWorklistView = 'wip';
+      }
+    }
+  }
+
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Project details saved successfully!', 'Task Completed');
+    showSvgSuccessPopup('Project details saved successfully!', 'Task Completed', () => {
+      closePmProjectModal();
+    });
   } else {
     showToast('Project details saved successfully');
+    closePmProjectModal();
   }
+
+  renderApp();
 };
 
 window.handlePmToggleChange = function(toggleType, inputEl) {
@@ -10259,6 +10699,11 @@ window.openPmPtwModal = function() {
     if (card.id !== 'pmPtwModal') card.style.display = 'none';
   });
 
+  const titleBadge = document.getElementById('lblPmPtwCardTitle');
+  if (titleBadge) {
+    titleBadge.textContent = activePmModalRow ? (activePmModalRow.projectId ? `${activePmModalRow.projectId} - PTW Details` : 'PTW Details') : 'PTW Details';
+  }
+
   const modal = document.getElementById('pmPtwModal');
   if (modal) {
     modal.style.display = 'block';
@@ -10272,13 +10717,17 @@ window.closePmPtwModal = function() {
 
   const mainModal = document.getElementById('pmProjectDetailsModal');
   if (mainModal) mainModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.savePmPtwDetails = function() {
-  closePmPtwModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('PTW details saved successfully!', 'Task Completed');
+    showSvgSuccessPopup('PTW details saved successfully!', 'Task Completed', () => {
+      closePmPtwModal();
+    });
   } else {
+    closePmPtwModal();
     showToast('PTW details saved successfully');
   }
 };
@@ -10324,6 +10773,11 @@ window.openPmPoleMountDetailsModal = function() {
     if (card.id !== 'pmPoleMountDetailsModal') card.style.display = 'none';
   });
 
+  const titleBadge = document.getElementById('lblPmPoleMountCardTitle');
+  if (titleBadge) {
+    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Pole Mount Details` : 'Pole Mount Details') : 'Pole Mount Details';
+  }
+
   renderPmPoleMountDetailsTable();
 
   const modal = document.getElementById('pmPoleMountDetailsModal');
@@ -10339,13 +10793,17 @@ window.closePmPoleMountDetailsModal = function() {
 
   const mainModal = document.getElementById('pmProjectDetailsModal');
   if (mainModal) mainModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.submitPmPoleMountDetails = function() {
-  closePmPoleMountDetailsModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Pole mount details submitted successfully!', 'Task Completed');
+    showSvgSuccessPopup('Pole mount details submitted successfully!', 'Task Completed', () => {
+      closePmPoleMountDetailsModal();
+    });
   } else {
+    closePmPoleMountDetailsModal();
     showToast('Pole mount details submitted successfully');
   }
 };
@@ -10377,6 +10835,8 @@ window.closePmAddMountDetailsModal = function() {
 
   const poleModal = document.getElementById('pmPoleMountDetailsModal');
   if (poleModal) poleModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.savePmNewMountDetail = function() {
@@ -10444,6 +10904,11 @@ window.openPmSurveyReportModal = function() {
     if (card.id !== 'pmSurveyReportModal') card.style.display = 'none';
   });
 
+  const titleBadge = document.getElementById('lblPmSurveyReportCardTitle');
+  if (titleBadge) {
+    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Survey Report` : 'Site Survey Report') : 'Site Survey Report';
+  }
+
   renderPmSurveyReportTable();
 
   const modal = document.getElementById('pmSurveyReportModal');
@@ -10459,6 +10924,8 @@ window.closePmSurveyReportModal = function() {
 
   const mainModal = document.getElementById('pmProjectDetailsModal');
   if (mainModal) mainModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.openPmAddSurveyItemsModal = function() {
@@ -10486,6 +10953,8 @@ window.closePmAddSurveyItemsModal = function() {
 
   const surveyModal = document.getElementById('pmSurveyReportModal');
   if (surveyModal) surveyModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.savePmNewSurveyItem = function() {
@@ -10581,6 +11050,11 @@ window.openPmCivilWorksModal = function() {
     if (card.id !== 'pmCivilWorksModal') card.style.display = 'none';
   });
 
+  const titleBadge = document.getElementById('lblPmCivilWorksCardTitle');
+  if (titleBadge) {
+    titleBadge.textContent = activePmModalRow ? (activePmModalRow.projectId ? `${activePmModalRow.projectId} - Civil Works` : 'Civil Works') : 'Civil Works';
+  }
+
   pmSelectedCivilWorkId = null;
   const btnDelete = document.getElementById('btnPmDeleteCivilWork');
   if (btnDelete) btnDelete.style.display = 'none';
@@ -10600,13 +11074,17 @@ window.closePmCivilWorksModal = function() {
 
   const mainModal = document.getElementById('pmProjectDetailsModal');
   if (mainModal) mainModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.submitPmCivilWorksDetails = function() {
-  closePmCivilWorksModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Civil works details submitted successfully!', 'Task Completed');
+    showSvgSuccessPopup('Civil works details submitted successfully!', 'Task Completed', () => {
+      closePmCivilWorksModal();
+    });
   } else {
+    closePmCivilWorksModal();
     showToast('Civil works details submitted successfully');
   }
 };
@@ -10644,6 +11122,8 @@ window.closePmAddCivilWorksModal = function() {
 
   const civilModal = document.getElementById('pmCivilWorksModal');
   if (civilModal) civilModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.handlePmCivilDrawingToggle = function(chk) {
@@ -10719,8 +11199,8 @@ window.downloadPmCivilWorkPdf = function(fileName) {
 // 5. STN MATERIALS CONTROLLER
 // --------------------------------------------------------------------------
 let pmStnMaterialsData = [
-  { id: 1, boqNo: 'BOQ-STN-001', boqDate: '12-05-2024', itemCategory: 'Antenna', infraDesc: 'Tri-sector 4G/5G Antenna with brackets', installationType: 'Additional', make: 'CommScope', uom: 'Nos', qty: '3' },
-  { id: 2, boqNo: 'BOQ-STN-002', boqDate: '14-05-2024', itemCategory: 'Cable', infraDesc: 'Coaxial Feeder Cable 7/8 inch 50 Ohm', installationType: 'Replacement', make: 'RFS', uom: 'Mtr', qty: '120' }
+  { id: 1, boqNo: 'BOQ-STN-001', boqDate: '12-05-2024', itemCategory: 'Antenna', infraDesc: 'Tri-sector 4G/5G Antenna with brackets', installationType: 'Additional', make: 'CommScope', uom: 'Nos', qty: '3.00' },
+  { id: 2, boqNo: 'BOQ-STN-002', boqDate: '14-05-2024', itemCategory: 'Cable', infraDesc: 'Coaxial Feeder Cable 7/8 inch 50 Ohm', installationType: 'Replacement', make: 'RFS', uom: 'Mtr', qty: '120.00' }
 ];
 let pmSelectedStnMaterialId = null;
 let pmEditingStnMaterialId = null;
@@ -10742,7 +11222,9 @@ function renderPmStnMaterialsTable() {
     return;
   }
 
-  tbody.innerHTML = pmStnMaterialsData.map(item => `
+  tbody.innerHTML = pmStnMaterialsData.map(item => {
+    const formattedQty = (parseFloat(item.qty) || 0).toFixed(2);
+    return `
     <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedStnMaterialId === item.id ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px;">
         <input type="radio" name="rdoPmStnMaterial" class="pm-circle-radio" ${pmSelectedStnMaterialId === item.id ? 'checked' : ''} onclick="togglePmStnMaterialSelect(${item.id})">
@@ -10754,9 +11236,9 @@ function renderPmStnMaterialsTable() {
       <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.installationType}</td>
       <td style="width: 15ch; min-width: 15ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.make}</td>
       <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.uom}</td>
-      <td style="width: 10ch; min-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b; font-weight: 600;">${item.qty}</td>
+      <td style="width: 10ch; min-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b; font-weight: 600;">${formattedQty}</td>
     </tr>
-  `).join('');
+  `;}).join('');
 }
 
 window.togglePmStnMaterialSelect = function(id) {
@@ -10777,6 +11259,11 @@ window.openPmStnMaterialsModal = function() {
     if (card.id !== 'pmStnMaterialsModal') card.style.display = 'none';
   });
 
+  const titleBadge = document.getElementById('lblPmStnMaterialsCardTitle');
+  if (titleBadge) {
+    titleBadge.textContent = activePmModalRow?.stn || 'STN-4401';
+  }
+
   pmSelectedStnMaterialId = null;
   renderPmStnMaterialsTable();
 
@@ -10793,13 +11280,17 @@ window.closePmStnMaterialsModal = function() {
 
   const mainModal = document.getElementById('pmProjectDetailsModal');
   if (mainModal) mainModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.submitPmStnMaterialsDetails = function() {
-  closePmStnMaterialsModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('STN materials submitted successfully!', 'Task Completed');
+    showSvgSuccessPopup('STN materials submitted successfully!', 'Task Completed', () => {
+      closePmStnMaterialsModal();
+    });
   } else {
+    closePmStnMaterialsModal();
     showToast('STN materials submitted successfully');
   }
 };
@@ -10863,6 +11354,8 @@ window.closePmAddStnMaterialsModal = function() {
 
   const parentModal = document.getElementById('pmStnMaterialsModal');
   if (parentModal) parentModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.savePmNewStnMaterial = function() {
@@ -10914,8 +11407,8 @@ window.savePmNewStnMaterial = function() {
 // 6. SRN MATERIALS CONTROLLER
 // --------------------------------------------------------------------------
 let pmSrnMaterialsData = [
-  { id: 1, parentCodeNo: '', boqNo: 'BOQ-SRN-001', boqDate: '10-05-2024', itemCategory: 'Power', infraDesc: 'Battery Bank 48V 600AH SMF VRLA', make: 'Exide', uom: 'Set', qty: '1' },
-  { id: 2, parentCodeNo: '', boqNo: 'BOQ-SRN-002', boqDate: '11-05-2024', itemCategory: 'Rectifier', infraDesc: 'SMPS Power Plant 48V/100A Module', make: 'Delta', uom: 'Nos', qty: '2' }
+  { id: 1, parentCodeNo: '', boqNo: 'BOQ-SRN-001', boqDate: '10-05-2024', itemCategory: 'Power', infraDesc: 'Battery Bank 48V 600AH SMF VRLA', make: 'Exide', uom: 'Set', qty: '1.00' },
+  { id: 2, parentCodeNo: '', boqNo: 'BOQ-SRN-002', boqDate: '11-05-2024', itemCategory: 'Rectifier', infraDesc: 'SMPS Power Plant 48V/100A Module', make: 'Delta', uom: 'Nos', qty: '2.00' }
 ];
 let pmSelectedSrnMaterialId = null;
 let pmEditingSrnMaterialId = null;
@@ -10937,7 +11430,9 @@ function renderPmSrnMaterialsTable() {
     return;
   }
 
-  tbody.innerHTML = pmSrnMaterialsData.map(item => `
+  tbody.innerHTML = pmSrnMaterialsData.map(item => {
+    const formattedQty = (parseFloat(item.qty) || 0).toFixed(2);
+    return `
     <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedSrnMaterialId === item.id ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px;">
         <input type="radio" name="rdoPmSrnMaterial" class="pm-circle-radio" ${pmSelectedSrnMaterialId === item.id ? 'checked' : ''} onclick="togglePmSrnMaterialSelect(${item.id})">
@@ -10948,9 +11443,9 @@ function renderPmSrnMaterialsTable() {
       <td style="width: 30ch; min-width: 30ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.infraDesc}</td>
       <td style="width: 15ch; min-width: 15ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.make}</td>
       <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.uom}</td>
-      <td style="width: 10ch; min-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b; font-weight: 600;">${item.qty}</td>
+      <td style="width: 10ch; min-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b; font-weight: 600;">${formattedQty}</td>
     </tr>
-  `).join('');
+  `;}).join('');
 }
 
 window.togglePmSrnMaterialSelect = function(id) {
@@ -10971,6 +11466,11 @@ window.openPmSrnMaterialsModal = function() {
     if (card.id !== 'pmSrnMaterialsModal') card.style.display = 'none';
   });
 
+  const titleBadge = document.getElementById('lblPmSrnMaterialsCardTitle');
+  if (titleBadge) {
+    titleBadge.textContent = activePmModalRow?.srn || 'SRN-8801';
+  }
+
   pmSelectedSrnMaterialId = null;
   renderPmSrnMaterialsTable();
 
@@ -10987,13 +11487,17 @@ window.closePmSrnMaterialsModal = function() {
 
   const mainModal = document.getElementById('pmProjectDetailsModal');
   if (mainModal) mainModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.submitPmSrnMaterialsDetails = function() {
-  closePmSrnMaterialsModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('SRN materials submitted successfully!', 'Task Completed');
+    showSvgSuccessPopup('SRN materials submitted successfully!', 'Task Completed', () => {
+      closePmSrnMaterialsModal();
+    });
   } else {
+    closePmSrnMaterialsModal();
     showToast('SRN materials submitted successfully');
   }
 };
@@ -11057,6 +11561,8 @@ window.closePmAddSrnMaterialsModal = function() {
 
   const parentModal = document.getElementById('pmSrnMaterialsModal');
   if (parentModal) parentModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.savePmNewSrnMaterial = function() {
@@ -11108,8 +11614,8 @@ window.savePmNewSrnMaterial = function() {
 // 7. CAM MATERIALS CONTROLLER
 // --------------------------------------------------------------------------
 let pmCamMaterialsData = [
-  { id: 1, boqNo: 'BOQ-CAM-001', boqDate: '08-05-2024', itemCategory: 'Tower Infra', infraDesc: 'Ground Based Tower 40M Galvanized', siteId: 'TN-CHE-104', siteName: 'Guindy Central Hub', make: 'Utkarsh', uom: 'Nos', qty: '1' },
-  { id: 2, boqNo: 'BOQ-CAM-002', boqDate: '09-05-2024', itemCategory: 'Security', infraDesc: 'IP Surveillance Camera 4MP Bullet', siteId: 'TN-CHE-108', siteName: 'Ambattur Industrial Site', make: 'Hikvision', uom: 'Nos', qty: '4' }
+  { id: 1, boqNo: 'BOQ-CAM-001', boqDate: '08-05-2024', itemCategory: 'Tower Infra', infraDesc: 'Ground Based Tower 40M Galvanized', siteId: 'TN-CHE-104', siteName: 'Guindy Central Hub', make: 'Utkarsh', uom: 'Nos', qty: '1.00' },
+  { id: 2, boqNo: 'BOQ-CAM-002', boqDate: '09-05-2024', itemCategory: 'Security', infraDesc: 'IP Surveillance Camera 4MP Bullet', siteId: 'TN-CHE-108', siteName: 'Ambattur Industrial Site', make: 'Hikvision', uom: 'Nos', qty: '4.00' }
 ];
 let pmSelectedCamMaterialId = null;
 let pmEditingCamMaterialId = null;
@@ -11131,7 +11637,9 @@ function renderPmCamMaterialsTable() {
     return;
   }
 
-  tbody.innerHTML = pmCamMaterialsData.map(item => `
+  tbody.innerHTML = pmCamMaterialsData.map(item => {
+    const formattedQty = (parseFloat(item.qty) || 0).toFixed(2);
+    return `
     <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedCamMaterialId === item.id ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px;">
         <input type="radio" name="rdoPmCamMaterial" class="pm-circle-radio" ${pmSelectedCamMaterialId === item.id ? 'checked' : ''} onclick="togglePmCamMaterialSelect(${item.id})">
@@ -11144,9 +11652,9 @@ function renderPmCamMaterialsTable() {
       <td style="width: 25ch; min-width: 25ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.siteName}</td>
       <td style="width: 15ch; min-width: 15ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.make}</td>
       <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.uom}</td>
-      <td style="width: 10ch; min-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b; font-weight: 600;">${item.qty}</td>
+      <td style="width: 10ch; min-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b; font-weight: 600;">${formattedQty}</td>
     </tr>
-  `).join('');
+  `;}).join('');
 }
 
 window.togglePmCamMaterialSelect = function(id) {
@@ -11167,6 +11675,11 @@ window.openPmCamMaterialsModal = function() {
     if (card.id !== 'pmCamMaterialsModal') card.style.display = 'none';
   });
 
+  const titleBadge = document.getElementById('lblPmCamMaterialsCardTitle');
+  if (titleBadge) {
+    titleBadge.textContent = activePmModalRow?.cam || 'CAM-101';
+  }
+
   pmSelectedCamMaterialId = null;
   renderPmCamMaterialsTable();
 
@@ -11183,13 +11696,17 @@ window.closePmCamMaterialsModal = function() {
 
   const mainModal = document.getElementById('pmProjectDetailsModal');
   if (mainModal) mainModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.submitPmCamMaterialsDetails = function() {
-  closePmCamMaterialsModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('CAM materials submitted successfully!', 'Task Completed');
+    showSvgSuccessPopup('CAM materials submitted successfully!', 'Task Completed', () => {
+      closePmCamMaterialsModal();
+    });
   } else {
+    closePmCamMaterialsModal();
     showToast('CAM materials submitted successfully');
   }
 };
@@ -11255,6 +11772,8 @@ window.closePmAddCamMaterialsModal = function() {
 
   const parentModal = document.getElementById('pmCamMaterialsModal');
   if (parentModal) parentModal.style.display = 'block';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
 };
 
 window.savePmNewCamMaterial = function() {
@@ -11369,7 +11888,8 @@ window.openPoCapexModal = function(titleText) {
 
   const titleBadge = document.getElementById('lblPoCapexTitle');
   if (titleBadge) {
-    titleBadge.textContent = titleText || '230510678 / ( 0 - Capex )';
+    const defaultTitle = activePmModalRow && activePmModalRow.poNo ? `${activePmModalRow.poNo} / (${activePmModalRow.poType === 'Capex' ? '0-Capex' : '0-Opex'})` : (titleText || '230510678 / ( 0 - Capex )');
+    titleBadge.textContent = defaultTitle;
   }
 
   renderPoCapexTable();
@@ -11383,9 +11903,21 @@ window.openPoCapexModal = function(titleText) {
 
 window.closePoCapexModal = function() {
   const modal = document.getElementById('poCapexModal');
-  const overlay = document.getElementById('sideFormOverlay');
   if (modal) modal.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
+  if (activePmModalRow) {
+    const mainModal = document.getElementById('pmProjectDetailsModal');
+    if (mainModal) mainModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else if (activeCommercialPoRowId) {
+    const commModal = document.getElementById('commercialPoDetailCard');
+    if (commModal) commModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.openSiteInfoModal = function(titleText) {
@@ -11398,8 +11930,9 @@ window.openSiteInfoModal = function(titleText) {
   });
 
   const titleBadge = document.getElementById('lblSiteInfoTitle');
-  if (titleBadge && titleText) {
-    titleBadge.textContent = titleText;
+  if (titleBadge) {
+    const defaultTitle = activePmModalRow && activePmModalRow.siteId ? `${activePmModalRow.siteId} / ${activePmModalRow.siteName || 'Guindy'}` : (titleText || 'IN-123456 / Guindy');
+    titleBadge.textContent = defaultTitle;
   }
 
   const modal = document.getElementById('siteInfoModal');
@@ -11411,9 +11944,21 @@ window.openSiteInfoModal = function(titleText) {
 
 window.closeSiteInfoModal = function() {
   const modal = document.getElementById('siteInfoModal');
-  const overlay = document.getElementById('sideFormOverlay');
   if (modal) modal.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
+  if (activePmModalRow) {
+    const mainModal = document.getElementById('pmProjectDetailsModal');
+    if (mainModal) mainModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else if (activeCommercialPoRowId) {
+    const commModal = document.getElementById('commercialPoDetailCard');
+    if (commModal) commModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.openExpensesSummaryModal = function(titleText) {
@@ -12197,7 +12742,12 @@ function renderProjectsToolbar() {
     `;
   } else {
     toolbar.innerHTML = `
-      <div class="toolbar-left"></div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        <div style="display: flex; align-items: center; gap: 8px;" title="Total Sum">
+          <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="display: block; object-fit: contain;">
+          <span id="lblProjectsMainTotalSum" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">12,00,000.00</span>
+        </div>
+      </div>
       <div class="toolbar-right">
         <button type="button" class="tool-btn" id="btnProjectsDashboard" title="Dashboard" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
           <img src="icons/Dash board.svg" alt="Dashboard" style="width: 28px; height: 28px; display: block;">
@@ -12631,14 +13181,20 @@ function renderProjectsFooter() {
 
   // In all customer content subpages: Expenses, Material, Infra, DPR, BOQ, Additional Approve, Service vendor
   const detailTabs = [
-    { key: 'expenses', label: 'Expenses' },
-    { key: 'material', label: 'Material' },
-    { key: 'infra', label: 'Infra' },
-    { key: 'dpr', label: 'DPR' },
-    { key: 'boq', label: 'BOQ' },
-    { key: 'additional_approve', label: 'Additional Approve' },
-    { key: 'service_vendor', label: 'Service vendor' }
+    { key: 'expenses', label: 'Expenses' }
   ];
+  if (pmProjectFeatureSettings.tspMaterials) {
+    detailTabs.push({ key: 'material', label: 'Material' });
+  }
+  detailTabs.push({ key: 'infra', label: 'Infra' });
+  detailTabs.push({ key: 'dpr', label: 'DPR' });
+  detailTabs.push({ key: 'boq', label: 'BOQ' });
+  if (pmProjectFeatureSettings.additionalApproval) {
+    detailTabs.push({ key: 'additional_approve', label: 'Additional Approve' });
+  }
+  if (pmProjectFeatureSettings.serviceContract) {
+    detailTabs.push({ key: 'service_vendor', label: 'Service vendor' });
+  }
 
   let currentActiveTab = '';
   if (currentProjectsView === 'project_expenses') currentActiveTab = 'expenses';
@@ -14586,6 +15142,17 @@ function loadWorklistDataset() {
         submitDate: item.submitDate || item.date || ''
       }));
       filteredDataset = [...currentDataset];
+    } else if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
+      let statusKey = currentWorklistView.toUpperCase();
+      if (currentWorklistView === 'project_update') statusKey = 'WIP';
+      currentDataset = pmStatusDataStore.filter(item => {
+        if (statusKey === 'WIP') return item.status === 'WIP';
+        if (statusKey === 'YTS') return item.status === 'YTS';
+        if (statusKey === 'HOLD') return item.status === 'HOLD';
+        if (statusKey === 'NR') return item.status === 'NR';
+        return true;
+      }).map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
       filteredDataset = [];
@@ -14696,10 +15263,21 @@ function renderWorklistToolbar() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
-    toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
-      <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;"></div>
-    `;
+    if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-collapse-action" id="btnPmToggleColumns" data-tooltip="${isPmColumnsExpanded ? 'Hide Extra Columns' : 'Show Extra Columns'}" aria-label="Toggle Columns" style="cursor: pointer;" onclick="togglePmExtraColumns()">
+            <img src="icons/Collapse.svg" alt="Toggle Columns" class="toolbar-icon-img" id="imgPmCollapseIcon" width="28" height="28" style="transform: ${isPmColumnsExpanded ? 'rotate(-90deg)' : 'rotate(90deg)'}; transition: transform 0.2s ease;">
+          </button>
+        </div>
+      `;
+    } else {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;"></div>
+      `;
+    }
     return;
   }
 
@@ -15348,42 +15926,35 @@ function renderWorklistFooter() {
     footer.style.width = '100%';
     footer.style.marginTop = 'auto';
     footer.style.padding = '24px';
-    footer.innerHTML = `
-      <div class="segmented-toggle-group">
-        <button type="button" class="segmented-btn ${currentWorklistView === 'new_project' ? 'active' : ''}" id="btnTogglePmNewProject">
-          New Project
-        </button>
-        <div class="segmented-divider"></div>
-        <button type="button" class="segmented-btn ${currentWorklistView === 'project_update' ? 'active' : ''}" id="btnTogglePmProjectUpdate">
-          Project Update
-        </button>
-        <div class="segmented-divider"></div>
-        <button type="button" class="segmented-btn ${currentWorklistView === 'payment' ? 'active' : ''}" id="btnTogglePmPayment">
-          Payment
-        </button>
-        <div class="segmented-divider"></div>
-        <button type="button" class="segmented-btn ${currentWorklistView === 'materials' ? 'active' : ''}" id="btnTogglePmMaterials">
-          Materials
-        </button>
-        <div class="segmented-divider"></div>
-        <button type="button" class="segmented-btn ${currentWorklistView === 'jms' ? 'active' : ''}" id="btnTogglePmJms">
-          JMS
-        </button>
-        <div class="segmented-divider"></div>
-        <button type="button" class="segmented-btn ${currentWorklistView === 'email' ? 'active' : ''}" id="btnTogglePmEmail">
-          Email
-        </button>
-      </div>
-    `;
+
+    const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 7;
+    const ytsCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'YTS').length : 2;
+    const wipCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'WIP').length : 3;
+    const holdCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'HOLD').length : 1;
+    const nrCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'NR').length : 1;
 
     const pmTabs = [
-      { id: 'btnTogglePmNewProject', view: 'new_project', label: 'New Project' },
-      { id: 'btnTogglePmProjectUpdate', view: 'project_update', label: 'Project Update' },
+      { id: 'btnTogglePmNewProject', view: 'new_project', label: `New project (${newProjectCount})` },
+      { id: 'btnTogglePmYts', view: 'yts', label: `YTS (${ytsCount})` },
+      { id: 'btnTogglePmWip', view: 'wip', label: `WIP (${wipCount})` },
+      { id: 'btnTogglePmHold', view: 'hold', label: `HOLD (${holdCount})` },
+      { id: 'btnTogglePmNr', view: 'nr', label: `NR (${nrCount})` },
       { id: 'btnTogglePmPayment', view: 'payment', label: 'Payment' },
       { id: 'btnTogglePmMaterials', view: 'materials', label: 'Materials' },
       { id: 'btnTogglePmJms', view: 'jms', label: 'JMS' },
       { id: 'btnTogglePmEmail', view: 'email', label: 'Email' }
     ];
+
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        ${pmTabs.map((tab, idx) => `
+          ${idx > 0 ? '<div class="segmented-divider"></div>' : ''}
+          <button type="button" class="segmented-btn ${currentWorklistView === tab.view ? 'active' : ''}" id="${tab.id}">
+            ${tab.label}
+          </button>
+        `).join('')}
+      </div>
+    `;
 
     pmTabs.forEach(tab => {
       document.getElementById(tab.id)?.addEventListener('click', () => {
@@ -15392,7 +15963,7 @@ function renderWorklistFooter() {
           activeColumnFilters = {};
           updateURL();
           renderApp();
-          showToast(`Switched to Worklist • ${tab.label}`);
+          showToast(`Switched to Worklist &bull; ${tab.label}`);
         }
       });
     });
@@ -15561,7 +16132,8 @@ function renderWorklistTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
 
-  const tableEl = document.getElementById('worklistTable');
+  const role = getAuthenticatedUserRole();
+  const tableEl = document.getElementById("tableMain") || document.querySelector(".worklist-custom-table") || (thead ? thead.closest("table") : null);
   if (tableEl) {
     if (currentWorklistView === 'wcc') {
       tableEl.style.minWidth = isWccColumnsExpanded ? '1600px' : '100%';
@@ -15569,13 +16141,15 @@ function renderWorklistTableHead() {
     } else if (currentWorklistView === 'jms') {
       tableEl.style.minWidth = isJmsColumnsExpanded ? '1600px' : '100%';
       tableEl.style.width = '100%';
+    } else if (role === 'Project Manager' && ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+      tableEl.style.minWidth = isPmColumnsExpanded ? '2300px' : '1600px';
+      tableEl.style.width = '100%';
     } else {
       tableEl.style.minWidth = '';
       tableEl.style.width = '';
     }
   }
 
-  const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
     if (currentWorklistView === 'new_project') {
       thead.innerHTML = `
@@ -15632,6 +16206,119 @@ function renderWorklistTableHead() {
           <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; text-align: center;">
               <span>Ageing</span>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    } else if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 60px, center, no filter -->
+          <th class="th-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. Site Name: 25ch, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Status: 10ch, center header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site ID: 15ch, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Project Type: 15ch, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Sub-Project Type: 25ch, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. STN: 15ch, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>STN</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['stn'] ? 'has-active-filter' : ''}" data-filter-col="stn" title="Filter STN">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. SRN: 15ch, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>SRN</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['srn'] ? 'has-active-filter' : ''}" data-filter-col="srn" title="Filter SRN">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. CAM: 15ch, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>CAM</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['cam'] ? 'has-active-filter' : ''}" data-filter-col="cam" title="Filter CAM">&#9660;</button>
+            </div>
+          </th>
+          <!-- 11. Materials: 15ch, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Materials</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['materials'] ? 'has-active-filter' : ''}" data-filter-col="materials" title="Filter Materials">&#9660;</button>
+            </div>
+          </th>
+          ${isPmColumnsExpanded ? `
+          <!-- 12. Support Required: 35ch, center header, filterable -->
+          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Support Required</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['supportRequired'] ? 'has-active-filter' : ''}" data-filter-col="supportRequired" title="Filter Support Required">&#9660;</button>
+            </div>
+          </th>
+          <!-- 13. Pending With: 25ch, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Pending With</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['pendingWith'] ? 'has-active-filter' : ''}" data-filter-col="pendingWith" title="Filter Pending With">&#9660;</button>
+            </div>
+          </th>
+          <!-- 14. Remarks: 25ch, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Remarks</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['remarks'] ? 'has-active-filter' : ''}" data-filter-col="remarks" title="Filter Remarks">&#9660;</button>
+            </div>
+          </th>
+          ` : ''}
+          <!-- 15. Ageing: 16ch, center header, filterable -->
+          <th style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
             </div>
           </th>
         </tr>
@@ -16683,6 +17370,102 @@ function applyFiltersAndRender() {
             </td>
             <!-- 8. Ageing: 10ch & center -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    } else if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+      const targetStatus = currentWorklistView.toUpperCase();
+      currentDataset = (pmStatusDataStore || []).filter(r => r.status === targetStatus);
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      const colsCount = isPmColumnsExpanded ? 15 : 12;
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="${colsCount}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Select: 60px & center (Green marker) -->
+            <td class="td-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <div class="circular-radio-btn" onclick="togglePmStatusRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${row.selected ? '#008744' : '#94a3b8'}; background: ${row.selected ? '#008744' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${row.selected ? 'Unselect' : 'Select'}">
+                ${row.selected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+              </div>
+            </td>
+            <!-- 2. Site Name: 25ch & left (Clickable to open PM Project Details Modal) -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              <a href="#" class="site-name-modal-trigger clickable-project-link" onclick="openPmProjectDetailsModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.siteName || ''}</a>
+            </td>
+            <!-- 3. Status: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.status || ''}
+            </td>
+            <!-- 4. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Site ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 6. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 7. Sub-Project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.subProjectType || '').replace(/"/g, '&quot;')}">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 8. STN: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.stn || ''}
+            </td>
+            <!-- 9. SRN: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.srn || ''}
+            </td>
+            <!-- 10. CAM: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.cam || ''}
+            </td>
+            <!-- 11. Materials: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
+              ${row.materials || ''}
+            </td>
+            ${isPmColumnsExpanded ? `
+            <!-- 12. Support Required: 35ch & center -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.supportRequired || '').replace(/"/g, '&quot;')}">
+              ${row.supportRequired || ''}
+            </td>
+            <!-- 13. Pending With: 25ch & center -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.pendingWith || '').replace(/"/g, '&quot;')}">
+              ${row.pendingWith || ''}
+            </td>
+            <!-- 14. Remarks: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
+              ${row.remarks || ''}
+            </td>
+            ` : ''}
+            <!-- 15. Ageing: 16ch & center -->
+            <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500;">
               ${row.ageing || ''}
             </td>
           </tr>
@@ -22844,7 +23627,24 @@ function initSideFormEvents() {
     }
   });
 
-  window.attachNexusCalendar = function(inputId, btnId) {
+  function attachNexusCalendar(inputId, btnId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    if (input) {
+      input.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openNexusCalendar(input, btn || input);
+      });
+    }
+    if (btn) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openNexusCalendar(input || btn, btn);
+      });
+    }
+  }
+  window.attachNexusCalendar = attachNexusCalendar;
+  const _unusedAttach = function(inputId, btnId) {
     const input = document.getElementById(inputId);
     const btn = document.getElementById(btnId);
     if (input) {
@@ -25278,9 +26078,9 @@ function rebindFilterButtons() {
 }
 
 // Global Company Bank Dataset & Filter State (Loaded dynamically from PostgreSQL employee_bank_details or company_bank_accounts)
-let companyBankData = [];
-let activeCompanyBankFilters = {};
-let currentCompanyBankFilterCol = null;
+companyBankData = [];
+activeCompanyBankFilters = {};
+currentCompanyBankFilterCol = null;
 
 // Bank View/Edit Modal Controller State
 let isViewBankEditing = false;
@@ -25644,9 +26444,9 @@ function openCompanyBankFilter(colKey, triggerBtn) {
 }
 
 // Global Company Holidays Dataset & Filter State (Loaded dynamically from PostgreSQL company_holidays)
-let companyHolidaysData = [];
-let activeCompanyHolidaysFilters = {};
-let currentCompanyHolidaysFilterCol = null;
+companyHolidaysData = [];
+activeCompanyHolidaysFilters = {};
+currentCompanyHolidaysFilterCol = null;
 
 window.loadCompanyHolidaysFromApi = async function(companyName = 'Nexus') {
   if (typeof NexusApi !== 'undefined' && NexusApi.companyHolidays) {
@@ -25773,9 +26573,9 @@ function openCompanyHolidaysFilter(colKey, triggerBtn) {
 }
 
 // Global Company Office Location Dataset & Filter State (Loaded dynamically from PostgreSQL company_office_locations)
-let companyLocationData = [];
-let activeCompanyLocationFilters = {};
-let currentCompanyLocationFilterCol = null;
+companyLocationData = [];
+activeCompanyLocationFilters = {};
+currentCompanyLocationFilterCol = null;
 
 // Office Location View/Edit Modal Controller State
 let isViewOfficeEditing = false;
@@ -26024,8 +26824,8 @@ function openCompanyLocationFilter(colKey, triggerBtn) {
 }
 
 // Contact Dataset & Filter State (Isolated per vendor context)
-let activeContactFilters = {};
-let currentContactFilterCol = null;
+activeContactFilters = {};
+currentContactFilterCol = null;
 
 function renderVendorContactTable() {
   const tbody = document.getElementById('tbodyContactDetails');
@@ -26126,8 +26926,8 @@ function openContactFilter(colKey, triggerBtn) {
 }
 
 // Supply Scope Dataset & Filter State (Isolated per vendor context)
-let activeSupplyScopeFilters = {};
-let currentSupplyScopeFilterCol = null;
+activeSupplyScopeFilters = {};
+currentSupplyScopeFilterCol = null;
 
 function renderVendorSupplyScopeTable() {
   const tbody = document.getElementById('tbodySupplyScopeDetails');
@@ -26232,8 +27032,8 @@ function openSupplyScopeFilter(colKey, triggerBtn) {
 }
 
 // Service (Project) Scope Dataset & Filter State (Isolated per vendor context)
-let activeServiceProjectScopeFilters = {};
-let currentServiceProjectScopeFilterCol = null;
+activeServiceProjectScopeFilters = {};
+currentServiceProjectScopeFilterCol = null;
 
 function renderVendorServiceProjectScopeTable() {
   const tbody = document.getElementById('tbodyServiceProjectScopeDetails');
@@ -26337,8 +27137,8 @@ function openServiceProjectScopeFilter(colKey, triggerBtn) {
 }
 
 // Service (Transport) Scope Dataset & Filter State (Isolated per vendor context)
-let activeServiceTransportScopeFilters = {};
-let currentServiceTransportScopeFilterCol = null;
+activeServiceTransportScopeFilters = {};
+currentServiceTransportScopeFilterCol = null;
 
 function renderVendorServiceTransportScopeTable() {
   const tbody = document.getElementById('tbodyServiceTransportScopeDetails');
@@ -26444,8 +27244,8 @@ function openServiceTransportScopeFilter(colKey, triggerBtn) {
 }
 
 // Service (Others) Scope Dataset & Filter State (Isolated per vendor context)
-let activeServiceOthersScopeFilters = {};
-let currentServiceOthersScopeFilterCol = null;
+activeServiceOthersScopeFilters = {};
+currentServiceOthersScopeFilterCol = null;
 
 function renderVendorServiceOthersScopeTable() {
   const tbody = document.getElementById('tbodyServiceOthersScopeDetails');
@@ -26550,7 +27350,7 @@ function openServiceOthersScopeFilter(colKey, triggerBtn) {
 }
 
 // Global Sub - Project Type Payment Report Dataset
-let subProjectTypeReportData = [
+subProjectTypeReportData = [
   { id: 'sptr-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'Active' },
   { id: 'sptr-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'In - Active' }
 ];
@@ -26574,7 +27374,7 @@ function renderSubProjectTypeReportTable() {
 }
 
 // Global Vehicle Payment Report Dataset
-let vehicleReportData = [
+vehicleReportData = [
   { id: 'vr-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rentalAmount: '2000.00', haltAmount: '2000.00', status: 'Active' },
   { id: 'vr-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rentalAmount: '2000.00', haltAmount: '2000.00', status: 'In - Active' }
 ];
@@ -26599,7 +27399,7 @@ function renderVehicleReportTable() {
 }
 
 // Global Other Service Payment Report Dataset
-let otherServiceReportData = [
+otherServiceReportData = [
   { id: 'osr-1', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'Active' },
   { id: 'osr-2', from: '01 - 01 - 2026', to: '01 - 01 - 2026', rate: '2000.00', status: 'In - Active' }
 ];
@@ -27392,7 +28192,7 @@ window.openProjectPaymentBankModal = function() {
   showToast('Bank details opened');
 };
 
-let paymentHistoryReportData = [
+paymentHistoryReportData = [
   {
     id: "hist-1",
     boqName: "25 X 3 Earth Strip",
@@ -27551,7 +28351,7 @@ window.openProjectPaymentReportModal = function() {
 };
 
 // BOQ Detail data keyed by history item id
-let boqDetailData = {
+boqDetailData = {
   'hist-1': [
     { id: 'bd-1', selected: false, requestDate: '12-06-2025', requestBy: 'Rajesh K', expenseType: 'Parent', expenseDesc: 'Earth Strip 25x3mm', uom: 'Mtr', qty: '12', rate: '450.00', basic: '5,400.00', gst: '972.00', total: '6,372.00', transferTo: 'Site A', txnDate: '15-06-2025' },
     { id: 'bd-2', selected: false, requestDate: '14-06-2025', requestBy: 'Suresh M', expenseType: 'Child', expenseDesc: 'Installation charges', uom: 'Lot', qty: '1', rate: '2,000.00', basic: '2,000.00', gst: '360.00', total: '2,360.00', transferTo: 'Site A', txnDate: '16-06-2025' }
@@ -32992,14 +33792,14 @@ window.triggerAccountsPdfUpload = function() {
 // ==========================================================================
 // MASTER -> CUSTOMER LOCATION & CONTACT MODALS
 // ==========================================================================
-let customerLocationData = [];
-let activeCustomerLocFilters = {};
-let currentCustomerLocFilterCol = null;
+customerLocationData = [];
+activeCustomerLocFilters = {};
+currentCustomerLocFilterCol = null;
 let isSavingCustomerLocation = false;
 
-let customerContactData = [];
-let activeCustomerContactFilters = {};
-let currentCustomerContactFilterCol = null;
+customerContactData = [];
+activeCustomerContactFilters = {};
+currentCustomerContactFilterCol = null;
 let isSavingCustomerContact = false;
 
 function getCurrentCustomerContext() {
@@ -33582,10 +34382,10 @@ window.openViewCustomerCard = function(rowId) {
 // ==========================================================================
 // SITE CONTACT DETAILS POPUP & ADD FORM
 // ==========================================================================
-let siteCurrentContactsList = [];
-let draftSiteContacts = [];
-let activeSiteContactFilters = {};
-let currentSiteContactFilterCol = null;
+siteCurrentContactsList = [];
+draftSiteContacts = [];
+activeSiteContactFilters = {};
+currentSiteContactFilterCol = null;
 let currentEditingContactId = null;
 let isViewSiteContactEditing = false;
 
@@ -34027,8 +34827,8 @@ window.handleCustomerGstProcess = function() {
   }
 };
 
-let activeProjectTransportFilters = {};
-let currentProjectTransportFilterCol = null;
+activeProjectTransportFilters = {};
+currentProjectTransportFilterCol = null;
 let currentEditingTransportId = null;
 let isTransportInEditMode = false;
 
@@ -34390,9 +35190,9 @@ window.openProjectTransportFilter = function(colKey, event) {
   if (searchInput) searchInput.focus();
 };
 
-let indusProjectActivityData = [];
-let activeProjectActivityFilters = {};
-let currentProjectActivityFilterCol = null;
+indusProjectActivityData = [];
+activeProjectActivityFilters = {};
+currentProjectActivityFilterCol = null;
 let currentEditingActivityId = null;
 
 window.openProjectActivitySidePanel = async function() {
@@ -34669,9 +35469,9 @@ window.openProjectActivityFilter = function(colKey, event) {
 // ==========================================================================
 // APPROVAL HISTORY DATASET & HANDLERS
 // ==========================================================================
-let indusProjectDocData = [];
-let activeProjectDocFilters = {};
-let currentProjectDocFilterCol = null;
+indusProjectDocData = [];
+activeProjectDocFilters = {};
+currentProjectDocFilterCol = null;
 
 window.openProjectDocSidePanel = async function() {
   const overlay = document.getElementById('sideFormOverlay');
@@ -34876,12 +35676,12 @@ window.openProjectDocFilter = function(colKey, event) {
 // ==========================================================================
 // BULK UPLOAD CONTROLLERS & TABLE HANDLERS
 // ==========================================================================
-let currentBulkUploadPageName = 'Employee';
-let activeBulkUploadFilters = {};
-let currentBulkUploadFilterCol = null;
+currentBulkUploadPageName = 'Employee';
+activeBulkUploadFilters = {};
+currentBulkUploadFilterCol = null;
 
 // Initial bulk upload history records mapped by page/module (empty by default)
-let bulkUploadHistoryData = [];
+bulkUploadHistoryData = [];
 
 function renderBulkUploadTable() {
   const tbody = document.getElementById('tbodyBulkUploadDetails');
@@ -35707,8 +36507,9 @@ window.closeSvgErrorPopup = function() {
 
 // ─── NEXUS SVG SUCCESS POPUP CONTROLLER ───────────────────────────────────────
 let svgSuccessPopupAutoCloseTimer = null;
+let currentSuccessPopupCallback = null;
 
-window.showSvgSuccessPopup = function(message, title = "Task Completed") {
+window.showSvgSuccessPopup = function(message, title = "Task Completed", onContinue = null) {
   const overlay = document.getElementById('nexusSuccessPopupOverlay');
   if (!overlay) return;
 
@@ -35716,6 +36517,8 @@ window.showSvgSuccessPopup = function(message, title = "Task Completed") {
     clearTimeout(svgSuccessPopupAutoCloseTimer);
     svgSuccessPopupAutoCloseTimer = null;
   }
+
+  currentSuccessPopupCallback = (typeof onContinue === 'function') ? onContinue : null;
 
   const titleEl = document.getElementById('svgSuccessPopupTitle');
   if (titleEl) {
@@ -35782,6 +36585,11 @@ window.closeSvgSuccessPopup = function() {
   }
   if (typeof updateCardDimmedState === 'function') {
     updateCardDimmedState();
+  }
+  if (typeof currentSuccessPopupCallback === 'function') {
+    const cb = currentSuccessPopupCallback;
+    currentSuccessPopupCallback = null;
+    try { cb(); } catch(e) { console.error(e); }
   }
 };
 

@@ -3567,15 +3567,15 @@
                 </button>
               </div>
               <!-- 2. Center: PO No (0-Opex) + Copy Icon (Center aligned) -->
-              <div id="lblPmHeaderPoInfoWrap">
-                <span id="lblPmHeaderPoInfo">PO No (0-Opex)</span>
+              <div id="lblPmHeaderPoInfoWrap" style="display: flex; align-items: center; justify-content: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <span id="lblPmHeaderPoInfo" onclick="openPoCapexModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Capex PO Details">PO No (0-Opex)</span>
                 <button type="button" class="btn-pm-copy" id="btnPmCopyPoNo" onclick="copyPmHeaderValue('poNo', 'PO No')" title="Copy PO No" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; flex-shrink: 0;">
                   <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 17px; height: 17px; display: block;">
                 </button>
               </div>
               <!-- 3. Right: Site ID / Site Name + Copy Icon (Right aligned) -->
               <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <span id="lblPmHeaderSiteInfo" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Site ID / Site Name</span>
+                <span id="lblPmHeaderSiteInfo" onclick="openSiteInfoModal('Site ID / Site Name')" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Site Details">Site ID / Site Name</span>
                 <button type="button" class="btn-pm-copy" id="btnPmCopySiteId" onclick="copyPmHeaderValue('siteId', 'Site ID')" title="Copy Site ID" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; flex-shrink: 0;">
                   <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 17px; height: 17px; display: block;">
                 </button>
@@ -3791,9 +3791,9 @@
               </div>
             </div>
 
-            <!-- 2. Layout for NON-NEW BUILD (7 x 7 Grid: 2 Columns of 7 Rows) -->
-            <div id="pmNonNewBuildLayout" style="display: none; grid-template-columns: 1.25fr 1fr; column-gap: 48px; row-gap: 14px; margin-bottom: 24px; align-items: start;">
-              <!-- Left Column: 7 Items (District, Town + 5 Toggles) -->
+            <!-- 2. Layout for NON-NEW BUILD (2 Columns: 7 toggles, 7 toggles) -->
+            <div id="pmNonNewBuildLayout" style="display: none; grid-template-columns: 1fr 1fr; column-gap: 40px; row-gap: 16px; margin-bottom: 24px; align-items: start;">
+              <!-- Left Column: 7 Items (2 disabled inputs + 5 toggles) -->
               <div style="display: flex; flex-direction: column; gap: 14px;">
                 <!-- 1. District -->
                 <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
@@ -3955,7 +3955,7 @@
 
         <!-- 1. PTW Modal Tab -->
         <div class="side-form-card side-contact-popup" id="pmPtwModal"
-          style="display: none; width: 480px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          style="display: none; width: 540px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPmPtwTitle"
@@ -4012,7 +4012,7 @@
 
         <!-- 2. Pole Mount Details Modal Tab -->
         <div class="side-form-card side-contact-popup" id="pmPoleMountDetailsModal"
-          style="display: none; width: 760px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          style="display: none; width: 840px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPmPoleMountTitle"
@@ -4109,7 +4109,7 @@
 
         <!-- 3. Survey Report Modal Tab -->
         <div class="side-form-card side-contact-popup" id="pmSurveyReportModal"
-          style="display: none; width: 760px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          style="display: none; width: 840px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPmSurveyReportTitle"
@@ -4167,7 +4167,7 @@
 
         <!-- 4. Civil Works Modal Tab -->
         <div class="side-form-card side-contact-popup" id="pmCivilWorksModal"
-          style="display: none; width: 760px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          style="display: none; width: 840px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPmCivilWorksTitle"
@@ -4261,12 +4261,12 @@
 
         <!-- 5. STN Materials Modal Tab -->
         <div class="side-form-card side-contact-popup" id="pmStnMaterialsModal"
-          style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          style="display: none; width: 1580px !important; max-width: 98vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPmStnMaterialsTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              STN Materials</div>
+              STN-4401</div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
               <button type="button" class="side-top-icon-btn" id="btnPmEditStnMaterial" onclick="editPmSelectedStnMaterial()" title="Edit STN Material" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: none; align-items: center;">
                 <img src="icons/Edit.svg" alt="Edit" style="width: 22px; height: 22px; display: block;">
@@ -4279,8 +4279,8 @@
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
-            <table class="contact-custom-table" id="tblPmStnMaterials" style="width: 100%; border-collapse: collapse;">
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow: visible; scrollbar-width: none;">
+            <table class="contact-custom-table" id="tblPmStnMaterials" style="width: 100%; min-width: 100%; border-collapse: collapse;">
               <thead>
                 <tr class="master-view-header">
                   <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 6px;">
@@ -4385,12 +4385,12 @@
 
         <!-- 6. SRN Materials Modal Tab -->
         <div class="side-form-card side-contact-popup" id="pmSrnMaterialsModal"
-          style="display: none; width: 1040px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          style="display: none; width: 1580px !important; max-width: 98vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPmSrnMaterialsTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              SRN Materials</div>
+              SRN-8801</div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
               <button type="button" class="side-top-icon-btn" id="btnPmEditSrnMaterial" onclick="editPmSelectedSrnMaterial()" title="Edit SRN Material" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: none; align-items: center;">
                 <img src="icons/Edit.svg" alt="Edit" style="width: 22px; height: 22px; display: block;">
@@ -4403,8 +4403,8 @@
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
-            <table class="contact-custom-table" id="tblPmSrnMaterials" style="width: 100%; border-collapse: collapse;">
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow: visible; scrollbar-width: none;">
+            <table class="contact-custom-table" id="tblPmSrnMaterials" style="width: 100%; min-width: 100%; border-collapse: collapse;">
               <thead>
                 <tr class="master-view-header">
                   <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 6px;">
@@ -4505,12 +4505,12 @@
 
         <!-- 7. CAM Materials Modal Tab -->
         <div class="side-form-card side-contact-popup" id="pmCamMaterialsModal"
-          style="display: none; width: 1160px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
+          style="display: none; width: 1620px !important; max-width: 98vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblPmCamMaterialsTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              CAM Materials</div>
+              CAM-101</div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
               <button type="button" class="side-top-icon-btn" id="btnPmEditCamMaterial" onclick="editPmSelectedCamMaterial()" title="Edit CAM Material" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: none; align-items: center;">
                 <img src="icons/Edit.svg" alt="Edit" style="width: 22px; height: 22px; display: block;">
@@ -4523,8 +4523,8 @@
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
-            <table class="contact-custom-table" id="tblPmCamMaterials" style="width: 100%; border-collapse: collapse;">
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto !important; max-height: 60vh; overflow-y: auto;">
+            <table class="contact-custom-table" id="tblPmCamMaterials" style="width: 100%; min-width: 1550px; border-collapse: collapse;">
               <thead>
                 <tr class="master-view-header">
                   <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 6px;">
@@ -4632,15 +4632,21 @@
         <!-- PO Capex Modal Tab (PO No - Revision No (Capex)) -->
         <div class="side-form-card project-info-modal-card" id="poCapexModal"
           style="display: none; width: 1240px; max-width: 96vw;">
-          <!-- Header Ribbon: Slanted Green Title Badge, Summation Total & Red Close Button -->
-          <div class="side-form-header" style="display: flex; align-items: center; justify-content: space-between;">
-            <div class="side-form-title-badge" id="lblPoCapexTitle">PO No - Revision No (Capex)</div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 18px;">
-              <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block;">
-              <span id="lblPoCapexTotalAmount" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">2,21,000.00</span>
+          <!-- Header Ribbon: Slanted Green Title Badge, Summation Total on Left & Red Close Button on Right -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 16px; height: 100%;">
+              <div class="side-form-title-badge" id="lblPoCapexTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                PO No - Revision No (Capex)</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain;">
+                <span id="lblPoCapexTotalAmount" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">2,21,000.00</span>
+              </div>
             </div>
-            <button type="button" class="side-form-close-btn" id="btnClosePoCapexModal" onclick="closePoCapexModal()"
-              aria-label="Close">&times;</button>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnClosePoCapexModal" onclick="closePoCapexModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
           </div>
           <div style="height: 14px;"></div>
 
@@ -6186,24 +6192,24 @@
         <div class="side-form-card" id="commercialPoDetailCard" style="display: none; width: 1100px; max-width: 96vw; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);">
           <!-- Header Ribbon Badge with 3 Badges + Copy Buttons & Top Right Save, Close Icons -->
           <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0; margin-bottom: 24px; box-sizing: border-box;">
-            <div class="side-form-title-badge" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 42px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 20px; margin: 0; white-space: nowrap; flex-shrink: 0;">
+            <div class="side-form-title-badge" id="lblPoHeaderSlantedBadge" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 42px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 20px; margin: 0; white-space: nowrap; flex-shrink: 0;">
               <!-- Badge 1: Project ID / Project Type / Sub-Project Type -->
               <div style="display: inline-flex; align-items: center; gap: 6px;">
-                <span id="lblPoHeaderProjectInfo">Project ID / Project Type / Sub-Project Type</span>
+                <span id="lblPoHeaderProjectInfo" onclick="openProjectInfoModal(activeCommercialPoRowId)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Project Details">Project ID / Project Type / Sub-Project Type</span>
                 <button type="button" id="btnCopyProjectInfo" title="Copy Project info" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
                   <img src="icons/Copy (1).svg" alt="Copy" width="16" height="16" style="filter: brightness(0) invert(1);">
                 </button>
               </div>
               <!-- Badge 2: PO No (0-Opex) -->
               <div style="display: inline-flex; align-items: center; gap: 6px;">
-                <span id="lblPoHeaderPoInfo">PO No (0-Opex)</span>
+                <span id="lblPoHeaderPoInfo" onclick="openPoCapexModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Capex PO Details">PO No (0-Opex)</span>
                 <button type="button" id="btnCopyPoInfo" title="Copy PO info" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
                   <img src="icons/Copy (1).svg" alt="Copy" width="16" height="16" style="filter: brightness(0) invert(1);">
                 </button>
               </div>
               <!-- Badge 3: Site ID / Site Name -->
               <div style="display: inline-flex; align-items: center; gap: 6px;">
-                <span id="lblPoHeaderSiteInfo">Site ID / Site Name</span>
+                <span id="lblPoHeaderSiteInfo" onclick="openSiteInfoModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Site Details">Site ID / Site Name</span>
                 <button type="button" id="btnCopySiteInfo" title="Copy Site info" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
                   <img src="icons/Copy (1).svg" alt="Copy" width="16" height="16" style="filter: brightness(0) invert(1);">
                 </button>

@@ -7275,7 +7275,13 @@ function goBackSubpage() {
       currentProjectsView = 'main';
       currentProjectsSubpage = 'supply';
       showToast('Returned to Supply Page');
-    } else if (currentProjectsView === 'details') {
+    } else if (window.lastPmWorklistView && ['yts', 'wip', 'hold', 'nr'].includes(window.lastPmWorklistView)) {
+      currentModule = 'worklist';
+      currentWorklistView = window.lastPmWorklistView;
+      const targetView = window.lastPmWorklistView.toUpperCase();
+      window.lastPmWorklistView = null;
+      showToast(`Returned to ${targetView}`);
+    } else if (currentProjectsView === 'details' || currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor') {
       currentProjectsView = 'main';
       currentProjectsSubpage = 'projects';
       showToast('Returned to Projects List');
@@ -7325,10 +7331,15 @@ function goBackSubpage() {
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
-      currentModule = 'projects';
-      currentProjectsSubpage = 'projects';
-      currentProjectsView = 'main';
-      showToast('Returned to Projects / Home');
+      if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+        currentWorklistView = 'new_project';
+        showToast('Returned to New project');
+      } else {
+        currentModule = 'projects';
+        currentProjectsSubpage = 'projects';
+        currentProjectsView = 'main';
+        showToast('Returned to Projects / Home');
+      }
     } else if (role === 'Commercial Manager') {
       if (currentWorklistView === 'po_amend_detail') {
         currentWorklistView = 'po_amend';
@@ -11839,7 +11850,7 @@ window.updatePoCapexTotalAmount = function() {
       const cells = tr.querySelectorAll('td');
       if (cells.length >= 7) {
         // Amount is at index 6 (7th column)
-        const amtText = cells[6].textContent.replace(/,/g, '').trim();
+        const amtText = cells[6].textContent.replace(/₹/g, '').replace(/,/g, '').trim();
         const amtVal = parseFloat(amtText);
         if (!isNaN(amtVal)) {
           sum += amtVal;
@@ -11853,7 +11864,7 @@ window.updatePoCapexTotalAmount = function() {
 
   const lblTotal = document.getElementById('lblPoCapexTotalAmount');
   if (lblTotal) {
-    lblTotal.textContent = (typeof formatIndianCurrency === 'function') ? formatIndianCurrency(sum) : sum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    lblTotal.textContent = (typeof formatIndianCurrency === 'function') ? formatIndianCurrency(sum).replace('₹ ', '') : sum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   return sum;
 };
@@ -11866,12 +11877,10 @@ window.renderPoCapexTable = function() {
       <td style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${item.lineNo}</td>
       <td style="text-align: left; width: 30ch; min-width: 30ch; max-width: 30ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${item.itemCode}</td>
       <td style="text-align: left; min-width: 35ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${item.description}</td>
-      <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${item.uom}</td>
-      <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${typeof item.qty === 'number' ? item.qty.toFixed(2) : item.qty}</td>
+      <td style="text-align: right; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${item.uom}</td>
+      <td style="text-align: right; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${typeof item.qty === 'number' ? item.qty.toFixed(2) : item.qty}</td>
       <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${(typeof formatIndianCurrency === 'function') ? formatIndianCurrency(item.rate) : Number(item.rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${(typeof formatIndianCurrency === 'function') ? formatIndianCurrency(item.amount) : Number(item.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-      <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${(typeof formatIndianCurrency === 'function') ? formatIndianCurrency(item.gst) : Number(item.gst).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-      <td style="text-align: right; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${(typeof formatIndianCurrency === 'function') ? formatIndianCurrency(item.total) : Number(item.total).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
     </tr>
   `).join('');
   updatePoCapexTotalAmount();
@@ -15265,7 +15274,9 @@ function renderWorklistToolbar() {
   if (role === 'Project Manager') {
     if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
       toolbar.innerHTML = `
-        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          ${universalBackBtnHtml}
+        </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
           <button type="button" class="toolbar-icon-btn btn-collapse-action" id="btnPmToggleColumns" data-tooltip="${isPmColumnsExpanded ? 'Hide Extra Columns' : 'Show Extra Columns'}" aria-label="Toggle Columns" style="cursor: pointer;" onclick="togglePmExtraColumns()">
             <img src="icons/Collapse.svg" alt="Toggle Columns" class="toolbar-icon-img" id="imgPmCollapseIcon" width="28" height="28" style="transform: ${isPmColumnsExpanded ? 'rotate(-90deg)' : 'rotate(90deg)'}; transition: transform 0.2s ease;">
@@ -15926,6 +15937,58 @@ function renderWorklistFooter() {
     footer.style.width = '100%';
     footer.style.marginTop = 'auto';
     footer.style.padding = '24px';
+
+    if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+      const detailTabs = [
+        { key: 'expenses', label: 'Expenses' }
+      ];
+      if (pmProjectFeatureSettings.tspMaterials) {
+        detailTabs.push({ key: 'material', label: 'Material' });
+      }
+      detailTabs.push({ key: 'infra', label: 'Infra' });
+      detailTabs.push({ key: 'dpr', label: 'DPR' });
+      detailTabs.push({ key: 'boq', label: 'BOQ' });
+      if (pmProjectFeatureSettings.additionalApproval) {
+        detailTabs.push({ key: 'additional_approve', label: 'Additional Approve' });
+      }
+      if (pmProjectFeatureSettings.serviceContract) {
+        detailTabs.push({ key: 'service_vendor', label: 'Service vendor' });
+      }
+
+      footer.innerHTML = `
+        <div class="segmented-toggle-group">
+          ${detailTabs.map((tab, idx) => `
+            <button type="button" class="segmented-btn" data-pm-worklist-tab="${tab.key}">
+              ${tab.label}
+            </button>
+            ${idx < detailTabs.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+          `).join('')}
+        </div>
+      `;
+
+      footer.querySelectorAll('.segmented-btn[data-pm-worklist-tab]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabKey = btn.getAttribute('data-pm-worklist-tab');
+          window.lastPmWorklistView = currentWorklistView;
+          if (tabKey === 'expenses') {
+            openProjectExpensesPage();
+          } else if (tabKey === 'material' || tabKey === 'materials') {
+            openProjectMaterialPage();
+          } else if (tabKey === 'infra') {
+            openProjectInfraPage();
+          } else if (tabKey === 'dpr') {
+            openProjectDprPage();
+          } else if (tabKey === 'boq') {
+            openProjectBoqPage();
+          } else if (tabKey === 'additional_approve' || tabKey === 'approvals' || tabKey === 'additional_approvals') {
+            openProjectApprovalsPage();
+          } else if (tabKey === 'service_vendor' || tabKey === 'service_vendors') {
+            openProjectServiceVendorPage();
+          }
+        });
+      });
+      return;
+    }
 
     const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 7;
     const ytsCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'YTS').length : 2;

@@ -1226,6 +1226,8 @@ const projectMaterialData = [
     mrr: "0.00",
     mrn: "0.00",
     net: "10.00",
+    jms: "10.00",
+    difference: "0.00",
     rate: "50,000.00",
     amount: "5,00,000.00"
   },
@@ -1238,6 +1240,8 @@ const projectMaterialData = [
     mrr: "0.00",
     mrn: "0.00",
     net: "120.00",
+    jms: "120.00",
+    difference: "0.00",
     rate: "450.00",
     amount: "54,000.00"
   },
@@ -1250,6 +1254,8 @@ const projectMaterialData = [
     mrr: "0.00",
     mrn: "0.00",
     net: "2.00",
+    jms: "2.00",
+    difference: "0.00",
     rate: "8,500.00",
     amount: "17,000.00"
   },
@@ -1262,6 +1268,8 @@ const projectMaterialData = [
     mrr: "0.00",
     mrn: "0.00",
     net: "1.00",
+    jms: "1.00",
+    difference: "0.00",
     rate: "1,50,000.00",
     amount: "1,50,000.00"
   },
@@ -1274,6 +1282,8 @@ const projectMaterialData = [
     mrr: "0.00",
     mrn: "0.00",
     net: "25.00",
+    jms: "25.00",
+    difference: "0.00",
     rate: "1,200.00",
     amount: "30,000.00"
   }
@@ -4041,6 +4051,22 @@ let pmStatusDataStore = [
   }
 ];
 
+try {
+  const savedCw = localStorage.getItem('commercialWorklistData');
+  if (savedCw) {
+    const parsedCw = JSON.parse(savedCw);
+    if (Array.isArray(parsedCw) && parsedCw.length > 0) {
+      commercialWorklistData = parsedCw;
+    }
+  }
+  const savedPm = localStorage.getItem('pmStatusDataStore');
+  if (savedPm) {
+    const parsedPm = JSON.parse(savedPm);
+    if (Array.isArray(parsedPm) && parsedPm.length > 0) {
+      pmStatusDataStore = parsedPm;
+    }
+  }
+} catch(e) {}
 
 window.toggleSelectAllPmStatus = function(isChecked) {
   if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
@@ -6703,6 +6729,109 @@ window.openCommercialEmailPage = function() {
   showToast('Switched to Worklist • E-mail');
 };
 
+// ==========================================================================
+// PROJECT MANAGER: MATERIALS WORKLIST DATA STORE
+// ==========================================================================
+const defaultPmMaterialsItems = [
+  {
+    id: "mat-1",
+    siteName: "Guindy Hub",
+    requestBy: "Rajesh Kumar",
+    requestDate: "12/08/2026",
+    projectId: "PRJ-2026-001",
+    siteId: "IN-123456",
+    projectType: "New Build",
+    subProjectType: "Civil Foundation",
+    ageing: "12 Days"
+  },
+  {
+    id: "mat-2",
+    siteName: "Velachery Site",
+    requestBy: "Suresh Babu",
+    requestDate: "10/08/2026",
+    projectId: "PRJ-2026-002",
+    siteId: "IN-123457",
+    projectType: "Upgrade",
+    subProjectType: "Electrical Cable",
+    ageing: "14 Days"
+  },
+  {
+    id: "mat-3",
+    siteName: "OMR Tower",
+    requestBy: "Praveen Nair",
+    requestDate: "05/08/2026",
+    projectId: "PRJ-2026-003",
+    siteId: "IN-123458",
+    projectType: "Maintenance",
+    subProjectType: "Telecom Structural",
+    ageing: "19 Days"
+  },
+  {
+    id: "mat-4",
+    siteName: "Tambaram Junction",
+    requestBy: "Karthik Raja",
+    requestDate: "01/08/2026",
+    projectId: "PRJ-2026-004",
+    siteId: "IN-123459",
+    projectType: "New Build",
+    subProjectType: "Earth Pit & Civil",
+    ageing: "23 Days"
+  },
+  {
+    id: "mat-5",
+    siteName: "Ambattur Estate",
+    requestBy: "Manoj Verma",
+    requestDate: "28/07/2026",
+    projectId: "PRJ-2026-005",
+    siteId: "IN-123460",
+    projectType: "Upgrade",
+    subProjectType: "Optical Fiber Cable",
+    ageing: "26 Days"
+  },
+  {
+    id: "mat-6",
+    siteName: "Porur Industrial",
+    requestBy: "Venkatesh Rao",
+    requestDate: "25/07/2026",
+    projectId: "PRJ-2026-006",
+    siteId: "IN-123461",
+    projectType: "New Build",
+    subProjectType: "Tower Erection",
+    ageing: "28 Days"
+  },
+  {
+    id: "mat-7",
+    siteName: "Anna Nagar Tower",
+    requestBy: "Dinesh Sharma",
+    requestDate: "20/07/2026",
+    projectId: "PRJ-2026-007",
+    siteId: "IN-123462",
+    projectType: "Upgrade",
+    subProjectType: "Power Back-up System",
+    ageing: "32 Days"
+  }
+];
+
+let pmMaterialsDataStore = [...defaultPmMaterialsItems];
+
+function syncPmMaterialsDataWithNewProject() {
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  pmMaterialsDataStore = commercialWorklistData.map((np, idx) => {
+    const existing = pmMaterialsDataStore.find(m => String(m.id) === String(np.id)) || defaultPmMaterialsItems[idx % defaultPmMaterialsItems.length];
+    return {
+      id: np.id || `mat-${idx + 1}`,
+      siteName: np.siteName || existing.siteName || "Guindy Hub",
+      requestBy: existing.requestBy || "Rajesh Kumar",
+      requestDate: np.date || np.submitDate || existing.requestDate || "12/08/2026",
+      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
+      siteId: np.siteId || existing.siteId || "IN-123456",
+      projectType: np.projectType || existing.projectType || "New Build",
+      subProjectType: np.subProjectType || existing.subProjectType || "Civil Foundation",
+      ageing: np.ageing || existing.ageing || "12 Days"
+    };
+  });
+}
+
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
 
@@ -6859,10 +6988,12 @@ document.addEventListener('DOMContentLoaded', () => {
     currentModule = 'worklist';
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
-      const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'materials', 'jms', 'email'];
-      if (viewParam === 'project_update') {
-        const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
-        currentWorklistView = isStnOrCam ? 'yts' : 'wip';
+      const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'materials', 'jms', 'jms_detail', 'email'];
+      const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
+      if (!isStnOrCam && ['yts', 'wip', 'hold', 'nr'].includes(viewParam)) {
+        currentWorklistView = 'project_update';
+      } else if (viewParam === 'project_update') {
+        currentWorklistView = isStnOrCam ? 'yts' : 'project_update';
       } else {
         currentWorklistView = pmViews.includes(viewParam) ? viewParam : 'new_project';
       }
@@ -7331,7 +7462,15 @@ function goBackSubpage() {
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
-      if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+      if (['project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment'].includes(currentWorklistView)) {
+        isProjectPaymentEditing = false;
+        isSubpageEditing = false;
+        currentWorklistView = 'payment';
+        showToast('Returned to Payment');
+      } else if (currentWorklistView === 'jms_detail') {
+        currentWorklistView = 'jms';
+        showToast('Returned to JMS list');
+      } else if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
         currentWorklistView = 'new_project';
         showToast('Returned to New project');
       } else {
@@ -7624,15 +7763,16 @@ function renderApp() {
           (typeof projectsMainData !== 'undefined' ? projectsMainData.find(r => String(r.id) === String(selectedProjectId)) : null) ||
           (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData.find(r => String(r.id) === String(selectedProjectId)) : null) || {};
 
-        const pProjId = activeRow.projectId || 'R/RL-234567';
-        const pProjType = activeRow.projectType || 'New Build';
-        const pSubProjType = activeRow.subProjectType || 'With DG';
-        const pPo = activeRow.poNo || '230510678';
+        const pProjId = activeRow.projectId || 'PRJ-2026-001';
+        const pProjType = activeRow.projectType || 'Run project';
+        const pSubProjType = activeRow.subProjectType || 'Civil';
+        const pPo = activeRow.poNo || '4500128934';
         const sId = activeRow.siteId || 'IN-123456';
-        const sName = activeRow.siteName || 'Guindy';
+        const sName = activeRow.siteName || 'Guindy Hub';
 
         const projStr = `${pProjId} / ${pProjType} / ${pSubProjType}`;
-        const poStr = pPo.includes('(') ? pPo : `${pPo} / ( 0 - Capex )`;
+        const poCategory = (activeRow.poType === 'Capex') ? '0-Capex' : '0-Opex';
+        const poStr = pPo.includes('(') ? pPo : `${pPo} ( ${poCategory} )`;
         const siteStr = `${sId} / ${sName}`;
 
         bannerTitle.innerHTML = `
@@ -10479,24 +10619,94 @@ window.closeProjectInfoModal = function() {
 };
 
 // ==========================================================================
+// ==========================================================================
 // PROJECT MANAGER PROJECT DETAILS MODAL CONTROLLER & SUB-MODALS
 // ==========================================================================
 let activePmModalRow = null;
 
 let pmProjectFeatureSettings = {
-  tspMaterials: false,
-  additionalApproval: false,
-  serviceContract: false,
+  siteSurvey: false,
+  tspMaterials: true,
+  qualityAudit: false,
+  civilWorks: false,
+  ptw: false,
+  srn: true,
   stn: false,
-  srn: false,
-  cam: false
+  electricalWorks: false,
+  additionalApproval: true,
+  cam: true,
+  poleMounts: false,
+  serviceContract: true,
+  towerType: 'Ground Based Tower',
+  towerHeight: '30 Mtr',
+  sbc: '150 KN/Sqm',
+  windSpeed: '180 Km/Hr',
+  planningBoq: ''
 };
+let siteFeatureSettingsMap = {};
 try {
   const savedSettings = localStorage.getItem('pmProjectFeatureSettings');
   if (savedSettings) {
     pmProjectFeatureSettings = Object.assign(pmProjectFeatureSettings, JSON.parse(savedSettings));
   }
+  const savedSiteMap = localStorage.getItem('siteFeatureSettingsMap');
+  if (savedSiteMap) {
+    siteFeatureSettingsMap = JSON.parse(savedSiteMap);
+  }
 } catch(e) {}
+
+window.getSiteFeatureSettings = function(siteKeyOrRow) {
+  if (!siteKeyOrRow) return pmProjectFeatureSettings;
+  if (typeof siteKeyOrRow === 'object') {
+    const sName = (siteKeyOrRow.siteName || '').trim().toLowerCase();
+    const sId = (siteKeyOrRow.siteId || '').trim().toLowerCase();
+    const pId = (siteKeyOrRow.projectId || '').trim().toLowerCase();
+    const rId = String(siteKeyOrRow.id || '').trim().toLowerCase();
+    if (sName && siteFeatureSettingsMap[sName]) return siteFeatureSettingsMap[sName];
+    if (sId && siteFeatureSettingsMap[sId]) return siteFeatureSettingsMap[sId];
+    if (pId && siteFeatureSettingsMap[pId]) return siteFeatureSettingsMap[pId];
+    if (rId && siteFeatureSettingsMap[rId]) return siteFeatureSettingsMap[rId];
+  } else {
+    const key = String(siteKeyOrRow).trim().toLowerCase();
+    if (siteFeatureSettingsMap[key]) return siteFeatureSettingsMap[key];
+    const foundRow = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id).toLowerCase() === key || (r.siteName && r.siteName.toLowerCase() === key)) ||
+                     (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id).toLowerCase() === key || (r.siteName && r.siteName.toLowerCase() === key));
+    if (foundRow) {
+      const sName = (foundRow.siteName || '').trim().toLowerCase();
+      const sId = (foundRow.siteId || '').trim().toLowerCase();
+      const pId = (foundRow.projectId || '').trim().toLowerCase();
+      if (sName && siteFeatureSettingsMap[sName]) return siteFeatureSettingsMap[sName];
+      if (sId && siteFeatureSettingsMap[sId]) return siteFeatureSettingsMap[sId];
+      if (pId && siteFeatureSettingsMap[pId]) return siteFeatureSettingsMap[pId];
+    }
+  }
+  return pmProjectFeatureSettings;
+};
+
+window.openProjectInfoModal = function(rowId) {
+  let row = null;
+  if (rowId && typeof rowId === 'object') {
+    row = rowId;
+  } else if (rowId) {
+    row = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(rowId) || r.siteName === rowId || r.siteId === rowId || r.projectId === rowId) ||
+          (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(rowId) || r.siteName === rowId || r.siteId === rowId || r.projectId === rowId) ||
+          (typeof projectsMainData !== 'undefined' ? projectsMainData : []).find(r => String(r.id) === String(rowId)) ||
+          (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(rowId)) ||
+          (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(rowId)) ||
+          (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(rowId));
+  }
+  if (!row && window.activePmProjectRow) {
+    row = window.activePmProjectRow;
+  }
+  openPmProjectDetailsModal(row || rowId);
+};
+
+window.closeProjectInfoModal = function() {
+  const modal = document.getElementById('pmProjectDetailsModal') || document.getElementById('projectInfoModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
 
 window.openPmProjectDetailsModal = function(rowId) {
   const overlay = document.getElementById('sideFormOverlay');
@@ -10510,32 +10720,41 @@ window.openPmProjectDetailsModal = function(rowId) {
   let row = null;
   if (rowId && typeof rowId === 'object') {
     row = rowId;
-  } else {
-    row = (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(rowId)) ||
+  } else if (rowId) {
+    row = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(rowId) || r.siteName === rowId || r.siteId === rowId || r.projectId === rowId) ||
+          (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id) === String(rowId) || r.siteName === rowId || r.siteId === rowId || r.projectId === rowId) ||
+          (typeof projectsMainData !== 'undefined' ? projectsMainData : []).find(r => String(r.id) === String(rowId)) ||
           (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(rowId)) ||
           (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(rowId)) ||
           (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(rowId)) ||
-          (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(rowId)) || {
-            projectId: 'R/RL-234567',
-            projectType: 'New Build',
-            subProjectType: 'With DG',
-            poNo: '230510678',
-            poType: 'Capex',
-            siteId: 'IN-123456',
-            siteName: 'Guindy'
-          };
+          (typeof currentDataset !== 'undefined' ? currentDataset : []).find(r => String(r.id) === String(rowId));
+  }
+  if (!row && window.activePmProjectRow) {
+    row = window.activePmProjectRow;
+  }
+  if (!row) {
+    row = {
+      id: 'cw-1',
+      projectId: 'PRJ-2026-001',
+      projectType: 'Run project',
+      subProjectType: 'Civil',
+      poNo: '4500128934',
+      poType: 'Opex',
+      siteId: 'IN-123456',
+      siteName: 'Guindy Hub'
+    };
   }
 
   activePmModalRow = row;
 
   // Header Texts
   const pId = row.projectId || 'PRJ-2026-001';
-  const pType = row.projectType || 'New Build';
+  const pType = row.projectType || 'Run project';
   const subType = row.subProjectType || 'Civil';
   const poNum = row.poNo || '4500128934';
   const poCategory = (row.poType === 'Capex') ? '0-Capex' : '0-Opex';
   const sId = row.siteId || 'IN-123456';
-  const sName = row.siteName || 'Site Name';
+  const sName = row.siteName || 'Guindy Hub';
 
   const lblProject = document.getElementById('lblPmHeaderProjectInfo');
   if (lblProject) lblProject.textContent = `${pId} / ${pType} / ${subType}`;
@@ -10575,7 +10794,7 @@ window.openPmProjectDetailsModal = function(rowId) {
     sel.disabled = false;
   });
 
-  // Toggles are active/editable by default and populate saved settings
+  // Toggles are active/editable by default and populate saved settings for this site
   const toggleSwitches = document.querySelectorAll('#pmProjectDetailsModal .pm-project-toggle-switch');
   toggleSwitches.forEach(sw => {
     sw.classList.remove('disabled');
@@ -10585,35 +10804,44 @@ window.openPmProjectDetailsModal = function(rowId) {
     }
   });
 
-  const chkTsp = document.getElementById('chkPmTspMaterials');
-  const chkNonNbTsp = document.getElementById('chkPmNonNbTspMaterials');
-  if (chkTsp) chkTsp.checked = !!pmProjectFeatureSettings.tspMaterials;
-  if (chkNonNbTsp) chkNonNbTsp.checked = !!pmProjectFeatureSettings.tspMaterials;
+  const activeFeat = getSiteFeatureSettings(row);
 
-  const chkAdd = document.getElementById('chkPmAdditionalApproval');
-  const chkNonNbAdd = document.getElementById('chkPmNonNbAdditionalApproval');
-  if (chkAdd) chkAdd.checked = !!pmProjectFeatureSettings.additionalApproval;
-  if (chkNonNbAdd) chkNonNbAdd.checked = !!pmProjectFeatureSettings.additionalApproval;
+  // Restore selects and textarea
+  const selTowerType = document.getElementById('pmTowerTypeSelect');
+  if (selTowerType && activeFeat.towerType !== undefined) selTowerType.value = activeFeat.towerType;
 
-  const chkService = document.getElementById('chkPmServiceContract');
-  const chkNonNbService = document.getElementById('chkPmNonNbServiceContract');
-  if (chkService) chkService.checked = !!pmProjectFeatureSettings.serviceContract;
-  if (chkNonNbService) chkNonNbService.checked = !!pmProjectFeatureSettings.serviceContract;
+  const selTowerHeight = document.getElementById('pmTowerHeightSelect');
+  if (selTowerHeight && activeFeat.towerHeight !== undefined) selTowerHeight.value = activeFeat.towerHeight;
 
-  const chkStn = document.getElementById('chkPmStn');
-  const chkNonNbStn = document.getElementById('chkPmNonNbStn');
-  if (chkStn) chkStn.checked = !!pmProjectFeatureSettings.stn;
-  if (chkNonNbStn) chkNonNbStn.checked = !!pmProjectFeatureSettings.stn;
+  const selSbc = document.getElementById('pmSbcSelect');
+  if (selSbc && activeFeat.sbc !== undefined) selSbc.value = activeFeat.sbc;
 
-  const chkSrn = document.getElementById('chkPmSrn');
-  const chkNonNbSrn = document.getElementById('chkPmNonNbSrn');
-  if (chkSrn) chkSrn.checked = !!pmProjectFeatureSettings.srn;
-  if (chkNonNbSrn) chkNonNbSrn.checked = !!pmProjectFeatureSettings.srn;
+  const selWindSpeed = document.getElementById('pmWindSpeedSelect');
+  if (selWindSpeed && activeFeat.windSpeed !== undefined) selWindSpeed.value = activeFeat.windSpeed;
 
-  const chkCam = document.getElementById('chkPmCam');
-  const chkNonNbCam = document.getElementById('chkPmNonNbCam');
-  if (chkCam) chkCam.checked = !!pmProjectFeatureSettings.cam;
-  if (chkNonNbCam) chkNonNbCam.checked = !!pmProjectFeatureSettings.cam;
+  const txtPlanningBoq = document.getElementById('pmPlanningBoqBox');
+  if (txtPlanningBoq && activeFeat.planningBoq !== undefined) txtPlanningBoq.value = activeFeat.planningBoq;
+
+  // Restore all toggles for both layouts
+  const setChk = (id1, id2, val) => {
+    const el1 = document.getElementById(id1);
+    const el2 = document.getElementById(id2);
+    if (el1) el1.checked = !!val;
+    if (el2) el2.checked = !!val;
+  };
+
+  setChk('chkPmSiteSurvey', 'chkPmNonNbSiteSurvey', activeFeat.siteSurvey);
+  setChk('chkPmTspMaterials', 'chkPmNonNbTspMaterials', activeFeat.tspMaterials);
+  setChk('chkPmQualityAudit', 'chkPmNonNbQualityAudit', activeFeat.qualityAudit);
+  setChk('chkPmCivilWorks', 'chkPmNonNbCivilWorks', activeFeat.civilWorks);
+  setChk('chkPmPtw', 'chkPmNonNbPtw', activeFeat.ptw);
+  setChk('chkPmSrn', 'chkPmNonNbSrn', activeFeat.srn);
+  setChk('chkPmStn', 'chkPmNonNbStn', activeFeat.stn);
+  setChk('chkPmElectricalWorks', 'chkPmNonNbElectricalWorks', activeFeat.electricalWorks);
+  setChk('chkPmAdditionalApproval', 'chkPmNonNbAdditionalApproval', activeFeat.additionalApproval);
+  setChk('chkPmCam', 'chkPmNonNbCam', activeFeat.cam);
+  setChk('chkPmPoleMounts', 'chkPmNonNbPoleMounts', activeFeat.poleMounts);
+  setChk('chkPmServiceContract', 'chkPmNonNbServiceContract', activeFeat.serviceContract);
 
   if (modal) {
     modal.style.display = 'block';
@@ -10660,27 +10888,106 @@ window.copyPmHeaderValue = function(fieldKey, label) {
 };
 
 window.savePmProjectDetails = function() {
-  const isTsp = !!(document.getElementById('chkPmTspMaterials')?.checked || document.getElementById('chkPmNonNbTspMaterials')?.checked);
-  const isAddApprove = !!(document.getElementById('chkPmAdditionalApproval')?.checked || document.getElementById('chkPmNonNbAdditionalApproval')?.checked);
-  const isService = !!(document.getElementById('chkPmServiceContract')?.checked || document.getElementById('chkPmNonNbServiceContract')?.checked);
-  const isStn = !!(document.getElementById('chkPmStn')?.checked || document.getElementById('chkPmNonNbStn')?.checked);
-  const isSrn = !!(document.getElementById('chkPmSrn')?.checked || document.getElementById('chkPmNonNbSrn')?.checked);
-  const isCam = !!(document.getElementById('chkPmCam')?.checked || document.getElementById('chkPmNonNbCam')?.checked);
+  const isNewBuild = activePmModalRow ? ((activePmModalRow.projectType || '').trim().toLowerCase() === 'new build') : true;
 
-  pmProjectFeatureSettings.tspMaterials = isTsp;
-  pmProjectFeatureSettings.additionalApproval = isAddApprove;
-  pmProjectFeatureSettings.serviceContract = isService;
-  pmProjectFeatureSettings.stn = isStn;
-  pmProjectFeatureSettings.srn = isSrn;
-  pmProjectFeatureSettings.cam = isCam;
+  const getToggleVal = (nbId, nonNbId) => {
+    const elNb = document.getElementById(nbId);
+    const elNonNb = document.getElementById(nonNbId);
+    if (isNewBuild) {
+      return elNb ? elNb.checked : (elNonNb ? elNonNb.checked : false);
+    } else {
+      return elNonNb ? elNonNb.checked : (elNb ? elNb.checked : false);
+    }
+  };
+
+  const isSiteSurvey = getToggleVal('chkPmSiteSurvey', 'chkPmNonNbSiteSurvey');
+  const isTsp = getToggleVal('chkPmTspMaterials', 'chkPmNonNbTspMaterials');
+  const isQuality = getToggleVal('chkPmQualityAudit', 'chkPmNonNbQualityAudit');
+  const isCivil = getToggleVal('chkPmCivilWorks', 'chkPmNonNbCivilWorks');
+  const isPtw = getToggleVal('chkPmPtw', 'chkPmNonNbPtw');
+  const isSrn = getToggleVal('chkPmSrn', 'chkPmNonNbSrn');
+  const isStn = getToggleVal('chkPmStn', 'chkPmNonNbStn');
+  const isElectrical = getToggleVal('chkPmElectricalWorks', 'chkPmNonNbElectricalWorks');
+  const isAddApprove = getToggleVal('chkPmAdditionalApproval', 'chkPmNonNbAdditionalApproval');
+  const isCam = getToggleVal('chkPmCam', 'chkPmNonNbCam');
+  const isPoleMounts = getToggleVal('chkPmPoleMounts', 'chkPmNonNbPoleMounts');
+  const isService = getToggleVal('chkPmServiceContract', 'chkPmNonNbServiceContract');
+
+  const towerTypeVal = document.getElementById('pmTowerTypeSelect')?.value || '';
+  const towerHeightVal = document.getElementById('pmTowerHeightSelect')?.value || '';
+  const sbcVal = document.getElementById('pmSbcSelect')?.value || '';
+  const windSpeedVal = document.getElementById('pmWindSpeedSelect')?.value || '';
+  const planningBoqVal = document.getElementById('pmPlanningBoqBox')?.value || '';
+
+  const updatedSettings = {
+    siteSurvey: isSiteSurvey,
+    tspMaterials: isTsp,
+    qualityAudit: isQuality,
+    civilWorks: isCivil,
+    ptw: isPtw,
+    srn: isSrn,
+    stn: isStn,
+    electricalWorks: isElectrical,
+    additionalApproval: isAddApprove,
+    cam: isCam,
+    poleMounts: isPoleMounts,
+    serviceContract: isService,
+    towerType: towerTypeVal,
+    towerHeight: towerHeightVal,
+    sbc: sbcVal,
+    windSpeed: windSpeedVal,
+    planningBoq: planningBoqVal
+  };
+
+  if (activePmModalRow) {
+    const siteKey = (activePmModalRow.siteName || activePmModalRow.siteId || activePmModalRow.projectId || 'default').trim().toLowerCase();
+    siteFeatureSettingsMap[siteKey] = Object.assign({}, updatedSettings);
+
+    const sName = (activePmModalRow.siteName || '').trim().toLowerCase();
+    const sId = (activePmModalRow.siteId || '').trim().toLowerCase();
+    const pId = (activePmModalRow.projectId || '').trim().toLowerCase();
+    const rId = String(activePmModalRow.id || '').trim().toLowerCase();
+
+    if (sName) siteFeatureSettingsMap[sName] = Object.assign({}, updatedSettings);
+    if (sId) siteFeatureSettingsMap[sId] = Object.assign({}, updatedSettings);
+    if (pId) siteFeatureSettingsMap[pId] = Object.assign({}, updatedSettings);
+    if (rId) siteFeatureSettingsMap[rId] = Object.assign({}, updatedSettings);
+
+    // Update active row in pmStatusDataStore or commercialWorklistData
+    const origSName = activePmModalRow.siteName || '';
+    const origSId = activePmModalRow.siteId || '';
+    const origPId = activePmModalRow.projectId || '';
+
+    if (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) {
+      pmStatusDataStore.forEach(r => {
+        if ((origSName && r.siteName === origSName) || (origSId && r.siteId === origSId) || (origPId && r.projectId === origPId) || String(r.id) === String(activePmModalRow.id)) {
+          if (isStn && !r.stn) r.stn = 'STN-' + Math.floor(1000 + Math.random() * 9000);
+          else if (!isStn) r.stn = '';
+          if (isSrn && !r.srn) r.srn = 'SRN-' + Math.floor(1000 + Math.random() * 9000);
+          else if (!isSrn) r.srn = '';
+          if (isCam && !r.cam) r.cam = 'CAM-' + Math.floor(100 + Math.random() * 900);
+          else if (!isCam) r.cam = '';
+        }
+      });
+      try {
+        localStorage.setItem('pmStatusDataStore', JSON.stringify(pmStatusDataStore));
+      } catch(e) {}
+    }
+
+    try {
+      localStorage.setItem('siteFeatureSettingsMap', JSON.stringify(siteFeatureSettingsMap));
+    } catch(e) {}
+  }
+
+  pmProjectFeatureSettings = Object.assign({}, updatedSettings);
   try {
     localStorage.setItem('pmProjectFeatureSettings', JSON.stringify(pmProjectFeatureSettings));
   } catch(e) {}
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
-    const isSrnOrCam = isSrn || isCam;
-    if (isSrnOrCam) {
+    const isStnOrCam = isStn || isCam;
+    if (isStnOrCam) {
       if (currentWorklistView === 'project_update') {
         currentWorklistView = 'yts';
       }
@@ -10704,38 +11011,105 @@ window.savePmProjectDetails = function() {
 };
 
 window.handlePmToggleChange = function(toggleType, inputEl) {
-  if (!inputEl || !inputEl.checked) return;
+  const isChecked = !!(inputEl && inputEl.checked);
+
+  const toggleMap = {
+    siteSurvey: ['chkPmSiteSurvey', 'chkPmNonNbSiteSurvey'],
+    tspMaterials: ['chkPmTspMaterials', 'chkPmNonNbTspMaterials'],
+    qualityAudit: ['chkPmQualityAudit', 'chkPmNonNbQualityAudit'],
+    civilWorks: ['chkPmCivilWorks', 'chkPmNonNbCivilWorks'],
+    ptw: ['chkPmPtw', 'chkPmNonNbPtw'],
+    srn: ['chkPmSrn', 'chkPmNonNbSrn'],
+    stn: ['chkPmStn', 'chkPmNonNbStn'],
+    electricalWorks: ['chkPmElectricalWorks', 'chkPmNonNbElectricalWorks'],
+    additionalApproval: ['chkPmAdditionalApproval', 'chkPmNonNbAdditionalApproval'],
+    cam: ['chkPmCam', 'chkPmNonNbCam'],
+    poleMounts: ['chkPmPoleMounts', 'chkPmNonNbPoleMounts'],
+    serviceContract: ['chkPmServiceContract', 'chkPmNonNbServiceContract']
+  };
+
+  if (toggleMap[toggleType]) {
+    toggleMap[toggleType].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el !== inputEl) el.checked = isChecked;
+    });
+  }
+
+  pmProjectFeatureSettings[toggleType] = isChecked;
+
+  if (activePmModalRow) {
+    const siteKey = (activePmModalRow.siteName || activePmModalRow.siteId || activePmModalRow.projectId || 'default').trim().toLowerCase();
+    if (!siteFeatureSettingsMap[siteKey]) siteFeatureSettingsMap[siteKey] = Object.assign({}, pmProjectFeatureSettings);
+    siteFeatureSettingsMap[siteKey][toggleType] = isChecked;
+    const sName = (activePmModalRow.siteName || '').trim().toLowerCase();
+    const sId = (activePmModalRow.siteId || '').trim().toLowerCase();
+    const pId = (activePmModalRow.projectId || '').trim().toLowerCase();
+    const rId = String(activePmModalRow.id || '').trim().toLowerCase();
+    if (sName) { if (!siteFeatureSettingsMap[sName]) siteFeatureSettingsMap[sName] = Object.assign({}, pmProjectFeatureSettings); siteFeatureSettingsMap[sName][toggleType] = isChecked; }
+    if (sId) { if (!siteFeatureSettingsMap[sId]) siteFeatureSettingsMap[sId] = Object.assign({}, pmProjectFeatureSettings); siteFeatureSettingsMap[sId][toggleType] = isChecked; }
+    if (pId) { if (!siteFeatureSettingsMap[pId]) siteFeatureSettingsMap[pId] = Object.assign({}, pmProjectFeatureSettings); siteFeatureSettingsMap[pId][toggleType] = isChecked; }
+    if (rId) { if (!siteFeatureSettingsMap[rId]) siteFeatureSettingsMap[rId] = Object.assign({}, pmProjectFeatureSettings); siteFeatureSettingsMap[rId][toggleType] = isChecked; }
+  }
+
+  try {
+    localStorage.setItem('pmProjectFeatureSettings', JSON.stringify(pmProjectFeatureSettings));
+    localStorage.setItem('siteFeatureSettingsMap', JSON.stringify(siteFeatureSettingsMap));
+  } catch(e) {}
+
+  const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager') {
+    const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
+    if (isStnOrCam) {
+      if (currentWorklistView === 'project_update') {
+        currentWorklistView = 'yts';
+      }
+    } else {
+      if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+        currentWorklistView = 'project_update';
+      }
+    }
+    renderWorklistFooter();
+  }
+
+  if (!isChecked) return;
 
   if (toggleType === 'ptw') {
     openPmPtwModal();
   } else if (toggleType === 'poleMounts') {
     openPmPoleMountDetailsModal();
   } else if (toggleType === 'siteSurvey') {
-    openPmSurveyReportModal();
+    if (typeof openPmSurveyReportModal === 'function') openPmSurveyReportModal();
+    else if (typeof openPmSiteSurveyModal === 'function') openPmSiteSurveyModal();
   } else if (toggleType === 'civilWorks') {
-    openPmCivilWorksModal();
+    if (typeof openPmCivilWorksModal === 'function') openPmCivilWorksModal();
   } else if (toggleType === 'stn') {
-    openPmStnMaterialsModal();
+    if (typeof openPmStnMaterialsModal === 'function') openPmStnMaterialsModal();
+    else if (typeof openPmStnModal === 'function') openPmStnModal();
   } else if (toggleType === 'srn') {
-    openPmSrnMaterialsModal();
+    if (typeof openPmSrnMaterialsModal === 'function') openPmSrnMaterialsModal();
   } else if (toggleType === 'cam') {
-    openPmCamMaterialsModal();
+    if (typeof openPmCamMaterialsModal === 'function') openPmCamMaterialsModal();
   }
 };
 
 // --------------------------------------------------------------------------
 // 1. PTW MODAL CONTROLLER
 // --------------------------------------------------------------------------
+let pmModalOpenedFromDetails = false;
+
 window.openPmPtwModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
+
+  const mainModal = document.getElementById('pmProjectDetailsModal');
+  pmModalOpenedFromDetails = !!(mainModal && (mainModal.style.display === 'block' || mainModal.style.display === 'flex'));
 
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
     if (card.id !== 'pmPtwModal') card.style.display = 'none';
   });
 
-  const titleBadge = document.getElementById('lblPmPtwCardTitle');
+  const titleBadge = document.getElementById('lblPmPtwCardTitle') || document.getElementById('lblPmPtwTitle');
   if (titleBadge) {
     titleBadge.textContent = activePmModalRow ? (activePmModalRow.projectId ? `${activePmModalRow.projectId} - PTW Details` : 'PTW Details') : 'PTW Details';
   }
@@ -10751,10 +11125,15 @@ window.closePmPtwModal = function() {
   const modal = document.getElementById('pmPtwModal');
   if (modal) modal.style.display = 'none';
 
-  const mainModal = document.getElementById('pmProjectDetailsModal');
-  if (mainModal) mainModal.style.display = 'block';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (pmModalOpenedFromDetails) {
+    const mainModal = document.getElementById('pmProjectDetailsModal');
+    if (mainModal) mainModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.savePmPtwDetails = function() {
@@ -10804,14 +11183,17 @@ window.openPmPoleMountDetailsModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
+  const mainModal = document.getElementById('pmProjectDetailsModal');
+  pmModalOpenedFromDetails = !!(mainModal && (mainModal.style.display === 'block' || mainModal.style.display === 'flex'));
+
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
     if (card.id !== 'pmPoleMountDetailsModal') card.style.display = 'none';
   });
 
-  const titleBadge = document.getElementById('lblPmPoleMountCardTitle');
+  const titleBadge = document.getElementById('lblPmPoleMountTitle') || document.getElementById('lblPmPoleMountCardTitle');
   if (titleBadge) {
-    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Pole Mount Details` : 'Pole Mount Details') : 'Pole Mount Details';
+    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Pole mount details` : 'Pole mount details') : 'Pole mount details';
   }
 
   renderPmPoleMountDetailsTable();
@@ -10827,10 +11209,15 @@ window.closePmPoleMountDetailsModal = function() {
   const modal = document.getElementById('pmPoleMountDetailsModal');
   if (modal) modal.style.display = 'none';
 
-  const mainModal = document.getElementById('pmProjectDetailsModal');
-  if (mainModal) mainModal.style.display = 'block';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (pmModalOpenedFromDetails) {
+    const mainModal = document.getElementById('pmProjectDetailsModal');
+    if (mainModal) mainModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.submitPmPoleMountDetails = function() {
@@ -10881,10 +11268,21 @@ window.savePmNewMountDetail = function() {
   const inpHeight = document.getElementById('inpPmNewMountHeight');
   const inpAzimuth = document.getElementById('inpPmNewMountAzimuth');
 
-  const mountType = selType ? selType.value : 'GSM';
-  const sector = selSector ? selSector.value : 'A';
+  const mountType = (selType ? selType.value : 'GSM').trim();
+  const sector = (selSector ? selSector.value : 'A').trim();
   const height = (inpHeight && inpHeight.value.trim()) ? inpHeight.value.trim() : '30m';
   const azimuth = (inpAzimuth && inpAzimuth.value.trim()) ? inpAzimuth.value.trim() : '0°';
+
+  // Prevent duplicate: check by mountType and sector
+  const isDuplicate = pmPoleMountDetailsData.some(item => 
+    item.mountType.toLowerCase() === mountType.toLowerCase() && 
+    item.sector.toLowerCase() === sector.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    showToast(`Duplicate entry! ${mountType} - Sector ${sector} already exists.`);
+    return;
+  }
 
   pmPoleMountDetailsData.push({
     id: Date.now(),
@@ -10935,14 +11333,17 @@ window.openPmSurveyReportModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
+  const mainModal = document.getElementById('pmProjectDetailsModal');
+  pmModalOpenedFromDetails = !!(mainModal && (mainModal.style.display === 'block' || mainModal.style.display === 'flex'));
+
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
     if (card.id !== 'pmSurveyReportModal') card.style.display = 'none';
   });
 
-  const titleBadge = document.getElementById('lblPmSurveyReportCardTitle');
+  const titleBadge = document.getElementById('lblPmSurveyReportTitle') || document.getElementById('lblPmSurveyReportCardTitle');
   if (titleBadge) {
-    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Survey Report` : 'Site Survey Report') : 'Site Survey Report';
+    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Survey report` : 'Site Survey report') : 'Site Survey report';
   }
 
   renderPmSurveyReportTable();
@@ -10958,10 +11359,15 @@ window.closePmSurveyReportModal = function() {
   const modal = document.getElementById('pmSurveyReportModal');
   if (modal) modal.style.display = 'none';
 
-  const mainModal = document.getElementById('pmProjectDetailsModal');
-  if (mainModal) mainModal.style.display = 'block';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (pmModalOpenedFromDetails) {
+    const mainModal = document.getElementById('pmProjectDetailsModal');
+    if (mainModal) mainModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.openPmAddSurveyItemsModal = function() {
@@ -10998,6 +11404,15 @@ window.savePmNewSurveyItem = function() {
   const desc = inpDesc ? inpDesc.value.trim() : '';
   if (!desc) {
     showToast('Please enter a description');
+    return;
+  }
+
+  const isDuplicate = pmSurveyReportData.some(item => 
+    (typeof item === 'string' ? item : item.description || '').trim().toLowerCase() === desc.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    showToast(`Duplicate entry! "${desc}" already exists.`);
     return;
   }
 
@@ -11081,14 +11496,17 @@ window.openPmCivilWorksModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
+  const mainModal = document.getElementById('pmProjectDetailsModal');
+  pmModalOpenedFromDetails = !!(mainModal && (mainModal.style.display === 'block' || mainModal.style.display === 'flex'));
+
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
     if (card.id !== 'pmCivilWorksModal') card.style.display = 'none';
   });
 
-  const titleBadge = document.getElementById('lblPmCivilWorksCardTitle');
+  const titleBadge = document.getElementById('lblPmCivilWorksTitle') || document.getElementById('lblPmCivilWorksCardTitle');
   if (titleBadge) {
-    titleBadge.textContent = activePmModalRow ? (activePmModalRow.projectId ? `${activePmModalRow.projectId} - Civil Works` : 'Civil Works') : 'Civil Works';
+    titleBadge.textContent = activePmModalRow ? (activePmModalRow.projectId ? `${activePmModalRow.projectId} - Civil works` : 'Civil works') : 'Civil works';
   }
 
   pmSelectedCivilWorkId = null;
@@ -11108,10 +11526,15 @@ window.closePmCivilWorksModal = function() {
   const modal = document.getElementById('pmCivilWorksModal');
   if (modal) modal.style.display = 'none';
 
-  const mainModal = document.getElementById('pmProjectDetailsModal');
-  if (mainModal) mainModal.style.display = 'block';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (pmModalOpenedFromDetails) {
+    const mainModal = document.getElementById('pmProjectDetailsModal');
+    if (mainModal) mainModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.submitPmCivilWorksDetails = function() {
@@ -11200,9 +11623,19 @@ window.handlePmCivilWorkPdfSelected = function(fileInput) {
 
 window.savePmNewCivilWork = function() {
   const selFoundation = document.getElementById('inpPmNewCivilFoundationName');
-  const foundationName = selFoundation ? selFoundation.value : 'Tower Foundation';
+  const foundationName = (selFoundation ? selFoundation.value : 'Tower Foundation').trim();
   const hasPdf = !!pmPendingCivilWorkPdf;
   const pdfFileName = pmPendingCivilWorkPdf ? pmPendingCivilWorkPdf.name : null;
+
+  // Prevent duplicate: check by foundationName
+  const isDuplicate = pmCivilWorksData.some(item => 
+    item.foundationName.toLowerCase() === foundationName.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    showToast(`Duplicate entry! "${foundationName}" already exists.`);
+    return;
+  }
 
   pmCivilWorksData.push({
     id: Date.now(),
@@ -11290,12 +11723,15 @@ window.openPmStnMaterialsModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
+  const mainModal = document.getElementById('pmProjectDetailsModal');
+  pmModalOpenedFromDetails = !!(mainModal && (mainModal.style.display === 'block' || mainModal.style.display === 'flex'));
+
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
     if (card.id !== 'pmStnMaterialsModal') card.style.display = 'none';
   });
 
-  const titleBadge = document.getElementById('lblPmStnMaterialsCardTitle');
+  const titleBadge = document.getElementById('lblPmStnMaterialsTitle') || document.getElementById('lblPmStnMaterialsCardTitle');
   if (titleBadge) {
     titleBadge.textContent = activePmModalRow?.stn || 'STN-4401';
   }
@@ -11314,10 +11750,15 @@ window.closePmStnMaterialsModal = function() {
   const modal = document.getElementById('pmStnMaterialsModal');
   if (modal) modal.style.display = 'none';
 
-  const mainModal = document.getElementById('pmProjectDetailsModal');
-  if (mainModal) mainModal.style.display = 'block';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'flex';
+  if (pmModalOpenedFromDetails) {
+    const mainModal = document.getElementById('pmProjectDetailsModal');
+    if (mainModal) mainModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.submitPmStnMaterialsDetails = function() {
@@ -11404,15 +11845,30 @@ window.savePmNewStnMaterial = function() {
   const uom = document.getElementById('inpPmStnUom') ? document.getElementById('inpPmStnUom').value.trim() : '';
   const qty = document.getElementById('inpPmStnQty') ? document.getElementById('inpPmStnQty').value.trim() : '';
 
+  const finalBoqNo = boqNo || (pmEditingStnMaterialId ? '' : `BOQ-STN-00${pmStnMaterialsData.length + 1}`);
+  const finalInfraDesc = infraDesc || 'Material item';
+
+  // Prevent duplicate: check by boqNo or (itemCategory + infraDesc)
+  const isDuplicate = pmStnMaterialsData.some(m => {
+    if (pmEditingStnMaterialId && m.id === pmEditingStnMaterialId) return false;
+    return (boqNo && m.boqNo.toLowerCase() === boqNo.toLowerCase()) ||
+           (m.infraDesc.toLowerCase() === finalInfraDesc.toLowerCase() && m.itemCategory.toLowerCase() === (itemCategory || 'General').toLowerCase());
+  });
+
+  if (isDuplicate) {
+    showToast(`Duplicate entry! STN Material "${boqNo || finalInfraDesc}" already exists.`);
+    return;
+  }
+
   if (pmEditingStnMaterialId) {
     const idx = pmStnMaterialsData.findIndex(m => m.id === pmEditingStnMaterialId);
     if (idx !== -1) {
       pmStnMaterialsData[idx] = {
         ...pmStnMaterialsData[idx],
-        boqNo: boqNo || pmStnMaterialsData[idx].boqNo,
+        boqNo: finalBoqNo || pmStnMaterialsData[idx].boqNo,
         boqDate: boqDate || pmStnMaterialsData[idx].boqDate,
         itemCategory: itemCategory || pmStnMaterialsData[idx].itemCategory,
-        infraDesc: infraDesc || pmStnMaterialsData[idx].infraDesc,
+        infraDesc: finalInfraDesc || pmStnMaterialsData[idx].infraDesc,
         installationType: installationType || pmStnMaterialsData[idx].installationType,
         make: make || pmStnMaterialsData[idx].make,
         uom: uom || pmStnMaterialsData[idx].uom,
@@ -11423,10 +11879,10 @@ window.savePmNewStnMaterial = function() {
   } else {
     pmStnMaterialsData.push({
       id: Date.now(),
-      boqNo: boqNo || `BOQ-STN-00${pmStnMaterialsData.length + 1}`,
+      boqNo: finalBoqNo,
       boqDate: boqDate || '15-05-2024',
       itemCategory: itemCategory || 'General',
-      infraDesc: infraDesc || 'Material item',
+      infraDesc: finalInfraDesc,
       installationType: installationType || 'Additional',
       make: make || 'Standard',
       uom: uom || 'Nos',
@@ -13056,8 +13512,14 @@ function renderProjectsToolbar() {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnDprApprovalHistory" title="Approval History" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
-          <img src="icons/Approval History.svg" alt="Approval History" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        <button type="button" class="tool-btn" id="btnDprPoleMount" title="Pole Mount Details" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openPmPoleMountDetailsModal(); return false;">
+          <img src="icons/pole.svg?v=${Date.now()}" alt="Pole Mount" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnDprCivilWorks" title="Civil Works" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openPmCivilWorksModal(); return false;">
+          <img src="icons/drawing.svg?v=${Date.now()}" alt="Civil Works" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+        <button type="button" class="tool-btn" id="btnDprApprovalHistory" title="Survey Report" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
+          <img src="icons/Approval History.svg" alt="Survey Report" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnDprContact" title="Members" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprMembersModal(); return false;">
           <img src="icons/Members.svg" alt="Members" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -13070,6 +13532,14 @@ function renderProjectsToolbar() {
         </button>
       </div>
     `;
+    toolbar.querySelector('#btnDprPoleMount')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openPmPoleMountDetailsModal();
+    });
+    toolbar.querySelector('#btnDprCivilWorks')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openPmCivilWorksModal();
+    });
     toolbar.querySelector('#btnDprApprovalHistory')?.addEventListener('click', (e) => {
       e.preventDefault();
       openDprSurveyReportModal();
@@ -13091,12 +13561,19 @@ function renderProjectsToolbar() {
   if (currentProjectsView === 'project_infra') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
-      <div class="toolbar-right" style="display: flex; align-items: center;">
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnPmInfraAddStn" title="Add STN Materials" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openPmStnMaterialsModal(); return false;">
+          <img src="icons/Add.svg" alt="Add STN" style="width: 26px; height: 26px; display: block;">
+        </button>
         <button type="button" class="tool-btn btn-export-pdf" id="btnExportInfraPdf" title="Upload / View PDF" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openInfraDocModal('DOC / STATUS'); return false;">
           <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
         </button>
       </div>
     `;
+    toolbar.querySelector('#btnPmInfraAddStn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openPmStnMaterialsModal();
+    });
     toolbar.querySelector('#btnExportInfraPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
       openInfraDocModal('STN / SRN / CAM');
@@ -13111,12 +13588,19 @@ function renderProjectsToolbar() {
           <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
         </div>
       </div>
-      <div class="toolbar-right" style="display: flex; align-items: center;">
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnAddBoqNameModal" title="Add BOQ Name" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openAddBoqNameModal(); return false;">
+          <img src="icons/Add.svg" alt="Add BOQ Name" style="width: 26px; height: 26px; display: block;">
+        </button>
         <button type="button" class="tool-btn btn-export-pdf" id="btnExportMaterialPdf" title="MIN / MRN" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openMinMrnModal('MIN / MRN'); return false;">
           <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
         </button>
       </div>
     `;
+    toolbar.querySelector('#btnAddBoqNameModal')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openAddBoqNameModal();
+    });
     toolbar.querySelector('#btnExportMaterialPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
       openMinMrnModal('MIN / MRN');
@@ -13437,7 +13921,7 @@ function renderProjectsTableHead() {
         <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
           <span>Uom</span>
         </th>
-        <th colspan="5" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+        <th colspan="7" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
           <span>Qty</span>
         </th>
         <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle;">
@@ -13462,6 +13946,12 @@ function renderProjectsTableHead() {
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
           <span>Net</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>JMS</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Difference</span>
         </th>
       </tr>
     `;
@@ -13620,19 +14110,51 @@ function renderProjectsFooter() {
   }
 
   // In all customer content subpages: Expenses, Material, Infra, DPR, BOQ, Additional Approve, Service vendor
+  let activeRow = null;
+  if (selectedProjectId) {
+    activeRow = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore.find(r => String(r.id) === String(selectedProjectId)) : null) ||
+                (typeof projectsMainData !== 'undefined' ? projectsMainData.find(r => String(r.id) === String(selectedProjectId)) : null) ||
+                (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData.find(r => String(r.id) === String(selectedProjectId)) : null) ||
+                window.activePmProjectRow;
+  }
+  if (!activeRow && window.activePmProjectRow) {
+    activeRow = window.activePmProjectRow;
+  }
+  const featSettings = getSiteFeatureSettings(activeRow || selectedProjectId);
+
+  // If currently on a disabled subpage view, fallback gracefully
+  if (currentProjectsView === 'project_material' && !featSettings.tspMaterials) {
+    currentProjectsView = 'details';
+  }
+  if (currentProjectsView === 'project_infra' && !(featSettings.stn && featSettings.srn && featSettings.cam)) {
+    currentProjectsView = 'details';
+  }
+  if (currentProjectsView === 'project_approvals' && !featSettings.additionalApproval) {
+    currentProjectsView = 'details';
+  }
+  if ((currentProjectsView === 'project_service_vendor' || currentProjectsView === 'project_service_vendor_detail') && !featSettings.serviceContract) {
+    currentProjectsView = 'details';
+  }
+
+  const isFromYtsWipHoldNr = (window.lastPmWorklistView && ['yts', 'wip', 'hold', 'nr'].includes(window.lastPmWorklistView)) || (currentModule === 'worklist' && ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView));
+
   let detailTabs = [
     { key: 'expenses', label: 'Expenses' }
   ];
-  if (pmProjectFeatureSettings.tspMaterials) {
+  if (featSettings.tspMaterials) {
     detailTabs.push({ key: 'material', label: 'Material' });
   }
-  detailTabs.push({ key: 'infra', label: 'Infra' });
+  if (featSettings.stn && featSettings.srn && featSettings.cam) {
+    detailTabs.push({ key: 'infra', label: 'Infra' });
+  }
   detailTabs.push({ key: 'dpr', label: 'DPR' });
-  detailTabs.push({ key: 'boq', label: 'BOQ' });
-  if (pmProjectFeatureSettings.additionalApproval) {
+  if (!isFromYtsWipHoldNr) {
+    detailTabs.push({ key: 'boq', label: 'BOQ' });
+  }
+  if (featSettings.additionalApproval) {
     detailTabs.push({ key: 'additional_approve', label: 'Additional Approve' });
   }
-  if (pmProjectFeatureSettings.serviceContract) {
+  if (featSettings.serviceContract) {
     detailTabs.push({ key: 'service_vendor', label: 'Service vendor' });
   }
 
@@ -15593,6 +16115,65 @@ function loadWorklistDataset() {
         return true;
       }).map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'project_payment') {
+      currentDataset = worklistProjectPaymentItems;
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'purchase_payment') {
+      const detail = purchaseDetailData[selectedPurchasePayId || 'pay-2'] || purchaseDetailData['pay-2'];
+      currentDataset = detail.lineItems || [];
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'employee_payment') {
+      const empDetail = employeeDetailData[selectedEmployeePayId || 'pay-3'] || employeeDetailData['pay-3'];
+      currentDataset = empDetail.lineItems || [];
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'transport_payment') {
+      const transDetail = transportDetailData[selectedTransportPayId || 'pay-4'] || transportDetailData['pay-4'];
+      currentDataset = transDetail.lineItems || [];
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'accounts_payment') {
+      const accDetail = accountsDetailData[selectedAccountsPayId || 'pay-6'] || accountsDetailData['pay-6'];
+      currentDataset = accDetail.lineItems || [];
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'admin_payment') {
+      const adminDetail = adminDetailData[selectedAdminPayId || 'pay-5'] || adminDetailData['pay-5'];
+      currentDataset = adminDetail.lineItems || [];
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'statutory_payment') {
+      const statutoryDetail = statutoryDetailData[selectedStatutoryPayId || 'pay-7'] || statutoryDetailData['pay-7'];
+      currentDataset = statutoryDetail.lineItems || [];
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'payment') {
+      currentDataset = paymentData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'jms') {
+      syncCommercialJmsDataWithNewProject();
+      const pmJmsTasks = ["JMS to be validate", "JMS approval pending"];
+      currentDataset = commercialJmsData.map((item, idx) => {
+        let pmTask = pmJmsTasks[idx % pmJmsTasks.length];
+        const tLower = (item.task || '').toLowerCase();
+        if (tLower.includes('validate') || tLower.includes('process')) {
+          pmTask = "JMS to be validate";
+        } else if (tLower.includes('pending') || tLower.includes('submit') || tLower.includes('approval')) {
+          pmTask = "JMS approval pending";
+        }
+        return {
+          ...item,
+          task: pmTask
+        };
+      });
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'jms_detail') {
+      const parentId = selectedJmsRowId || 'cw-1';
+      currentDataset = getJmsDetailItems(parentId);
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'email') {
+      syncCommercialEmailDataWithNewProject();
+      currentDataset = commercialEmailData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'materials') {
+      syncPmMaterialsDataWithNewProject();
+      currentDataset = pmMaterialsDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
       filteredDataset = [];
@@ -15702,6 +16283,18 @@ window.togglePmStatusRowSelect = function(rowId) {
   renderWorklistToolbar();
 };
 
+window.togglePmSelectAllRows = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (currentDataset && currentDataset.length > 0 ? currentDataset : (pmStatusDataStore || []));
+  const allSelected = data.length > 0 && data.every(r => r.selected);
+  data.forEach(r => {
+    r.selected = !allSelected;
+    const storeRow = (pmStatusDataStore || []).find(sr => String(sr.id) === String(r.id));
+    if (storeRow) storeRow.selected = !allSelected;
+  });
+  applyFiltersAndRender();
+  renderWorklistToolbar();
+};
+
 window.toggleSelectAllPmStatus = function(selectAll) {
   currentDataset.forEach(r => {
     r.selected = selectAll;
@@ -15712,13 +16305,469 @@ window.toggleSelectAllPmStatus = function(selectAll) {
   renderWorklistToolbar();
 };
 
-window.editSelectedPmRow = function() {
-  const selectedRows = currentDataset.filter(r => r.selected);
+window.openPmEditProjectUpdateModal = function() {
+  const selectedRows = (currentDataset || []).filter(r => r.selected);
   if (selectedRows.length === 0) {
     showToast('Please select a row to edit.');
     return;
   }
-  showToast(`Edit mode activated for ${selectedRows.length} record(s).`);
+
+  const firstRow = selectedRows[0];
+  const selStatus = document.getElementById('pmEditStatusSelect');
+  const selSupport = document.getElementById('pmEditSupportRequiredSelect');
+  const inpPending = document.getElementById('pmEditPendingWithInput');
+  const txtRemarks = document.getElementById('pmEditRemarksInput');
+
+  if (selStatus) {
+    const rawStatus = (firstRow.status || 'WIP').toUpperCase();
+    if (rawStatus === 'NR' || rawStatus === 'NOT REQUIRED') {
+      selStatus.value = 'Not Required';
+    } else if (rawStatus === 'HOLD') {
+      selStatus.value = 'HOLD';
+    } else {
+      selStatus.value = 'WIP';
+    }
+  }
+
+  if (selSupport) {
+    selSupport.value = firstRow.supportRequired || '';
+  }
+
+  if (inpPending) {
+    inpPending.value = firstRow.pendingWith || '';
+  }
+
+  if (txtRemarks) {
+    txtRemarks.value = firstRow.remarks || '';
+  }
+
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('pmEditProjectUpdateModal');
+  if (overlay && modal) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(card => {
+      if (card.id !== 'pmEditProjectUpdateModal') card.style.display = 'none';
+    });
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closePmEditProjectUpdateModal = function() {
+  const modal = document.getElementById('pmEditProjectUpdateModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.savePmEditProjectUpdate = function() {
+  const selStatus = document.getElementById('pmEditStatusSelect');
+  const selSupport = document.getElementById('pmEditSupportRequiredSelect');
+  const inpPending = document.getElementById('pmEditPendingWithInput');
+  const txtRemarks = document.getElementById('pmEditRemarksInput');
+
+  const statusVal = selStatus ? selStatus.value : 'WIP';
+  const targetStatus = (statusVal === 'Not Required' || statusVal === 'NR') ? 'NR' : statusVal;
+  const supportVal = selSupport ? selSupport.value : '';
+  const pendingWithVal = inpPending ? inpPending.value : '';
+  const remarksVal = txtRemarks ? txtRemarks.value : '';
+
+  const selectedRows = (currentDataset || []).filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    showToast('No record selected to update.');
+    closePmEditProjectUpdateModal();
+    return;
+  }
+
+  const selectedIds = new Set(selectedRows.map(r => String(r.id)));
+
+  if (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) {
+    pmStatusDataStore.forEach(r => {
+      if (selectedIds.has(String(r.id))) {
+        r.status = targetStatus;
+        r.supportRequired = supportVal;
+        r.pendingWith = pendingWithVal;
+        r.remarks = remarksVal;
+        r.selected = false;
+      }
+    });
+    try {
+      localStorage.setItem('pmStatusDataStore', JSON.stringify(pmStatusDataStore));
+    } catch(e) {}
+  }
+
+  // Switch to the target status tab so the user sees the moved row in its new tab
+  currentWorklistView = targetStatus.toLowerCase();
+  activeColumnFilters = {};
+  updateURL();
+
+  closePmEditProjectUpdateModal();
+  loadWorklistDataset();
+  applyFiltersAndRender();
+  renderWorklistToolbar();
+  renderWorklistFooter();
+
+  const statusDisplayName = targetStatus === 'NR' ? 'NR' : targetStatus;
+  showToast(`Record updated & moved to ${statusDisplayName} tab!`);
+};
+
+window.editSelectedPmRow = function() {
+  openPmEditProjectUpdateModal();
+};
+
+// ==========================================================================
+// BOQ MATERIALS SUB-TABLE & POPUP MODALS DATA & HANDLERS
+// ==========================================================================
+let activeSelectedBoqName = "Telecom Tower Mast Accessories 30M";
+
+let boqSubTableDataStore = {
+  "Telecom Tower Mast Accessories 30M": [
+    { id: "sub-1", materialDescription: "30M Triangular Galvanized Mast Body Section", uom: "SET", mir: "10.00", min: "10.00", mrr: "0.00", mrn: "0.00", net: "10.00", jms: "10.00", difference: "0.00", rate: "35,000.00", amount: "3,50,000.00" },
+    { id: "sub-2", materialDescription: "Guy Wire & High Tensile Turnbuckle Set", uom: "SET", mir: "10.00", min: "10.00", mrr: "0.00", mrn: "0.00", net: "10.00", jms: "10.00", difference: "0.00", rate: "15,000.00", amount: "1,50,000.00" }
+  ],
+  "4 Core 16 sq mm Armoured Copper Cable": [
+    { id: "sub-3", materialDescription: "4C x 16 sq mm XLPE Insulated Armoured Cu Cable", uom: "MTR", mir: "120.00", min: "120.00", mrr: "0.00", mrn: "0.00", net: "120.00", jms: "120.00", difference: "0.00", rate: "450.00", amount: "54,000.00" }
+  ],
+  "Chemical Earthing Electrode with Compound": [
+    { id: "sub-4", materialDescription: "Copper Bonded Chemical Earthing Rod 3M 17.2mm", uom: "SET", mir: "2.00", min: "2.00", mrr: "0.00", mrn: "0.00", net: "2.00", jms: "2.00", difference: "0.00", rate: "5,500.00", amount: "11,000.00" },
+    { id: "sub-5", materialDescription: "BFC Backfill Earthing Compound Bag 25Kg", uom: "BAG", mir: "4.00", min: "4.00", mrr: "0.00", mrn: "0.00", net: "4.00", jms: "4.00", difference: "0.00", rate: "1,500.00", amount: "6,000.00" }
+  ],
+  "Diesel Generator Set 15kVA Silent Type": [
+    { id: "sub-6", materialDescription: "15kVA CPCB IV+ Compliant Silent Diesel Engine", uom: "NOS", mir: "1.00", min: "1.00", mrr: "0.00", mrn: "0.00", net: "1.00", jms: "1.00", difference: "0.00", rate: "1,20,000.00", amount: "1,20,000.00" },
+    { id: "sub-7", materialDescription: "Automatic Mains Failure (AMF) Control Panel", uom: "SET", mir: "1.00", min: "1.00", mrr: "0.00", mrn: "0.00", net: "1.00", jms: "1.00", difference: "0.00", rate: "30,000.00", amount: "30,000.00" }
+  ],
+  "Galvanized Steel Fasteners & Clamps": [
+    { id: "sub-8", materialDescription: "SS-304 Grade Heavy Duty Mast Clamps & U-Bolts", uom: "PKT", mir: "25.00", min: "25.00", mrr: "0.00", mrn: "0.00", net: "25.00", jms: "25.00", difference: "0.00", rate: "1,200.00", amount: "30,000.00" }
+  ],
+  "25 X 6 GI Earth Strip": [
+    { id: "sub-9", materialDescription: "25x6mm Hot Dip Galvanized Earth Strip - Grade A", uom: "MTR", mir: "50.00", min: "20.00", mrr: "10.00", mrn: "5.00", net: "15.00", jms: "15.00", difference: "0.00", rate: "120.00", amount: "1,800.00" },
+    { id: "sub-10", materialDescription: "Earthing Clamps & Fasteners (SS-304)", uom: "NOS", mir: "100.00", min: "40.00", mrr: "20.00", mrn: "10.00", net: "30.00", jms: "30.00", difference: "0.00", rate: "45.00", amount: "1,350.00" },
+    { id: "sub-11", materialDescription: "Chemical Earthing Compound Backfill (25Kg Bag)", uom: "BAG", mir: "10.00", min: "6.00", mrr: "2.00", mrn: "1.00", net: "5.00", jms: "5.00", difference: "0.00", rate: "850.00", amount: "4,250.00" }
+  ]
+};
+
+const boqAvailableMaterialsMaster = [
+  { name: "30M Triangular Galvanized Mast Body Section", uom: "SET", rate: 35000 },
+  { name: "Guy Wire & High Tensile Turnbuckle Set", uom: "SET", rate: 15000 },
+  { name: "4C x 16 sq mm XLPE Insulated Armoured Cu Cable", uom: "MTR", rate: 450 },
+  { name: "Copper Bonded Chemical Earthing Rod 3M 17.2mm", uom: "SET", rate: 5500 },
+  { name: "BFC Backfill Earthing Compound Bag 25Kg", uom: "BAG", rate: 1500 },
+  { name: "15kVA CPCB IV+ Compliant Silent Diesel Engine", uom: "NOS", rate: 120000 },
+  { name: "Automatic Mains Failure (AMF) Control Panel", uom: "SET", rate: 30000 },
+  { name: "SS-304 Grade Heavy Duty Mast Clamps & U-Bolts", uom: "PKT", rate: 1200 },
+  { name: "25x6mm Hot Dip Galvanized Earth Strip - Grade A", uom: "MTR", rate: 120 },
+  { name: "Earthing Clamps & Fasteners (SS-304)", uom: "NOS", rate: 45 },
+  { name: "Chemical Earthing Compound Backfill (25Kg Bag)", uom: "BAG", rate: 850 },
+  { name: "40mm NB Medium Class GI Pipe 6M Length", uom: "MTR", rate: 680 },
+  { name: "Cable Tray Perforated Galvanized 150mm x 50mm", uom: "MTR", rate: 320 }
+];
+
+let mirItemsData = [
+  { materialDescription: "30M Triangular Galvanized Mast Body Section", uom: "SET", qty: "10.00" },
+  { materialDescription: "Guy Wire & High Tensile Turnbuckle Set", uom: "SET", qty: "10.00" },
+  { materialDescription: "4C x 16 sq mm XLPE Insulated Armoured Cu Cable", uom: "MTR", qty: "120.00" },
+  { materialDescription: "Copper Bonded Chemical Earthing Rod 3M 17.2mm", uom: "SET", qty: "2.00" },
+  { materialDescription: "25x6mm Hot Dip Galvanized Earth Strip - Grade A", uom: "MTR", qty: "50.00" }
+];
+
+window.openAddBoqNameModal = function() {
+  const sel = document.getElementById('selAddBoqNameField');
+  if (sel) {
+    const existingBoqs = (typeof projectMaterialData !== 'undefined') ? projectMaterialData.map(d => d.boqName) : [];
+    const allBoqOptions = [
+      ...existingBoqs,
+      "25 X 6 GI Earth Strip",
+      "40MM GI PIPE",
+      "Telecom Tower Mast Accessories 30M",
+      "4 Core 16 sq mm Armoured Copper Cable",
+      "Chemical Earthing Electrode with Compound",
+      "Diesel Generator Set 15kVA Silent Type",
+      "Galvanized Steel Fasteners & Clamps"
+    ];
+    const uniqueBoqs = Array.from(new Set(allBoqOptions.filter(Boolean)));
+    sel.innerHTML = uniqueBoqs.map(b => `<option value="${b.replace(/"/g, '&quot;')}">${b}</option>`).join('');
+  }
+
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('addBoqNameModal');
+  if (overlay && modal) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+      if (c.id !== 'addBoqNameModal') c.style.display = 'none';
+    });
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAddBoqNameModal = function() {
+  const modal = document.getElementById('addBoqNameModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitAddBoqName = function() {
+  const sel = document.getElementById('selAddBoqNameField');
+  const selectedBoq = sel ? sel.value : '';
+  if (!selectedBoq) {
+    showToast('Please select a BOQ Name');
+    return;
+  }
+
+  const exists = projectMaterialData.some(d => d.boqName === selectedBoq);
+  if (!exists) {
+    projectMaterialData.push({
+      id: `mat-${Date.now()}`,
+      boqName: selectedBoq,
+      uom: "SET",
+      mir: "0.00",
+      min: "0.00",
+      mrr: "0.00",
+      mrn: "0.00",
+      net: "0.00",
+      jms: "0.00",
+      difference: "0.00",
+      rate: "0.00",
+      amount: "0.00"
+    });
+  }
+
+  closeAddBoqNameModal();
+  if (typeof loadProjectsDataset === 'function') loadProjectsDataset();
+  if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  showToast(`BOQ Name "${selectedBoq}" added!`);
+};
+
+window.openProjectBoqSubTable = function(boqName) {
+  activeSelectedBoqName = boqName || "Telecom Tower Mast Accessories 30M";
+  const section = document.getElementById('projectBoqSubTableSection');
+  const title = document.getElementById('lblProjectBoqSubTableTitle');
+  const thead = document.getElementById('theadProjectBoqSubTable');
+  const tbody = document.getElementById('tbodyProjectBoqSubTable');
+
+  if (title) title.textContent = activeSelectedBoqName;
+
+  if (thead) {
+    thead.innerHTML = `
+      <tr class="master-view-header projects-view-header">
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Material Description</span>
+        </th>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Uom</span>
+        </th>
+        <th colspan="7" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+          <span>Qty</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle;">
+          <span>Rate</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+          <span>Amount</span>
+        </th>
+      </tr>
+      <tr class="master-view-header projects-view-header">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MIR</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MIN</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MRR</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>MRN</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Net</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>JMS</span>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+          <span>Difference</span>
+        </th>
+      </tr>
+    `;
+  }
+
+  let rows = boqSubTableDataStore[activeSelectedBoqName];
+  if (!rows || rows.length === 0) {
+    const parent = projectMaterialData.find(d => d.boqName === activeSelectedBoqName);
+    rows = [
+      {
+        id: `sub-${Date.now()}`,
+        materialDescription: activeSelectedBoqName + " - Main Item Component",
+        uom: parent ? parent.uom : "SET",
+        mir: parent ? parent.mir : "10.00",
+        min: parent ? parent.min : "10.00",
+        mrr: parent ? parent.mrr : "0.00",
+        mrn: parent ? parent.mrn : "0.00",
+        net: parent ? parent.net : "10.00",
+        jms: parent ? (parent.jms || "10.00") : "10.00",
+        difference: parent ? (parent.difference || "0.00") : "0.00",
+        rate: parent ? parent.rate : "1,000.00",
+        amount: parent ? parent.amount : "10,000.00"
+      }
+    ];
+    boqSubTableDataStore[activeSelectedBoqName] = rows;
+  }
+
+  if (tbody) {
+    tbody.innerHTML = rows.map(r => `
+      <tr class="projects-data-row" data-row-id="${r.id}">
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${r.materialDescription || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${r.uom || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mir || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.min || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mrr || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mrn || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.net || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.jms || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.difference || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0;">${r.rate || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${r.amount || '0.00'}</td>
+      </tr>
+    `).join('');
+  }
+
+  if (section) {
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+};
+
+window.closeProjectBoqSubTable = function() {
+  const section = document.getElementById('projectBoqSubTableSection');
+  if (section) section.style.display = 'none';
+};
+
+window.openBoqDetailItemModal = function() {
+  const title = document.getElementById('lblBoqDetailItemModalTitle');
+  if (title) title.textContent = activeSelectedBoqName || 'BOQ Name';
+
+  const sel = document.getElementById('selBoqDetailItemMaterial');
+  if (sel) {
+    sel.innerHTML = boqAvailableMaterialsMaster.map(m => `
+      <option value="${m.name.replace(/"/g, '&quot;')}" data-uom="${m.uom}" data-rate="${m.rate}">${m.name} (${m.uom})</option>
+    `).join('');
+  }
+
+  const inpQty = document.getElementById('inpBoqDetailItemQty');
+  if (inpQty) inpQty.value = '';
+
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('boqDetailItemModal');
+  if (overlay && modal) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+      if (c.id !== 'boqDetailItemModal') c.style.display = 'none';
+    });
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeBoqDetailItemModal = function() {
+  const modal = document.getElementById('boqDetailItemModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.saveBoqDetailItem = function() {
+  const sel = document.getElementById('selBoqDetailItemMaterial');
+  const inpQty = document.getElementById('inpBoqDetailItemQty');
+
+  const selectedMaterialName = sel ? sel.value : '';
+  const rawQty = inpQty ? parseFloat(inpQty.value || '0') : 0;
+  const formattedQty = (isNaN(rawQty) || rawQty <= 0 ? 1 : rawQty).toFixed(2);
+
+  const opt = sel ? sel.options[sel.selectedIndex] : null;
+  const uom = opt ? (opt.getAttribute('data-uom') || 'SET') : 'SET';
+  const rateNum = opt ? parseFloat(opt.getAttribute('data-rate') || '1000') : 1000;
+  const amountNum = (parseFloat(formattedQty) * rateNum);
+  const formattedRate = rateNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formattedAmount = amountNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  if (!boqSubTableDataStore[activeSelectedBoqName]) {
+    boqSubTableDataStore[activeSelectedBoqName] = [];
+  }
+
+  boqSubTableDataStore[activeSelectedBoqName].push({
+    id: `sub-${Date.now()}`,
+    materialDescription: selectedMaterialName,
+    uom: uom,
+    mir: formattedQty,
+    min: formattedQty,
+    mrr: "0.00",
+    mrn: "0.00",
+    net: formattedQty,
+    jms: formattedQty,
+    difference: "0.00",
+    rate: formattedRate,
+    amount: formattedAmount
+  });
+
+  closeBoqDetailItemModal();
+  openProjectBoqSubTable(activeSelectedBoqName);
+  showToast(`Saved ${selectedMaterialName} to table!`);
+};
+
+window.openMirModal = function() {
+  const tbody = document.getElementById('tbodyMirTable');
+  if (tbody) {
+    tbody.innerHTML = mirItemsData.map(item => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="width: 55%; text-align: left !important; padding: 12px 16px; font-weight: 500; color: #1e293b;">${item.materialDescription || ''}</td>
+        <td style="width: 20%; text-align: center !important; padding: 12px 16px; color: #475569;">${item.uom || ''}</td>
+        <td style="width: 25%; text-align: center !important; padding: 12px 16px; font-weight: 600; color: #0f172a;">${parseFloat(item.qty || '0').toFixed(2)}</td>
+      </tr>
+    `).join('');
+  }
+
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('mirModal');
+  if (overlay && modal) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
+      if (c.id !== 'mirModal') c.style.display = 'none';
+    });
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeMirModal = function() {
+  const modal = document.getElementById('mirModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitMirModal = function() {
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(
+      'Task Completed Successfully!',
+      'MIR submitted successfully.',
+      '',
+      '',
+      'Continue',
+      () => {
+        closeMirModal();
+        closeBoqDetailItemModal();
+        closeAddBoqNameModal();
+      }
+    );
+  } else {
+    showToast('Task Completed Successfully!');
+    closeMirModal();
+    closeBoqDetailItemModal();
+    closeAddBoqNameModal();
+  }
+};
+
+window.openMinMrnModal = function(title) {
+  showToast(`${title || 'MIN / MRN'} document viewer opened`);
 };
 
 window.sendMailPmWorklist = function() {
@@ -15821,16 +16870,17 @@ function renderWorklistToolbar() {
           </button>
         </div>
       `;
-    } else {
+    } else if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email'].includes(currentWorklistView)) {
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;"></div>
       `;
+      return;
     }
-    return;
   }
 
-  if (role === 'Commercial Manager') {
+  const isCommercialToolbarView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'].includes(currentWorklistView);
+  if (isCommercialToolbarView) {
     const isNewProject = currentWorklistView === 'new_project';
     const isJms = currentWorklistView === 'jms';
     const isPoAmend = currentWorklistView === 'po_amend';
@@ -16469,6 +17519,26 @@ function renderWorklistFooter() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
+    if (currentWorklistView === 'jms_detail') {
+      footer.style.display = 'none';
+      footer.innerHTML = '';
+      return;
+    }
+    if (['project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment'].includes(currentWorklistView)) {
+      footer.style.display = 'flex';
+      footer.style.justifyContent = 'center';
+      footer.style.alignItems = 'center';
+      footer.style.width = '100%';
+      footer.style.setProperty('margin-top', '12px', 'important');
+      footer.style.setProperty('padding', '12px 0 16px 0', 'important');
+      footer.innerHTML = `
+        <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openTransferDetailsModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+          <img src="icons/Submit.svg" alt="Submit" width="32" height="32">
+        </button>
+      `;
+      return;
+    }
+
     footer.style.display = 'flex';
     footer.style.justifyContent = 'flex-start';
     footer.style.alignItems = 'center';
@@ -16482,17 +17552,32 @@ function renderWorklistFooter() {
     const holdCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'HOLD').length : 1;
     const nrCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'NR').length : 1;
 
+    const hasStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
+
     const pmTabs = [
-      { id: 'btnTogglePmNewProject', view: 'new_project', label: `New project (${newProjectCount})` },
-      { id: 'btnTogglePmYts', view: 'yts', label: `YTS (${ytsCount})` },
-      { id: 'btnTogglePmWip', view: 'wip', label: `WIP (${wipCount})` },
-      { id: 'btnTogglePmHold', view: 'hold', label: `HOLD (${holdCount})` },
-      { id: 'btnTogglePmNr', view: 'nr', label: `NR (${nrCount})` },
+      { id: 'btnTogglePmNewProject', view: 'new_project', label: `New project (${newProjectCount})` }
+    ];
+
+    if (hasStnOrCam) {
+      pmTabs.push(
+        { id: 'btnTogglePmYts', view: 'yts', label: `YTS (${ytsCount})` },
+        { id: 'btnTogglePmWip', view: 'wip', label: `WIP (${wipCount})` },
+        { id: 'btnTogglePmHold', view: 'hold', label: `HOLD (${holdCount})` },
+        { id: 'btnTogglePmNr', view: 'nr', label: `NR (${nrCount})` }
+      );
+    } else {
+      const totalUpdateCount = ytsCount + wipCount + holdCount + nrCount;
+      pmTabs.push(
+        { id: 'btnTogglePmProjectUpdate', view: 'project_update', label: `Project Update (${totalUpdateCount})` }
+      );
+    }
+
+    pmTabs.push(
       { id: 'btnTogglePmPayment', view: 'payment', label: 'Payment' },
       { id: 'btnTogglePmMaterials', view: 'materials', label: 'Materials' },
       { id: 'btnTogglePmJms', view: 'jms', label: 'JMS' },
       { id: 'btnTogglePmEmail', view: 'email', label: 'Email' }
-    ];
+    );
 
     footer.innerHTML = `
       <div class="segmented-toggle-group">
@@ -16682,20 +17767,34 @@ function renderWorklistTableHead() {
   if (!thead) return;
 
   const role = getAuthenticatedUserRole();
-  const tableEl = document.getElementById("tableMain") || document.querySelector(".worklist-custom-table") || (thead ? thead.closest("table") : null);
+  const tableEl = document.getElementById("worklistTable") || document.getElementById("tableMain") || document.querySelector(".worklist-custom-table") || (thead ? thead.closest("table") : null);
+  const containerEl = document.querySelector(".table-container-full") || (tableEl ? tableEl.parentElement : null);
   if (tableEl) {
     if (currentWorklistView === 'wcc') {
       tableEl.style.minWidth = isWccColumnsExpanded ? '1600px' : '100%';
       tableEl.style.width = '100%';
+      tableEl.style.tableLayout = '';
+      if (containerEl) containerEl.style.overflowX = 'auto';
     } else if (currentWorklistView === 'jms') {
       tableEl.style.minWidth = isJmsColumnsExpanded ? '1600px' : '100%';
       tableEl.style.width = '100%';
+      tableEl.style.tableLayout = '';
+      if (containerEl) containerEl.style.overflowX = 'auto';
     } else if (role === 'Project Manager' && ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
       tableEl.style.minWidth = isPmColumnsExpanded ? '2300px' : '1600px';
       tableEl.style.width = '100%';
+      tableEl.style.tableLayout = '';
+      if (containerEl) containerEl.style.overflowX = 'auto';
+    } else if (role === 'Project Manager' && currentWorklistView === 'materials') {
+      tableEl.style.minWidth = '0';
+      tableEl.style.width = '100%';
+      tableEl.style.tableLayout = 'fixed';
+      if (containerEl) containerEl.style.overflowX = 'hidden';
     } else {
       tableEl.style.minWidth = '';
       tableEl.style.width = '';
+      tableEl.style.tableLayout = '';
+      if (containerEl) containerEl.style.overflowX = '';
     }
   }
 
@@ -16874,13 +17973,73 @@ function renderWorklistTableHead() {
       `;
       rebindFilterButtons();
       return;
-    } else {
+    } else if (currentWorklistView === 'materials') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Site Name: 18%, center header, filter enabled -->
+          <th style="width: 18%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 2. Request by: 17%, center header, NO filter -->
+          <th style="width: 17%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Request by</span>
+            </div>
+          </th>
+          <!-- 3. Request Date: 11%, center header, NO filter -->
+          <th style="width: 11%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Request Date</span>
+            </div>
+          </th>
+          <!-- 4. Project ID: 11%, center header, filter enabled -->
+          <th style="width: 11%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site ID: 10%, center header, NO filter -->
+          <th style="width: 10%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Site ID</span>
+            </div>
+          </th>
+          <!-- 6. Project type: 11%, center header, filter enabled -->
+          <th style="width: 11%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Sub-project Type: 15%, center header, filter enabled -->
+          <th style="width: 15%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Ageing: 7%, center header, NO filter -->
+          <th style="width: 7%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Ageing</span>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    } else if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email', 'materials'].includes(currentWorklistView)) {
       thead.innerHTML = '';
       return;
     }
   }
 
-  if (role === 'Commercial Manager') {
+  const isCommercialHeaderView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'].includes(currentWorklistView);
+  if (isCommercialHeaderView) {
     if (currentWorklistView === 'new_project') {
       thead.innerHTML = `
         <tr class="master-view-header">
@@ -17587,8 +18746,9 @@ function renderWorklistTableHead() {
         </tr>
       `;
       rebindFilterButtons();
-    } else {
+    } else if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment'].includes(currentWorklistView)) {
       thead.innerHTML = '';
+      return;
     }
     return;
   }
@@ -17773,9 +18933,9 @@ function renderWorklistTableHead() {
         </th>
       </tr>
       <tr class="tr-sub-headers payment-view-header">
-        <th style="text-align: right !important; padding-right: 14px;">Approved</th>
-        <th style="text-align: right !important; padding-right: 14px;">Transferred</th>
-        <th style="text-align: right !important; padding-right: 14px;">Payable</th>
+        <th style="text-align: center !important; vertical-align: middle; padding: 6px 10px;">Approved</th>
+        <th style="text-align: center !important; vertical-align: middle; padding: 6px 10px;">Transferred</th>
+        <th style="text-align: center !important; vertical-align: middle; padding: 6px 10px;">Payable</th>
       </tr>
     `;
   }
@@ -18020,34 +19180,106 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+      const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
+      if (pmSubmitArea) {
+        const isAllSelected = filteredDataset.length > 0 && filteredDataset.every(r => r.selected);
+        pmSubmitArea.style.display = isAllSelected ? 'flex' : 'none';
+      }
       return;
     }
 
-    const titles = {
-      project_update: 'Project Update',
-      payment: 'Payment',
-      materials: 'Materials',
-      jms: 'JMS',
-      email: 'Email'
-    };
-    const activeTitle = titles[currentWorklistView] || 'New Project';
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="12" class="empty-data-row" style="text-align: center; padding: 72px 24px; border: none;">
-          <div style="max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
-            <div style="width: 56px; height: 56px; border-radius: 12px; background: rgba(4, 84, 228, 0.08); display: flex; align-items: center; justify-content: center;">
-              <img src="icons/Worklist.svg" alt="${activeTitle}" width="32" height="32" style="opacity: 0.85;">
+    if (currentWorklistView === 'materials') {
+      syncPmMaterialsDataWithNewProject();
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.requestBy)) {
+        currentDataset = pmMaterialsDataStore.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}">
+            <!-- 1. Site Name: 18% & left -->
+            <td style="width: 18%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 2. Request by: 17% & left -->
+            <td style="width: 17%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1e293b; vertical-align: middle; padding: 10px 8px;" title="${(row.requestBy || '').replace(/"/g, '&quot;')}">
+              ${row.requestBy || ''}
+            </td>
+            <!-- 3. Request Date: 11% & center -->
+            <td class="td-center" style="width: 11%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.requestDate || ''}
+            </td>
+            <!-- 4. Project ID: 11% & center -->
+            <td class="td-center" style="width: 11%; text-align: center !important; white-space: nowrap; color: #1e293b; font-weight: 500; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Site ID: 10% & center -->
+            <td class="td-center" style="width: 10%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.siteId || ''}
+            </td>
+            <!-- 6. Project type: 11% & center -->
+            <td class="td-center" style="width: 11%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 7. Sub-project Type: 15% & left -->
+            <td style="width: 15%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;" title="${(row.subProjectType || '').replace(/"/g, '&quot;')}">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 8. Ageing: 7% & center -->
+            <td class="td-center" style="width: 7%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email', 'materials'].includes(currentWorklistView)) {
+      const titles = {
+        project_update: 'Project Update',
+        materials: 'Materials',
+        jms: 'JMS',
+        email: 'Email'
+      };
+      const activeTitle = titles[currentWorklistView] || 'New Project';
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="12" class="empty-data-row" style="text-align: center; padding: 72px 24px; border: none;">
+            <div style="max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
+              <div style="width: 56px; height: 56px; border-radius: 12px; background: rgba(4, 84, 228, 0.08); display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Worklist.svg" alt="${activeTitle}" width="32" height="32" style="opacity: 0.85;">
+              </div>
+              <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; letter-spacing: -0.2px;">${activeTitle}</div>
+              <div style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">This section is currently being configured for Project Manager operations.</div>
             </div>
-            <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; letter-spacing: -0.2px;">${activeTitle}</div>
-            <div style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">This section is currently being configured for Project Manager operations.</div>
-          </div>
-        </td>
-      </tr>
-    `;
-    return;
+          </td>
+        </tr>
+      `;
+      return;
+    }
   }
 
-  const isCommercialWorklistView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email'].includes(currentWorklistView);
+  const isCommercialWorklistView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail', 'po_to_be_open'].includes(currentWorklistView);
 
   if (currentModule === 'worklist' && isCommercialWorklistView) {
     if (currentWorklistView === 'new_project') {
@@ -18119,7 +19351,24 @@ function applyFiltersAndRender() {
     if (currentWorklistView === 'jms') {
       syncCommercialJmsDataWithNewProject();
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.task)) {
-        currentDataset = commercialJmsData.map(item => ({ ...item }));
+        if (role === 'Project Manager') {
+          const pmJmsTasks = ["JMS to be validate", "JMS approval pending"];
+          currentDataset = commercialJmsData.map((item, idx) => {
+            let pmTask = pmJmsTasks[idx % pmJmsTasks.length];
+            const tLower = (item.task || '').toLowerCase();
+            if (tLower.includes('validate') || tLower.includes('process')) {
+              pmTask = "JMS to be validate";
+            } else if (tLower.includes('pending') || tLower.includes('submit') || tLower.includes('approval')) {
+              pmTask = "JMS approval pending";
+            }
+            return {
+              ...item,
+              task: pmTask
+            };
+          });
+        } else {
+          currentDataset = commercialJmsData.map(item => ({ ...item }));
+        }
       }
 
       filteredDataset = currentDataset.filter(row => {
@@ -19991,16 +21240,18 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">
-            <a href="#" class="req-link td-link-blue clickable-boq-item-link" onclick="openBoqMaterialDetailModal('${(row.boqName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: none; cursor: pointer; font-weight: 600;">${row.boqName || ''}</a>
+            <a href="#" class="req-link td-link-blue clickable-boq-item-link" onclick="openProjectBoqSubTable('${(row.boqName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">${row.boqName || ''}</a>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.uom || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mir || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.min || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrr || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrn || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.net || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0;">${row.rate || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mir || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.min || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrr || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrn || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.net || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.jms || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.difference || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0;">${row.rate || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || '0.00'}</td>
         </tr>
       `).join('');
     } else if (currentProjectsView === 'project_expenses') {
@@ -37581,6 +38832,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pTypeVal) curRow.poType = pTypeVal;
         curRow.raBill = raVal;
       }
+
+      // Sync with pmStatusDataStore as well
+      const rowSiteId = row ? row.siteId : (curRow ? curRow.siteId : '');
+      const rowProjId = row ? row.projectId : (curRow ? curRow.projectId : '');
+      if (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) {
+        pmStatusDataStore.forEach(p => {
+          if ((rowSiteId && p.siteId === rowSiteId) || (rowProjId && p.projectId === rowProjId) || (row && String(p.id) === String(row.id))) {
+            if (projVal) p.projectId = projVal;
+            if (prTypeVal) p.projectType = prTypeVal;
+            if (subPrTypeVal) p.subProjectType = subPrTypeVal;
+          }
+        });
+      }
+
+      // Save datasets to localStorage
+      try {
+        localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
+        localStorage.setItem('pmStatusDataStore', JSON.stringify(pmStatusDataStore));
+      } catch(e) {}
+
+      // Re-sync all dependent commercial datasets
+      if (typeof syncCommercialJmsDataWithNewProject === 'function') syncCommercialJmsDataWithNewProject();
+      if (typeof syncCommercialPoAmendDataWithNewProject === 'function') syncCommercialPoAmendDataWithNewProject();
+      if (typeof syncCommercialWccDataWithNewProject === 'function') syncCommercialWccDataWithNewProject();
+      if (typeof syncCommercialInvoiceDataWithNewProject === 'function') syncCommercialInvoiceDataWithNewProject();
+      if (typeof syncCommercialReceivableDataWithNewProject === 'function') syncCommercialReceivableDataWithNewProject();
+      if (typeof syncCommercialPoToBeOpenDataWithNewProject === 'function') syncCommercialPoToBeOpenDataWithNewProject();
+      if (typeof syncCommercialEmailDataWithNewProject === 'function') syncCommercialEmailDataWithNewProject();
+
+      try {
+        localStorage.setItem('commercialJmsData', JSON.stringify(commercialJmsData));
+        localStorage.setItem('commercialPoAmendData', JSON.stringify(commercialPoAmendData));
+        localStorage.setItem('commercialWccData', JSON.stringify(commercialWccData));
+        localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
+      } catch(e) {}
 
       closeCommercialPoModal();
       currentWorklistView = 'new_project';

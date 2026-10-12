@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20260927_1955">
+  <link rel="stylesheet" href="assets/css/home.css?v=20261010_2245">
 </head>
 
 <body>
@@ -113,34 +113,7 @@
       </table>
     </div>
 
-    <!-- BOQ Materials Sub-Table Section (Shown below current table when clicking BOQ Name in Materials Page) -->
-    <div id="projectBoqSubTableSection" style="display: none; width: 100%; margin-top: 24px; margin-bottom: 24px;">
-      <div style="background: #ffffff; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #cbd5e1;">
-        <!-- Header Banner with BOQ Name, + Icon and Close Icon on Top Right -->
-        <div style="height: 52px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 16px 0 0;">
-          <div id="lblProjectBoqSubTableTitle" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-            BOQ Name
-          </div>
-          <div style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
-            <button type="button" id="btnProjectBoqSubTableAdd" onclick="openBoqDetailItemModal()" title="Add Material" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
-              <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
-            </button>
-            <button type="button" id="btnProjectBoqSubTableClose" onclick="closeProjectBoqSubTable()" aria-label="Close" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
-          </div>
-        </div>
-        <!-- Sub-Table -->
-        <div class="table-container-full" style="margin: 0; border: none; box-shadow: none;">
-          <table class="worklist-table-full" id="tblProjectBoqSubTable" style="margin: 0; width: 100%;">
-            <thead id="theadProjectBoqSubTable">
-              <!-- Rendered dynamically -->
-            </thead>
-            <tbody id="tbodyProjectBoqSubTable">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+
 
     <!-- Centered Submit Area for YTS/WIP/HOLD/NR when all rows selected -->
     <div id="pmStatusSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
@@ -4470,11 +4443,27 @@
             </div>
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ Date</label>
-              <input type="text" id="inpPmStnBoqDate" class="form-input-control" placeholder="DD-MM-YYYY" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+              <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" id="inpPmStnBoqDate" class="form-input-control" placeholder="DD-MM-YYYY" style="width: 100%; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 40px 0 14px; font-size: 0.92rem; outline: none;">
+                <button type="button" id="btnPmStnBoqDateCalendar" style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" style="width: 20px; height: 20px;">
+                </button>
+              </div>
             </div>
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Item Category</label>
-              <input type="text" id="inpPmStnItemCategory" class="form-input-control" placeholder="Enter Item Category" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
+              <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                <select id="inpPmStnItemCategory" class="pm-custom-select">
+                  <option value="Active">Active</option>
+                  <option value="Passive">Passive</option>
+                  <option value="Tower Structure">Tower Structure</option>
+                  <option value="Power & DG">Power & DG</option>
+                  <option value="Civil & Foundation">Civil & Foundation</option>
+                  <option value="Electrical & Earthing">Electrical & Earthing</option>
+                  <option value="Optical & Telecom">Optical & Telecom</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
             </div>
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Description</label>
@@ -4488,14 +4477,6 @@
                   <option value="Replacement">Replacement</option>
                 </select>
               </div>
-            </div>
-            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
-              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Make</label>
-              <input type="text" id="inpPmStnMake" class="form-input-control" placeholder="Enter Make" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
-            </div>
-            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
-              <label class="pm-field-label" style="min-width: 140px; width: 140px;">UOM</label>
-              <input type="text" id="inpPmStnUom" class="form-input-control" placeholder="Enter UOM (e.g. Nos, Mtr)" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
             </div>
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Qty</label>
@@ -4968,7 +4949,7 @@
 
         <!-- Project Plan Modal Tab -->
         <div class="side-form-card project-info-modal-card" id="pmProjectPlanModal"
-          style="display: none; width: 560px; max-width: 96vw;">
+          style="display: none; width: 420px; max-width: 96vw; margin: auto;">
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div class="side-form-title-badge" id="lblPmProjectPlanTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
@@ -4981,11 +4962,11 @@
           </div>
           <div style="height: 14px;"></div>
 
-          <div style="padding: 10px 28px 24px; display: flex; flex-direction: column; gap: 18px;">
+          <div style="padding: 10px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
             <!-- Select field (STN / SRN / Project) -->
-            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Select</label>
-              <select id="selPmPlanType" class="form-input-control" onchange="handlePmPlanTypeChange(this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 110px; min-width: 110px; text-align: left;">Select</label>
+              <select id="selPmPlanType" class="form-input-control" onchange="handlePmPlanTypeChange(this.value)" style="flex: 1; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                 <option value="" disabled selected>Select option</option>
                 <option value="STN">STN</option>
                 <option value="SRN">SRN</option>
@@ -4994,9 +4975,9 @@
             </div>
 
             <!-- Activity field (When Project selected) -->
-            <div id="rowPmPlanActivity" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Activity</label>
-              <select id="selPmPlanActivity" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+            <div id="rowPmPlanActivity" class="pm-field-row" style="display: none; align-items: center; justify-content: space-between; gap: 14px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 110px; min-width: 110px; text-align: left;">Activity</label>
+              <select id="selPmPlanActivity" class="form-input-control" style="flex: 1; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                 <option value="Survey to be complete" selected>Survey to be complete</option>
                 <option value="MIR to be raise">MIR to be raise</option>
                 <option value="Project to be complete">Project to be complete</option>
@@ -5004,17 +4985,17 @@
             </div>
 
             <!-- Move to field (When STN or SRN selected) -->
-            <div id="rowPmPlanMoveTo" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Move to</label>
-              <select id="selPmPlanMoveTo" class="form-input-control" onchange="handlePmPlanMoveToChange(this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+            <div id="rowPmPlanMoveTo" class="pm-field-row" style="display: none; align-items: center; justify-content: space-between; gap: 14px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 110px; min-width: 110px; text-align: left;">Move to</label>
+              <select id="selPmPlanMoveTo" class="form-input-control" onchange="handlePmPlanMoveToChange(this.value)" style="flex: 1; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                 <!-- Dynamically populated options -->
               </select>
             </div>
 
             <!-- WH Location field (When STN -> WH selected) -->
-            <div id="rowPmPlanWhLocation" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">WH Location</label>
-              <select id="selPmPlanWhLocation" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+            <div id="rowPmPlanWhLocation" class="pm-field-row" style="display: none; align-items: center; justify-content: space-between; gap: 14px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 110px; min-width: 110px; text-align: left;">WH Location</label>
+              <select id="selPmPlanWhLocation" class="form-input-control" style="flex: 1; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                 <option value="Central WH (Guindy Hub)" selected>Central WH (Guindy Hub)</option>
                 <option value="North Regional WH (Ambattur)">North Regional WH (Ambattur)</option>
                 <option value="South Regional WH (Tambaram)">South Regional WH (Tambaram)</option>
@@ -5023,9 +5004,9 @@
             </div>
 
             <!-- I-WH Location field (When SRN -> I-WH selected) -->
-            <div id="rowPmPlanIwhLocation" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">I-WH Location</label>
-              <select id="selPmPlanIwhLocation" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+            <div id="rowPmPlanIwhLocation" class="pm-field-row" style="display: none; align-items: center; justify-content: space-between; gap: 14px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 110px; min-width: 110px; text-align: left;">I-WH Location</label>
+              <select id="selPmPlanIwhLocation" class="form-input-control" style="flex: 1; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                 <option value="I-WH Guindy Intermediate Hub" selected>I-WH Guindy Intermediate Hub</option>
                 <option value="I-WH Ambattur Logistics Point">I-WH Ambattur Logistics Point</option>
                 <option value="I-WH Sriperumbudur Depot">I-WH Sriperumbudur Depot</option>
@@ -5045,7 +5026,7 @@
 
         <!-- Members Modal Tab -->
         <div class="side-form-card project-info-modal-card" id="pmMembersModal"
-          style="display: none; width: 1080px; max-width: 96vw;">
+          style="display: none; width: 540px; max-width: 96vw; margin: auto;">
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div class="side-form-title-badge" id="lblPmMembersTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
@@ -5062,20 +5043,20 @@
           </div>
           <div style="height: 14px;"></div>
 
-          <div class="contact-table-wrap" style="padding: 0 28px 16px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 16px 16px; overflow-x: auto;">
             <table class="projects-custom-table" id="tblMembersItems" style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+                  <th style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px; cursor: pointer;" onclick="toggleSelectAllPmMembers()" title="Select All / Deselect All">
                     <span>Select</span>
                   </th>
-                  <th style="text-align: center; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 130px; min-width: 130px; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Name</th>
-                  <th style="text-align: center; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 10px 12px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 110px; min-width: 110px; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Designation</th>
-                  <th style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 120px; min-width: 120px; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Contact Number</th>
-                  <th style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
+                  <th style="text-align: center; width: 80px; min-width: 80px; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
                     Status</th>
                 </tr>
               </thead>
@@ -5095,8 +5076,8 @@
         </div>
 
         <!-- Add Members Modal Tab -->
-        <div class="side-form-card project-info-modal-card" id="pmAddMemberModal"
-          style="display: none; width: 520px; max-width: 96vw;">
+        <div class="side-form-card" id="pmAddMemberModal"
+          style="display: none; width: 280px !important; max-width: 96vw; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div class="side-form-title-badge" id="lblPmAddMemberTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
@@ -5113,18 +5094,18 @@
           </div>
           <div style="height: 14px;"></div>
 
-          <div style="padding: 10px 28px 24px; display: flex; flex-direction: column; gap: 20px;">
-            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Select Designation</label>
-              <select id="selMemberDesignation" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+          <div style="padding: 10px 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <div class="pm-field-row" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.9rem; text-align: left;">Select Designation</label>
+              <select id="selMemberDesignation" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 36px 0 12px; font-size: 0.9rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 12px center / 14px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
                 <option value="Supervisor" selected>Supervisor</option>
                 <option value="Technician">Technician</option>
                 <option value="Service Vendor">Service Vendor</option>
               </select>
             </div>
-            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
-              <label style="font-weight: 600; color: #334155; font-size: 0.92rem;">Name</label>
-              <select id="selMemberEmployeeName" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+            <div class="pm-field-row" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.9rem; text-align: left;">Name</label>
+              <select id="selMemberEmployeeName" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 36px 0 12px; font-size: 0.9rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 12px center / 14px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
                 <!-- Populated dynamically from masterEmployeeData -->
               </select>
             </div>
@@ -5537,98 +5518,33 @@
           </div>
         </div>
 
-        <!-- Transfer Details Modal (Opened from Payment subpages submit button) -->
-        <div class="side-form-card side-contact-popup" id="transferDetailsModal"
-          style="display: none; width: 480px; max-width: 95vw; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); overflow: hidden;">
-          <!-- Header Ribbon Badge: Transfer Details + Red Close Button -->
+        <!-- Remarks Modal Tab (Opened from Payment subpages submit button) -->
+        <div class="side-form-card side-contact-popup" id="remarksModal"
+          style="display: none; width: 440px; max-width: 95vw; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); overflow: hidden;">
+          <!-- Header Ribbon Badge: Remarks + Red Close Button -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Transfer Details</div>
+            <div class="side-form-title-badge">Remarks</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-form-close-btn" id="btnCloseTransferDetailsModal"
-                onclick="closeTransferDetailsModal()" aria-label="Close transfer details">&times;</button>
+              <button type="button" class="side-form-close-btn" id="btnCloseRemarksModal"
+                onclick="closeRemarksModal()" aria-label="Close remarks">&times;</button>
             </div>
           </div>
 
           <!-- Modal Form Body -->
-          <div class="transfer-details-body" style="padding: 28px 28px 20px 28px;">
-            <!-- 1. Select Bank -->
-            <div class="transfer-form-row"
-              style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
-              <label class="transfer-form-label" for="selTransferBank"
-                style="font-size: 0.96rem; font-weight: 500; color: #475569; margin: 0;">Select Bank</label>
-              <div style="width: 230px; position: relative;">
-                <select class="form-input-control" id="selTransferBank"
-                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 4px 30px 4px 12px; font-size: 0.9rem; font-family: inherit; color: #1e293b; background: #ffffff; cursor: pointer; appearance: none; -webkit-appearance: none;">
-                  <option value="" disabled selected></option>
-                  <option value="hdfc">HDFC Bank - 0987</option>
-                  <option value="icici">ICICI Bank - 4321</option>
-                  <option value="sbi">State Bank of India - 5678</option>
-                  <option value="axis">Axis Bank - 1122</option>
-                  <option value="kotak">Kotak Mahindra Bank - 3344</option>
-                </select>
-                <span
-                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; align-items: center; justify-content: center;">
-                  <img src="icons/dropdown-arrow.svg" alt="Select" width="16" height="16">
-                </span>
-              </div>
-            </div>
-
-            <!-- 2. IMPS Transfer Toggle -->
-            <div class="transfer-form-row"
-              style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
-              <label class="transfer-form-label"
-                style="font-size: 0.96rem; font-weight: 500; color: #475569; margin: 0;">IMPS Transfer</label>
-              <div style="width: auto;">
-                <label class="toggle-slide-switch">
-                  <input type="checkbox" id="chkImpsTransfer">
-                  <span class="toggle-slide-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- 3. Partial Payment Toggle -->
-            <div class="transfer-form-row"
-              style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
-              <label class="transfer-form-label"
-                style="font-size: 0.96rem; font-weight: 500; color: #475569; margin: 0;">Partial Payment</label>
-              <div style="width: auto;">
-                <label class="toggle-slide-switch">
-                  <input type="checkbox" id="chkPartialPayment" onchange="togglePartialPaymentField(this.checked)">
-                  <span class="toggle-slide-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <!-- 4. Process payment (Dynamically displayed when Partial Payment is ON) -->
-            <div class="transfer-form-row" id="rowProcessPayment"
-              style="display: none; align-items: center; justify-content: space-between; margin-bottom: 22px;">
-              <label class="transfer-form-label" for="inpProcessPayment"
-                style="font-size: 0.96rem; font-weight: 500; color: #475569; margin: 0;">Process payment</label>
-              <div style="width: 230px;">
-                <input type="text" class="form-input-control" id="inpProcessPayment" placeholder="Enter amount"
-                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 4px 12px; font-size: 0.9rem; font-family: inherit; color: #1e293b; box-sizing: border-box;">
-              </div>
-            </div>
-
-            <!-- 5. Whatsapp receipt Toggle -->
-            <div class="transfer-form-row"
-              style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px;">
-              <label class="transfer-form-label"
-                style="font-size: 0.96rem; font-weight: 500; color: #475569; margin: 0;">Whatsapp receipt</label>
-              <div style="width: auto;">
-                <label class="toggle-slide-switch">
-                  <input type="checkbox" id="chkWhatsappReceipt">
-                  <span class="toggle-slide-slider"></span>
-                </label>
-              </div>
+          <div class="remarks-modal-body" style="padding: 24px 28px 20px 28px;">
+            <div style="margin-bottom: 20px;">
+              <label for="inpPaymentRemarksText"
+                style="display: block; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 8px;">Remarks</label>
+              <textarea id="inpPaymentRemarksText" rows="4" placeholder="Enter remarks..."
+                style="width: 100%; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 10px 12px; font-size: 0.92rem; font-family: inherit; color: #1e293b; box-sizing: border-box; resize: vertical; outline: none;"></textarea>
             </div>
 
             <!-- Submit Icon Button Inside Tab Centered -->
             <div
-              style="display: flex; justify-content: center; align-items: center; margin-top: 10px; margin-bottom: 6px;">
-              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnTransferDetailsSubmit"
-                onclick="submitTransferDetails()" aria-label="Submit"
-                style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
+              style="display: flex; justify-content: center; align-items: center; margin-top: 14px; margin-bottom: 6px;">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnRemarksSubmit"
+                onclick="submitRemarksModal()" aria-label="Submit"
+                style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </div>
@@ -9859,7 +9775,7 @@
 
         <!-- DPR Members Modal Tab (Triggered by clicking Contact icon in DPR toolbar) -->
         <div class="side-form-card side-contact-popup" id="dprMembersModal"
-          style="display: none; width: 640px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          style="display: none; width: 320px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblDprMembersTitle"
@@ -9989,63 +9905,6 @@
           </div>
         </div>
 
-        <!-- DPR Documents Modal Tab (Document Type, Document Details, Document Name) -->
-        <div class="side-form-card side-contact-popup" id="dprDocumentsModal"
-          style="display: none; width: 640px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
-          <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
-            <div class="side-form-title-badge" id="lblDprDocumentsTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Documents</div>
-            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
-              <button type="button" class="side-form-close-btn" id="btnCloseDprDocumentsModal"
-                onclick="closeDprDocumentsModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
-            </div>
-          </div>
-          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
-            <table class="contact-custom-table" id="tblDprDocumentsPopup"
-              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-              <thead>
-                <tr class="master-view-header">
-                  <th
-                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <span>Document Type</span>
-                      <span style="opacity: 0.85; font-size: 10px; cursor: pointer;">&#9660;</span>
-                    </div>
-                  </th>
-                  <th
-                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <span>Document Details</span>
-                  </th>
-                  <th
-                    style="width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <span>Document Name</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody id="tbodyDprDocuments">
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Site Survey</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Pre-Installation</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">SR_2026_01.pdf</a></td>
-                </tr>
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Soil Test</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Geotechnical</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">ST_Report_B.pdf</a></td>
-                </tr>
-                <tr>
-                  <td style="width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Topography</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Elevation Map</td>
-                  <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">TOPO_Map.dwg</a></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
         <!-- DPR Survey Report Modal Tab (Description, Observation, Remarks, Photo) -->
         <div class="side-form-card side-contact-popup" id="dprSurveyReportModal"
           style="display: none; width: 1100px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
@@ -10054,7 +9913,10 @@
             <div class="side-form-title-badge" id="lblDprSurveyReportTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
               Survey report</div>
-            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnDprAddSurveyItem" onclick="openAddDprSurveyItemModal()" title="Add Survey Item" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" style="width: 24px; height: 24px; display: block;">
+              </button>
               <button type="button" class="side-form-close-btn" id="btnCloseDprSurveyReportModal"
                 onclick="closeDprSurveyReportModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
@@ -10118,6 +9980,58 @@
                   <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">Pending lab compression test</td>
                   <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">View</a></td>
                 </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Survey Item Modal (Opened from DPR Survey Report Modal) -->
+        <div class="side-form-card side-contact-popup" id="dprAddSurveyItemModal"
+          style="display: none; width: 520px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblDprAddSurveyItemTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Add Survey item</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnSaveDprSurveyItem" onclick="saveDprSurveyItem()" title="Save Survey Item" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" style="width: 24px; height: 24px; display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseDprAddSurveyItemModal"
+                onclick="closeAddDprSurveyItemModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+              <label class="pm-field-label" style="min-width: 120px; width: 120px; font-size: 0.95rem; font-weight: 600; color: #1e293b;">Description</label>
+              <input type="text" id="inpDprSurveyItemDesc" class="form-input-control" placeholder="Enter Description" style="flex: 1; height: 40px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.95rem; outline: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- BOQ Sub Table Modal Tab (Opened by clicking BOQ Name in Material page) -->
+        <div class="side-form-card side-contact-popup" id="projectBoqSubTableModal"
+          style="display: none; width: 1480px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblProjectBoqSubModalTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              BOQ Details</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseProjectBoqSubModal"
+                onclick="closeProjectBoqSubTable()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
+            <table class="contact-custom-table" id="tblProjectBoqSubModal"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead id="theadProjectBoqSubModal">
+                <!-- Dynamically rendered -->
+              </thead>
+              <tbody id="tbodyProjectBoqSubModal">
+                <!-- Dynamically rendered -->
               </tbody>
             </table>
           </div>
@@ -12504,8 +12418,17 @@
     </div>
   </div>
 
-  <script src="assets/js/api.js?v=20260928_2230"></script>
-  <script src="assets/js/home.js?v=20260928_2230"></script>
+  <script src="assets/js/api.js?v=20261010_2245"></script>
+  <script src="assets/js/utils/toast.js?v=20261012_01"></script>
+  <script src="assets/js/utils/formatters.js?v=20261012_01"></script>
+  <script src="assets/js/components/excel-filters.js?v=20261012_01"></script>
+  <script src="assets/js/modules/master/master-vendors.js?v=20261012_01"></script>
+  <script src="assets/js/modules/master/master-customers.js?v=20261012_01"></script>
+  <script src="assets/js/modules/master/master-employees.js?v=20261012_01"></script>
+  <script src="assets/js/modules/master/master-expenses.js?v=20261012_01"></script>
+  <script src="assets/js/modules/master/master-hr-policies.js?v=20261012_01"></script>
+  <script src="assets/js/modules/indus/indus-towers.js?v=20261012_01"></script>
+  <script src="assets/js/home.js?v=20261010_2245"></script>
 </body>
 
 </html>

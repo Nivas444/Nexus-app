@@ -55,381 +55,32 @@ var activeBulkUploadFilters = {};
 var currentBulkUploadFilterCol = null;
 var currentBulkUploadPageName = "";
 
-// Master -> Employee Sub-Page Dataset (Loaded dynamically from PostgreSQL via FastAPI)
-let masterEmployeeData = [];
-
-async function loadMasterEmployeesFromApi() {
-  if (typeof NexusApi !== 'undefined' && NexusApi.employees) {
-    try {
-      const response = await NexusApi.employees.getAll({ limit: 500 });
-      let items = [];
-      if (response && Array.isArray(response.items)) {
-        items = response.items;
-      } else if (Array.isArray(response)) {
-        items = response;
-      }
-      masterEmployeeData = items.map(e => ({
-        ...e,
-        id: e.employee_id || e.id || `emp-${e.employee_code || Date.now()}`,
-        employee_id: e.employee_id || e.id,
-        employeeName: e.employee_name || e.employeeName || '',
-        employeeId: e.employee_code || e.employeeId || '',
-        employee_code: e.employee_code || e.employeeId || '',
-        employeeType: e.employee_type || e.empType || 'On-Roll',
-        empType: e.employee_type || e.empType || 'On-Roll',
-        designation: e.designation || '',
-        contactNumber: e.mobile_number || e.contactNumber || '',
-        email: e.email || '',
-        address: e.address || '',
-        pan: e.pan_number || e.pan || '',
-        aadhar: e.aadhaar_number || e.aadhar || '',
-        drivingLicense: e.dl_number || e.drivingLicense || '',
-        passportNumber: e.passport_number || e.passportNumber || '',
-        epfUan: e.epf_uan || e.epfUan || '',
-        esiCode: e.esi_code || e.esiId || e.esiCode || '',
-        esiId: e.esi_code || e.esiId || e.esiCode || '',
-        documents: e.documents || [],
-        pan_documents: e.pan_documents || '',
-        aadhaar_documents: e.aadhaar_documents || '',
-        dl_documents: e.dl_documents || '',
-        passport_documents: e.passport_documents || '',
-        epf_documents: e.epf_documents || '',
-        esi_documents: e.esi_documents || '',
-        qualification_documents: e.qualification_documents || '',
-        geo_attendance: (e.geo_attendance === true || e.geo_attendance === 'true' || e.geoAttendance === true || e.geoAttendance === 'true' || e.geo_attendance === 1 || e.geoAttendance === 1),
-        geoAttendance: (e.geo_attendance === true || e.geo_attendance === 'true' || e.geoAttendance === true || e.geoAttendance === 'true' || e.geo_attendance === 1 || e.geoAttendance === 1),
-        status: (e.status === false || e.status === 'In - Active' || e.status === 'Inactive' || (typeof e.status === 'string' && (e.status.toLowerCase().includes('in') || e.status.toLowerCase().includes('false')))) ? 'In - Active' : 'Active'
-      }));
-    } catch (err) {
-      console.error('Error fetching master employees from API:', err);
-      if (typeof showToast === 'function') {
-        showToast('Could not load employees from database: ' + (err.message || err));
-      }
-    }
-  }
-  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'employee') {
-    currentDataset = [...masterEmployeeData];
-    if (typeof applyFiltersAndRender === 'function') {
-      applyFiltersAndRender();
-    }
-  }
-}
+// Master -> Employee Sub-Page Dataset (Modularized into frontend/assets/js/modules/master/master-employees.js)
+var masterEmployeeData = window.masterEmployeeData || [];
+var currentViewedEmpId = window.currentViewedEmpId || null;
+var isEmployeeFormEditing = window.isEmployeeFormEditing || false;
+var loadMasterEmployeesFromApi = window.loadMasterEmployeesFromApi;
 
 // Master -> Customer Sub-Page Dataset (Loaded dynamically from PostgreSQL via FastAPI)
-let masterCustomerData = [
-  {
-    id: "cust-1",
-    customer_id: 1,
-    customerName: "Indus Towers Ltd",
-    customer_name: "Indus Towers Ltd",
-    legal_name: "Indus Towers Ltd",
-    customerId: "230510678",
-    customer_code: "230510678",
-    businessType: "Projects",
-    business_type: "Projects",
-    gstNumber: "33ASMPM8643F1Z5",
-    gst_number: "33ASMPM8643F1Z5",
-    gstType: "SGST",
-    gst_type: "SGST",
-    invoiceType: "B2B",
-    invoice_type: "B2B",
-    panNumber: "33ASMPM8643F",
-    pan_number: "33ASMPM8643F",
-    address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
-    gst_address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
-    poDigits: "450",
-    po_stating_3_digits: "450",
-    status: "Active"
-  }
-];
-
-async function loadMasterCustomersFromApi() {
-  if (typeof NexusApi !== 'undefined' && NexusApi.customers) {
-    try {
-      const response = await NexusApi.customers.getAll({ limit: 500 });
-      let items = [];
-      if (response && Array.isArray(response.items)) {
-        items = response.items;
-      } else if (Array.isArray(response)) {
-        items = response;
-      }
-      if (items.length > 0) {
-        masterCustomerData = items.map(c => ({
-          ...c,
-          id: c.customer_id || c.id || `cust-${c.customer_code || Date.now()}`,
-          customerName: c.customer_name || c.customerName || c.legal_name || 'Customer',
-          customerId: c.customer_code || c.customerId || c.customer_id || '',
-          businessType: c.business_type || c.businessType || 'Projects',
-          gstNumber: c.gst_number || c.gstNumber || 'NA',
-          gstType: c.gst_type || c.gstType || 'SGST',
-          invoiceType: c.invoice_type || c.invoiceType || 'B2B',
-          panNumber: c.pan_number || c.panNumber || '',
-          address: c.gst_address || c.address || '',
-          poDigits: c.po_stating_3_digits || c.poDigits || '',
-          status: c.status || 'Active'
-        }));
-      }
-    } catch (err) {
-      console.error('Error fetching master customers from API:', err);
-      if (typeof showToast === 'function') {
-        showToast('Could not load customers from database: ' + (err.message || err));
-      }
-    }
-  }
-  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
-    currentDataset = [...masterCustomerData];
-    if (typeof applyFiltersAndRender === 'function') {
-      applyFiltersAndRender();
-    }
-  }
-}
+// Master -> Customer Sub-Page Dataset (Modularized into frontend/assets/js/modules/master/master-customers.js)
+var masterCustomerData = window.masterCustomerData || [];
+var customerLocationData = window.customerLocationData || [];
+var customerContactData = window.customerContactData || [];
+var loadMasterCustomersFromApi = window.loadMasterCustomersFromApi;
 
 
-// Master -> Vendor Dataset (Loaded dynamically from PostgreSQL via FastAPI)
-let masterVendorData = [];
-
-// --- VENDOR-SPECIFIC SUB-DATA STORE (Bank, Contacts, Scope) ---
-let currentViewedVendorId = null;
-let isVendorFormEditing = false;
-let isVendorBankEditing = false;
-
-const vendorSubDataStore = {};
-
-let newVendorTempSubData = {
-  bank: null,
-  contacts: [],
-  supplyScope: [],
-  serviceProjectScope: [],
-  serviceTransportScope: [],
-  serviceOthersScope: []
-};
-
-async function loadMasterVendorsFromApi() {
-  if (typeof NexusApi !== 'undefined' && NexusApi.vendors) {
-    try {
-      const response = await NexusApi.vendors.getAll({ limit: 500 });
-      let items = [];
-      if (response && Array.isArray(response.items)) {
-        items = response.items;
-      } else if (Array.isArray(response)) {
-        items = response;
-      }
-      masterVendorData = items.map(v => {
-        const vId = v.vendor_id || v.id;
-        if (!vendorSubDataStore[vId]) {
-          vendorSubDataStore[vId] = {
-            bank: (v.account_name || v.account_number || v.bank_name) ? {
-              accountName: v.account_name || '',
-              accountNumber: v.account_number || '',
-              bankName: v.bank_name || '',
-              accountType: v.account_type || '',
-              ifscCode: v.ifsc_code || '',
-              status: v.status || 'Active'
-            } : null,
-            contacts: v.contact_name ? [{
-              id: `c-${vId}-1`,
-              name: v.contact_name,
-              designation: 'Primary Contact',
-              phone: v.contact_number || '',
-              email: v.email || '',
-              status: v.status || 'Active'
-            }] : [],
-            supplyScope: [],
-            serviceProjectScope: [],
-            serviceTransportScope: [],
-            serviceOthersScope: []
-          };
-        } else {
-          if (v.account_name || v.account_number || v.bank_name) {
-            vendorSubDataStore[vId].bank = {
-              accountName: v.account_name || '',
-              accountNumber: v.account_number || '',
-              bankName: v.bank_name || '',
-              accountType: v.account_type || '',
-              ifscCode: v.ifsc_code || '',
-              status: v.status || 'Active'
-            };
-          }
-          if (v.contact_name && (!vendorSubDataStore[vId].contacts || vendorSubDataStore[vId].contacts.length === 0)) {
-            vendorSubDataStore[vId].contacts = [{
-              id: `c-${vId}-1`,
-              name: v.contact_name,
-              designation: 'Primary Contact',
-              phone: v.contact_number || '',
-              email: v.email || '',
-              status: v.status || 'Active'
-            }];
-          }
-        }
-
-        return {
-          ...v,
-          id: vId,
-          vendor_id: vId,
-          vendorName: v.vendor_name || v.vendorName || '',
-          vendor_name: v.vendor_name || v.vendorName || '',
-          entityType: v.entity_type || v.entityType || 'Proprietorship',
-          businessType: v.business_type || v.businessType || 'Supply',
-          vendorType: v.business_type || v.vendorType || 'Supply',
-          serviceType: v.service_type || v.serviceType || '',
-          contractType: v.contract_type || v.contractType || '',
-          gstEnabled: (v.gst_number_available !== undefined) ? v.gst_number_available : (v.gst_number && v.gst_number !== 'NA' && v.gst_number !== ''),
-          gstNumber: v.gst_number || v.gstNumber || '',
-          gstType: v.gst_type || v.gstType || 'SGST',
-          panNumber: v.pan_number || v.panNumber || '',
-          tdsDeduction: v.tds_deduction !== undefined ? v.tds_deduction : false,
-          tdsCode: v.tds_code || v.tdsCode || '',
-          tdsRate: v.tds_rate ? `${v.tds_rate}%` : (v.tdsRate || '1%'),
-          address: v.address || '',
-          status: v.status || 'Active'
-        };
-      });
-    } catch (err) {
-      console.error('Error fetching master vendors from API:', err);
-      if (typeof showToast === 'function') {
-        showToast('Could not load vendors from database: ' + (err.message || err));
-      }
-    }
-  }
-  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'vendor') {
-    currentDataset = [...masterVendorData];
-    if (typeof applyFiltersAndRender === 'function') {
-      applyFiltersAndRender();
-    }
-  }
-}
-
-async function loadVendorPricingFromApi(vendorId) {
-  if (typeof NexusApi !== 'undefined' && NexusApi.vendors && vendorId) {
-    try {
-      const numericId = parseInt(vendorId, 10);
-      const res = !isNaN(numericId) ? await NexusApi.vendors.getPricing(numericId) : null;
-      if (res && Array.isArray(res.items)) {
-        if (!vendorSubDataStore[vendorId]) {
-          vendorSubDataStore[vendorId] = {
-            bank: null,
-            contacts: [],
-            supplyScope: [],
-            serviceProjectScope: [],
-            serviceTransportScope: [],
-            serviceOthersScope: []
-          };
-        }
-        const store = vendorSubDataStore[vendorId];
-        store.supplyScope = [];
-        store.serviceProjectScope = [];
-        store.serviceTransportScope = [];
-        store.serviceOthersScope = [];
-
-        res.items.forEach(item => {
-          if (item.vehicle_type || item.vehicle_number) {
-            store.serviceTransportScope.push({
-              id: item.vendor_service_id || item.id,
-              vendor_service_id: item.vendor_service_id,
-              vehicleType: item.vehicle_type || '',
-              vehicleNumber: item.vehicle_number || '',
-              fuelType: item.fuel_type || '',
-              range: item.range_value ? String(item.range_value) : (item.sub_project_type || 'Project'),
-              rentalType: item.rental_type || 'Monthly',
-              rate: item.rate ? String(item.rate) : '',
-              status: item.status || 'Active'
-            });
-          } else if (item.sub_project_type && item.sub_project_type.toLowerCase() !== 'supply') {
-            store.serviceProjectScope.push({
-              id: item.vendor_service_id || item.id,
-              vendor_service_id: item.vendor_service_id,
-              subProjectType: item.sub_project_type || '',
-              uom: item.item_description || 'LS',
-              rate: item.rate ? String(item.rate) : '',
-              status: item.status || 'Active'
-            });
-          } else if (item.service_description) {
-            store.serviceOthersScope.push({
-              id: item.vendor_service_id || item.id,
-              vendor_service_id: item.vendor_service_id,
-              description: item.service_description || '',
-              from: item.fromDate || '01 - 01 - 2026',
-              to: item.toDate || '31 - 12 - 2026',
-              uom: item.item_description || 'Project',
-              rate: item.rate ? String(item.rate) : '',
-              status: item.status || 'Active'
-            });
-          } else {
-            store.supplyScope.push({
-              id: item.vendor_service_id || item.id,
-              vendor_service_id: item.vendor_service_id,
-              category: item.sub_project_type || 'Supply',
-              productName: item.product_name || '',
-              uom: item.item_description || 'Nos',
-              price: item.rate ? String(item.rate) : '',
-              status: item.status || 'Active'
-            });
-          }
-        });
-      }
-    } catch (err) {
-      console.warn('Could not fetch vendor pricing from API:', err);
-    }
-  }
-}
-
-function getEffectiveVendorContext() {
-  if (currentViewedVendorId) {
-    if (!vendorSubDataStore[currentViewedVendorId]) {
-      vendorSubDataStore[currentViewedVendorId] = {
-        bank: null,
-        contacts: [],
-        supplyScope: [],
-        serviceProjectScope: [],
-        serviceTransportScope: [],
-        serviceOthersScope: []
-      };
-    }
-    return vendorSubDataStore[currentViewedVendorId];
-  }
-  return newVendorTempSubData;
-}
-
-function loadVendorBankDataToForm() {
-  const ctx = getEffectiveVendorContext();
-  const bank = ctx.bank;
-  const inpName = document.getElementById('inpVendorBankAccountName');
-  const inpNum = document.getElementById('inpVendorBankAccountNumber');
-  const inpIfsc = document.getElementById('inpVendorBankIfsc');
-  const selBank = document.getElementById('inpVendorBankName');
-  const chkStatus = document.getElementById('inpVendorBankStatusToggle');
-
-  if (bank) {
-    if (inpName) inpName.value = bank.accountName || '';
-    if (inpNum) inpNum.value = bank.accountNumber || '';
-    if (inpIfsc) inpIfsc.value = bank.ifscCode || '';
-    if (selBank) selBank.value = bank.bankName || '';
-    if (chkStatus) chkStatus.checked = (bank.status || '').toLowerCase() === 'active';
-  } else {
-    if (inpName) inpName.value = '';
-    if (inpNum) inpNum.value = '';
-    if (inpIfsc) inpIfsc.value = '';
-    if (selBank) selBank.value = '';
-    if (chkStatus) chkStatus.checked = true;
-  }
-}
-
-function saveVendorBankDataFromForm() {
-  const ctx = getEffectiveVendorContext();
-  const inpName = document.getElementById('inpVendorBankAccountName');
-  const inpNum = document.getElementById('inpVendorBankAccountNumber');
-  const inpIfsc = document.getElementById('inpVendorBankIfsc');
-  const selBank = document.getElementById('inpVendorBankName');
-  const chkStatus = document.getElementById('inpVendorBankStatusToggle');
-
-  ctx.bank = {
-    accountName: inpName ? inpName.value.trim() : '',
-    accountNumber: inpNum ? inpNum.value.trim() : '',
-    ifscCode: inpIfsc ? inpIfsc.value.trim() : '',
-    bankName: selBank ? selBank.value : '',
-    status: (chkStatus && chkStatus.checked) ? 'Active' : 'In - Active'
-  };
-}
+// Master -> Vendor Dataset & Helpers (Modularized into frontend/assets/js/modules/master/master-vendors.js)
+var masterVendorData = window.masterVendorData || [];
+var vendorSubDataStore = window.vendorSubDataStore || {};
+var newVendorTempSubData = window.newVendorTempSubData || {};
+var currentViewedVendorId = window.currentViewedVendorId || null;
+var isVendorFormEditing = window.isVendorFormEditing || false;
+var isVendorBankEditing = window.isVendorBankEditing || false;
+var loadMasterVendorsFromApi = window.loadMasterVendorsFromApi;
+var loadVendorPricingFromApi = window.loadVendorPricingFromApi;
+var getEffectiveVendorContext = window.getEffectiveVendorContext;
+var loadVendorBankDataToForm = window.loadVendorBankDataToForm;
+var saveVendorBankDataFromForm = window.saveVendorBankDataFromForm;
 
 
 // Master -> Products Dataset (Loaded dynamically from PostgreSQL via FastAPI)
@@ -808,175 +459,23 @@ const paymentData = [
 // ==========================================================================
 // INDUS TOWERS DATASET (Sub-Page from Customer Table Indus Link)
 // ==========================================================================
-let currentIndusSubpage = 'site'; // 'site', 'products', 'infra', 'projects'
-
-let indusSiteData = [];
-
-
-let indusProductsData = [];
-
-
-let indusInfraData = [];
-
-
-let indusProjectsData = [];
-
-async function fetchIndusProjects(renderAfter = true) {
-  if (typeof NexusApi === 'undefined' || !NexusApi.indusProjects) return [];
-  try {
-    const resp = await NexusApi.indusProjects.getAll({
-      company_name: 'Indus Tower Ltd',
-      page: 1,
-      page_size: 500
-    });
-    const items = (resp && (resp.items || resp)) || [];
-    indusProjectsData = items.map(item => ({
-      id: item.project_type_id || item.id,
-      projectType: item.project_type || '',
-      subProjectType: item.sub_project_type || '',
-      upgradationType: item.upgradation_type || 'Major',
-      tat: item.tat || '',
-      indusPm: item.indus_pm || '',
-      indusScm: item.indus_scm || '',
-      pm: item.pm || '',
-      survey: item.survey || 'Yes',
-      additionalTransport: item.additional_transport || 'Yes',
-      status: item.status || 'Active'
-    }));
-    if (currentIndusSubpage === 'projects') {
-      currentDataset = [...indusProjectsData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusProjectsData;
-  } catch (err) {
-    console.warn('Error fetching Indus projects:', err);
-    return [];
-  }
-}
-
-let currentIndusProductSubpage = 'materials';
-let selectedProductName = 'Product Name';
-
-let indusProductMaterialsData = [];
-let indusProductExpensesData = [];
-let indusProductInfraData = [];
-
-function getActiveGbpaCustomerName() {
-  if (window.currentCustomerName && String(window.currentCustomerName).trim()) {
-    return String(window.currentCustomerName).trim();
-  }
-  if (window.currentCustomerContext) {
-    const c = window.currentCustomerContext;
-    const name = c.customerName || c.customer_name || c.legalName || c.name;
-    if (name && String(name).trim()) return String(name).trim();
-  }
-  return 'Indus Tower Ltd';
-}
-window.getActiveGbpaCustomerName = getActiveGbpaCustomerName;
-
-async function fetchGbpaMaterials(renderAfter = true) {
-  try {
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
-      const resp = await NexusApi.indusGbpaMaterials.getAll({
-        customer_name: getActiveGbpaCustomerName(),
-        page: 1,
-        page_size: 500
-      });
-      indusProductMaterialsData = (resp && resp.items) ? resp.items : [];
-    }
-    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'materials') {
-      currentDataset = [...indusProductMaterialsData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusProductMaterialsData;
-  } catch (err) {
-    console.error('Failed to fetch GBPA materials:', err);
-    indusProductMaterialsData = [];
-    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'materials') {
-      currentDataset = [];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA materials from database.', 'Database Error');
-    }
-    return [];
-  }
-}
-window.fetchGbpaMaterials = fetchGbpaMaterials;
-
-async function fetchGbpaExpenses(renderAfter = true) {
-  try {
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
-      const resp = await NexusApi.indusGbpaExpenses.getAll({
-        customer_name: getActiveGbpaCustomerName(),
-        page: 1,
-        page_size: 500
-      });
-      indusProductExpensesData = (resp && resp.items) ? resp.items : [];
-    }
-    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'expenses') {
-      currentDataset = [...indusProductExpensesData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusProductExpensesData;
-  } catch (err) {
-    console.error('Failed to fetch GBPA expenses:', err);
-    indusProductExpensesData = [];
-    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'expenses') {
-      currentDataset = [];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA expenses from database.', 'Database Error');
-    }
-    return [];
-  }
-}
-window.fetchGbpaExpenses = fetchGbpaExpenses;
-
-async function fetchGbpaInfra(renderAfter = true) {
-  try {
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra) {
-      const resp = await NexusApi.indusGbpaInfra.getAll({
-        customer_name: getActiveGbpaCustomerName(),
-        page: 1,
-        page_size: 500
-      });
-      indusProductInfraData = (resp && resp.items) ? resp.items : [];
-    }
-    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'infra') {
-      currentDataset = [...indusProductInfraData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusProductInfraData;
-  } catch (err) {
-    console.error('Failed to fetch GBPA infrastructure:', err);
-    indusProductInfraData = [];
-    if (currentModule === 'indus_towers' && currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'infra') {
-      currentDataset = [];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA infrastructure from database.', 'Database Error');
-    }
-    return [];
-  }
-}
-window.fetchGbpaInfra = fetchGbpaInfra;
+// Indus Towers Datasets & Fetchers (Modularized into frontend/assets/js/modules/indus/indus-towers.js)
+var currentIndusSubpage = window.currentIndusSubpage || 'site';
+var indusSiteData = window.indusSiteData || [];
+var indusProductsData = window.indusProductsData || [];
+var indusInfraData = window.indusInfraData || [];
+var indusProjectsData = window.indusProjectsData || [];
+var indusEshData = window.indusEshData || [];
+var currentIndusProductSubpage = window.currentIndusProductSubpage || 'materials';
+var selectedProductName = window.selectedProductName || 'Product Name';
+var indusProductMaterialsData = window.indusProductMaterialsData || [];
+var indusProductExpensesData = window.indusProductExpensesData || [];
+var indusProductInfraData = window.indusProductInfraData || [];
+var fetchIndusProjects = window.fetchIndusProjects;
+var getActiveGbpaCustomerName = window.getActiveGbpaCustomerName;
+var fetchGbpaMaterials = window.fetchGbpaMaterials;
+var fetchGbpaExpenses = window.fetchGbpaExpenses;
+var fetchGbpaInfra = window.fetchGbpaInfra;
 
 
 const indusProductRateData = [
@@ -998,7 +497,7 @@ const indusProductRateData = [
   }
 ];
 
-let indusEshData = [];
+var indusEshData = window.indusEshData || [];
 
 
 let selectedProjectType = "Project Type";
@@ -6989,7 +6488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
       const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'materials', 'jms', 'jms_detail', 'email'];
-      const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
+      const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.srn || pmProjectFeatureSettings.cam);
       if (!isStnOrCam && ['yts', 'wip', 'hold', 'nr'].includes(viewParam)) {
         currentWorklistView = 'project_update';
       } else if (viewParam === 'project_update') {
@@ -7177,6 +6676,9 @@ function switchModule(moduleName) {
 
   currentModule = moduleName;
   activeColumnFilters = {};
+
+  const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
+  if (pmSubmitArea) pmSubmitArea.style.display = 'none';
 
   if (moduleName === 'master') {
     currentMasterView = 'main';
@@ -7530,6 +7032,15 @@ const universalBackBtnHtml = `
 function renderApp() {
   applyRoleBasedNavigation();
   const bannerTitle = document.getElementById('pageBannerTitle');
+
+  const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
+  if (pmSubmitArea) {
+    const role = getAuthenticatedUserRole();
+    const isPmStatusView = (currentModule === 'worklist' && role === 'Project Manager' && ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView));
+    if (!isPmStatusView) {
+      pmSubmitArea.style.display = 'none';
+    }
+  }
 
   if (window.isStandaloneMode) {
     document.body.classList.add('standalone-mode');
@@ -7964,252 +7475,13 @@ function renderApp() {
 // ==========================================================================
 // INDUS TOWERS MODULE RENDERERS
 // ==========================================================================
-async function fetchIndusSites(renderAfter = true) {
-  try {
-    const resp = await NexusApi.indusSites.getAll({ page: 1, page_size: 500 });
-    indusSiteData = (resp && resp.items) ? resp.items : [];
-    if (currentIndusSubpage === 'site') {
-      currentDataset = [...indusSiteData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusSiteData;
-  } catch (err) {
-    console.error('Failed to fetch Indus sites:', err);
-    indusSiteData = [];
-    if (currentIndusSubpage === 'site') {
-      currentDataset = [];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || 'Failed to retrieve site details from database.', 'Database Error');
-    }
-    return [];
-  }
-}
-window.fetchIndusSites = fetchIndusSites;
-
-async function fetchIndusGbpa(renderAfter = true) {
-  try {
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
-      const resp = await NexusApi.indusGbpa.getAll({ page: 1, page_size: 500 });
-      indusProductsData = (resp && resp.items) ? resp.items : [];
-    }
-    if (currentIndusSubpage === 'products') {
-      currentDataset = [...indusProductsData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusProductsData;
-  } catch (err) {
-    console.error('Failed to fetch Indus GBPA items:', err);
-    indusProductsData = [];
-    if (currentIndusSubpage === 'products') {
-      currentDataset = [];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || 'Failed to retrieve GBPA records from database.', 'Database Error');
-    }
-    return [];
-  }
-}
-window.fetchIndusGbpa = fetchIndusGbpa;
-
-async function fetchIndusInfra(renderAfter = true) {
-  try {
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
-      const resp = await NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
-      indusInfraData = (resp && resp.items) ? resp.items : [];
-    }
-    if (currentIndusSubpage === 'infra') {
-      currentDataset = [...indusInfraData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusInfraData;
-  } catch (err) {
-    console.error('Failed to fetch Indus Infra items:', err);
-    indusInfraData = [];
-    if (currentIndusSubpage === 'infra') {
-      currentDataset = [];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || 'Failed to retrieve infrastructure details from database.', 'Database Error');
-    }
-    return [];
-  }
-}
-window.fetchIndusInfra = fetchIndusInfra;
-
-async function fetchIndusEsh(renderAfter = true) {
-  try {
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusEsh) {
-      const resp = await NexusApi.indusEsh.getAll({ company_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
-      indusEshData = (resp && resp.items) ? resp.items : [];
-    }
-    if (currentIndusSubpage === 'esh') {
-      currentDataset = [...indusEshData];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    return indusEshData;
-  } catch (err) {
-    console.error('Failed to fetch Indus ESH items:', err);
-    indusEshData = [];
-    if (currentIndusSubpage === 'esh') {
-      currentDataset = [];
-      if (renderAfter && typeof applyFiltersAndRender === 'function') {
-        applyFiltersAndRender();
-      }
-    }
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || 'Failed to retrieve ESH records from database.', 'Database Error');
-    }
-    return [];
-  }
-}
-window.fetchIndusEsh = fetchIndusEsh;
-
-function openIndusTowersPage() {
-  currentModule = 'indus_towers';
-  currentIndusSubpage = 'site';
-  activeColumnFilters = {};
-  updateURL();
-  renderApp();
-  fetchIndusSites(true);
-  showToast('Navigated to Indus Towers Ltd');
-}
-
-function loadIndusDataset() {
-  if (currentIndusSubpage === 'site') {
-    currentDataset = [...indusSiteData];
-    // Trigger async refresh if indusSiteData is empty or needs refresh
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
-      NexusApi.indusSites.getAll({ page: 1, page_size: 500 }).then(resp => {
-        if (resp && resp.items) {
-          indusSiteData = resp.items;
-          if (currentIndusSubpage === 'site') {
-            currentDataset = [...indusSiteData];
-            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-          }
-        }
-      }).catch(err => {
-        console.warn('Async loadIndusDataset fetch error:', err);
-      });
-    }
-  } else if (currentIndusSubpage === 'products') {
-    currentDataset = [...indusProductsData];
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
-      NexusApi.indusGbpa.getAll({ page: 1, page_size: 500 }).then(resp => {
-        if (resp && resp.items) {
-          indusProductsData = resp.items;
-          if (currentIndusSubpage === 'products') {
-            currentDataset = [...indusProductsData];
-            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-          }
-        }
-      }).catch(err => {
-        console.warn('Async loadIndusDataset GBPA fetch error:', err);
-      });
-    }
-  } else if (currentIndusSubpage === 'infra') {
-    currentDataset = [...indusInfraData];
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
-      NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 }).then(resp => {
-        if (resp && resp.items) {
-          indusInfraData = resp.items;
-          if (currentIndusSubpage === 'infra') {
-            currentDataset = [...indusInfraData];
-            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-          }
-        }
-      }).catch(err => {
-        console.warn('Async loadIndusDataset Infra fetch error:', err);
-      });
-    }
-  } else if (currentIndusSubpage === 'projects') {
-    currentDataset = [...indusProjectsData];
-    if (typeof fetchIndusProjects === 'function') {
-      fetchIndusProjects(true);
-    }
-  } else if (currentIndusSubpage === 'esh') {
-    currentDataset = [...indusEshData];
-    if (typeof NexusApi !== 'undefined' && NexusApi.indusEsh) {
-      NexusApi.indusEsh.getAll({ company_name: 'Indus Tower Ltd', page: 1, page_size: 500 }).then(resp => {
-        if (resp && resp.items) {
-          indusEshData = resp.items;
-          if (currentIndusSubpage === 'esh') {
-            currentDataset = [...indusEshData];
-            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-          }
-        }
-      }).catch(err => {
-        console.warn('Async loadIndusDataset ESH fetch error:', err);
-      });
-    }
-  } else if (currentIndusSubpage === 'project_type_details') {
-    if (currentIndusProjectTypeSubpage === 'transport') {
-      currentDataset = [...indusProjectTransportData];
-    } else {
-      currentDataset = [...indusProjectSurveyData];
-    }
-  } else if (currentIndusSubpage === 'product_details') {
-    if (currentIndusProductSubpage === 'materials') {
-      currentDataset = [...indusProductMaterialsData];
-      if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
-        NexusApi.indusGbpaMaterials.getAll({ customer_name: getActiveGbpaCustomerName(), page: 1, page_size: 500 }).then(resp => {
-          if (resp && resp.items) {
-            indusProductMaterialsData = resp.items;
-            if (currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'materials') {
-              currentDataset = [...indusProductMaterialsData];
-              if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-            }
-          }
-        }).catch(err => console.warn('Async loadIndusDataset Materials fetch error:', err));
-      }
-    } else if (currentIndusProductSubpage === 'expenses') {
-      currentDataset = [...indusProductExpensesData];
-      if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
-        NexusApi.indusGbpaExpenses.getAll({ customer_name: getActiveGbpaCustomerName(), page: 1, page_size: 500 }).then(resp => {
-          if (resp && resp.items) {
-            indusProductExpensesData = resp.items;
-            if (currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'expenses') {
-              currentDataset = [...indusProductExpensesData];
-              if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-            }
-          }
-        }).catch(err => console.warn('Async loadIndusDataset Expenses fetch error:', err));
-      }
-    } else if (currentIndusProductSubpage === 'infra') {
-      currentDataset = [...indusProductInfraData];
-      if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra) {
-        NexusApi.indusGbpaInfra.getAll({ customer_name: getActiveGbpaCustomerName(), page: 1, page_size: 500 }).then(resp => {
-          if (resp && resp.items) {
-            indusProductInfraData = resp.items;
-            if (currentIndusSubpage === 'product_details' && currentIndusProductSubpage === 'infra') {
-              currentDataset = [...indusProductInfraData];
-              if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-            }
-          }
-        }).catch(err => console.warn('Async loadIndusDataset Infra fetch error:', err));
-      }
-    } else if (currentIndusProductSubpage === 'rate') {
-      currentDataset = [...indusProductRateData];
-    }
-  }
-}
+// Indus Towers Module Renderers & Navigation (Modularized into frontend/assets/js/modules/indus/indus-towers.js)
+var fetchIndusSites = window.fetchIndusSites;
+var fetchIndusGbpa = window.fetchIndusGbpa;
+var fetchIndusInfra = window.fetchIndusInfra;
+var fetchIndusEsh = window.fetchIndusEsh;
+var openIndusTowersPage = window.openIndusTowersPage;
+var loadIndusDataset = window.loadIndusDataset;
 
 function renderIndusToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
@@ -9636,939 +8908,14 @@ function renderCompanyHrFooter() {
   });
 }
 
-window.openCompanyHrPoliciesPage = function(tab) {
-  closeSideForm();
-  currentModule = 'master';
-  currentMasterView = 'hr_policies';
-  currentCompanyHrTab = tab || 'epf';
-  activeColumnFilters = {};
-  updateURL();
-  renderApp();
-  fetchCompanyHrDataFromBackend(currentCompanyHrTab);
-  showToast(`Opened Company HR Policies • ${(currentCompanyHrTab || 'epf').toUpperCase()}`);
-};
-
-// Generic Helper for HR Modals
-function genericSetHrReadOnly(formId, toggleId, isReadOnly) {
-  const form = document.getElementById(formId);
-  if (!form) return;
-  const inputs = form.querySelectorAll('input:not([type="checkbox"])');
-  inputs.forEach(inp => {
-    inp.readOnly = isReadOnly;
-    inp.style.backgroundColor = '#ffffff';
-    inp.style.cursor = isReadOnly ? 'default' : 'text';
-  });
-  const selects = form.querySelectorAll('select');
-  selects.forEach(sel => {
-    sel.disabled = isReadOnly;
-    sel.style.backgroundColor = isReadOnly ? '#f8fafc' : '#ffffff';
-    sel.style.cursor = isReadOnly ? 'default' : 'pointer';
-  });
-  const calTriggers = form.querySelectorAll('.btn-calendar-trigger');
-  calTriggers.forEach(b => {
-    b.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-    b.style.opacity = isReadOnly ? '0.65' : '1';
-    b.style.cursor = isReadOnly ? 'default' : 'pointer';
-  });
-  const toggle = document.getElementById(toggleId);
-  if (toggle) {
-    toggle.disabled = isReadOnly;
-    const parentSwitch = toggle.closest('.toggle-slide-switch');
-    if (parentSwitch) {
-      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
-    }
-  }
-}
-
-let isSubmittingHrCompliance = false;
-
-window.saveCompanyHrCompliance = async function(complianceType) {
-  if (isSubmittingHrCompliance) return;
-
-  const companyName = (typeof currentCompanyMasterName !== 'undefined' && currentCompanyMasterName) ? currentCompanyMasterName : 'Nexus';
-  let payload = {
-    compliance_type: complianceType,
-    company_name: companyName
-  };
-
-  const getVal = id => {
-    const el = document.getElementById(id);
-    return el ? el.value.trim() : '';
-  };
-
-  const getChecked = id => {
-    const el = document.getElementById(id);
-    return el ? el.checked : true;
-  };
-
-  if (complianceType === 'EPF') {
-    const fromDate = getVal('inpEpfFromDate');
-    const toDate = getVal('inpEpfToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.epf_filling_due_date = getVal('inpEpfFillingDueDate') || null;
-    payload.epf_sealing_amount = getVal('inpEpfSealingAmount') || null;
-    payload.epf_employee_contribution = getVal('inpEpfEmpContribution') || null;
-    payload.epf_employer_contribution = getVal('inpEpfEmployerContribution') || null;
-    payload.eps_employer_contribution = getVal('inpEpsEmployerContribution') || null;
-    payload.edli_employer_contribution = getVal('inpEdliEmployerContribution') || null;
-    payload.epf_admin_charges = getVal('inpEpfAdminCharges') || null;
-    payload.epf_status = getChecked('inpEpfStatusToggle') ? 'Active' : 'In - Active';
-  } else if (complianceType === 'ESI') {
-    const fromDate = getVal('inpEsiFromDate');
-    const toDate = getVal('inpEsiToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.esi_filling_frequency = getVal('inpEsiFillingFrequency') || 'Monthly';
-    payload.esi_filling_date = getVal('inpEsiFillingDueDate') || null;
-    payload.esi_sealing_amount = getVal('inpEsiSealingAmount') || null;
-    payload.esi_employee_contribution = getVal('inpEsiEmpContribution') || null;
-    payload.esi_employer_contribution = getVal('inpEsiEmployerContribution') || null;
-    payload.esi_status = getChecked('inpEsiStatusToggle') ? 'Active' : 'In - Active';
-  } else if (complianceType === 'PT') {
-    const fromDate = getVal('inpPtFromDate');
-    const toDate = getVal('inpPtToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.state = getVal('inpPtState') || null;
-    payload.pt_filling_frequency = getVal('inpPtFillingFrequency') || null;
-    payload.pt_filling_due_date = getVal('inpPtFillingDueDate') || null;
-    payload.gross_salary_from = getVal('inpPtThresholdLimit') || null;
-    payload.pt_employee_deduction = getVal('inpPtEmpContribution') || null;
-    payload.pt_status = getChecked('inpPtStatusToggle') ? 'Active' : 'In - Active';
-  } else if (complianceType === 'LWF') {
-    const fromDate = getVal('inpLwfFromDate');
-    const toDate = getVal('inpLwfToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.state = getVal('inpLwfState') || null;
-    payload.lwf_filling_frequency = getVal('inpLwfFillingFrequency') || null;
-    payload.lwf_filling_due_date = getVal('inpLwfFillingDueDate') || null;
-    payload.lwf_employee_contribution = getVal('inpLwfEmpContribution') || null;
-    payload.lwf_employer_contribution = getVal('inpLwfEmployerContribution') || null;
-    payload.lwf_status = getChecked('inpLwfStatusToggle') ? 'Active' : 'In - Active';
-  } else if (complianceType === 'TDS') {
-    const fromDate = getVal('inpTdsFromDate');
-    const toDate = getVal('inpTdsToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.pt_filling_frequency = getVal('inpTdsFillingFrequency') || null;
-    payload.pt_filling_due_date = getVal('inpTdsFillingDueDate') || null;
-    payload.state = getVal('inpTdsCode') || null;
-    payload.epf_filling_frequency = getVal('inpTdsCategory') || null;
-    payload.gross_salary_from = getVal('inpTdsThresholdLimit') || null;
-    payload.tds_standard_deduction = getVal('inpTdsStandardDeduction') || null;
-    payload.tds_deduction_percentage = getVal('inpTdsRate') || null;
-    payload.health_and_education_cess = getVal('inpTdsHealthCess') || null;
-    payload.tds_status = getChecked('inpTdsStatusToggle') ? 'Active' : 'In - Active';
-  } else if (complianceType === 'Leave') {
-    const fromDate = getVal('inpLeaveFromDate');
-    const toDate = getVal('inpLeaveToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    const leaveType = getVal('inpLeaveType') || 'Casual Leave';
-    const eligibleDays = getVal('inpLeaveEligibleWorkingDays');
-    const claimablePeriod = getVal('inpLeaveClaimablePeriod');
-    const sandwichPolicy = getVal('inpLeaveSandwichPolicy') || 'No';
-
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.state = leaveType;
-    payload.leave_type = leaveType;
-    payload.sandwich_leave_policy = sandwichPolicy;
-
-    if (leaveType === 'Casual Leave') {
-      payload.cl_eligible = eligibleDays || null;
-      payload.cl_can_claim = claimablePeriod || null;
-    } else if (leaveType === 'Sick Leave') {
-      payload.sl_eligible = eligibleDays || null;
-      payload.sl_can_claim = claimablePeriod || null;
-    } else if (leaveType === 'Earning Leave') {
-      payload.el_eligible = eligibleDays || null;
-      payload.el_can_claim = claimablePeriod || null;
-    }
-    payload.leave_status = getChecked('inpLeaveStatusToggle') ? 'Active' : 'In - Active';
-  } else if (complianceType === 'Bonus') {
-    const fromDate = getVal('inpBonusFromDate');
-    const toDate = getVal('inpBonusToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    const bonusType = getVal('inpBonusType') || 'Statutory Bonus';
-    const bonusVal = getVal('inpBonusPercent') || null;
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.state = bonusType;
-    payload.bonus_type = bonusType;
-    payload.statutory_bonus_sealing_amount = getVal('inpBonusSealingAmount') || null;
-    if (bonusType === 'Performance Bonus') {
-      payload.performance_bonus = bonusVal;
-      payload.statutory_bonus = bonusVal;
-    } else {
-      payload.statutory_bonus = bonusVal;
-    }
-    payload.bonus_status = getChecked('inpBonusStatusToggle') ? 'Active' : 'In - Active';
-  } else if (complianceType === 'Medical Insurance') {
-    const fromDate = getVal('inpMedFromDate');
-    const toDate = getVal('inpMedToDate');
-    if (!fromDate || !toDate) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('From Date and To Date are required.', 'Validation Error');
-      } else {
-        showToast('From Date and To Date are required.');
-      }
-      return;
-    }
-    payload.from_date = fromDate;
-    payload.to_date = toDate;
-    payload.medical_insurance_company_name = getVal('inpMedInsuranceCompany') || null;
-    payload.epf_sealing_amount = getVal('inpMedSealingAmount') || null;
-    payload.medical_insurance_employee_contribution = getVal('inpMedEmpContribution') || null;
-    payload.medical_insurance_employer_contribution = getVal('inpMedEmployerContribution') || null;
-    payload.medical_insurance_status = getChecked('inpMedStatusToggle') ? 'Active' : 'In - Active';
-  }
-
-  isSubmittingHrCompliance = true;
-  try {
-    if (!window.NexusApi || !window.NexusApi.hrCompliance) {
-      throw new Error('HR Compliance API is not available.');
-    }
-    const res = await window.NexusApi.hrCompliance.create(payload, companyName);
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup(`${complianceType} compliance details added successfully!`, 'Task Completed');
-    }
-
-    // Close the corresponding modal
-    const closeFns = {
-      'EPF': closeCompanyHrEpfModal,
-      'ESI': closeCompanyHrEsiModal,
-      'PT': closeCompanyHrPtModal,
-      'LWF': closeCompanyHrLwfModal,
-      'TDS': closeCompanyHrTdsModal,
-      'Leave': closeCompanyHrLeaveModal,
-      'Bonus': closeCompanyHrBonusModal,
-      'Medical Insurance': closeCompanyHrMedicalInsuranceModal
-    };
-    if (closeFns[complianceType]) closeFns[complianceType]();
-
-    // Reload backend data
-    const tabMap = {
-      'EPF': 'epf',
-      'ESI': 'esi',
-      'PT': 'pt',
-      'LWF': 'lwf',
-      'TDS': 'tds',
-      'Leave': 'leave',
-      'Bonus': 'bonus',
-      'Medical Insurance': 'medical_insurance'
-    };
-    await fetchCompanyHrDataFromBackend(tabMap[complianceType]);
-  } catch (err) {
-    console.error(`Failed to save ${complianceType} compliance record:`, err);
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(err.message || `Failed to save ${complianceType} compliance details`, 'Error Message!');
-    }
-  } finally {
-    isSubmittingHrCompliance = false;
-  }
-};
-
-// 1. EPF Modal Controller
-let isCompanyHrEpfEditing = false;
-function setCompanyHrEpfReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrEpf', 'inpEpfStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrEpfModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrEpfCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrEpfData !== 'undefined') && companyHrEpfData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpEpfFromDate')) document.getElementById('inpEpfFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpEpfToDate')) document.getElementById('inpEpfToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpEpfFillingDueDate')) document.getElementById('inpEpfFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
-  if (document.getElementById('inpEpfSealingAmount')) document.getElementById('inpEpfSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpEpfEmpContribution')) document.getElementById('inpEpfEmpContribution').value = row ? String(row.employee || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpEpfEmployerContribution')) document.getElementById('inpEpfEmployerContribution').value = row ? String(row.epf || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpEpsEmployerContribution')) document.getElementById('inpEpsEmployerContribution').value = row ? String(row.eps || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpEdliEmployerContribution')) document.getElementById('inpEdliEmployerContribution').value = row ? String(row.edli || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpEpfAdminCharges')) document.getElementById('inpEpfAdminCharges').value = row ? String(row.adminCharges || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpEpfStatusToggle')) document.getElementById('inpEpfStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrEpfEditing = true;
-  setCompanyHrEpfReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrEpfEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrEpfCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrEpfModal = function() {
-  document.getElementById('companyHrEpfCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
-
-// 2. ESI Modal Controller
-let isCompanyHrEsiEditing = false;
-function setCompanyHrEsiReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrEsi', 'inpEsiStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrEsiModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrEsiCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrEsiData !== 'undefined') && companyHrEsiData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpEsiFromDate')) document.getElementById('inpEsiFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpEsiToDate')) document.getElementById('inpEsiToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpEsiFillingFrequency')) document.getElementById('inpEsiFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
-  if (document.getElementById('inpEsiFillingDueDate')) document.getElementById('inpEsiFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
-  if (document.getElementById('inpEsiSealingAmount')) document.getElementById('inpEsiSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpEsiEmpContribution')) document.getElementById('inpEsiEmpContribution').value = row ? String(row.employee || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpEsiEmployerContribution')) document.getElementById('inpEsiEmployerContribution').value = row ? String(row.employer || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpEsiStatusToggle')) document.getElementById('inpEsiStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrEsiEditing = true;
-  setCompanyHrEsiReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrEsiEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrEsiCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrEsiModal = function() {
-  document.getElementById('companyHrEsiCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
-
-// 3. PT Modal Controller
-let isCompanyHrPtEditing = false;
-function setCompanyHrPtReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrPt', 'inpPtStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrPtModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrPtCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrPtData !== 'undefined') && companyHrPtData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpPtFromDate')) document.getElementById('inpPtFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpPtToDate')) document.getElementById('inpPtToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpPtState')) document.getElementById('inpPtState').value = row ? (row.state || '') : '';
-  if (document.getElementById('inpPtFillingFrequency')) document.getElementById('inpPtFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
-  if (document.getElementById('inpPtFillingDueDate')) document.getElementById('inpPtFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
-  if (document.getElementById('inpPtThresholdLimit')) document.getElementById('inpPtThresholdLimit').value = row ? String(row.thresholdLimit || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpPtEmpContribution')) document.getElementById('inpPtEmpContribution').value = row ? String(row.employee || '').replace('₹', '').replace('%', '').trim() : '';
-  if (document.getElementById('inpPtStatusToggle')) document.getElementById('inpPtStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrPtEditing = true;
-  setCompanyHrPtReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrPtEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrPtCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrPtModal = function() {
-  document.getElementById('companyHrPtCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
-
-// 4. LWF Modal Controller
-let isCompanyHrLwfEditing = false;
-function setCompanyHrLwfReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrLwf', 'inpLwfStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrLwfModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrLwfCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrLwfData !== 'undefined') && companyHrLwfData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpLwfFromDate')) document.getElementById('inpLwfFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpLwfToDate')) document.getElementById('inpLwfToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpLwfState')) document.getElementById('inpLwfState').value = row ? (row.state || '') : '';
-  if (document.getElementById('inpLwfFillingFrequency')) document.getElementById('inpLwfFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
-  if (document.getElementById('inpLwfFillingDueDate')) document.getElementById('inpLwfFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
-  if (document.getElementById('inpLwfEmpContribution')) document.getElementById('inpLwfEmpContribution').value = row ? String(row.employee || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpLwfEmployerContribution')) document.getElementById('inpLwfEmployerContribution').value = row ? String(row.employer || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpLwfStatusToggle')) document.getElementById('inpLwfStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrLwfEditing = true;
-  setCompanyHrLwfReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrLwfEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrLwfCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrLwfModal = function() {
-  document.getElementById('companyHrLwfCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
-
-// 5. TDS Modal Controller
-let isCompanyHrTdsEditing = false;
-function setCompanyHrTdsReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrTds', 'inpTdsStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrTdsModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrTdsCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrTdsData !== 'undefined') && companyHrTdsData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpTdsFromDate')) document.getElementById('inpTdsFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpTdsToDate')) document.getElementById('inpTdsToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpTdsFillingFrequency')) document.getElementById('inpTdsFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
-  if (document.getElementById('inpTdsFillingDueDate')) document.getElementById('inpTdsFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
-  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = row ? (row.tdsCode || '') : '';
-  if (document.getElementById('inpTdsCategory')) document.getElementById('inpTdsCategory').value = row ? (row.tdsCategory || '') : '';
-  if (document.getElementById('inpTdsThresholdLimit')) document.getElementById('inpTdsThresholdLimit').value = row ? String(row.thresholdLimit || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpTdsStandardDeduction')) document.getElementById('inpTdsStandardDeduction').value = row ? String(row.standardDeduction || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = row ? String(row.tdsRate || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpTdsHealthCess')) document.getElementById('inpTdsHealthCess').value = row ? String(row.healthEducationCess || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpTdsStatusToggle')) document.getElementById('inpTdsStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrTdsEditing = true;
-  setCompanyHrTdsReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrTdsEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrTdsCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrTdsModal = function() {
-  document.getElementById('companyHrTdsCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
-
-// 6. Leave Modal Controller
-let isCompanyHrLeaveEditing = false;
-function setCompanyHrLeaveReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrLeave', 'inpLeaveStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrLeaveModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrLeaveCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrLeaveData !== 'undefined') && companyHrLeaveData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpLeaveFromDate')) document.getElementById('inpLeaveFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpLeaveToDate')) document.getElementById('inpLeaveToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpLeaveType')) document.getElementById('inpLeaveType').value = row ? (row.leaveType || row.leave_type || 'Casual Leave') : 'Casual Leave';
-
-  let eligVal = '';
-  let claimVal = '';
-  if (row) {
-    if (row.clEligible) eligVal = row.clEligible;
-    else if (row.slEligible) eligVal = row.slEligible;
-    else if (row.elEligible) eligVal = row.elEligible;
-
-    if (row.clClaimable) claimVal = row.clClaimable;
-    else if (row.slClaimable) claimVal = row.slClaimable;
-    else if (row.elClaimable) claimVal = row.elClaimable;
-  }
-  if (document.getElementById('inpLeaveEligibleWorkingDays')) document.getElementById('inpLeaveEligibleWorkingDays').value = eligVal ? String(eligVal).replace('Days', '').trim() : '';
-  if (document.getElementById('inpLeaveClaimablePeriod')) document.getElementById('inpLeaveClaimablePeriod').value = claimVal ? String(claimVal).replace('/ Month', '').trim() : '';
-  if (document.getElementById('inpLeaveSandwichPolicy')) document.getElementById('inpLeaveSandwichPolicy').value = row ? (row.sandwichLeavePolicy || 'No') : 'No';
-  if (document.getElementById('inpLeaveStatusToggle')) document.getElementById('inpLeaveStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrLeaveEditing = true;
-  setCompanyHrLeaveReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrLeaveEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrLeaveCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrLeaveModal = function() {
-  document.getElementById('companyHrLeaveCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
-
-// 7. Bonus Modal Controller
-let isCompanyHrBonusEditing = false;
-function setCompanyHrBonusReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrBonus', 'inpBonusStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrBonusModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrBonusCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrBonusData !== 'undefined') && companyHrBonusData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpBonusFromDate')) document.getElementById('inpBonusFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpBonusToDate')) document.getElementById('inpBonusToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpBonusType')) document.getElementById('inpBonusType').value = row ? (row.bonusType || 'Statutory Bonus') : 'Statutory Bonus';
-  if (document.getElementById('inpBonusSealingAmount')) document.getElementById('inpBonusSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpBonusPercent')) document.getElementById('inpBonusPercent').value = row ? String(row.bonusPercent || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpBonusStatusToggle')) document.getElementById('inpBonusStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrBonusEditing = true;
-  setCompanyHrBonusReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrBonusEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrBonusCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrBonusModal = function() {
-  document.getElementById('companyHrBonusCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
-
-// 8. Medical Insurance Modal Controller
-let isCompanyHrMedEditing = false;
-function setCompanyHrMedicalInsuranceReadOnly(isReadOnly) {
-  genericSetHrReadOnly('frmCompanyHrMed', 'inpMedStatusToggle', isReadOnly);
-}
-
-window.openCompanyHrMedicalInsuranceModal = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-  overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
-    if (c.id !== 'companyHrMedicalInsuranceCard') c.style.display = 'none';
-  });
-  const row = (rowId && (typeof companyHrMedicalInsuranceData !== 'undefined') && companyHrMedicalInsuranceData.find(r => r.id === rowId)) || null;
-
-  if (document.getElementById('inpMedFromDate')) document.getElementById('inpMedFromDate').value = row ? (row.from || '') : '';
-  if (document.getElementById('inpMedToDate')) document.getElementById('inpMedToDate').value = row ? (row.to || '') : '';
-  if (document.getElementById('inpMedInsuranceCompany')) document.getElementById('inpMedInsuranceCompany').value = row ? (row.insuranceCompany || '') : '';
-  if (document.getElementById('inpMedSealingAmount')) document.getElementById('inpMedSealingAmount').value = row ? String(row.sealingAmount || '').replace('₹', '').trim() : '';
-  if (document.getElementById('inpMedEmpContribution')) document.getElementById('inpMedEmpContribution').value = row ? String(row.employee || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpMedEmployerContribution')) document.getElementById('inpMedEmployerContribution').value = row ? String(row.employer || '').replace('%', '').trim() : '';
-  if (document.getElementById('inpMedStatusToggle')) document.getElementById('inpMedStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
-
-  isCompanyHrMedEditing = true;
-  setCompanyHrMedicalInsuranceReadOnly(false);
-
-  const imgIcon = document.getElementById('imgCompanyHrMedEditIcon');
-  if (imgIcon) {
-    imgIcon.src = 'icons/Save.svg';
-    imgIcon.className = 'icon-green';
-    imgIcon.title = 'Save';
-  }
-  const modal = document.getElementById('companyHrMedicalInsuranceCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-};
-
-window.closeCompanyHrMedicalInsuranceModal = function() {
-  document.getElementById('companyHrMedicalInsuranceCard')?.style.setProperty('display', 'none');
-  document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
-};
+// Modularized into frontend/assets/js/modules/master/master-hr-policies.js
+// Contains openCompanyHrPoliciesPage, genericSetHrReadOnly, saveCompanyHrCompliance, and statutory modal handlers.
 
 // ==========================================================================
 // TELECOM DETAILS MODAL (Green Banner Title Link & Customer Details with Edit/Save)
 // ==========================================================================
-let isTelecomDetailsEditing = false;
-
-window.setTelecomDetailsReadOnly = function(isReadOnly) {
-  const form = document.getElementById('frmTelecomDetails');
-  if (!form) return;
-
-  // 1. Business Type, Customer Legal Name, PO Starting Digits, PAN Number are always strictly read-only
-  const alwaysReadOnlyIds = ['inpTelecomBusinessType', 'inpTelecomCustomerName', 'inpTelecomPoDigits', 'inpTelecomPanNumber'];
-  alwaysReadOnlyIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.readOnly = true;
-      el.disabled = true;
-      el.style.background = '#f8fafc';
-      el.style.color = '#64748b';
-      el.style.cursor = 'not-allowed';
-      el.style.borderColor = '#cbd5e1';
-    }
-  });
-
-  // 2. GST Slidebar Toggle
-  const gstToggle = document.getElementById('inpTelecomGstToggle');
-  if (gstToggle) {
-    gstToggle.disabled = isReadOnly;
-    const parentSwitch = gstToggle.closest('.toggle-slide-switch');
-    if (parentSwitch) {
-      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
-    }
-  }
-
-  // 3. GST Type & GST Number
-  const isGstOn = gstToggle ? gstToggle.checked : true;
-  const rowGstType = document.getElementById('rowTelecomGstType');
-  const rowGstNumber = document.getElementById('rowTelecomGstNumber');
-  const inpGstType = document.getElementById('inpTelecomGstType');
-  const inpGstNumber = document.getElementById('inpTelecomGstNumber');
-
-  if (rowGstType) rowGstType.style.display = isGstOn ? 'flex' : 'none';
-  if (rowGstNumber) rowGstNumber.style.display = isGstOn ? 'flex' : 'none';
-
-  if (inpGstType) {
-    inpGstType.disabled = isReadOnly || !isGstOn;
-    inpGstType.style.background = (isReadOnly || !isGstOn) ? '#f8fafc' : '#ffffff';
-    inpGstType.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#1e293b';
-    inpGstType.style.cursor = (isReadOnly || !isGstOn) ? 'not-allowed' : 'pointer';
-    inpGstType.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
-  }
-
-  if (inpGstNumber) {
-    inpGstNumber.readOnly = isReadOnly || !isGstOn;
-    inpGstNumber.disabled = isReadOnly || !isGstOn;
-    inpGstNumber.style.background = (isReadOnly || !isGstOn) ? '#f8fafc' : '#ffffff';
-    inpGstNumber.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#1e293b';
-    inpGstNumber.style.cursor = (isReadOnly || !isGstOn) ? 'not-allowed' : 'text';
-    inpGstNumber.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
-  }
-
-  // 4. Address (Editable when edit mode active)
-  const inpAddress = document.getElementById('inpTelecomAddress');
-  if (inpAddress) {
-    inpAddress.readOnly = isReadOnly;
-    inpAddress.disabled = isReadOnly;
-    inpAddress.style.background = isReadOnly ? '#f8fafc' : '#ffffff';
-    inpAddress.style.color = isReadOnly ? '#64748b' : '#1e293b';
-    inpAddress.style.cursor = isReadOnly ? 'not-allowed' : 'text';
-    inpAddress.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
-  }
-
-  // 5. Status Slidebar Toggle (Editable when edit mode active)
-  const statusToggle = document.getElementById('inpTelecomStatusToggle');
-  if (statusToggle) {
-    statusToggle.disabled = isReadOnly;
-    const parentSwitch = statusToggle.closest('.toggle-slide-switch');
-    if (parentSwitch) {
-      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
-    }
-  }
-
-  // 6. Edit/Save Icon update
-  const imgIcon = document.getElementById('imgTelecomDetailsEditIcon');
-  const btnToggle = document.getElementById('btnTelecomDetailsEditToggle');
-  if (imgIcon && btnToggle) {
-    if (isReadOnly) {
-      imgIcon.src = 'icons/Edit.svg';
-      imgIcon.alt = 'Edit';
-      btnToggle.title = 'Edit Info';
-    } else {
-      imgIcon.src = 'icons/Save.svg';
-      imgIcon.alt = 'Save';
-      btnToggle.title = 'Save Changes';
-    }
-  }
-};
-
-window.handleTelecomGstToggleChange = function() {
-  const gstToggle = document.getElementById('inpTelecomGstToggle');
-  const isGstOn = gstToggle ? gstToggle.checked : true;
-  const rowGstType = document.getElementById('rowTelecomGstType');
-  const rowGstNumber = document.getElementById('rowTelecomGstNumber');
-  const inpGstType = document.getElementById('inpTelecomGstType');
-  const inpGstNumber = document.getElementById('inpTelecomGstNumber');
-
-  if (rowGstType) rowGstType.style.display = isGstOn ? 'flex' : 'none';
-  if (rowGstNumber) rowGstNumber.style.display = isGstOn ? 'flex' : 'none';
-
-  if (inpGstType) {
-    inpGstType.disabled = !isTelecomDetailsEditing || !isGstOn;
-    inpGstType.style.background = (!isTelecomDetailsEditing || !isGstOn) ? '#f8fafc' : '#ffffff';
-    inpGstType.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#1e293b';
-    inpGstType.style.cursor = (!isTelecomDetailsEditing || !isGstOn) ? 'not-allowed' : 'pointer';
-    inpGstType.style.borderColor = !isTelecomDetailsEditing ? '#cbd5e1' : '#00cba0';
-  }
-
-  if (inpGstNumber) {
-    inpGstNumber.readOnly = !isTelecomDetailsEditing || !isGstOn;
-    inpGstNumber.disabled = !isTelecomDetailsEditing || !isGstOn;
-    inpGstNumber.style.background = (!isTelecomDetailsEditing || !isGstOn) ? '#f8fafc' : '#ffffff';
-    inpGstNumber.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#1e293b';
-    inpGstNumber.style.cursor = (!isTelecomDetailsEditing || !isGstOn) ? 'not-allowed' : 'text';
-    inpGstNumber.style.borderColor = !isTelecomDetailsEditing ? '#cbd5e1' : '#00cba0';
-  }
-};
-
-window.openTelecomDetailsModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(card => {
-    if (card.id !== 'telecomDetailsCard') card.style.display = 'none';
-  });
-
-  const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => ((c.customerName || c.customer_name || '').toLowerCase().includes('indus')))) || 
-               (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]) || {
-                 customerName: "Indus Towers Ltd",
-                 customerId: "230510678",
-                 businessType: "Projects",
-                 panNumber: "33ASMPM8643F",
-                 poDigits: "450",
-                 gstNumber: "33ASMPM8643F1Z5",
-                 gstType: "SGST",
-                 address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
-                 status: "Active",
-                 gstEnabled: true
-               };
-
-  const inpType = document.getElementById('inpTelecomBusinessType');
-  if (inpType) inpType.value = cust.businessType || cust.business_type || 'Projects';
-
-  const inpName = document.getElementById('inpTelecomCustomerName');
-  if (inpName) inpName.value = cust.customerName || cust.customer_name || 'Indus Towers Ltd';
-
-  const inpDigits = document.getElementById('inpTelecomPoDigits');
-  if (inpDigits) inpDigits.value = cust.poDigits || cust.po_stating_3_digits || '450';
-
-  const inpPan = document.getElementById('inpTelecomPanNumber');
-  if (inpPan) inpPan.value = cust.panNumber || cust.pan_number || '33ASMPM8643F';
-
-  const inpGstToggle = document.getElementById('inpTelecomGstToggle');
-  if (inpGstToggle) {
-    inpGstToggle.checked = (cust.gstEnabled !== false && cust.gstNumber !== 'NA' && cust.gst_number !== 'NA');
-  }
-
-  const inpGstType = document.getElementById('inpTelecomGstType');
-  if (inpGstType) inpGstType.value = cust.gstType || cust.gst_type || 'SGST';
-
-  const inpGstNumber = document.getElementById('inpTelecomGstNumber');
-  const actualGst = cust.gstNumber || cust.gst_number;
-  if (inpGstNumber) inpGstNumber.value = (actualGst && actualGst !== 'NA') ? actualGst : '33ASMPM8643F1Z5';
-
-  const inpAddress = document.getElementById('inpTelecomAddress');
-  if (inpAddress) inpAddress.value = cust.address || cust.gst_address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
-
-  const inpStatus = document.getElementById('inpTelecomStatusToggle');
-  if (inpStatus) inpStatus.checked = !((cust.status || '').toLowerCase().includes('in'));
-
-  // Initial mode is view-only (read-only) with Edit icon
-  isTelecomDetailsEditing = false;
-  setTelecomDetailsReadOnly(true);
-
-  const lblCardTitle = document.getElementById('lblTelecomDetailsCardTitle');
-  if (lblCardTitle) lblCardTitle.innerText = cust.customerName || cust.customer_name || 'Indus Towers Ltd';
-
-  const modal = document.getElementById('telecomDetailsCard');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-  showToast('Opened Indus Towers Ltd Details');
-};
-
-window.closeTelecomDetailsModal = function() {
-  const modal = document.getElementById('telecomDetailsCard');
-  if (modal) modal.style.display = 'none';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'none';
-};
-
-window.toggleTelecomDetailsEdit = async function() {
-  if (!isTelecomDetailsEditing) {
-    // Switch to edit mode
-    isTelecomDetailsEditing = true;
-    setTelecomDetailsReadOnly(false);
-    showToast('Edit mode enabled for GST, Address, and Status');
-  } else {
-    // Save changes
-    const gstToggle = document.getElementById('inpTelecomGstToggle');
-    const isGstOn = gstToggle ? gstToggle.checked : true;
-    const gstType = isGstOn ? (document.getElementById('inpTelecomGstType')?.value || 'SGST') : 'NA';
-    const gstNumber = isGstOn ? (document.getElementById('inpTelecomGstNumber')?.value?.trim() || 'NA') : 'NA';
-    const address = document.getElementById('inpTelecomAddress')?.value?.trim() || '';
-    const statusToggle = document.getElementById('inpTelecomStatusToggle');
-    const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
-
-    const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => ((c.customerName || c.customer_name || '').toLowerCase().includes('indus')))) || 
-                 (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]);
-
-    const payload = {
-      gstEnabled: isGstOn,
-      gst_enabled: isGstOn,
-      gstType: gstType,
-      gst_type: gstType,
-      gstNumber: gstNumber,
-      gst_number: gstNumber,
-      address: address,
-      gst_address: address,
-      status: status
-    };
-
-    if (cust && (cust.customer_id || cust.id) && typeof NexusApi !== 'undefined' && NexusApi.customers) {
-      try {
-        const custId = cust.customer_id || cust.id;
-        const updated = await NexusApi.customers.updateRestricted(custId, payload);
-        Object.assign(cust, updated);
-        if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
-          currentDataset = [...masterCustomerData];
-          applyFiltersAndRender();
-        }
-        isTelecomDetailsEditing = false;
-        setTelecomDetailsReadOnly(true);
-        if (typeof showSvgSuccessPopup === 'function') {
-          showSvgSuccessPopup('Customer updated successfully!', 'Task Completed');
-        } else {
-          showToast('Telecom Details saved successfully!');
-        }
-      } catch (err) {
-        console.error('Failed to update Indus Tower details:', err);
-        const msg = err.detail || err.message || 'Failed to update customer details.';
-        if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup(msg, 'Error Message!');
-        } else {
-          showToast(`Error: ${msg}`);
-        }
-      }
-    } else {
-      if (cust) {
-        cust.gstEnabled = isGstOn;
-        cust.gstType = gstType;
-        cust.gstNumber = gstNumber;
-        cust.address = address;
-        cust.status = status;
-      }
-
-      if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'customer') {
-        currentDataset = [...masterCustomerData];
-        applyFiltersAndRender();
-      }
-
-      isTelecomDetailsEditing = false;
-      setTelecomDetailsReadOnly(true);
-      showToast('Telecom Details saved successfully!');
-    }
-  }
-};
+// Telecom Details Modal Handlers (Indus Customer Details)
+// Modularized into frontend/assets/js/modules/master/master-customers.js
 
 // ==========================================================================
 // 3B. PROJECTS MODULE RENDERERS
@@ -10986,7 +9333,7 @@ window.savePmProjectDetails = function() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
-    const isStnOrCam = isStn || isCam;
+    const isStnOrCam = isStn || isSrn || isCam;
     if (isStnOrCam) {
       if (currentWorklistView === 'project_update') {
         currentWorklistView = 'yts';
@@ -11056,9 +9403,9 @@ window.handlePmToggleChange = function(toggleType, inputEl) {
     localStorage.setItem('siteFeatureSettingsMap', JSON.stringify(siteFeatureSettingsMap));
   } catch(e) {}
 
-  const role = getAuthenticatedUserRole();
-  if (role === 'Project Manager') {
-    const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
+  const role2 = getAuthenticatedUserRole();
+  if (role2 === 'Project Manager') {
+    const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.srn || pmProjectFeatureSettings.cam);
     if (isStnOrCam) {
       if (currentWorklistView === 'project_update') {
         currentWorklistView = 'yts';
@@ -11811,6 +10158,10 @@ window.openPmAddStnMaterialsModal = function(editItem) {
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
+  }
+
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpPmStnBoqDate', 'btnPmStnBoqDateCalendar');
   }
 };
 
@@ -12746,7 +11097,10 @@ window.openPmMembersModal = function() {
 window.closePmMembersModal = function() {
   const modal = document.getElementById('pmMembersModal');
   const overlay = document.getElementById('sideFormOverlay');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
+    modal.style.display = 'none';
+  }
   if (overlay) overlay.style.display = 'none';
 };
 
@@ -13364,9 +11718,30 @@ window.openServiceVendorItems = function(vendorName) {
 
 window.toggleApprovalRowSelect = function(id) {
   projectApprovalsData.forEach(d => {
-    d.selected = (d.id === id) ? !d.selected : false;
+    if (d.id === id) {
+      d.selected = !d.selected;
+    }
   });
   renderApp();
+};
+
+window.toggleSelectAllApprovals = function() {
+  const allSelected = projectApprovalsData.length > 0 && projectApprovalsData.every(d => d.selected);
+  projectApprovalsData.forEach(d => {
+    d.selected = !allSelected;
+  });
+  renderApp();
+};
+
+window.toggleSelectAllPmMembers = function() {
+  if (typeof pmMembersDataStore === 'undefined' || !Array.isArray(pmMembersDataStore)) return;
+  const allSelected = pmMembersDataStore.length > 0 && pmMembersDataStore.every(d => d.selected);
+  pmMembersDataStore.forEach(d => {
+    d.selected = !allSelected;
+  });
+  if (typeof renderPmMembersTable === 'function') {
+    renderPmMembersTable();
+  }
 };
 
 window.openSupplyCustomerDetailsPage = function(customerId, customerName) {
@@ -14126,7 +12501,7 @@ function renderProjectsFooter() {
   if (currentProjectsView === 'project_material' && !featSettings.tspMaterials) {
     currentProjectsView = 'details';
   }
-  if (currentProjectsView === 'project_infra' && !(featSettings.stn && featSettings.srn && featSettings.cam)) {
+  if (currentProjectsView === 'project_infra' && !(featSettings.stn || featSettings.srn || featSettings.cam)) {
     currentProjectsView = 'details';
   }
   if (currentProjectsView === 'project_approvals' && !featSettings.additionalApproval) {
@@ -14144,7 +12519,7 @@ function renderProjectsFooter() {
   if (featSettings.tspMaterials) {
     detailTabs.push({ key: 'material', label: 'Material' });
   }
-  if (featSettings.stn && featSettings.srn && featSettings.cam) {
+  if (featSettings.stn || featSettings.srn || featSettings.cam) {
     detailTabs.push({ key: 'infra', label: 'Infra' });
   }
   detailTabs.push({ key: 'dpr', label: 'DPR' });
@@ -16540,29 +14915,30 @@ window.submitAddBoqName = function() {
 
 window.openProjectBoqSubTable = function(boqName) {
   activeSelectedBoqName = boqName || "Telecom Tower Mast Accessories 30M";
-  const section = document.getElementById('projectBoqSubTableSection');
-  const title = document.getElementById('lblProjectBoqSubTableTitle');
-  const thead = document.getElementById('theadProjectBoqSubTable');
-  const tbody = document.getElementById('tbodyProjectBoqSubTable');
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('projectBoqSubTableModal');
+  const title = document.getElementById('lblProjectBoqSubModalTitle');
+  const thead = document.getElementById('theadProjectBoqSubModal');
+  const tbody = document.getElementById('tbodyProjectBoqSubModal');
 
   if (title) title.textContent = activeSelectedBoqName;
 
   if (thead) {
     thead.innerHTML = `
       <tr class="master-view-header projects-view-header">
-        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+        <th rowspan="2" style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
           <span>Material Description</span>
         </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+        <th rowspan="2" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
           <span>Uom</span>
         </th>
         <th colspan="7" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
           <span>Qty</span>
         </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle;">
+        <th rowspan="2" style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle; white-space: nowrap;">
           <span>Rate</span>
         </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap;">
           <span>Amount</span>
         </th>
       </tr>
@@ -16585,7 +14961,7 @@ window.openProjectBoqSubTable = function(boqName) {
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
           <span>JMS</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
           <span>Difference</span>
         </th>
       </tr>
@@ -16616,31 +14992,37 @@ window.openProjectBoqSubTable = function(boqName) {
 
   if (tbody) {
     tbody.innerHTML = rows.map(r => `
-      <tr class="projects-data-row" data-row-id="${r.id}">
-        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${r.materialDescription || ''}</td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${r.uom || ''}</td>
+      <tr class="projects-data-row" data-row-id="${r.id}" style="border-bottom: 1px solid #f1f5f9;">
+        <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${r.materialDescription || ''}</td>
+        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: left !important; padding: 10px 14px;">${r.uom || ''}</td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mir || '0.00'}</td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.min || '0.00'}</td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mrr || '0.00'}</td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mrn || '0.00'}</td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.net || '0.00'}</td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.jms || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.difference || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0;">${r.rate || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${r.amount || '0.00'}</td>
+        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px; white-space: nowrap;">${r.difference || '0.00'}</td>
+        <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0; white-space: nowrap;">${r.rate || '0.00'}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600; white-space: nowrap;">${r.amount || '0.00'}</td>
       </tr>
     `).join('');
   }
 
-  if (section) {
-    section.style.display = 'block';
-    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (overlay) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(card => {
+      if (card.id !== 'projectBoqSubTableModal') card.style.display = 'none';
+    });
+    if (modal) modal.style.display = 'block';
+    overlay.style.display = 'flex';
   }
 };
 
 window.closeProjectBoqSubTable = function() {
-  const section = document.getElementById('projectBoqSubTableSection');
-  if (section) section.style.display = 'none';
+  const modal = document.getElementById('projectBoqSubTableModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
 };
 
 window.openBoqDetailItemModal = function() {
@@ -16847,7 +15229,7 @@ function renderWorklistToolbar() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
-    if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
+    if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
       const hasSelected = currentDataset.some(r => r.selected);
       const viewUpper = currentWorklistView.toUpperCase();
       toolbar.innerHTML = `
@@ -16870,6 +15252,8 @@ function renderWorklistToolbar() {
           </button>
         </div>
       `;
+      initWorklistToolbarEvents();
+      return;
     } else if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email'].includes(currentWorklistView)) {
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
@@ -17532,7 +15916,7 @@ function renderWorklistFooter() {
       footer.style.setProperty('margin-top', '12px', 'important');
       footer.style.setProperty('padding', '12px 0 16px 0', 'important');
       footer.innerHTML = `
-        <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openTransferDetailsModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+        <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openRemarksModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
           <img src="icons/Submit.svg" alt="Submit" width="32" height="32">
         </button>
       `;
@@ -17716,7 +16100,7 @@ function renderWorklistFooter() {
     footer.style.setProperty('margin-top', '12px', 'important');
     footer.style.setProperty('padding', '12px 0 16px 0', 'important');
     footer.innerHTML = `
-      <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openTransferDetailsModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+      <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openRemarksModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
         <img src="icons/Submit.svg" alt="Submit" width="32" height="32">
       </button>
     `;
@@ -17864,7 +16248,7 @@ function renderWorklistTableHead() {
       thead.innerHTML = `
         <tr class="master-view-header">
           <!-- 1. Select: 60px, center, no filter -->
-          <th class="th-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <th class="th-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="togglePmSelectAllRows()" title="Select / Deselect All">
             <div class="th-content-wrap" style="justify-content: center; text-align: center;">
               <span>Select</span>
             </div>
@@ -18970,12 +17354,12 @@ function initWorklistToolbarEvents() {
   }
 
   document.getElementById('btnDeleteAction')?.addEventListener('click', () => {
-    const selectedIndex = currentDataset.findIndex(r => r.selected);
-    if (selectedIndex !== -1) {
-      const deleted = currentDataset.splice(selectedIndex, 1)[0];
+    const selectedRows = currentDataset.filter(r => r.selected);
+    if (selectedRows.length > 0) {
+      currentDataset = currentDataset.filter(r => !r.selected);
       applyFiltersAndRender();
       updateDeleteButtonVisibility();
-      showToast(`Deleted record: ${deleted.submitBy || deleted.submittedBy}`);
+      showToast(`Deleted ${selectedRows.length} record${selectedRows.length > 1 ? 's' : ''}`);
     } else {
       showToast('No record selected to delete.');
     }
@@ -18992,6 +17376,11 @@ function initWorklistToolbarEvents() {
 function applyFiltersAndRender() {
   const tbody = document.getElementById('worklistTableBody');
   if (!tbody) return;
+
+  const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
+  if (pmSubmitArea) {
+    pmSubmitArea.style.display = 'none';
+  }
 
   const tableContainer = document.querySelector('.table-container-full');
   const worklistTableEl = document.getElementById('worklistTable');
@@ -19182,7 +17571,8 @@ function applyFiltersAndRender() {
       }).join('');
       const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
       if (pmSubmitArea) {
-        const isAllSelected = filteredDataset.length > 0 && filteredDataset.every(r => r.selected);
+        const isTargetView = ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView);
+        const isAllSelected = isTargetView && filteredDataset.length > 0 && filteredDataset.every(r => r.selected);
         pmSubmitArea.style.display = isAllSelected ? 'flex' : 'none';
       }
       return;
@@ -22973,540 +21363,8 @@ function initSideFormEvents() {
   // Submit / Save Actions
   async function handleFormSave() {
     if (currentModule === 'indus_towers') {
-      if (currentIndusSubpage === 'projects') {
-        const projectType = document.getElementById('inpProjectType')?.value?.trim();
-        const subProjectType = document.getElementById('inpSubProjectType')?.value?.trim();
-        const upgradationType = document.getElementById('inpProjectUpgradationType')?.value?.trim() || "Major";
-        const tat = document.getElementById('inpProjectTat')?.value?.trim() || "30 Days";
-        const indusPm = document.getElementById('inpIndusPm')?.value?.trim() || "";
-        const indusScm = document.getElementById('inpIndusScm')?.value?.trim() || "";
-        const pm = document.getElementById('inpProjectPm')?.value?.trim() || "";
-        const surveyToggle = document.getElementById('inpProjectSurveyToggle');
-        const survey = (surveyToggle && surveyToggle.checked) ? "Yes" : "No";
-        const transportToggle = document.getElementById('inpProjectTransportToggle');
-        const additionalTransport = (transportToggle && transportToggle.checked) ? "Yes" : "No";
-        const statusToggle = document.getElementById('inpProjectStatusToggle');
-        const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
-
-        if (!projectType) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup('Please select Project Type', 'Validation Error');
-          } else {
-            showToast('Please select Project Type');
-          }
-          return;
-        }
-
-        if (!subProjectType) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup('Please select Sub - Project Type', 'Validation Error');
-          } else {
-            showToast('Please select Sub - Project Type');
-          }
-          return;
-        }
-
-        const payload = {
-          company_name: 'Indus Tower Ltd',
-          customer_name: 'Indus Tower Ltd',
-          project_type: projectType,
-          sub_project_type: subProjectType,
-          upgradation_type: upgradationType,
-          tat: tat,
-          indus_pm: indusPm,
-          indus_scm: indusScm,
-          pm: pm,
-          survey: survey,
-          additional_transport: additionalTransport,
-          status: status
-        };
-
-        if (typeof NexusApi !== 'undefined' && NexusApi.indusProjects) {
-          try {
-            await NexusApi.indusProjects.create(payload);
-            await fetchIndusProjects(true);
-            closeSideForm();
-            if (typeof showSvgSuccessPopup === 'function') {
-              showSvgSuccessPopup('Project added successfully!', 'Task Completed');
-            } else {
-              showToast(`Project ${projectType} successfully saved & added to table!`);
-            }
-          } catch (err) {
-            console.error('Failed to save project:', err);
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup(err.message || 'Failed to save project', 'Error');
-            } else {
-              showToast('Failed to save project');
-            }
-          }
-        } else {
-          const newRecord = {
-            id: `indus-proj-${Date.now()}`,
-            ...payload,
-            projectType,
-            subProjectType,
-            upgradationType,
-            additionalTransport
-          };
-          indusProjectsData.unshift(newRecord);
-          loadIndusDataset();
-          applyFiltersAndRender();
-          closeSideForm();
-          showToast(`Project ${projectType} successfully saved & added to table!`);
-        }
-        return;
-      }
-
-      if (currentIndusSubpage === 'project_type_details') {
-        if (currentIndusProjectTypeSubpage === 'transport') {
-          const itemCode = document.getElementById('inpProjectTransItemCode')?.value || "KTN";
-          const itemDescription = document.getElementById('inpProjectTransItemDesc')?.value || "KTN";
-          const zoneSelect = document.getElementById('inpProjectTransZone');
-          const transportZone = zoneSelect ? zoneSelect.value : "Zone 1";
-          const qty = document.getElementById('inpProjectTransQty')?.value || "1";
-          const statusToggle = document.getElementById('inpProjectTransStatusToggle');
-          const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
-
-          const newRecord = {
-            id: `transport-${Date.now()}`,
-            itemCode,
-            itemDescription,
-            transportZone,
-            qty,
-            status
-          };
-          indusProjectTransportData.push(newRecord);
-          loadIndusDataset();
-          applyFiltersAndRender();
-          closeSideForm();
-          showToast(`Transport item ${itemCode} successfully saved!`);
-          return;
-        }
-
-        const descriptionInput = document.getElementById('inpProjectTypeDescription')?.value || "KTN";
-        const newRecord = {
-          id: `proj-desc-${Date.now()}`,
-          description: descriptionInput
-        };
-        indusProjectSurveyData.push(newRecord);
-        loadIndusDataset();
-        applyFiltersAndRender();
-        closeSideForm();
-        showToast(`Record ${descriptionInput} successfully saved!`);
-        return;
-      }
-
-      if (currentIndusSubpage === 'product_details') {
-        if (currentIndusProductSubpage === 'rate') {
-          const from = document.getElementById('inpProdRateFrom')?.value || "230510678";
-          const to = document.getElementById('inpProdRateTo')?.value || "230510678";
-          const gbpa = document.getElementById('inpProdRateGbpa')?.value || "230510678";
-          const rate = document.getElementById('inpProdRateType')?.value || "Parent";
-          const prodRateStatusToggle = document.getElementById('inpProdRateStatusToggle');
-          const status = (prodRateStatusToggle && prodRateStatusToggle.checked) ? "Active" : "In - Active";
-
-          const newRecord = {
-            id: `prod-rate-${Date.now()}`,
-            from,
-            to,
-            gbpa,
-            rate,
-            status
-          };
-
-          indusProductRateData.push(newRecord);
-          loadIndusDataset();
-          applyFiltersAndRender();
-          closeSideForm();
-          showToast(`Rate record successfully saved & added to table!`);
-          return;
-        }
-
-        if (currentIndusProductSubpage === 'infra') {
-          const infraCode = document.getElementById('inpProdInfraCode')?.value?.trim() || '';
-          const infraCategory = document.getElementById('inpProdInfraCategory')?.value?.trim() || '';
-          const infraDescription = document.getElementById('inpProdInfraDescription')?.value?.trim() || '';
-          const typeSelect = document.getElementById('inpProdInfraType');
-          const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
-          const prodInfraStatusToggle = document.getElementById('inpProdInfraStatusToggle');
-          const status = (prodInfraStatusToggle && prodInfraStatusToggle.checked) ? "Active" : "In - Active";
-
-          if (!infraCode) {
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup('Please enter Infra Code.', 'Validation Error');
-            } else {
-              showToast('Please enter Infra Code');
-            }
-            return;
-          }
-
-          if (!infraCategory) {
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup('Please enter Infra Category.', 'Validation Error');
-            } else {
-              showToast('Please enter Infra Category');
-            }
-            return;
-          }
-
-          const payload = {
-            customer_name: getActiveGbpaCustomerName(),
-            infra_code: infraCode,
-            infra_category: infraCategory,
-            infra_description: infraDescription,
-            infra_type: type,
-            status: status,
-            item_name: selectedProductName || null
-          };
-
-          try {
-            if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaInfra) {
-              await NexusApi.indusGbpaInfra.create(payload);
-            }
-            await fetchGbpaInfra(true);
-            closeSideForm();
-            if (typeof showSvgSuccessPopup === 'function') {
-              showSvgSuccessPopup('GBPA infrastructure added successfully!', 'Task Completed');
-            } else {
-              showToast('GBPA infrastructure added successfully!');
-            }
-          } catch (err) {
-            console.error('Failed to create GBPA infrastructure:', err);
-            const isConflict = err.isConflict || (err.statusCode === 409) || (err.message && err.message.toLowerCase().includes('already exists'));
-            const errMsg = isConflict
-              ? 'This Infra Code already exists. Please use a unique Infra Code.'
-              : (err.detail || err.message || 'Failed to save GBPA infrastructure.');
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup(errMsg, isConflict ? 'Validation Error' : 'Database Error');
-            } else {
-              showToast(errMsg);
-            }
-          }
-          return;
-        }
-
-        if (currentIndusProductSubpage === 'expenses') {
-          const expenseHead = document.getElementById('inpProdExpenseHead')?.value?.trim() || '';
-          const expenseCategory = document.getElementById('inpProdExpenseCategory')?.value?.trim() || '';
-          const expenseDescription = document.getElementById('inpProdExpenseDescription')?.value?.trim() || '';
-          const typeSelect = document.getElementById('inpProdExpenseType');
-          const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
-          const prodExpenseStatusToggle = document.getElementById('inpProdExpenseStatusToggle');
-          const status = (prodExpenseStatusToggle && prodExpenseStatusToggle.checked) ? "Active" : "In - Active";
-
-          if (!expenseHead) {
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup('Please enter Expense Head.', 'Validation Error');
-            } else {
-              showToast('Please enter Expense Head');
-            }
-            return;
-          }
-
-          if (!expenseCategory) {
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup('Please enter Expense Category.', 'Validation Error');
-            } else {
-              showToast('Please enter Expense Category');
-            }
-            return;
-          }
-
-          const payload = {
-            customer_name: getActiveGbpaCustomerName(),
-            expense_head: expenseHead,
-            expense_category: expenseCategory,
-            expense_description: expenseDescription,
-            expense_type: type,
-            status: status,
-            item_name: selectedProductName || null,
-            expense_code: expenseHead
-          };
-
-          try {
-            if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
-              await NexusApi.indusGbpaExpenses.create(payload);
-            }
-            await fetchGbpaExpenses(true);
-            closeSideForm();
-            if (typeof showSvgSuccessPopup === 'function') {
-              showSvgSuccessPopup('GBPA expense added successfully!', 'Task Completed');
-            } else {
-              showToast('GBPA expense added successfully!');
-            }
-          } catch (err) {
-            console.error('Failed to create GBPA expense:', err);
-            const errMsg = err.detail || err.message || 'Failed to save GBPA expense.';
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup(errMsg, 'Database Error');
-            } else {
-              showToast(errMsg);
-            }
-          }
-          return;
-        }
-
-        const materialHead = document.getElementById('inpMaterialHead')?.value?.trim() || '';
-        const materialCategory = document.getElementById('inpMaterialCategory')?.value?.trim() || '';
-        const materialDescription = document.getElementById('inpMaterialDescription')?.value?.trim() || '';
-        const make = document.getElementById('inpMaterialMake')?.value?.trim() || '';
-        const typeSelect = document.getElementById('inpMaterialType');
-        const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
-        const ucf = document.getElementById('inpMaterialUcf')?.value?.trim() || '';
-        const materialStatusToggle = document.getElementById('inpMaterialStatusToggle');
-        const status = (materialStatusToggle && materialStatusToggle.checked) ? "Active" : "In - Active";
-
-        if (!materialHead) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup('Please enter Material Head.', 'Validation Error');
-          } else {
-            showToast('Please enter Material Head');
-          }
-          return;
-        }
-
-        if (!materialCategory) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup('Please enter Material Category.', 'Validation Error');
-          } else {
-            showToast('Please enter Material Category');
-          }
-          return;
-        }
-
-        const payload = {
-          customer_name: getActiveGbpaCustomerName(),
-          material_head: materialHead,
-          material_category: materialCategory,
-          material_description: materialDescription,
-          material_type: type,
-          uom: ucf,
-          status: status,
-          company_name: make || null,
-          item_name: selectedProductName || null,
-          material_code: materialHead
-        };
-
-        try {
-          if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
-            await NexusApi.indusGbpaMaterials.create(payload);
-          }
-          await fetchGbpaMaterials(true);
-          closeSideForm();
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup('GBPA material added successfully!', 'Task Completed');
-          } else {
-            showToast('GBPA material added successfully!');
-          }
-        } catch (err) {
-          console.error('Failed to create GBPA material:', err);
-          const errMsg = err.detail || err.message || 'Failed to save GBPA material.';
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(errMsg, 'Database Error');
-          } else {
-            showToast(errMsg);
-          }
-        }
-        return;
-      }
-
-      if (currentIndusSubpage === 'infra') {
-        const infraCategory = document.getElementById('inpInfraCategory')?.value?.trim() || "";
-        const infraDescription = document.getElementById('inpInfraDescription')?.value?.trim() || "";
-        const uom = document.getElementById('inpInfraUom')?.value?.trim() || "";
-        const make = document.getElementById('inpInfraMake')?.value?.trim() || "";
-        const commissioningToggle = document.getElementById('inpInfraCommissioningToggle');
-        const commissioning = (commissioningToggle && commissioningToggle.checked) ? "Yes" : "No";
-        const iMapToggle = document.getElementById('inpInfraIMapToggle');
-        const iMap = (iMapToggle && iMapToggle.checked) ? "Yes" : "No";
-        const infraStatusToggle = document.getElementById('inpInfraStatusToggle');
-        const status = (infraStatusToggle && infraStatusToggle.checked) ? "Active" : "In - Active";
-
-        if (!infraCategory) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup('Infra Category is required.', 'Validation Error');
-          } else {
-            showToast('Infra Category is required.');
-          }
-          return;
-        }
-
-        const payload = {
-          customerName: 'Indus Tower Ltd',
-          companyName: 'Nexus',
-          infraCategory,
-          infraDescription,
-          uom,
-          make,
-          commissioning,
-          iMap,
-          status
-        };
-
-        try {
-          if (typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
-            const created = await NexusApi.indusInfra.create(payload);
-            await fetchIndusInfra(true);
-            closeSideForm();
-            const frm = document.getElementById('frmAddInfra');
-            if (frm) frm.reset();
-            if (typeof showSvgSuccessPopup === 'function') {
-              showSvgSuccessPopup('Infrastructure details added successfully!', 'Task Completed');
-            } else {
-              showToast('Infrastructure details added successfully!');
-            }
-          } else {
-            throw new Error('API client not available');
-          }
-        } catch (err) {
-          console.error('Failed to create infra record:', err);
-          const errMsg = err.detail || err.message || 'Failed to add infrastructure details. Please try again.';
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(errMsg, 'Database Error');
-          } else {
-            showToast(errMsg);
-          }
-        }
-        return;
-      }
-
-      if (currentIndusSubpage === 'products') {
-        const itemCode = document.getElementById('inpGbpaItemCode')?.value?.trim() || '';
-        const productName = document.getElementById('inpGbpaProductName')?.value?.trim() || '';
-        const productType = document.getElementById('inpGbpaProductType')?.value?.trim() || 'Capex';
-        const productDescription = document.getElementById('inpGbpaProductDescription')?.value?.trim() || '';
-        const uom = document.getElementById('inpGbpaUom')?.value?.trim() || 'Pcs';
-        const rate = document.getElementById('inpGbpaRate')?.value?.trim() || '0.00';
-        const hsnSacType = document.getElementById('inpGbpaHsnSac')?.value?.trim() || 'HSN';
-        const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value?.trim() || '';
-        const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value?.trim() || '';
-        const budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value?.trim() || '';
-        const statusToggle = document.getElementById('inpGbpaStatusToggle');
-        const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
-
-        if (!itemCode) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup('Please enter Item Code.', 'Validation Error');
-          } else {
-            showToast('Please enter Item Code');
-          }
-          return;
-        }
-
-        if (!productName) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup('Please enter Item Name.', 'Validation Error');
-          } else {
-            showToast('Please enter Item Name');
-          }
-          return;
-        }
-
-        const payload = {
-          company_name: 'Nexus',
-          customer_name: 'Indus Tower Ltd',
-          item_code: itemCode,
-          item_name: productName,
-          item_description: productDescription,
-          item_type: productType,
-          hsn_sac: hsnSacType,
-          hsn_sac_code: hsnSacCode,
-          uom: uom,
-          rate: rate,
-          budget_percentage: budgetPercent,
-          budget_amount: budgetAmount,
-          status: status
-        };
-
-        try {
-          if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
-            await NexusApi.indusGbpa.create(payload);
-          }
-          await fetchIndusGbpa(true);
-          closeSideForm();
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup('GBPA record added successfully!', 'Task Completed');
-          } else {
-            showToast('GBPA record added successfully!');
-          }
-        } catch (err) {
-          console.error('Failed to create GBPA item:', err);
-          const errMsg = err.detail || err.message || 'Failed to save GBPA item.';
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(errMsg, 'Error Message!');
-          } else {
-            showToast(errMsg);
-          }
-        }
-        return;
-      }
-
-
-      const siteCodeVal = document.getElementById('inpSiteId')?.value?.trim() || '';
-      const whIdVal = document.getElementById('inpSiteWhId')?.value?.trim() || '';
-      const siteNameVal = document.getElementById('inpSiteName')?.value?.trim() || '';
-      const towerTypeVal = document.getElementById('inpSiteTowerType')?.value?.trim() || 'GBT';
-      const districtVal = document.getElementById('inpSiteDistrict')?.value?.trim() || '';
-      const townVal = document.getElementById('inpSiteTown')?.value?.trim() || '';
-      const addressVal = document.getElementById('inpSiteAddress')?.value?.trim() || '';
-      const latVal = document.getElementById('inpSiteLattitude')?.value?.trim() || '';
-      const longVal = document.getElementById('inpSiteLongtitude')?.value?.trim() || '';
-      const transportZoneVal = document.getElementById('inpSiteTransportZone')?.value?.trim() || '';
-      const siteStatusToggle = document.getElementById('inpSiteStatusToggle');
-      const statusVal = (siteStatusToggle && siteStatusToggle.checked) ? 'Active' : 'In - Active';
-
-      if (!siteCodeVal) {
-        if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup('Please enter Site ID.', 'Error Message!');
-        } else {
-          showToast('Please enter Site ID');
-        }
-        return;
-      }
-      if (!siteNameVal) {
-        if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup('Please enter Site Name.', 'Error Message!');
-        } else {
-          showToast('Please enter Site Name');
-        }
-        return;
-      }
-
-      const payload = {
-        site_code: siteCodeVal,
-        site_name: siteNameVal,
-        wh_id: whIdVal || null,
-        tower_type: towerTypeVal || 'GBT',
-        district: districtVal || null,
-        town: townVal || null,
-        address: addressVal || null,
-        latitude: latVal || null,
-        longitude: longVal || null,
-        transport_zone: transportZoneVal || null,
-        status: statusVal,
-        contacts: (typeof draftSiteContacts !== 'undefined' && draftSiteContacts.length > 0) ? draftSiteContacts : []
-      };
-
-      if (typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
-        try {
-          const savedSite = await NexusApi.indusSites.create(payload);
-          await fetchIndusSites(true);
-          if (typeof draftSiteContacts !== 'undefined') draftSiteContacts = [];
-          closeSideForm();
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup('Site added successfully!', 'Task Completed');
-          } else {
-            showToast('Site added successfully!');
-          }
-        } catch (err) {
-          console.error('Failed to create site:', err);
-          const errMsg = err.detail || err.message || 'Failed to save site details.';
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(errMsg, 'Error Message!');
-          } else {
-            showToast(errMsg);
-          }
-        }
+      if (typeof window.saveIndusTowersRecord === 'function') {
+        await window.saveIndusTowersRecord();
       }
       return;
     }
@@ -23514,73 +21372,8 @@ function initSideFormEvents() {
 
     const isExpenseCardOpen = document.getElementById('addExpenseCard') && document.getElementById('addExpenseCard').style.display === 'block';
     if (isExpenseCardOpen || (currentModule === 'master' && currentMasterSubpage === 'expenses')) {
-      const expenseName = document.getElementById('inpExpenseName')?.value?.trim();
-      if (!expenseName) {
-        showToast('Please enter Expense Name');
-        return;
-      }
-      const expenseCategory = document.getElementById('inpExpenseCategory')?.value || "Direct Operations";
-      const expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value || "";
-      const expenseHead = document.getElementById('inpExpenseHead')?.value || "Capex";
-      const gst = document.getElementById('inpExpenseGst')?.value || "18%";
-      const depreciation = document.getElementById('inpExpenseDepreciation')?.value || "10%";
-      const expenseRcmToggle = document.getElementById('inpExpenseRcmToggle');
-      const rcm = (expenseRcmToggle && expenseRcmToggle.checked);
-      const expenseStatusToggle = document.getElementById('inpExpenseStatusToggle');
-      const status = (expenseStatusToggle && expenseStatusToggle.checked) ? "Active" : "In - Active";
-
-      const payload = {
-        expenseName,
-        expenseCategory,
-        expenseSubCategory,
-        expenseHead,
-        gst,
-        depreciation_rate: (expenseHead.toLowerCase() === 'capex' ? depreciation : '0%'),
-        rcm,
-        status
-      };
-
-      if (typeof NexusApi !== 'undefined' && NexusApi.expenses) {
-        NexusApi.expenses.create(payload)
-          .then(newRecord => {
-            masterExpensesData.unshift(newRecord);
-            currentDataset = [...masterExpensesData];
-            applyFiltersAndRender();
-            closeSideForm();
-            if (typeof showSvgSuccessPopup === 'function') {
-              showSvgSuccessPopup('Expense added successfully!', 'Task Completed');
-            } else {
-              showToast(`Expense ${expenseName} successfully saved to database!`);
-            }
-          })
-          .catch(err => {
-            console.error('Failed to create expense:', err);
-            const msg = err.detail || err.message || "Expense with this name or code already exists.";
-            if (typeof showSvgErrorPopup === 'function') {
-              showSvgErrorPopup(msg, "Error Message!");
-            } else {
-              showToast(`Error: ${msg}`);
-            }
-            // Form remains open and all field values are preserved for user correction!
-          });
-      } else {
-        const newRecord = {
-          id: `exp-${Date.now()}`,
-          expenseName,
-          expenseCategory,
-          expenseSubCategory,
-          expenseHead,
-          gst,
-          gstRate: gst,
-          depreciation: (expenseHead.toLowerCase() === 'capex' ? depreciation : '0%'),
-          rcm: rcm ? "Yes" : "No",
-          status
-        };
-        masterExpensesData.unshift(newRecord);
-        currentDataset = [...masterExpensesData];
-        applyFiltersAndRender();
-        closeSideForm();
-        showToast(`Expense ${expenseName} successfully saved!`);
+      if (typeof window.saveMasterExpenseRecord === 'function') {
+        window.saveMasterExpenseRecord();
       }
       return;
     }
@@ -23665,323 +21458,16 @@ function initSideFormEvents() {
     }
 
     if (currentModule === 'master' && currentMasterSubpage === 'employee') {
-      if (isEmployeeFormEditing || currentViewedEmpId) {
-        if (typeof window.saveEmployeeEdits === 'function') {
-          window.saveEmployeeEdits();
-        }
-        return;
-      }
-      const employeeName = document.getElementById('inpEmpName')?.value.trim();
-      const employeeId = document.getElementById('inpEmpId')?.value.trim();
-      const empType = document.getElementById('inpEmpType')?.value || "On-Roll";
-      const address = document.getElementById('inpEmpAddress')?.value.trim() || "";
-      const contactNumber = document.getElementById('inpEmpMobile')?.value.trim() || "";
-      const email = document.getElementById('inpEmpEmail')?.value.trim() || "";
-      const dob = document.getElementById('inpEmpDob')?.value || "";
-      const bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || "A+";
-      const maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || "Single";
-      const qualification = document.getElementById('inpEmpQualification')?.value.trim() || "";
-      const panToggle = document.getElementById('inpEmpPanToggle');
-      const pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value.trim() || "") : "";
-      const aadharToggle = document.getElementById('inpEmpAadharToggle');
-      const aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value.trim() || "") : "";
-      const dlToggle = document.getElementById('inpEmpDlToggle');
-      const drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value.trim() || "") : "";
-      const passportToggle = document.getElementById('inpEmpPassportToggle');
-      const passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value.trim() || "") : "";
-      const epfToggle = document.getElementById('inpEmpEpfToggle');
-      const epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value.trim() || "") : "";
-      const esiToggle = document.getElementById('inpEmpEsiToggle');
-      const esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value.trim() || "") : "";
-      const prevExp = document.getElementById('inpEmpPrevExp')?.value.trim() || "";
-      const currentExp = document.getElementById('inpEmpCurrExp')?.value.trim() || "";
-      const totalExp = document.getElementById('inpEmpTotalExp')?.value.trim() || "";
-      const doj = document.getElementById('inpEmpDoj')?.value || "";
-      const designation = document.getElementById('inpEmpDesignation')?.value || "Executive";
-      const geoToggle = document.getElementById('inpEmpGeoAttendanceToggle');
-      const geoAttendance = geoToggle ? geoToggle.checked : false;
-      const statusToggle = document.getElementById('inpEmpStatusToggle');
-      const status = (statusToggle && statusToggle.checked) ? "Active" : "In - Active";
-
-      if (!employeeName) {
-        if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup("Please enter Employee Name.", "Error Message!");
-        } else {
-          showToast("Please enter Employee Name.");
-        }
-        return;
-      }
-
-      if (!employeeId) {
-        if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup("Please enter Employee ID / Code.", "Error Message!");
-        } else {
-          showToast("Please enter Employee ID / Code.");
-        }
-        return;
-      }
-
-      const payload = {
-        employeeName,
-        employeeId,
-        empType,
-        designation,
-        address,
-        contactNumber,
-        email,
-        dob,
-        bloodGroup,
-        maritalStatus,
-        qualification,
-        pan,
-        aadhar,
-        drivingLicense,
-        passportNumber,
-        epfUan,
-        esiId,
-        prevExp,
-        currentExp,
-        totalExp,
-        doj,
-        geoAttendance,
-        status
-      };
-
-      if (typeof NexusApi !== 'undefined' && NexusApi.employees) {
-        try {
-          const newRecord = await NexusApi.employees.create(payload);
-          const dbEmpId = newRecord.employee_id || newRecord.id;
-
-          // Upload any pending PDF documents
-          if (window.pendingEmployeePdfs && Object.keys(window.pendingEmployeePdfs).length > 0 && dbEmpId) {
-            for (const [docType, file] of Object.entries(window.pendingEmployeePdfs)) {
-              try {
-                await NexusApi.employees.uploadDocument(dbEmpId, docType, file);
-              } catch (docErr) {
-                console.error(`Failed to upload ${docType} PDF:`, docErr);
-              }
-            }
-            window.pendingEmployeePdfs = {};
-          }
-
-          masterEmployeeData.unshift({
-            ...newRecord,
-            id: newRecord.employee_id || newRecord.id,
-            employeeName: newRecord.employee_name || newRecord.employeeName,
-            employeeId: newRecord.employee_code || newRecord.employeeId,
-            employeeType: newRecord.employee_type || newRecord.empType,
-            empType: newRecord.employee_type || newRecord.empType,
-            contactNumber: newRecord.mobile_number || newRecord.contactNumber
-          });
-          currentDataset = [...masterEmployeeData];
-          applyFiltersAndRender();
-          closeSideForm();
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup('Employee added successfully!', 'Task Completed');
-          } else {
-            showToast(`Employee ${employeeName} successfully saved & added to table!`);
-          }
-        } catch (err) {
-          console.error('Failed to create employee via API:', err);
-          const msg = err.detail || err.message || "Failed to create employee.";
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(msg, "Error Message!");
-          } else {
-            showToast(`Error: ${msg}`);
-          }
-        }
-      } else {
-        const newRecord = {
-          id: `emp-${Date.now()}`,
-          employeeName,
-          employeeId,
-          empType,
-          employeeType: empType,
-          address,
-          contactNumber,
-          email,
-          dob,
-          bloodGroup,
-          maritalStatus,
-          qualification,
-          pan,
-          aadhar,
-          drivingLicense,
-          passportNumber,
-          epfUan,
-          esiId,
-          esiCode: esiId,
-          prevExp,
-          currentExp,
-          totalExp,
-          doj,
-          designation,
-          status
-        };
-
-        masterEmployeeData.unshift(newRecord);
-        currentDataset = [...masterEmployeeData];
-        applyFiltersAndRender();
-        closeSideForm();
-        showToast(`Employee ${employeeName} successfully saved & added to table!`);
+      if (typeof window.saveMasterEmployeeRecord === 'function') {
+        await window.saveMasterEmployeeRecord();
       }
       return;
     }
 
-    const businessType = document.getElementById('inpBusinessType')?.value || "Projects";
-    const legalName = document.getElementById('inpCustomerName')?.value?.trim();
-    const customerProjectName = document.getElementById('inpCustomerProjectName')?.value?.trim();
-    const customerName = (businessType === 'Projects' && customerProjectName) ? customerProjectName : (legalName || "");
-
-    if (!legalName && !customerName) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup("Please enter Customer Legal Name.", "Error Message!");
-      } else {
-        showToast("Please enter Customer Legal Name.");
-      }
+    if (typeof window.saveMasterCustomerRecord === 'function') {
+      await window.saveMasterCustomerRecord();
       return;
     }
-
-    const effectiveCustomerName = customerName || legalName;
-    const effectiveLegalName = legalName || customerName;
-
-    // Check Indus Towers variant uniqueness (Only 1 Indus Towers record is allowable)
-    const isIndusVariant = (effectiveCustomerName + ' ' + effectiveLegalName).toLowerCase().replace(/[^a-z0-9]/g, '').includes('industower');
-    if (isIndusVariant) {
-      const existingIndus = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {
-        const cn = (c.customerName || c.customer_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        const ln = (c.legalName || c.legal_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        return cn.includes('industower') || ln.includes('industower');
-      }) : null;
-
-      if (existingIndus) {
-        if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup("Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable.", "Duplicate Error!");
-        } else {
-          showToast("Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable.");
-        }
-        return;
-      }
-    }
-
-    // Check general duplicate customer name in active dataset
-    const normEnteredName = effectiveCustomerName.trim().toLowerCase();
-    const normEnteredLegal = effectiveLegalName.trim().toLowerCase();
-    const existingDup = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {
-      const cn = (c.customerName || c.customer_name || '').trim().toLowerCase();
-      const ln = (c.legalName || c.legal_name || '').trim().toLowerCase();
-      return (cn && cn === normEnteredName) || (ln && ln === normEnteredLegal);
-    }) : null;
-
-    if (existingDup) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup("Customer name already exists. Please use a different name.", "Duplicate Error!");
-      } else {
-        showToast("Customer name already exists.");
-      }
-      return;
-    }
-
-    const isGstOn = document.getElementById('inpCustomerGstToggle')?.checked || false;
-    const gstType = isGstOn ? (document.getElementById('inpGstType')?.value || "SGST") : "NA";
-    const gstNumber = isGstOn ? (document.getElementById('inpGstNumber')?.value?.trim() || "NA") : "NA";
-    const panNumber = businessType === 'Projects' ? (document.getElementById('inpPanNumber')?.value?.trim() || "") : "";
-    const address = document.getElementById('inpAddress')?.value?.trim() || "";
-    const poDigits = (businessType === 'Projects' && isIndusVariant) ? (document.getElementById('inpCustomerPoDigits')?.value?.trim() || "") : "";
-    const statusToggleEl = document.getElementById('inpStatusToggle');
-    const status = (statusToggleEl && statusToggleEl.checked) ? "Active" : "In - Active";
-    const invoiceType = "B2B";
-
-    const payload = {
-      customer_name: customerName || legalName,
-      customerName: customerName || legalName,
-      legal_name: legalName || customerName,
-      legalName: legalName || customerName,
-      business_type: businessType,
-      businessType: businessType,
-      gst_type: gstType,
-      gstType: gstType,
-      gst_number: gstNumber,
-      gstNumber: gstNumber,
-      pan_number: panNumber,
-      panNumber: panNumber,
-      invoice_type: invoiceType,
-      invoiceType: invoiceType,
-      po_stating_3_digits: poDigits,
-      poDigits: poDigits,
-      gst_address: address,
-      address: address,
-      status: status,
-      gst_enabled: isGstOn,
-      gstEnabled: isGstOn
-    };
-
-    if (typeof NexusApi !== 'undefined' && NexusApi.customers) {
-      NexusApi.customers.create(payload)
-        .then(newRecord => {
-          const mapped = {
-            ...newRecord,
-            id: newRecord.customer_id || newRecord.id || `cust-${Date.now()}`,
-            customerName: newRecord.customer_name || newRecord.customerName || customerName || legalName,
-            customerId: newRecord.customer_code || newRecord.customerId || '',
-            businessType: newRecord.business_type || newRecord.businessType || businessType,
-            gstNumber: newRecord.gst_number || newRecord.gstNumber || gstNumber,
-            gstType: newRecord.gst_type || newRecord.gstType || gstType,
-            invoiceType: newRecord.invoice_type || newRecord.invoiceType || invoiceType,
-            panNumber: newRecord.pan_number || newRecord.panNumber || panNumber,
-            address: newRecord.gst_address || newRecord.address || address,
-            poDigits: newRecord.po_stating_3_digits || newRecord.poDigits || poDigits,
-            status: newRecord.status || status
-          };
-          masterCustomerData.unshift(mapped);
-          currentDataset = [...masterCustomerData];
-          applyFiltersAndRender();
-          closeSideForm();
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup('Customer added successfully!', 'Task Completed');
-          } else {
-            showToast(`Customer ${customerName || legalName} successfully saved to database!`);
-          }
-        })
-        .catch(err => {
-          console.error('Failed to create customer in DB:', err);
-          const msg = err.detail || err.message || "Customer with this name or code already exists.";
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(msg, "Error Message!");
-          } else {
-            showToast(`Error: ${msg}`);
-          }
-          // Form remains open and all field values are preserved for user correction!
-        });
-    } else {
-      const newRecord = {
-        id: `cust-${Date.now()}`,
-        customerName: customerName || legalName,
-        customerId: `23051068${masterCustomerData.length + 1}`,
-        businessType,
-        gstNumber,
-        gstType,
-        invoiceType,
-        panNumber,
-        address,
-        poDigits,
-        status
-      };
-
-      masterCustomerData.unshift(newRecord);
-      if (currentModule === 'master' && currentMasterSubpage === 'customer') {
-        currentDataset = [...masterCustomerData];
-        applyFiltersAndRender();
-      }
-
-      closeSideForm();
-      if (typeof showSvgSuccessPopup === 'function') {
-        showSvgSuccessPopup('Customer added successfully!', 'Task Completed');
-      } else {
-        showToast(`Customer ${customerName || legalName} successfully saved!`);
-      }
-    }
-    return;
   }
 
   const btnSubmitCustomer = document.getElementById('btnSubmitCustomer');
@@ -24130,7 +21616,6 @@ function initSideFormEvents() {
       }
     });
   });
-  if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
 
   const btnCloseVendorForm = document.getElementById('btnCloseVendorForm');
   if (btnCloseVendorForm) btnCloseVendorForm.addEventListener('click', closeSideForm);
@@ -25747,213 +23232,8 @@ function initSideFormEvents() {
   document.getElementById('inpVendorGstToggle')?.addEventListener('change', updateVendorConditionalFields);
   document.getElementById('inpTdsDeductionToggle')?.addEventListener('change', updateVendorConditionalFields);
 
-  async function saveVendorForm(isFormSubmit = true) {
-    const vName = document.getElementById('inpVendorName')?.value.trim();
-    if (!vName) {
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup('Please enter a Vendor Name', 'Validation Error');
-      } else {
-        showToast('Please enter a Vendor Name');
-      }
-      return false;
-    }
-
-    const entityType = document.getElementById('inpVendorEntityType')?.value || 'Proprietorship';
-    const bType = document.getElementById('inpVendorType')?.value || 'Supply';
-    const sType = document.getElementById('inpServiceType')?.value || 'Project';
-    const contractType = document.getElementById('inpVendorContractType')?.value || 'B2B';
-    const address = document.getElementById('inpVendorAddress')?.value.trim() || '';
-    const pan = document.getElementById('inpVendorPanNumber')?.value.trim() || '';
-    const isGstOn = document.getElementById('inpVendorGstToggle')?.checked || false;
-    const gstType = document.getElementById('inpVendorGstType')?.value || 'SGST';
-    const gstNumber = isGstOn ? (document.getElementById('inpVendorGstNumber')?.value.trim() || '') : 'NA';
-    const isTdsOn = document.getElementById('inpTdsDeductionToggle')?.checked || false;
-    const tdsCode = document.getElementById('inpTdsCode')?.value || '';
-    const tdsRate = document.getElementById('inpTdsRate')?.value || '1%';
-    const status = document.getElementById('inpVendorStatusToggle')?.checked ? 'Active' : 'In - Active';
-
-    if (currentViewedVendorId) {
-      // Update existing vendor in PostgreSQL
-      const numericVendorId = parseInt(currentViewedVendorId, 10);
-      const updatePayload = {
-        vendor_name: vName,
-        entity_type: entityType,
-        business_type: bType,
-        service_type: (bType.toLowerCase() === 'service') ? sType : '',
-        contract_type: (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '',
-        address: address,
-        pan_number: pan,
-        gst_number_available: isGstOn,
-        gst_type: isGstOn ? gstType : 'NA',
-        gst_number: gstNumber,
-        tds_deduction: isTdsOn,
-        tds_code: isTdsOn ? tdsCode : '',
-        tds_rate: isTdsOn ? tdsRate : '',
-        status: status
-      };
-
-      const ctx = getEffectiveVendorContext();
-      if (ctx && ctx.bank) {
-        updatePayload.account_name = ctx.bank.accountName;
-        updatePayload.account_number = ctx.bank.accountNumber;
-        updatePayload.bank_name = ctx.bank.bankName;
-        updatePayload.ifsc_code = ctx.bank.ifscCode;
-        updatePayload.account_type = ctx.bank.accountType;
-      }
-
-      if (typeof NexusApi !== 'undefined' && NexusApi.vendors && !isNaN(numericVendorId)) {
-        try {
-          await NexusApi.vendors.update(numericVendorId, updatePayload);
-          await loadMasterVendorsFromApi();
-
-          const lblTitle = document.getElementById('lblVendorCardTitle');
-          if (lblTitle) lblTitle.innerText = vName;
-
-          isVendorFormEditing = false;
-          setVendorFormReadOnly(true);
-
-          const imgIcon = document.getElementById('imgVendorCardEditIcon');
-          if (imgIcon) {
-            imgIcon.src = 'icons/Edit.svg';
-            imgIcon.className = 'icon-blue';
-            imgIcon.title = 'Edit Info';
-          }
-          const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
-          if (btnSaveWrap) btnSaveWrap.style.display = 'none';
-
-          if (isFormSubmit) {
-            closeSideForm();
-          }
-
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup(`Vendor updated successfully!`, 'Task Completed');
-          } else {
-            showToast(`Vendor ${vName} updated successfully!`);
-          }
-          return true;
-        } catch (err) {
-          console.error('Failed to update vendor:', err);
-          const errorMsg = err.detail || err.message || 'Failed to update vendor';
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(errorMsg, 'Error Message!');
-          } else {
-            showToast(`Error: ${errorMsg}`);
-          }
-          return false;
-        }
-      }
-    } else {
-      // Add new vendor in PostgreSQL
-      const createPayload = {
-        vendor_name: vName,
-        entity_type: entityType,
-        business_type: bType,
-        service_type: (bType.toLowerCase() === 'service') ? sType : '',
-        contract_type: (bType.toLowerCase() === 'service' && sType.toLowerCase() === 'project') ? contractType : '',
-        address: address,
-        pan_number: pan,
-        gst_number_available: isGstOn,
-        gst_type: isGstOn ? gstType : 'NA',
-        gst_number: gstNumber,
-        tds_deduction: isTdsOn,
-        tds_code: isTdsOn ? tdsCode : '',
-        tds_rate: isTdsOn ? tdsRate : '',
-        status: status
-      };
-
-      if (newVendorTempSubData.bank) {
-        createPayload.account_name = newVendorTempSubData.bank.accountName;
-        createPayload.account_number = newVendorTempSubData.bank.accountNumber;
-        createPayload.bank_name = newVendorTempSubData.bank.bankName;
-        createPayload.ifsc_code = newVendorTempSubData.bank.ifscCode;
-        createPayload.account_type = newVendorTempSubData.bank.accountType;
-      }
-      if (newVendorTempSubData.contacts && newVendorTempSubData.contacts.length > 0) {
-        createPayload.contact_name = newVendorTempSubData.contacts[0].name;
-        createPayload.contact_number = newVendorTempSubData.contacts[0].phone;
-        createPayload.email = newVendorTempSubData.contacts[0].email;
-      }
-
-      if (typeof NexusApi !== 'undefined' && NexusApi.vendors) {
-        try {
-          const created = await NexusApi.vendors.create(createPayload);
-          const createdId = created.vendor_id || created.id;
-
-          // If temporary pricing rows were configured, save them to vendor_price
-          if (createdId) {
-            const allScopes = [
-              ...(newVendorTempSubData.supplyScope || []).map(s => ({
-                product_name: s.productName,
-                item_description: s.uom,
-                rate: s.price,
-                sub_project_type: s.category || 'Supply',
-                status: s.status || 'Active'
-              })),
-              ...(newVendorTempSubData.serviceProjectScope || []).map(s => ({
-                sub_project_type: s.subProjectType,
-                item_description: s.uom,
-                rate: s.rate,
-                status: s.status || 'Active'
-              })),
-              ...(newVendorTempSubData.serviceTransportScope || []).map(s => ({
-                vehicle_type: s.vehicleType,
-                vehicle_number: s.vehicleNumber,
-                fuel_type: s.fuelType,
-                rental_type: s.rentalType,
-                rate: s.rate,
-                sub_project_type: s.range,
-                status: s.status || 'Active'
-              })),
-              ...(newVendorTempSubData.serviceOthersScope || []).map(s => ({
-                service_description: s.description,
-                from_date: s.from,
-                to_date: s.to,
-                item_description: s.uom,
-                rate: s.rate,
-                status: s.status || 'Active'
-              }))
-            ];
-
-            for (const scopePayload of allScopes) {
-              try {
-                await NexusApi.vendors.createPricing(createdId, scopePayload);
-              } catch (e) {
-                console.warn('Failed to save scope row:', e);
-              }
-            }
-          }
-
-          newVendorTempSubData = {
-            bank: null,
-            contacts: [],
-            supplyScope: [],
-            serviceProjectScope: [],
-            serviceTransportScope: [],
-            serviceOthersScope: []
-          };
-
-          await loadMasterVendorsFromApi();
-          closeSideForm();
-
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup(`Vendor added successfully!`, 'Task Completed');
-          } else {
-            showToast(`Vendor ${vName} added successfully!`);
-          }
-          return true;
-        } catch (err) {
-          console.error('Failed to create vendor:', err);
-          const errorMsg = err.detail || err.message || 'Failed to create vendor';
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup(errorMsg, 'Error Message!');
-          } else {
-            showToast(`Error: ${errorMsg}`);
-          }
-          return false;
-        }
-      }
-    }
-  }
+  // saveVendorForm is modularized into frontend/assets/js/modules/master/master-vendors.js
+  var saveVendorForm = window.saveVendorForm;
 
   const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
   if (btnVendorCardEditToggle) {
@@ -27385,497 +24665,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================================================
 // 7. EXCEL-STYLE FILTER ENGINE
 // ==========================================================================
-function initExcelFilterSystem() {
-  const dropdown = document.getElementById('excelFilterDropdown');
-  const btnCancel = document.getElementById('btnCancelFilter');
-  const btnApply = document.getElementById('btnApplyFilter');
-  const searchInput = document.getElementById('filterSearchInput');
-  const chkSelectAll = document.getElementById('chkFilterSelectAll');
-
-  if (btnCancel) {
-    btnCancel.addEventListener('click', () => {
-      if (dropdown.dataset.filterContext === 'contact') {
-        if (currentContactFilterCol) {
-          delete activeContactFilters[currentContactFilterCol];
-          renderVendorContactTable();
-        }
-        closeExcelFilter();
-        showToast('Contact filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'supplyScope') {
-        if (currentSupplyScopeFilterCol) {
-          delete activeSupplyScopeFilters[currentSupplyScopeFilterCol];
-          renderVendorSupplyScopeTable();
-        }
-        closeExcelFilter();
-        showToast('Scope filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'serviceProjectScope') {
-        if (currentServiceProjectScopeFilterCol) {
-          delete activeServiceProjectScopeFilters[currentServiceProjectScopeFilterCol];
-          renderVendorServiceProjectScopeTable();
-        }
-        closeExcelFilter();
-        showToast('Scope filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'serviceTransportScope') {
-        if (currentServiceTransportScopeFilterCol) {
-          delete activeServiceTransportScopeFilters[currentServiceTransportScopeFilterCol];
-          renderVendorServiceTransportScopeTable();
-        }
-        closeExcelFilter();
-        showToast('Scope filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'companyLocation') {
-        if (currentCompanyLocationFilterCol) {
-          delete activeCompanyLocationFilters[currentCompanyLocationFilterCol];
-          renderCompanyLocationTable();
-        }
-        closeExcelFilter();
-        showToast('Location filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'companyHolidays') {
-        if (currentCompanyHolidaysFilterCol) {
-          delete activeCompanyHolidaysFilters[currentCompanyHolidaysFilterCol];
-          renderCompanyHolidaysTable();
-        }
-        closeExcelFilter();
-        showToast('Holiday filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'companyBank') {
-        if (currentCompanyBankFilterCol) {
-          delete activeCompanyBankFilters[currentCompanyBankFilterCol];
-          renderCompanyBankTable();
-        }
-        closeExcelFilter();
-        showToast('Bank filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'serviceOthersScope') {
-        if (currentServiceOthersScopeFilterCol) {
-          delete activeServiceOthersScopeFilters[currentServiceOthersScopeFilterCol];
-          renderVendorServiceOthersScopeTable();
-        }
-        closeExcelFilter();
-        showToast('Scope filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'tdsSummary') {
-        if (currentTdsSummaryFilterCol) {
-          delete activeTdsSummaryFilters[currentTdsSummaryFilterCol];
-          renderAccountsTdsSummaryTable();
-        }
-        closeExcelFilter();
-        showToast('TDS filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'customerLoc') {
-        if (currentCustomerLocFilterCol) {
-          delete activeCustomerLocFilters[currentCustomerLocFilterCol];
-          renderCustomerLocationTable();
-        }
-        closeExcelFilter();
-        showToast('Location filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'customerContact') {
-        if (currentCustomerContactFilterCol) {
-          delete activeCustomerContactFilters[currentCustomerContactFilterCol];
-          renderCustomerContactTable();
-        }
-        closeExcelFilter();
-        showToast('Contact filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'bulkUpload') {
-        if (currentBulkUploadFilterCol) {
-          delete activeBulkUploadFilters[currentBulkUploadFilterCol];
-          renderBulkUploadTable();
-        }
-        closeExcelFilter();
-        showToast('Bulk upload filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'siteContact') {
-        if (currentSiteContactFilterCol) {
-          delete activeSiteContactFilters[currentSiteContactFilterCol];
-          renderSiteContactTable();
-        }
-        closeExcelFilter();
-        showToast('Site contact filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'projectDoc') {
-        if (currentProjectDocFilterCol) {
-          delete activeProjectDocFilters[currentProjectDocFilterCol];
-          if (typeof renderProjectDocTable === 'function') renderProjectDocTable();
-        }
-        closeExcelFilter();
-        showToast('Description filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'projectTransport') {
-        if (currentProjectTransportFilterCol) {
-          delete activeProjectTransportFilters[currentProjectTransportFilterCol];
-          if (typeof renderProjectTransportTable === 'function') renderProjectTransportTable();
-        }
-        closeExcelFilter();
-        showToast('Transport filter cleared');
-        return;
-      }
-      if (dropdown.dataset.filterContext === 'projectActivity') {
-        if (currentProjectActivityFilterCol) {
-          delete activeProjectActivityFilters[currentProjectActivityFilterCol];
-          if (typeof renderProjectActivityTable === 'function') renderProjectActivityTable();
-        }
-        closeExcelFilter();
-        showToast('Activity filter cleared');
-        return;
-      }
-      closeExcelFilter();
-    });
-  }
-
-  document.addEventListener('click', (e) => {
-    if (dropdown && !dropdown.contains(e.target) && !e.target.classList.contains('filter-funnel-btn') && !e.target.classList.contains('contact-th-filter-btn')) {
-      closeExcelFilter();
-    }
-  });
-
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      const query = searchInput.value.toLowerCase().trim();
-      const items = document.querySelectorAll('.excel-filter-dynamic-item');
-      items.forEach(item => {
-        const val = item.getAttribute('data-val').toLowerCase();
-        item.style.display = val.includes(query) ? 'flex' : 'none';
-      });
-    });
-  }
-
-  if (chkSelectAll) {
-    chkSelectAll.addEventListener('change', () => {
-      const visibleCheckboxes = Array.from(document.querySelectorAll('.excel-filter-dynamic-item'))
-        .filter(item => item.style.display !== 'none')
-        .map(item => item.querySelector('input[type="checkbox"]'));
-
-      visibleCheckboxes.forEach(chk => {
-        chk.checked = chkSelectAll.checked;
-      });
-    });
-  }
-
-  if (btnApply) {
-    btnApply.addEventListener('click', () => {
-      if (dropdown.dataset.filterContext === 'contact') {
-        if (!currentContactFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeContactFilters[currentContactFilterCol];
-        } else {
-          activeContactFilters[currentContactFilterCol] = new Set(checkedItems);
-        }
-        renderVendorContactTable();
-        closeExcelFilter();
-        showToast('Contact filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'supplyScope') {
-        if (!currentSupplyScopeFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeSupplyScopeFilters[currentSupplyScopeFilterCol];
-        } else {
-          activeSupplyScopeFilters[currentSupplyScopeFilterCol] = new Set(checkedItems);
-        }
-        renderVendorSupplyScopeTable();
-        closeExcelFilter();
-        showToast('Scope filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'serviceProjectScope') {
-        if (!currentServiceProjectScopeFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeServiceProjectScopeFilters[currentServiceProjectScopeFilterCol];
-        } else {
-          activeServiceProjectScopeFilters[currentServiceProjectScopeFilterCol] = new Set(checkedItems);
-        }
-        renderVendorServiceProjectScopeTable();
-        closeExcelFilter();
-        showToast('Scope filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'serviceTransportScope') {
-        if (!currentServiceTransportScopeFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeServiceTransportScopeFilters[currentServiceTransportScopeFilterCol];
-        } else {
-          activeServiceTransportScopeFilters[currentServiceTransportScopeFilterCol] = new Set(checkedItems);
-        }
-        renderVendorServiceTransportScopeTable();
-        closeExcelFilter();
-        showToast('Transport filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'companyLocation') {
-        if (!currentCompanyLocationFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeCompanyLocationFilters[currentCompanyLocationFilterCol];
-        } else {
-          activeCompanyLocationFilters[currentCompanyLocationFilterCol] = new Set(checkedItems);
-        }
-        renderCompanyLocationTable();
-        closeExcelFilter();
-        showToast('Location filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'companyHolidays') {
-        if (!currentCompanyHolidaysFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeCompanyHolidaysFilters[currentCompanyHolidaysFilterCol];
-        } else {
-          activeCompanyHolidaysFilters[currentCompanyHolidaysFilterCol] = new Set(checkedItems);
-        }
-        renderCompanyHolidaysTable();
-        closeExcelFilter();
-        showToast('Holiday filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'companyBank') {
-        if (!currentCompanyBankFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeCompanyBankFilters[currentCompanyBankFilterCol];
-        } else {
-          activeCompanyBankFilters[currentCompanyBankFilterCol] = new Set(checkedItems);
-        }
-        renderCompanyBankTable();
-        closeExcelFilter();
-        showToast('Bank filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'serviceOthersScope') {
-        if (!currentServiceOthersScopeFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeServiceOthersScopeFilters[currentServiceOthersScopeFilterCol];
-        } else {
-          activeServiceOthersScopeFilters[currentServiceOthersScopeFilterCol] = new Set(checkedItems);
-        }
-        renderVendorServiceOthersScopeTable();
-        closeExcelFilter();
-        showToast('Other Service filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'tdsSummary') {
-        if (!currentTdsSummaryFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeTdsSummaryFilters[currentTdsSummaryFilterCol];
-        } else {
-          activeTdsSummaryFilters[currentTdsSummaryFilterCol] = new Set(checkedItems);
-        }
-        renderAccountsTdsSummaryTable();
-        closeExcelFilter();
-        showToast('TDS filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'customerLoc') {
-        if (!currentCustomerLocFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeCustomerLocFilters[currentCustomerLocFilterCol];
-        } else {
-          activeCustomerLocFilters[currentCustomerLocFilterCol] = new Set(checkedItems);
-        }
-        renderCustomerLocationTable();
-        closeExcelFilter();
-        showToast('Location filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'customerContact') {
-        if (!currentCustomerContactFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeCustomerContactFilters[currentCustomerContactFilterCol];
-        } else {
-          activeCustomerContactFilters[currentCustomerContactFilterCol] = new Set(checkedItems);
-        }
-        renderCustomerContactTable();
-        closeExcelFilter();
-        showToast('Contact filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'bulkUpload') {
-        if (!currentBulkUploadFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeBulkUploadFilters[currentBulkUploadFilterCol];
-        } else {
-          activeBulkUploadFilters[currentBulkUploadFilterCol] = new Set(checkedItems);
-        }
-        renderBulkUploadTable();
-        closeExcelFilter();
-        showToast('Bulk upload filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'siteContact') {
-        if (!currentSiteContactFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeSiteContactFilters[currentSiteContactFilterCol];
-        } else {
-          activeSiteContactFilters[currentSiteContactFilterCol] = new Set(checkedItems);
-        }
-        renderSiteContactTable();
-        closeExcelFilter();
-        showToast('Site contact filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'projectDoc') {
-        if (!currentProjectDocFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeProjectDocFilters[currentProjectDocFilterCol];
-        } else {
-          activeProjectDocFilters[currentProjectDocFilterCol] = new Set(checkedItems);
-        }
-        if (typeof renderProjectDocTable === 'function') renderProjectDocTable();
-        closeExcelFilter();
-        showToast('Description filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'projectTransport') {
-        if (!currentProjectTransportFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeProjectTransportFilters[currentProjectTransportFilterCol];
-        } else {
-          activeProjectTransportFilters[currentProjectTransportFilterCol] = new Set(checkedItems);
-        }
-        if (typeof renderProjectTransportTable === 'function') renderProjectTransportTable();
-        closeExcelFilter();
-        showToast('Transport filter applied');
-        return;
-      }
-
-      if (dropdown.dataset.filterContext === 'projectActivity') {
-        if (!currentProjectActivityFilterCol) return;
-        const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-          .map(chk => chk.value);
-        const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-          .map(chk => chk.value);
-        if (checkedItems.length === allItems.length) {
-          delete activeProjectActivityFilters[currentProjectActivityFilterCol];
-        } else {
-          activeProjectActivityFilters[currentProjectActivityFilterCol] = new Set(checkedItems);
-        }
-        if (typeof renderProjectActivityTable === 'function') renderProjectActivityTable();
-        closeExcelFilter();
-        showToast('Activity filter applied');
-        return;
-      }
-
-      if (!currentFilterColumn) return;
-
-      const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
-        .map(chk => chk.value);
-
-      const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
-        .map(chk => chk.value);
-
-      if (checkedItems.length === allItems.length) {
-        delete activeColumnFilters[currentFilterColumn];
-      } else {
-        activeColumnFilters[currentFilterColumn] = new Set(checkedItems);
-      }
-
-      updateFilterIconBadge(currentFilterColumn);
-      applyFiltersAndRender();
-      closeExcelFilter();
-      showToast(`Filter applied on ${getColumnDisplayName(currentFilterColumn)}`);
-    });
-  }
-}
-
-function rebindFilterButtons() {
-  document.querySelectorAll('.filter-funnel-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const colKey = btn.getAttribute('data-filter-col');
-      openExcelFilter(colKey, btn);
-    });
-  });
-}
+// 7. EXCEL-STYLE FILTER ENGINE (Modularized into frontend/assets/js/components/excel-filters.js)
+var initExcelFilterSystem = window.initExcelFilterSystem;
+var rebindFilterButtons = window.rebindFilterButtons;
 
 // Global Company Bank Dataset & Filter State (Loaded dynamically from PostgreSQL employee_bank_details or company_bank_accounts)
 companyBankData = [];
@@ -29222,208 +26014,12 @@ function renderOtherServiceReportTable() {
   `).join('');
 }
 
-function openExcelFilter(colKey, triggerBtn) {
-  currentFilterColumn = colKey;
-  const dropdown = document.getElementById('excelFilterDropdown');
-  const searchInput = document.getElementById('filterSearchInput');
-  const chkList = document.getElementById('filterCheckboxList');
-  const chkSelectAll = document.getElementById('chkFilterSelectAll');
-
-  if (!dropdown) return;
-
-  if (searchInput) searchInput.value = '';
-
-  const uniqueValues = Array.from(new Set(currentDataset.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-  const activeSet = activeColumnFilters[colKey];
-
-  chkList.innerHTML = uniqueValues.map(val => {
-    const isChecked = activeSet ? activeSet.has(val) : true;
-    const displayLabel = val === '' ? '(Blanks)' : val;
-    return `
-      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
-        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
-        <span class="chk-label">${displayLabel}</span>
-      </label>
-    `;
-  }).join('');
-
-  if (chkSelectAll) {
-    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
-  }
-
-  const rect = triggerBtn.getBoundingClientRect();
-  const dropdownWidth = 280;
-  let leftPos = rect.left;
-  if (leftPos + dropdownWidth > window.innerWidth - 16) {
-    leftPos = window.innerWidth - dropdownWidth - 16;
-  }
-
-  dropdown.style.display = 'flex';
-  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
-  dropdown.style.left = `${Math.max(12, leftPos)}px`;
-
-  if (searchInput) searchInput.focus();
-}
-
-function closeExcelFilter() {
-  const dropdown = document.getElementById('excelFilterDropdown');
-  if (dropdown) dropdown.style.display = 'none';
-  currentFilterColumn = null;
-}
-
-function getColumnDisplayName(colKey) {
-  const map = {
-    businessType: "Business Type",
-    customerId: "Customer ID",
-    customerName: "Customer Name",
-    gstNumber: "GST Number",
-    gstType: "GST Type",
-    invoiceType: "Invoice Type",
-    name: "Name",
-    employeeType: "Employee Type",
-    trainingType: "Training Type",
-    status: "Status",
-    infraCategory: "Infra Category",
-    infraDescription: "Infra Description",
-    make: "Make",
-    commissioning: "Commissioning",
-    materialHead: "Material Head",
-    materialCategory: "Material Category",
-    materialDescription: "Material Description",
-    expenseHead: "Expense Head",
-    expenseCategory: "Expense Category",
-    expenseDescription: "Expense Description",
-    infraCode: "Infra Code",
-    type: "Type",
-    ucf: "UCF",
-    tat: "TAT",
-    submitDate: "Submit Date",
-    poNo: "PO No",
-    projectId: "Project ID",
-    projectType: "Project Type",
-    subProjectType: "Sub - Project Type",
-    indusPm: "Indus PM",
-    indusScm: "Indus SCM",
-    pm: "PM",
-    mis: "MIS",
-    iMap: "I - Map",
-    itemCode: "Item Code",
-    productName: "Product Name",
-    productType: "Product Type",
-    hsnSacType: "HSN / SAC Type",
-    hsnSacCode: "HSN / SAC Code",
-    activeRate: "Active Rate",
-    budgetPercent: "Budget %",
-    budgetAmount: "Budget Amount",
-    vendorType: "Vendor Type",
-    vendorId: "Vendor ID",
-    vendorName: "Vendor Name",
-    panNumber: "PAN Number",
-    circle: "Circle",
-    siteId: "Site ID",
-    whId: "WH ID",
-    siteName: "Site Name",
-    district: "District",
-    town: "Town",
-    latitude: "Lattitude",
-    longitude: "Longtitude",
-    transportZone: "Transport Zone",
-    employeeId: "Employee ID",
-    employeeName: "Employee Name",
-    designation: "Designation",
-    contactNumber: "Contact Number",
-    email: "E-Mail",
-    productHead: "Product Head",
-    productName: "Product Name",
-    productCategory: "Product Category",
-    productCode: "Product Code",
-    hsnCode: "HSN Code",
-    productDescription: "Product Description",
-    gst: "GST",
-    gstRate: "GST Rate",
-    price: "Price",
-    expenseName: "Expense Name",
-    expenseCategory: "Expense Category",
-    expenseHead: "Expense Head",
-    expenseCode: "Expense Code",
-    sacCode: "SAC Code",
-    expenseDescription: "Expense Description",
-    tdsRate: "TDS Rate",
-    uom: "Uom",
-    submittedBy: "Submitted BY",
-    submitBy: "Submit By",
-    submissionDate: "Submission Date",
-    approvedBy: "Approved By",
-    transferTo: "Transfer To",
-    ageing: "Ageing",
-    customer: "Customer",
-    projectId: "Project ID",
-    poNo: "PO No",
-    poAgeing: "PO Ageing",
-    poStatus: "PO Status",
-    subProjectType: "Sub-Project Type",
-    projectStatus: "Project Status",
-    task: "Task",
-    pendingWith: "Pending With",
-    supportRequired: "Support Required",
-    pendingWith2: "Pending With",
-    orderId: "Order ID",
-    orderDate: "Order Date",
-    orderAmount: "Order Amount",
-    invoiceNumber: "Invoice Number",
-    invoiceDate: "Invoice Date",
-    invoiceAmount: "Invoice Amount",
-    paymentStatus: "Payment Status",
-    itemDescription: "Item Description",
-    expenseType: "Expense Type",
-    itemName: "Item Name",
-    po: "PO",
-    budget: "Budget",
-    used: "Used",
-    available: "Available",
-    boqName: "BOQ Name",
-    mir: "MIR",
-    min: "MIN",
-    mrr: "MRR",
-    mrn: "MRN",
-    net: "Net",
-    qty: "Qty",
-    rate: "Rate",
-    amount: "Amount",
-    docType: "Doc Type",
-    boqNo: "BOQ No",
-    boqDate: "BOQ Date",
-    category: "Category",
-    qy: "Qy"
-  };
-  return map[colKey] || colKey;
-}
-
-function updateFilterIconBadge(colKey) {
-  const btn = document.querySelector(`.filter-funnel-btn[data-filter-col="${colKey}"]`);
-  if (!btn) return;
-  if (activeColumnFilters[colKey]) {
-    btn.classList.add('has-active-filter');
-  } else {
-    btn.classList.remove('has-active-filter');
-  }
-}
-
-function sortDataset(colKey, direction) {
-  currentDataset.sort((a, b) => {
-    let valA = a[colKey] !== undefined ? a[colKey] : '';
-    let valB = b[colKey] !== undefined ? b[colKey] : '';
-
-    if (typeof valA === 'number' && typeof valB === 'number') {
-      return direction === 'asc' ? valA - valB : valB - valA;
-    }
-    valA = String(valA).toLowerCase();
-    valB = String(valB).toLowerCase();
-    return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-  });
-}
+// Excel Filter UI & Column Sort Engine (Modularized into frontend/assets/js/components/excel-filters.js)
+var openExcelFilter = window.openExcelFilter;
+var closeExcelFilter = window.closeExcelFilter;
+var getColumnDisplayName = window.getColumnDisplayName;
+var updateFilterIconBadge = window.updateFilterIconBadge;
+var sortDataset = window.sortDataset;
 
 // ==========================================================================
 // 8. ROW ACTIONS & CSV EXPORT
@@ -29433,7 +26029,7 @@ window.selectRow = function(rowId) {
     if (row.id === rowId) {
       return { ...row, selected: !row.selected };
     }
-    return { ...row, selected: false };
+    return row;
   });
   applyFiltersAndRender();
   updateDeleteButtonVisibility();
@@ -30366,585 +26962,8 @@ window.openPurchaseBankTab = function() {
   overlay.style.display = 'flex';
 };
 
-let currentViewedEmpId = null;
-let isEmployeeFormEditing = false;
-
-window.handleEmpToggleDisappear = function(toggleId, toggleWrapId, wrapInputId) {
-  const toggle = document.getElementById(toggleId);
-  const toggleWrap = document.getElementById(toggleWrapId);
-  const wrapInput = document.getElementById(wrapInputId);
-  if (toggle && toggle.checked) {
-    if (toggleWrap) toggleWrap.style.setProperty('display', 'none', 'important');
-    if (wrapInput) {
-      wrapInput.style.setProperty('display', 'flex', 'important');
-      const textInp = wrapInput.querySelector('input[type="text"]');
-      if (textInp) textInp.focus();
-    }
-  }
-};
-
-window.handleEmpToggleReappear = function(toggleId, toggleWrapId, wrapInputId) {
-  const toggle = document.getElementById(toggleId);
-  const toggleWrap = document.getElementById(toggleWrapId);
-  const wrapInput = document.getElementById(wrapInputId);
-  if (toggle) toggle.checked = false;
-  if (wrapInput) {
-    wrapInput.style.setProperty('display', 'none', 'important');
-    const textInp = wrapInput.querySelector('input[type="text"]');
-    if (textInp) textInp.value = '';
-  }
-  if (toggleWrap) toggleWrap.style.setProperty('display', 'flex', 'important');
-};
-
-window.triggerEmpPdf = function(fileInputId) {
-  const fileInput = document.getElementById(fileInputId);
-  if (fileInput) fileInput.click();
-};
-
-window.pendingEmployeePdfs = window.pendingEmployeePdfs || {};
-
-window.handleEmpPdfUpload = function(fileInput, textInputId) {
-  if (fileInput && fileInput.files && fileInput.files[0]) {
-    const file = fileInput.files[0];
-    const txt = document.getElementById(textInputId);
-    if (txt) {
-      txt.value = file.name;
-    }
-    window.pendingEmployeePdfs = window.pendingEmployeePdfs || {};
-    const map = {
-      'inpEmpQualification': 'qualification',
-      'inpEmpPanNumber': 'pan',
-      'inpEmpAadharNumber': 'aadhar',
-      'inpEmpDrivingLicense': 'driving_license',
-      'inpEmpPassportNumber': 'passport',
-      'inpEmpEpfUan': 'epf',
-      'inpEmpEsiCode': 'esi'
-    };
-    const docType = map[textInputId] || textInputId;
-    window.pendingEmployeePdfs[docType] = file;
-    showToast('Document selected: ' + file.name);
-  }
-};
-
-window.handleEmpPhotoUpload = function(fileInput, textInputId) {
-  if (fileInput && fileInput.files && fileInput.files[0]) {
-    const file = fileInput.files[0];
-    const txt = document.getElementById(textInputId);
-    if (txt) {
-      txt.value = file.name;
-    }
-    window.pendingEmployeePdfs = window.pendingEmployeePdfs || {};
-    window.pendingEmployeePdfs['photo'] = file;
-    showToast('Photo selected: ' + file.name);
-  }
-};
-
-window.updateEmployeeFormLayout = function(mode, empType) {
-  const empCard = document.getElementById('addEmployeeCard');
-  if (!empCard) return;
-
-  empCard.classList.remove('emp-contract-add', 'emp-contract-view', 'emp-contract-edit', 'emp-onroll-edit');
-
-  const isContract = (empType === 'Contract');
-
-  if (isContract) {
-    if (mode === 'add') {
-      empCard.classList.add('emp-contract-add');
-    } else if (mode === 'view') {
-      empCard.classList.add('emp-contract-view');
-    } else if (mode === 'edit') {
-      empCard.classList.add('emp-contract-edit');
-    }
-  } else {
-    // On-Roll: only apply restricted layout and compact width in edit mode
-    if (mode === 'edit') {
-      empCard.classList.add('emp-onroll-edit');
-    }
-  }
-};
-
-function setEmployeeFormReadOnly(isReadOnly) {
-  const form = document.getElementById('frmAddEmployee');
-  const card = document.getElementById('addEmployeeCard');
-  if (!form) return;
-
-  if (isReadOnly) {
-    if (card) card.classList.add('is-view-mode');
-    form.classList.add('is-view-mode');
-  } else {
-    if (card) card.classList.remove('is-view-mode');
-    form.classList.remove('is-view-mode');
-  }
-
-  const inputs = form.querySelectorAll('input, select');
-  inputs.forEach(input => {
-    if (input.type === 'file') return;
-    if (input.type === 'checkbox') {
-      if (isReadOnly) {
-        input.disabled = true;
-        const parentSwitch = input.closest('.toggle-slide-switch') || input.closest('label');
-        if (parentSwitch) {
-          parentSwitch.style.pointerEvents = 'none';
-          parentSwitch.style.opacity = '0.75';
-          parentSwitch.style.cursor = 'not-allowed';
-        }
-      } else {
-        input.disabled = false;
-        const parentSwitch = input.closest('.toggle-slide-switch') || input.closest('label');
-        if (parentSwitch) {
-          parentSwitch.style.pointerEvents = 'auto';
-          parentSwitch.style.opacity = '1';
-          parentSwitch.style.cursor = 'pointer';
-        }
-      }
-      return;
-    }
-
-    if (input.tagName === 'SELECT') {
-      if (isReadOnly) {
-        input.setAttribute('disabled', 'true');
-        input.style.backgroundColor = '#f8fafc';
-      } else {
-        input.removeAttribute('disabled');
-        input.style.backgroundColor = '#ffffff';
-      }
-    } else {
-      if (isReadOnly) {
-        input.setAttribute('readonly', 'true');
-        input.style.backgroundColor = '#f8fafc';
-      } else {
-        input.removeAttribute('readonly');
-        input.style.backgroundColor = '#ffffff';
-      }
-    }
-  });
-
-  // Explicitly ensure Status and Geo Attendance toggles and containers are properly enabled/disabled
-  const statusToggle = document.getElementById('inpEmpStatusToggle');
-  if (statusToggle) {
-    statusToggle.disabled = isReadOnly;
-    const parent = statusToggle.closest('.toggle-slide-switch') || statusToggle.parentElement;
-    if (parent) {
-      parent.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parent.style.opacity = isReadOnly ? '0.75' : '1';
-      parent.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
-    }
-    const wrap = document.getElementById('toggleWrapEmpStatus');
-    if (wrap) {
-      wrap.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-    }
-  }
-
-  const geoToggle = document.getElementById('inpEmpGeoAttendanceToggle');
-  if (geoToggle) {
-    geoToggle.disabled = isReadOnly;
-    const parent = geoToggle.closest('.toggle-slide-switch') || geoToggle.parentElement;
-    if (parent) {
-      parent.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parent.style.opacity = isReadOnly ? '0.75' : '1';
-      parent.style.cursor = isReadOnly ? 'not-allowed' : 'pointer';
-    }
-    const wrap = document.getElementById('toggleWrapEmpGeoAttendance');
-    if (wrap) {
-      wrap.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-    }
-  }
-
-  const reverts = form.querySelectorAll('.btn-toggle-revert');
-  reverts.forEach(b => {
-    if (isReadOnly) {
-      b.style.setProperty('display', 'none', 'important');
-    } else {
-      const wrap = b.closest('.slide-dynamic-wrap');
-      if (wrap && wrap.style.display !== 'none') {
-        b.style.setProperty('display', 'flex', 'important');
-      }
-    }
-  });
-
-  const badges = form.querySelectorAll('.input-pdf-badge');
-  badges.forEach(b => {
-    b.style.pointerEvents = 'auto';
-    b.style.opacity = '1';
-    b.style.cursor = 'pointer';
-  });
-}
-
-window.handleEmpClick = function(empId, empName) {
-  const dataset = masterEmployeeData;
-  let emp = dataset.find(e => String(e.id) === String(empId) || String(e.employee_id) === String(empId) || e.employeeName === empName || e.employeeId === empId);
-
-  if (!emp) {
-    emp = {
-      id: empId || 'emp-1',
-      employeeId: "",
-      employeeName: empName || "",
-      empType: "On-Roll",
-      address: "",
-      contactNumber: "",
-      email: "",
-      dob: "",
-      bloodGroup: "A+",
-      maritalStatus: "Single",
-      qualification: "",
-      pan: "",
-      aadhar: "",
-      drivingLicense: "",
-      passportNumber: "",
-      epfUan: "",
-      esiCode: "",
-      prevExp: "",
-      currentExp: "",
-      totalExp: "",
-      doj: "",
-      designation: "",
-      status: "Active"
-    };
-  }
-
-  currentViewedEmpId = emp.employee_id || emp.id;
-  isEmployeeFormEditing = false;
-
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'flex';
-
-  const cards = document.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(c => c.style.display = 'none');
-
-  const card = document.getElementById('addEmployeeCard');
-  if (card) card.style.display = 'block';
-
-  // Update Header Title to Employee Name
-  const lblTitle = document.getElementById('lblEmployeeCardTitle');
-  if (lblTitle) lblTitle.innerText = emp.employeeName || emp.employee_name || 'View Employee';
-
-  // Hide Bank, Asset, Salary action icons in View Employee tab
-  const btnEmpBank = document.getElementById('btnEmpBankDetails');
-  const btnEmpAsset = document.getElementById('btnEmpAssetDetails');
-  const btnEmpSalary = document.getElementById('btnEmpSalaryDetails');
-  if (btnEmpBank) btnEmpBank.style.display = 'none';
-  if (btnEmpAsset) btnEmpAsset.style.display = 'none';
-  if (btnEmpSalary) btnEmpSalary.style.display = 'none';
-
-  // Show Edit button with Blue Pencil icon
-  const btnEditToggle = document.getElementById('btnEmpCardEditToggle');
-  const imgEditIcon = document.getElementById('imgEmpCardEditIcon');
-  if (btnEditToggle) btnEditToggle.style.display = 'flex';
-  if (imgEditIcon) {
-    imgEditIcon.src = 'icons/Edit.svg';
-    imgEditIcon.title = 'Edit Info';
-  }
-
-  // Hide bottom save button container in View mode
-  const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
-  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
-
-  // Populate form regular fields
-  if (document.getElementById('inpEmpType')) document.getElementById('inpEmpType').value = emp.empType || emp.employeeType || emp.employee_type || 'On-Roll';
-  if (document.getElementById('inpEmpName')) document.getElementById('inpEmpName').value = emp.employeeName || emp.employee_name || '';
-  if (document.getElementById('inpEmpId')) document.getElementById('inpEmpId').value = emp.employeeId || emp.employee_code || '';
-  if (document.getElementById('inpEmpAddress')) document.getElementById('inpEmpAddress').value = emp.address || '';
-  if (document.getElementById('inpEmpMobile')) document.getElementById('inpEmpMobile').value = emp.contactNumber || emp.mobile_number || '';
-  if (document.getElementById('inpEmpEmail')) document.getElementById('inpEmpEmail').value = emp.email || '';
-  if (document.getElementById('inpEmpDob')) document.getElementById('inpEmpDob').value = emp.dob || '';
-  if (document.getElementById('inpEmpDoj')) document.getElementById('inpEmpDoj').value = emp.doj || '';
-  if (document.getElementById('inpEmpBloodGroup')) document.getElementById('inpEmpBloodGroup').value = emp.bloodGroup || emp.blood_group || 'A+';
-  if (document.getElementById('inpEmpMaritalStatus')) document.getElementById('inpEmpMaritalStatus').value = emp.maritalStatus || emp.marital_status || 'Single';
-  if (document.getElementById('inpEmpQualification')) document.getElementById('inpEmpQualification').value = emp.qualification || '';
-  if (document.getElementById('inpEmpPrevExp')) document.getElementById('inpEmpPrevExp').value = emp.prevExp || '';
-  if (document.getElementById('inpEmpCurrExp')) document.getElementById('inpEmpCurrExp').value = emp.currentExp || '';
-  if (document.getElementById('inpEmpTotalExp')) document.getElementById('inpEmpTotalExp').value = emp.totalExp || '';
-  if (document.getElementById('inpEmpDesignation')) document.getElementById('inpEmpDesignation').value = emp.designation || '';
-
-  // Populate toggle fields (PAN, Aadhar, DL, Passport, EPF, ESI)
-  const toggleFields = [
-    { key: 'Pan', val: emp.pan || emp.pan_number, inpId: 'inpEmpPanNumber' },
-    { key: 'Aadhar', val: emp.aadhar || emp.aadhaar_number, inpId: 'inpEmpAadharNumber' },
-    { key: 'Dl', val: emp.drivingLicense || emp.dl_number, inpId: 'inpEmpDrivingLicense' },
-    { key: 'Passport', val: emp.passportNumber || emp.passport_number, inpId: 'inpEmpPassportNumber' },
-    { key: 'Epf', val: emp.epfUan || emp.epf_uan, inpId: 'inpEmpEpfUan' },
-    { key: 'Esi', val: emp.esiId || emp.esiCode || emp.esi_code, inpId: 'inpEmpEsiCode' }
-  ];
-
-  toggleFields.forEach(tf => {
-    const toggle = document.getElementById(`inpEmp${tf.key}Toggle`);
-    const wrap = document.getElementById(`wrapEmp${tf.key}`);
-    const toggleWrap = document.getElementById(`toggleWrapEmp${tf.key}`);
-    const textInp = document.getElementById(tf.inpId);
-
-    if (tf.val && String(tf.val).trim() !== '') {
-      if (toggle) toggle.checked = true;
-      if (toggleWrap) toggleWrap.style.setProperty('display', 'none', 'important');
-      if (wrap) wrap.style.setProperty('display', 'flex', 'important');
-      if (textInp) textInp.value = tf.val;
-    } else {
-      if (toggle) toggle.checked = false;
-      if (wrap) wrap.style.setProperty('display', 'none', 'important');
-      if (toggleWrap) toggleWrap.style.setProperty('display', 'flex', 'important');
-      if (textInp) textInp.value = '';
-    }
-  });
-
-  const statusToggleEl = document.getElementById('inpEmpStatusToggle');
-  const rawStatus = emp.status !== undefined ? emp.status : 'Active';
-  const isStatusActive = (rawStatus === true || rawStatus === 'Active' || (typeof rawStatus === 'string' && rawStatus.trim().toLowerCase() === 'active'));
-  if (statusToggleEl) {
-    statusToggleEl.checked = isStatusActive;
-    if (isStatusActive) {
-      statusToggleEl.setAttribute('checked', 'checked');
-    } else {
-      statusToggleEl.removeAttribute('checked');
-    }
-  }
-
-  const geoToggleEl = document.getElementById('inpEmpGeoAttendanceToggle');
-  const rawGeo = emp.geo_attendance !== undefined ? emp.geo_attendance : emp.geoAttendance;
-  const isGeoActive = Boolean(rawGeo === true || rawGeo === 'true' || rawGeo === 1 || rawGeo === '1');
-  if (geoToggleEl) {
-    geoToggleEl.checked = isGeoActive;
-    if (isGeoActive) {
-      geoToggleEl.setAttribute('checked', 'checked');
-    } else {
-      geoToggleEl.removeAttribute('checked');
-    }
-  }
-
-  setEmployeeFormReadOnly(true);
-  const isContract = (emp.empType === 'Contract' || emp.employeeType === 'Contract' || emp.employee_type === 'Contract');
-  if (typeof updateEmployeeFormLayout === 'function') {
-    updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
-  }
-  showToast(`Viewing details for employee: ${emp.employeeName || emp.employee_name}`);
-};
-
-window.saveEmployeeEdits = async function() {
-  const currentEmp = masterEmployeeData.find(e => String(e.id) === String(currentViewedEmpId) || String(e.employee_id) === String(currentViewedEmpId) || String(e.employeeId) === String(currentViewedEmpId));
-  const dbEmpId = (currentEmp && (currentEmp.employee_id || currentEmp.id)) || currentViewedEmpId;
-  const isContract = currentEmp && (currentEmp.empType === 'Contract' || currentEmp.employeeType === 'Contract' || currentEmp.employee_type === 'Contract');
-
-  const empType = document.getElementById('inpEmpType')?.value || (currentEmp ? currentEmp.employeeType : 'On-Roll');
-  const employeeName = document.getElementById('inpEmpName')?.value?.trim() || (currentEmp ? currentEmp.employeeName : '');
-  const employeeId = document.getElementById('inpEmpId')?.value?.trim() || (currentEmp ? currentEmp.employeeId : '');
-  const address = document.getElementById('inpEmpAddress')?.value?.trim() || '';
-  const contactNumber = document.getElementById('inpEmpMobile')?.value?.trim() || '';
-  const email = document.getElementById('inpEmpEmail')?.value?.trim() || '';
-  const dob = document.getElementById('inpEmpDob')?.value || '';
-  const doj = document.getElementById('inpEmpDoj')?.value || '';
-  const bloodGroup = document.getElementById('inpEmpBloodGroup')?.value || 'A+';
-  const maritalStatus = document.getElementById('inpEmpMaritalStatus')?.value || 'Single';
-  const qualification = document.getElementById('inpEmpQualification')?.value?.trim() || '';
-  const designation = document.getElementById('inpEmpDesignation')?.value?.trim() || '';
-
-  const panToggle = document.getElementById('inpEmpPanToggle');
-  const pan = (panToggle && panToggle.checked) ? (document.getElementById('inpEmpPanNumber')?.value?.trim() || '') : (document.getElementById('inpEmpPanNumber')?.value?.trim() || '');
-
-  const aadharToggle = document.getElementById('inpEmpAadharToggle');
-  const aadhar = (aadharToggle && aadharToggle.checked) ? (document.getElementById('inpEmpAadharNumber')?.value?.trim() || '') : (document.getElementById('inpEmpAadharNumber')?.value?.trim() || '');
-
-  const dlToggle = document.getElementById('inpEmpDlToggle');
-  const drivingLicense = (dlToggle && dlToggle.checked) ? (document.getElementById('inpEmpDrivingLicense')?.value?.trim() || '') : (document.getElementById('inpEmpDrivingLicense')?.value?.trim() || '');
-
-  const passportToggle = document.getElementById('inpEmpPassportToggle');
-  const passportNumber = (passportToggle && passportToggle.checked) ? (document.getElementById('inpEmpPassportNumber')?.value?.trim() || '') : (document.getElementById('inpEmpPassportNumber')?.value?.trim() || '');
-
-  const epfToggle = document.getElementById('inpEmpEpfToggle');
-  const epfUan = (epfToggle && epfToggle.checked) ? (document.getElementById('inpEmpEpfUan')?.value?.trim() || '') : (document.getElementById('inpEmpEpfUan')?.value?.trim() || '');
-
-  const esiToggle = document.getElementById('inpEmpEsiToggle');
-  const esiId = (esiToggle && esiToggle.checked) ? (document.getElementById('inpEmpEsiCode')?.value?.trim() || '') : (document.getElementById('inpEmpEsiCode')?.value?.trim() || '');
-
-  const prevExp = document.getElementById('inpEmpPrevExp')?.value?.trim() || '';
-  const currentExp = document.getElementById('inpEmpCurrExp')?.value?.trim() || '';
-  const totalExp = document.getElementById('inpEmpTotalExp')?.value?.trim() || '';
-
-  const geoToggle = document.getElementById('inpEmpGeoAttendanceToggle');
-  const geoAttendance = Boolean(geoToggle && geoToggle.checked);
-
-  const statusToggle = document.getElementById('inpEmpStatusToggle');
-  const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
-
-  const payload = {
-    employee_type: empType,
-    empType: empType,
-    employee_name: employeeName,
-    employeeName: employeeName,
-    employee_code: employeeId,
-    employeeId: employeeId,
-    address,
-    mobile_number: contactNumber,
-    contactNumber,
-    email,
-    dob,
-    doj,
-    blood_group: bloodGroup,
-    bloodGroup,
-    marital_status: maritalStatus,
-    maritalStatus,
-    qualification,
-    designation,
-    pan_number: pan,
-    pan,
-    aadhaar_number: aadhar,
-    aadhar,
-    dl_number: drivingLicense,
-    drivingLicense,
-    passport_number: passportNumber,
-    passportNumber,
-    epf_uan: epfUan,
-    epfUan,
-    esi_code: esiId,
-    esiId,
-    esiCode: esiId,
-    previous_experience: prevExp,
-    prevExp,
-    current_experience: currentExp,
-    currentExp,
-    total_experience: totalExp,
-    totalExp,
-    geo_attendance: geoAttendance,
-    geoAttendance,
-    status
-  };
-
-  let numericEmpId = parseInt(dbEmpId, 10);
-  if (isNaN(numericEmpId) && currentEmp && currentEmp.employee_id) {
-    numericEmpId = parseInt(currentEmp.employee_id, 10);
-  }
-
-  if (typeof NexusApi !== 'undefined' && NexusApi.employees && !isNaN(numericEmpId)) {
-    try {
-      const updatedRecord = await NexusApi.employees.update(numericEmpId, payload);
-
-      if (window.pendingEmployeePdfs && Object.keys(window.pendingEmployeePdfs).length > 0) {
-        for (const [docType, file] of Object.entries(window.pendingEmployeePdfs)) {
-          try {
-            await NexusApi.employees.uploadDocument(numericEmpId, docType, file);
-          } catch (docErr) {
-            console.error(`Failed to upload ${docType} PDF:`, docErr);
-          }
-        }
-        window.pendingEmployeePdfs = {};
-      }
-
-      const targetIdx = masterEmployeeData.findIndex(e => String(e.id) === String(currentViewedEmpId) || String(e.employee_id) === String(currentViewedEmpId) || String(e.employeeId) === String(currentViewedEmpId) || String(e.employee_id) === String(numericEmpId));
-
-      const mappedRecord = {
-        ...updatedRecord,
-        id: updatedRecord.employee_id || updatedRecord.id || numericEmpId,
-        employee_id: updatedRecord.employee_id || updatedRecord.id || numericEmpId,
-        employeeName: updatedRecord.employee_name || updatedRecord.employeeName || employeeName,
-        employee_name: updatedRecord.employee_name || updatedRecord.employeeName || employeeName,
-        employeeId: updatedRecord.employee_code || updatedRecord.employeeId || employeeId,
-        employee_code: updatedRecord.employee_code || updatedRecord.employeeId || employeeId,
-        employeeType: updatedRecord.employee_type || updatedRecord.empType || empType,
-        empType: updatedRecord.employee_type || updatedRecord.empType || empType,
-        designation: updatedRecord.designation !== undefined ? updatedRecord.designation : designation,
-        address: updatedRecord.address !== undefined ? updatedRecord.address : address,
-        contactNumber: updatedRecord.mobile_number || updatedRecord.contactNumber || contactNumber,
-        mobile_number: updatedRecord.mobile_number || updatedRecord.contactNumber || contactNumber,
-        email: updatedRecord.email !== undefined ? updatedRecord.email : email,
-        dob: updatedRecord.dob !== undefined ? updatedRecord.dob : dob,
-        doj: updatedRecord.doj !== undefined ? updatedRecord.doj : doj,
-        bloodGroup: updatedRecord.blood_group || updatedRecord.bloodGroup || bloodGroup,
-        maritalStatus: updatedRecord.marital_status || updatedRecord.maritalStatus || maritalStatus,
-        qualification: updatedRecord.qualification !== undefined ? updatedRecord.qualification : qualification,
-        pan: updatedRecord.pan_number || updatedRecord.pan || pan,
-        aadhar: updatedRecord.aadhaar_number || updatedRecord.aadhar || aadhar,
-        drivingLicense: updatedRecord.dl_number || updatedRecord.drivingLicense || drivingLicense,
-        passportNumber: updatedRecord.passport_number || updatedRecord.passportNumber || passportNumber,
-        epfUan: updatedRecord.epf_uan || updatedRecord.epfUan || epfUan,
-        esiCode: updatedRecord.esi_code || updatedRecord.esiId || esiId,
-        esiId: updatedRecord.esi_code || updatedRecord.esiId || esiId,
-        geo_attendance: updatedRecord.geo_attendance !== undefined ? updatedRecord.geo_attendance : geoAttendance,
-        geoAttendance: updatedRecord.geo_attendance !== undefined ? updatedRecord.geo_attendance : geoAttendance,
-        status: updatedRecord.status || status
-      };
-
-      if (targetIdx !== -1) {
-        masterEmployeeData[targetIdx] = mappedRecord;
-      } else {
-        masterEmployeeData.unshift(mappedRecord);
-      }
-
-      if (currentModule === 'master' && currentMasterSubpage === 'employee') {
-        currentDataset = [...masterEmployeeData];
-        applyFiltersAndRender();
-      }
-
-      isEmployeeFormEditing = false;
-      setEmployeeFormReadOnly(true);
-      if (typeof updateEmployeeFormLayout === 'function') {
-        updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
-      }
-
-      const lblTitle = document.getElementById('lblEmployeeCardTitle');
-      if (lblTitle) lblTitle.innerText = mappedRecord.employeeName;
-      const imgIcon = document.getElementById('imgEmpCardEditIcon');
-      if (imgIcon) {
-        imgIcon.src = 'icons/Edit.svg';
-        imgIcon.title = 'Edit Info';
-      }
-      const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
-      if (btnSaveWrap) btnSaveWrap.style.display = 'none';
-
-      currentViewedEmpId = mappedRecord.employee_id || mappedRecord.id;
-
-      // Synchronize form toggle elements in view mode
-      const stToggle = document.getElementById('inpEmpStatusToggle');
-      if (stToggle) {
-        const isStActive = (mappedRecord.status === true || mappedRecord.status === 'Active' || (typeof mappedRecord.status === 'string' && !mappedRecord.status.toLowerCase().includes('in') && !mappedRecord.status.toLowerCase().includes('false')));
-        stToggle.checked = isStActive;
-      }
-      const gToggle = document.getElementById('inpEmpGeoAttendanceToggle');
-      if (gToggle) {
-        const rawG = mappedRecord.geo_attendance !== undefined ? mappedRecord.geo_attendance : mappedRecord.geoAttendance;
-        gToggle.checked = Boolean(rawG === true || rawG === 'true' || rawG === 1 || rawG === '1');
-      }
-
-      if (typeof showSvgSuccessPopup === 'function') {
-        showSvgSuccessPopup('Employee details updated successfully!', 'Task Completed');
-      } else {
-        showToast('Employee details saved & updated successfully!');
-      }
-    } catch (err) {
-      console.error('Failed to update employee via API:', err);
-      const msg = err.detail || err.message || 'Failed to update employee.';
-      if (typeof showSvgErrorPopup === 'function') {
-        showSvgErrorPopup(msg, 'Error Message!');
-      } else {
-        showToast(`Error: ${msg}`);
-      }
-    }
-  } else {
-    // Fallback local update
-    if (currentEmp) {
-      Object.assign(currentEmp, payload);
-    }
-    if (currentModule === 'master' && currentMasterSubpage === 'employee') {
-      currentDataset = [...masterEmployeeData];
-      applyFiltersAndRender();
-    }
-    isEmployeeFormEditing = false;
-    setEmployeeFormReadOnly(true);
-    if (typeof updateEmployeeFormLayout === 'function') {
-      updateEmployeeFormLayout('view', isContract ? 'Contract' : 'On-Roll');
-    }
-    const lblTitle = document.getElementById('lblEmployeeCardTitle');
-    if (lblTitle) lblTitle.innerText = employeeName || 'View Employee';
-    const imgIcon = document.getElementById('imgEmpCardEditIcon');
-    if (imgIcon) {
-      imgIcon.src = 'icons/Edit.svg';
-      imgIcon.title = 'Edit Info';
-    }
-    const btnSaveWrap = document.querySelector('#frmAddEmployee .form-submit-inside-wrap');
-    if (btnSaveWrap) btnSaveWrap.style.display = 'none';
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('Employee details updated successfully!', 'Task Completed');
-    } else {
-      showToast('Employee details saved & updated successfully!');
-    }
-  }
-};
+// Employee viewing, editing, layout toggling, and document upload controllers
+// are modularized into frontend/assets/js/modules/master/master-employees.js
 
 // Wire btnEmpCardEditToggle
 document.addEventListener('DOMContentLoaded', () => {
@@ -31313,68 +27332,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- VENDOR BANK EDIT HANDLER ---
-function setVendorBankEditingState(isEditing) {
-  isVendorBankEditing = isEditing;
-  const form = document.getElementById('frmVendorBank');
-  if (!form) return;
-
-  const textInputs = form.querySelectorAll('input[type="text"]');
-  textInputs.forEach(inp => {
-    if (isEditing) {
-      inp.removeAttribute('readonly');
-      inp.style.backgroundColor = '#ffffff';
-      inp.style.cursor = 'text';
-    } else {
-      inp.setAttribute('readonly', 'true');
-      inp.style.backgroundColor = '#f8fafc';
-      inp.style.cursor = 'not-allowed';
-    }
-  });
-
-  const selects = form.querySelectorAll('select');
-  selects.forEach(sel => {
-    if (isEditing) {
-      sel.removeAttribute('disabled');
-      sel.style.backgroundColor = '#ffffff';
-      sel.style.cursor = 'pointer';
-    } else {
-      sel.setAttribute('disabled', 'true');
-      sel.style.backgroundColor = '#f8fafc';
-      sel.style.cursor = 'not-allowed';
-    }
-  });
-
-  const toggles = form.querySelectorAll('input[type="checkbox"]');
-  toggles.forEach(t => {
-    t.disabled = !isEditing;
-  });
-
-  const btnEditToggle = document.getElementById('btnVendorBankEditToggle');
-  const imgEditIcon = document.getElementById('imgVendorBankEditIcon');
-  if (btnEditToggle) {
-    if (currentViewedVendorId) {
-      btnEditToggle.style.display = 'flex';
-      if (imgEditIcon) {
-        if (isEditing) {
-          imgEditIcon.src = 'icons/Save.svg';
-          imgEditIcon.className = 'icon-green';
-          imgEditIcon.title = 'Save';
-        } else {
-          imgEditIcon.src = 'icons/Edit.svg';
-          imgEditIcon.className = 'icon-blue';
-          imgEditIcon.title = 'Edit Info';
-        }
-      }
-    } else {
-      btnEditToggle.style.display = 'none';
-    }
-  }
-
-  const btnSubmitWrap = form.querySelector('.form-submit-inside-wrap');
-  if (btnSubmitWrap) {
-    btnSubmitWrap.style.display = (!currentViewedVendorId) ? 'flex' : 'none';
-  }
-}
+// setVendorBankEditingState is modularized into frontend/assets/js/modules/master/master-vendors.js
+var setVendorBankEditingState = window.setVendorBankEditingState;
 
 // --- SITE, INFRA, PROJECT, GBPA, MATERIALS, EXPENSES VIEW HANDLERS ---
 let currentViewedSiteId = null;
@@ -33373,130 +29332,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-function setVendorFormReadOnly(isReadOnly, isEditModeOnly = false) {
-  const form = document.getElementById('frmAddVendor');
-  if (!form) return;
-
-  const isEdit = !isReadOnly && (isEditModeOnly || isVendorFormEditing);
-
-  // 1. Text Inputs
-  const inputs = form.querySelectorAll('input[type="text"], input[type="number"]');
-  inputs.forEach(inp => {
-    if (isReadOnly) {
-      inp.setAttribute('readonly', 'true');
-      inp.style.backgroundColor = '#f8fafc';
-    } else {
-      inp.removeAttribute('readonly');
-      inp.style.backgroundColor = '#ffffff';
-    }
-  });
-
-  // 2. Select Dropdowns
-  const selects = form.querySelectorAll('select');
-  selects.forEach(sel => {
-    if (isReadOnly) {
-      sel.setAttribute('disabled', 'true');
-      sel.style.backgroundColor = '#f8fafc';
-    } else {
-      sel.removeAttribute('disabled');
-      sel.style.backgroundColor = '#ffffff';
-    }
-  });
-
-  // 3. Slidebar Toggles
-  const toggles = form.querySelectorAll('input[type="checkbox"]');
-  toggles.forEach(t => {
-    const parentSwitch = t.closest('.toggle-slide-switch');
-    t.disabled = isReadOnly;
-    if (parentSwitch) {
-      parentSwitch.style.pointerEvents = isReadOnly ? 'none' : 'auto';
-      parentSwitch.style.opacity = isReadOnly ? '0.65' : '1';
-    }
-  });
-
-  // 4. Action / Upload Badges
-  const gstProcessBadge = document.querySelector('#rowVendorGstNumber .input-process-badge, #rowVendorGstNumber .input-pdf-badge');
-  const panPdfBadge = document.querySelector('#rowVendorPanNumber .input-pdf-badge');
-
-  if (isReadOnly) {
-    if (gstProcessBadge) {
-      gstProcessBadge.style.pointerEvents = 'none';
-      gstProcessBadge.style.opacity = '0.5';
-      gstProcessBadge.style.cursor = 'default';
-    }
-    if (panPdfBadge) {
-      panPdfBadge.style.pointerEvents = 'none';
-      panPdfBadge.style.opacity = '0.5';
-      panPdfBadge.style.cursor = 'default';
-    }
-  } else {
-    if (gstProcessBadge) {
-      gstProcessBadge.style.pointerEvents = 'auto';
-      gstProcessBadge.style.opacity = '1';
-      gstProcessBadge.style.cursor = 'pointer';
-    }
-    if (panPdfBadge) {
-      panPdfBadge.style.pointerEvents = 'auto';
-      panPdfBadge.style.opacity = '1';
-      panPdfBadge.style.cursor = 'pointer';
-    }
-  }
-}
-
-window.setVendorFormReadOnly = setVendorFormReadOnly;
-
-function updateVendorConditionalFields() {
-  const inpVendorType = document.getElementById('inpVendorType');
-  const inpServiceType = document.getElementById('inpServiceType');
-  const inpGstToggle = document.getElementById('inpVendorGstToggle');
-
-  const rowServiceType = document.getElementById('rowVendorServiceType');
-  const rowContractType = document.getElementById('rowVendorContractType');
-  const rowGstType = document.getElementById('rowVendorGstType');
-  const rowGstNumber = document.getElementById('rowVendorGstNumber');
-
-  const bType = (inpVendorType?.value || 'Supply').trim();
-  const sType = (inpServiceType?.value || 'Project').trim();
-  const isGstOn = inpGstToggle ? inpGstToggle.checked : false;
-
-  // 1. Business Type logic:
-  if (bType.toLowerCase() === 'service') {
-    if (rowServiceType) rowServiceType.style.setProperty('display', 'flex', 'important');
-    if (sType.toLowerCase() === 'project') {
-      if (rowContractType) rowContractType.style.setProperty('display', 'flex', 'important');
-    } else {
-      if (rowContractType) rowContractType.style.setProperty('display', 'none', 'important');
-    }
-  } else {
-    if (rowServiceType) rowServiceType.style.setProperty('display', 'none', 'important');
-    if (rowContractType) rowContractType.style.setProperty('display', 'none', 'important');
-  }
-
-  // 2. GST Slidebar logic:
-  if (isGstOn) {
-    if (rowGstType) rowGstType.style.setProperty('display', 'flex', 'important');
-    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'flex', 'important');
-  } else {
-    if (rowGstType) rowGstType.style.setProperty('display', 'none', 'important');
-    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'none', 'important');
-  }
-
-  // 3. TDS Deduction Slidebar logic:
-  const inpTdsToggle = document.getElementById('inpTdsDeductionToggle');
-  const rowTdsCode = document.getElementById('rowVendorTdsCode');
-  const rowTdsRate = document.getElementById('rowVendorTdsRate');
-  const isTdsOn = inpTdsToggle ? inpTdsToggle.checked : false;
-
-  if (isTdsOn) {
-    if (rowTdsCode) rowTdsCode.style.setProperty('display', 'flex', 'important');
-    if (rowTdsRate) rowTdsRate.style.setProperty('display', 'flex', 'important');
-  } else {
-    if (rowTdsCode) rowTdsCode.style.setProperty('display', 'none', 'important');
-    if (rowTdsRate) rowTdsRate.style.setProperty('display', 'none', 'important');
-  }
-}
-window.updateVendorConditionalFields = updateVendorConditionalFields;
-window.updateVendorBusinessTypeFields = updateVendorConditionalFields;
+// setVendorFormReadOnly & updateVendorConditionalFields are modularized into frontend/assets/js/modules/master/master-vendors.js
+var setVendorFormReadOnly = window.setVendorFormReadOnly;
+var updateVendorConditionalFields = window.updateVendorConditionalFields;
 
 function updateCustomerConditionalFields() {
   const inpBusinessType = document.getElementById('inpBusinessType');
@@ -33579,94 +29417,8 @@ document.getElementById('inpCustomerProjectName')?.addEventListener('input', upd
 document.getElementById('inpCustomerProjectName')?.addEventListener('change', updateCustomerConditionalFields);
 
 
-window.openViewVendorCard = async function(vendorId) {
-  let vend = masterVendorData.find(v => v.id === vendorId || v.vendorName === vendorId || v.vendorId === vendorId || String(v.vendor_id) === String(vendorId));
-  const numericId = parseInt(vendorId, 10);
-  if (!vend && !isNaN(numericId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
-    try {
-      vend = await NexusApi.vendors.getById(numericId);
-    } catch (err) {
-      console.warn('Could not fetch vendor by ID:', err);
-    }
-  }
-  if (!vend) return;
-
-  const actualVendorId = vend.vendor_id || vend.id;
-  currentViewedVendorId = actualVendorId;
-  isVendorFormEditing = false;
-  openSideForm();
-
-  const cards = document.querySelectorAll('.side-form-card');
-  cards.forEach(c => c.style.display = 'none');
-
-  const card = document.getElementById('addVendorCard');
-  if (card) card.style.display = 'block';
-
-  const lblTitle = document.getElementById('lblVendorCardTitle');
-  if (lblTitle) lblTitle.innerText = vend.vendor_name || vend.vendorName || 'View Vendor';
-
-  const btnEditToggle = document.getElementById('btnVendorCardEditToggle');
-  const imgEditIcon = document.getElementById('imgVendorCardEditIcon');
-  if (btnEditToggle) btnEditToggle.style.display = 'flex';
-  if (imgEditIcon) {
-    imgEditIcon.src = 'icons/Edit.svg';
-    imgEditIcon.className = 'icon-blue';
-    imgEditIcon.title = 'Edit Info';
-  }
-
-  const btnBank = document.getElementById('btnVendorCardBank');
-  const btnMessage = document.getElementById('btnVendorCardMessage');
-  const btnScope = document.getElementById('btnVendorCardScope');
-  if (btnBank) btnBank.style.display = 'inline-flex';
-  if (btnMessage) btnMessage.style.display = 'inline-flex';
-  if (btnScope) btnScope.style.display = 'inline-flex';
-
-  const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
-  if (btnSaveWrap) btnSaveWrap.style.display = 'none';
-
-  if (document.getElementById('inpVendorName')) document.getElementById('inpVendorName').value = vend.vendor_name || vend.vendorName || '';
-  if (document.getElementById('inpVendorEntityType')) document.getElementById('inpVendorEntityType').value = vend.entity_type || vend.entityType || 'Proprietorship';
-  if (document.getElementById('inpVendorType')) document.getElementById('inpVendorType').value = (vend.business_type || vend.businessType || vend.vendorType || 'Supply');
-  if (document.getElementById('inpServiceType')) document.getElementById('inpServiceType').value = vend.service_type || vend.serviceType || 'Project';
-  if (document.getElementById('inpVendorContractType')) document.getElementById('inpVendorContractType').value = vend.contract_type || vend.contractType || 'B2B';
-  if (document.getElementById('inpVendorAddress')) document.getElementById('inpVendorAddress').value = vend.address || '';
-  if (document.getElementById('inpVendorPanNumber')) document.getElementById('inpVendorPanNumber').value = vend.pan_number || vend.panNumber || '';
-
-  const chkGst = document.getElementById('inpVendorGstToggle');
-  if (chkGst) {
-    chkGst.checked = (vend.gst_number_available !== undefined) ? vend.gst_number_available : (vend.gstEnabled !== undefined ? vend.gstEnabled : (vend.gst_number && vend.gst_number !== 'NA' && vend.gst_number !== ''));
-  }
-
-  if (document.getElementById('inpVendorGstType')) document.getElementById('inpVendorGstType').value = vend.gst_type || vend.gstType || 'SGST';
-  if (document.getElementById('inpVendorGstNumber')) document.getElementById('inpVendorGstNumber').value = (vend.gst_number && vend.gst_number !== 'NA') ? vend.gst_number : ((vend.gstNumber && vend.gstNumber !== 'NA') ? vend.gstNumber : '');
-
-  const chkTds = document.getElementById('inpTdsDeductionToggle');
-  if (chkTds) chkTds.checked = (vend.tds_deduction === true || vend.tdsDeduction === true);
-
-  if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = vend.tds_code || vend.tdsCode || '';
-  if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = vend.tds_rate ? `${vend.tds_rate}%` : (vend.tdsRate || '1%');
-
-  const statusToggle = document.getElementById('inpVendorStatusToggle');
-  if (statusToggle) {
-    statusToggle.checked = (vend.status || '').toLowerCase() === 'active';
-  }
-
-  updateVendorConditionalFields();
-  setVendorFormReadOnly(true);
-
-  // Pre-load bank data and reset active filter sets for view
-  loadVendorBankDataToForm();
-  activeContactFilters = {};
-  activeSupplyScopeFilters = {};
-  activeServiceProjectScopeFilters = {};
-  activeServiceTransportScopeFilters = {};
-  activeServiceOthersScopeFilters = {};
-
-  // Fetch live pricing records from backend
-  await loadVendorPricingFromApi(actualVendorId);
-
-  showToast(`Viewing vendor details: ${vend.vendor_name || vend.vendorName}`);
-};
+// openViewVendorCard is modularized into frontend/assets/js/modules/master/master-vendors.js
+var openViewVendorCard = window.openViewVendorCard;
 
 let currentViewedProductId = null;
 let isProductFormEditing = false;
@@ -34484,27 +30236,48 @@ window.submitPoSupplier = function() {
   showToast('PO Details Submitted Successfully!');
 };
 
+window.deleteSelectedPmRows = function() {
+  const selectedCount = currentDataset.filter(r => r.selected).length;
+  if (selectedCount === 0) {
+    showToast('Please select rows to delete');
+    return;
+  }
+  currentDataset = currentDataset.filter(r => !r.selected);
+  if (typeof ytsData !== 'undefined') ytsData = ytsData.filter(r => !r.selected);
+  if (typeof wipData !== 'undefined') wipData = wipData.filter(r => !r.selected);
+  if (typeof holdData !== 'undefined') holdData = holdData.filter(r => !r.selected);
+  if (typeof nrData !== 'undefined') nrData = nrData.filter(r => !r.selected);
+  if (typeof pmWorklistData !== 'undefined') pmWorklistData = pmWorklistData.filter(r => !r.selected);
+  
+  if (typeof renderWorklistTable === 'function') renderWorklistTable();
+  if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+  showToast(`${selectedCount} row(s) deleted successfully`);
+};
+
+window.refreshPmWorklist = function() {
+  if (typeof renderWorklistTable === 'function') renderWorklistTable();
+  if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+  showToast('Worklist refreshed');
+};
+
+// --------------------------------------------------------------------------
+// DPR MODULE CONTROLLERS & DATA
+// --------------------------------------------------------------------------
 window.openDprMembersModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(card => {
-    if (card.id !== 'dprMembersModal') card.style.display = 'none';
-  });
-
-  const modal = document.getElementById('dprMembersModal');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
+  if (typeof openPmMembersModal === 'function') {
+    openPmMembersModal();
   }
 };
 
 window.closeDprMembersModal = function() {
-  const modal = document.getElementById('dprMembersModal');
-  if (modal) modal.style.display = 'none';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'none';
+  if (typeof closePmMembersModal === 'function') {
+    closePmMembersModal();
+  } else {
+    const modal = document.getElementById('pmMembersModal');
+    if (modal) modal.style.display = 'none';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.openDprAttendanceModal = function() {
@@ -34530,28 +30303,110 @@ window.closeDprAttendanceModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+// DPR Documents Controller & Selection
+let dprDocumentsData = [
+  { id: 1, type: 'Site Safety Inspection', details: 'Initial safety assessment doc', name: 'safety_inspection_v1.pdf', selected: false },
+  { id: 2, type: 'Material Quality Check', details: 'Civil work quality report', name: 'material_qc_sheet.pdf', selected: false },
+  { id: 3, type: 'Foundation Concrete Test', details: 'Lab test results', name: 'concrete_test_report.pdf', selected: false }
+];
+
+function renderDprDocumentsTable() {
+  const tbody = document.getElementById('tbodyDprDocuments');
+  if (!tbody) return;
+
+  const btnDelete = document.getElementById('btnDprDeleteDoc');
+  const hasSelected = dprDocumentsData.some(d => d.selected);
+  if (btnDelete) {
+    btnDelete.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+
+  const chkAll = document.getElementById('chkDprDocSelectAll');
+  if (chkAll) {
+    chkAll.checked = dprDocumentsData.length > 0 && dprDocumentsData.every(d => d.selected);
+  }
+
+  if (dprDocumentsData.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.92rem;">No documents added yet.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = dprDocumentsData.map(item => `
+    <tr style="border-bottom: 1px solid #f1f5f9; ${item.selected ? 'background-color: #f8fafc;' : ''}">
+      <td style="width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px;">
+        <input type="checkbox" ${item.selected ? 'checked' : ''} onchange="toggleSelectDprDoc(${item.id}, this.checked)" style="cursor: pointer; width: 16px; height: 16px;">
+      </td>
+      <td style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.type}</td>
+      <td style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.details}</td>
+      <td style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #0454e4;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">${item.name}</a></td>
+    </tr>
+  `).join('');
+}
+
+window.toggleSelectDprDoc = function(id, checked) {
+  const item = dprDocumentsData.find(d => d.id === id);
+  if (item) item.selected = checked;
+  renderDprDocumentsTable();
+};
+
+window.toggleSelectAllDprDocs = function(checked) {
+  dprDocumentsData.forEach(d => d.selected = checked);
+  renderDprDocumentsTable();
+};
+
+window.deleteSelectedDprDocuments = function() {
+  const count = dprDocumentsData.filter(d => d.selected).length;
+  if (count === 0) return;
+  dprDocumentsData = dprDocumentsData.filter(d => !d.selected);
+  renderDprDocumentsTable();
+  showToast(`${count} document(s) deleted successfully`);
+};
+
 window.openDprDocumentsModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(card => {
-    if (card.id !== 'dprDocumentsModal') card.style.display = 'none';
-  });
-
-  const modal = document.getElementById('dprDocumentsModal');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
+  if (typeof openJmsDocumentsModal === 'function') {
+    openJmsDocumentsModal();
   }
 };
 
 window.closeDprDocumentsModal = function() {
-  const modal = document.getElementById('dprDocumentsModal');
-  if (modal) modal.style.display = 'none';
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'none';
+  if (typeof closeJmsDocumentsModal === 'function') {
+    closeJmsDocumentsModal();
+  }
 };
+
+// DPR Survey Report Controller
+let dprSurveyReportData = [
+  { id: 1, description: 'Site Safety Inspection Report', yes: true, no: false, remarks: 'All safety parameters verified', photo: 'View' },
+  { id: 2, description: 'Material Quality Check Sheet', yes: true, no: false, remarks: 'Inspected by QC lead', photo: 'View' },
+  { id: 3, description: 'Foundation Concrete Test Report', yes: false, no: true, remarks: 'Pending lab compression test', photo: 'View' }
+];
+
+function renderDprSurveyReportTable() {
+  const tbody = document.getElementById('tbodyDprSurveyReport');
+  if (!tbody) return;
+
+  if (dprSurveyReportData.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.92rem;">No survey items added yet.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = dprSurveyReportData.map(item => `
+    <tr style="border-bottom: 1px solid #f1f5f9;">
+      <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.description}</td>
+      <td style="width: 10ch; text-align: center !important; padding: 10px 12px; white-space: nowrap; color: ${item.yes ? '#1e293b' : '#475569'}; font-size: 0.95rem;">${item.yes ? 'Yes' : '-'}</td>
+      <td style="width: 10ch; text-align: center !important; padding: 10px 12px; white-space: nowrap; color: ${item.no ? '#1e293b' : '#475569'}; font-size: 0.95rem;">${item.no ? 'No' : '-'}</td>
+      <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">${item.remarks || '-'}</td>
+      <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">${item.photo || 'View'}</a></td>
+    </tr>
+  `).join('');
+}
 
 window.openDprSurveyReportModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
@@ -34562,8 +30417,11 @@ window.openDprSurveyReportModal = function() {
     if (card.id !== 'dprSurveyReportModal') card.style.display = 'none';
   });
 
+  renderDprSurveyReportTable();
+
   const modal = document.getElementById('dprSurveyReportModal');
   if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
@@ -34571,9 +30429,63 @@ window.openDprSurveyReportModal = function() {
 
 window.closeDprSurveyReportModal = function() {
   const modal = document.getElementById('dprSurveyReportModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
+    modal.style.display = 'none';
+  }
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
+};
+
+window.openAddDprSurveyItemModal = function() {
+  const inp = document.getElementById('inpDprSurveyItemDesc');
+  if (inp) inp.value = '';
+  const modal = document.getElementById('dprAddSurveyItemModal');
+  const parentModal = document.getElementById('dprSurveyReportModal');
+  if (parentModal) {
+    parentModal.classList.add('card-dimmed-blurred');
+  }
+  if (modal) {
+    modal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  }
+};
+
+window.closeAddDprSurveyItemModal = function() {
+  const modal = document.getElementById('dprAddSurveyItemModal');
+  if (modal) modal.style.display = 'none';
+  const parentModal = document.getElementById('dprSurveyReportModal');
+  if (parentModal) {
+    parentModal.classList.remove('card-dimmed-blurred');
+  }
+  if (parentModal && parentModal.style.display === 'block') {
+    // Keep overlay open
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.saveDprSurveyItem = function() {
+  const inp = document.getElementById('inpDprSurveyItemDesc');
+  const desc = inp ? inp.value.trim() : '';
+  if (!desc) {
+    showToast('Please enter description');
+    return;
+  }
+  const newItem = {
+    id: Date.now(),
+    description: desc,
+    yes: true,
+    no: false,
+    remarks: 'Added via DPR Survey',
+    photo: 'View'
+  };
+  dprSurveyReportData.push(newItem);
+  renderDprSurveyReportTable();
+  closeAddDprSurveyItemModal();
+  showToast('Survey item saved successfully!');
 };
 
 window.triggerBoqFileUpload = function() {
@@ -35592,589 +31504,8 @@ window.triggerAccountsPdfUpload = function() {
 // ==========================================================================
 // MASTER -> CUSTOMER LOCATION & CONTACT MODALS
 // ==========================================================================
-customerLocationData = [];
-activeCustomerLocFilters = {};
-currentCustomerLocFilterCol = null;
-let isSavingCustomerLocation = false;
-
-customerContactData = [];
-activeCustomerContactFilters = {};
-currentCustomerContactFilterCol = null;
-let isSavingCustomerContact = false;
-
-function getCurrentCustomerContext() {
-  const inpName = document.getElementById('inpCustomerName')?.value?.trim();
-  const inpProj = document.getElementById('inpCustomerProjectName')?.value?.trim();
-  const name = inpName || inpProj || window.currentCustomerName || (window.currentCustomerContext && (window.currentCustomerContext.customerName || window.currentCustomerContext.customer_name || window.currentCustomerContext.legalName)) || '';
-  const id = window.currentCustomerId || (window.currentCustomerContext && (window.currentCustomerContext.customer_id || window.currentCustomerContext.id)) || null;
-  return { customer_name: name, customer_id: id };
-}
-
-// --- CUSTOMER LOCATION MODAL HANDLERS ---
-window.loadCustomerLocationsFromApi = async function() {
-  try {
-    const { customer_name, customer_id } = getCurrentCustomerContext();
-    let res;
-    if (customer_id) {
-      res = await NexusApi.customers.getLocations({ customerId: customer_id });
-    } else if (customer_name) {
-      res = await NexusApi.customers.getLocations({ customerName: customer_name });
-    } else {
-      res = await NexusApi.customers.getLocations();
-    }
-    if (res && res.items) {
-      customerLocationData = res.items.map(item => ({
-        id: item.office_id || item.id,
-        office_id: item.office_id || item.id,
-        officeName: item.office_name || item.officeName || '',
-        latitude: item.latitude !== null && item.latitude !== undefined ? String(item.latitude) : '',
-        longitude: item.longitude !== null && item.longitude !== undefined ? String(item.longitude) : '',
-        status: item.status || 'Active',
-        customer_name: item.customer_name || item.customerName || ''
-      }));
-    } else {
-      customerLocationData = [];
-    }
-  } catch (err) {
-    console.error('Failed to load customer locations from backend:', err);
-    customerLocationData = [];
-  }
-  renderCustomerLocationTable();
-};
-
-window.openCustomerLocationModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(card => {
-    if (card.id !== 'customerLocationSidePanel') card.style.display = 'none';
-  });
-
-  const modal = document.getElementById('customerLocationSidePanel');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-  activeCustomerLocFilters = {};
-  currentCustomerLocFilterCol = null;
-  loadCustomerLocationsFromApi();
-};
-
-window.closeCustomerLocationModal = function() {
-  const modal = document.getElementById('customerLocationSidePanel');
-  if (modal) modal.style.display = 'none';
-  const customerCard = document.getElementById('addCustomerCard');
-  if (customerCard && currentModule === 'master' && currentMasterSubpage === 'customer') {
-    customerCard.style.display = 'block';
-  } else {
-    const overlay = document.getElementById('sideFormOverlay');
-    if (overlay) overlay.style.display = 'none';
-  }
-};
-
-window.renderCustomerLocationTable = function() {
-  const tbody = document.getElementById('tbodyCustomerLocationDetails');
-  if (!tbody) return;
-
-  let filtered = [...customerLocationData];
-
-  for (const [colKey, allowedSet] of Object.entries(activeCustomerLocFilters)) {
-    if (allowedSet && allowedSet instanceof Set) {
-      filtered = filtered.filter(item => {
-        const val = String(item[colKey] !== undefined ? item[colKey] : '');
-        return allowedSet.has(val);
-      });
-    }
-  }
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="4" style="text-align: center; padding: 24px; color: #64748b; font-weight: 500; font-size: 14px;">
-          No office locations found
-        </td>
-      </tr>
-    `;
-  } else {
-    tbody.innerHTML = filtered.map(row => {
-      const isInactive = (row.status || '').toLowerCase().includes('in');
-      return `
-        <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.officeName || '').replace(/"/g, '&quot;')}">${row.officeName || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.latitude || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.longitude || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-            <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  // Update filter button active states
-  const btnOffice = document.getElementById('btnCustomerLocOfficeFilter');
-  if (btnOffice) {
-    if (activeCustomerLocFilters['officeName']) btnOffice.classList.add('has-active-filter');
-    else btnOffice.classList.remove('has-active-filter');
-  }
-  const btnStatus = document.getElementById('btnCustomerLocStatusFilter');
-  if (btnStatus) {
-    if (activeCustomerLocFilters['status']) btnStatus.classList.add('has-active-filter');
-    else btnStatus.classList.remove('has-active-filter');
-  }
-};
-
-window.openCustomerLocationAddForm = function() {
-  const panel = document.getElementById('customerLocationSidePanel');
-  if (panel) panel.style.display = 'none';
-
-  const formCard = document.getElementById('addCustomerLocationCard');
-  if (formCard) {
-    formCard.style.display = 'block';
-    const frm = document.getElementById('frmAddCustomerLocation');
-    if (frm) frm.reset();
-    const stToggle = document.getElementById('inpCustLocStatusToggle');
-    if (stToggle) stToggle.checked = true;
-  }
-};
-
-window.closeAddCustomerLocationForm = function() {
-  const formCard = document.getElementById('addCustomerLocationCard');
-  if (formCard) formCard.style.display = 'none';
-
-  const panel = document.getElementById('customerLocationSidePanel');
-  if (panel) panel.style.display = 'block';
-};
-
-window.saveCustomerLocation = async function() {
-  if (isSavingCustomerLocation) return;
-
-  const name = document.getElementById('inpCustLocOfficeName')?.value?.trim();
-  const lat = document.getElementById('inpCustLocLatitude')?.value?.trim() || '';
-  const lng = document.getElementById('inpCustLocLongitude')?.value?.trim() || '';
-  const isChecked = document.getElementById('inpCustLocStatusToggle')?.checked;
-  const status = isChecked ? 'Active' : 'In - Active';
-
-  if (!name) {
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup("Please enter Office Name", "Error Message!");
-    } else {
-      showToast('Please enter Office Name');
-    }
-    return;
-  }
-
-  const { customer_name, customer_id } = getCurrentCustomerContext();
-  const payload = {
-    customer_name: customer_name || 'Indus Towers Ltd',
-    office_name: name,
-    latitude: lat ? parseFloat(lat) : null,
-    longitude: lng ? parseFloat(lng) : null,
-    status: status
-  };
-
-  isSavingCustomerLocation = true;
-  try {
-    await NexusApi.customers.createLocation(payload, customer_id);
-
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('Office location added successfully!', 'Task Completed');
-    } else {
-      showToast('Office location added successfully!');
-    }
-
-    await loadCustomerLocationsFromApi();
-    closeAddCustomerLocationForm();
-  } catch (err) {
-    console.error('Failed to save office location:', err);
-    const msg = (err && (err.message || err.detail)) || 'Failed to add office location. Please try again.';
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(msg, 'Error Message!');
-    } else {
-      showToast(msg);
-    }
-  } finally {
-    isSavingCustomerLocation = false;
-  }
-};
-
-window.openCustomerLocFilter = function(colKey, event) {
-  if (event) event.stopPropagation();
-  currentCustomerLocFilterCol = colKey;
-  const dropdown = document.getElementById('excelFilterDropdown');
-  const searchInput = document.getElementById('filterSearchInput');
-  const chkList = document.getElementById('filterCheckboxList');
-  const chkSelectAll = document.getElementById('chkFilterSelectAll');
-
-  if (!dropdown) return;
-  if (searchInput) searchInput.value = '';
-
-  const uniqueValues = Array.from(new Set(customerLocationData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-  const activeSet = activeCustomerLocFilters[colKey];
-
-  chkList.innerHTML = uniqueValues.map(val => {
-    const isChecked = activeSet ? activeSet.has(val) : true;
-    const displayLabel = val === '' ? '(Blanks)' : val;
-    return `
-      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
-        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
-        <span class="chk-label">${displayLabel}</span>
-      </label>
-    `;
-  }).join('');
-
-  if (chkSelectAll) {
-    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
-  }
-
-  const targetBtn = event ? event.currentTarget : document.getElementById(colKey === 'officeName' ? 'btnCustomerLocOfficeFilter' : 'btnCustomerLocStatusFilter');
-  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
-  const dropdownWidth = 280;
-  let leftPos = rect.left;
-  if (leftPos + dropdownWidth > window.innerWidth - 16) {
-    leftPos = window.innerWidth - dropdownWidth - 16;
-  }
-
-  dropdown.dataset.filterContext = 'customerLoc';
-  dropdown.style.display = 'flex';
-  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
-  dropdown.style.left = `${Math.max(12, leftPos)}px`;
-
-  if (searchInput) searchInput.focus();
-};
-
-// --- CUSTOMER CONTACT MODAL HANDLERS ---
-window.loadCustomerContactsFromApi = async function() {
-  try {
-    const { customer_name, customer_id } = getCurrentCustomerContext();
-    let res;
-    if (customer_id) {
-      res = await NexusApi.customers.getContacts({ customerId: customer_id });
-    } else if (customer_name) {
-      res = await NexusApi.customers.getContacts({ customerName: customer_name });
-    } else {
-      res = await NexusApi.customers.getContacts();
-    }
-    if (res && res.items) {
-      customerContactData = res.items.map(item => ({
-        id: item.contact_id || item.id,
-        contact_id: item.contact_id || item.id,
-        name: item.name || '',
-        designation: item.designation || '',
-        contact: item.contact_number || item.contact || '',
-        email: item.email || '',
-        status: item.status || 'Active',
-        customer_name: item.customer_name || item.customerName || ''
-      }));
-    } else {
-      customerContactData = [];
-    }
-  } catch (err) {
-    console.error('Failed to load customer contacts from backend:', err);
-    customerContactData = [];
-  }
-  renderCustomerContactTable();
-};
-
-window.openCustomerContactModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(card => {
-    if (card.id !== 'customerContactSidePanel') card.style.display = 'none';
-  });
-
-  const modal = document.getElementById('customerContactSidePanel');
-  if (modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'flex';
-  }
-  activeCustomerContactFilters = {};
-  currentCustomerContactFilterCol = null;
-  loadCustomerContactsFromApi();
-};
-
-window.closeCustomerContactModal = function() {
-  const modal = document.getElementById('customerContactSidePanel');
-  if (modal) modal.style.display = 'none';
-  const customerCard = document.getElementById('addCustomerCard');
-  if (customerCard && currentModule === 'master' && currentMasterSubpage === 'customer') {
-    customerCard.style.display = 'block';
-  } else {
-    const overlay = document.getElementById('sideFormOverlay');
-    if (overlay) overlay.style.display = 'none';
-  }
-};
-
-window.renderCustomerContactTable = function() {
-  const tbody = document.getElementById('tbodyCustomerContactDetails');
-  if (!tbody) return;
-
-  let filtered = [...customerContactData];
-
-  for (const [colKey, allowedSet] of Object.entries(activeCustomerContactFilters)) {
-    if (allowedSet && allowedSet instanceof Set) {
-      filtered = filtered.filter(item => {
-        const val = String(item[colKey] !== undefined ? item[colKey] : '');
-        return allowedSet.has(val);
-      });
-    }
-  }
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align: center; padding: 24px; color: #64748b; font-weight: 500; font-size: 14px;">
-          No contact details found
-        </td>
-      </tr>
-    `;
-  } else {
-    tbody.innerHTML = filtered.map(row => {
-      const isInactive = (row.status || '').toLowerCase().includes('in');
-      return `
-        <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${(row.name || '').replace(/"/g, '&quot;')}">${row.name || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.contact || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-            <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
-          </td>
-        </tr>
-      `;
-    }).join('');
-  }
-
-  // Update filter button active states
-  const btnName = document.getElementById('btnCustomerContactNameFilter');
-  if (btnName) {
-    if (activeCustomerContactFilters['name']) btnName.classList.add('has-active-filter');
-    else btnName.classList.remove('has-active-filter');
-  }
-  const btnDesig = document.getElementById('btnCustomerContactDesigFilter');
-  if (btnDesig) {
-    if (activeCustomerContactFilters['designation']) btnDesig.classList.add('has-active-filter');
-    else btnDesig.classList.remove('has-active-filter');
-  }
-  const btnStatus = document.getElementById('btnCustomerContactStatusFilter');
-  if (btnStatus) {
-    if (activeCustomerContactFilters['status']) btnStatus.classList.add('has-active-filter');
-    else btnStatus.classList.remove('has-active-filter');
-  }
-};
-
-window.openCustomerContactAddForm = function() {
-  const panel = document.getElementById('customerContactSidePanel');
-  if (panel) panel.style.display = 'none';
-
-  const formCard = document.getElementById('addCustomerContactCard');
-  if (formCard) {
-    formCard.style.display = 'block';
-    const frm = document.getElementById('frmAddCustomerContact');
-    if (frm) frm.reset();
-    const stToggle = document.getElementById('inpCustContactStatusToggle');
-    if (stToggle) stToggle.checked = true;
-  }
-};
-
-window.closeAddCustomerContactForm = function() {
-  const formCard = document.getElementById('addCustomerContactCard');
-  if (formCard) formCard.style.display = 'none';
-
-  const panel = document.getElementById('customerContactSidePanel');
-  if (panel) panel.style.display = 'block';
-};
-
-window.saveCustomerContact = async function() {
-  if (isSavingCustomerContact) return;
-
-  const name = document.getElementById('inpCustContactName')?.value?.trim();
-  const desig = document.getElementById('inpCustContactDesignation')?.value?.trim() || '';
-  const phone = document.getElementById('inpCustContactPhone')?.value?.trim() || '';
-  const email = document.getElementById('inpCustContactEmail')?.value?.trim() || '';
-  const isChecked = document.getElementById('inpCustContactStatusToggle')?.checked;
-  const status = isChecked ? 'Active' : 'In - Active';
-
-  if (!name) {
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup("Please enter Name", "Error Message!");
-    } else {
-      showToast('Please enter Name');
-    }
-    return;
-  }
-
-  const { customer_name, customer_id } = getCurrentCustomerContext();
-  const payload = {
-    customer_name: customer_name || 'Indus Towers Ltd',
-    name: name,
-    designation: desig,
-    contact_number: phone,
-    email: email,
-    status: status
-  };
-
-  isSavingCustomerContact = true;
-  try {
-    await NexusApi.customers.createContact(payload, customer_id);
-
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('Contact details added successfully!', 'Task Completed');
-    } else {
-      showToast('Contact details added successfully!');
-    }
-
-    await loadCustomerContactsFromApi();
-    closeAddCustomerContactForm();
-  } catch (err) {
-    console.error('Failed to save customer contact:', err);
-    const msg = (err && (err.message || err.detail)) || 'Failed to add contact details. Please try again.';
-    if (typeof showSvgErrorPopup === 'function') {
-      showSvgErrorPopup(msg, 'Error Message!');
-    } else {
-      showToast(msg);
-    }
-  } finally {
-    isSavingCustomerContact = false;
-  }
-};
-
-window.triggerCustomerContactCsvUpload = function() {
-  document.getElementById('inpCustContactCsvFile')?.click();
-};
-
-window.handleCustomerContactCsvFile = function(input) {
-  if (input.files && input.files[0]) {
-    const file = input.files[0];
-    showToast(`File selected: ${file.name}`);
-    input.value = '';
-  }
-};
-
-window.triggerCustomerContactBulkUpload = function() {
-  document.getElementById('inpCustContactFolderFile')?.click();
-};
-
-window.handleCustomerContactFolderFile = function(input) {
-  if (input.files && input.files.length > 0) {
-    const count = input.files.length;
-    const folderPath = input.files[0].webkitRelativePath || '';
-    const folderName = folderPath.split('/')[0] || 'Selected Folder';
-    showToast(`Folder selected: "${folderName}" (${count} files)`);
-    input.value = '';
-  }
-};
-
-window.openCustomerContactFilter = function(colKey, event) {
-  if (event) event.stopPropagation();
-  currentCustomerContactFilterCol = colKey;
-  const dropdown = document.getElementById('excelFilterDropdown');
-  const searchInput = document.getElementById('filterSearchInput');
-  const chkList = document.getElementById('filterCheckboxList');
-  const chkSelectAll = document.getElementById('chkFilterSelectAll');
-
-  if (!dropdown) return;
-  if (searchInput) searchInput.value = '';
-
-  const uniqueValues = Array.from(new Set(customerContactData.map(r => String(r[colKey] !== undefined ? r[colKey] : ''))))
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-  const activeSet = activeCustomerContactFilters[colKey];
-
-  chkList.innerHTML = uniqueValues.map(val => {
-    const isChecked = activeSet ? activeSet.has(val) : true;
-    const displayLabel = val === '' ? '(Blanks)' : val;
-    return `
-      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
-        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
-        <span class="chk-label">${displayLabel}</span>
-      </label>
-    `;
-  }).join('');
-
-  if (chkSelectAll) {
-    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
-  }
-
-  const targetBtn = event ? event.currentTarget : document.getElementById(`btnCustomerContact${colKey.charAt(0).toUpperCase() + colKey.slice(1)}Filter`);
-  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
-  const dropdownWidth = 280;
-  let leftPos = rect.left;
-  if (leftPos + dropdownWidth > window.innerWidth - 16) {
-    leftPos = window.innerWidth - dropdownWidth - 16;
-  }
-
-  dropdown.dataset.filterContext = 'customerContact';
-  dropdown.style.display = 'flex';
-  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
-  dropdown.style.left = `${Math.max(12, leftPos)}px`;
-
-  if (searchInput) searchInput.focus();
-};
-
-window.openViewCustomerCard = function(rowId) {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
-  cards.forEach(card => {
-    if (card.id !== 'addCustomerCard') card.style.display = 'none';
-  });
-
-  const row = (rowId && (typeof masterCustomerData !== 'undefined') && masterCustomerData.find(r => r.id === rowId || r.customer_id === rowId || r.customerName === rowId)) || 
-              ((typeof masterCustomerData !== 'undefined') && masterCustomerData[0]);
-  if (!row) return;
-
-  window.currentCustomerContext = row;
-  window.currentCustomerName = row.customerName || row.customer_name || row.legalName || '';
-  window.currentCustomerId = row.customer_id || row.id || null;
-
-  const addCustomerCard = document.getElementById('addCustomerCard');
-  if (addCustomerCard) {
-    addCustomerCard.style.display = 'block';
-    const lblTitle = document.getElementById('lblCustomerCardTitle');
-    if (lblTitle) lblTitle.innerText = 'View Customer';
-
-    const bTypeSelect = document.getElementById('inpBusinessType');
-    if (bTypeSelect) bTypeSelect.value = row.businessType || 'Projects';
-
-    const inpName = document.getElementById('inpCustomerName');
-    if (inpName) inpName.value = row.customerName || row.customer_name || '';
-
-    const inpDigits = document.getElementById('inpCustomerPoDigits');
-    if (inpDigits) inpDigits.value = row.poDigits || row.po_stating_3_digits || '450';
-
-    const gstToggle = document.getElementById('inpCustomerGstToggle');
-    if (gstToggle) gstToggle.checked = (row.gstNumber && row.gstNumber !== 'NA') || (row.gst_number && row.gst_number !== 'NA');
-
-    const inpGstType = document.getElementById('inpGstType');
-    if (inpGstType) inpGstType.value = row.gstType || row.gst_type || 'SGST';
-
-    const inpGstNumber = document.getElementById('inpGstNumber');
-    if (inpGstNumber) inpGstNumber.value = (row.gstNumber && row.gstNumber !== 'NA') ? row.gstNumber : ((row.gst_number && row.gst_number !== 'NA') ? row.gst_number : '');
-
-    const inpPan = document.getElementById('inpPanNumber');
-    if (inpPan) inpPan.value = row.panNumber || row.pan_number || '33ASMPM8643F';
-
-    const inpAddress = document.getElementById('inpAddress');
-    if (inpAddress) inpAddress.value = row.address || row.gst_address || 'Building 10, DLF Cyber City, Gurugram, Haryana - 122002';
-
-    const statusToggle = document.getElementById('inpStatusToggle');
-    if (statusToggle) statusToggle.checked = !((row.status || '').toLowerCase().includes('in'));
-
-    if (typeof updateCustomerConditionalFields === 'function') {
-      updateCustomerConditionalFields();
-    }
-  }
-
-  overlay.style.display = 'flex';
-  showToast('Opened View Customer');
-};
+// Customer Location & Contact Modals, and View Customer Card
+// Modularized into frontend/assets/js/modules/master/master-customers.js
 
 // ==========================================================================
 // SITE CONTACT DETAILS POPUP & ADD FORM
@@ -39676,3 +35007,49 @@ window.submitPoAmendStatusModal = function() {
     showToast('Navigated to WCC Worklist');
   }, 1200);
 };
+
+// ─── Inline HTML Compatibility Handlers ───
+window.closeAddSurveyForm = function() {
+  const card = document.getElementById('addProjectTypeCard');
+  if (card) card.style.display = 'none';
+  if (typeof closeSideForm === 'function') closeSideForm();
+};
+
+window.saveSurveyDescription = function() {
+  const descriptionInput = document.getElementById('inpProjectTypeDescription')?.value || "KTN";
+  const newRecord = {
+    id: `proj-desc-${Date.now()}`,
+    description: descriptionInput
+  };
+  if (typeof indusProjectSurveyData !== 'undefined') {
+    indusProjectSurveyData.push(newRecord);
+  }
+  if (typeof loadIndusDataset === 'function') loadIndusDataset();
+  if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  window.closeAddSurveyForm();
+  if (typeof showToast === 'function') showToast(`Record ${descriptionInput} successfully saved!`);
+};
+
+window.closeRemarksModal = function() {
+  const modal = document.getElementById('remarksModal');
+  if (modal) modal.style.display = 'none';
+  if (typeof closeSideForm === 'function') closeSideForm();
+};
+
+window.submitRemarksModal = function() {
+  const txt = document.getElementById('inpPaymentRemarksText');
+  const remarks = txt ? txt.value.trim() : '';
+  window.closeRemarksModal();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Remarks submitted successfully!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Remarks submitted successfully!');
+  }
+};
+
+window.closeJmsPayableExpensesModal = function() {
+  const panel = document.getElementById('jmsPayableExpensesPanel');
+  if (panel) panel.style.display = 'none';
+  if (typeof closeSideForm === 'function') closeSideForm();
+};
+

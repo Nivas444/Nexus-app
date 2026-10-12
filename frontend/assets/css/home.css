@@ -2035,18 +2035,19 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 }
 
 /* Card Dimmed & Blurred state when child popup is active */
+.card-dimmed-blurred,
 .side-form-card.card-dimmed-blurred {
-  filter: blur(4px) brightness(0.6) opacity(0.6);
+  filter: blur(4px) brightness(0.6) opacity(0.6) !important;
   pointer-events: none !important;
   transition: filter 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.side-form-cards-row {
-  position: relative;
-}
-
 .side-form-cards-row.has-dimmed-card .side-contact-popup,
-.side-form-card.card-dimmed-blurred~.side-contact-popup {
+.side-form-card.card-dimmed-blurred~.side-contact-popup,
+.side-form-card.card-dimmed-blurred~.project-info-modal-card,
+.side-form-card.card-dimmed-blurred~.side-form-card,
+#pmMembersModal.card-dimmed-blurred~#pmAddMemberModal,
+#dprSurveyReportModal.card-dimmed-blurred~#dprAddSurveyItemModal {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
@@ -4617,6 +4618,21 @@ a:visited,
   box-sizing: border-box !important;
 }
 
+#pmAddMemberModal {
+  width: 280px !important;
+  max-width: 96vw !important;
+}
+
+#pmMembersModal {
+  width: 540px !important;
+  max-width: 96vw !important;
+}
+
+#dprMembersModal {
+  width: 320px !important;
+  max-width: 96vw !important;
+}
+
 .project-info-modal-body {
   padding: 20px 32px 8px !important;
   box-sizing: border-box;
@@ -5185,8 +5201,12 @@ body.standalone-mode .worklist-main-full {
   border-color: #000000 !important;
 }
 
-.pm-custom-select:disabled {
-  background-color: #e2e8f0 !important;
+.pm-custom-select:disabled,
+#pmDistrictSelect,
+#pmNonNbDistrictSelect,
+#pmTownSelect,
+#pmNonNbTownSelect {
+  background-color: #ffffff !important;
   color: #334155 !important;
   cursor: default !important;
   opacity: 1 !important;

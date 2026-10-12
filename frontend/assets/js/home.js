@@ -923,42 +923,58 @@ const projectBoqData = [
 ];
 
 // Project Additional Approvals Dataset
-const projectApprovalsData = [
+let projectApprovalsData = [
   {
     id: "appr-1",
     selected: false,
-    requestDate: "15 - 08 - 2026",
-    approvedDate: "18 - 08 - 2026",
-    ageing: "3 Days",
-    subject: "Additional DG Capacity Approval",
-    status: "Approved"
+    activity: "DG Foundation & Canopy Installation",
+    itemCode: "ITM-CIV-101",
+    itemDescription: "RCC Foundation for 25kVA Soundproof Canopy DG Set",
+    uom: "Nos",
+    qty: "1.00",
+    rate: "1,50,000.00",
+    estimated: "1,50,000.00",
+    expensed: "1,35,000.00",
+    approved: "1,50,000.00"
   },
   {
     id: "appr-2",
     selected: false,
-    requestDate: "10 - 08 - 2026",
-    approvedDate: "-",
-    ageing: "5 Days",
-    subject: "Additional Budget for Civil Work",
-    status: "Pending"
+    activity: "Electrical Cabling & Earthing",
+    itemCode: "ITM-ELE-204",
+    itemDescription: "4C x 70 sq.mm Armoured Copper Cable Laying & Termination",
+    uom: "Mtr",
+    qty: "80.00",
+    rate: "2,500.00",
+    estimated: "2,00,000.00",
+    expensed: "1,80,000.00",
+    approved: "2,00,000.00"
   },
   {
     id: "appr-3",
     selected: false,
-    requestDate: "05 - 08 - 2026",
-    approvedDate: "08 - 08 - 2026",
-    ageing: "3 Days",
-    subject: "Overtime Labour Approval",
-    status: "Approved"
+    activity: "Tower Height Modification",
+    itemCode: "ITM-HGT-305",
+    itemDescription: "Additional Structural Bracing & Antenna Mount Extension",
+    uom: "Lot",
+    qty: "2.00",
+    rate: "75,000.00",
+    estimated: "1,50,000.00",
+    expensed: "1,20,000.00",
+    approved: "1,40,000.00"
   },
   {
     id: "appr-4",
     selected: false,
-    requestDate: "01 - 08 - 2026",
-    approvedDate: "-",
-    ageing: "14 Days",
-    subject: "Extra Material Purchase Approval",
-    status: "Pending"
+    activity: "Site Grounding & Protection",
+    itemCode: "ITM-EAR-402",
+    itemDescription: "Chemical Earthing Pit with Heavy Duty Copper Electrode",
+    uom: "Nos",
+    qty: "4.00",
+    rate: "18,500.00",
+    estimated: "74,000.00",
+    expensed: "70,000.00",
+    approved: "74,000.00"
   }
 ];
 
@@ -11882,6 +11898,7 @@ window.openProjectBoqPage = function() {
 window.openProjectApprovalsPage = function() {
   currentModule = 'projects';
   currentProjectsView = 'project_approvals';
+  window.editingApprovalRowId = null;
   activeColumnFilters = {};
   updateURL();
   renderApp();
@@ -12182,12 +12199,18 @@ window.submitServiceVendorInvoiceAmountModal = function() {
   }
 };
 
+window.editingApprovalRowId = null;
+
 window.toggleApprovalRowSelect = function(id) {
   projectApprovalsData.forEach(d => {
     if (d.id === id) {
       d.selected = !d.selected;
+      if (!d.selected && window.editingApprovalRowId === id) {
+        window.editingApprovalRowId = null;
+      }
     }
   });
+  loadProjectsDataset();
   renderApp();
 };
 
@@ -12196,7 +12219,145 @@ window.toggleSelectAllApprovals = function() {
   projectApprovalsData.forEach(d => {
     d.selected = !allSelected;
   });
+  if (allSelected) {
+    window.editingApprovalRowId = null;
+  }
+  loadProjectsDataset();
   renderApp();
+};
+
+window.openAddActivityModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(card => {
+      if (card.id !== 'pmAddActivityModal') {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  const modal = document.getElementById('pmAddActivityModal');
+  if (!modal) return;
+
+  const inpQty = document.getElementById('inpAddActivityQty');
+  if (inpQty) inpQty.value = '1.00';
+  const inpRate = document.getElementById('inpAddActivityRate');
+  if (inpRate) inpRate.value = '';
+
+  modal.style.display = 'block';
+  if (overlay) overlay.style.display = 'flex';
+};
+
+window.closeAddActivityModal = function() {
+  const modal = document.getElementById('pmAddActivityModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.saveNewActivity = function() {
+  const selActivity = document.getElementById('selAddActivityName');
+  const selDesc = document.getElementById('selAddActivityItemDesc');
+  const inpQty = document.getElementById('inpAddActivityQty');
+  const inpRate = document.getElementById('inpAddActivityRate');
+
+  const activity = selActivity ? selActivity.value : 'Civil Works';
+  const itemDescription = selDesc ? selDesc.value : 'RCC Foundation Work';
+  const rawQty = parseFloat(inpQty ? inpQty.value : 1) || 1;
+  const formattedQty = rawQty.toFixed(2);
+  const rawRateStr = inpRate ? inpRate.value.replace(/,/g, '') : '0';
+  const rawRate = parseFloat(rawRateStr) || 0;
+  const formattedRate = Number(rawRate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const totalAmount = rawQty * rawRate;
+  const formattedAmount = Number(totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  let itemCode = 'ITM-ACT-' + Math.floor(100 + Math.random() * 900);
+  let uom = 'Nos';
+  const descLower = itemDescription.toLowerCase();
+  if (descLower.includes('cable') || descLower.includes('cabling')) {
+    itemCode = 'ITM-ELE-' + Math.floor(100 + Math.random() * 900);
+    uom = 'Mtr';
+  } else if (descLower.includes('bracing') || descLower.includes('mount') || descLower.includes('height')) {
+    itemCode = 'ITM-HGT-' + Math.floor(100 + Math.random() * 900);
+    uom = 'Lot';
+  } else if (descLower.includes('foundation') || descLower.includes('civil')) {
+    itemCode = 'ITM-CIV-' + Math.floor(100 + Math.random() * 900);
+    uom = 'Nos';
+  } else if (descLower.includes('earthing') || descLower.includes('electrode')) {
+    itemCode = 'ITM-EAR-' + Math.floor(100 + Math.random() * 900);
+    uom = 'Nos';
+  }
+
+  const newRow = {
+    id: 'appr-' + Date.now(),
+    selected: false,
+    activity: activity,
+    itemCode: itemCode,
+    itemDescription: itemDescription,
+    uom: uom,
+    qty: formattedQty,
+    rate: formattedRate,
+    estimated: formattedAmount,
+    expensed: '0.00',
+    approved: formattedAmount
+  };
+
+  projectApprovalsData.unshift(newRow);
+  loadProjectsDataset();
+  renderApp();
+  closeAddActivityModal();
+  showToast('Activity added successfully.');
+};
+
+window.handleApprovalEditOrSave = function() {
+  if (window.editingApprovalRowId) {
+    const row = projectApprovalsData.find(d => d.id === window.editingApprovalRowId);
+    if (row) {
+      const inpEst = document.getElementById(`inpEditApprEstimated_${row.id}`);
+      const inpAppr = document.getElementById(`inpEditApprApproved_${row.id}`);
+      if (inpEst) {
+        const valEst = parseFloat(inpEst.value.replace(/,/g, '')) || 0;
+        row.estimated = Number(valEst).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      if (inpAppr) {
+        const valAppr = parseFloat(inpAppr.value.replace(/,/g, '')) || 0;
+        row.approved = Number(valAppr).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }
+    window.editingApprovalRowId = null;
+    loadProjectsDataset();
+    renderApp();
+    showToast('Activity approval amounts updated successfully.');
+  } else {
+    const selectedRow = projectApprovalsData.find(d => d.selected);
+    if (selectedRow) {
+      window.editingApprovalRowId = selectedRow.id;
+      loadProjectsDataset();
+      renderApp();
+      setTimeout(() => {
+        const inp = document.getElementById(`inpEditApprEstimated_${selectedRow.id}`);
+        if (inp) {
+          inp.focus();
+          inp.select();
+        }
+      }, 50);
+    } else {
+      showToast('Please select a row to edit.');
+    }
+  }
+};
+
+window.deleteSelectedApprovals = function() {
+  const count = projectApprovalsData.filter(d => d.selected).length;
+  if (count === 0) return;
+  projectApprovalsData = projectApprovalsData.filter(d => !d.selected);
+  if (window.editingApprovalRowId && !projectApprovalsData.some(d => d.id === window.editingApprovalRowId)) {
+    window.editingApprovalRowId = null;
+  }
+  loadProjectsDataset();
+  renderApp();
+  showToast(`${count} Activity${count > 1 ? 'ies' : ''} deleted successfully.`);
 };
 
 window.toggleSelectAllPmMembers = function() {
@@ -12309,22 +12470,26 @@ function renderProjectsToolbar() {
   }
   if (currentProjectsView === 'project_approvals') {
     const hasSelectedRow = projectApprovalsData.some(d => d.selected);
+    const isEditing = Boolean(window.editingApprovalRowId);
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 14px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnApprovalsAddActivity" title="Add Activity" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAddActivityModal(); return false;">
+          <img src="icons/Add.svg" alt="Add Activity" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
         ${hasSelectedRow ? `
-          <button type="button" class="tool-btn" id="btnApprovalsChart" title="E - Mail Approval" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openEmailApprovalModal('E - Mail Approval'); return false;">
-            <img src="icons/approval.svg?v=${Date.now()}" alt="Approval" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          <button type="button" class="tool-btn" id="btnApprovalsEditOrSave" title="${isEditing ? 'Save' : 'Edit'}" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="handleApprovalEditOrSave(); return false;">
+            <img src="${isEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isEditing ? 'Save' : 'Edit'}" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+          <button type="button" class="tool-btn" id="btnApprovalsDelete" title="Delete" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteSelectedApprovals(); return false;">
+            <img src="icons/Delete.svg" alt="Delete" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+          <button type="button" class="tool-btn" id="btnApprovalsMail" title="E - Mail Approval" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openEmailApprovalModal('E - Mail Approval'); return false;">
+            <img src="icons/mail.svg" alt="Mail" style="width: 28px; height: 28px; display: block; object-fit: contain;">
           </button>
         ` : ''}
       </div>
     `;
-    if (hasSelectedRow) {
-      toolbar.querySelector('#btnApprovalsChart')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        openEmailApprovalModal('E - Mail Approval');
-      });
-    }
     return;
   }
   if (currentProjectsView === 'project_boq') {
@@ -12596,7 +12761,10 @@ function renderProjectsTableHead() {
           <span>Select</span>
         </th>
         <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Service Vendor Name</span>
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Service Vendor Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['serviceVendorName'] ? 'has-active-filter' : ''}" data-filter-col="serviceVendorName" title="Filter Service Vendor Name">&#9660;</button>
+          </div>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Contract Type</span>
@@ -12625,23 +12793,40 @@ function renderProjectsTableHead() {
   if (currentProjectsView === 'project_approvals') {
     thead.innerHTML = `
       <tr class="master-view-header projects-view-header">
-        <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th rowspan="2" style="width: 85px; min-width: 85px; max-width: 85px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px; cursor: pointer;" onclick="toggleSelectAllApprovals()">
           <span>Select</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Request Date</span>
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Activity</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Approved Date</span>
+        <th rowspan="2" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Item Code</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Ageing</span>
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Item Description</span>
         </th>
-        <th style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Subject</span>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Uom</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Status</span>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Qty</span>
+        </th>
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Rate</span>
+        </th>
+        <th colspan="3" class="th-sv-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1.5px solid #ffffff !important; border-right: none !important; border-left: none !important; padding: 6px 10px;">
+          <span>Amount</span>
+        </th>
+      </tr>
+      <tr class="master-view-header projects-view-header">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 10px;">
+          <span>Estimated</span>
+        </th>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Expensed</span>
+        </th>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: none !important; padding: 6px 10px;">
+          <span>Approved</span>
         </th>
       </tr>
     `;
@@ -20087,20 +20272,30 @@ function applyFiltersAndRender() {
       `).join('');
     } else if (currentProjectsView === 'project_approvals') {
       tbody.innerHTML = filteredDataset.map(row => {
-        const statusLower = (row.status || '').toLowerCase();
-        const isApproved = statusLower.includes('approved');
-        const isPending = statusLower.includes('pending');
-        const statusStyle = isApproved ? 'color: #008744; font-weight: 600;' : (isPending ? 'color: #d62d20; font-weight: 600;' : 'color: #1e293b; font-weight: 500;');
+        const isEditingThisRow = window.editingApprovalRowId === row.id;
+        const formattedQty = !isNaN(parseFloat(row.qty)) ? parseFloat(row.qty).toFixed(2) : (row.qty || '0.00');
         return `
           <tr class="projects-data-row" data-row-id="${row.id}">
-            <td class="td-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 14px;">
+            <td class="td-select" style="width: 85px; min-width: 85px; max-width: 85px; text-align: center !important; padding: 10px 14px;">
               <div class="radio-select-indicator ${row.selected ? 'selected' : ''}" onclick="toggleApprovalRowSelect('${row.id}')" aria-label="Select row"></div>
             </td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.requestDate || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.approvedDate || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.ageing || ''}</td>
-            <td style="text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.subject || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; ${statusStyle}">${row.status || ''}</td>
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.activity || ''}</td>
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px;">${row.itemCode || ''}</td>
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #1e293b;">${row.itemDescription || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.uom || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${formattedQty}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.rate || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: ${isEditingThisRow ? '6px 8px' : '10px 14px'}; font-weight: 600;">
+              ${isEditingThisRow ? `
+                <input type="text" id="inpEditApprEstimated_${row.id}" value="${(row.estimated || '').replace(/"/g, '&quot;')}" class="form-input-control" style="width: 100%; height: 32px; border: 1.5px solid #00cba0; border-radius: 6px; padding: 0 8px; font-size: 0.9rem; text-align: right; font-weight: 600; color: #1e293b; background: #ffffff; box-sizing: border-box;" onkeydown="if(event.key==='Enter'){ handleApprovalEditOrSave(); }" />
+              ` : (row.estimated || '')}
+            </td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.expensed || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: ${isEditingThisRow ? '6px 8px' : '10px 14px'}; font-weight: 600;">
+              ${isEditingThisRow ? `
+                <input type="text" id="inpEditApprApproved_${row.id}" value="${(row.approved || '').replace(/"/g, '&quot;')}" class="form-input-control" style="width: 100%; height: 32px; border: 1.5px solid #00cba0; border-radius: 6px; padding: 0 8px; font-size: 0.9rem; text-align: right; font-weight: 600; color: #1e293b; background: #ffffff; box-sizing: border-box;" onkeydown="if(event.key==='Enter'){ handleApprovalEditOrSave(); }" />
+              ` : (row.approved || '')}
+            </td>
           </tr>
         `;
       }).join('');

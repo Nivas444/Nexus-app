@@ -4661,7 +4661,8 @@ a:visited,
 }
 
 #pmAddServiceVendorModal,
-#serviceVendorInvoiceAmountPanel {
+#serviceVendorInvoiceAmountPanel,
+#pmAddActivityModal {
   width: 620px !important;
   max-width: 96vw !important;
 }

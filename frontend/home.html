@@ -5240,6 +5240,74 @@
           </div>
         </div>
 
+        <!-- Add Activity Modal Tab (Additional Approve) -->
+        <div class="side-form-card" id="pmAddActivityModal"
+          style="display: none; width: 620px !important; max-width: 96vw; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmAddActivityTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Activity
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSaveActivityBtn" title="Save" onclick="saveNewActivity()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddActivityModal" onclick="closeAddActivityModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Activity (Dropdown) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Activity</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selAddActivityName" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Civil Works" selected>Civil Works</option>
+                  <option value="Electrical Installation">Electrical Installation</option>
+                  <option value="DG Foundation & Canopy Installation">DG Foundation & Canopy Installation</option>
+                  <option value="Tower Height Modification">Tower Height Modification</option>
+                  <option value="Site Grounding & Protection">Site Grounding & Protection</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Item Description (Dropdown) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Item Description</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selAddActivityItemDesc" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="RCC Foundation for 25kVA Soundproof Canopy DG Set" selected>RCC Foundation for 25kVA Soundproof Canopy DG Set</option>
+                  <option value="4C x 70 sq.mm Armoured Copper Cable Laying & Termination">4C x 70 sq.mm Armoured Copper Cable Laying & Termination</option>
+                  <option value="Additional Structural Bracing & Antenna Mount Extension">Additional Structural Bracing & Antenna Mount Extension</option>
+                  <option value="Chemical Earthing Pit with Heavy Duty Copper Electrode">Chemical Earthing Pit with Heavy Duty Copper Electrode</option>
+                  <option value="Supply & Installation of Aviation Warning Light">Supply & Installation of Aviation Warning Light</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Qty (Typeable input) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Qty</label>
+              <div style="flex: 1; position: relative;">
+                <input type="number" step="0.01" class="form-input-control" id="inpAddActivityQty" placeholder="Enter Qty (e.g. 1.00)" value="1.00"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box;">
+              </div>
+            </div>
+
+            <!-- 4. Rate (Typeable input) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Rate</label>
+              <div style="flex: 1; position: relative;">
+                <input type="text" class="form-input-control" id="inpAddActivityRate" placeholder="Enter Rate (e.g. 50,000.00)"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box;">
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Payment Receipt Modal Tab (Supply Subpage / Customer Details) -->
         <div class="side-form-card project-info-modal-card" id="paymentReceiptModal"
           style="display: none; width: 620px; max-width: 96vw;">

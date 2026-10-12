@@ -108,6 +108,7 @@
       vendorType: "Vendor Type",
       vendorId: "Vendor ID",
       vendorName: "Vendor Name",
+      serviceVendorName: "Service Vendor Name",
       panNumber: "PAN Number",
       circle: "Circle",
       siteId: "Site ID",

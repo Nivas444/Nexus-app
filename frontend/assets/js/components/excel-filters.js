@@ -174,6 +174,10 @@
       used: "Used",
       available: "Available",
       boqName: "BOQ Name",
+      boqNo: "BOQ No",
+      stnNo: "STN No",
+      srnNo: "SRN No",
+      remarks: "Remarks",
       mir: "MIR",
       min: "MIN",
       mrr: "MRR",
@@ -394,6 +398,15 @@
           if (window.currentExpensesSummaryItemFilterCol) {
             delete window.activeExpensesSummaryItemFilters[window.currentExpensesSummaryItemFilterCol];
             if (typeof renderExpensesSummaryDetailsTable === 'function') renderExpensesSummaryDetailsTable();
+          }
+          closeExcelFilter();
+          showToast('Filter cleared');
+          return;
+        }
+        if (dropdown.dataset.filterContext === 'pmMaterialDetail') {
+          if (window.currentPmMaterialDetailFilterCol) {
+            delete window.activePmMaterialDetailFilters[window.currentPmMaterialDetailFilterCol];
+            if (typeof renderPmMaterialDetailTable === 'function') renderPmMaterialDetailTable();
           }
           closeExcelFilter();
           showToast('Filter cleared');
@@ -740,6 +753,23 @@
           return;
         }
   
+        if (dropdown.dataset.filterContext === 'pmMaterialDetail') {
+          if (!window.currentPmMaterialDetailFilterCol) return;
+          const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+            .map(chk => chk.value);
+          const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+            .map(chk => chk.value);
+          if (checkedItems.length === allItems.length) {
+            delete window.activePmMaterialDetailFilters[window.currentPmMaterialDetailFilterCol];
+          } else {
+            window.activePmMaterialDetailFilters[window.currentPmMaterialDetailFilterCol] = new Set(checkedItems);
+          }
+          if (typeof renderPmMaterialDetailTable === 'function') renderPmMaterialDetailTable();
+          closeExcelFilter();
+          showToast('Filter applied');
+          return;
+        }
+
         if (!currentFilterColumn) return;
   
         const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))

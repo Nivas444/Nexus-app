@@ -816,11 +816,11 @@ tr.tr-sub-headers th,
 }
 
 .radio-select-indicator:hover {
-  border-color: var(--primary-green) !important;
+  border-color: #16a34a !important;
 }
 
 .radio-select-indicator.selected {
-  border-color: var(--primary-green) !important;
+  border-color: #16a34a !important;
   background: #ffffff !important;
 }
 
@@ -829,7 +829,7 @@ tr.tr-sub-headers th,
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--primary-green) !important;
+  background: #16a34a !important;
   display: block;
 }
 
@@ -4661,19 +4661,60 @@ a:visited,
   max-width: 96vw !important;
 }
 
+#pmMaterialsDetailModal {
+  width: 1260px !important;
+  max-width: 96vw !important;
+}
+
 #pmAddServiceVendorModal,
 #serviceVendorInvoiceAmountPanel,
 #pmAddActivityModal,
 #pmExpenseDetailsModal,
 #pmAddItemNameModal,
 #pmAddExpenseEntryModal,
-#expensesSummaryModal {
+#paymentReceiptModal {
   width: 620px !important;
   max-width: 96vw !important;
 }
 
+.projects-data-row td.cell-approved,
+.projects-data-row td.cell-approved span,
+.projects-data-row td .text-approved,
+tr td.cell-approved,
+tr td.cell-approved span {
+  color: #0454e4 !important;
+  font-weight: 600 !important;
+}
+
+.projects-data-row td.cell-transferred,
+.projects-data-row td.cell-transferred a,
+.projects-data-row td .text-transferred,
+tr td.cell-transferred,
+tr td.cell-transferred a {
+  color: #008744 !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  cursor: pointer !important;
+}
+
+.projects-data-row td.cell-payable,
+.projects-data-row td.cell-payable span,
+.projects-data-row td .text-payable,
+tr td.cell-payable,
+tr td.cell-payable span {
+  color: #ef4444 !important;
+  font-weight: 600 !important;
+}
+
+#expensesSummaryModal {
+  width: 1260px !important;
+  max-width: 96vw !important;
+}
+
 .side-form-container:has(#pmExpenseDetailsModal:not([style*="display: none"])),
-.side-form-container:has(#expenseItemRepresentativeModal:not([style*="display: none"])) {
+.side-form-container:has(#expenseItemRepresentativeModal:not([style*="display: none"])),
+.side-form-container:has(#expensesSummaryModal:not([style*="display: none"])) {
   max-width: 1580px !important;
   width: 98vw !important;
 }

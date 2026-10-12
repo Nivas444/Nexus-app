@@ -4176,6 +4176,7 @@
                 <select id="inpPmNewMountType" class="pm-custom-select">
                   <option value="GSM">GSM</option>
                   <option value="MW">MW</option>
+                  <option value="Dual">Dual</option>
                 </select>
               </div>
             </div>
@@ -4383,9 +4384,6 @@
                   <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
                     <span>BOQ No</span>
                   </th>
-                  <th style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <span>BOQ Date</span>
-                  </th>
                   <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
                     <span>Item Category</span>
                   </th>
@@ -4440,8 +4438,9 @@
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Document type</label>
               <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                <select id="inpPmStnDocumentType" class="pm-custom-select">
-                  <option value="STN" selected>STN</option>
+                <select id="inpPmStnDocumentType" class="pm-custom-select" onchange="updatePmStnInstallationTypeVisibility()">
+                  <option value="" disabled selected>Select Document Type</option>
+                  <option value="STN">STN</option>
                   <option value="SRN">SRN</option>
                   <option value="CAM">CAM</option>
                 </select>
@@ -4479,7 +4478,7 @@
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Description</label>
               <input type="text" id="inpPmStnInfraDesc" class="form-input-control" placeholder="Enter Infra Description" style="flex: 1; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none;">
             </div>
-            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
+            <div class="pm-field-row" id="rowPmStnInstallationType" style="display: none; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Installation Type</label>
               <div class="pm-select-wrapper" style="flex: 1; position: relative;">
                 <select id="inpPmStnInstallationType" class="pm-custom-select">
@@ -4524,9 +4523,6 @@
                   </th>
                   <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
                     <span>BOQ No</span>
-                  </th>
-                  <th style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
-                    <span>BOQ Date</span>
                   </th>
                   <th style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 8px 8px;">
                     <span>Item Category</span>
@@ -4862,6 +4858,106 @@
           </div>
         </div>
 
+        <!-- Project Manager: Material Details Modal Tab (Opened when clicking Site Name in Material Worklist) -->
+        <div class="side-form-card project-info-modal-card" id="pmMaterialsDetailModal"
+          style="display: none; width: 1260px !important; max-width: 96vw;">
+          <!-- Header Ribbon: Slanted Green Title Badge (Project Info, PO No, Site Info), Summation Icon + Value, Tick & Close Button -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 16px; height: 100%;">
+              <div class="side-form-title-badge" id="lblPmMatHeaderSlantedBadge"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 42px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 20px; margin: 0; white-space: nowrap; flex-shrink: 0;">
+                <!-- 1. Project ID / Project Type / Sub-Project Type + Copy Button -->
+                <div style="display: inline-flex; align-items: center; gap: 6px;">
+                  <span id="lblPmMatHeaderProjectInfo" style="font-weight: 700; color: #ffffff;">Project ID / Project Type / Sub-Project Type</span>
+                  <button type="button" class="btn-pm-copy" id="btnPmMatCopyProjectInfo" onclick="copyPmMatHeaderValue('projectInfo', 'Project Info')" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+                    <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+                  </button>
+                </div>
+                <!-- 2. PO No (0-Opex) + Copy Button -->
+                <div style="display: inline-flex; align-items: center; gap: 6px;">
+                  <span id="lblPmMatHeaderPoInfo" onclick="openPoCapexModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Capex PO Details">PO No (0-Opex)</span>
+                  <button type="button" class="btn-pm-copy" id="btnPmMatCopyPoInfo" onclick="copyPmMatHeaderValue('poNo', 'PO No')" title="Copy PO No" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+                    <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+                  </button>
+                </div>
+                <!-- 3. Site ID / Site Name + Copy Button -->
+                <div style="display: inline-flex; align-items: center; gap: 6px;">
+                  <span id="lblPmMatHeaderSiteInfo" onclick="openSiteInfoModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Site Details">Site ID / Site Name</span>
+                  <button type="button" class="btn-pm-copy" id="btnPmMatCopySiteInfo" onclick="copyPmMatHeaderValue('siteInfo', 'Site Info')" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+                    <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+                  </button>
+                </div>
+              </div>
+
+              <!-- Summation Icon next to header design with value near to it -->
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain;" title="Total Qty">
+                <span id="lblPmMatHeaderTotalQty" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">0.00</span>
+              </div>
+            </div>
+
+            <!-- Top Right Icons: Tick Validate & Close Button -->
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px; padding-right: 20px; flex-shrink: 0;">
+              <button type="button" class="side-top-icon-btn" id="btnPmMatValidateTick" onclick="highlightSelectedPmMaterialRow()"
+                title="Highlight / Validate Selected Row" aria-label="Validate Row"
+                style="display: none; background: transparent; border: none; padding: 0; cursor: pointer; align-items: center; justify-content: center;">
+                <img src="icons/Approve.svg" alt="Validate" width="28" height="28" style="display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmMaterialsDetailModal" onclick="closePmMaterialsDetailModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 34px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <div style="height: 14px;"></div>
+
+          <!-- Table Container with Centered Headers and Specified Content Columns -->
+          <div class="contact-table-wrap" style="padding: 0 28px 24px; overflow-x: hidden;">
+            <table class="projects-custom-table" id="tblPmMaterialDetails" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background-color: #8c9399;">
+                  <!-- 1. Select: Centered Header -->
+                  <th style="text-align: center !important; vertical-align: middle; width: 8ch; min-width: 8ch; max-width: 8ch; padding: 10px 6px; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; font-family: 'Outfit', sans-serif; white-space: nowrap;">
+                    <span>Select</span>
+                  </th>
+                  <!-- 2. Material Type: 15ch, Centered Header, Filterable -->
+                  <th style="text-align: center !important; vertical-align: middle; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; font-family: 'Outfit', sans-serif; white-space: nowrap;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      <span>Material Type</span>
+                      <button type="button" class="filter-funnel-btn" id="btnFilterPmMatType" onclick="openPmMaterialDetailFilter('materialType', event)" title="Filter Material Type">&#9660;</button>
+                    </div>
+                  </th>
+                  <!-- 3. Material Name: 40ch, Centered Header, Filterable -->
+                  <th style="text-align: center !important; vertical-align: middle; width: 40ch; min-width: 40ch; max-width: 40ch; padding: 10px 8px; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; font-family: 'Outfit', sans-serif; white-space: nowrap;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      <span>Material Name</span>
+                      <button type="button" class="filter-funnel-btn" id="btnFilterPmMatName" onclick="openPmMaterialDetailFilter('materialName', event)" title="Filter Material Name">&#9660;</button>
+                    </div>
+                  </th>
+                  <!-- 4. UOM: 10ch, Centered Header -->
+                  <th style="text-align: center !important; vertical-align: middle; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 6px; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; font-family: 'Outfit', sans-serif; white-space: nowrap;">
+                    <span>Uom</span>
+                  </th>
+                  <!-- 5. Qty: 10ch, Centered Header -->
+                  <th style="text-align: center !important; vertical-align: middle; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 10px 8px; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; font-family: 'Outfit', sans-serif; white-space: nowrap;">
+                    <span>Qty</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblPmMaterialDetailsBody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+
+            <!-- Submit icon below the last of the table as center -->
+            <div id="pmMatSubmitContainer" style="display: none; justify-content: center; align-items: center; margin-top: 18px; margin-bottom: 4px;">
+              <button type="button" class="toolbar-icon-btn" id="btnPmMatSubmitAll" onclick="submitPmMaterialsCompletion()"
+                title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36" style="display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Site Info Modal Tab (Site ID / Site Name) -->
         <div class="side-form-card project-info-modal-card" id="siteInfoModal"
           style="display: none; width: 1140px; max-width: 96vw;">
@@ -5043,6 +5139,11 @@
               Members
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <div id="pmMemberHeaderToggleWrap" style="display: none; align-items: center;">
+                <div id="btnPmMemberTopToggle" onclick="toggleSelectedPmMembersStatus()" style="width: 44px; height: 22px; border-radius: 11px; background-color: #16a34a; position: relative; cursor: pointer; transition: background-color 0.2s ease; display: inline-flex; align-items: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);" title="Toggle Member Status">
+                  <div id="knobPmMemberTopToggle" style="width: 18px; height: 18px; border-radius: 50%; background-color: #ffffff; position: absolute; top: 2px; left: 24px; transition: left 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+                </div>
+              </div>
               <button type="button" class="toolbar-icon-btn" id="btnAddMemberBtn" title="Add Member" onclick="openAddMemberModal()"
                 style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
                 <img src="icons/Add.svg" alt="Add" width="28" height="28">
@@ -5112,6 +5213,7 @@
                   <option value="Supervisor" selected>Supervisor</option>
                   <option value="Technician">Technician</option>
                   <option value="Service Vendor">Service Vendor</option>
+                  <option value="Driver">Driver</option>
                 </select>
               </div>
             </div>
@@ -5274,17 +5376,16 @@
               </div>
             </div>
 
-            <!-- 2. Item Description (Dropdown) -->
-            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+            <!-- 2. Item Description (Input with search icon and live suggestions dropdown) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; position: relative;">
               <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Item Description</label>
-              <div style="flex: 1; position: relative;">
-                <select id="selAddActivityItemDesc" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
-                  <option value="RCC Foundation for 25kVA Soundproof Canopy DG Set" selected>RCC Foundation for 25kVA Soundproof Canopy DG Set</option>
-                  <option value="4C x 70 sq.mm Armoured Copper Cable Laying & Termination">4C x 70 sq.mm Armoured Copper Cable Laying & Termination</option>
-                  <option value="Additional Structural Bracing & Antenna Mount Extension">Additional Structural Bracing & Antenna Mount Extension</option>
-                  <option value="Chemical Earthing Pit with Heavy Duty Copper Electrode">Chemical Earthing Pit with Heavy Duty Copper Electrode</option>
-                  <option value="Supply & Installation of Aviation Warning Light">Supply & Installation of Aviation Warning Light</option>
-                </select>
+              <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" id="inpAddActivityItemDesc" placeholder="Enter keywords to search description..." class="form-input-control" autocomplete="off" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box;" oninput="handleActivityItemDescInput(this.value)" onfocus="handleActivityItemDescInput(this.value, true)">
+                <button type="button" id="btnSearchAddActivityItemDesc" onclick="handleActivityItemDescInput(document.getElementById('inpAddActivityItemDesc').value, true)" title="Search Item Description" style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                  <img src="icons/Search.svg" alt="Search" style="width: 20px; height: 20px; display: block;">
+                </button>
+                <div id="dropdownAddActivityItemDesc" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1100; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
+                </div>
               </div>
             </div>
 
@@ -5529,18 +5630,23 @@
           </div>
         </div>
 
-        <!-- Payment Receipt Modal Tab (Supply Subpage / Customer Details) -->
-        <div class="side-form-card project-info-modal-card" id="paymentReceiptModal"
-          style="display: none; width: 620px; max-width: 96vw;">
+        <!-- Payment Receipt Modal Tab (Supply Subpage / Service Vendor / Project Details) -->
+        <div class="side-form-card side-contact-popup" id="paymentReceiptModal"
+          style="display: none; width: 620px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; margin: auto;">
           <!-- Header Ribbon: Slanted Green Title Badge & Red Close Button -->
-          <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblPaymentReceiptTitle">Payment Receipt</div>
-            <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal"
-              onclick="closePaymentReceiptModal()" aria-label="Close">&times;</button>
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
+            <div class="side-form-title-badge" id="lblPaymentReceiptTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              Payment Receipt</div>
+            <div class="side-header-top-icons" style="margin-left: auto;">
+              <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal"
+                onclick="closePaymentReceiptModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
+            </div>
           </div>
 
           <!-- Table Container with Centered Headers and Centered 15ch Content -->
-          <div class="contact-table-wrap" style="padding: 24px 28px 24px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 14px 24px 24px; overflow-x: auto;">
             <table class="projects-custom-table" id="tblPaymentReceiptItems"
               style="width: 100%; border-collapse: collapse;">
               <thead>
@@ -5553,7 +5659,7 @@
                     Receipt #</th>
                   <th
                     style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 10px 8px; color: #ffffff; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap;">
-                    Paid Amount</th>
+                    <span id="lblPaymentReceiptAmountCol">Paid Amount</span></th>
                 </tr>
               </thead>
               <tbody id="tblPaymentReceiptBody">
@@ -9341,96 +9447,94 @@
           </form>
         </div>
 
-        <!-- Payment Receipt Modal Tab (Triggered by clicking green amount in Supply & Service Vendor subpages) -->
-        <div class="side-form-card side-contact-popup" id="paymentReceiptModal"
-          style="display: none; width: 560px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+        <!-- Expense Summary Modal Tab (Triggered by clicking blue Summation amount in Project Expenses toolbar) -->
+        <div class="side-form-card side-contact-popup" id="expensesSummaryModal"
+          style="display: none; width: 1260px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; margin: auto;">
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
-            <div class="side-form-title-badge" id="lblPaymentReceiptTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Payment Receipt</div>
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblExpensesSummaryTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Expense Summary</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Amount">
+                <span id="lblExpensesSummaryTotalAmount" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">12,00,000.00</span>
+              </div>
+            </div>
+
             <div class="side-header-top-icons" style="margin-left: auto;">
-              <button type="button" class="side-form-close-btn" id="btnClosePaymentReceiptModal"
-                onclick="closePaymentReceiptModal()" aria-label="Close"
+              <button type="button" class="side-form-close-btn" id="btnCloseExpensesSummaryModal"
+                onclick="closeExpensesSummaryModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 20px 24px 20px; overflow-x: auto;">
-            <table class="master-custom-table" id="tblPaymentReceiptPopup"
-              style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-              <thead>
-                <tr class="master-view-header">
-                  <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px; white-space: nowrap;">
-                    <span>Payment Date</span>
-                  </th>
-                  <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px; white-space: nowrap;">
-                    <span>Receipt #</span>
-                  </th>
-                  <th
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px; white-space: nowrap;">
-                    <span id="lblPaymentReceiptAmountCol">Paid Amount</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody id="tbodyPaymentReceiptDetails">
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
-                    12/08/2026</td>
-                  <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
-                    REC-2026-901</td>
-                  <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">
-                    5,00,000.00</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
-                    25/08/2026</td>
-                  <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">
-                    REC-2026-902</td>
-                  <td
-                    style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; font-weight: 600; color: #1e293b; font-size: 0.95rem;">
-                    6,00,000.00</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <div style="height: 10px;"></div>
 
-        <!-- Expense Details Modal Tab (Triggered by clicking blue Summation amount in Project Expenses toolbar) -->
-        <div class="side-form-card project-info-modal-card" id="expensesSummaryModal"
-          style="display: none; width: 620px !important; max-width: 96vw; margin: auto;">
-          <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 12px;">
-            <div class="side-form-title-badge" id="lblExpensesSummaryTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
-              Expense Details</div>
-            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
-              <button type="button" class="side-form-close-btn" id="btnCloseExpensesSummaryModal"
-                onclick="closeExpensesSummaryModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
-            </div>
-          </div>
-          <div style="height: 14px;"></div>
-
-          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: hidden;">
+          <div class="contact-table-wrap" style="padding: 0 24px 20px 24px; overflow-x: auto;">
             <table class="projects-custom-table" id="tblExpensesSummaryPopup"
-              style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+              style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; margin: 0 auto;">
+              <colgroup>
+                <col style="width: 15ch;">
+                <col style="width: 20ch;">
+                <col style="width: 24ch;">
+                <col style="width: 14ch;">
+                <col style="width: 14ch;">
+                <col style="width: 8ch;">
+                <col style="width: 8ch;">
+                <col style="width: 10ch;">
+                <col style="width: 18ch;">
+              </colgroup>
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; padding: 12px 14px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff;">
-                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                      <span>Item name</span>
-                      <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryItemFilter" onclick="openExpensesSummaryItemFilter('itemName', event)" title="Filter Item name" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
+                  <!-- 1. Request Date: 15ch & center (rowspan 2) -->
+                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <span>Request Date</span>
+                  </th>
+                  <!-- 2. Request By: 20ch & left (rowspan 2) -->
+                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Request By</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryReqByFilter" onclick="openExpensesSummaryColFilter('requestBy', event)" title="Filter Request By" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
                     </div>
                   </th>
-                  <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 12px 14px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                  <!-- 3. Expense Type: 24ch & left (rowspan 2) -->
+                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Expense Type</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryTypeFilter" onclick="openExpensesSummaryColFilter('expenseType', event)" title="Filter Expense Type" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
+                    </div>
+                  </th>
+                  <!-- 4. Amount: colspan 2 & center -->
+                  <th colspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <span>Amount</span>
+                  </th>
+                  <!-- 5. Uom: 8ch & center (rowspan 2) -->
+                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 6px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <span>Uom</span>
+                  </th>
+                  <!-- 6. Qty: 8ch & right (rowspan 2) -->
+                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <span>Qty</span>
+                  </th>
+                  <!-- 7. Rate: 10ch & right (rowspan 2) -->
+                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <span>Rate</span>
+                  </th>
+                  <!-- 8. Status: 18ch & left (rowspan 2) -->
+                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Status</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryStatusFilter" onclick="openExpensesSummaryColFilter('status', event)" title="Filter Status" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
+                    </div>
+                  </th>
+                </tr>
+                <tr style="background-color: #8c9399;">
+                  <!-- Subcolumns under Amount -->
+                  <th style="text-align: center !important; vertical-align: middle; padding: 8px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <span>Request</span>
+                  </th>
+                  <th style="text-align: center !important; vertical-align: middle; padding: 8px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <span>Approved</span>
                   </th>
                 </tr>
               </thead>

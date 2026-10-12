@@ -694,7 +694,7 @@ const projectExpensesData = [
     id: "exp-1",
     requestDate: "12-10-2026",
     requestBy: "Aakash Sharma",
-    expenseDescription: "Diesel Generator Set 15kVA Silent Type Installation",
+    expenseType: "Operational Expenses",
     request: "1,60,000.00",
     approved: "1,50,000.00",
     transferred: "1,20,000.00",
@@ -706,13 +706,25 @@ const projectExpensesData = [
     id: "exp-2",
     requestDate: "10-10-2026",
     requestBy: "Vikram Patel",
-    expenseDescription: "Site Survey, Soil Testing & Foundation Works",
+    expenseType: "Non-standard Expenses",
     request: "50,000.00",
     approved: "45,000.00",
     transferred: "45,000.00",
     payable: "0.00",
     transferTo: "GeoTech Surveyors Ltd",
     status: "Completed"
+  },
+  {
+    id: "exp-3",
+    requestDate: "08-10-2026",
+    requestBy: "Suresh Kumar",
+    expenseType: "Service Vendor Payment",
+    request: "2,00,000.00",
+    approved: "1,80,000.00",
+    transferred: "1,50,000.00",
+    payable: "30,000.00",
+    transferTo: "Sri Vari Infra Structures",
+    status: "Partially Transferred"
   }
 ];
 
@@ -4193,7 +4205,23 @@ window.handleJmsDetailSubmitClick = function() {
 
   if (taskStr.includes('pending') || taskStr.includes('approval')) {
     openJmsPdfUploadModal();
-  } else if (taskStr.includes('validate') || taskStr.includes('commercial')) {
+  } else if (taskStr.includes('validate')) {
+    // Where task is jms to be validate, task completion popup appears instead of select worktype modal
+    if (selectedJmsRowId) {
+      const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId));
+      if (parentRow) {
+        parentRow.task = "JMS to be process";
+      }
+    }
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Task Completed');
+    } else {
+      showToast('Task completed successfully!');
+    }
+    setTimeout(() => {
+      backToJmsList();
+    }, 1200);
+  } else if (taskStr.includes('commercial')) {
     openJmsSelectWorkTypeModal();
   } else {
     submitJmsDetail();
@@ -6435,6 +6463,241 @@ function syncPmMaterialsDataWithNewProject() {
   });
 }
 
+// ==========================================================================
+// WORKLIST: STN & SRN DATA STORES & STATUS SEQUENCES
+// ==========================================================================
+const STN_STATUS_SEQUENCE = [
+  'BOQ Request Pending',
+  'BOQ Pending',
+  'To be Taken',
+  'Dispatch Request Pending',
+  'Dispatch Request Send',
+  'Taken'
+];
+
+const SRN_STATUS_SEQUENCE = [
+  'BOQ Request Pending',
+  'BOQ Pending',
+  'Document Pending',
+  'To Be Complete',
+  'Dispatch Request Pending',
+  'To Be Returned'
+];
+
+const defaultWorklistStnItems = [
+  {
+    id: "stn-1",
+    stnNo: "STN-2026-001",
+    boqNo: "BOQ-2026-101",
+    projectId: "PRJ-2026-001",
+    siteName: "Guindy Central Hub",
+    infraCategory: "Civil",
+    qty: "10.00",
+    status: "BOQ Request Pending",
+    ageing: "3 Days",
+    remarks: "i-map pending",
+    selected: false
+  },
+  {
+    id: "stn-2",
+    stnNo: "STN-2026-002",
+    boqNo: "BOQ-2026-102",
+    projectId: "PRJ-2026-002",
+    siteName: "Ambattur Industrial Estate",
+    infraCategory: "Electrical",
+    qty: "25.00",
+    status: "BOQ Pending",
+    ageing: "6 Days",
+    remarks: "received",
+    selected: false
+  },
+  {
+    id: "stn-3",
+    stnNo: "STN-2026-003",
+    boqNo: "BOQ-2026-103",
+    projectId: "PRJ-2026-003",
+    siteName: "Madurai East Tower",
+    infraCategory: "Power",
+    qty: "8.00",
+    status: "To be Taken",
+    ageing: "11 Days",
+    remarks: "i-map pending",
+    selected: false
+  },
+  {
+    id: "stn-4",
+    stnNo: "STN-2026-004",
+    boqNo: "BOQ-2026-104",
+    projectId: "PRJ-2026-004",
+    siteName: "Coimbatore South Hub",
+    infraCategory: "Tower Infra",
+    qty: "4.00",
+    status: "Dispatch Request Pending",
+    ageing: "14 Days",
+    remarks: "received",
+    selected: false
+  },
+  {
+    id: "stn-5",
+    stnNo: "STN-2026-005",
+    boqNo: "BOQ-2026-105",
+    projectId: "PRJ-2026-005",
+    siteName: "Salem Steel Plant Node",
+    infraCategory: "Telecom",
+    qty: "18.00",
+    status: "Dispatch Request Send",
+    ageing: "18 Days",
+    remarks: "i-map pending",
+    selected: false
+  },
+  {
+    id: "stn-6",
+    stnNo: "STN-2026-006",
+    boqNo: "BOQ-2026-106",
+    projectId: "PRJ-2026-006",
+    siteName: "Trichy Central Junction",
+    infraCategory: "Civil",
+    qty: "30.00",
+    status: "Taken",
+    ageing: "22 Days",
+    remarks: "received",
+    selected: false
+  }
+];
+
+const defaultWorklistSrnItems = [
+  {
+    id: "srn-1",
+    srnNo: "SRN-2026-001",
+    boqNo: "BOQ-SRN-101",
+    projectId: "PRJ-2026-001",
+    siteName: "Guindy Central Hub",
+    infraCategory: "Power",
+    qty: "5.00",
+    status: "BOQ Request Pending",
+    ageing: "4 Days",
+    remarks: "i-map pending",
+    selected: false
+  },
+  {
+    id: "srn-2",
+    srnNo: "SRN-2026-002",
+    boqNo: "BOQ-SRN-102",
+    projectId: "PRJ-2026-002",
+    siteName: "Ambattur Industrial Estate",
+    infraCategory: "Electrical",
+    qty: "12.00",
+    status: "BOQ Pending",
+    ageing: "7 Days",
+    remarks: "received",
+    selected: false
+  },
+  {
+    id: "srn-3",
+    srnNo: "SRN-2026-003",
+    boqNo: "BOQ-SRN-103",
+    projectId: "PRJ-2026-003",
+    siteName: "Madurai East Tower",
+    infraCategory: "Civil",
+    qty: "8.00",
+    status: "Document Pending",
+    ageing: "10 Days",
+    remarks: "i-map pending",
+    selected: false
+  },
+  {
+    id: "srn-4",
+    srnNo: "SRN-2026-004",
+    boqNo: "BOQ-SRN-104",
+    projectId: "PRJ-2026-004",
+    siteName: "Coimbatore South Hub",
+    infraCategory: "Tower Infra",
+    qty: "2.00",
+    status: "To Be Complete",
+    ageing: "15 Days",
+    remarks: "received",
+    selected: false
+  },
+  {
+    id: "srn-5",
+    srnNo: "SRN-2026-005",
+    boqNo: "BOQ-SRN-105",
+    projectId: "PRJ-2026-005",
+    siteName: "Salem Steel Plant Node",
+    infraCategory: "Telecom",
+    qty: "15.00",
+    status: "Dispatch Request Pending",
+    ageing: "19 Days",
+    remarks: "i-map pending",
+    selected: false
+  },
+  {
+    id: "srn-6",
+    srnNo: "SRN-2026-006",
+    boqNo: "BOQ-SRN-106",
+    projectId: "PRJ-2026-006",
+    siteName: "Trichy Central Junction",
+    infraCategory: "Rectifier",
+    qty: "3.00",
+    status: "To Be Returned",
+    ageing: "25 Days",
+    remarks: "received",
+    selected: false
+  }
+];
+
+function normalizeWorklistQtyVal(q) {
+  const num = parseFloat(q);
+  return !isNaN(num) ? num.toFixed(2) : '0.00';
+}
+
+function normalizeWorklistRemarksVal(rem, idx = 0) {
+  const r = String(rem || '').toLowerCase().trim();
+  if (r === 'received' || r === 'receive') return 'received';
+  if (r === 'i-map pending' || r === 'imap pending' || r === 'i map pending') return 'i-map pending';
+  return (idx % 2 === 0) ? 'i-map pending' : 'received';
+}
+
+let worklistStnData = defaultWorklistStnItems.map((item, idx) => ({
+  ...item,
+  qty: normalizeWorklistQtyVal(item.qty),
+  remarks: normalizeWorklistRemarksVal(item.remarks, idx)
+}));
+
+let worklistSrnData = defaultWorklistSrnItems.map((item, idx) => ({
+  ...item,
+  qty: normalizeWorklistQtyVal(item.qty),
+  remarks: normalizeWorklistRemarksVal(item.remarks, idx)
+}));
+
+try {
+  const savedStn = localStorage.getItem('worklistStnData');
+  if (savedStn) {
+    const parsed = JSON.parse(savedStn);
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].stnNo) {
+      worklistStnData = parsed.map((item, idx) => ({
+        ...item,
+        qty: normalizeWorklistQtyVal(item.qty),
+        remarks: normalizeWorklistRemarksVal(item.remarks, idx)
+      }));
+    }
+  }
+} catch(e) {}
+
+try {
+  const savedSrn = localStorage.getItem('worklistSrnData');
+  if (savedSrn) {
+    const parsed = JSON.parse(savedSrn);
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].srnNo) {
+      worklistSrnData = parsed.map((item, idx) => ({
+        ...item,
+        qty: normalizeWorklistQtyVal(item.qty),
+        remarks: normalizeWorklistRemarksVal(item.remarks, idx)
+      }));
+    }
+  }
+} catch(e) {}
+
 let currentDataset = [...poData];
 let filteredDataset = [...poData];
 
@@ -6591,7 +6854,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentModule = 'worklist';
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
-      const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'materials', 'jms', 'jms_detail', 'email'];
+      const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'materials', 'jms', 'jms_detail', 'stn', 'srn', 'email'];
       const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.srn || pmProjectFeatureSettings.cam);
       if (!isStnOrCam && ['yts', 'wip', 'hold', 'nr'].includes(viewParam)) {
         currentWorklistView = 'project_update';
@@ -10157,7 +10420,7 @@ function renderPmStnMaterialsTable() {
   if (pmStnMaterialsData.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.92rem;">No STN materials added yet.</td>
+        <td colspan="8" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.92rem;">No STN materials added yet.</td>
       </tr>
     `;
     return;
@@ -10171,7 +10434,6 @@ function renderPmStnMaterialsTable() {
         <input type="checkbox" name="chkPmStnMaterial" class="pm-circle-radio" ${pmSelectedStnMaterialIds.has(item.id) ? 'checked' : ''} onchange="togglePmStnMaterialSelect(${item.id})">
       </td>
       <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqNo}</td>
-      <td style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqDate}</td>
       <td style="width: 15ch; min-width: 15ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.itemCategory}</td>
       <td style="width: 30ch; min-width: 30ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.infraDesc}</td>
       <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.installationType}</td>
@@ -10271,6 +10533,18 @@ window.openPmAddStnFromInfra = function() {
   if (title) title.textContent = 'Add Infra';
 };
 
+window.updatePmStnInstallationTypeVisibility = function() {
+  const docTypeEl = document.getElementById('inpPmStnDocumentType');
+  const installRow = document.getElementById('rowPmStnInstallationType');
+  if (installRow) {
+    if (docTypeEl && docTypeEl.value === 'STN') {
+      installRow.style.display = 'flex';
+    } else {
+      installRow.style.display = 'none';
+    }
+  }
+};
+
 window.openPmAddStnMaterialsModal = function(editItem) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -10297,7 +10571,7 @@ window.openPmAddStnMaterialsModal = function(editItem) {
     pmEditingStnMaterialId = null;
     const title = document.getElementById('lblPmAddStnMaterialsTitle');
     if (title) title.textContent = window.pmAddStnOpenedFromInfra ? 'Add Infra' : 'Add STN Materials';
-    if (document.getElementById('inpPmStnDocumentType')) document.getElementById('inpPmStnDocumentType').value = 'STN';
+    if (document.getElementById('inpPmStnDocumentType')) document.getElementById('inpPmStnDocumentType').value = '';
     if (document.getElementById('inpPmStnBoqNo')) document.getElementById('inpPmStnBoqNo').value = '';
     if (document.getElementById('inpPmStnBoqDate')) document.getElementById('inpPmStnBoqDate').value = '';
     if (document.getElementById('inpPmStnItemCategory')) document.getElementById('inpPmStnItemCategory').value = '';
@@ -10307,6 +10581,8 @@ window.openPmAddStnMaterialsModal = function(editItem) {
     if (document.getElementById('inpPmStnUom')) document.getElementById('inpPmStnUom').value = '';
     if (document.getElementById('inpPmStnQty')) document.getElementById('inpPmStnQty').value = '';
   }
+
+  updatePmStnInstallationTypeVisibility();
 
   const modal = document.getElementById('pmAddStnMaterialsModal');
   if (modal) {
@@ -10408,6 +10684,11 @@ window.savePmNewStnMaterial = function() {
   }
 
   renderPmStnMaterialsTable();
+  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'stn') {
+    currentDataset = pmStnMaterialsData.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  }
   closePmAddStnMaterialsModal();
 };
 
@@ -10433,7 +10714,7 @@ function renderPmSrnMaterialsTable() {
   if (pmSrnMaterialsData.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.92rem;">No SRN materials added yet.</td>
+        <td colspan="7" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.92rem;">No SRN materials added yet.</td>
       </tr>
     `;
     return;
@@ -10447,7 +10728,6 @@ function renderPmSrnMaterialsTable() {
         <input type="checkbox" name="chkPmSrnMaterial" class="pm-circle-radio" ${pmSelectedSrnMaterialIds.has(item.id) ? 'checked' : ''} onchange="togglePmSrnMaterialSelect(${item.id})">
       </td>
       <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqNo}</td>
-      <td style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqDate}</td>
       <td style="width: 15ch; min-width: 15ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.itemCategory}</td>
       <td style="width: 30ch; min-width: 30ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.infraDesc}</td>
       <td style="width: 15ch; min-width: 15ch; text-align: left !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.make}</td>
@@ -10637,6 +10917,11 @@ window.savePmNewSrnMaterial = function() {
   }
 
   renderPmSrnMaterialsTable();
+  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'srn') {
+    currentDataset = pmSrnMaterialsData.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  }
   closePmAddSrnMaterialsModal();
 };
 
@@ -10970,6 +11255,298 @@ window.closePoCapexModal = function() {
   }
 };
 
+// ==========================================================================
+// PROJECT MANAGER: MATERIAL DETAILS MODAL CONTROLLER
+// ==========================================================================
+let defaultPmMaterialDetailItems = [
+  { id: 'pmat-1', materialType: 'Electrical', materialName: 'Copper Earthing Cable 50 Sq.mm', uom: 'Mtr', qty: '150.00', selected: false, highlighted: false },
+  { id: 'pmat-2', materialType: 'Civil', materialName: 'Ready Mix Concrete M25 Grade', uom: 'Cum', qty: '18.50', selected: false, highlighted: false },
+  { id: 'pmat-3', materialType: 'Height', materialName: 'Tower Climbing Safety Harness & Lanyard', uom: 'Nos', qty: '4.00', selected: false, highlighted: false },
+  { id: 'pmat-4', materialType: 'Electrical', materialName: 'Surge Protection Device (SPD) Class B+C', uom: 'Nos', qty: '6.00', selected: false, highlighted: false },
+  { id: 'pmat-5', materialType: 'Civil', materialName: 'Galvanized Steel Foundation Bolts M24', uom: 'Nos', qty: '24.00', selected: false, highlighted: false }
+];
+
+let pmMaterialsDetailStore = {};
+
+window.activePmMaterialDetailFilters = {};
+window.currentPmMaterialDetailFilterCol = null;
+window.activePmMaterialModalRow = null;
+window.currentPmMaterialItems = [];
+
+window.openPmMaterialsDetailModal = function(rowId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'pmMaterialsDetailModal') card.style.display = 'none';
+  });
+
+  const row = (pmMaterialsDataStore || []).find(r => String(r.id) === String(rowId)) ||
+              (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              { id: rowId, siteName: 'Guindy Hub', projectId: 'PRJ-2026-001', siteId: 'IN-123456', projectType: 'New Build', subProjectType: 'Civil Foundation' };
+  
+  window.activePmMaterialModalRow = row;
+
+  // Header Details
+  const prjInfo = document.getElementById('lblPmMatHeaderProjectInfo');
+  if (prjInfo) {
+    prjInfo.textContent = `${row.projectId || 'PRJ-2026-001'} / ${row.projectType || 'New Build'} / ${row.subProjectType || 'Civil Foundation'}`;
+  }
+
+  const poInfo = document.getElementById('lblPmMatHeaderPoInfo');
+  if (poInfo) {
+    poInfo.textContent = `${row.poNo || 'PO-2026-001'} (0-Opex)`;
+  }
+
+  const siteInfo = document.getElementById('lblPmMatHeaderSiteInfo');
+  if (siteInfo) {
+    siteInfo.textContent = `${row.siteId || 'IN-123456'} / ${row.siteName || 'Site Name'}`;
+  }
+
+  // Load items for this site
+  if (!pmMaterialsDetailStore[row.id]) {
+    pmMaterialsDetailStore[row.id] = defaultPmMaterialDetailItems.map((item, idx) => ({
+      ...item,
+      id: `pmat-${row.id}-${idx + 1}`,
+      selected: false,
+      highlighted: false
+    }));
+  }
+
+  window.currentPmMaterialItems = pmMaterialsDetailStore[row.id];
+  window.activePmMaterialDetailFilters = {};
+
+  const tickBtn = document.getElementById('btnPmMatValidateTick');
+  if (tickBtn) tickBtn.style.display = 'none';
+
+  renderPmMaterialDetailTable();
+
+  const modal = document.getElementById('pmMaterialsDetailModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closePmMaterialsDetailModal = function() {
+  const modal = document.getElementById('pmMaterialsDetailModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+  window.activePmMaterialModalRow = null;
+};
+
+window.renderPmMaterialDetailTable = function() {
+  const tbody = document.getElementById('tblPmMaterialDetailsBody');
+  if (!tbody) return;
+
+  const allItems = window.currentPmMaterialItems || [];
+
+  // Filter items
+  const filtered = allItems.filter(item => {
+    for (const [colKey, allowedSet] of Object.entries(window.activePmMaterialDetailFilters || {})) {
+      const cellVal = String(item[colKey] !== undefined ? item[colKey] : '');
+      if (!allowedSet.has(cellVal)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  // Calculate summation value
+  const totalQty = filtered.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0);
+  const totalQtyEl = document.getElementById('lblPmMatHeaderTotalQty');
+  if (totalQtyEl) {
+    totalQtyEl.textContent = totalQty.toFixed(2);
+  }
+
+  // Tick Icon appears when user selects row using select column
+  const hasUnconfirmedSelected = allItems.some(it => it.selected && !it.highlighted);
+  const tickBtn = document.getElementById('btnPmMatValidateTick');
+  if (tickBtn) {
+    tickBtn.style.display = hasUnconfirmedSelected ? 'inline-flex' : 'none';
+  }
+
+  // If all rows are highlighted, submit icon appears as center below table
+  const allHighlighted = allItems.length > 0 && allItems.every(it => it.highlighted);
+  const submitContainer = document.getElementById('pmMatSubmitContainer');
+  if (submitContainer) {
+    submitContainer.style.display = allHighlighted ? 'flex' : 'none';
+  }
+
+  // Update filter buttons appearance
+  const btnType = document.getElementById('btnFilterPmMatType');
+  if (btnType) {
+    if (window.activePmMaterialDetailFilters && window.activePmMaterialDetailFilters['materialType']) {
+      btnType.classList.add('has-active-filter');
+    } else {
+      btnType.classList.remove('has-active-filter');
+    }
+  }
+  const btnName = document.getElementById('btnFilterPmMatName');
+  if (btnName) {
+    if (window.activePmMaterialDetailFilters && window.activePmMaterialDetailFilters['materialName']) {
+      btnName.classList.add('has-active-filter');
+    } else {
+      btnName.classList.remove('has-active-filter');
+    }
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 32px; color: #64748b; font-size: 0.95rem;">No material records match filter.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(item => {
+    const rawQty = parseFloat(item.qty);
+    const formattedQty = !isNaN(rawQty) ? rawQty.toFixed(2) : (item.qty || '0.00');
+    const isHighlighted = !!item.highlighted;
+    const isSelected = !!item.selected;
+    let rowBgStyle = '';
+    if (isHighlighted) {
+      rowBgStyle = 'background-color: #dcfce7 !important; transition: background-color 0.25s ease;';
+    } else if (isSelected) {
+      rowBgStyle = 'background-color: rgba(0, 203, 160, 0.08) !important;';
+    }
+
+    return `
+      <tr class="${isSelected ? 'row-selected' : ''} ${isHighlighted ? 'row-highlighted' : ''}" style="border-bottom: 1px solid #e2e8f0; ${rowBgStyle}">
+        <!-- 1. Select: 8ch & center (Circle radio button with green select marker) -->
+        <td class="td-select" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+          <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="togglePmMaterialDetailItemSelect('${item.id}')" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
+        </td>
+        <!-- 2. Material Type: 15ch & left -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; font-weight: 500; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${item.materialType || ''}
+        </td>
+        <!-- 3. Material Name: 40ch & left -->
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; font-weight: 500; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialName || '').replace(/"/g, '&quot;')}">
+          ${item.materialName || ''}
+        </td>
+        <!-- 4. UOM: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; color: #1e293b; font-weight: 500;">
+          ${item.uom || ''}
+        </td>
+        <!-- 5. Qty: 10ch & right (.00 format) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 8px; font-weight: 600; color: #0f172a;">
+          ${formattedQty}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.togglePmMaterialDetailItemSelect = function(itemId) {
+  const item = (window.currentPmMaterialItems || []).find(it => String(it.id) === String(itemId));
+  if (item) {
+    item.selected = !item.selected;
+    if (!item.selected) {
+      item.highlighted = false;
+    }
+  }
+  renderPmMaterialDetailTable();
+};
+
+window.highlightSelectedPmMaterialRow = function() {
+  const allItems = window.currentPmMaterialItems || [];
+  let highlightedCount = 0;
+  allItems.forEach(item => {
+    if (item.selected) {
+      item.highlighted = true;
+      // Keep item.selected = true so select marker remains present until user explicitly unselects it
+      highlightedCount++;
+    }
+  });
+
+  renderPmMaterialDetailTable();
+  if (highlightedCount > 0) {
+    showToast(`${highlightedCount} row${highlightedCount > 1 ? 's' : ''} highlighted`);
+  }
+};
+
+window.submitPmMaterialsCompletion = function() {
+  closePmMaterialsDetailModal();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Material verification completed and submitted successfully!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Task completed successfully!');
+  }
+};
+
+window.openPmMaterialDetailFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  window.currentPmMaterialDetailFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+  if (!dropdown) return;
+
+  if (searchInput) searchInput.value = '';
+
+  const allItems = window.currentPmMaterialItems || [];
+  const uniqueValues = Array.from(new Set(allItems.map(r => String(r[colKey] || ''))))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = window.activePmMaterialDetailFilters ? window.activePmMaterialDetailFilters[colKey] : null;
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : (colKey === 'materialType' ? document.getElementById('btnFilterPmMatType') : document.getElementById('btnFilterPmMatName'));
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'pmMaterialDetail';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
+
+window.copyPmMatHeaderValue = function(fieldKey, label) {
+  if (!window.activePmMaterialModalRow) return;
+  const row = window.activePmMaterialModalRow;
+  let textToCopy = '';
+  if (fieldKey === 'projectInfo') {
+    textToCopy = `${row.projectId || 'PRJ-2026-001'} / ${row.projectType || 'New Build'} / ${row.subProjectType || 'Civil Foundation'}`;
+  } else if (fieldKey === 'poNo') {
+    textToCopy = `${row.poNo || 'PO-2026-001'} (0-Opex)`;
+  } else if (fieldKey === 'siteInfo') {
+    textToCopy = `${row.siteId || 'IN-123456'} / ${row.siteName || 'Guindy Hub'}`;
+  }
+
+  if (textToCopy) {
+    if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast(`Copied ${label}: ${textToCopy}`);
+      }).catch(() => {
+        showToast(`Copied ${label}: ${textToCopy}`);
+      });
+    } else {
+      showToast(`Copied ${label}: ${textToCopy}`);
+    }
+  }
+};
+
 let siteInfoDataStore = [
   { id: 'site-mem-1', name: 'Rajesh Kumar', designation: 'Site Engineer', contact: '+91 9876543210', email: 'rajesh.k@telecom.in', status: 'Active', selected: false },
   { id: 'site-mem-2', name: 'Anand Sundaram', designation: 'Project Manager', contact: '+91 9845012345', email: 'anand.s@telecom.in', status: 'Active', selected: false },
@@ -11256,14 +11833,30 @@ window.renderPmMembersTable = function() {
   const tbody = document.getElementById('tblMembersBody');
   if (!tbody) return;
 
+  const headerToggleWrap = document.getElementById('pmMemberHeaderToggleWrap');
+  const selectedRows = pmMembersDataStore.filter(r => r.selected);
+  if (headerToggleWrap) {
+    if (selectedRows.length > 0) {
+      headerToggleWrap.style.display = 'inline-flex';
+      const anyActive = selectedRows.some(r => r.status === 'Active');
+      const topToggle = document.getElementById('btnPmMemberTopToggle');
+      const topKnob = document.getElementById('knobPmMemberTopToggle');
+      if (topToggle) topToggle.style.backgroundColor = anyActive ? '#16a34a' : '#ef4444';
+      if (topKnob) topKnob.style.left = anyActive ? '24px' : '2px';
+    } else {
+      headerToggleWrap.style.display = 'none';
+    }
+  }
+
   if (pmMembersDataStore.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">No members assigned.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = pmMembersDataStore.map(row => {
+    const isActive = (row.status || 'Active') === 'Active';
     return `
-      <tr style="border-bottom: 1px solid #e2e8f0;">
+      <tr style="border-bottom: 1px solid #e2e8f0; background: ${row.selected ? '#f0fdf4' : 'transparent'};">
         <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
           <div class="circular-radio-btn" onclick="togglePmMemberSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${row.selected ? '#008744' : '#94a3b8'}; background: ${row.selected ? '#008744' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${row.selected ? 'Unselect' : 'Select'}">
             ${row.selected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
@@ -11272,10 +11865,25 @@ window.renderPmMembersTable = function() {
         <td style="text-align: left; width: 25ch; min-width: 25ch; max-width: 25ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${row.name || ''}</td>
         <td style="text-align: left; width: 20ch; min-width: 20ch; max-width: 20ch; padding: 12px 12px; color: #334155; font-size: 0.9rem;">${row.designation || ''}</td>
         <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">${row.contact || ''}</td>
-        <td style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px; color: #16a34a; font-weight: 600; font-size: 0.9rem;">${row.status || 'Active'}</td>
+        <td style="text-align: center; width: 10ch; min-width: 10ch; max-width: 10ch; padding: 12px 8px;">
+          <span style="color: ${isActive ? '#16a34a' : '#ef4444'}; font-weight: 600; font-size: 0.9rem;">${row.status || 'Active'}</span>
+        </td>
       </tr>
     `;
   }).join('');
+};
+
+window.toggleSelectedPmMembersStatus = function() {
+  const selectedRows = pmMembersDataStore.filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    showToast('Please select a member row first.');
+    return;
+  }
+  const anyActive = selectedRows.some(r => r.status === 'Active');
+  selectedRows.forEach(r => {
+    r.status = anyActive ? 'Inactive' : 'Active';
+  });
+  renderPmMembersTable();
 };
 
 window.togglePmMemberSelect = function(memId) {
@@ -11390,50 +11998,89 @@ window.submitMembersTask = function() {
 window.activeExpensesSummaryItemFilters = window.activeExpensesSummaryItemFilters || {};
 window.currentExpensesSummaryItemFilterCol = null;
 
-window.getExpensesSummaryItemsWithAmounts = function() {
-  const baseItems = typeof getExpenseItemsList === 'function' ? getExpenseItemsList() : [
-    { id: 'exp-item-op', itemName: 'Operational Expenses' }
-  ];
-  const hasNonStd = baseItems.some(it => it.itemName === 'Non-standard Expenses');
-  const hasSV = baseItems.some(it => it.itemName === 'Service Vendor Payment');
-
-  return baseItems.map(item => {
-    let amt = '0.00';
-    if (item.itemName === 'Operational Expenses') {
-      if (hasNonStd && hasSV) amt = '6,00,000.00';
-      else if (hasNonStd) amt = '8,50,000.00';
-      else if (hasSV) amt = '9,50,000.00';
-      else amt = '12,00,000.00';
-    } else if (item.itemName === 'Non-standard Expenses') {
-      amt = '3,50,000.00';
-    } else if (item.itemName === 'Service Vendor Payment') {
-      amt = '2,50,000.00';
-    } else {
-      amt = '0.00';
-    }
-    return {
-      id: item.id,
-      itemName: item.itemName,
-      amount: amt
-    };
-  });
-};
+window.expensesSummaryDataStore = [
+  {
+    id: "es-1",
+    requestDate: "12-10-2026",
+    requestBy: "Aakash Sharma",
+    expenseType: "Operational Expenses",
+    request: "6,00,000.00",
+    approved: "6,00,000.00",
+    amount: "6,00,000.00",
+    uom: "Sq.Ft",
+    qty: "150.00",
+    rate: "4,000.00",
+    status: "Approved"
+  },
+  {
+    id: "es-2",
+    requestDate: "10-10-2026",
+    requestBy: "Vikram Patel",
+    expenseType: "Non-standard Expenses",
+    request: "3,50,000.00",
+    approved: "3,50,000.00",
+    amount: "3,50,000.00",
+    uom: "Nos",
+    qty: "10.00",
+    rate: "35,000.00",
+    status: "Completed"
+  },
+  {
+    id: "es-3",
+    requestDate: "08-10-2026",
+    requestBy: "Suresh Kumar",
+    expenseType: "Service Vendor Payment",
+    request: "2,50,000.00",
+    approved: "2,50,000.00",
+    amount: "2,50,000.00",
+    uom: "Nos",
+    qty: "5.00",
+    rate: "50,000.00",
+    status: "Approved"
+  }
+];
 
 window.renderExpensesSummaryDetailsTable = function() {
   const tbody = document.getElementById('tbodyExpensesSummaryDetails');
   if (!tbody) return;
 
-  let items = getExpensesSummaryItemsWithAmounts();
+  let items = window.expensesSummaryDataStore || [];
 
-  if (window.activeExpensesSummaryItemFilters && window.activeExpensesSummaryItemFilters['itemName']) {
-    const allowed = window.activeExpensesSummaryItemFilters['itemName'];
-    items = items.filter(it => allowed.has(it.itemName));
+  for (const [colKey, allowedSet] of Object.entries(window.activeExpensesSummaryItemFilters || {})) {
+    if (allowedSet && allowedSet instanceof Set) {
+      items = items.filter(it => allowedSet.has(String(it[colKey] !== undefined ? it[colKey] : '')));
+    }
+  }
+
+  // Update filter buttons appearance
+  ['requestBy', 'expenseType', 'status'].forEach(col => {
+    const btnId = col === 'requestBy' ? 'btnExpensesSummaryReqByFilter' :
+                  col === 'expenseType' ? 'btnExpensesSummaryTypeFilter' :
+                  'btnExpensesSummaryStatusFilter';
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      if (window.activeExpensesSummaryItemFilters && window.activeExpensesSummaryItemFilters[col]) {
+        btn.classList.add('has-active-filter');
+      } else {
+        btn.classList.remove('has-active-filter');
+      }
+    }
+  });
+
+  // Calculate dynamic sum of amount column
+  const totalAmt = items.reduce((sum, it) => {
+    const val = parseFloat(String(it.approved || it.amount || it.request || '0').replace(/,/g, ''));
+    return sum + (isNaN(val) ? 0 : val);
+  }, 0);
+  const totalEl = document.getElementById('lblExpensesSummaryTotalAmount');
+  if (totalEl) {
+    totalEl.textContent = typeof formatIndianCurrencyNumber === 'function' ? formatIndianCurrencyNumber(totalAmt) : totalAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   if (items.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="2" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No items found</td>
+        <td colspan="9" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No expense records match filter.</td>
       </tr>
     `;
     return;
@@ -11441,19 +12088,47 @@ window.renderExpensesSummaryDetailsTable = function() {
 
   tbody.innerHTML = items.map((item, idx) => `
     <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
-      <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 12px 18px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(item.itemName || '').replace(/"/g, '&quot;')}">
-        <a href="#" onclick="openExpenseItemRepresentativeModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-expense-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
-          ${item.itemName}
-        </a>
+      <!-- 1. Request Date -->
+      <td style="text-align: center !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; white-space: nowrap; border: 1px solid #e2e8f0;">
+        ${item.requestDate || ''}
       </td>
-      <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 12px 18px; color: #0f172a; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
-        ${item.amount}
+      <!-- 2. Request By -->
+      <td style="text-align: left !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #e2e8f0;" title="${(item.requestBy || '').replace(/"/g, '&quot;')}">
+        ${item.requestBy || ''}
+      </td>
+      <!-- 3. Expense Type -->
+      <td style="text-align: left !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #e2e8f0;" title="${(item.expenseType || '').replace(/"/g, '&quot;')}">
+        ${item.expenseType || ''}
+      </td>
+      <!-- 4. Amount - Request -->
+      <td style="text-align: right !important; padding: 10px 8px; color: #0f172a; font-size: 0.92rem; font-weight: 600; white-space: nowrap; border: 1px solid #e2e8f0;">
+        ${item.request || item.amount || '0.00'}
+      </td>
+      <!-- 5. Amount - Approved -->
+      <td style="text-align: right !important; padding: 10px 8px; color: #0454e4; font-size: 0.92rem; font-weight: 600; white-space: nowrap; border: 1px solid #e2e8f0;">
+        ${item.approved || item.amount || '0.00'}
+      </td>
+      <!-- 6. Uom -->
+      <td style="text-align: center !important; padding: 10px 6px; color: #1e293b; font-size: 0.92rem; white-space: nowrap; border: 1px solid #e2e8f0;">
+        ${item.uom || ''}
+      </td>
+      <!-- 7. Qty -->
+      <td style="text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; white-space: nowrap; border: 1px solid #e2e8f0;">
+        ${item.qty || '0.00'}
+      </td>
+      <!-- 8. Rate -->
+      <td style="text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; white-space: nowrap; border: 1px solid #e2e8f0;">
+        ${item.rate || '0.00'}
+      </td>
+      <!-- 9. Status -->
+      <td style="text-align: left !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #e2e8f0;" title="${(item.status || '').replace(/"/g, '&quot;')}">
+        ${item.status || ''}
       </td>
     </tr>
   `).join('');
 };
 
-window.openExpensesSummaryItemFilter = function(colKey, event) {
+window.openExpensesSummaryColFilter = function(colKey, event) {
   if (event) event.stopPropagation();
   window.currentExpensesSummaryItemFilterCol = colKey;
   const dropdown = document.getElementById('excelFilterDropdown');
@@ -11464,8 +12139,8 @@ window.openExpensesSummaryItemFilter = function(colKey, event) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const allItems = getExpensesSummaryItemsWithAmounts();
-  const uniqueValues = Array.from(new Set(allItems.map(r => r.itemName)))
+  const allItems = window.expensesSummaryDataStore || [];
+  const uniqueValues = Array.from(new Set(allItems.map(r => String(r[colKey] || ''))))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const activeSet = window.activeExpensesSummaryItemFilters[colKey];
@@ -11498,6 +12173,7 @@ window.openExpensesSummaryItemFilter = function(colKey, event) {
   dropdown.style.left = `${Math.min(rect.left, window.innerWidth - 240)}px`;
   dropdown.style.zIndex = '99999';
 };
+window.openExpensesSummaryItemFilter = window.openExpensesSummaryColFilter;
 
 window.openExpensesSummaryModal = function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
@@ -11510,7 +12186,7 @@ window.openExpensesSummaryModal = function(titleText) {
 
   const titleBadge = document.getElementById('lblExpensesSummaryTitle');
   if (titleBadge) {
-    titleBadge.textContent = titleText || 'Expense Details';
+    titleBadge.textContent = titleText || 'Expense Summary';
   }
 
   const modal = document.getElementById('expensesSummaryModal');
@@ -12377,6 +13053,67 @@ window.toggleSelectAllApprovals = function() {
   renderApp();
 };
 
+window.masterActivityItemDescriptions = [
+  "RCC Foundation for 25kVA Soundproof Canopy DG Set",
+  "4C x 70 sq.mm Armoured Copper Cable Laying & Termination",
+  "Additional Structural Bracing & Antenna Mount Extension",
+  "Chemical Earthing Pit with Heavy Duty Copper Electrode",
+  "Supply & Installation of Aviation Warning Light",
+  "Tower Height Extension & Galvanized Steel Leg Strengthening",
+  "Transformer Substation Civil Pad Construction",
+  "Optical Fiber Splicing & Patch Panel Installation",
+  "Diesel Generator Soundproof Enclosure Dismantling",
+  "Site Security Fencing & Barbed Wire Installation"
+];
+
+window.handleActivityItemDescInput = function(val, forceOpen = false) {
+  const dropdown = document.getElementById('dropdownAddActivityItemDesc');
+  if (!dropdown) return;
+  const query = (val || '').trim().toLowerCase();
+  
+  const matched = (!query && !forceOpen)
+    ? []
+    : (!query ? window.masterActivityItemDescriptions : window.masterActivityItemDescriptions.filter(desc => desc.toLowerCase().includes(query)));
+
+  if (matched.length === 0) {
+    if (query) {
+      dropdown.innerHTML = `<div style="padding: 10px 14px; font-size: 0.88rem; color: #94a3b8; font-style: italic;">No matching descriptions for "${query}"</div>`;
+      dropdown.style.display = 'block';
+    } else {
+      dropdown.style.display = 'none';
+    }
+    return;
+  }
+
+  dropdown.innerHTML = matched.map(item => {
+    const escaped = item.replace(/'/g, "\\'");
+    return `
+      <div onclick="selectActivityItemDesc('${escaped}')" style="padding: 10px 14px; font-size: 0.88rem; color: #1e293b; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='#ffffff'">
+        ${item}
+      </div>
+    `;
+  }).join('');
+  dropdown.style.display = 'block';
+};
+
+window.selectActivityItemDesc = function(desc) {
+  const inp = document.getElementById('inpAddActivityItemDesc');
+  if (inp) inp.value = desc;
+  const dropdown = document.getElementById('dropdownAddActivityItemDesc');
+  if (dropdown) dropdown.style.display = 'none';
+};
+
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('dropdownAddActivityItemDesc');
+  const inp = document.getElementById('inpAddActivityItemDesc');
+  const btn = document.getElementById('btnSearchAddActivityItemDesc');
+  if (dropdown && dropdown.style.display === 'block') {
+    if (!dropdown.contains(e.target) && e.target !== inp && (!btn || !btn.contains(e.target))) {
+      dropdown.style.display = 'none';
+    }
+  }
+});
+
 window.openAddActivityModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) {
@@ -12390,6 +13127,11 @@ window.openAddActivityModal = function() {
 
   const modal = document.getElementById('pmAddActivityModal');
   if (!modal) return;
+
+  const inpDesc = document.getElementById('inpAddActivityItemDesc');
+  if (inpDesc) inpDesc.value = '';
+  const dropdown = document.getElementById('dropdownAddActivityItemDesc');
+  if (dropdown) dropdown.style.display = 'none';
 
   const inpQty = document.getElementById('inpAddActivityQty');
   if (inpQty) inpQty.value = '1.00';
@@ -12409,12 +13151,12 @@ window.closeAddActivityModal = function() {
 
 window.saveNewActivity = function() {
   const selActivity = document.getElementById('selAddActivityName');
-  const selDesc = document.getElementById('selAddActivityItemDesc');
+  const inpDesc = document.getElementById('inpAddActivityItemDesc');
   const inpQty = document.getElementById('inpAddActivityQty');
   const inpRate = document.getElementById('inpAddActivityRate');
 
   const activity = selActivity ? selActivity.value : 'Civil Works';
-  const itemDescription = selDesc ? selDesc.value : 'RCC Foundation Work';
+  const itemDescription = (inpDesc ? inpDesc.value.trim() : '') || 'RCC Foundation Work';
   const rawQty = parseFloat(inpQty ? inpQty.value : 1) || 1;
   const formattedQty = rawQty.toFixed(2);
   const rawRateStr = inpRate ? inpRate.value.replace(/,/g, '') : '0';
@@ -13221,9 +13963,9 @@ function renderProjectsToolbar() {
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpensesSummaryModal('Expense Details'); return false;" title="Open Expense Details">
+          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpensesSummaryModal('Expense Summary'); return false;" title="Open Expense Summary">
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block; cursor: pointer;">
-            <a href="#" onclick="openExpensesSummaryModal('Expense Details'); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
+            <a href="#" onclick="openExpensesSummaryModal('Expense Summary'); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="icons/Paid _ Received.svg" alt="Paid / Received" style="width: 28px; height: 28px; display: block;">
@@ -13621,10 +14363,10 @@ function renderProjectsTableHead() {
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestBy'] ? 'has-active-filter' : ''}" data-filter-col="requestBy" title="Filter Request By">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <span>Expense Description</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
+            <span>Expense Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseType'] ? 'has-active-filter' : ''}" data-filter-col="expenseType" title="Filter Expense Type">&#9660;</button>
           </div>
         </th>
         <th colspan="4" class="th-sv-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1.5px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
@@ -13636,7 +14378,7 @@ function renderProjectsTableHead() {
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: none !important; padding: 6px 10px;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: none !important; padding: 6px 10px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -15762,6 +16504,17 @@ function renderAccountsFooter() {
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
+  if (currentWorklistView === 'stn') {
+    currentDataset = worklistStnData.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    return;
+  }
+  if (currentWorklistView === 'srn') {
+    currentDataset = worklistSrnData.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    return;
+  }
+
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
     if (currentWorklistView === 'new_project') {
@@ -15839,6 +16592,12 @@ function loadWorklistDataset() {
     } else if (currentWorklistView === 'materials') {
       syncPmMaterialsDataWithNewProject();
       currentDataset = pmMaterialsDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'stn') {
+      currentDataset = pmStnMaterialsData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'srn') {
+      currentDataset = pmSrnMaterialsData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
@@ -15969,6 +16728,199 @@ window.toggleSelectAllPmStatus = function(selectAll) {
   });
   applyFiltersAndRender();
   renderWorklistToolbar();
+};
+
+window.toggleWorklistRowSelected = function(rowId, isChecked) {
+  if (currentDataset) {
+    const row = currentDataset.find(r => String(r.id) === String(rowId));
+    if (row) row.selected = isChecked !== undefined ? isChecked : !row.selected;
+  }
+  const isStn = currentWorklistView === 'stn';
+  const sourceStore = isStn ? worklistStnData : worklistSrnData;
+  if (sourceStore) {
+    const storeRow = sourceStore.find(r => String(r.id) === String(rowId));
+    if (storeRow) storeRow.selected = isChecked !== undefined ? isChecked : !storeRow.selected;
+  }
+  applyFiltersAndRender();
+  updateWorklistSubmitVisibility();
+};
+
+window.toggleSelectAllWorklistRows = function(forceState) {
+  const isStn = currentWorklistView === 'stn';
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (currentDataset && currentDataset.length > 0 ? currentDataset : []);
+  const allSelected = data.length > 0 && data.every(r => r.selected);
+  const targetState = forceState !== undefined ? forceState : !allSelected;
+  data.forEach(r => {
+    r.selected = targetState;
+  });
+  const sourceStore = isStn ? worklistStnData : worklistSrnData;
+  if (sourceStore) {
+    sourceStore.forEach(sr => {
+      const match = data.find(r => String(r.id) === String(sr.id));
+      if (match) sr.selected = targetState;
+    });
+  }
+  applyFiltersAndRender();
+  updateWorklistSubmitVisibility();
+};
+
+window.updateWorklistSubmitVisibility = function() {
+  const isStn = currentWorklistView === 'stn';
+  const submitBtn = document.getElementById(isStn ? 'btnWorklistStnSubmit' : 'btnWorklistSrnSubmit');
+  if (submitBtn) {
+    const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+    submitBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+};
+
+window.submitSelectedWorklistStnRows = function() {
+  const selectedRows = (currentDataset || []).filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    showToast('Please select at least one row to submit.');
+    return;
+  }
+  const selectedIds = new Set(selectedRows.map(r => String(r.id)));
+  worklistStnData = worklistStnData.filter(r => !selectedIds.has(String(r.id)));
+  currentDataset = worklistStnData.map(r => ({ ...r }));
+  try {
+    localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
+  } catch(e) {}
+  showToast(`${selectedRows.length} STN record(s) submitted successfully.`);
+  applyFiltersAndRender();
+  updateWorklistSubmitVisibility();
+};
+
+window.submitSelectedWorklistSrnRows = function() {
+  const selectedRows = (currentDataset || []).filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    showToast('Please select at least one row to submit.');
+    return;
+  }
+  const selectedIds = new Set(selectedRows.map(r => String(r.id)));
+  worklistSrnData = worklistSrnData.filter(r => !selectedIds.has(String(r.id)));
+  currentDataset = worklistSrnData.map(r => ({ ...r }));
+  try {
+    localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
+  } catch(e) {}
+  showToast(`${selectedRows.length} SRN record(s) submitted successfully.`);
+  applyFiltersAndRender();
+  updateWorklistSubmitVisibility();
+};
+
+window.exportWorklistStnToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (worklistStnData || []);
+  const headers = ["STN No", "BOQ No", "Project ID", "Site Name", "Infra Category", "Qty", "Status", "Ageing", "Remarks"];
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+  const rows = data.map(r => [
+    escapeCsv(r.stnNo),
+    escapeCsv(r.boqNo),
+    escapeCsv(r.projectId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.infraCategory),
+    escapeCsv(r.qty),
+    escapeCsv(r.status),
+    escapeCsv(r.ageing),
+    escapeCsv(r.remarks)
+  ].join(','));
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `STN_Worklist_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+window.exportWorklistSrnToCsv = function() {
+  const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (worklistSrnData || []);
+  const headers = ["SRN No", "BOQ No", "Project ID", "Site Name", "Infra Category", "Qty", "Status", "Ageing", "Remarks"];
+  const escapeCsv = (str) => {
+    if (str === null || str === undefined) return '""';
+    const s = String(str).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+  const rows = data.map(r => [
+    escapeCsv(r.srnNo),
+    escapeCsv(r.boqNo),
+    escapeCsv(r.projectId),
+    escapeCsv(r.siteName),
+    escapeCsv(r.infraCategory),
+    escapeCsv(r.qty),
+    escapeCsv(r.status),
+    escapeCsv(r.ageing),
+    escapeCsv(r.remarks)
+  ].join(','));
+  const csvContent = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `SRN_Worklist_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+window.openWorklistStnDashboard = function() {
+  if (typeof switchModule === 'function') {
+    switchModule('projects');
+  }
+};
+
+window.openWorklistSrnDashboard = function() {
+  if (typeof switchModule === 'function') {
+    switchModule('projects');
+  }
+};
+
+window.openPmBulkUploadModal = function(type) {
+  if (typeof openBulkUploadSidePanel === 'function') {
+    openBulkUploadSidePanel(type);
+  }
+  if (typeof openAddBulkUploadModal === 'function') {
+    openAddBulkUploadModal();
+  }
+  const selUploadType = document.getElementById('selBulkUploadSiteType');
+  if (selUploadType) {
+    const val = String(type).toLowerCase() === 'stn' ? 'stn_boq' : 'srn_boq';
+    selUploadType.value = val;
+  }
+};
+
+window.openPmAddStnMaterialsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('pmAddInfraModal');
+  if (modal && overlay) {
+    const selDoc = document.getElementById('inpPmStnDocumentType');
+    if (selDoc) {
+      selDoc.value = 'STN';
+      if (typeof updatePmStnInstallationTypeVisibility === 'function') updatePmStnInstallationTypeVisibility();
+    }
+    overlay.style.display = 'flex';
+    modal.style.display = 'block';
+  }
+};
+
+window.openPmAddSrnMaterialsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('pmAddInfraModal');
+  if (modal && overlay) {
+    const selDoc = document.getElementById('inpPmStnDocumentType');
+    if (selDoc) {
+      selDoc.value = 'SRN';
+      if (typeof updatePmStnInstallationTypeVisibility === 'function') updatePmStnInstallationTypeVisibility();
+    }
+    overlay.style.display = 'flex';
+    modal.style.display = 'block';
+  }
 };
 
 window.openPmEditProjectUpdateModal = function() {
@@ -16544,6 +17496,27 @@ function renderWorklistToolbar() {
         </div>
       `;
       initWorklistToolbarEvents();
+      return;
+    } else if (currentWorklistView === 'stn' || currentWorklistView === 'srn') {
+      const isStn = currentWorklistView === 'stn';
+      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}CsvDownload" data-tooltip="Download CSV" title="Download CSV" style="cursor: pointer;" onclick="${isStn ? 'exportWorklistStnToCsv()' : 'exportWorklistSrnToCsv()'}">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Dashboard" data-tooltip="Dashboard" title="Dashboard" style="cursor: pointer;" onclick="${isStn ? 'openWorklistStnDashboard()' : 'openWorklistSrnDashboard()'}">
+            <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-bulk-upload-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}BulkUpload" data-tooltip="Bulk Upload" title="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadSidePanel('${isStn ? 'STN' : 'SRN'}')">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Submit" data-tooltip="Submit" title="Submit" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;" onclick="${isStn ? 'submitSelectedWorklistStnRows()' : 'submitSelectedWorklistSrnRows()'}">
+            <img src="icons/Submit.svg" alt="Submit" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        </div>
+      `;
       return;
     } else if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email'].includes(currentWorklistView)) {
       toolbar.innerHTML = `
@@ -17251,6 +18224,8 @@ function renderWorklistFooter() {
       { id: 'btnTogglePmPayment', view: 'payment', label: 'Payment' },
       { id: 'btnTogglePmMaterials', view: 'materials', label: 'Materials' },
       { id: 'btnTogglePmJms', view: 'jms', label: 'JMS' },
+      { id: 'btnTogglePmStn', view: 'stn', label: 'STN' },
+      { id: 'btnTogglePmSrn', view: 'srn', label: 'SRN' },
       { id: 'btnTogglePmEmail', view: 'email', label: 'Email' }
     );
 
@@ -17460,7 +18435,7 @@ function renderWorklistTableHead() {
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = '';
       if (containerEl) containerEl.style.overflowX = 'auto';
-    } else if (role === 'Project Manager' && currentWorklistView === 'materials') {
+    } else if (role === 'Project Manager' && ['materials', 'stn', 'srn'].includes(currentWorklistView)) {
       tableEl.style.minWidth = '0';
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = 'fixed';
@@ -17701,6 +18676,158 @@ function renderWorklistTableHead() {
           <th style="width: 7%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; text-align: center;">
               <span>Ageing</span>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    } else if (currentWorklistView === 'stn') {
+      const isAllSelected = currentDataset && currentDataset.length > 0 && currentDataset.every(r => r.selected);
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 8ch, center -->
+          <th class="th-select" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="toggleSelectAllWorklistRows()" title="Select All">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. STN No: 15ch, center, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>STN No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['stnNo'] ? 'has-active-filter' : ''}" data-filter-col="stnNo" title="Filter STN No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. BOQ No: 15ch, center, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>BOQ No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['boqNo'] ? 'has-active-filter' : ''}" data-filter-col="boqNo" title="Filter BOQ No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, center, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site Name: 25ch, left content, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Infra Category: 15ch, left content, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Infra Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Qty: 10ch, center, NO filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
+              <span>Qty</span>
+            </div>
+          </th>
+          <!-- 8. Status: 25ch, left content, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Ageing: 10ch, center, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. Remarks: 25ch, left content, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Remarks</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['remarks'] ? 'has-active-filter' : ''}" data-filter-col="remarks" title="Filter Remarks">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    } else if (currentWorklistView === 'srn') {
+      const isAllSelected = currentDataset && currentDataset.length > 0 && currentDataset.every(r => r.selected);
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 8ch, center -->
+          <th class="th-select" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="toggleSelectAllWorklistRows()" title="Select All">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. SRN No: 15ch, center, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>SRN No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['srnNo'] ? 'has-active-filter' : ''}" data-filter-col="srnNo" title="Filter SRN No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. BOQ No: 15ch, center, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>BOQ No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['boqNo'] ? 'has-active-filter' : ''}" data-filter-col="boqNo" title="Filter BOQ No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, center, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Site Name: 25ch, left content, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Infra Category: 15ch, left content, center header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Infra Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Qty: 10ch, center, NO filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
+              <span>Qty</span>
+            </div>
+          </th>
+          <!-- 8. Status: 25ch, left content, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Ageing: 10ch, center, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. Remarks: 25ch, left content, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Remarks</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['remarks'] ? 'has-active-filter' : ''}" data-filter-col="remarks" title="Filter Remarks">&#9660;</button>
             </div>
           </th>
         </tr>
@@ -18904,9 +20031,9 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => {
         return `
           <tr data-row-id="${row.id}">
-            <!-- 1. Site Name: 18% & left -->
+            <!-- 1. Site Name: 18% & left (Clickable to open Material Details Tab) -->
             <td style="width: 18%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
-              ${row.siteName || ''}
+              <a href="#" class="clickable-project-link" onclick="openPmMaterialsDetailModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; font-weight: 500; cursor: pointer;">${row.siteName || ''}</a>
             </td>
             <!-- 2. Request by: 17% & left -->
             <td style="width: 17%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #1e293b; vertical-align: middle; padding: 10px 8px;" title="${(row.requestBy || '').replace(/"/g, '&quot;')}">
@@ -18942,7 +20069,87 @@ function applyFiltersAndRender() {
       return;
     }
 
-    if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email', 'materials'].includes(currentWorklistView)) {
+    if (currentWorklistView === 'stn' || currentWorklistView === 'srn') {
+      const isStn = currentWorklistView === 'stn';
+      const sourceStore = isStn ? worklistStnData : worklistSrnData;
+      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => isStn ? r.stnNo : r.srnNo)) {
+        currentDataset = sourceStore.map(item => ({ ...item }));
+      }
+
+      filteredDataset = currentDataset.filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No ${isStn ? 'STN' : 'SRN'} records match the filter criteria.</td>
+          </tr>
+        `;
+        updateWorklistSubmitVisibility();
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map((row) => {
+        const numVal = isStn ? row.stnNo : row.srnNo;
+        const rawQty = parseFloat(row.qty);
+        const formattedQty = !isNaN(rawQty) ? rawQty.toFixed(2) : (row.qty || '0.00');
+        return `
+          <tr class="${row.selected ? 'row-selected' : ''}" data-row-id="${row.id}" style="${row.selected ? 'background: rgba(0, 203, 160, 0.08);' : ''}">
+            <!-- 1. Select: 8ch & center (Circle radio button with green select marker) -->
+            <td class="td-select" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <div class="radio-select-indicator ${row.selected ? 'selected' : ''}" onclick="toggleWorklistRowSelected('${row.id}')" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
+            </td>
+            <!-- 2. STN/SRN No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${numVal || ''}
+            </td>
+            <!-- 3. BOQ No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.boqNo || ''}
+            </td>
+            <!-- 4. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 6. Infra Category: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.infraCategory || ''}
+            </td>
+            <!-- 7. Qty: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${formattedQty}
+            </td>
+            <!-- 8. Status: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #0f172a; font-weight: 600;">
+              ${row.status || ''}
+            </td>
+            <!-- 9. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 10. Remarks: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
+              ${row.remarks || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      updateWorklistSubmitVisibility();
+      return;
+    }
+
+    if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email', 'materials', 'stn', 'srn'].includes(currentWorklistView)) {
       const titles = {
         project_update: 'Project Update',
         materials: 'Materials',
@@ -20827,9 +22034,9 @@ function applyFiltersAndRender() {
             <td style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${row.approvedBy}</td>
             <td>${row.expenseHead}</td>
             <td style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${row.transferTo}</td>
-            <td class="td-amount" style="text-align: right !important; padding-right: 14px;">${row.approvedAmount || ''}</td>
-            <td class="td-amount" style="text-align: right !important; padding-right: 14px;">${row.transferredAmount || ''}</td>
-            <td class="td-amount" style="text-align: right !important; padding-right: 14px;">${row.payableAmount || ''}</td>
+            <td class="td-amount cell-approved" style="text-align: right !important; padding-right: 14px; color: #0454e4 !important; font-weight: 600;"><span class="text-approved" style="color: #0454e4 !important; font-weight: 600;">${row.approvedAmount || ''}</span></td>
+            <td class="td-amount cell-transferred" style="text-align: right !important; padding-right: 14px; cursor: pointer;" onclick="openPaymentReceiptModal('Payment Receipt', 'Paid Amount'); return false;"><a href="#" class="text-transferred" onclick="event.preventDefault(); event.stopPropagation(); openPaymentReceiptModal('Payment Receipt', 'Paid Amount'); return false;" style="color: #008744 !important; font-weight: 600; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer;">${row.transferredAmount || ''}</a></td>
+            <td class="td-amount cell-payable" style="text-align: right !important; padding-right: 14px; color: #ef4444 !important; font-weight: 600;"><span class="text-payable" style="color: #ef4444 !important; font-weight: 600;">${row.payableAmount || ''}</span></td>
             <td class="td-center">${row.ageing}</td>
           </tr>
         `;
@@ -20973,13 +22180,19 @@ function applyFiltersAndRender() {
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.requestDate || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.requestBy || ''}</td>
-          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #1e293b;">${row.expenseDescription || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; color: #1e293b;">${row.expenseType || row.expenseDescription || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.request || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.approved || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.transferred || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.payable || ''}</td>
+          <td class="cell-approved" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: #0454e4 !important; font-weight: 600;">
+            <span class="text-approved" style="color: #0454e4 !important; font-weight: 600;">${row.approved || ''}</span>
+          </td>
+          <td class="cell-transferred" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; cursor: pointer;" onclick="openPaymentReceiptModal('Payment Receipt', 'Paid Amount'); return false;">
+            <a href="#" class="text-transferred" onclick="event.preventDefault(); event.stopPropagation(); openPaymentReceiptModal('Payment Receipt', 'Paid Amount'); return false;" style="color: #008744 !important; font-weight: 600; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer;">${row.transferred || ''}</a>
+          </td>
+          <td class="cell-payable" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: #ef4444 !important; font-weight: 600;">
+            <span class="text-payable" style="color: #ef4444 !important; font-weight: 600;">${row.payable || ''}</span>
+          </td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; color: #1e293b; border-left: 1px solid #e2e8f0;">${row.transferTo || ''}</td>
-          <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; font-weight: 500;">${row.status || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.status || '').replace(/"/g, '&quot;')}">${row.status || ''}</td>
         </tr>
       `).join('');
     } else if (currentProjectsView === 'supply_details') {

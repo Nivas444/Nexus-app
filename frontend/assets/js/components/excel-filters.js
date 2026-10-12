@@ -143,6 +143,7 @@
       uom: "Uom",
       submittedBy: "Submitted BY",
       submitBy: "Submit By",
+      requestBy: "Request By",
       submissionDate: "Submission Date",
       approvedBy: "Approved By",
       transferTo: "Transfer To",
@@ -378,6 +379,24 @@
           }
           closeExcelFilter();
           showToast('Activity filter cleared');
+          return;
+        }
+        if (dropdown.dataset.filterContext === 'expenseItemName') {
+          if (window.currentExpenseItemFilterCol) {
+            delete window.activeExpenseItemFilters[window.currentExpenseItemFilterCol];
+            if (typeof renderExpenseDetailsTable === 'function') renderExpenseDetailsTable();
+          }
+          closeExcelFilter();
+          showToast('Filter cleared');
+          return;
+        }
+        if (dropdown.dataset.filterContext === 'expensesSummaryItemName') {
+          if (window.currentExpensesSummaryItemFilterCol) {
+            delete window.activeExpensesSummaryItemFilters[window.currentExpensesSummaryItemFilterCol];
+            if (typeof renderExpensesSummaryDetailsTable === 'function') renderExpensesSummaryDetailsTable();
+          }
+          closeExcelFilter();
+          showToast('Filter cleared');
           return;
         }
         closeExcelFilter();
@@ -684,6 +703,40 @@
           if (typeof renderProjectActivityTable === 'function') renderProjectActivityTable();
           closeExcelFilter();
           showToast('Activity filter applied');
+          return;
+        }
+
+        if (dropdown.dataset.filterContext === 'expenseItemName') {
+          if (!window.currentExpenseItemFilterCol) return;
+          const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+            .map(chk => chk.value);
+          const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+            .map(chk => chk.value);
+          if (checkedItems.length === allItems.length) {
+            delete window.activeExpenseItemFilters[window.currentExpenseItemFilterCol];
+          } else {
+            window.activeExpenseItemFilters[window.currentExpenseItemFilterCol] = new Set(checkedItems);
+          }
+          if (typeof renderExpenseDetailsTable === 'function') renderExpenseDetailsTable();
+          closeExcelFilter();
+          showToast('Filter applied');
+          return;
+        }
+
+        if (dropdown.dataset.filterContext === 'expensesSummaryItemName') {
+          if (!window.currentExpensesSummaryItemFilterCol) return;
+          const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+            .map(chk => chk.value);
+          const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+            .map(chk => chk.value);
+          if (checkedItems.length === allItems.length) {
+            delete window.activeExpensesSummaryItemFilters[window.currentExpensesSummaryItemFilterCol];
+          } else {
+            window.activeExpensesSummaryItemFilters[window.currentExpensesSummaryItemFilterCol] = new Set(checkedItems);
+          }
+          if (typeof renderExpensesSummaryDetailsTable === 'function') renderExpensesSummaryDetailsTable();
+          closeExcelFilter();
+          showToast('Filter applied');
           return;
         }
   

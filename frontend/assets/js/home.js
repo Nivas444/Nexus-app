@@ -688,29 +688,31 @@ const supplyCustomerDetailData = {
   ]
 };
 
-// Project Details -> Expenses Sub-Page Dataset (2 rows)
+// Project Details -> Expenses Sub-Page Dataset
 const projectExpensesData = [
   {
     id: "exp-1",
-    expenseType: "Material",
-    itemName: "Diesel Generator Set 15kVA Silent Type",
-    uom: "NOS",
-    qty: "1.00",
-    po: "1,50,000.00",
-    budget: "1,60,000.00",
-    used: "1,50,000.00",
-    available: "10,000.00"
+    requestDate: "12-10-2026",
+    requestBy: "Aakash Sharma",
+    expenseDescription: "Diesel Generator Set 15kVA Silent Type Installation",
+    request: "1,60,000.00",
+    approved: "1,50,000.00",
+    transferred: "1,20,000.00",
+    payable: "30,000.00",
+    transferTo: "PowerTech Engineering",
+    status: "Partially Transferred"
   },
   {
     id: "exp-2",
-    expenseType: "Service",
-    itemName: "Site Survey, Soil Testing & Foundation",
-    uom: "LOT",
-    qty: "1.00",
-    po: "45,000.00",
-    budget: "50,000.00",
-    used: "45,000.00",
-    available: "5,000.00"
+    requestDate: "10-10-2026",
+    requestBy: "Vikram Patel",
+    expenseDescription: "Site Survey, Soil Testing & Foundation Works",
+    request: "50,000.00",
+    approved: "45,000.00",
+    transferred: "45,000.00",
+    payable: "0.00",
+    transferTo: "GeoTech Surveyors Ltd",
+    status: "Completed"
   }
 ];
 
@@ -11385,6 +11387,118 @@ window.submitMembersTask = function() {
   }
 };
 
+window.activeExpensesSummaryItemFilters = window.activeExpensesSummaryItemFilters || {};
+window.currentExpensesSummaryItemFilterCol = null;
+
+window.getExpensesSummaryItemsWithAmounts = function() {
+  const baseItems = typeof getExpenseItemsList === 'function' ? getExpenseItemsList() : [
+    { id: 'exp-item-op', itemName: 'Operational Expenses' }
+  ];
+  const hasNonStd = baseItems.some(it => it.itemName === 'Non-standard Expenses');
+  const hasSV = baseItems.some(it => it.itemName === 'Service Vendor Payment');
+
+  return baseItems.map(item => {
+    let amt = '0.00';
+    if (item.itemName === 'Operational Expenses') {
+      if (hasNonStd && hasSV) amt = '6,00,000.00';
+      else if (hasNonStd) amt = '8,50,000.00';
+      else if (hasSV) amt = '9,50,000.00';
+      else amt = '12,00,000.00';
+    } else if (item.itemName === 'Non-standard Expenses') {
+      amt = '3,50,000.00';
+    } else if (item.itemName === 'Service Vendor Payment') {
+      amt = '2,50,000.00';
+    } else {
+      amt = '0.00';
+    }
+    return {
+      id: item.id,
+      itemName: item.itemName,
+      amount: amt
+    };
+  });
+};
+
+window.renderExpensesSummaryDetailsTable = function() {
+  const tbody = document.getElementById('tbodyExpensesSummaryDetails');
+  if (!tbody) return;
+
+  let items = getExpensesSummaryItemsWithAmounts();
+
+  if (window.activeExpensesSummaryItemFilters && window.activeExpensesSummaryItemFilters['itemName']) {
+    const allowed = window.activeExpensesSummaryItemFilters['itemName'];
+    items = items.filter(it => allowed.has(it.itemName));
+  }
+
+  if (items.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="2" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No items found</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = items.map((item, idx) => `
+    <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+      <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 12px 18px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(item.itemName || '').replace(/"/g, '&quot;')}">
+        <a href="#" onclick="openExpenseItemRepresentativeModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-expense-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
+          ${item.itemName}
+        </a>
+      </td>
+      <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 12px 18px; color: #0f172a; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
+        ${item.amount}
+      </td>
+    </tr>
+  `).join('');
+};
+
+window.openExpensesSummaryItemFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  window.currentExpensesSummaryItemFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const allItems = getExpensesSummaryItemsWithAmounts();
+  const uniqueValues = Array.from(new Set(allItems.map(r => r.itemName)))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = window.activeExpensesSummaryItemFilters[colKey];
+
+  if (chkList) {
+    chkList.innerHTML = uniqueValues.map(val => {
+      const isChecked = activeSet ? activeSet.has(val) : true;
+      const displayLabel = val === '' ? '(Blanks)' : val;
+      return `
+        <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+          <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} />
+          <span>${displayLabel}</span>
+        </label>
+      `;
+    }).join('');
+  }
+
+  if (chkSelectAll) {
+    const allChecked = uniqueValues.every(val => !activeSet || activeSet.has(val));
+    chkSelectAll.checked = allChecked;
+  }
+
+  dropdown.dataset.filterContext = 'expensesSummaryItemName';
+  dropdown.style.display = 'flex';
+
+  const btn = event.currentTarget || event.target;
+  const rect = btn.getBoundingClientRect();
+  dropdown.style.position = 'fixed';
+  dropdown.style.top = `${rect.bottom + 4}px`;
+  dropdown.style.left = `${Math.min(rect.left, window.innerWidth - 240)}px`;
+  dropdown.style.zIndex = '99999';
+};
+
 window.openExpensesSummaryModal = function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -11395,12 +11509,13 @@ window.openExpensesSummaryModal = function(titleText) {
   });
 
   const titleBadge = document.getElementById('lblExpensesSummaryTitle');
-  if (titleBadge && titleText) {
-    titleBadge.textContent = titleText;
+  if (titleBadge) {
+    titleBadge.textContent = titleText || 'Expense Details';
   }
 
   const modal = document.getElementById('expensesSummaryModal');
   if (modal) {
+    renderExpensesSummaryDetailsTable();
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
@@ -11408,9 +11523,45 @@ window.openExpensesSummaryModal = function(titleText) {
 
 window.closeExpensesSummaryModal = function() {
   const modal = document.getElementById('expensesSummaryModal');
+  const repModal = document.getElementById('expenseItemRepresentativeModal');
   const overlay = document.getElementById('sideFormOverlay');
   if (modal) modal.style.display = 'none';
+  if (repModal) repModal.style.display = 'none';
   if (overlay) overlay.style.display = 'none';
+};
+
+window.openExpenseItemRepresentativeModal = function(itemName) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'expenseItemRepresentativeModal') card.style.display = 'none';
+  });
+
+  const titleBadge = document.getElementById('lblExpenseItemRepresentativeTitle');
+  if (titleBadge) {
+    titleBadge.textContent = itemName || 'Expense Item';
+  }
+
+  const modal = document.getElementById('expenseItemRepresentativeModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeExpenseItemRepresentativeModal = function() {
+  const modal = document.getElementById('expenseItemRepresentativeModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+
+  const summaryModal = document.getElementById('expensesSummaryModal');
+  if (summaryModal) {
+    summaryModal.style.display = 'block';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
 };
 
 window.openExpenseRequestDetailModal = function(requestBy, expenseDate) {
@@ -12371,6 +12522,442 @@ window.toggleSelectAllPmMembers = function() {
   }
 };
 
+// ==========================================================================
+// EXPENSE DETAILS & ITEM NAME HANDLERS (Projects -> Expense Page)
+// ==========================================================================
+window.customExpenseItemNames = window.customExpenseItemNames || [];
+window.activeExpenseItemFilters = window.activeExpenseItemFilters || {};
+window.currentExpenseItemFilterCol = null;
+
+window.getExpenseItemsList = function() {
+  let activeRow = null;
+  if (typeof selectedProjectId !== 'undefined' && selectedProjectId) {
+    activeRow = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(selectedProjectId) || r.siteName === selectedProjectId || r.siteId === selectedProjectId || r.projectId === selectedProjectId);
+  }
+  if (!activeRow && typeof window.activePmProjectRow !== 'undefined') {
+    activeRow = window.activePmProjectRow;
+  }
+  const featSettings = getSiteFeatureSettings(activeRow || selectedProjectId);
+
+  const items = [
+    { id: 'exp-item-op', itemName: 'Operational Expenses' }
+  ];
+  if (featSettings && featSettings.additionalApproval) {
+    items.push({ id: 'exp-item-nonstd', itemName: 'Non-standard Expenses' });
+  }
+  if (featSettings && featSettings.serviceContract) {
+    items.push({ id: 'exp-item-sv', itemName: 'Service Vendor Payment' });
+  }
+  (window.customExpenseItemNames || []).forEach((name, idx) => {
+    items.push({ id: `exp-item-custom-${idx + 1}`, itemName: name });
+  });
+  return items;
+};
+
+window.renderExpenseDetailsTable = function() {
+  const tbody = document.getElementById('tblExpenseDetailsBody');
+  if (!tbody) return;
+
+  let items = getExpenseItemsList();
+
+  if (window.activeExpenseItemFilters && window.activeExpenseItemFilters['itemName']) {
+    const allowed = window.activeExpenseItemFilters['itemName'];
+    items = items.filter(it => allowed.has(it.itemName));
+  }
+
+  if (items.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No items found</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = items.map((item, idx) => `
+    <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+      <td style="padding: 12px 18px; text-align: left; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0;">
+        <a href="#" onclick="openAddExpenseTableModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
+          ${item.itemName}
+        </a>
+      </td>
+    </tr>
+  `).join('');
+};
+
+window.openExpenseDetailsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(card => {
+      card.style.display = 'none';
+    });
+  }
+
+  const modal = document.getElementById('pmExpenseDetailsModal');
+  if (!modal) return;
+  modal.classList.remove('card-dimmed-blurred');
+
+  const addItemModal = document.getElementById('pmAddItemNameModal');
+  if (addItemModal) addItemModal.style.display = 'none';
+
+  renderExpenseDetailsTable();
+  modal.style.display = 'block';
+  if (overlay) overlay.style.display = 'flex';
+};
+
+window.closeExpenseDetailsModal = function() {
+  const modal = document.getElementById('pmExpenseDetailsModal');
+  if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
+    modal.style.display = 'none';
+  }
+
+  const addItemModal = document.getElementById('pmAddItemNameModal');
+  if (addItemModal) addItemModal.style.display = 'none';
+
+  const addExpTableModal = document.getElementById('pmAddExpenseTableModal');
+  if (addExpTableModal) addExpTableModal.style.display = 'none';
+
+  const addExpEntryModal = document.getElementById('pmAddExpenseEntryModal');
+  if (addExpEntryModal) addExpEntryModal.style.display = 'none';
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) {
+    const visibleCards = overlay.querySelectorAll('.side-form-card:not([style*="display: none"]), .side-contact-popup:not([style*="display: none"])');
+    if (visibleCards.length === 0) {
+      overlay.style.display = 'none';
+    }
+  }
+};
+
+let addExpenseItemsDataStore = [
+  { id: 'exp-1', description: 'Civil Foundation Work & Excavation', uom: 'Sq.Ft', qty: 120.00, rate: 2500.00, amount: 300000.00, remarks: 'Site phase 1' },
+  { id: 'exp-2', description: 'Electrical Cabling & Termination', uom: 'Mtr', qty: 450.00, rate: 350.00, amount: 157500.00, remarks: 'Power cables' },
+  { id: 'exp-3', description: 'Site Diesel Generator Fuel', uom: 'Ltr', qty: 650.00, rate: 92.50, amount: 60125.00, remarks: 'DG fuel' }
+];
+
+window.selectedExpenseEntryPdfName = '';
+
+window.openAddExpenseTableModal = function(itemName) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'pmAddExpenseTableModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('pmAddExpenseTableModal');
+  if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
+    renderAddExpenseTable();
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAddExpenseTableModal = function() {
+  const modal = document.getElementById('pmAddExpenseTableModal');
+  if (modal) modal.style.display = 'none';
+
+  const parentModal = document.getElementById('pmExpenseDetailsModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (parentModal) {
+    parentModal.style.display = 'block';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
+};
+
+window.renderAddExpenseTable = function() {
+  const tbody = document.getElementById('tblAddExpenseTableBody');
+  const sumEl = document.getElementById('lblAddExpenseTotalSum');
+  if (!tbody) return;
+
+  let totalSum = 0;
+  addExpenseItemsDataStore.forEach(item => {
+    const amt = parseFloat(item.amount) || 0;
+    totalSum += amt;
+  });
+
+  if (sumEl) {
+    sumEl.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  if (addExpenseItemsDataStore.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.95rem;">No expense records added yet.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = addExpenseItemsDataStore.map((row, idx) => {
+    const qtyVal = parseFloat(row.qty) || 0;
+    const rateVal = parseFloat(row.rate) || 0;
+    const amtVal = parseFloat(row.amount) || 0;
+    return `
+      <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
+          ${row.description || ''}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${row.uom || 'Nos'}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${qtyVal.toFixed(2)}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${rateVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${amtVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.openAddExpenseEntryFormModal = function() {
+  const modal = document.getElementById('pmAddExpenseEntryModal');
+  if (!modal) return;
+
+  const parentCard = document.getElementById('pmAddExpenseTableModal');
+  if (parentCard) parentCard.classList.add('card-dimmed-blurred');
+
+  const qtyInp = document.getElementById('inpExpenseEntryQty');
+  const rateInp = document.getElementById('inpExpenseEntryRate');
+  const remInp = document.getElementById('inpExpenseEntryRemarks');
+  const fileLbl = document.getElementById('lblExpenseEntryPdfName');
+  const fileInp = document.getElementById('inpExpenseEntryPdfFile');
+  if (qtyInp) qtyInp.value = '';
+  if (rateInp) rateInp.value = '';
+  if (remInp) remInp.value = '';
+  if (fileLbl) fileLbl.textContent = '';
+  if (fileInp) fileInp.value = '';
+  window.selectedExpenseEntryPdfName = '';
+
+  modal.style.display = 'block';
+};
+
+window.closeAddExpenseEntryFormModal = function() {
+  const modal = document.getElementById('pmAddExpenseEntryModal');
+  if (modal) modal.style.display = 'none';
+
+  const parentCard = document.getElementById('pmAddExpenseTableModal');
+  if (parentCard) parentCard.classList.remove('card-dimmed-blurred');
+};
+
+window.handleExpenseEntryPdfFile = function(input) {
+  if (input && input.files && input.files[0]) {
+    const file = input.files[0];
+    window.selectedExpenseEntryPdfName = file.name;
+    const lbl = document.getElementById('lblExpenseEntryPdfName');
+    if (lbl) {
+      lbl.textContent = file.name;
+      lbl.style.color = '#0454e4';
+      lbl.style.fontWeight = '500';
+    }
+    showToast('PDF selected: ' + file.name);
+  }
+};
+
+window.saveNewExpenseEntry = function() {
+  const descEl = document.getElementById('selExpenseEntryDescription');
+  const qtyEl = document.getElementById('inpExpenseEntryQty');
+  const rateEl = document.getElementById('inpExpenseEntryRate');
+  const remEl = document.getElementById('inpExpenseEntryRemarks');
+
+  const desc = descEl ? descEl.value : 'Civil Foundation Work & Excavation';
+  const qty = parseFloat(qtyEl ? qtyEl.value : 0) || 0;
+  const rate = parseFloat(rateEl ? rateEl.value : 0) || 0;
+  const remarks = remEl ? remEl.value.trim() : '';
+
+  if (qty <= 0) {
+    showToast('Please enter a valid Quantity.');
+    if (qtyEl) qtyEl.focus();
+    return;
+  }
+  if (rate <= 0) {
+    showToast('Please enter a valid Rate.');
+    if (rateEl) rateEl.focus();
+    return;
+  }
+
+  const amount = qty * rate;
+  let uom = 'Nos';
+  const dLower = desc.toLowerCase();
+  if (dLower.includes('civil') || dLower.includes('foundation') || dLower.includes('survey')) uom = 'Sq.Ft';
+  else if (dLower.includes('cable') || dLower.includes('cabling')) uom = 'Mtr';
+  else if (dLower.includes('fuel') || dLower.includes('generator')) uom = 'Ltr';
+  else if (dLower.includes('manpower') || dLower.includes('labour')) uom = 'Mandays';
+  else if (dLower.includes('equipment') || dLower.includes('rental')) uom = 'Hours';
+
+  addExpenseItemsDataStore.push({
+    id: 'exp-' + Date.now(),
+    description: desc,
+    uom: uom,
+    qty: qty,
+    rate: rate,
+    amount: amount,
+    remarks: remarks,
+    pdf: window.selectedExpenseEntryPdfName || ''
+  });
+
+  renderAddExpenseTable();
+
+  // Close entry modal
+  const entryModal = document.getElementById('pmAddExpenseEntryModal');
+  if (entryModal) entryModal.style.display = 'none';
+
+  // Close table modal
+  const tableModal = document.getElementById('pmAddExpenseTableModal');
+  if (tableModal) {
+    tableModal.classList.remove('card-dimmed-blurred');
+    tableModal.style.display = 'none';
+  }
+
+  // Close parent Expense Details modal
+  const detailsModal = document.getElementById('pmExpenseDetailsModal');
+  if (detailsModal) detailsModal.style.display = 'none';
+
+  // Close side overlay
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // Show Task Completion popup
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Expense details saved successfully!', 'Task Completed');
+  } else {
+    showToast('Task completed successfully!');
+  }
+};
+
+window.openAddItemNameModal = function() {
+  const modal = document.getElementById('pmAddItemNameModal');
+  if (!modal) return;
+
+  const parentCard = document.getElementById('pmExpenseDetailsModal');
+  if (parentCard) parentCard.classList.add('card-dimmed-blurred');
+
+  const sel = document.getElementById('selAddExpenseItemName');
+  if (sel) {
+    const existingList = getExpenseItemsList().map(it => it.itemName);
+    const candidateOptions = [
+      'Operational Expenses',
+      'Non-standard Expenses',
+      'Service Vendor Payment',
+      'Travel & Lodging Expenses',
+      'Equipment Rental Expenses',
+      'Fuel & Energy Expenses',
+      'Administrative & Office Expenses',
+      'Safety & PPE Expenses',
+      'Site Survey & Testing',
+      'Repair & Maintenance',
+      'Material Transportation',
+      'Contingency Expenses'
+    ];
+    if (typeof masterExpensesData !== 'undefined' && Array.isArray(masterExpensesData) && masterExpensesData.length > 0) {
+      masterExpensesData.forEach(e => {
+        const name = e.expenseHead || e.expenseName || e.expenseDescription;
+        if (name && !candidateOptions.includes(name)) {
+          candidateOptions.push(name);
+        }
+      });
+    }
+
+    sel.innerHTML = candidateOptions.map(opt => {
+      const isAlreadyAdded = existingList.includes(opt);
+      return `<option value="${opt}" ${isAlreadyAdded ? 'disabled style="color:#94a3b8;"' : ''}>${opt}${isAlreadyAdded ? ' (Already Added)' : ''}</option>`;
+    }).join('');
+
+    const firstEnabled = Array.from(sel.options).find(o => !o.disabled);
+    if (firstEnabled) {
+      sel.value = firstEnabled.value;
+    }
+  }
+
+  modal.style.display = 'block';
+};
+
+window.closeAddItemNameModal = function() {
+  const modal = document.getElementById('pmAddItemNameModal');
+  if (modal) modal.style.display = 'none';
+
+  const parentCard = document.getElementById('pmExpenseDetailsModal');
+  if (parentCard) parentCard.classList.remove('card-dimmed-blurred');
+};
+
+window.saveNewExpenseItemName = function() {
+  const sel = document.getElementById('selAddExpenseItemName');
+  const val = sel ? sel.value.trim() : '';
+  if (!val) {
+    showToast('Please select an Item name');
+    return;
+  }
+
+  const list = getExpenseItemsList();
+  if (list.some(it => it.itemName.toLowerCase() === val.toLowerCase())) {
+    showToast('Item name is already in the table');
+    return;
+  }
+
+  window.customExpenseItemNames.push(val);
+  closeAddItemNameModal();
+  renderExpenseDetailsTable();
+  showToast(`Item name "${val}" added successfully`);
+};
+
+window.openExpenseItemFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  window.currentExpenseItemFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const allItems = getExpenseItemsList();
+  const uniqueValues = Array.from(new Set(allItems.map(r => r.itemName)))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = window.activeExpenseItemFilters[colKey];
+
+  chkList.innerHTML = uniqueValues.map(val => {
+    const isChecked = activeSet ? activeSet.has(val) : true;
+    const displayLabel = val === '' ? '(Blanks)' : val;
+    return `
+      <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+        <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''}>
+        <span class="chk-label">${displayLabel}</span>
+      </label>
+    `;
+  }).join('');
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+  }
+
+  const targetBtn = event ? event.currentTarget : document.getElementById('btnExpenseItemNameFilter');
+  const rect = targetBtn ? targetBtn.getBoundingClientRect() : { left: 200, bottom: 200 };
+  const dropdownWidth = 280;
+  let leftPos = rect.left;
+  if (leftPos + dropdownWidth > window.innerWidth - 16) {
+    leftPos = window.innerWidth - dropdownWidth - 16;
+  }
+
+  dropdown.dataset.filterContext = 'expenseItemName';
+  dropdown.style.display = 'flex';
+  dropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  dropdown.style.left = `${Math.max(12, leftPos)}px`;
+
+  if (searchInput) searchInput.focus();
+};
+
 window.openSupplyCustomerDetailsPage = function(customerId, customerName) {
   currentModule = 'projects';
   currentProjectsSubpage = 'supply';
@@ -12634,9 +13221,9 @@ function renderProjectsToolbar() {
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpensesSummaryModal('Expenses Summarry'); return false;" title="Open Expenses Summary">
+          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpensesSummaryModal('Expense Details'); return false;" title="Open Expense Details">
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block; cursor: pointer;">
-            <a href="#" onclick="openExpensesSummaryModal('Expenses Summarry'); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
+            <a href="#" onclick="openExpensesSummaryModal('Expense Details'); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="icons/Paid _ Received.svg" alt="Paid / Received" style="width: 28px; height: 28px; display: block;">
@@ -12648,7 +13235,11 @@ function renderProjectsToolbar() {
           </div>
         </div>
       </div>
-      <div class="toolbar-right"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="tool-btn" id="btnExpensesAddDetails" title="Expense Details" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openExpenseDetailsModal(); return false;">
+          <img src="icons/Add.svg" alt="Expense Details" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
     `;
     return;
   }
@@ -13021,37 +13612,53 @@ function renderProjectsTableHead() {
   if (currentProjectsView === 'project_expenses') {
     thead.innerHTML = `
       <tr class="master-view-header projects-view-header">
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
-          <span>Expense Type</span>
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Request Date</span>
         </th>
-        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
-          <span>Item Name</span>
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Request By</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestBy'] ? 'has-active-filter' : ''}" data-filter-col="requestBy" title="Filter Request By">&#9660;</button>
+          </div>
         </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
-          <span>Uom</span>
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Expense Description</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseDescription'] ? 'has-active-filter' : ''}" data-filter-col="expenseDescription" title="Filter Expense Description">&#9660;</button>
+          </div>
         </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
-          <span>Qty</span>
-        </th>
-        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+        <th colspan="4" class="th-sv-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1.5px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
           <span>Amount</span>
+        </th>
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Transfer To</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
+          </div>
+        </th>
+        <th rowspan="2" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: none !important; padding: 6px 10px;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
         </th>
       </tr>
       <tr class="master-view-header projects-view-header">
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
-          <span>PO</span>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 10px;">
+          <span>Request</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
-          <span>Budget</span>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Approved</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
-          <span>Used</span>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Transferred</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
-          <span>Available</span>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Payable</span>
         </th>
       </tr>
     `;
+    rebindFilterButtons();
     return;
   }
 
@@ -20364,14 +20971,15 @@ function applyFiltersAndRender() {
     } else if (currentProjectsView === 'project_expenses') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.expenseType || ''}</td>
-          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.itemName || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 14px;">${row.uom || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.qty || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.po || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.budget || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.used || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.available || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.requestDate || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.requestBy || ''}</td>
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #1e293b;">${row.expenseDescription || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.request || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.approved || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.transferred || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.payable || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; color: #1e293b; border-left: 1px solid #e2e8f0;">${row.transferTo || ''}</td>
+          <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; font-weight: 500;">${row.status || ''}</td>
         </tr>
       `).join('');
     } else if (currentProjectsView === 'supply_details') {

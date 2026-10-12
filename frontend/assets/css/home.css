@@ -2074,7 +2074,8 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 .side-form-card.card-dimmed-blurred~.project-info-modal-card,
 .side-form-card.card-dimmed-blurred~.side-form-card,
 #pmMembersModal.card-dimmed-blurred~#pmAddMemberModal,
-#dprSurveyReportModal.card-dimmed-blurred~#dprAddSurveyItemModal {
+#dprSurveyReportModal.card-dimmed-blurred~#dprAddSurveyItemModal,
+#pmExpenseDetailsModal.card-dimmed-blurred~#pmAddItemNameModal {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
@@ -4662,8 +4663,33 @@ a:visited,
 
 #pmAddServiceVendorModal,
 #serviceVendorInvoiceAmountPanel,
-#pmAddActivityModal {
+#pmAddActivityModal,
+#pmExpenseDetailsModal,
+#pmAddItemNameModal,
+#pmAddExpenseEntryModal,
+#expensesSummaryModal {
   width: 620px !important;
+  max-width: 96vw !important;
+}
+
+.side-form-container:has(#pmExpenseDetailsModal:not([style*="display: none"])),
+.side-form-container:has(#expenseItemRepresentativeModal:not([style*="display: none"])) {
+  max-width: 1580px !important;
+  width: 98vw !important;
+}
+
+.side-form-container:has(#pmAddExpenseTableModal:not([style*="display: none"])) {
+  max-width: 1020px !important;
+  width: 98vw !important;
+}
+
+#pmAddExpenseTableModal {
+  width: 960px !important;
+  max-width: 96vw !important;
+}
+
+#expenseItemRepresentativeModal {
+  width: 1540px !important;
   max-width: 96vw !important;
 }
 

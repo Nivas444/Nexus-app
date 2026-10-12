@@ -5308,6 +5308,227 @@
           </div>
         </div>
 
+        <!-- Expense Details Modal Tab -->
+        <div class="side-form-card project-info-modal-card" id="pmExpenseDetailsModal"
+          style="display: none; width: 620px !important; max-width: 96vw; margin: auto;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmExpenseDetailsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Expense Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnAddExpenseItemNameBtn" title="Add Item Name" onclick="openAddItemNameModal()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmExpenseDetailsModal" onclick="closeExpenseDetailsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div class="contact-table-wrap" style="padding: 0 24px 24px; overflow-x: hidden;">
+            <table class="projects-custom-table" id="tblExpenseDetailsTable" style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+              <thead>
+                <tr style="background-color: #8c9399;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 12px 14px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                      <span>Item name</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnExpenseItemNameFilter" onclick="openExpenseItemFilter('itemName', event)" title="Filter Item name" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblExpenseDetailsBody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Item Name Modal Tab -->
+        <div class="side-form-card" id="pmAddItemNameModal"
+          style="display: none; width: 620px !important; max-width: 96vw;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmAddItemNameTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Item Name
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSaveExpenseItemNameBtn" title="Save" onclick="saveNewExpenseItemName()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddItemNameModal" onclick="closeAddItemNameModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- Field: Item name -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Item name</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selAddExpenseItemName" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Operational Expenses">Operational Expenses</option>
+                  <option value="Non-standard Expenses">Non-standard Expenses</option>
+                  <option value="Service Vendor Payment">Service Vendor Payment</option>
+                  <option value="Travel & Lodging Expenses">Travel & Lodging Expenses</option>
+                  <option value="Equipment Rental Expenses">Equipment Rental Expenses</option>
+                  <option value="Fuel & Energy Expenses">Fuel & Energy Expenses</option>
+                  <option value="Administrative & Office Expenses">Administrative & Office Expenses</option>
+                  <option value="Safety & PPE Expenses">Safety & PPE Expenses</option>
+                  <option value="Site Survey & Testing">Site Survey & Testing</option>
+                  <option value="Repair & Maintenance">Repair & Maintenance</option>
+                  <option value="Material Transportation">Material Transportation</option>
+                  <option value="Contingency Expenses">Contingency Expenses</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Expense Table Modal Tab (Triggered by clicking Item Name in Expense Details table) -->
+        <div class="side-form-card project-info-modal-card" id="pmAddExpenseTableModal"
+          style="display: none; width: 960px !important; max-width: 96vw; margin: auto;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmAddExpenseTableTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Expense
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnAddExpenseEntryBtn" title="Add Expense" onclick="openAddExpenseEntryFormModal()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Add.svg" alt="Add" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddExpenseTableModal" onclick="closeAddExpenseTableModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="padding: 10px 24px; display: flex; align-items: center; gap: 10px;">
+            <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
+            <span id="lblAddExpenseTotalSum" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">0.00</span>
+          </div>
+
+          <div class="contact-table-wrap" style="padding: 0 24px 24px; overflow-x: auto;">
+            <table class="projects-custom-table" id="tblAddExpenseTable" style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+              <colgroup>
+                <col style="width: 40ch;">
+                <col style="width: 15ch;">
+                <col style="width: 15ch;">
+                <col style="width: 15ch;">
+                <col style="width: 18ch;">
+              </colgroup>
+              <thead>
+                <tr style="background-color: #8c9399;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 40ch; white-space: nowrap;">
+                    <span>Expense Description</span>
+                  </th>
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 15ch; white-space: nowrap;">
+                    <span>Uom</span>
+                  </th>
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 15ch; white-space: nowrap;">
+                    <span>Qty</span>
+                  </th>
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 15ch; white-space: nowrap;">
+                    <span>Rate</span>
+                  </th>
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 18ch; white-space: nowrap;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblAddExpenseTableBody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add Expense Entry Form Modal Tab (Triggered by clicking + icon in Add Expense Table tab) -->
+        <div class="side-form-card" id="pmAddExpenseEntryModal"
+          style="display: none; width: 620px !important; max-width: 96vw;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmAddExpenseEntryTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Expense
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSaveExpenseEntryBtn" title="Save" onclick="saveNewExpenseEntry()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmAddExpenseEntryModal" onclick="closeAddExpenseEntryFormModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- Field 1: Expense Description as dropdown with options -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Expense Description</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selExpenseEntryDescription" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Civil Foundation Work & Excavation">Civil Foundation Work & Excavation</option>
+                  <option value="Electrical Cabling & Termination">Electrical Cabling & Termination</option>
+                  <option value="Equipment Rental & Crane Hire">Equipment Rental & Crane Hire</option>
+                  <option value="Site Diesel Generator Fuel">Site Diesel Generator Fuel</option>
+                  <option value="Soil Testing & Geotech Survey">Soil Testing & Geotech Survey</option>
+                  <option value="Tower Structural Erection">Tower Structural Erection</option>
+                  <option value="Earthing & Surge Protection">Earthing & Surge Protection</option>
+                  <option value="Manpower & Labour Charges">Manpower & Labour Charges</option>
+                  <option value="Material Transportation & Logistics">Material Transportation & Logistics</option>
+                  <option value="Miscellaneous Site Operations">Miscellaneous Site Operations</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Field 2: Qty -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Qty</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" id="inpExpenseEntryQty" placeholder="0.00" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Field 3: Rate -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Rate</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" id="inpExpenseEntryRate" placeholder="0.00" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Field 4: Remarks -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Remarks</label>
+              <div style="flex: 1;">
+                <input type="text" id="inpExpenseEntryRemarks" placeholder="Enter remarks" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Field 5: Attach Documents (only pdf upload icon, center aligned) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Attach Documents</label>
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <input type="file" id="inpExpenseEntryPdfFile" accept=".pdf,application/pdf" style="display: none;" onchange="handleExpenseEntryPdfFile(this)">
+                <button type="button" id="btnUploadExpenseEntryPdf" onclick="document.getElementById('inpExpenseEntryPdfFile').click()"
+                  style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="Upload PDF" style="width: 32px; height: 32px; display: block;">
+                </button>
+                <span id="lblExpenseEntryPdfName" style="font-size: 0.85rem; color: #64748b; margin-top: 2px;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Payment Receipt Modal Tab (Supply Subpage / Customer Details) -->
         <div class="side-form-card project-info-modal-card" id="paymentReceiptModal"
           style="display: none; width: 620px; max-width: 96vw;">
@@ -9181,105 +9402,126 @@
           </div>
         </div>
 
-        <!-- Expenses Summary Modal Tab (Triggered by clicking blue Summation amount in Project Expenses toolbar) -->
-        <div class="side-form-card side-contact-popup" id="expensesSummaryModal"
-          style="display: none; width: 1360px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden;">
+        <!-- Expense Details Modal Tab (Triggered by clicking blue Summation amount in Project Expenses toolbar) -->
+        <div class="side-form-card project-info-modal-card" id="expensesSummaryModal"
+          style="display: none; width: 620px !important; max-width: 96vw; margin: auto;">
           <div class="side-form-header"
-            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 12px;">
             <div class="side-form-title-badge" id="lblExpensesSummaryTitle"
-              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Expenses Summary</div>
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Expense Details</div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseExpensesSummaryModal"
                 onclick="closeExpensesSummaryModal()" aria-label="Close"
-                style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; margin-left: auto;">&times;</button>
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
             </div>
           </div>
-          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: auto;">
-            <table class="contact-custom-table" id="tblExpensesSummaryPopup"
-              style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+          <div style="height: 14px;"></div>
+
+          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: hidden;">
+            <table class="projects-custom-table" id="tblExpensesSummaryPopup"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
               <thead>
-                <tr class="master-view-header">
-                  <th rowspan="2"
-                    style="width: 10%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 4px;">
-                    <span>Request Date</span>
+                <tr style="background-color: #8c9399;">
+                  <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; padding: 12px 14px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                      <span>Item name</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryItemFilter" onclick="openExpensesSummaryItemFilter('itemName', event)" title="Filter Item name" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
+                    </div>
                   </th>
-                  <th rowspan="2"
-                    style="width: 16%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
-                    <span>Request By</span>
-                  </th>
-                  <th colspan="4"
-                    style="width: 42%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 6px;">
+                  <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 12px 14px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff;">
                     <span>Amount</span>
-                  </th>
-                  <th rowspan="2"
-                    style="width: 16%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
-                    <span>Transferred To</span>
-                  </th>
-                  <th rowspan="2"
-                    style="width: 16%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; white-space: nowrap; padding: 9px 6px;">
-                    <span>Pending With</span>
-                  </th>
-                </tr>
-                <tr class="master-view-header">
-                  <th
-                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
-                    <span>Request</span>
-                  </th>
-                  <th
-                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
-                    <span>Approved</span>
-                  </th>
-                  <th
-                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
-                    <span>Transferred</span>
-                  </th>
-                  <th
-                    style="width: 10.5%; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 9px 4px;">
-                    <span>Payable</span>
                   </th>
                 </tr>
               </thead>
               <tbody id="tbodyExpensesSummaryDetails">
-                <tr>
-                  <td style="width: 10%; text-align: center !important; padding: 10px 4px; white-space: nowrap;">
-                    12/08/2026</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">
-                    <a href="#" onclick="openExpenseRequestDetailModal('Nivas Kumar', '12/08/2026'); return false;" class="clickable-requestby-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Nivas Kumar</a>
-                  </td>
-                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
-                    6,00,000.00</td>
-                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
-                    6,00,000.00</td>
-                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
-                    5,00,000.00</td>
-                  <td
-                    style="width: 10.5%; text-align: right !important; padding: 10px 8px; font-weight: 600; white-space: nowrap;">
-                    1,00,000.00</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">SBI -
-                    4092109281</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Finance
-                    Head</td>
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Representative Expense Item Modal Tab (Triggered by clicking Item Name in Expense Details Summary table) -->
+        <div class="side-form-card project-info-modal-card" id="expenseItemRepresentativeModal"
+          style="display: none; width: 1480px !important; max-width: 96vw; margin: auto;">
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblExpenseItemRepresentativeTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Expense Item</div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
+              <button type="button" class="side-form-close-btn" id="btnCloseExpenseItemRepresentativeModal"
+                onclick="closeExpenseItemRepresentativeModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div class="contact-table-wrap" style="padding: 0 24px 24px 24px; overflow-x: auto;">
+            <table class="projects-custom-table" id="tblExpenseItemRepresentative"
+              style="width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid #cbd5e1;">
+              <colgroup>
+                <col style="width: 15ch;">
+                <col style="width: 20ch;">
+                <col style="width: 32ch;">
+                <col style="width: 16ch;">
+                <col style="width: 16ch;">
+                <col style="width: 16ch;">
+                <col style="width: 16ch;">
+                <col style="width: 20ch;">
+                <col style="width: 20ch;">
+              </colgroup>
+              <thead>
+                <tr class="master-view-header projects-view-header">
+                  <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px; white-space: nowrap !important;">
+                    <span>Request Date</span>
+                  </th>
+                  <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px; white-space: nowrap !important;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Request By</span>
+                      <button type="button" class="filter-funnel-btn" title="Filter Request By">&#9660;</button>
+                    </div>
+                  </th>
+                  <th rowspan="2" style="width: 32ch; min-width: 32ch; max-width: 32ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px; white-space: nowrap !important;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Expense Description</span>
+                      <button type="button" class="filter-funnel-btn" title="Filter Expense Description">&#9660;</button>
+                    </div>
+                  </th>
+                  <th colspan="4" class="th-sv-group" style="width: 64ch; min-width: 64ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1px solid #8e8e8e !important; border-bottom: 1.5px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px; white-space: nowrap !important;">
+                    <span>Amount</span>
+                  </th>
+                  <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 10px; white-space: nowrap !important;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Transfer To</span>
+                      <button type="button" class="filter-funnel-btn" title="Filter Transfer To">&#9660;</button>
+                    </div>
+                  </th>
+                  <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: none !important; padding: 6px 10px; white-space: nowrap !important;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>Status</span>
+                      <button type="button" class="filter-funnel-btn" title="Filter Status">&#9660;</button>
+                    </div>
+                  </th>
                 </tr>
+                <tr class="master-view-header projects-view-header">
+                  <th class="th-sv-sub" style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 8px; white-space: nowrap !important;">
+                    <span style="white-space: nowrap;">Request</span>
+                  </th>
+                  <th class="th-sv-sub" style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 8px; white-space: nowrap !important;">
+                    <span style="white-space: nowrap;">Approved</span>
+                  </th>
+                  <th class="th-sv-sub" style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 8px; white-space: nowrap !important;">
+                    <span style="white-space: nowrap;">Transferred</span>
+                  </th>
+                  <th class="th-sv-sub" style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 8px; white-space: nowrap !important;">
+                    <span style="white-space: nowrap;">Payable</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyExpenseItemRepresentative">
                 <tr>
-                  <td style="width: 10%; text-align: center !important; padding: 10px 4px; white-space: nowrap;">
-                    25/08/2026</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">
-                    <a href="#" onclick="openExpenseRequestDetailModal('Praveen Raj', '25/08/2026'); return false;" class="clickable-requestby-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">Praveen Raj</a>
-                  </td>
-                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
-                    6,00,000.00</td>
-                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
-                    6,00,000.00</td>
-                  <td style="width: 10.5%; text-align: right !important; padding: 10px 8px; white-space: nowrap;">
-                    5,00,000.00</td>
-                  <td
-                    style="width: 10.5%; text-align: right !important; padding: 10px 8px; font-weight: 600; white-space: nowrap;">
-                    1,00,000.00</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">HDFC -
-                    8920192831</td>
-                  <td style="width: 16%; text-align: left !important; padding: 10px 8px; white-space: nowrap;">Accounts
-                    Dept</td>
+                  <td colspan="9" style="text-align: center; padding: 36px 16px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No records found.</td>
                 </tr>
               </tbody>
             </table>

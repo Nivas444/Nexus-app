@@ -963,64 +963,84 @@ const projectApprovalsData = [
 ];
 
 // Project Service Vendor Dataset
-const projectServiceVendorData = [
+let projectServiceVendorData = [
   {
     id: "sv-1",
     serviceVendorName: "Sri Balaji Electricals",
+    contractType: "B2B",
     workType: "Electrical",
-    basic: "2,50,000.00",
-    gst: "45,000.00",
-    totalAmount: "2,95,000.00",
+    invoiceAmount: "2,95,000.00",
     tdsDeduction: "5,000.00",
     paidAmount: "2,90,000.00",
-    paidDate: "25 - 08 - 2026"
+    paidDate: "25 - 08 - 2026",
+    selected: false
   },
   {
     id: "sv-2",
     serviceVendorName: "Apex Civil Constructions",
+    contractType: "Labour",
     workType: "Civil",
-    basic: "4,80,000.00",
-    gst: "86,400.00",
-    totalAmount: "5,66,400.00",
+    invoiceAmount: "5,66,400.00",
     tdsDeduction: "9,600.00",
     paidAmount: "5,56,800.00",
-    paidDate: "28 - 08 - 2026"
+    paidDate: "28 - 08 - 2026",
+    selected: false
   }
 ];
 
 // Project Service Vendor Detail Items Dataset
-const projectServiceVendorItemsData = [
+let projectServiceVendorItemsData = [
   {
     id: "sv-item-1",
     itemDescription: "Supply & Installation of 25kVA DG Set Soundproof Canopy with Base Frame",
     uom: "Nos",
     qty: "1.00",
+    qtyWcc: "1.00",
+    qtyVendor: "1.00",
     rate: "4,50,000.00",
-    amount: "4,50,000.00"
+    ratePo: "4,50,000.00",
+    rateVendor: "4,50,000.00",
+    amount: "4,50,000.00",
+    selected: false
   },
   {
     id: "sv-item-2",
     itemDescription: "Laying and Termination of 4C x 70 sq.mm Armoured Copper Power Cable",
     uom: "Mtr",
     qty: "120.00",
+    qtyWcc: "120.00",
+    qtyVendor: "120.00",
     rate: "2,500.00",
-    amount: "3,00,000.00"
+    ratePo: "2,500.00",
+    rateVendor: "2,500.00",
+    amount: "3,00,000.00",
+    selected: false
   },
   {
     id: "sv-item-3",
     itemDescription: "Chemical Earthing System with Copper Bonded Earth Electrodes & Chamber",
     uom: "Set",
     qty: "4.00",
+    qtyWcc: "4.00",
+    qtyVendor: "4.00",
     rate: "35,000.00",
-    amount: "1,40,000.00"
+    ratePo: "35,000.00",
+    rateVendor: "35,000.00",
+    amount: "1,40,000.00",
+    selected: false
   },
   {
     id: "sv-item-4",
     itemDescription: "Automatic Mains Failure (AMF) Control Panel with Auto Changeover Switch",
     uom: "Nos",
     qty: "1.00",
+    qtyWcc: "1.00",
+    qtyVendor: "1.00",
     rate: "2,10,000.00",
-    amount: "2,10,000.00"
+    ratePo: "2,10,000.00",
+    rateVendor: "2,10,000.00",
+    amount: "2,10,000.00",
+    selected: false
   }
 ];
 
@@ -3947,6 +3967,12 @@ function getJmsDetailItems(rowId) {
 
 window.openJmsDetailPage = function(rowId) {
   selectedJmsRowId = rowId;
+  const parentInDataset = (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset))
+    ? currentDataset.find(r => String(r.id) === String(rowId))
+    : null;
+  if (parentInDataset && parentInDataset.task) {
+    window.selectedJmsParentTask = parentInDataset.task;
+  }
   currentWorklistView = 'jms_detail';
   activeColumnFilters = {};
   loadWorklistDataset();
@@ -3993,21 +4019,27 @@ window.copyJmsDetailInfo = function(elementId) {
 window.toggleJmsDetailRowSelect = function(lineId) {
   const row = currentDataset.find(r => String(r.id) === String(lineId));
   if (row) {
-    const isCurrentlySelected = Boolean(row.selected);
-    currentDataset.forEach(r => {
-      if (String(r.id) === String(lineId)) {
-        r.selected = !isCurrentlySelected;
-        if (!r.selected && r.highlighted) {
-          r.highlighted = false;
-        }
-      } else {
-        r.selected = false;
-      }
-    });
+    row.selected = !row.selected;
+    if (!row.selected && row.highlighted) {
+      row.highlighted = false;
+    }
     applyFiltersAndRender();
     updateJmsDetailActionIcons();
     renderWorklistFooter();
   }
+};
+
+window.toggleJmsDetailSelectAll = function() {
+  const anyUnselected = currentDataset.some(r => !r.selected);
+  currentDataset.forEach(r => {
+    r.selected = anyUnselected;
+    if (!anyUnselected) {
+      r.highlighted = false;
+    }
+  });
+  applyFiltersAndRender();
+  updateJmsDetailActionIcons();
+  renderWorklistFooter();
 };
 
 window.highlightSelectedJmsDetailRows = function() {
@@ -4113,7 +4145,8 @@ window.updateJmsDetailActionIcons = function() {
 
 window.handleJmsDetailSubmitClick = function() {
   const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId));
-  const taskStr = parentRow && parentRow.task ? parentRow.task.trim().toLowerCase() : '';
+  const rawTaskStr = window.selectedJmsParentTask || (parentRow && parentRow.task ? parentRow.task : '');
+  const taskStr = String(rawTaskStr).trim().toLowerCase();
   
   if (taskStr === 'jms to be process' || taskStr.includes('process')) {
     // When user highlighted all rows and click submit, the respective row should disappear from table where task 'jms to be process'
@@ -4140,11 +4173,55 @@ window.handleJmsDetailSubmitClick = function() {
     return;
   }
 
-  if (taskStr.includes('commercial') || taskStr.includes('pending')) {
+  if (taskStr.includes('pending') || taskStr.includes('approval')) {
+    openJmsPdfUploadModal();
+  } else if (taskStr.includes('validate') || taskStr.includes('commercial')) {
     openJmsSelectWorkTypeModal();
   } else {
     submitJmsDetail();
   }
+};
+
+let selectedJmsPdfFileName = '';
+
+window.openJmsPdfUploadModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'jmsPdfUploadPanel') card.style.display = 'none';
+  });
+  const modal = document.getElementById('jmsPdfUploadPanel');
+  if (modal) {
+    selectedJmsPdfFileName = '';
+    const lbl = document.getElementById('lblJmsPdfUploadFileName');
+    if (lbl) lbl.textContent = 'Click to upload PDF';
+    const inp = document.getElementById('inpJmsPdfUploadFile');
+    if (inp) inp.value = '';
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeJmsPdfUploadModal = function() {
+  const modal = document.getElementById('jmsPdfUploadPanel');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.handleJmsPdfFileSelected = function(input) {
+  if (input.files && input.files[0]) {
+    selectedJmsPdfFileName = input.files[0].name;
+    const lbl = document.getElementById('lblJmsPdfUploadFileName');
+    if (lbl) lbl.textContent = selectedJmsPdfFileName;
+    showToast(`PDF selected: ${selectedJmsPdfFileName}`);
+  }
+};
+
+window.submitJmsPdfUpload = function() {
+  closeJmsPdfUploadModal();
+  submitJmsDetail();
 };
 
 window.submitJmsDetail = function() {
@@ -4490,18 +4567,21 @@ window.backToPoAmendList = function() {
 window.togglePoAmendDetailRowSelect = function(lineId) {
   const row = currentDataset.find(r => String(r.id) === String(lineId));
   if (row) {
-    const isCurrentlySelected = Boolean(row.selected);
-    currentDataset.forEach(r => {
-      if (String(r.id) === String(lineId)) {
-        r.selected = !isCurrentlySelected;
-      } else {
-        r.selected = false;
-      }
-    });
+    row.selected = !row.selected;
     applyFiltersAndRender();
     updatePoAmendDetailActionIcons();
     renderWorklistFooter();
   }
+};
+
+window.togglePoAmendDetailSelectAll = function() {
+  const anyUnselected = currentDataset.some(r => !r.selected);
+  currentDataset.forEach(r => {
+    r.selected = anyUnselected;
+  });
+  applyFiltersAndRender();
+  updatePoAmendDetailActionIcons();
+  renderWorklistFooter();
 };
 
 window.updatePoAmendDetailLineNo = function(lineId, val) {
@@ -4994,21 +5074,27 @@ window.backToWccList = function() {
 window.toggleWccDetailRowSelect = function(lineId) {
   const row = currentDataset.find(r => String(r.id) === String(lineId));
   if (row) {
-    const isCurrentlySelected = Boolean(row.selected);
-    currentDataset.forEach(r => {
-      if (String(r.id) === String(lineId)) {
-        r.selected = !isCurrentlySelected;
-        if (!r.selected && r.highlighted) {
-          r.highlighted = false;
-        }
-      } else {
-        r.selected = false;
-      }
-    });
+    row.selected = !row.selected;
+    if (!row.selected && row.highlighted) {
+      row.highlighted = false;
+    }
     applyFiltersAndRender();
     updateWccDetailActionIcons();
     renderWorklistFooter();
   }
+};
+
+window.toggleWccDetailSelectAll = function() {
+  const anyUnselected = currentDataset.some(r => !r.selected);
+  currentDataset.forEach(r => {
+    r.selected = anyUnselected;
+    if (!anyUnselected) {
+      r.highlighted = false;
+    }
+  });
+  applyFiltersAndRender();
+  updateWccDetailActionIcons();
+  renderWorklistFooter();
 };
 
 window.highlightSelectedWccDetailRows = function() {
@@ -9778,6 +9864,7 @@ let pmCivilWorksData = [
   { id: 3, foundationName: 'OD Bed Foundation', hasPdf: false },
   { id: 4, foundationName: 'Shelter Foundation', hasPdf: false }
 ];
+let pmSelectedCivilWorkIds = new Set();
 let pmSelectedCivilWorkId = null;
 let pmPendingCivilWorkPdf = null;
 
@@ -9795,9 +9882,9 @@ function renderPmCivilWorksTable() {
   }
 
   tbody.innerHTML = pmCivilWorksData.map(item => `
-    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedCivilWorkId === item.id ? 'rgba(4, 84, 228, 0.05)' : 'transparent'};">
+    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedCivilWorkIds.has(item.id) ? 'rgba(4, 84, 228, 0.05)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
-        <input type="radio" name="rdoPmCivilWork" class="pm-circle-radio" ${pmSelectedCivilWorkId === item.id ? 'checked' : ''} onclick="togglePmCivilWorkSelect(${item.id})">
+        <input type="checkbox" name="chkPmCivilWork" class="pm-circle-radio" ${pmSelectedCivilWorkIds.has(item.id) ? 'checked' : ''} onchange="togglePmCivilWorkSelect(${item.id})">
       </td>
       <td style="text-align: left !important; vertical-align: middle; padding: 10px 14px; font-size: 0.95rem;">
         ${item.hasPdf ? `
@@ -9813,23 +9900,41 @@ function renderPmCivilWorksTable() {
 }
 
 window.togglePmCivilWorkSelect = function(id) {
-  if (pmSelectedCivilWorkId === id) {
-    pmSelectedCivilWorkId = null;
+  if (pmSelectedCivilWorkIds.has(id)) {
+    pmSelectedCivilWorkIds.delete(id);
   } else {
-    pmSelectedCivilWorkId = id;
+    pmSelectedCivilWorkIds.add(id);
   }
+  pmSelectedCivilWorkId = pmSelectedCivilWorkIds.values().next().value || null;
 
   const btnDelete = document.getElementById('btnPmDeleteCivilWork');
   if (btnDelete) {
-    btnDelete.style.display = pmSelectedCivilWorkId !== null ? 'inline-flex' : 'none';
+    btnDelete.style.display = pmSelectedCivilWorkIds.size > 0 ? 'inline-flex' : 'none';
+  }
+
+  renderPmCivilWorksTable();
+};
+
+window.toggleSelectAllPmCivilWorks = function() {
+  if (pmSelectedCivilWorkIds.size === pmCivilWorksData.length) {
+    pmSelectedCivilWorkIds.clear();
+  } else {
+    pmCivilWorksData.forEach(item => pmSelectedCivilWorkIds.add(item.id));
+  }
+  pmSelectedCivilWorkId = pmSelectedCivilWorkIds.values().next().value || null;
+
+  const btnDelete = document.getElementById('btnPmDeleteCivilWork');
+  if (btnDelete) {
+    btnDelete.style.display = pmSelectedCivilWorkIds.size > 0 ? 'inline-flex' : 'none';
   }
 
   renderPmCivilWorksTable();
 };
 
 window.deletePmSelectedCivilWork = function() {
-  if (pmSelectedCivilWorkId === null) return;
-  pmCivilWorksData = pmCivilWorksData.filter(item => item.id !== pmSelectedCivilWorkId);
+  if (pmSelectedCivilWorkIds.size === 0) return;
+  pmCivilWorksData = pmCivilWorksData.filter(item => !pmSelectedCivilWorkIds.has(item.id));
+  pmSelectedCivilWorkIds.clear();
   pmSelectedCivilWorkId = null;
 
   const btnDelete = document.getElementById('btnPmDeleteCivilWork');
@@ -9856,6 +9961,7 @@ window.openPmCivilWorksModal = function() {
     titleBadge.textContent = activePmModalRow ? (activePmModalRow.projectId ? `${activePmModalRow.projectId} - Civil works` : 'Civil works') : 'Civil works';
   }
 
+  pmSelectedCivilWorkIds.clear();
   pmSelectedCivilWorkId = null;
   const btnDelete = document.getElementById('btnPmDeleteCivilWork');
   if (btnDelete) btnDelete.style.display = 'none';
@@ -10018,6 +10124,7 @@ let pmStnMaterialsData = [
   { id: 1, boqNo: 'BOQ-STN-001', boqDate: '12-05-2024', itemCategory: 'Antenna', infraDesc: 'Tri-sector 4G/5G Antenna with brackets', installationType: 'Additional', make: 'CommScope', uom: 'Nos', qty: '3.00' },
   { id: 2, boqNo: 'BOQ-STN-002', boqDate: '14-05-2024', itemCategory: 'Cable', infraDesc: 'Coaxial Feeder Cable 7/8 inch 50 Ohm', installationType: 'Replacement', make: 'RFS', uom: 'Mtr', qty: '120.00' }
 ];
+let pmSelectedStnMaterialIds = new Set();
 let pmSelectedStnMaterialId = null;
 let pmEditingStnMaterialId = null;
 
@@ -10025,7 +10132,7 @@ function renderPmStnMaterialsTable() {
   const tbody = document.getElementById('tbodyPmStnMaterials');
   const editBtn = document.getElementById('btnPmEditStnMaterial');
   if (editBtn) {
-    editBtn.style.display = pmSelectedStnMaterialId !== null ? 'inline-flex' : 'none';
+    editBtn.style.display = pmSelectedStnMaterialIds.size === 1 ? 'inline-flex' : 'none';
   }
   if (!tbody) return;
 
@@ -10041,9 +10148,9 @@ function renderPmStnMaterialsTable() {
   tbody.innerHTML = pmStnMaterialsData.map(item => {
     const formattedQty = (parseFloat(item.qty) || 0).toFixed(2);
     return `
-    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedStnMaterialId === item.id ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
+    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedStnMaterialIds.has(item.id) ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px;">
-        <input type="radio" name="rdoPmStnMaterial" class="pm-circle-radio" ${pmSelectedStnMaterialId === item.id ? 'checked' : ''} onclick="togglePmStnMaterialSelect(${item.id})">
+        <input type="checkbox" name="chkPmStnMaterial" class="pm-circle-radio" ${pmSelectedStnMaterialIds.has(item.id) ? 'checked' : ''} onchange="togglePmStnMaterialSelect(${item.id})">
       </td>
       <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqNo}</td>
       <td style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqDate}</td>
@@ -10058,10 +10165,29 @@ function renderPmStnMaterialsTable() {
 }
 
 window.togglePmStnMaterialSelect = function(id) {
-  if (pmSelectedStnMaterialId === id) {
-    pmSelectedStnMaterialId = null;
+  if (pmSelectedStnMaterialIds.has(id)) {
+    pmSelectedStnMaterialIds.delete(id);
   } else {
-    pmSelectedStnMaterialId = id;
+    pmSelectedStnMaterialIds.add(id);
+  }
+  pmSelectedStnMaterialId = pmSelectedStnMaterialIds.values().next().value || null;
+  const editBtn = document.getElementById('btnPmEditStnMaterial');
+  if (editBtn) {
+    editBtn.style.display = pmSelectedStnMaterialIds.size === 1 ? 'inline-flex' : 'none';
+  }
+  renderPmStnMaterialsTable();
+};
+
+window.toggleSelectAllPmStnMaterials = function() {
+  if (pmSelectedStnMaterialIds.size === pmStnMaterialsData.length) {
+    pmSelectedStnMaterialIds.clear();
+  } else {
+    pmStnMaterialsData.forEach(item => pmSelectedStnMaterialIds.add(item.id));
+  }
+  pmSelectedStnMaterialId = pmSelectedStnMaterialIds.values().next().value || null;
+  const editBtn = document.getElementById('btnPmEditStnMaterial');
+  if (editBtn) {
+    editBtn.style.display = pmSelectedStnMaterialIds.size === 1 ? 'inline-flex' : 'none';
   }
   renderPmStnMaterialsTable();
 };
@@ -10083,6 +10209,7 @@ window.openPmStnMaterialsModal = function() {
     titleBadge.textContent = activePmModalRow?.stn || 'STN-4401';
   }
 
+  pmSelectedStnMaterialIds.clear();
   pmSelectedStnMaterialId = null;
   renderPmStnMaterialsTable();
 
@@ -10119,6 +10246,13 @@ window.submitPmStnMaterialsDetails = function() {
   }
 };
 
+window.openPmAddStnFromInfra = function() {
+  window.pmAddStnOpenedFromInfra = true;
+  openPmAddStnMaterialsModal();
+  const title = document.getElementById('lblPmAddStnMaterialsTitle');
+  if (title) title.textContent = 'Add Infra';
+};
+
 window.openPmAddStnMaterialsModal = function(editItem) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
@@ -10132,6 +10266,7 @@ window.openPmAddStnMaterialsModal = function(editItem) {
     pmEditingStnMaterialId = editItem.id;
     const title = document.getElementById('lblPmAddStnMaterialsTitle');
     if (title) title.textContent = 'Edit STN Materials';
+    if (document.getElementById('inpPmStnDocumentType')) document.getElementById('inpPmStnDocumentType').value = editItem.documentType || 'STN';
     if (document.getElementById('inpPmStnBoqNo')) document.getElementById('inpPmStnBoqNo').value = editItem.boqNo || '';
     if (document.getElementById('inpPmStnBoqDate')) document.getElementById('inpPmStnBoqDate').value = editItem.boqDate || '';
     if (document.getElementById('inpPmStnItemCategory')) document.getElementById('inpPmStnItemCategory').value = editItem.itemCategory || '';
@@ -10143,7 +10278,8 @@ window.openPmAddStnMaterialsModal = function(editItem) {
   } else {
     pmEditingStnMaterialId = null;
     const title = document.getElementById('lblPmAddStnMaterialsTitle');
-    if (title) title.textContent = 'Add STN Materials';
+    if (title) title.textContent = window.pmAddStnOpenedFromInfra ? 'Add Infra' : 'Add STN Materials';
+    if (document.getElementById('inpPmStnDocumentType')) document.getElementById('inpPmStnDocumentType').value = 'STN';
     if (document.getElementById('inpPmStnBoqNo')) document.getElementById('inpPmStnBoqNo').value = '';
     if (document.getElementById('inpPmStnBoqDate')) document.getElementById('inpPmStnBoqDate').value = '';
     if (document.getElementById('inpPmStnItemCategory')) document.getElementById('inpPmStnItemCategory').value = '';
@@ -10166,11 +10302,12 @@ window.openPmAddStnMaterialsModal = function(editItem) {
 };
 
 window.editPmSelectedStnMaterial = function() {
-  if (!pmSelectedStnMaterialId) {
+  const selectedId = pmSelectedStnMaterialIds.size === 1 ? pmSelectedStnMaterialIds.values().next().value : pmSelectedStnMaterialId;
+  if (!selectedId) {
     showToast('Please select an STN material row to edit');
     return;
   }
-  const item = pmStnMaterialsData.find(m => m.id === pmSelectedStnMaterialId);
+  const item = pmStnMaterialsData.find(m => m.id === selectedId);
   if (item) {
     openPmAddStnMaterialsModal(item);
   }
@@ -10180,6 +10317,13 @@ window.closePmAddStnMaterialsModal = function() {
   const modal = document.getElementById('pmAddStnMaterialsModal');
   if (modal) modal.style.display = 'none';
 
+  if (window.pmAddStnOpenedFromInfra) {
+    window.pmAddStnOpenedFromInfra = false;
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+    return;
+  }
+
   const parentModal = document.getElementById('pmStnMaterialsModal');
   if (parentModal) parentModal.style.display = 'block';
   const overlay = document.getElementById('sideFormOverlay');
@@ -10187,6 +10331,7 @@ window.closePmAddStnMaterialsModal = function() {
 };
 
 window.savePmNewStnMaterial = function() {
+  const docType = document.getElementById('inpPmStnDocumentType') ? document.getElementById('inpPmStnDocumentType').value : 'STN';
   const boqNo = document.getElementById('inpPmStnBoqNo') ? document.getElementById('inpPmStnBoqNo').value.trim() : '';
   const boqDate = document.getElementById('inpPmStnBoqDate') ? document.getElementById('inpPmStnBoqDate').value.trim() : '';
   const itemCategory = document.getElementById('inpPmStnItemCategory') ? document.getElementById('inpPmStnItemCategory').value.trim() : '';
@@ -10216,6 +10361,7 @@ window.savePmNewStnMaterial = function() {
     if (idx !== -1) {
       pmStnMaterialsData[idx] = {
         ...pmStnMaterialsData[idx],
+        documentType: docType,
         boqNo: finalBoqNo || pmStnMaterialsData[idx].boqNo,
         boqDate: boqDate || pmStnMaterialsData[idx].boqDate,
         itemCategory: itemCategory || pmStnMaterialsData[idx].itemCategory,
@@ -10226,10 +10372,11 @@ window.savePmNewStnMaterial = function() {
         qty: qty || pmStnMaterialsData[idx].qty
       };
     }
-    showToast('STN material updated successfully');
+    showToast('Material updated successfully');
   } else {
     pmStnMaterialsData.push({
       id: Date.now(),
+      documentType: docType,
       boqNo: finalBoqNo,
       boqDate: boqDate || '15-05-2024',
       itemCategory: itemCategory || 'General',
@@ -10239,7 +10386,7 @@ window.savePmNewStnMaterial = function() {
       uom: uom || 'Nos',
       qty: qty || '1'
     });
-    showToast('STN material added successfully');
+    showToast(window.pmAddStnOpenedFromInfra ? 'Infra material added successfully' : 'STN material added successfully');
   }
 
   renderPmStnMaterialsTable();
@@ -10253,6 +10400,7 @@ let pmSrnMaterialsData = [
   { id: 1, parentCodeNo: '', boqNo: 'BOQ-SRN-001', boqDate: '10-05-2024', itemCategory: 'Power', infraDesc: 'Battery Bank 48V 600AH SMF VRLA', make: 'Exide', uom: 'Set', qty: '1.00' },
   { id: 2, parentCodeNo: '', boqNo: 'BOQ-SRN-002', boqDate: '11-05-2024', itemCategory: 'Rectifier', infraDesc: 'SMPS Power Plant 48V/100A Module', make: 'Delta', uom: 'Nos', qty: '2.00' }
 ];
+let pmSelectedSrnMaterialIds = new Set();
 let pmSelectedSrnMaterialId = null;
 let pmEditingSrnMaterialId = null;
 
@@ -10260,7 +10408,7 @@ function renderPmSrnMaterialsTable() {
   const tbody = document.getElementById('tbodyPmSrnMaterials');
   const editBtn = document.getElementById('btnPmEditSrnMaterial');
   if (editBtn) {
-    editBtn.style.display = pmSelectedSrnMaterialId !== null ? 'inline-flex' : 'none';
+    editBtn.style.display = pmSelectedSrnMaterialIds.size === 1 ? 'inline-flex' : 'none';
   }
   if (!tbody) return;
 
@@ -10276,9 +10424,9 @@ function renderPmSrnMaterialsTable() {
   tbody.innerHTML = pmSrnMaterialsData.map(item => {
     const formattedQty = (parseFloat(item.qty) || 0).toFixed(2);
     return `
-    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedSrnMaterialId === item.id ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
+    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedSrnMaterialIds.has(item.id) ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px;">
-        <input type="radio" name="rdoPmSrnMaterial" class="pm-circle-radio" ${pmSelectedSrnMaterialId === item.id ? 'checked' : ''} onclick="togglePmSrnMaterialSelect(${item.id})">
+        <input type="checkbox" name="chkPmSrnMaterial" class="pm-circle-radio" ${pmSelectedSrnMaterialIds.has(item.id) ? 'checked' : ''} onchange="togglePmSrnMaterialSelect(${item.id})">
       </td>
       <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqNo}</td>
       <td style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqDate}</td>
@@ -10292,10 +10440,29 @@ function renderPmSrnMaterialsTable() {
 }
 
 window.togglePmSrnMaterialSelect = function(id) {
-  if (pmSelectedSrnMaterialId === id) {
-    pmSelectedSrnMaterialId = null;
+  if (pmSelectedSrnMaterialIds.has(id)) {
+    pmSelectedSrnMaterialIds.delete(id);
   } else {
-    pmSelectedSrnMaterialId = id;
+    pmSelectedSrnMaterialIds.add(id);
+  }
+  pmSelectedSrnMaterialId = pmSelectedSrnMaterialIds.values().next().value || null;
+  const editBtn = document.getElementById('btnPmEditSrnMaterial');
+  if (editBtn) {
+    editBtn.style.display = pmSelectedSrnMaterialIds.size === 1 ? 'inline-flex' : 'none';
+  }
+  renderPmSrnMaterialsTable();
+};
+
+window.toggleSelectAllPmSrnMaterials = function() {
+  if (pmSelectedSrnMaterialIds.size === pmSrnMaterialsData.length) {
+    pmSelectedSrnMaterialIds.clear();
+  } else {
+    pmSrnMaterialsData.forEach(item => pmSelectedSrnMaterialIds.add(item.id));
+  }
+  pmSelectedSrnMaterialId = pmSelectedSrnMaterialIds.values().next().value || null;
+  const editBtn = document.getElementById('btnPmEditSrnMaterial');
+  if (editBtn) {
+    editBtn.style.display = pmSelectedSrnMaterialIds.size === 1 ? 'inline-flex' : 'none';
   }
   renderPmSrnMaterialsTable();
 };
@@ -10314,6 +10481,7 @@ window.openPmSrnMaterialsModal = function() {
     titleBadge.textContent = activePmModalRow?.srn || 'SRN-8801';
   }
 
+  pmSelectedSrnMaterialIds.clear();
   pmSelectedSrnMaterialId = null;
   renderPmSrnMaterialsTable();
 
@@ -10388,11 +10556,12 @@ window.openPmAddSrnMaterialsModal = function(editItem) {
 };
 
 window.editPmSelectedSrnMaterial = function() {
-  if (!pmSelectedSrnMaterialId) {
+  const selectedId = pmSelectedSrnMaterialIds.size === 1 ? pmSelectedSrnMaterialIds.values().next().value : pmSelectedSrnMaterialId;
+  if (!selectedId) {
     showToast('Please select an SRN material row to edit');
     return;
   }
-  const item = pmSrnMaterialsData.find(m => m.id === pmSelectedSrnMaterialId);
+  const item = pmSrnMaterialsData.find(m => m.id === selectedId);
   if (item) {
     openPmAddSrnMaterialsModal(item);
   }
@@ -10460,6 +10629,7 @@ let pmCamMaterialsData = [
   { id: 1, boqNo: 'BOQ-CAM-001', boqDate: '08-05-2024', itemCategory: 'Tower Infra', infraDesc: 'Ground Based Tower 40M Galvanized', siteId: 'TN-CHE-104', siteName: 'Guindy Central Hub', make: 'Utkarsh', uom: 'Nos', qty: '1.00' },
   { id: 2, boqNo: 'BOQ-CAM-002', boqDate: '09-05-2024', itemCategory: 'Security', infraDesc: 'IP Surveillance Camera 4MP Bullet', siteId: 'TN-CHE-108', siteName: 'Ambattur Industrial Site', make: 'Hikvision', uom: 'Nos', qty: '4.00' }
 ];
+let pmSelectedCamMaterialIds = new Set();
 let pmSelectedCamMaterialId = null;
 let pmEditingCamMaterialId = null;
 
@@ -10467,7 +10637,7 @@ function renderPmCamMaterialsTable() {
   const tbody = document.getElementById('tbodyPmCamMaterials');
   const editBtn = document.getElementById('btnPmEditCamMaterial');
   if (editBtn) {
-    editBtn.style.display = pmSelectedCamMaterialId !== null ? 'inline-flex' : 'none';
+    editBtn.style.display = pmSelectedCamMaterialIds.size === 1 ? 'inline-flex' : 'none';
   }
   if (!tbody) return;
 
@@ -10483,9 +10653,9 @@ function renderPmCamMaterialsTable() {
   tbody.innerHTML = pmCamMaterialsData.map(item => {
     const formattedQty = (parseFloat(item.qty) || 0).toFixed(2);
     return `
-    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedCamMaterialId === item.id ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
+    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedCamMaterialIds.has(item.id) ? 'rgba(0, 203, 160, 0.08)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px;">
-        <input type="radio" name="rdoPmCamMaterial" class="pm-circle-radio" ${pmSelectedCamMaterialId === item.id ? 'checked' : ''} onclick="togglePmCamMaterialSelect(${item.id})">
+        <input type="checkbox" name="chkPmCamMaterial" class="pm-circle-radio" ${pmSelectedCamMaterialIds.has(item.id) ? 'checked' : ''} onchange="togglePmCamMaterialSelect(${item.id})">
       </td>
       <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqNo}</td>
       <td style="width: 12ch; min-width: 12ch; text-align: center !important; vertical-align: middle; padding: 8px 8px; font-size: 0.92rem; color: #1e293b;">${item.boqDate}</td>
@@ -10501,10 +10671,29 @@ function renderPmCamMaterialsTable() {
 }
 
 window.togglePmCamMaterialSelect = function(id) {
-  if (pmSelectedCamMaterialId === id) {
-    pmSelectedCamMaterialId = null;
+  if (pmSelectedCamMaterialIds.has(id)) {
+    pmSelectedCamMaterialIds.delete(id);
   } else {
-    pmSelectedCamMaterialId = id;
+    pmSelectedCamMaterialIds.add(id);
+  }
+  pmSelectedCamMaterialId = pmSelectedCamMaterialIds.values().next().value || null;
+  const editBtn = document.getElementById('btnPmEditCamMaterial');
+  if (editBtn) {
+    editBtn.style.display = pmSelectedCamMaterialIds.size === 1 ? 'inline-flex' : 'none';
+  }
+  renderPmCamMaterialsTable();
+};
+
+window.toggleSelectAllPmCamMaterials = function() {
+  if (pmSelectedCamMaterialIds.size === pmCamMaterialsData.length) {
+    pmSelectedCamMaterialIds.clear();
+  } else {
+    pmCamMaterialsData.forEach(item => pmSelectedCamMaterialIds.add(item.id));
+  }
+  pmSelectedCamMaterialId = pmSelectedCamMaterialIds.values().next().value || null;
+  const editBtn = document.getElementById('btnPmEditCamMaterial');
+  if (editBtn) {
+    editBtn.style.display = pmSelectedCamMaterialIds.size === 1 ? 'inline-flex' : 'none';
   }
   renderPmCamMaterialsTable();
 };
@@ -10523,6 +10712,7 @@ window.openPmCamMaterialsModal = function() {
     titleBadge.textContent = activePmModalRow?.cam || 'CAM-101';
   }
 
+  pmSelectedCamMaterialIds.clear();
   pmSelectedCamMaterialId = null;
   renderPmCamMaterialsTable();
 
@@ -10599,11 +10789,12 @@ window.openPmAddCamMaterialsModal = function(editItem) {
 };
 
 window.editPmSelectedCamMaterial = function() {
-  if (!pmSelectedCamMaterialId) {
+  const selectedId = pmSelectedCamMaterialIds.size === 1 ? pmSelectedCamMaterialIds.values().next().value : pmSelectedCamMaterialId;
+  if (!selectedId) {
     showToast('Please select a CAM material row to edit');
     return;
   }
-  const item = pmCamMaterialsData.find(m => m.id === pmSelectedCamMaterialId);
+  const item = pmCamMaterialsData.find(m => m.id === selectedId);
   if (item) {
     openPmAddCamMaterialsModal(item);
   }
@@ -10845,18 +11036,18 @@ window.saveNewSiteDetails = function() {
   const aomVal = selAom ? selAom.value : '';
 
   if (!fsmVal && !aomVal) {
-    showToast('Please select at least one FSM or AOM option.');
+    showToast('Please select at least one FSE or AOM option.');
     return;
   }
 
   if (fsmVal) {
     const parts = fsmVal.split(' - ');
-    const name = parts[0] || 'FSM Contact';
+    const name = parts[0] || 'FSE Contact';
     const contact = (fsmVal.match(/\+91\s?\d{10}/) || ['+91 9845112233'])[0];
     siteInfoDataStore.unshift({
-      id: 'site-fsm-' + Date.now(),
+      id: 'site-fse-' + Date.now(),
       name: name,
-      designation: 'FSM',
+      designation: 'FSE',
       contact: contact,
       email: name.toLowerCase().replace(/\s+/g, '.') + '@telecom.in',
       status: 'Active',
@@ -11710,10 +11901,285 @@ window.openServiceVendorItems = function(vendorName) {
   currentModule = 'projects';
   currentProjectsView = 'project_service_vendor_detail';
   selectedServiceVendorName = vendorName || 'Service Vendor Name';
+  window.editingServiceVendorItemId = null;
+  projectServiceVendorItemsData.forEach(d => { d.selected = false; });
   activeColumnFilters = {};
   updateURL();
   renderApp();
   showToast(`Opened ${selectedServiceVendorName} Items`);
+};
+
+window.toggleServiceVendorRowSelect = function(id) {
+  projectServiceVendorData.forEach(d => {
+    if (d.id === id) {
+      d.selected = !d.selected;
+    }
+  });
+  loadProjectsDataset();
+  renderApp();
+};
+
+window.toggleSelectAllServiceVendors = function() {
+  const allSelected = projectServiceVendorData.length > 0 && projectServiceVendorData.every(d => d.selected);
+  projectServiceVendorData.forEach(d => {
+    d.selected = !allSelected;
+  });
+  loadProjectsDataset();
+  renderApp();
+};
+
+window.editingServiceVendorItemId = null;
+
+window.toggleServiceVendorItemRowSelect = function(id) {
+  projectServiceVendorItemsData.forEach(d => {
+    if (d.id === id) {
+      d.selected = !d.selected;
+    }
+  });
+  loadProjectsDataset();
+  renderApp();
+};
+
+window.toggleSelectAllServiceVendorItems = function() {
+  const allSelected = projectServiceVendorItemsData.length > 0 && projectServiceVendorItemsData.every(d => d.selected);
+  projectServiceVendorItemsData.forEach(d => {
+    d.selected = !allSelected;
+  });
+  loadProjectsDataset();
+  renderApp();
+};
+
+window.handleServiceVendorItemAddOrSave = function() {
+  if (window.editingServiceVendorItemId) {
+    // Save mode: save edited item description
+    const target = projectServiceVendorItemsData.find(d => d.id === window.editingServiceVendorItemId);
+    const inp = document.getElementById('inpEditSvDesc_' + window.editingServiceVendorItemId);
+    if (target && inp) {
+      target.itemDescription = inp.value.trim() || target.itemDescription;
+    }
+    window.editingServiceVendorItemId = null;
+    loadProjectsDataset();
+    renderApp();
+    showToast('Item Description saved successfully');
+  } else {
+    // Edit mode: make selected row's item description editable
+    let target = projectServiceVendorItemsData.find(d => d.selected);
+    if (!target && projectServiceVendorItemsData.length > 0) {
+      target = projectServiceVendorItemsData[0];
+      target.selected = true;
+    }
+    if (target) {
+      window.editingServiceVendorItemId = target.id;
+      loadProjectsDataset();
+      renderApp();
+      setTimeout(() => {
+        const inp = document.getElementById('inpEditSvDesc_' + target.id);
+        if (inp) {
+          inp.focus();
+          inp.select();
+        }
+      }, 50);
+    } else {
+      showToast('No items available to edit');
+    }
+  }
+};
+
+window.deleteSelectedServiceVendorItems = function() {
+  const count = projectServiceVendorItemsData.filter(d => d.selected).length;
+  if (count === 0) return;
+  projectServiceVendorItemsData = projectServiceVendorItemsData.filter(d => !d.selected);
+  if (window.editingServiceVendorItemId && !projectServiceVendorItemsData.some(d => d.id === window.editingServiceVendorItemId)) {
+    window.editingServiceVendorItemId = null;
+  }
+  loadProjectsDataset();
+  renderApp();
+  showToast(`${count} item${count > 1 ? 's' : ''} deleted`);
+};
+
+window.openAddServiceVendorModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(card => {
+      if (card.id !== 'pmAddServiceVendorModal') {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  const modal = document.getElementById('pmAddServiceVendorModal');
+  if (!modal) return;
+
+  const selVendor = document.getElementById('selAddServiceVendorName');
+  if (selVendor) {
+    let vendorNames = [];
+    if (typeof masterVendorData !== 'undefined' && Array.isArray(masterVendorData) && masterVendorData.length > 0) {
+      vendorNames = masterVendorData.map(v => v.vendorName || v.vendor_name || v.name).filter(Boolean);
+    }
+    const defaultVendors = [
+      'Sri Balaji Electricals',
+      'Apex Civil Constructions',
+      'Apex Height Solutions',
+      'Vertex Power Solutions',
+      'Shree Ganesh Engineering',
+      'Skyline Infra Tech'
+    ];
+    defaultVendors.forEach(v => {
+      if (!vendorNames.includes(v)) vendorNames.push(v);
+    });
+    selVendor.innerHTML = vendorNames.map((name, i) => `<option value="${name}" ${i === 0 ? 'selected' : ''}>${name}</option>`).join('');
+  }
+
+  const selWorkType = document.getElementById('selAddServiceVendorWorkType');
+  if (selWorkType) selWorkType.value = 'Civil';
+
+  modal.style.display = 'block';
+  if (overlay) overlay.style.display = 'flex';
+};
+
+window.closeAddServiceVendorModal = function() {
+  const modal = document.getElementById('pmAddServiceVendorModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.saveNewServiceVendor = function() {
+  const selVendor = document.getElementById('selAddServiceVendorName');
+  const selWorkType = document.getElementById('selAddServiceVendorWorkType');
+  const vendorName = selVendor ? selVendor.value : 'Sri Balaji Electricals';
+  const workType = selWorkType ? selWorkType.value : 'Civil';
+
+  let contractType = 'B2B';
+  if (typeof masterVendorData !== 'undefined' && Array.isArray(masterVendorData)) {
+    const vMatch = masterVendorData.find(v => (v.vendorName || v.vendor_name) === vendorName);
+    if (vMatch && (vMatch.contractType || vMatch.contract_type)) {
+      contractType = vMatch.contractType || vMatch.contract_type;
+    }
+  }
+
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  const formattedDate = `${day} - ${month} - ${year}`;
+
+  const newRow = {
+    id: 'sv-' + Date.now(),
+    serviceVendorName: vendorName,
+    contractType: contractType,
+    workType: workType,
+    invoiceAmount: '0.00',
+    tdsDeduction: '0.00',
+    paidAmount: '0.00',
+    paidDate: formattedDate,
+    selected: false
+  };
+
+  projectServiceVendorData.unshift(newRow);
+  loadProjectsDataset();
+  renderApp();
+  closeAddServiceVendorModal();
+  showToast('Service Vendor added successfully.');
+};
+
+window.deleteSelectedServiceVendor = function() {
+  const count = projectServiceVendorData.filter(d => d.selected).length;
+  if (count === 0) return;
+  projectServiceVendorData = projectServiceVendorData.filter(d => !d.selected);
+  loadProjectsDataset();
+  renderApp();
+  showToast(`${count} Service Vendor${count > 1 ? 's' : ''} deleted successfully.`);
+};
+
+window.backToServiceVendorPage = function() {
+  currentModule = 'projects';
+  currentProjectsView = 'project_service_vendor';
+  window.editingServiceVendorItemId = null;
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  showToast('Returned to Service Vendor');
+};
+
+window.selectedServiceVendorRowId = null;
+
+window.openServiceVendorInvoiceAmountModal = function(rowId) {
+  window.selectedServiceVendorRowId = rowId;
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('serviceVendorInvoiceAmountPanel');
+  if (!overlay || !panel) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'serviceVendorInvoiceAmountPanel') {
+      card.style.display = 'none';
+    }
+  });
+
+  const row = (projectServiceVendorData || []).find(r => String(r.id) === String(rowId)) || projectServiceVendorData[0];
+  const formattedAmt = row ? (row.invoiceAmount || row.totalAmount || '0.00') : '0.00';
+  const rawAmt = parseFloat(String(formattedAmt).replace(/,/g, '')) || 0;
+
+  const lblTotal = document.getElementById('lblServiceVendorInvoiceAmountModalTotal');
+  if (lblTotal) {
+    lblTotal.textContent = formattedAmt;
+  }
+
+  const basicAmt = (rawAmt / 1.18).toFixed(2);
+  const gstEach = ((rawAmt - (rawAmt / 1.18)) / 2).toFixed(2);
+
+  const inpBasic = document.getElementById('inpSvInvBasicAmt');
+  if (inpBasic) inpBasic.value = Number(basicAmt).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpCgst = document.getElementById('inpSvInvCgst');
+  if (inpCgst) inpCgst.value = Number(gstEach).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpSgst = document.getElementById('inpSvInvSgst');
+  if (inpSgst) inpSgst.value = Number(gstEach).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpIgst = document.getElementById('inpSvInvIgst');
+  if (inpIgst) inpIgst.value = '0.00';
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeServiceVendorInvoiceAmountModal = function() {
+  const panel = document.getElementById('serviceVendorInvoiceAmountPanel');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitServiceVendorInvoiceAmountModal = function() {
+  const inpBasic = document.getElementById('inpSvInvBasicAmt');
+  const inpCgst = document.getElementById('inpSvInvCgst');
+  const inpSgst = document.getElementById('inpSvInvSgst');
+  const inpIgst = document.getElementById('inpSvInvIgst');
+
+  const valBasic = parseFloat((inpBasic?.value || '0').replace(/,/g, '')) || 0;
+  const valCgst = parseFloat((inpCgst?.value || '0').replace(/,/g, '')) || 0;
+  const valSgst = parseFloat((inpSgst?.value || '0').replace(/,/g, '')) || 0;
+  const valIgst = parseFloat((inpIgst?.value || '0').replace(/,/g, '')) || 0;
+  const total = valBasic + valCgst + valSgst + valIgst;
+
+  if (window.selectedServiceVendorRowId) {
+    const row = (projectServiceVendorData || []).find(r => String(r.id) === String(window.selectedServiceVendorRowId));
+    if (row && total > 0) {
+      row.invoiceAmount = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      loadProjectsDataset();
+      applyFiltersAndRender();
+    }
+  }
+
+  closeServiceVendorInvoiceAmountModal();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Invoice Amount details updated successfully!', 'Task Completed');
+  } else {
+    showToast('Invoice Amount details updated successfully!');
+  }
 };
 
 window.toggleApprovalRowSelect = function(id) {
@@ -11789,8 +12255,13 @@ function renderProjectsToolbar() {
   const toolbar = document.getElementById('worklistToolbar') || document.getElementById('pageToolbar');
   if (!toolbar) return;
   if (currentProjectsView === 'project_service_vendor_detail') {
+    const hasSelectedRow = projectServiceVendorItemsData.some(d => d.selected);
+    const isEditing = Boolean(window.editingServiceVendorItemId);
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 20px;">
+        <button type="button" class="tool-btn btn-back-action" id="btnServiceVendorDetailBack" title="Back to Service Vendor" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="backToServiceVendorPage(); return false;">
+          <img src="icons/Backward.svg" alt="Back" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
         <div style="display: flex; align-items: center; gap: 36px; padding-left: 0;">
           <div style="display: flex; align-items: center; gap: 10px;" title="Total Amount">
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
@@ -11807,21 +12278,32 @@ function renderProjectsToolbar() {
         </div>
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn btn-export-pdf" id="btnExportServiceVendorPdf" title="Upload / View PDF" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="showToast('PDF Upload / View opened'); return false;">
-          <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
+        ${hasSelectedRow ? `
+          <button type="button" class="tool-btn" id="btnServiceVendorItemDelete" title="Delete" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteSelectedServiceVendorItems(); return false;">
+            <img src="icons/Delete.svg" alt="Delete" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+        ` : ''}
+        <button type="button" class="tool-btn" id="btnServiceVendorItemAddOrSave" title="${isEditing ? 'Save' : 'Edit Description'}" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="handleServiceVendorItemAddOrSave(); return false;">
+          <img src="${isEditing ? 'icons/Save.svg' : 'icons/Add.svg'}" alt="${isEditing ? 'Save' : 'Add'}" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
-    toolbar.querySelector('#btnExportServiceVendorPdf')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      showToast('PDF Upload / View opened');
-    });
     return;
   }
   if (currentProjectsView === 'project_service_vendor') {
+    const hasSelectedRow = projectServiceVendorData.some(d => d.selected);
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
-      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
+        ${hasSelectedRow ? `
+          <button type="button" class="tool-btn" id="btnServiceVendorDelete" title="Delete" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteSelectedServiceVendor(); return false;">
+            <img src="icons/Delete.svg" alt="Delete" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+        ` : ''}
+        <button type="button" class="tool-btn" id="btnServiceVendorAdd" title="Add Service Vendor" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAddServiceVendorModal(); return false;">
+          <img src="icons/Add.svg" alt="Add Service Vendor" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+        </button>
+      </div>
     `;
     return;
   }
@@ -11937,8 +12419,8 @@ function renderProjectsToolbar() {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnPmInfraAddStn" title="Add STN Materials" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openPmStnMaterialsModal(); return false;">
-          <img src="icons/Add.svg" alt="Add STN" style="width: 26px; height: 26px; display: block;">
+        <button type="button" class="tool-btn" id="btnPmInfraAddStn" title="Add Infra" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openPmAddStnFromInfra(); return false;">
+          <img src="icons/Add.svg" alt="Add Infra" style="width: 26px; height: 26px; display: block;">
         </button>
         <button type="button" class="tool-btn btn-export-pdf" id="btnExportInfraPdf" title="Upload / View PDF" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openInfraDocModal('DOC / STATUS'); return false;">
           <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
@@ -11947,7 +12429,7 @@ function renderProjectsToolbar() {
     `;
     toolbar.querySelector('#btnPmInfraAddStn')?.addEventListener('click', (e) => {
       e.preventDefault();
-      openPmStnMaterialsModal();
+      openPmAddStnFromInfra();
     });
     toolbar.querySelector('#btnExportInfraPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
@@ -12065,24 +12547,41 @@ function renderProjectsTableHead() {
 
   if (currentProjectsView === 'project_service_vendor_detail') {
     thead.innerHTML = `
-      <tr class="master-view-header projects-view-header">
-        <th style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+      <tr class="master-view-header projects-view-header service-vendor-detail-header">
+        <th rowspan="2" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px; cursor: pointer;" onclick="toggleSelectAllServiceVendorItems()" title="Select All">
+          <span>Select</span>
+        </th>
+        <th rowspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Item Description</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemDescription'] ? 'has-active-filter' : ''}" data-filter-col="itemDescription" title="Filter Item Description">&#9660;</button>
           </div>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
           <span>Uom</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th colspan="2" class="th-sv-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1.5px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
           <span>Qty</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th colspan="2" class="th-sv-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1.5px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
           <span>Rate</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+        <th rowspan="2" class="th-sv-amount" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-left: 1.5px solid #ffffff !important; border-right: none !important; padding: 6px 10px;">
           <span>Amount</span>
+        </th>
+      </tr>
+      <tr class="master-view-header projects-view-header service-vendor-detail-header">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>WCC</span>
+        </th>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Vendor</span>
+        </th>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>PO</span>
+        </th>
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+          <span>Vendor</span>
         </th>
       </tr>
     `;
@@ -12093,20 +12592,20 @@ function renderProjectsTableHead() {
   if (currentProjectsView === 'project_service_vendor') {
     thead.innerHTML = `
       <tr class="master-view-header projects-view-header">
+        <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px; cursor: pointer;" onclick="toggleSelectAllServiceVendors()">
+          <span>Select</span>
+        </th>
         <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Service Vendor Name</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <span>Contract Type</span>
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>Work Type</span>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Basic</span>
-        </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>GST</span>
-        </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-          <span>Total Amount</span>
+          <span>Invoice Amount</span>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
           <span>TDS Deduction</span>
@@ -16727,7 +17226,7 @@ function renderWorklistTableHead() {
       thead.innerHTML = `
         <tr class="master-view-header">
           <!-- 1. Select: 60px, center -->
-          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="toggleJmsDetailSelectAll()">
             <span>Select</span>
           </th>
           <!-- 2. Line No: 10ch, center -->
@@ -16768,7 +17267,7 @@ function renderWorklistTableHead() {
       thead.innerHTML = `
         <tr class="master-view-header">
           <!-- 1. Select: 50px, center -->
-          <th style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
+          <th style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px; cursor: pointer;" onclick="togglePoAmendDetailSelectAll()">
             <span>Select</span>
           </th>
           <!-- 2. Amendment Type: 14%, center -->
@@ -16815,7 +17314,7 @@ function renderWorklistTableHead() {
         thead.innerHTML = `
           <tr class="master-view-header">
             <!-- 1. Select: 60px, center -->
-            <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="toggleWccDetailSelectAll()">
               <span>Select</span>
             </th>
             <!-- 2. Line No: 10ch, center -->
@@ -17140,21 +17639,21 @@ function renderWorklistTableHead() {
   if (currentWorklistView === 'project_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px;">Select</th>
-        <th rowspan="2" style="width: 140px;">Expense Type</th>
-        <th rowspan="2" style="width: 180px;">BOQ Name</th>
-        <th rowspan="2" style="width: 80px;">Uom</th>
-        <th rowspan="2" style="width: 80px;">Qty</th>
-        <th colspan="3">Rate</th>
-        <th colspan="3">Amount</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff; cursor: pointer;" onclick="toggleProjectPaymentSelectAll()">Select</th>
+        <th rowspan="2" style="width: 140px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Expense Type</th>
+        <th rowspan="2" style="width: 180px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">BOQ Name</th>
+        <th rowspan="2" style="width: 80px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Uom</th>
+        <th rowspan="2" style="width: 80px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Qty</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Rate</th>
+        <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Amount</th>
       </tr>
       <tr class="project-payment-header-row2">
-        <th style="width: 110px;">Requested</th>
-        <th style="width: 110px;">Validated</th>
-        <th style="width: 110px;">Approved</th>
-        <th style="width: 110px;">Basic</th>
-        <th style="width: 110px;">GST</th>
-        <th style="width: 110px;">Total</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Requested</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Validated</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Approved</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Basic</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">GST</th>
+        <th style="width: 110px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; vertical-align: middle; border: 1px solid #ffffff;">Total</th>
       </tr>
     `;
   } else if (currentWorklistView === 'purchase_payment') {
@@ -17175,7 +17674,7 @@ function renderWorklistTableHead() {
   } else if (currentWorklistView === 'employee_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; cursor: pointer;" onclick="toggleSubpageSelectAll()">Select</th>
         <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Description</th>
         <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Amount</th>
       </tr>
@@ -17188,7 +17687,7 @@ function renderWorklistTableHead() {
   } else if (currentWorklistView === 'transport_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; cursor: pointer;" onclick="toggleSubpageSelectAll()">Select</th>
         <th rowspan="2" style="width: 100px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Vehicle Type</th>
         <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Description</th>
         <th rowspan="2" style="width: 25ch; max-width: 25ch; min-width: 25ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">From</th>
@@ -17204,7 +17703,7 @@ function renderWorklistTableHead() {
   } else if (currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; cursor: pointer;" onclick="toggleSubpageSelectAll()">Select</th>
         <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Description</th>
         <th colspan="3" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Amount</th>
       </tr>
@@ -17217,7 +17716,7 @@ function renderWorklistTableHead() {
   } else if (currentWorklistView === 'po_supplier') {
     thead.innerHTML = `
       <tr class="project-payment-header-row1">
-        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Select</th>
+        <th rowspan="2" style="width: 70px; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; cursor: pointer;" onclick="togglePoSupplierSelectAll()">Select</th>
         <th rowspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 12px;">Material Description</th>
         <th rowspan="2" style="width: 15ch; max-width: 15ch; min-width: 15ch; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff; padding: 6px 10px; white-space: nowrap;">Uom</th>
         <th colspan="2" style="background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; text-align: center !important; border: 1px solid #ffffff;">Qty</th>
@@ -17281,47 +17780,54 @@ function renderWorklistTableHead() {
     `;
   } else {
     thead.innerHTML = `
-      <tr class="payment-view-header">
-        <th rowspan="2" class="th-select">Select</th>
-        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: left !important;">
-          <div class="th-content-wrap" style="justify-content: flex-start;">
+      <tr class="master-view-header payment-view-header">
+        <th rowspan="2" class="th-select" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="togglePaymentSelectAll()">
+          <span>Select</span>
+        </th>
+        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Submit By</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['submitBy'] ? 'has-active-filter' : ''}" data-filter-col="submitBy" title="Filter Submit By">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="white-space: nowrap; width: 140px; text-align: center;">Submission Date</th>
-        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: left !important;">
-          <div class="th-content-wrap" style="justify-content: flex-start;">
+        <th rowspan="2" style="white-space: nowrap; width: 140px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
+          <span>Submission Date</span>
+        </th>
+        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Approved By</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['approvedBy'] ? 'has-active-filter' : ''}" data-filter-col="approvedBy" title="Filter Approved By">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2">
-          <div class="th-content-wrap">
+        <th rowspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Expense Head</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: left !important;">
-          <div class="th-content-wrap" style="justify-content: flex-start;">
+        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Transfer To</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
           </div>
         </th>
-        <th colspan="3" class="th-amount-group" style="text-align: center;">Amount</th>
-        <th rowspan="2">
-          <div class="th-content-wrap">
+        <th colspan="3" class="th-amount-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+          <span>Amount</span>
+        </th>
+        <th rowspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Ageing</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
           </div>
         </th>
       </tr>
-      <tr class="tr-sub-headers payment-view-header">
-        <th style="text-align: center !important; vertical-align: middle; padding: 6px 10px;">Approved</th>
-        <th style="text-align: center !important; vertical-align: middle; padding: 6px 10px;">Transferred</th>
-        <th style="text-align: center !important; vertical-align: middle; padding: 6px 10px;">Payable</th>
+      <tr class="tr-sub-headers master-view-header payment-view-header">
+        <th style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">Approved</th>
+        <th style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">Transferred</th>
+        <th style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">Payable</th>
       </tr>
     `;
+    rebindFilterButtons();
   }
 }
 
@@ -19539,25 +20045,41 @@ function applyFiltersAndRender() {
     }
   } else if (currentModule === 'projects') {
     if (currentProjectsView === 'project_service_vendor_detail') {
-      tbody.innerHTML = filteredDataset.map(row => `
-        <tr class="projects-data-row" data-row-id="${row.id}">
-          <td style="text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.itemDescription || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.uom || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.qty || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.rate || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || ''}</td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isEditing = (window.editingServiceVendorItemId === row.id);
+        return `
+          <tr class="projects-data-row ${row.selected ? 'row-selected' : ''}" data-row-id="${row.id}">
+            <td class="td-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 14px;">
+              <div class="radio-select-indicator ${row.selected ? 'selected' : ''}" onclick="toggleServiceVendorItemRowSelect('${row.id}')" aria-label="Select row"></div>
+            </td>
+            <td style="text-align: left !important; padding: ${isEditing ? '6px 14px' : '10px 14px'}; font-weight: 500; color: #1e293b;">
+              ${isEditing 
+                ? `<input type="text" id="inpEditSvDesc_${row.id}" value="${(row.itemDescription || '').replace(/"/g, '&quot;')}" class="form-input-control" style="width: 100%; height: 36px; border: 1.5px solid #00cba0; border-radius: 6px; padding: 0 10px; font-size: 0.95rem; font-family: inherit; font-weight: 500; color: #1e293b; background: #ffffff; box-sizing: border-box;" onkeydown="if(event.key==='Enter'){ handleServiceVendorItemAddOrSave(); }" />`
+                : (row.itemDescription || '')}
+            </td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.uom || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.qtyWcc || row.qty || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.qtyVendor || row.qty || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.ratePo || row.rate || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.rateVendor || row.rate || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || ''}</td>
+          </tr>
+        `;
+      }).join('');
     } else if (currentProjectsView === 'project_service_vendor') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
+          <td class="td-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 14px;">
+            <div class="radio-select-indicator ${row.selected ? 'selected' : ''}" onclick="toggleServiceVendorRowSelect('${row.id}')" aria-label="Select row"></div>
+          </td>
           <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; font-weight: 500;">
             <a href="#" class="clickable-project-link" onclick="openServiceVendorItems('${(row.serviceVendorName || 'Service Vendor Name').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; cursor: pointer;">${row.serviceVendorName || ''}</a>
           </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.contractType || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; padding: 10px 14px;">${row.workType || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.basic || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.gst || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.totalAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">
+            <a href="#" class="clickable-project-link" onclick="openServiceVendorInvoiceAmountModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; cursor: pointer;" title="View Invoice Amount Details">${row.invoiceAmount || row.totalAmount || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.tdsDeduction || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.paidAmount || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.paidDate || ''}</td>
@@ -35028,6 +35550,65 @@ window.saveSurveyDescription = function() {
   if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
   window.closeAddSurveyForm();
   if (typeof showToast === 'function') showToast(`Record ${descriptionInput} successfully saved!`);
+};
+
+window.openRemarksModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'remarksModal') card.style.display = 'none';
+  });
+  const modal = document.getElementById('remarksModal');
+  if (modal) {
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+    const txt = document.getElementById('inpPaymentRemarksText');
+    if (txt) {
+      txt.value = '';
+      setTimeout(() => txt.focus(), 50);
+    }
+  }
+};
+
+window.togglePaymentSelectAll = function() {
+  const allSelected = currentDataset.length > 0 && currentDataset.every(r => r.selected);
+  currentDataset = currentDataset.map(row => ({
+    ...row,
+    selected: !allSelected
+  }));
+  applyFiltersAndRender();
+  updateDeleteButtonVisibility();
+};
+
+window.toggleProjectPaymentSelectAll = function() {
+  const allSelected = worklistProjectPaymentItems.length > 0 && worklistProjectPaymentItems.every(r => r.selected);
+  worklistProjectPaymentItems.forEach(item => {
+    item.selected = !allSelected;
+    if (!item.selected) item.approved = false;
+  });
+  renderWorklistToolbar();
+  applyFiltersAndRender();
+};
+
+window.toggleSubpageSelectAll = function() {
+  loadWorklistDataset();
+  const allSelected = (currentDataset || []).length > 0 && currentDataset.every(r => r.selected);
+  (currentDataset || []).forEach(item => {
+    item.selected = !allSelected;
+    if (!item.selected) item.approved = false;
+  });
+  renderWorklistToolbar();
+  applyFiltersAndRender();
+};
+
+window.togglePoSupplierSelectAll = function() {
+  const allSelected = poSupplierItems.length > 0 && poSupplierItems.every(r => r.selected);
+  poSupplierItems.forEach(item => {
+    item.selected = !allSelected;
+    if (!item.selected) item.approved = false;
+  });
+  applyFiltersAndRender();
 };
 
 window.closeRemarksModal = function() {

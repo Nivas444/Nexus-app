@@ -148,6 +148,8 @@
       approvedBy: "Approved By",
       transferTo: "Transfer To",
       ageing: "Ageing",
+      whName: "WH Name",
+      projectManager: "Project Manager",
       customer: "Customer",
       projectId: "Project ID",
       poNo: "PO No",
@@ -166,6 +168,7 @@
       invoiceDate: "Invoice Date",
       invoiceAmount: "Invoice Amount",
       paymentStatus: "Payment Status",
+      expenseName: "Expense Name",
       itemDescription: "Item Description",
       expenseType: "Expense Type",
       itemName: "Item Name",
@@ -190,7 +193,10 @@
       boqNo: "BOQ No",
       boqDate: "BOQ Date",
       category: "Category",
-      qy: "Qy"
+      qy: "Qy",
+      customerName: "Customer Name",
+      orderValue: "Order Value",
+      status: "Status"
     };
     return map[colKey] || colKey;
   }

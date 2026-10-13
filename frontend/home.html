@@ -122,6 +122,13 @@
       </button>
     </div>
 
+    <!-- Centered Submit Area for Warehouse Manager PR when one or all rows selected -->
+    <div id="wmPrSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmPrSubmitBatch" onclick="submitWmPr()" title="Submit PR" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
     <!-- Bottom View Switcher Toggles (In Left Below Corner) -->
     <div class="worklist-footer-bar" id="worklistFooterBar">
       <!-- Injected dynamically by home.js based on Master vs Worklist -->
@@ -5822,8 +5829,15 @@
               </div>
             </div>
 
-            <!-- 5. New Account -> Account Number, Bank Name, IFSC Code, Whatsapp Number -->
+            <!-- 5. New Account -> Account Name, Account Number, Bank Name, IFSC Code, Whatsapp Number -->
             <div id="groupTransferNewAccount" style="display: none; flex-direction: column; gap: 16px;">
+              <div class="pm-field-row" id="rowTransferNewAccountName" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Account Name</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpTransferNewAccountName" placeholder="Enter Account Name"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
               <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                 <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Account Number</label>
                 <div style="flex: 1;">
@@ -5869,9 +5883,12 @@
             <div id="groupTransferGstFields" style="display: none; flex-direction: column; gap: 16px;">
               <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                 <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">GST Number</label>
-                <div style="flex: 1;">
+                <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
                   <input type="text" class="form-input-control" id="inpTransferGstNumber" placeholder="Enter GST Number"
-                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 46px 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                  <span class="input-process-badge" id="btnTransferGstProcess" title="Process" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" onclick="handleTransferGstProcess()">
+                    <img src="icons/Process .svg" alt="Process" class="input-process-icon" width="22" height="22">
+                  </span>
                 </div>
               </div>
               <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
@@ -5890,6 +5907,63 @@
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Warehouse Manager: Add Product Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="wmAddProductModal"
+          style="display: none; width: 560px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblWmAddProductTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Product
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnWmAddProductSave" title="Save" onclick="saveWmAddProduct()"
+                style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseWmAddProductModal" onclick="closeWmAddProductModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <form id="frmWmAddProduct" onsubmit="event.preventDefault(); saveWmAddProduct();" style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 18px;">
+            <!-- 1. Material Category: dropdown with options -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Material category</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selWmMaterialCategory" class="form-input-control" onchange="handleWmMaterialCategoryChange(this.value)"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Tower Infrastructure" selected>Tower Infrastructure</option>
+                  <option value="Electrical & Cabling">Electrical & Cabling</option>
+                  <option value="Optical Fiber">Optical Fiber</option>
+                  <option value="Hardware & Fasteners">Hardware & Fasteners</option>
+                  <option value="Civil Materials">Civil Materials</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Material Description: dropdown with options -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Material Description</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selWmMaterialDescription" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <!-- Populated dynamically based on category -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Qty: typeable input field -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Qty</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" class="form-input-control" id="inpWmProductQty" placeholder="Enter Qty"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+          </form>
         </div>
 
         <!-- Payment Receipt Modal Tab (Supply Subpage / Service Vendor / Project Details) -->
@@ -13030,6 +13104,280 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- Warehouse Manager: GRN Supplier Details Modal (Placed at body level for exact viewport centering) -->
+  <div class="side-form-card" id="wmGrnSupplierModal"
+    style="display: none; width: 95vw !important; max-width: 1380px !important; max-height: 90vh !important; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column; animation: none !important;">
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; background: #ffffff; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; height: 100%;">
+        <div class="side-form-title-badge" id="lblWmGrnHeaderBadge"
+          style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 50px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 14px; margin: 0; white-space: nowrap;">
+          <span id="lblWmGrnSupplierName">Supplier Name</span>
+          <span style="opacity: 0.8; font-weight: 400; font-size: 0.95rem;">|</span>
+          <span id="lblWmGrnInvoiceNo" style="font-weight: 600; font-size: 1rem;">INV-2026-001</span>
+        </div>
+        <!-- Summation icon with value next to header design -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: 20px;">
+          <img src="icons/summation.svg" alt="Summation" width="20" height="20" style="display: block;">
+          <div id="lblWmGrnTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0057e7; letter-spacing: -0.2px;">0.00</div>
+        </div>
+      </div>
+      <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+        <!-- Tick icon: appears only when row is selected -->
+        <button type="button" class="side-top-icon-btn" id="btnWmGrnTick" title="Confirm / Approve" onclick="handleWmGrnTick()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+        </button>
+        <!-- Edit icon: appears only when row is selected -->
+        <button type="button" class="side-top-icon-btn" id="btnWmGrnEdit" title="Edit Received Qty" onclick="handleWmGrnEditToggle()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Edit.svg" id="imgWmGrnEdit" alt="Edit" width="28" height="28">
+        </button>
+        <!-- Transport icon: near close icon -->
+        <button type="button" class="side-top-icon-btn" id="btnWmGrnTransport" title="Transport Details" onclick="openWmGrnTransportModal()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
+          <img src="icons/Vehicle.svg" alt="Transport" width="28" height="28">
+        </button>
+        <!-- Close icon -->
+        <button type="button" class="side-form-close-btn" id="btnCloseWmGrnSupplierModal" onclick="closeWmGrnSupplierModal()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+      </div>
+    </div>
+
+    <div style="padding: 16px 24px 20px; overflow-y: auto; max-height: calc(90vh - 52px); display: flex; flex-direction: column;">
+      <!-- Table -->
+      <div class="table-container-full" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; background: #ffffff;">
+        <table class="master-preview-table" id="tblWmGrnItems" style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+          <thead>
+            <tr class="master-view-header">
+              <!-- 1. Select: circle radio / checkbox with multiselect -->
+              <th rowspan="2" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+                <span>Select</span>
+              </th>
+              <!-- 2. Material Description: 40ch & left content, center header -->
+              <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Material Description</span>
+              </th>
+              <!-- 3. Uom: 10ch & center -->
+              <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Uom</span>
+              </th>
+              <!-- 4. Rate: 15ch & right content, center header -->
+              <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Rate</span>
+              </th>
+              <!-- 5. Qty: center header spanning 4 columns with horizontal white line under it -->
+              <th colspan="4" class="wm-grn-header-qty" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+                <span>Qty</span>
+              </th>
+              <!-- 6. Amount: center header spanning 3 columns with horizontal white line under it -->
+              <th colspan="3" class="wm-grn-header-amount" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+                <span>Amount</span>
+              </th>
+            </tr>
+            <tr class="master-view-header">
+              <!-- 5a. PO: 10ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>PO</span>
+              </th>
+              <!-- 5b. Invoice Qty: 10ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Invoice Qty</span>
+              </th>
+              <!-- 5c. Receivable: 10ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Receivable</span>
+              </th>
+              <!-- 5d. Taxable: 10ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Taxable</span>
+              </th>
+              <!-- 6a. CGST: 15ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>CGST</span>
+              </th>
+              <!-- 6b. SGST: 15ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>SGST</span>
+              </th>
+              <!-- 6c. Total: 15ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Total</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tblWmGrnItemsBody">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Submit icon area below the last row of the table - CENTERED IN TAB -->
+      <div id="wmGrnTableSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; margin-top: 18px; padding: 6px 0 10px 0;">
+        <button type="button" id="btnWmGrnTableSubmit" title="Proceed to Transport Payment" onclick="openWmGrnTransportPaymentModal()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+          <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouse Manager: Transport Details Modal -->
+  <div class="side-form-card" id="wmGrnTransportModal"
+    style="display: none; width: 560px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; animation: none !important;">
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+      <div class="side-form-title-badge"
+        style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+        Transport Details
+      </div>
+      <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+        <!-- PDF Upload icon -->
+        <label for="fileWmGrnTransportPdf" style="cursor: pointer; margin: 0; display: flex; align-items: center;" title="Upload Transport PDF">
+          <input type="file" id="fileWmGrnTransportPdf" accept=".pdf" style="display: none;" onchange="handleWmGrnTransportPdfUpload(event)">
+          <img src="icons/PDF Upload.svg" alt="PDF Upload" width="28" height="28">
+        </label>
+        <!-- Close icon -->
+        <button type="button" class="side-form-close-btn" id="btnCloseWmGrnTransportModal" onclick="closeWmGrnTransportModal()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+      </div>
+    </div>
+    <div style="height: 14px;"></div>
+
+    <form id="frmWmTransportDetails" onsubmit="event.preventDefault(); saveWmTransportDetails();" style="padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 16px;">
+      <!-- 1. Logistics Name -->
+      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Logistics Name</label>
+        <div style="flex: 1;">
+          <input type="text" class="form-input-control" id="inpWmLogisticsName" placeholder="Enter Logistics Name"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 2. Freight Charges -->
+      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Freight Charges</label>
+        <div style="flex: 1;">
+          <input type="number" step="0.01" class="form-input-control" id="inpWmFreightCharges" placeholder="Enter Freight Charges" oninput="calculateWmTransportTotal()"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 3. CGST/IGST -->
+      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">CGST/IGST</label>
+        <div style="flex: 1;">
+          <input type="number" step="0.01" class="form-input-control" id="inpWmTransportCgstIgst" placeholder="Enter CGST/IGST" oninput="calculateWmTransportTotal()"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 4. SGST -->
+      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">SGST</label>
+        <div style="flex: 1;">
+          <input type="number" step="0.01" class="form-input-control" id="inpWmTransportSgst" placeholder="Enter SGST" oninput="calculateWmTransportTotal()"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 5. Total Amount -->
+      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Total Amount</label>
+        <div style="flex: 1;">
+          <input type="number" step="0.01" class="form-input-control" id="inpWmTransportTotalAmount" placeholder="Enter Total Amount"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- Centered save icon below last field -->
+      <div style="display: flex; justify-content: center; align-items: center; margin-top: 10px;">
+        <button type="button" id="btnWmTransportSave" title="Save Transport Details" onclick="saveWmTransportDetails()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;">
+          <img src="icons/Save.svg" alt="Save" width="34" height="34">
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Warehouse Manager: Transport Payment Modal -->
+  <div class="side-form-card" id="wmGrnTransportPaymentModal"
+    style="display: none; width: 560px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100002 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; animation: none !important;">
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+      <div class="side-form-title-badge"
+        style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+        Transport Payment
+      </div>
+      <button type="button" class="side-form-close-btn" id="btnCloseWmGrnTransportPaymentModal" onclick="closeWmGrnTransportPaymentModal()"
+        aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; margin-left: auto;">&times;</button>
+    </div>
+    <div style="height: 14px;"></div>
+
+    <form id="frmWmTransportPayment" onsubmit="event.preventDefault(); submitWmTransportPayment();" style="padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 16px;">
+      <!-- 1. Select Beneficiary Type -->
+      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Select Benificiary Type</label>
+        <div style="flex: 1; position: relative;">
+          <select id="selWmBeneficiaryType" class="form-input-control" onchange="handleWmBeneficiaryTypeChange(this.value)"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+            <option value="Self" selected>Self</option>
+            <option value="Other Employee">Other Employee</option>
+            <option value="Transport Vendor">Transport Vendor</option>
+            <option value="New Account">New Account</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 2. Transfer Type -->
+      <div class="pm-field-row" id="rowWmPaymentTransferType" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transfer Type</label>
+        <div style="flex: 1; position: relative;">
+          <select id="selWmTransferType" class="form-input-control"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+            <option value="NET Banking" selected>NET Banking</option>
+            <option value="Cash">Cash</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 3. Account Name (dropdown or typeable) -->
+      <div class="pm-field-row" id="rowWmPaymentAccountName" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+        <label id="lblWmPaymentAccountName" style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Account Name</label>
+        <div style="flex: 1; position: relative;">
+          <select id="selWmPaymentAccountName" class="form-input-control"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+            <!-- Options populated dynamically from members list or transport vendor -->
+          </select>
+          <input type="text" class="form-input-control" id="inpWmPaymentNewAccountName" placeholder="Enter Account Name"
+            style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 4. Account Number -->
+      <div class="pm-field-row" id="rowWmPaymentAccountNumber" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Account number</label>
+        <div style="flex: 1;">
+          <input type="text" class="form-input-control" id="inpWmPaymentAccountNumber" placeholder="Enter Account Number"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 5. IFSC Code -->
+      <div class="pm-field-row" id="rowWmPaymentIfscCode" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">IFSC Code</label>
+        <div style="flex: 1;">
+          <input type="text" class="form-input-control" id="inpWmPaymentIfscCode" placeholder="Enter IFSC Code"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- Centered submit icon below last field -->
+      <div style="display: flex; justify-content: center; align-items: center; margin-top: 12px;">
+        <button type="button" id="btnWmTransportPaymentSubmit" title="Submit Transport Payment" onclick="submitWmTransportPayment()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;">
+          <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+        </button>
+      </div>
+    </form>
   </div>
 
   <!-- EXCEL-STYLE FILTER POPUP (Simplified & Clean) -->

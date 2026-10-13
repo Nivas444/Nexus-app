@@ -870,6 +870,48 @@ input[type="radio"].gbpa-row-radio:focus-visible {
   box-shadow: inset 0 0 0 3.5px #ffffff !important;
 }
 
+/* Custom PR Table Circular Checkbox with Green Marker */
+.pr-circle-checkbox,
+input[type="checkbox"].pr-circle-checkbox {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  border: 2px solid #cbd5e1 !important;
+  outline: none !important;
+  cursor: pointer !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.pr-circle-checkbox:hover,
+input[type="checkbox"].pr-circle-checkbox:hover {
+  border-color: #00cba0 !important;
+}
+
+.pr-circle-checkbox:checked,
+input[type="checkbox"].pr-circle-checkbox:checked {
+  border-color: #00cba0 !important;
+  background-color: #00cba0 !important;
+  box-shadow: inset 0 0 0 3.5px #ffffff !important;
+}
+
+.pr-circle-checkbox:focus,
+.pr-circle-checkbox:focus-visible,
+input[type="checkbox"].pr-circle-checkbox:focus,
+input[type="checkbox"].pr-circle-checkbox:focus-visible {
+  outline: none !important;
+  box-shadow: inset 0 0 0 3.5px #ffffff !important;
+}
+
 .req-link {
   color: #2563eb;
   font-weight: 600;
@@ -5568,4 +5610,56 @@ body.standalone-mode .worklist-main-full {
 
 .pm-circle-radio:hover {
   border-color: #00cba0 !important;
+}
+
+/* Warehouse Manager GRN Modals: Strictly Centered on Display */
+#wmGrnSupplierModal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  animation: none !important;
+  z-index: 99999 !important;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+#wmGrnSupplierModal.card-dimmed-blurred {
+  filter: blur(5px) brightness(0.65) opacity(0.7) !important;
+  pointer-events: none !important;
+}
+
+#wmGrnTransportModal,
+#wmGrnTransportPaymentModal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  animation: none !important;
+  z-index: 100001 !important;
+}
+
+/* White horizontal dividing line under PR Qty column header (1px thickness) */
+.master-view-header th.wm-qty-col-header,
+th.wm-qty-col-header {
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.master-view-header th.wm-qty-sub-header,
+th.wm-qty-sub-header {
+  border-top: 1px solid #ffffff !important;
+}
+
+/* White horizontal dividing line under GRN Qty & Amount column headers */
+.wm-grn-header-qty,
+.wm-grn-header-amount,
+th.wm-grn-header-qty,
+th.wm-grn-header-amount {
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.wm-grn-sub-header,
+th.wm-grn-sub-header {
+  border-top: 1px solid #ffffff !important;
 }

@@ -10781,7 +10781,7 @@ window.openPmAddStnMaterialsModal = function(editItem) {
   } else {
     pmEditingStnMaterialId = null;
     const title = document.getElementById('lblPmAddStnMaterialsTitle');
-    if (title) title.textContent = window.pmAddStnOpenedFromInfra ? 'Add Infra' : 'Add STN Materials';
+    if (title) title.textContent = (window.pmAddStnOpenedFromInfra || (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_infra')) ? 'Add Infra' : 'Add STN Materials';
     if (document.getElementById('inpPmStnDocumentType')) document.getElementById('inpPmStnDocumentType').value = '';
     if (document.getElementById('inpPmStnBoqNo')) document.getElementById('inpPmStnBoqNo').value = '';
     if (document.getElementById('inpPmStnBoqDate')) document.getElementById('inpPmStnBoqDate').value = '';
@@ -10822,7 +10822,7 @@ window.closePmAddStnMaterialsModal = function() {
   const modal = document.getElementById('pmAddStnMaterialsModal');
   if (modal) modal.style.display = 'none';
 
-  if (window.pmAddStnOpenedFromInfra) {
+  if (window.pmAddStnOpenedFromInfra || (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_infra')) {
     window.pmAddStnOpenedFromInfra = false;
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
@@ -10848,6 +10848,29 @@ window.savePmNewStnMaterial = function() {
 
   const finalBoqNo = boqNo || (pmEditingStnMaterialId ? '' : `BOQ-STN-00${pmStnMaterialsData.length + 1}`);
   const finalInfraDesc = infraDesc || 'Material item';
+
+  const isFromInfraPage = window.pmAddStnOpenedFromInfra || (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_infra');
+  if (isFromInfraPage) {
+    projectInfraData.push({
+      id: "infra-" + Date.now(),
+      docType: docType || 'STN',
+      boqNo: finalBoqNo,
+      boqDate: boqDate || '15-05-2024',
+      category: itemCategory || 'General',
+      infraDescription: finalInfraDesc,
+      qy: qty || '1.00',
+      status: 'Active'
+    });
+    showToast('Infra added successfully');
+    if (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_infra') {
+      currentDataset = [...projectInfraData];
+      filteredDataset = [...currentDataset];
+      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+      else if (typeof renderApp === 'function') renderApp();
+    }
+    closePmAddStnMaterialsModal();
+    return;
+  }
 
   // Prevent duplicate: check by boqNo or (itemCategory + infraDesc)
   const isDuplicate = pmStnMaterialsData.some(m => {
@@ -10891,7 +10914,7 @@ window.savePmNewStnMaterial = function() {
       uom: uom || 'Nos',
       qty: qty || '1'
     });
-    showToast(window.pmAddStnOpenedFromInfra ? 'Infra material added successfully' : 'STN material added successfully');
+    showToast('STN material added successfully');
   }
 
   renderPmStnMaterialsTable();
@@ -13114,7 +13137,34 @@ window.openProjectDprPage = function() {
   showToast('Opened Project DPR Page');
 };
 
+function isPmYtsWipHoldNrFlow() {
+  const role = getAuthenticatedUserRole();
+  if (role !== 'Project Manager') return false;
+  const validStatusViews = ['yts', 'wip', 'hold', 'nr'];
+  if (currentModule === 'worklist' && validStatusViews.includes(currentWorklistView)) {
+    return true;
+  }
+  if (window.projectNavigationContext === 'worklist' && validStatusViews.includes(window.projectWorklistOrigin)) {
+    return true;
+  }
+  if (window.lastPmWorklistView && validStatusViews.includes(window.lastPmWorklistView)) {
+    return true;
+  }
+  try {
+    const savedOrigin = sessionStorage.getItem('nexus_project_worklist_origin');
+    const savedCtx = sessionStorage.getItem('nexus_project_context');
+    if (savedCtx === 'worklist' && savedOrigin && validStatusViews.includes(savedOrigin)) {
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
 window.openProjectBoqPage = function() {
+  if (isPmYtsWipHoldNrFlow()) {
+    showToast('BOQ page is not accessible from this section');
+    return;
+  }
   currentModule = 'projects';
   currentProjectsView = 'project_boq';
   activeColumnFilters = {};
@@ -13720,7 +13770,7 @@ window.renderExpenseDetailsTable = function() {
   tbody.innerHTML = items.map((item, idx) => `
     <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
       <td style="padding: 12px 18px; text-align: left; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0;">
-        <a href="#" onclick="openAddExpenseTableModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
+        <a href="#" onclick="openEditExpenseModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
           ${item.itemName}
         </a>
       </td>
@@ -13831,9 +13881,7 @@ window.renderExpenseDetailsInlineTable = function() {
     return `
       <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
         <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
-          <a href="#" onclick="openEditExpenseModal(${idx}); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
-            ${row.description || ''}
-          </a>
+          ${row.description || ''}
         </td>
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${row.uom || 'Nos'}
@@ -13874,7 +13922,18 @@ window.toggleExpenseDetailsInlineTable = function() {
   }
 };
 
-window.openEditExpenseModal = function(index) {
+window.openEditExpenseModal = function(indexOrItemName) {
+  let index = 0;
+  let customDesc = '';
+  if (typeof indexOrItemName === 'number') {
+    index = indexOrItemName;
+  } else if (typeof indexOrItemName === 'string') {
+    customDesc = indexOrItemName;
+    const foundIdx = (window.expenseDetailsInlineItems || []).findIndex(r => r.description === customDesc || r.itemName === customDesc);
+    if (foundIdx !== -1) {
+      index = foundIdx;
+    }
+  }
   window.currentEditingExpenseInlineIndex = index;
   const modal = document.getElementById('pmEditExpenseModal');
   const parentModal = document.getElementById('pmExpenseDetailsModal');
@@ -13888,11 +13947,12 @@ window.openEditExpenseModal = function(index) {
   const lblDoc = document.getElementById('lblEditExpensePdfName');
   const fileInput = document.getElementById('inpEditExpensePdfFile');
 
+  const descToSelect = customDesc || row.description || '';
   if (selDesc) {
-    if (row.description) {
+    if (descToSelect) {
       let matched = false;
       for (let i = 0; i < selDesc.options.length; i++) {
-        if (selDesc.options[i].value === row.description) {
+        if (selDesc.options[i].value === descToSelect) {
           selDesc.selectedIndex = i;
           matched = true;
           break;
@@ -13900,10 +13960,10 @@ window.openEditExpenseModal = function(index) {
       }
       if (!matched) {
         const newOpt = document.createElement('option');
-        newOpt.value = row.description;
-        newOpt.textContent = row.description;
+        newOpt.value = descToSelect;
+        newOpt.textContent = descToSelect;
         selDesc.appendChild(newOpt);
-        selDesc.value = row.description;
+        selDesc.value = descToSelect;
       }
     } else {
       selDesc.selectedIndex = 0;
@@ -13941,34 +14001,40 @@ window.handleEditExpensePdfFile = function(input) {
 };
 
 window.saveEditedExpenseItem = function() {
-  const idx = window.currentEditingExpenseInlineIndex;
-  if (idx < 0 || !window.expenseDetailsInlineItems || !window.expenseDetailsInlineItems[idx]) {
-    if (typeof showToast === 'function') showToast('No item selected to edit');
-    return;
-  }
-
   const selDesc = document.getElementById('selEditExpenseDescription');
   const inpQty = document.getElementById('inpEditExpenseQty');
   const inpRate = document.getElementById('inpEditExpenseRate');
   const inpRemarks = document.getElementById('inpEditExpenseRemarks');
   const lblDoc = document.getElementById('lblEditExpensePdfName');
 
-  const descVal = selDesc ? selDesc.value.trim() : window.expenseDetailsInlineItems[idx].description;
-  const qtyVal = inpQty ? parseFloat(inpQty.value.replace(/,/g, '')) || 0 : parseFloat(window.expenseDetailsInlineItems[idx].qty) || 0;
-  const rateVal = inpRate ? parseFloat(inpRate.value.replace(/,/g, '')) || 0 : parseFloat(window.expenseDetailsInlineItems[idx].rate) || 0;
-  const remarksVal = inpRemarks ? inpRemarks.value.trim() : '';
-  const docVal = lblDoc ? lblDoc.textContent.trim() : '';
+  const idx = window.currentEditingExpenseInlineIndex;
+  const existingItem = (window.expenseDetailsInlineItems && window.expenseDetailsInlineItems[idx]) || {};
+
+  const descVal = selDesc ? selDesc.value.trim() : (existingItem.description || '');
+  const qtyVal = inpQty ? parseFloat(inpQty.value.replace(/,/g, '')) || 0 : (parseFloat(existingItem.qty) || 0);
+  const rateVal = inpRate ? parseFloat(inpRate.value.replace(/,/g, '')) || 0 : (parseFloat(existingItem.rate) || 0);
+  const remarksVal = inpRemarks ? inpRemarks.value.trim() : (existingItem.remarks || '');
+  const docVal = lblDoc ? lblDoc.textContent.trim() : (existingItem.doc || '');
   const amtVal = qtyVal * rateVal;
 
-  window.expenseDetailsInlineItems[idx] = {
-    ...window.expenseDetailsInlineItems[idx],
+  const updatedRecord = {
+    id: existingItem.id || `exp-inline-${Date.now()}`,
     description: descVal,
+    uom: existingItem.uom || 'Nos',
     qty: qtyVal.toFixed(2),
     rate: rateVal.toFixed(2),
     amount: amtVal.toFixed(2),
     remarks: remarksVal,
     doc: docVal
   };
+
+  if (!window.expenseDetailsInlineItems || window.expenseDetailsInlineItems.length === 0) {
+    window.expenseDetailsInlineItems = [updatedRecord];
+  } else if (idx >= 0 && idx < window.expenseDetailsInlineItems.length) {
+    window.expenseDetailsInlineItems[idx] = updatedRecord;
+  } else {
+    window.expenseDetailsInlineItems.push(updatedRecord);
+  }
 
   window.renderExpenseDetailsInlineTable();
   window.closeEditExpenseModal();
@@ -14039,6 +14105,8 @@ window.openTransferDetailsModal = window.openPmTransferDetailsModal = function()
   // Reset inputs
   const inpAccName = document.getElementById('inpTransferNewAccountName');
   if (inpAccName) inpAccName.value = '';
+  const rowAccName = document.getElementById('rowTransferNewAccountName');
+  if (rowAccName) rowAccName.style.display = 'flex';
   const inpAccNum = document.getElementById('inpTransferAccountNumber');
   if (inpAccNum) inpAccNum.value = '';
   const inpBankName = document.getElementById('inpTransferBankName');
@@ -14086,6 +14154,7 @@ window.handleTransferToChange = function(transferTo) {
   const rowServiceVendor = document.getElementById('rowTransferServiceVendor');
   const rowSupplyVendor = document.getElementById('rowTransferSupplyVendor');
   const groupNewAccount = document.getElementById('groupTransferNewAccount');
+  const rowTransferNewAccountName = document.getElementById('rowTransferNewAccountName');
   const rowGstToggle = document.getElementById('rowTransferGstToggle');
   const groupGstFields = document.getElementById('groupTransferGstFields');
   const inpGstToggle = document.getElementById('inpTransferGstToggle');
@@ -14098,6 +14167,7 @@ window.handleTransferToChange = function(transferTo) {
   if (rowGstToggle) rowGstToggle.style.display = 'none';
   if (groupGstFields) groupGstFields.style.display = 'none';
   if (inpGstToggle) inpGstToggle.checked = false;
+  if (rowTransferNewAccountName) rowTransferNewAccountName.style.display = 'flex';
 
   if (transferTo === 'Self') {
     // only submit icon appears
@@ -14114,6 +14184,9 @@ window.handleTransferToChange = function(transferTo) {
   } else if (transferTo === 'New Account') {
     if (groupNewAccount) groupNewAccount.style.display = 'flex';
     if (rowGstToggle) rowGstToggle.style.display = 'flex';
+    if (rowTransferNewAccountName) {
+      rowTransferNewAccountName.style.display = (inpGstToggle && inpGstToggle.checked) ? 'none' : 'flex';
+    }
   }
 };
 
@@ -14121,6 +14194,24 @@ window.handleTransferGstToggle = function(isChecked) {
   const groupGstFields = document.getElementById('groupTransferGstFields');
   if (groupGstFields) {
     groupGstFields.style.display = isChecked ? 'flex' : 'none';
+  }
+  const selTransferTo = document.getElementById('selTransferToOption');
+  const rowTransferNewAccountName = document.getElementById('rowTransferNewAccountName');
+  if (rowTransferNewAccountName && selTransferTo && selTransferTo.value === 'New Account') {
+    rowTransferNewAccountName.style.display = isChecked ? 'none' : 'flex';
+  }
+};
+
+window.handleTransferGstProcess = function() {
+  const gstVal = document.getElementById('inpTransferGstNumber')?.value?.trim();
+  if (gstVal) {
+    if (typeof showToast === 'function') {
+      showToast(`Processing GST verification for ${gstVal}... Verified!`);
+    }
+  } else {
+    if (typeof showToast === 'function') {
+      showToast('Please enter a GST number to process verification');
+    }
   }
 };
 
@@ -14517,6 +14608,11 @@ function loadProjectsDataset() {
   } else if (currentProjectsView === 'project_dpr') {
     currentDataset = [...projectDprData];
   } else if (currentProjectsView === 'project_boq') {
+    if (typeof isPmYtsWipHoldNrFlow === 'function' && isPmYtsWipHoldNrFlow()) {
+      currentProjectsView = 'details';
+      currentDataset = [];
+      return;
+    }
     currentDataset = [...projectBoqData];
   } else if (currentProjectsView === 'project_approvals') {
     currentDataset = [...projectApprovalsData];
@@ -15349,7 +15445,10 @@ function renderProjectsFooter() {
     currentProjectsView = 'details';
   }
 
-  const isFromYtsWipHoldNr = (window.lastPmWorklistView && ['yts', 'wip', 'hold', 'nr'].includes(window.lastPmWorklistView)) || (currentModule === 'worklist' && ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView));
+  const isPmWorklistFlow = (typeof isPmYtsWipHoldNrFlow === 'function') ? isPmYtsWipHoldNrFlow() : false;
+  if (currentProjectsView === 'project_boq' && isPmWorklistFlow) {
+    currentProjectsView = 'details';
+  }
 
   let detailTabs = [
     { key: 'expenses', label: 'Expenses' }
@@ -15361,7 +15460,9 @@ function renderProjectsFooter() {
     detailTabs.push({ key: 'infra', label: 'Infra' });
   }
   detailTabs.push({ key: 'dpr', label: 'DPR' });
-  detailTabs.push({ key: 'boq', label: 'BOQ' });
+  if (!isPmWorklistFlow) {
+    detailTabs.push({ key: 'boq', label: 'BOQ' });
+  }
   if (featSettings.additionalApproval) {
     detailTabs.push({ key: 'additional_approve', label: 'Additional Approve' });
   }
@@ -17303,12 +17404,1367 @@ function renderAccountsFooter() {
   });
 }
 
+// Warehouse Manager PR Data Store & State
+let isWmPrEditing = false;
+let wmPrDataStore = [
+  {
+    id: 'wm-pr-1',
+    selected: false,
+    submissionDate: '12-10-2026',
+    materialHead: 'Tower Structure',
+    materialCategory: 'Tower Infrastructure',
+    materialDescription: '40M Galvanized Tubular Telecom Tower Mast Structure',
+    uom: 'Nos',
+    stockQty: 25.00,
+    prQty: 10.00
+  },
+  {
+    id: 'wm-pr-2',
+    selected: false,
+    submissionDate: '12-10-2026',
+    materialHead: 'Power Cable',
+    materialCategory: 'Electrical & Cabling',
+    materialDescription: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
+    uom: 'Mtr',
+    stockQty: 150.00,
+    prQty: 500.00
+  },
+  {
+    id: 'wm-pr-3',
+    selected: false,
+    submissionDate: '13-10-2026',
+    materialHead: 'Optical Fiber',
+    materialCategory: 'Optical Fiber',
+    materialDescription: '24F Single Mode Armoured Optical Fiber Cable',
+    uom: 'Mtr',
+    stockQty: 80.00,
+    prQty: 1200.00
+  },
+  {
+    id: 'wm-pr-4',
+    selected: false,
+    submissionDate: '13-10-2026',
+    materialHead: 'Earthing Rod',
+    materialCategory: 'Electrical & Cabling',
+    materialDescription: 'Copper Bonded Chemical Earthing Electrode 3M',
+    uom: 'Set',
+    stockQty: 15.00,
+    prQty: 30.00
+  },
+  {
+    id: 'wm-pr-5',
+    selected: false,
+    submissionDate: '13-10-2026',
+    materialHead: 'Anchor Bolts',
+    materialCategory: 'Hardware & Fasteners',
+    materialDescription: 'High Tensile Foundation Anchor Bolts M24 x 1000mm',
+    uom: 'Nos',
+    stockQty: 40.00,
+    prQty: 160.00
+  }
+];
+
+const wmMaterialCatalog = {
+  'Tower Infrastructure': [
+    { desc: '40M Galvanized Tubular Telecom Tower Mast Structure', head: 'Tower Structure', uom: 'Nos' },
+    { desc: '30M Angular Lattice Guyed Mast Tower Section', head: 'Tower Structure', uom: 'Nos' },
+    { desc: 'Tower Antenna Mount Fixture Bracket Galvanized', head: 'Antenna Mount', uom: 'Set' },
+    { desc: 'Lightning Arrester Copper Spike 1.5M with Base', head: 'Lightning Arrester', uom: 'Nos' }
+  ],
+  'Electrical & Cabling': [
+    { desc: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable', head: 'Power Cable', uom: 'Mtr' },
+    { desc: '2C x 16 Sq.mm Copper Submersible Cable', head: 'Power Cable', uom: 'Mtr' },
+    { desc: 'Copper Bonded Chemical Earthing Electrode 3M', head: 'Earthing Rod', uom: 'Set' },
+    { desc: '25x3 mm Galvanized Iron Earthing Strip Flat', head: 'Earthing Strip', uom: 'Mtr' },
+    { desc: '100A 4-Pole Auto Mains Failure (AMF) Panel', head: 'Control Panel', uom: 'Nos' }
+  ],
+  'Optical Fiber': [
+    { desc: '24F Single Mode Armoured Optical Fiber Cable', head: 'Optical Fiber', uom: 'Mtr' },
+    { desc: '48F Duct Optical Fiber Cable G.652D', head: 'Optical Fiber', uom: 'Mtr' },
+    { desc: 'Fiber Joint Closure Dome Type 96 Fibers Heat Shrink', head: 'Joint Closure', uom: 'Nos' },
+    { desc: 'Optical Distribution Frame 24 Port SC/UPC', head: 'ODF Rack', uom: 'Nos' }
+  ],
+  'Hardware & Fasteners': [
+    { desc: 'High Tensile Foundation Anchor Bolts M24 x 1000mm', head: 'Anchor Bolts', uom: 'Nos' },
+    { desc: 'Galvanized Hex Nut and Washer Bolt M16 x 75mm Grade 8.8', head: 'Bolts & Nuts', uom: 'Kg' },
+    { desc: 'Stainless Steel Band Clamping Buckle 3/4 inch', head: 'Clamp Band', uom: 'Pkt' }
+  ],
+  'Civil Materials': [
+    { desc: 'Portland Pozzolana Cement 50kg Bags', head: 'Cement', uom: 'Bags' },
+    { desc: 'Fe550D TMT Reinforcement Steel Rods 12mm', head: 'TMT Steel', uom: 'Kg' },
+    { desc: 'Ready-mix Concrete M25 Grade Design Mix', head: 'RMC Concrete', uom: 'Cu.M' }
+  ]
+};
+
+window.handleWmMaterialCategoryChange = function(category) {
+  const selDesc = document.getElementById('selWmMaterialDescription');
+  if (!selDesc) return;
+  const items = wmMaterialCatalog[category] || [];
+  selDesc.innerHTML = items.map(item => `<option value="${item.desc}">${item.desc}</option>`).join('');
+};
+
+window.openWmAddProductModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('wmAddProductModal');
+  if (!modal) return;
+  if (overlay) {
+    overlay.style.display = 'flex';
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => {
+      c.style.display = 'none';
+    });
+  }
+  const selCat = document.getElementById('selWmMaterialCategory');
+  if (selCat) {
+    window.handleWmMaterialCategoryChange(selCat.value);
+  }
+  const inpQty = document.getElementById('inpWmProductQty');
+  if (inpQty) inpQty.value = '';
+
+  modal.style.display = 'block';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '99999', 'important');
+  modal.style.setProperty('width', '560px', 'important');
+};
+
+window.closeWmAddProductModal = function() {
+  const modal = document.getElementById('wmAddProductModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.saveWmAddProduct = function() {
+  const selCat = document.getElementById('selWmMaterialCategory');
+  const selDesc = document.getElementById('selWmMaterialDescription');
+  const inpQty = document.getElementById('inpWmProductQty');
+
+  const cat = selCat ? selCat.value : 'Tower Infrastructure';
+  const desc = selDesc ? selDesc.value : '';
+  const qtyVal = inpQty ? parseFloat(inpQty.value) : 0;
+
+  if (isNaN(qtyVal) || qtyVal <= 0) {
+    if (typeof showToast === 'function') {
+      showToast('Please enter a valid quantity greater than 0');
+    }
+    return;
+  }
+  if (!desc) {
+    if (typeof showToast === 'function') {
+      showToast('Please select a material description');
+    }
+    return;
+  }
+
+  const items = wmMaterialCatalog[cat] || [];
+  const meta = items.find(i => i.desc === desc) || { head: 'Material', uom: 'Nos' };
+
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const year = today.getFullYear();
+  const dateStr = `${day}-${month}-${year}`;
+
+  const newId = 'wm-pr-' + Date.now();
+  const newRow = {
+    id: newId,
+    selected: false,
+    submissionDate: dateStr,
+    materialHead: meta.head || 'Material',
+    materialCategory: cat,
+    materialDescription: desc,
+    uom: meta.uom || 'Nos',
+    stockQty: 0.00,
+    prQty: qtyVal
+  };
+
+  wmPrDataStore.unshift(newRow);
+  if (!currentDataset) currentDataset = [];
+  currentDataset.unshift(newRow);
+  filteredDataset = [...currentDataset];
+
+  window.closeWmAddProductModal();
+  renderWorklistTableBody();
+  updateWmPrSelectionUI();
+
+  if (typeof showToast === 'function') {
+    showToast('Product added to PR successfully');
+  }
+};
+
+window.handleWmPrEditToggle = function() {
+  if (!isWmPrEditing) {
+    // Turn into edit mode
+    isWmPrEditing = true;
+    renderWorklistToolbar();
+    renderWorklistTableBody();
+    setTimeout(() => {
+      const firstInput = document.querySelector('.wm-pr-editable-input');
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+      }
+    }, 50);
+  } else {
+    // Save edits
+    const inputs = document.querySelectorAll('.wm-pr-editable-input');
+    inputs.forEach(input => {
+      const rowId = input.getAttribute('data-row-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = wmPrDataStore.find(r => r.id === rowId);
+        if (item) item.prQty = val;
+        const curItem = currentDataset.find(r => r.id === rowId);
+        if (curItem) curItem.prQty = val;
+      }
+    });
+
+    isWmPrEditing = false;
+    renderWorklistToolbar();
+    renderWorklistTableBody();
+    if (typeof showToast === 'function') {
+      showToast('PR quantity updated successfully');
+    }
+  }
+};
+
+window.handleWmPrRowSelect = function(rowId, isChecked) {
+  if (isWmPrEditing) {
+    document.querySelectorAll('.wm-pr-editable-input').forEach(input => {
+      const id = input.getAttribute('data-row-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = wmPrDataStore.find(r => r.id === id);
+        if (item) item.prQty = val;
+        const curItem = currentDataset.find(r => r.id === id);
+        if (curItem) curItem.prQty = val;
+      }
+    });
+  }
+
+  const row = currentDataset.find(r => r.id === rowId);
+  if (row) row.selected = isChecked;
+  const storeRow = wmPrDataStore.find(r => r.id === rowId);
+  if (storeRow) storeRow.selected = isChecked;
+
+  // If user unselects all while editing, turn off editing
+  const hasSelected = currentDataset.some(r => r.selected);
+  if (!hasSelected && isWmPrEditing) {
+    isWmPrEditing = false;
+  }
+
+  renderWorklistToolbar();
+  renderWorklistTableBody();
+  updateWmPrSelectionUI();
+};
+
+window.toggleSelectAllWmPr = function(isChecked) {
+  if (isWmPrEditing) {
+    document.querySelectorAll('.wm-pr-editable-input').forEach(input => {
+      const id = input.getAttribute('data-row-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = wmPrDataStore.find(r => r.id === id);
+        if (item) item.prQty = val;
+        const curItem = currentDataset.find(r => r.id === id);
+        if (curItem) curItem.prQty = val;
+      }
+    });
+  }
+
+  currentDataset.forEach(r => r.selected = isChecked);
+  wmPrDataStore.forEach(r => r.selected = isChecked);
+
+  if (!isChecked && isWmPrEditing) {
+    isWmPrEditing = false;
+  }
+
+  renderWorklistToolbar();
+  renderWorklistTableBody();
+  updateWmPrSelectionUI();
+};
+
+function updateWmPrSelectionUI() {
+  if (!currentDataset) return;
+  const total = currentDataset.length;
+  const selectedCount = currentDataset.filter(r => r.selected).length;
+  const chkAll = document.getElementById('chkSelectAllWmPr');
+  if (chkAll) {
+    chkAll.checked = (total > 0 && selectedCount === total);
+  }
+
+  const btnEdit = document.getElementById('btnWmPrEdit');
+  if (btnEdit) {
+    btnEdit.style.display = selectedCount > 0 ? 'inline-flex' : 'none';
+  }
+
+  const submitArea = document.getElementById('wmPrSubmitArea');
+  if (submitArea) {
+    submitArea.style.display = selectedCount > 0 ? 'flex' : 'none';
+  }
+}
+
+window.submitWmPr = function() {
+  if (!currentDataset) return;
+  const selectedRows = currentDataset.filter(r => r.selected);
+  const selectedCount = selectedRows.length;
+  if (selectedCount === 0) {
+    if (typeof showToast === 'function') {
+      showToast('Please select at least one row to submit');
+    }
+    return;
+  }
+
+  const selectedIds = new Set(selectedRows.map(r => r.id));
+  wmPrDataStore = wmPrDataStore.filter(r => !selectedIds.has(r.id));
+  currentDataset = currentDataset.filter(r => !selectedIds.has(r.id));
+  if (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset)) {
+    filteredDataset = filteredDataset.filter(r => !selectedIds.has(r.id));
+  }
+
+  isWmPrEditing = false;
+
+  renderWorklistToolbar();
+  renderWorklistTableBody();
+  updateWmPrSelectionUI();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('PR submitted successfully!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('PR submitted successfully!');
+  }
+};
+
+// ==========================================================================
+// Warehouse Manager GRN Data Store & Functions
+// ==========================================================================
+let activeWmGrnRowId = null;
+let isWmGrnEditing = false;
+let wmGrnDataStore = [
+  {
+    id: 'wm-grn-1',
+    supplierName: 'Polycab India Limited',
+    poNo: 'PO-2026-0814',
+    poDate: '02-10-2026',
+    poAmount: 1485600.00,
+    invoiceNo: 'INV-2026-9842',
+    invoiceDate: '08-10-2026',
+    invoiceAmount: 1485600.00,
+    status: 'In-Transit',
+    ageing: '5 Days',
+    isHighlighted: false,
+    items: [
+      {
+        id: 'grn-item-1',
+        materialDescription: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
+        uom: 'Mtr',
+        rate: 550.00,
+        poQty: 1000.00,
+        invoiceQty: 1000.00,
+        receivedQty: 1000.00,
+        taxableQty: 1000.00,
+        cgst: 49500.00,
+        sgst: 49500.00,
+        totalAmount: 649000.00,
+        selected: false,
+        isTicked: false
+      },
+      {
+        id: 'grn-item-2',
+        materialDescription: '2C x 16 Sq.mm Copper Submersible Cable',
+        uom: 'Mtr',
+        rate: 320.00,
+        poQty: 500.00,
+        invoiceQty: 500.00,
+        receivedQty: 500.00,
+        taxableQty: 500.00,
+        cgst: 14400.00,
+        sgst: 14400.00,
+        totalAmount: 188800.00,
+        selected: false,
+        isTicked: false
+      },
+      {
+        id: 'grn-item-3',
+        materialDescription: 'Copper Bonded Chemical Earthing Electrode 3M',
+        uom: 'Set',
+        rate: 4200.00,
+        poQty: 150.00,
+        invoiceQty: 150.00,
+        receivedQty: 150.00,
+        taxableQty: 150.00,
+        cgst: 56700.00,
+        sgst: 56700.00,
+        totalAmount: 743400.00,
+        selected: false,
+        isTicked: false
+      }
+    ],
+    transport: {
+      logisticsName: 'V-Trans India Ltd',
+      freightCharges: 18500.00,
+      cgstIgst: 1665.00,
+      sgst: 1665.00,
+      totalAmount: 21830.00
+    }
+  },
+  {
+    id: 'wm-grn-2',
+    supplierName: 'Schneider Electric India',
+    poNo: 'PO-2026-0820',
+    poDate: '04-10-2026',
+    poAmount: 840000.00,
+    invoiceNo: 'INV-2026-1024',
+    invoiceDate: '10-10-2026',
+    invoiceAmount: 840000.00,
+    status: 'PO To Be Approve',
+    ageing: '3 Days',
+    isHighlighted: false,
+    items: [
+      {
+        id: 'grn-item-4',
+        materialDescription: '100A 4-Pole Auto Mains Failure (AMF) Panel',
+        uom: 'Nos',
+        rate: 42000.00,
+        poQty: 20.00,
+        invoiceQty: 20.00,
+        receivedQty: 20.00,
+        taxableQty: 20.00,
+        cgst: 75600.00,
+        sgst: 75600.00,
+        totalAmount: 991200.00,
+        selected: false,
+        isTicked: false
+      }
+    ],
+    transport: {
+      logisticsName: 'TCI Freight Logistics',
+      freightCharges: 12000.00,
+      cgstIgst: 1080.00,
+      sgst: 1080.00,
+      totalAmount: 14160.00
+    }
+  },
+  {
+    id: 'wm-grn-3',
+    supplierName: 'Sterlite Technologies Ltd',
+    poNo: 'PO-2026-0835',
+    poDate: '05-10-2026',
+    poAmount: 1250000.00,
+    invoiceNo: 'INV-2026-3390',
+    invoiceDate: '11-10-2026',
+    invoiceAmount: 1250000.00,
+    status: 'In-Transit',
+    ageing: '2 Days',
+    isHighlighted: false,
+    items: [
+      {
+        id: 'grn-item-5',
+        materialDescription: '24F Single Mode Armoured Optical Fiber Cable',
+        uom: 'Mtr',
+        rate: 85.00,
+        poQty: 10000.00,
+        invoiceQty: 10000.00,
+        receivedQty: 10000.00,
+        taxableQty: 10000.00,
+        cgst: 76500.00,
+        sgst: 76500.00,
+        totalAmount: 1003000.00,
+        selected: false,
+        isTicked: false
+      },
+      {
+        id: 'grn-item-6',
+        materialDescription: 'Fiber Joint Closure Dome Type 96 Fibers Heat Shrink',
+        uom: 'Nos',
+        rate: 2850.00,
+        poQty: 80.00,
+        invoiceQty: 80.00,
+        receivedQty: 80.00,
+        taxableQty: 80.00,
+        cgst: 20520.00,
+        sgst: 20520.00,
+        totalAmount: 269040.00,
+        selected: false,
+        isTicked: false
+      }
+    ],
+    transport: {
+      logisticsName: 'Blue Dart Surface Logistics',
+      freightCharges: 24000.00,
+      cgstIgst: 2160.00,
+      sgst: 2160.00,
+      totalAmount: 28320.00
+    }
+  },
+  {
+    id: 'wm-grn-4',
+    supplierName: 'Tata Steel Tubes Division',
+    poNo: 'PO-2026-0841',
+    poDate: '06-10-2026',
+    poAmount: 2150000.00,
+    invoiceNo: 'INV-2026-5541',
+    invoiceDate: '12-10-2026',
+    invoiceAmount: 2150000.00,
+    status: 'PO To Be Approve',
+    ageing: '1 Day',
+    isHighlighted: false,
+    items: [
+      {
+        id: 'grn-item-7',
+        materialDescription: '40M Galvanized Tubular Telecom Tower Mast Structure',
+        uom: 'Nos',
+        rate: 430000.00,
+        poQty: 5.00,
+        invoiceQty: 5.00,
+        receivedQty: 5.00,
+        taxableQty: 5.00,
+        cgst: 193500.00,
+        sgst: 193500.00,
+        totalAmount: 2537000.00,
+        selected: false,
+        isTicked: false
+      }
+    ],
+    transport: {
+      logisticsName: 'GATI KWE Logistics',
+      freightCharges: 35000.00,
+      cgstIgst: 3150.00,
+      sgst: 3150.00,
+      totalAmount: 41300.00
+    }
+  }
+];
+
+// Warehouse Manager MIN, MRN, MTN, STN, SRN Data Stores
+let wmMinDataStore = [
+  {
+    id: 'wm-min-1',
+    selected: false,
+    siteName: 'Airtel Tower Site - Hub 104',
+    requestDate: '12-10-2026',
+    requestBy: 'Rajesh Sharma',
+    projectId: 'PRJ-IND-4091',
+    projectType: 'New Build',
+    subProjectType: 'Ground Based Tower 40M',
+    status: 'Ready To Dispatch',
+    ageing: '2 Days'
+  },
+  {
+    id: 'wm-min-2',
+    selected: false,
+    siteName: 'Jio Fiber ODC Site Alpha',
+    requestDate: '10-10-2026',
+    requestBy: 'Vikram Patel',
+    projectId: 'PRJ-IND-4092',
+    projectType: 'Upgrade',
+    subProjectType: 'Rooftop Pole Mast 15M',
+    status: 'To Be Prepare',
+    ageing: '4 Days'
+  },
+  {
+    id: 'wm-min-3',
+    selected: false,
+    siteName: 'BSNL Phase IX Site 42',
+    requestDate: '13-10-2026',
+    requestBy: 'Suresh Kumar',
+    projectId: 'PRJ-IND-4095',
+    projectType: 'Macro Tower',
+    subProjectType: 'Monopole Tower 30M',
+    status: 'Stock Not Available',
+    ageing: '1 Day'
+  },
+  {
+    id: 'wm-min-4',
+    selected: false,
+    siteName: 'Vodafone Idea Cell Site 88',
+    requestDate: '09-10-2026',
+    requestBy: 'Karthik Raja',
+    projectId: 'PRJ-IND-4098',
+    projectType: 'New Build',
+    subProjectType: '4 Legged Lattice Tower',
+    status: 'Ready To Dispatch',
+    ageing: '5 Days'
+  }
+];
+
+let wmMrnDataStore = [
+  {
+    id: 'wm-mrn-1',
+    siteName: 'BSNL Phase IX Site 42',
+    completionDate: '08-10-2026',
+    submitBy: 'Amitabh Verma',
+    projectId: 'PRJ-IND-3910',
+    projectType: 'Upgrade',
+    subProjectType: 'Solar Power Hybrid 10kVA',
+    ageing: '3 Days'
+  },
+  {
+    id: 'wm-mrn-2',
+    siteName: 'Airtel Cell Site Pune North',
+    completionDate: '11-10-2026',
+    submitBy: 'Pooja Hegde',
+    projectId: 'PRJ-IND-3911',
+    projectType: 'Maintenance',
+    subProjectType: 'Tower Maintenance',
+    ageing: '1 Day'
+  },
+  {
+    id: 'wm-mrn-3',
+    siteName: 'Indus Telecom Hub Delta-9',
+    completionDate: '06-10-2026',
+    submitBy: 'Sunil Narine',
+    projectId: 'PRJ-IND-3915',
+    projectType: 'New Build',
+    subProjectType: 'Ground Based Tower 40M',
+    ageing: '5 Days'
+  }
+];
+
+let wmMtnDataStore = [
+  {
+    id: 'wm-mtn-1',
+    selected: false,
+    whName: 'Central Hub Warehouse Mumbai',
+    requestDate: '14-10-2026',
+    requestBy: 'Mahesh Rathi',
+    materialDescription: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
+    uom: 'Mtr',
+    qty: 500.00,
+    status: 'To Be Dispatch'
+  },
+  {
+    id: 'wm-mtn-2',
+    selected: false,
+    whName: 'North Regional Depot Delhi',
+    requestDate: '12-10-2026',
+    requestBy: 'Kavita Joshi',
+    materialDescription: '24F Single Mode Armoured Optical Fiber Cable',
+    uom: 'Mtr',
+    qty: 1200.00,
+    status: 'Yet To Receive'
+  },
+  {
+    id: 'wm-mtn-3',
+    selected: false,
+    whName: 'South Logistics Center Chennai',
+    requestDate: '10-10-2026',
+    requestBy: 'Praveen Das',
+    materialDescription: 'Copper Bonded Chemical Earthing Electrode 3M',
+    uom: 'Set',
+    qty: 75.00,
+    status: 'To Be Dispatch'
+  }
+];
+
+let wmStnDataStore = [
+  {
+    id: 'wm-stn-1',
+    selected: false,
+    siteName: 'Indus Tower Site Delta-8',
+    stnNo: 'STN-2026-001',
+    projectId: 'PRJ-IND-4091',
+    projectManager: 'Nivas Kumar',
+    infraCategory: 'Electrical',
+    qty: 250.00,
+    ageing: '2 Days',
+    status: 'To Be Dispatch'
+  },
+  {
+    id: 'wm-stn-2',
+    selected: false,
+    siteName: 'Vi Telemetry Hub Kolhapur',
+    stnNo: 'STN-2026-002',
+    projectId: 'PRJ-IND-4093',
+    projectManager: 'Anand Verma',
+    infraCategory: 'Civil & Tower',
+    qty: 75.00,
+    ageing: '5 Days',
+    status: 'To Be Receive'
+  },
+  {
+    id: 'wm-stn-3',
+    selected: false,
+    siteName: 'Airtel Micro Hub Nagpur',
+    stnNo: 'STN-2026-003',
+    projectId: 'PRJ-IND-4096',
+    projectManager: 'Priya Sharma',
+    infraCategory: 'Optical Fiber',
+    qty: 120.00,
+    ageing: '1 Day',
+    status: 'To Be Dispatch'
+  }
+];
+
+let wmSrnDataStore = [
+  {
+    id: 'wm-srn-1',
+    selected: false,
+    siteName: 'Indus Tower Site Delta-8',
+    srnNo: 'SRN-2026-001',
+    projectId: 'PRJ-IND-4091',
+    projectManager: 'Nivas Kumar',
+    infraCategory: 'Electrical',
+    qty: 40.00,
+    ageing: '1 Day',
+    status: 'To Be Dispatch'
+  },
+  {
+    id: 'wm-srn-2',
+    selected: false,
+    siteName: 'Vi Telemetry Hub Kolhapur',
+    srnNo: 'SRN-2026-002',
+    projectId: 'PRJ-IND-4093',
+    projectManager: 'Anand Verma',
+    infraCategory: 'Civil & Tower',
+    qty: 15.00,
+    ageing: '3 Days',
+    status: 'To Be Receive'
+  },
+  {
+    id: 'wm-srn-3',
+    selected: false,
+    siteName: 'Airtel Micro Hub Nagpur',
+    srnNo: 'SRN-2026-003',
+    projectId: 'PRJ-IND-4096',
+    projectManager: 'Priya Sharma',
+    infraCategory: 'Optical Fiber',
+    qty: 25.00,
+    ageing: '2 Days',
+    status: 'To Be Dispatch'
+  }
+];
+
+let wmPaymentDataStore = [
+  {
+    id: 'wm-pay-1',
+    requestDate: '12-10-2026',
+    expenseName: 'Tower Maintenance & Foundation Labor',
+    transferTo: 'Apex Infrastructure Pvt Ltd',
+    requestAmount: 85000.00,
+    approvedAmount: 85000.00,
+    paidAmount: 50000.00,
+    payableAmount: 35000.00,
+    pendingWith: 'Accounts Dept',
+    ageing: '2 Days'
+  },
+  {
+    id: 'wm-pay-2',
+    requestDate: '10-10-2026',
+    expenseName: 'DG Fuel & DG Set Transportation',
+    transferTo: 'Om Logistics Express',
+    requestAmount: 32000.00,
+    approvedAmount: 30000.00,
+    paidAmount: 30000.00,
+    payableAmount: 0.00,
+    pendingWith: 'Finance Head',
+    ageing: '4 Days'
+  },
+  {
+    id: 'wm-pay-3',
+    requestDate: '08-10-2026',
+    expenseName: 'Crane Rental & Heavy Lifting Charges',
+    transferTo: 'Western Heavy Equipment Corp',
+    requestAmount: 64000.00,
+    approvedAmount: 60000.00,
+    paidAmount: 20000.00,
+    payableAmount: 40000.00,
+    pendingWith: 'Site Incharge',
+    ageing: '6 Days'
+  },
+  {
+    id: 'wm-pay-4',
+    requestDate: '14-10-2026',
+    expenseName: 'Optical Fiber Splicing & Testing Tools',
+    transferTo: 'FiberTech Solutions',
+    requestAmount: 18500.00,
+    approvedAmount: 18500.00,
+    paidAmount: 18500.00,
+    payableAmount: 0.00,
+    pendingWith: 'Commercial Head',
+    ageing: '1 Day'
+  }
+];
+
+let wmSupplyDataStore = [
+  {
+    id: 'wm-sup-1',
+    submissionDate: '12-10-2026',
+    customerName: 'Bharti Airtel Limited',
+    orderId: 'ORD-AIR-1029',
+    orderValue: 450000.00,
+    status: 'Ready To Dispatch',
+    ageing: '2 Days'
+  },
+  {
+    id: 'wm-sup-2',
+    submissionDate: '11-10-2026',
+    customerName: 'Reliance Jio Infocomm',
+    orderId: 'ORD-JIO-5541',
+    orderValue: 780000.00,
+    status: 'To Be Prepare',
+    ageing: '3 Days'
+  },
+  {
+    id: 'wm-sup-3',
+    submissionDate: '09-10-2026',
+    customerName: 'Vodafone Idea Ltd',
+    orderId: 'ORD-VI-3320',
+    orderValue: 310000.00,
+    status: 'Ready To Dispatch',
+    ageing: '5 Days'
+  },
+  {
+    id: 'wm-sup-4',
+    submissionDate: '14-10-2026',
+    customerName: 'Indus Towers Limited',
+    orderId: 'ORD-IND-8812',
+    orderValue: 1250000.00,
+    status: 'To Be Prepare',
+    ageing: '1 Day'
+  }
+];
+
+window.toggleWmRowSelected = function(rowId, isChecked) {
+  if (currentDataset) {
+    const curRow = currentDataset.find(r => r.id === rowId);
+    if (curRow) curRow.selected = isChecked;
+  }
+  const stores = [
+    typeof wmMinDataStore !== 'undefined' ? wmMinDataStore : null,
+    typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : null,
+    typeof wmStnDataStore !== 'undefined' ? wmStnDataStore : null,
+    typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : null
+  ];
+  stores.forEach(store => {
+    if (Array.isArray(store)) {
+      const r = store.find(x => x.id === rowId);
+      if (r) r.selected = isChecked;
+    }
+  });
+  renderWorklistTableBody();
+};
+
+window.openWmGrnSupplierModal = function(grnId) {
+  activeWmGrnRowId = grnId;
+  const row = wmGrnDataStore.find(r => r.id === grnId);
+  if (!row) return;
+
+  const lblSupplier = document.getElementById('lblWmGrnSupplierName');
+  const lblInvoice = document.getElementById('lblWmGrnInvoiceNo');
+  if (lblSupplier) lblSupplier.textContent = row.supplierName || 'Supplier';
+  if (lblInvoice) lblInvoice.textContent = row.invoiceNo || '';
+
+  // Reset states
+  isWmGrnEditing = false;
+  const editImg = document.getElementById('imgWmGrnEdit');
+  if (editImg) editImg.src = 'icons/Edit.svg';
+  const btnEdit = document.getElementById('btnWmGrnEdit');
+  if (btnEdit) btnEdit.title = 'Edit Received Qty';
+
+  if (row.items && Array.isArray(row.items)) {
+    row.items.forEach(it => {
+      it.selected = false;
+      it.isTicked = false;
+    });
+  }
+
+  renderWmGrnSupplierItems();
+
+  const modal = document.getElementById('wmGrnSupplierModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
+};
+
+window.closeWmGrnSupplierModal = function() {
+  const modal = document.getElementById('wmGrnSupplierModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('card-dimmed-blurred');
+  }
+
+  const transportModal = document.getElementById('wmGrnTransportModal');
+  const paymentModal = document.getElementById('wmGrnTransportPaymentModal');
+  const anyOtherOpen = (transportModal && transportModal.style.display !== 'none') ||
+                       (paymentModal && paymentModal.style.display !== 'none');
+
+  if (!anyOtherOpen) {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.renderWmGrnSupplierItems = function() {
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (!row || !row.items) return;
+
+  const tbody = document.getElementById('tblWmGrnItemsBody');
+  if (!tbody) return;
+
+  // Summation on top left
+  const totalSum = row.items.reduce((sum, it) => sum + (Number(it.totalAmount) || 0), 0);
+  const lblSum = document.getElementById('lblWmGrnTotalSum');
+  if (lblSum) {
+    lblSum.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    lblSum.style.color = '#0057e7';
+  }
+
+  const hasSelected = row.items.some(it => it.selected);
+  const allSelected = row.items.length > 0 && row.items.every(it => it.selected);
+  const hasTicked = row.items.some(it => it.isTicked);
+
+  // Toggle tick and edit icons visibility
+  const btnTick = document.getElementById('btnWmGrnTick');
+  const btnEdit = document.getElementById('btnWmGrnEdit');
+  if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+  // Toggle submit area below table
+  const submitArea = document.getElementById('wmGrnTableSubmitArea');
+  if (submitArea) submitArea.style.display = hasTicked ? 'flex' : 'none';
+
+  const chkAll = document.getElementById('chkSelectAllWmGrnItems');
+  if (chkAll) chkAll.checked = allSelected;
+
+  tbody.innerHTML = row.items.map(item => {
+    const isSelected = !!item.selected;
+    const isTicked = !!item.isTicked;
+    const rowBg = isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff');
+    const rowBorder = isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
+    return `
+      <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
+        <!-- 1. Select: circle checkbox -->
+        <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+          <input type="checkbox" class="pr-circle-checkbox" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handleWmGrnItemSelect('${item.id}', this.checked)">
+        </td>
+        <!-- 2. Material Description: 40ch & left -->
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+          ${item.materialDescription || ''}
+        </td>
+        <!-- 3. Uom: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+          ${item.uom || ''}
+        </td>
+        <!-- 4. Rate: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
+          ${Number(item.rate || 0).toFixed(2)}
+        </td>
+        <!-- 5a. PO: 10ch & right -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(item.poQty || 0).toFixed(2)}
+        </td>
+        <!-- 5b. Invoice Qty: 10ch & right -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(item.invoiceQty || 0).toFixed(2)}
+        </td>
+        <!-- 5c. Receivable (Received): 10ch & right (editable when edit clicked) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 6px 8px; color: #1e293b; font-weight: 600;">
+          ${isWmGrnEditing && isSelected ? `
+            <input type="number" step="0.01" class="form-input-control wm-grn-editable-input" data-item-id="${item.id}" value="${Number(item.receivedQty || 0).toFixed(2)}"
+              style="width: 100%; height: 30px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;"
+              onkeydown="if(event.key === 'Enter') handleWmGrnEditToggle();">
+          ` : `
+            <span>${Number(item.receivedQty || 0).toFixed(2)}</span>
+          `}
+        </td>
+        <!-- 5d. Taxable: 10ch & right -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(item.taxableQty || 0).toFixed(2)}
+        </td>
+        <!-- 6a. CGST: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
+          ${Number(item.cgst || 0).toFixed(2)}
+        </td>
+        <!-- 6b. SGST: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
+          ${Number(item.sgst || 0).toFixed(2)}
+        </td>
+        <!-- 6c. Total: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 700;">
+          ${Number(item.totalAmount || 0).toFixed(2)}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.handleWmGrnItemSelect = function(itemId, isChecked) {
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (!row || !row.items) return;
+
+  if (isWmGrnEditing) {
+    document.querySelectorAll('.wm-grn-editable-input').forEach(input => {
+      const id = input.getAttribute('data-item-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = row.items.find(i => i.id === id);
+        if (item) item.receivedQty = val;
+      }
+    });
+  }
+
+  const it = row.items.find(i => i.id === itemId);
+  if (it) it.selected = isChecked;
+
+  const hasSelected = row.items.some(i => i.selected);
+  if (!hasSelected && isWmGrnEditing) {
+    isWmGrnEditing = false;
+    const editImg = document.getElementById('imgWmGrnEdit');
+    if (editImg) editImg.src = 'icons/Edit.svg';
+  }
+
+  renderWmGrnSupplierItems();
+};
+
+window.toggleSelectAllWmGrnItems = function(isChecked) {
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (!row || !row.items) return;
+
+  if (isWmGrnEditing) {
+    document.querySelectorAll('.wm-grn-editable-input').forEach(input => {
+      const id = input.getAttribute('data-item-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = row.items.find(i => i.id === id);
+        if (item) item.receivedQty = val;
+      }
+    });
+  }
+
+  row.items.forEach(it => { it.selected = isChecked; });
+
+  if (!isChecked && isWmGrnEditing) {
+    isWmGrnEditing = false;
+    const editImg = document.getElementById('imgWmGrnEdit');
+    if (editImg) editImg.src = 'icons/Edit.svg';
+  }
+
+  renderWmGrnSupplierItems();
+};
+
+window.handleWmGrnEditToggle = function() {
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (!row || !row.items) return;
+
+  const editImg = document.getElementById('imgWmGrnEdit');
+  const btnEdit = document.getElementById('btnWmGrnEdit');
+
+  if (!isWmGrnEditing) {
+    isWmGrnEditing = true;
+    if (editImg) editImg.src = 'icons/Save.svg';
+    if (btnEdit) btnEdit.title = 'Save Received Qty';
+    renderWmGrnSupplierItems();
+    setTimeout(() => {
+      const firstInput = document.querySelector('.wm-grn-editable-input');
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+      }
+    }, 50);
+  } else {
+    // Save edits
+    document.querySelectorAll('.wm-grn-editable-input').forEach(input => {
+      const id = input.getAttribute('data-item-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = row.items.find(i => i.id === id);
+        if (item) item.receivedQty = val;
+      }
+    });
+
+    isWmGrnEditing = false;
+    if (editImg) editImg.src = 'icons/Edit.svg';
+    if (btnEdit) btnEdit.title = 'Edit Received Qty';
+    renderWmGrnSupplierItems();
+    if (typeof showToast === 'function') {
+      showToast('Received quantity updated successfully');
+    }
+  }
+};
+
+window.handleWmGrnTick = function() {
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (!row || !row.items) return;
+
+  const selectedItems = row.items.filter(it => it.selected);
+  if (selectedItems.length === 0) {
+    showToast('Please select at least one row to approve');
+    return;
+  }
+
+  selectedItems.forEach(it => {
+    it.isTicked = true;
+  });
+
+  renderWmGrnSupplierItems();
+  showToast('Selected row(s) approved and highlighted');
+};
+
+// Transport Details Modal Functions
+window.openWmGrnTransportModal = function() {
+  const prevModal = document.getElementById('wmGrnSupplierModal');
+  if (prevModal) prevModal.classList.add('card-dimmed-blurred');
+
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  const t = (row && row.transport) ? row.transport : {
+    logisticsName: 'V-Trans India Ltd',
+    freightCharges: 18500.00,
+    cgstIgst: 1665.00,
+    sgst: 1665.00,
+    totalAmount: 21830.00
+  };
+
+  const inpLog = document.getElementById('inpWmLogisticsName');
+  const inpFc = document.getElementById('inpWmFreightCharges');
+  const inpCgst = document.getElementById('inpWmTransportCgstIgst');
+  const inpSgst = document.getElementById('inpWmTransportSgst');
+  const inpTot = document.getElementById('inpWmTransportTotalAmount');
+
+  if (inpLog) inpLog.value = t.logisticsName || '';
+  if (inpFc) inpFc.value = Number(t.freightCharges || 0).toFixed(2);
+  if (inpCgst) inpCgst.value = Number(t.cgstIgst || 0).toFixed(2);
+  if (inpSgst) inpSgst.value = Number(t.sgst || 0).toFixed(2);
+  if (inpTot) inpTot.value = Number(t.totalAmount || 0).toFixed(2);
+
+  const modal = document.getElementById('wmGrnTransportModal');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+};
+
+window.closeWmGrnTransportModal = function() {
+  const modal = document.getElementById('wmGrnTransportModal');
+  if (modal) modal.style.display = 'none';
+  const prevModal = document.getElementById('wmGrnSupplierModal');
+  if (prevModal) prevModal.classList.remove('card-dimmed-blurred');
+};
+
+window.calculateWmTransportTotal = function() {
+  const fc = parseFloat(document.getElementById('inpWmFreightCharges')?.value) || 0;
+  const cgst = parseFloat(document.getElementById('inpWmTransportCgstIgst')?.value) || 0;
+  const sgst = parseFloat(document.getElementById('inpWmTransportSgst')?.value) || 0;
+  const total = fc + cgst + sgst;
+
+  const inpTot = document.getElementById('inpWmTransportTotalAmount');
+  if (inpTot) inpTot.value = total.toFixed(2);
+};
+
+window.handleWmGrnTransportPdfUpload = function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (file) {
+    showToast(`PDF "${file.name}" uploaded successfully`);
+  }
+};
+
+window.saveWmTransportDetails = function() {
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (row) {
+    if (!row.transport) row.transport = {};
+    row.transport.logisticsName = document.getElementById('inpWmLogisticsName')?.value || 'V-Trans India Ltd';
+    row.transport.freightCharges = parseFloat(document.getElementById('inpWmFreightCharges')?.value) || 0;
+    row.transport.cgstIgst = parseFloat(document.getElementById('inpWmTransportCgstIgst')?.value) || 0;
+    row.transport.sgst = parseFloat(document.getElementById('inpWmTransportSgst')?.value) || 0;
+    row.transport.totalAmount = parseFloat(document.getElementById('inpWmTransportTotalAmount')?.value) || 0;
+  }
+
+  closeWmGrnTransportModal();
+  showToast('Transport details saved successfully');
+};
+
+// Transport Payment Modal Functions
+window.openWmGrnTransportPaymentModal = function() {
+  const prevModal = document.getElementById('wmGrnSupplierModal');
+  if (prevModal) prevModal.classList.add('card-dimmed-blurred');
+
+  const selBeneficiary = document.getElementById('selWmBeneficiaryType');
+  if (selBeneficiary) selBeneficiary.value = 'Self';
+
+  const selTransfer = document.getElementById('selWmTransferType');
+  if (selTransfer) selTransfer.value = 'NET Banking';
+
+  handleWmBeneficiaryTypeChange('Self');
+
+  const modal = document.getElementById('wmGrnTransportPaymentModal');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+};
+
+window.closeWmGrnTransportPaymentModal = function() {
+  const modal = document.getElementById('wmGrnTransportPaymentModal');
+  if (modal) modal.style.display = 'none';
+  const prevModal = document.getElementById('wmGrnSupplierModal');
+  if (prevModal) prevModal.classList.remove('card-dimmed-blurred');
+};
+
+window.handleWmBeneficiaryTypeChange = function(type) {
+  const rowTransferType = document.getElementById('rowWmPaymentTransferType');
+  const rowAccountName = document.getElementById('rowWmPaymentAccountName');
+  const rowAccountNumber = document.getElementById('rowWmPaymentAccountNumber');
+  const rowIfscCode = document.getElementById('rowWmPaymentIfscCode');
+  const selAccountName = document.getElementById('selWmPaymentAccountName');
+  const inpNewAccountName = document.getElementById('inpWmPaymentNewAccountName');
+  const lblAccountName = document.getElementById('lblWmPaymentAccountName');
+
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+
+  if (type === 'Self') {
+    if (rowTransferType) rowTransferType.style.display = 'flex';
+    if (rowAccountName) rowAccountName.style.display = 'none';
+    if (rowAccountNumber) rowAccountNumber.style.display = 'none';
+    if (rowIfscCode) rowIfscCode.style.display = 'none';
+  } else if (type === 'Other Employee') {
+    if (rowTransferType) rowTransferType.style.display = 'flex';
+    if (rowAccountName) rowAccountName.style.display = 'flex';
+    if (lblAccountName) lblAccountName.textContent = 'Account Name';
+    if (selAccountName) {
+      selAccountName.style.display = 'block';
+      let members = ['Karthik Raja', 'Priya Sharma', 'Suresh Kumar', 'Anand Verma', 'Deepak Joshi'];
+      if (typeof pmMembersDataStore !== 'undefined' && Array.isArray(pmMembersDataStore) && pmMembersDataStore.length > 0) {
+        members = pmMembersDataStore.map(m => m.name).filter(Boolean);
+      }
+      selAccountName.innerHTML = members.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+    if (inpNewAccountName) inpNewAccountName.style.display = 'none';
+    if (rowAccountNumber) rowAccountNumber.style.display = 'none';
+    if (rowIfscCode) rowIfscCode.style.display = 'none';
+  } else if (type === 'Transport Vendor') {
+    if (rowTransferType) rowTransferType.style.display = 'flex';
+    if (rowAccountName) rowAccountName.style.display = 'flex';
+    if (lblAccountName) lblAccountName.textContent = 'Transport Vendor Name';
+    if (selAccountName) {
+      selAccountName.style.display = 'block';
+      const defaultLogistics = (row && row.transport && row.transport.logisticsName) || 'V-Trans India Ltd';
+      const vendors = [defaultLogistics, 'TCI Freight Logistics', 'Blue Dart Surface Logistics', 'GATI KWE Logistics'];
+      const uniqueVendors = Array.from(new Set(vendors));
+      selAccountName.innerHTML = uniqueVendors.map(v => `<option value="${v}">${v}</option>`).join('');
+    }
+    if (inpNewAccountName) inpNewAccountName.style.display = 'none';
+    if (rowAccountNumber) rowAccountNumber.style.display = 'none';
+    if (rowIfscCode) rowIfscCode.style.display = 'none';
+  } else if (type === 'New Account') {
+    if (rowTransferType) rowTransferType.style.display = 'flex';
+    if (rowAccountName) rowAccountName.style.display = 'flex';
+    if (lblAccountName) lblAccountName.textContent = 'Account Name';
+    if (selAccountName) selAccountName.style.display = 'none';
+    if (inpNewAccountName) {
+      inpNewAccountName.style.display = 'block';
+      inpNewAccountName.value = '';
+    }
+    if (rowAccountNumber) {
+      rowAccountNumber.style.display = 'flex';
+      const inpAcc = document.getElementById('inpWmPaymentAccountNumber');
+      if (inpAcc) inpAcc.value = '';
+    }
+    if (rowIfscCode) {
+      rowIfscCode.style.display = 'flex';
+      const inpIfsc = document.getElementById('inpWmPaymentIfscCode');
+      if (inpIfsc) inpIfsc.value = '';
+    }
+  }
+};
+
+window.submitWmTransportPayment = function() {
+  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (row) {
+    row.isHighlighted = true;
+  }
+  if (currentDataset && Array.isArray(currentDataset)) {
+    const cur = currentDataset.find(r => r.id === activeWmGrnRowId);
+    if (cur) cur.isHighlighted = true;
+  }
+
+  // Close modals
+  closeWmGrnTransportPaymentModal();
+  closeWmGrnSupplierModal();
+
+  // Re-render table with highlighted row
+  applyFiltersAndRender();
+
+  // Show Task Completed SVG popup
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Transport Payment completed and submitted successfully!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Task completed successfully!');
+  }
+};
+
 // ==========================================================================
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
   const role = getAuthenticatedUserRole();
   if (role === 'Warehouse Manager') {
+    if (currentWorklistView === 'pr') {
+      currentDataset = wmPrDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'grn') {
+      currentDataset = wmGrnDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'min') {
+      currentDataset = wmMinDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'mrn') {
+      currentDataset = wmMrnDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'mtn') {
+      currentDataset = wmMtnDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'stn') {
+      currentDataset = wmStnDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'srn') {
+      currentDataset = wmSrnDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'payment') {
+      currentDataset = wmPaymentDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'supply') {
+      currentDataset = wmSupplyDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
     currentDataset = [];
     filteredDataset = [];
     return;
@@ -17704,33 +19160,6 @@ window.openPmBulkUploadModal = function(type) {
   }
 };
 
-window.openPmAddStnMaterialsModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const modal = document.getElementById('pmAddInfraModal');
-  if (modal && overlay) {
-    const selDoc = document.getElementById('inpPmStnDocumentType');
-    if (selDoc) {
-      selDoc.value = 'STN';
-      if (typeof updatePmStnInstallationTypeVisibility === 'function') updatePmStnInstallationTypeVisibility();
-    }
-    overlay.style.display = 'flex';
-    modal.style.display = 'block';
-  }
-};
-
-window.openPmAddSrnMaterialsModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const modal = document.getElementById('pmAddInfraModal');
-  if (modal && overlay) {
-    const selDoc = document.getElementById('inpPmStnDocumentType');
-    if (selDoc) {
-      selDoc.value = 'SRN';
-      if (typeof updatePmStnInstallationTypeVisibility === 'function') updatePmStnInstallationTypeVisibility();
-    }
-    overlay.style.display = 'flex';
-    modal.style.display = 'block';
-  }
-};
 
 window.openPmEditProjectUpdateModal = function() {
   const selectedRows = (currentDataset || []).filter(r => r.selected);
@@ -18281,6 +19710,26 @@ function renderWorklistToolbar() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Warehouse Manager') {
+    if (currentWorklistView === 'pr') {
+      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+      toolbar.style.display = 'flex';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <button type="button" class="toolbar-icon-btn" id="btnWmPrEdit" title="${isWmPrEditing ? 'Save' : 'Edit'}"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;"
+            onclick="handleWmPrEditToggle()">
+            <img src="${isWmPrEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isWmPrEditing ? 'Save' : 'Edit'}" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnWmPrAddProduct" title="Add Product"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="openWmAddProductModal()">
+            <img src="icons/Add.svg" alt="Add Product" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
     toolbar.innerHTML = '';
     toolbar.style.display = 'none';
     return;
@@ -19301,6 +20750,16 @@ function renderWorklistTableHead() {
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = 'fixed';
       if (containerEl) containerEl.style.overflowX = 'hidden';
+    } else if (role === 'Warehouse Manager' && currentWorklistView === 'pr') {
+      tableEl.style.minWidth = '1100px';
+      tableEl.style.width = '100%';
+      tableEl.style.tableLayout = 'auto';
+      if (containerEl) containerEl.style.overflowX = 'auto';
+    } else if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn'].includes(currentWorklistView)) {
+      tableEl.style.minWidth = '0';
+      tableEl.style.width = '100%';
+      tableEl.style.tableLayout = 'fixed';
+      if (containerEl) containerEl.style.overflowX = 'hidden';
     } else {
       tableEl.style.minWidth = '';
       tableEl.style.width = '';
@@ -19308,6 +20767,514 @@ function renderWorklistTableHead() {
   }
 
   if (role === 'Warehouse Manager') {
+    if (currentWorklistView === 'pr') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: centered header with no radio/checkbox -->
+          <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Select</span>
+          </th>
+          <!-- 2. Submission date: 15ch & center -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Submission date</span>
+          </th>
+          <!-- 3. Material Head: 15ch & center -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Material Head</span>
+          </th>
+          <!-- 4. Material Description: 40ch & left content, center header -->
+          <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Material Description</span>
+          </th>
+          <!-- 5. Uom: 10ch & center -->
+          <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Uom</span>
+          </th>
+          <!-- 6. Qty: center header spanning 2 columns with white horizontal line under it (1px) -->
+          <th colspan="2" class="wm-qty-col-header" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Qty</span>
+          </th>
+        </tr>
+        <tr class="master-view-header">
+          <!-- 6a. Stock: 15ch & right content, center header -->
+          <th class="wm-qty-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Stock</span>
+          </th>
+          <!-- 6b. PR: 15ch & right content, center header -->
+          <th class="wm-qty-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>PR</span>
+          </th>
+        </tr>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'grn') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Supplier Name: 22ch, center header -->
+          <th style="width: 22ch; min-width: 22ch; max-width: 22ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Supplier Name</span>
+          </th>
+          <!-- 2. PO No: 15ch, center header -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>PO No</span>
+          </th>
+          <!-- 3. PO Date: 15ch, center header -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>PO Date</span>
+          </th>
+          <!-- 4. PO Amount: 15ch, center header -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>PO Amount</span>
+          </th>
+          <!-- 5. Invoice: 15ch, center header -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Invoice</span>
+          </th>
+          <!-- 6. Invoice date: 15ch, center header -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Invoice date</span>
+          </th>
+          <!-- 7. Invoice Amount: 15ch, center header -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Invoice Amount</span>
+          </th>
+          <!-- 8. Status: 14ch, center header -->
+          <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Status</span>
+          </th>
+          <!-- 9. Ageing: 10ch, center header -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Ageing</span>
+          </th>
+        </tr>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'min') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 70px, centered header, NO radio on header -->
+          <th style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. Site Name: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Request Date: 15ch, centered header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Request Date</span>
+            </div>
+          </th>
+          <!-- 4. Request By: 22ch, centered header, filterable -->
+          <th style="width: 22ch; min-width: 22ch; max-width: 22ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Request By</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestBy'] ? 'has-active-filter' : ''}" data-filter-col="requestBy" title="Filter Request By">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Project ID: 15ch, centered header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Project Type: 15ch, centered header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Sub-project type: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-project type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-project type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Status: 20ch, centered header, filterable -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Ageing: 13ch, centered header, filterable -->
+          <th style="width: 13ch; min-width: 13ch; max-width: 13ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'mrn') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Site Name: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 2. Completion Date: 15ch, centered header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Completion Date</span>
+            </div>
+          </th>
+          <!-- 3. Submit By: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Submit By</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['submitBy'] ? 'has-active-filter' : ''}" data-filter-col="submitBy" title="Filter Submit By">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, centered header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project ID</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Project Type: 15ch, centered header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectType'] ? 'has-active-filter' : ''}" data-filter-col="projectType" title="Filter Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Sub-project Type: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Sub-project Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Ageing: 10ch, centered header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'mtn') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 70px, centered header, NO radio on header -->
+          <th style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. WH Name: 20ch, centered header, filterable -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>WH Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['whName'] ? 'has-active-filter' : ''}" data-filter-col="whName" title="Filter WH Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Request Date: 15ch, centered header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Request Date</span>
+            </div>
+          </th>
+          <!-- 4. Request By: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Request By</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestBy'] ? 'has-active-filter' : ''}" data-filter-col="requestBy" title="Filter Request By">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. Material Description: 40ch, centered header, filterable -->
+          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Material Description</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialDescription'] ? 'has-active-filter' : ''}" data-filter-col="materialDescription" title="Filter Material Description">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Uom: 10ch, centered header, NO filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Uom</span>
+            </div>
+          </th>
+          <!-- 7. Qty: 15ch, centered header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Qty</span>
+            </div>
+          </th>
+          <!-- 8. Status: 20ch, centered header, filterable -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'stn') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 70px, centered header, NO radio on header -->
+          <th style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. Site name: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. STN No: 10ch, centered header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>STN No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['stnNo'] ? 'has-active-filter' : ''}" data-filter-col="stnNo" title="Filter STN No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, centered header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Project ID</span>
+            </div>
+          </th>
+          <!-- 5. Project Manager: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Manager</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectManager'] ? 'has-active-filter' : ''}" data-filter-col="projectManager" title="Filter Project Manager">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Infra Category: 15ch, centered header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Infra Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Qty: 10ch, centered header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Qty</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['qty'] ? 'has-active-filter' : ''}" data-filter-col="qty" title="Filter Qty">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Ageing: 10ch, centered header, NO filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Ageing</span>
+            </div>
+          </th>
+          <!-- 9. Status: 20ch, centered header, filterable -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'srn') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 70px, centered header, NO radio on header -->
+          <th style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. Site name: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. SRN No: 10ch, centered header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>SRN No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['srnNo'] ? 'has-active-filter' : ''}" data-filter-col="srnNo" title="Filter SRN No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, centered header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Project ID</span>
+            </div>
+          </th>
+          <!-- 5. Project Manager: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Manager</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectManager'] ? 'has-active-filter' : ''}" data-filter-col="projectManager" title="Filter Project Manager">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Infra Category: 15ch, centered header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Infra Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Qty: 10ch, centered header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Qty</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['qty'] ? 'has-active-filter' : ''}" data-filter-col="qty" title="Filter Qty">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Ageing: 10ch, centered header, NO filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Ageing</span>
+            </div>
+          </th>
+          <!-- 9. Status: 20ch, centered header, filterable -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'payment') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Request Date: 15ch, center header -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Request Date</span>
+          </th>
+          <!-- 2. Expense Name: 40ch, center header, filterable -->
+          <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Expense Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseName'] ? 'has-active-filter' : ''}" data-filter-col="expenseName" title="Filter Expense Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Transfer To: 25ch, center header, filterable -->
+          <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Transfer To</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Amount: center header spanning 4 columns -->
+          <th colspan="4" class="wm-amount-col-header" style="width: 60ch; min-width: 60ch; max-width: 60ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Amount</span>
+          </th>
+          <!-- 5. Pending with: 25ch, center header -->
+          <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Pending with</span>
+          </th>
+          <!-- 6. Ageing: 10ch, center header -->
+          <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Ageing</span>
+          </th>
+        </tr>
+        <tr class="master-view-header">
+          <!-- 4a. Request: 15ch, center header -->
+          <th class="wm-amount-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Request</span>
+          </th>
+          <!-- 4b. Approved: 15ch, center header -->
+          <th class="wm-amount-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Approved</span>
+          </th>
+          <!-- 4c. Paid: 15ch, center header -->
+          <th class="wm-amount-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Paid</span>
+          </th>
+          <!-- 4d. Payable: 15ch, center header -->
+          <th class="wm-amount-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Payable</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'supply') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Submission Date: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Submission Date</span>
+            </div>
+          </th>
+          <!-- 2. Customer Name: 25ch, center header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Customer Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. Order ID: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Order ID</span>
+            </div>
+          </th>
+          <!-- 4. Order Value: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Order Value</span>
+            </div>
+          </th>
+          <!-- 5. Status: 20ch, center header, filterable -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Ageing: 10ch, center header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
     thead.innerHTML = '';
     return;
   }
@@ -20662,13 +22629,24 @@ function initWorklistToolbarEvents() {
 // ==========================================================================
 // 5. TABLE BODY RENDERING (Clean Text Badges in Table)
 // ==========================================================================
+function renderWorklistTableBody() {
+  applyFiltersAndRender();
+}
+window.renderWorklistTableBody = renderWorklistTableBody;
+
 function applyFiltersAndRender() {
   const tbody = document.getElementById('worklistTableBody');
   if (!tbody) return;
 
+  const role = getAuthenticatedUserRole();
+
   const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
   if (pmSubmitArea) {
     pmSubmitArea.style.display = 'none';
+  }
+  const wmSubmitArea = document.getElementById('wmPrSubmitArea');
+  if (wmSubmitArea) {
+    wmSubmitArea.style.display = 'none';
   }
 
   const tableContainer = document.querySelector('.table-container-full');
@@ -20681,12 +22659,31 @@ function applyFiltersAndRender() {
       tableContainer.style.overflowX = 'auto';
       tableContainer.style.width = '';
     }
+    if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'payment', 'supply'].includes(currentWorklistView)) {
+      tableContainer.style.marginTop = '24px';
+    } else {
+      tableContainer.style.marginTop = '';
+    }
   }
   if (worklistTableEl) {
     if (currentWorklistView === 'po_amend_detail') {
       worklistTableEl.style.minWidth = '0';
       worklistTableEl.style.width = '100%';
       worklistTableEl.style.tableLayout = 'fixed';
+    } else if (role === 'Warehouse Manager' && currentWorklistView === 'pr') {
+      worklistTableEl.style.minWidth = '1100px';
+      worklistTableEl.style.width = '100%';
+      worklistTableEl.style.tableLayout = 'auto';
+    } else if (role === 'Warehouse Manager' && currentWorklistView === 'payment') {
+      worklistTableEl.style.minWidth = '170ch';
+      worklistTableEl.style.width = '100%';
+      worklistTableEl.style.tableLayout = 'fixed';
+      if (tableContainer) tableContainer.style.overflowX = 'auto';
+    } else if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'supply'].includes(currentWorklistView)) {
+      worklistTableEl.style.minWidth = '0';
+      worklistTableEl.style.width = '100%';
+      worklistTableEl.style.tableLayout = 'fixed';
+      if (tableContainer) tableContainer.style.overflowX = 'hidden';
     } else {
       worklistTableEl.style.minWidth = '';
       worklistTableEl.style.width = '100%';
@@ -20694,8 +22691,574 @@ function applyFiltersAndRender() {
     }
   }
 
-  const role = getAuthenticatedUserRole();
   if (currentModule === 'worklist' && role === 'Warehouse Manager') {
+    if (currentWorklistView === 'pr') {
+      const wmSubmitArea = document.getElementById('wmPrSubmitArea');
+      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+      if (wmSubmitArea) {
+        wmSubmitArea.style.display = hasSelected ? 'flex' : 'none';
+      }
+
+      if (!currentDataset || currentDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No PR items found. Click + to add product.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = currentDataset.map(row => {
+        const isRowSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+            <!-- 1. Select: circle radio / checkbox with green marker, multiselect -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="handleWmPrRowSelect('${row.id}', this.checked)">
+            </td>
+            <!-- 2. Submission date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.submissionDate || ''}
+            </td>
+            <!-- 3. Material Head: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.materialHead || ''}
+            </td>
+            <!-- 4. Material Description: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">
+              ${row.materialDescription || ''}
+            </td>
+            <!-- 5. Uom: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.uom || ''}
+            </td>
+            <!-- 6a. Stock: 15ch & right with decimal .00 -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
+              ${Number(row.stockQty || 0).toFixed(2)}
+            </td>
+            <!-- 6b. PR: 15ch & right with decimal .00 -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+              ${isWmPrEditing && isRowSelected ? `
+                <input type="number" step="0.01" class="form-input-control wm-pr-editable-input" data-row-id="${row.id}" value="${Number(row.prQty || 0).toFixed(2)}"
+                  style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+                  onkeydown="if(event.key === 'Enter') handleWmPrEditToggle();">
+              ` : `
+                <span>${Number(row.prQty || 0).toFixed(2)}</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'grn') {
+      if (!currentDataset || currentDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No GRN records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = currentDataset.map(row => {
+        const isHighlighted = !!row.isHighlighted;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isHighlighted ? '#dcfce7 !important' : '#ffffff'}; ${isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : ''}">
+            <!-- 1. Supplier Name: 22ch & left, clickable to open supplier modal -->
+            <td style="width: 22ch; min-width: 22ch; max-width: 22ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <a href="#" onclick="openWmGrnSupplierModal('${row.id}'); return false;" style="color: #0454e4; font-weight: 600; text-decoration: none; cursor: pointer;" title="${(row.supplierName || '').replace(/"/g, '&quot;')}">
+                ${row.supplierName || ''}
+              </a>
+            </td>
+            <!-- 2. PO No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.poNo || ''}
+            </td>
+            <!-- 3. PO Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.poDate || ''}
+            </td>
+            <!-- 4. PO Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.poAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 5. Invoice: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.invoiceNo || ''}
+            </td>
+            <!-- 6. Invoice date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.invoiceDate || ''}
+            </td>
+            <!-- 7. Invoice Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.invoiceAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 8. Status: 14ch & left (Regular font, no colored badge) -->
+            <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${row.status || 'In-Transit'}
+            </td>
+            <!-- 9. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'min') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isRowSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+            <!-- 1. Select: circle radio, multiselect, green marker -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
+            </td>
+            <!-- 2. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 3. Request Date: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.requestDate || ''}
+            </td>
+            <!-- 4. Request By: 22ch & left -->
+            <td style="width: 22ch; min-width: 22ch; max-width: 22ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.requestBy || '').replace(/"/g, '&quot;')}">
+              ${row.requestBy || ''}
+            </td>
+            <!-- 5. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 6. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 7. Sub-project type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.subProjectType || '').replace(/"/g, '&quot;')}">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 8. Status: 20ch & left (Categories: Ready To Dispatch, To Be Prepare, Stock Not Available) -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.status || ''}
+            </td>
+            <!-- 9. Ageing: 13ch & center -->
+            <td style="width: 13ch; min-width: 13ch; max-width: 13ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'mrn') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+            <!-- 1. Site Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 2. Completion Date: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.completionDate || ''}
+            </td>
+            <!-- 3. Submit By: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.submitBy || '').replace(/"/g, '&quot;')}">
+              ${row.submitBy || ''}
+            </td>
+            <!-- 4. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Project Type: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectType || ''}
+            </td>
+            <!-- 6. Sub-project Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.subProjectType || '').replace(/"/g, '&quot;')}">
+              ${row.subProjectType || ''}
+            </td>
+            <!-- 7. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'mtn') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isRowSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+            <!-- 1. Select: circle radio, multiselect, green marker -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
+            </td>
+            <!-- 2. WH Name: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.whName || '').replace(/"/g, '&quot;')}">
+              ${row.whName || ''}
+            </td>
+            <!-- 3. Request Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.requestDate || ''}
+            </td>
+            <!-- 4. Request By: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.requestBy || '').replace(/"/g, '&quot;')}">
+              ${row.requestBy || ''}
+            </td>
+            <!-- 5. Material Description: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">
+              ${row.materialDescription || ''}
+            </td>
+            <!-- 6. Uom: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.uom || ''}
+            </td>
+            <!-- 7. Qty: 15ch & right as decimal .00 -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.qty || 0).toFixed(2)}
+            </td>
+            <!-- 8. Status: 20ch & left (Categories: To Be Dispatch, Yet To Receive) -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.status || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'stn') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          let cellVal = row[colKey] !== undefined ? row[colKey] : '';
+          if (colKey === 'qty' && typeof cellVal === 'number') {
+            cellVal = cellVal.toFixed(2);
+          } else {
+            cellVal = String(cellVal);
+          }
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isRowSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+            <!-- 1. Select: circle radio, multiselect, green marker -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
+            </td>
+            <!-- 2. Site name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 3. STN No: 10ch & left -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.stnNo || ''}
+            </td>
+            <!-- 4. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Project Manager: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.projectManager || '').replace(/"/g, '&quot;')}">
+              ${row.projectManager || ''}
+            </td>
+            <!-- 6. Infra Category: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 10px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">
+              ${row.infraCategory || ''}
+            </td>
+            <!-- 7. Qty: 10ch & right as decimal .00 -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
+              ${Number(row.qty || 0).toFixed(2)}
+            </td>
+            <!-- 8. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 9. Status: 20ch & left (Categories: To Be Dispatch, To Be Receive) -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.status || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'srn') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          let cellVal = row[colKey] !== undefined ? row[colKey] : '';
+          if (colKey === 'qty' && typeof cellVal === 'number') {
+            cellVal = cellVal.toFixed(2);
+          } else {
+            cellVal = String(cellVal);
+          }
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isRowSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+            <!-- 1. Select: circle radio, multiselect, green marker -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
+            </td>
+            <!-- 2. Site name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 3. SRN No: 10ch & left -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.srnNo || ''}
+            </td>
+            <!-- 4. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Project Manager: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.projectManager || '').replace(/"/g, '&quot;')}">
+              ${row.projectManager || ''}
+            </td>
+            <!-- 6. Infra Category: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 10px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">
+              ${row.infraCategory || ''}
+            </td>
+            <!-- 7. Qty: 10ch & right as decimal .00 -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
+              ${Number(row.qty || 0).toFixed(2)}
+            </td>
+            <!-- 8. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 9. Status: 20ch & left (Categories: To Be Dispatch, To Be Receive) -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.status || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'payment') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+            <!-- 1. Request Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.requestDate || ''}
+            </td>
+            <!-- 2. Expense Name: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.expenseName || '').replace(/"/g, '&quot;')}">
+              ${row.expenseName || ''}
+            </td>
+            <!-- 3. Transfer To: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.transferTo || '').replace(/"/g, '&quot;')}">
+              ${row.transferTo || ''}
+            </td>
+            <!-- 4a. Request: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.requestAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4b. Approved: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.approvedAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4c. Paid: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4d. Payable: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.payableAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 5. Pending with: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.pendingWith || '').replace(/"/g, '&quot;')}">
+              ${row.pendingWith || ''}
+            </td>
+            <!-- 6. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'supply') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+            <!-- 1. Submission Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.submissionDate || ''}
+            </td>
+            <!-- 2. Customer Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.customerName || '').replace(/"/g, '&quot;')}">
+              ${row.customerName || ''}
+            </td>
+            <!-- 3. Order ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.orderId || ''}
+            </td>
+            <!-- 4. Order Value: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.orderValue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 5. Status: 20ch & left (Categories: Ready To Dispatch, To Be Prepare) -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.status || ''}
+            </td>
+            <!-- 6. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
     const warehouseTitles = {
       pr: 'PR',
       grn: 'GRN',

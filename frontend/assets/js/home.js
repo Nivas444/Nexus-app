@@ -6705,7 +6705,10 @@ let filteredDataset = [...poData];
 let activeColumnFilters = {};
 let currentFilterColumn = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+window.projectNavigationContext = 'projects';
+window.projectWorklistOrigin = null;
+
+function parseUrlAndApplyState() {
   const params = new URLSearchParams(window.location.search);
   const isStandalone = params.get('standalone') === 'true';
   if (isStandalone) {
@@ -6741,6 +6744,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } else if (moduleParam === 'projects') {
     currentModule = 'projects';
+    const contextParam = params.get('context');
+    const originParam = params.get('origin');
+    const siteIdParam = params.get('site_id');
+    const validOrigins = ['yts', 'wip', 'hold', 'nr'];
+
+    if (contextParam === 'worklist' || validOrigins.includes(originParam)) {
+      window.projectNavigationContext = 'worklist';
+      window.projectWorklistOrigin = validOrigins.includes(originParam) ? originParam : 'wip';
+      window.lastPmWorklistView = window.projectWorklistOrigin;
+    } else {
+      let savedCtx = null;
+      let savedOrigin = null;
+      try {
+        savedCtx = sessionStorage.getItem('nexus_project_context');
+        savedOrigin = sessionStorage.getItem('nexus_project_worklist_origin');
+      } catch(e) {}
+      if (savedCtx === 'worklist' && validOrigins.includes(savedOrigin)) {
+        window.projectNavigationContext = 'worklist';
+        window.projectWorklistOrigin = savedOrigin;
+        window.lastPmWorklistView = savedOrigin;
+      } else {
+        window.projectNavigationContext = 'projects';
+        window.projectWorklistOrigin = null;
+        window.lastPmWorklistView = null;
+      }
+    }
+    if (siteIdParam) {
+      selectedProjectId = siteIdParam;
+      const row = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(siteIdParam));
+      if (row) window.activePmProjectRow = row;
+    }
+
     if (viewParam === 'project_expenses') {
       currentProjectsView = 'project_expenses';
     } else if (viewParam === 'project_material') {
@@ -6852,6 +6887,13 @@ document.addEventListener('DOMContentLoaded', () => {
     currentModule = 'profile';
   } else if (moduleParam === 'worklist' || moduleParam) {
     currentModule = 'worklist';
+    window.projectNavigationContext = null;
+    window.projectWorklistOrigin = null;
+    try {
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
       const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'materials', 'jms', 'jms_detail', 'stn', 'srn', 'email'];
@@ -6876,6 +6918,13 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     // Default after login
     currentModule = 'worklist';
+    window.projectNavigationContext = null;
+    window.projectWorklistOrigin = null;
+    try {
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
       currentWorklistView = 'new_project';
@@ -6885,11 +6934,19 @@ document.addEventListener('DOMContentLoaded', () => {
       currentWorklistView = (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') ? viewParam : 'payment';
     }
   }
+}
 
+document.addEventListener('DOMContentLoaded', () => {
+  parseUrlAndApplyState();
   applyRoleBasedNavigation();
   initNavEventListeners();
   initExcelFilterSystem();
   initSideFormEvents();
+  renderApp();
+});
+
+window.addEventListener('popstate', () => {
+  parseUrlAndApplyState();
   renderApp();
 });
 
@@ -7057,16 +7114,56 @@ function switchModule(moduleName) {
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
     currentProjectsView = 'main';
+    window.projectNavigationContext = 'projects';
+    window.projectWorklistOrigin = null;
+    window.lastPmWorklistView = null;
+    try {
+      sessionStorage.setItem('nexus_project_context', 'projects');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
   } else if (moduleName === 'inventory') {
     currentInventorySubpage = 'inventory';
     currentInventoryView = 'main';
+    window.projectNavigationContext = null;
+    window.projectWorklistOrigin = null;
+    window.lastPmWorklistView = null;
+    try {
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
   } else if (moduleName === 'purchase') {
     currentPurchaseView = 'main';
+    window.projectNavigationContext = null;
+    window.projectWorklistOrigin = null;
+    window.lastPmWorklistView = null;
+    try {
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
   } else if (moduleName === 'accounts') {
     currentAccountsView = 'main';
     currentAccountsSubpage = 'sales';
+    window.projectNavigationContext = null;
+    window.projectWorklistOrigin = null;
+    window.lastPmWorklistView = null;
+    try {
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
   } else if (moduleName === 'admin') {
     currentAdminView = 'salary';
+    window.projectNavigationContext = null;
+    window.projectWorklistOrigin = null;
+    window.lastPmWorklistView = null;
+    try {
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
   }
 
   updateURL();
@@ -7106,6 +7203,19 @@ function updateURL() {
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
   } else if (currentModule === 'projects') {
+    if (window.projectNavigationContext === 'worklist') {
+      url.searchParams.set('context', 'worklist');
+      if (window.projectWorklistOrigin) {
+        url.searchParams.set('origin', window.projectWorklistOrigin);
+      }
+      if (selectedProjectId) {
+        url.searchParams.set('site_id', selectedProjectId);
+      }
+    } else {
+      url.searchParams.delete('context');
+      url.searchParams.delete('origin');
+      url.searchParams.delete('site_id');
+    }
     if (currentProjectsView === 'project_expenses') {
       url.searchParams.set('view', 'project_expenses');
       url.searchParams.delete('subpage');
@@ -7229,7 +7339,16 @@ function updateURL() {
     url.searchParams.delete('customer');
   }
 
-  window.history.replaceState({}, '', url.toString());
+  if (currentModule !== 'projects') {
+    url.searchParams.delete('context');
+    url.searchParams.delete('origin');
+    url.searchParams.delete('site_id');
+  }
+
+  const newUrlStr = url.toString();
+  if (window.location.href !== newUrlStr) {
+    window.history.pushState({}, '', newUrlStr);
+  }
 }
 
 // ==========================================================================
@@ -7275,20 +7394,36 @@ function goBackSubpage() {
       currentProjectsView = 'main';
       currentProjectsSubpage = 'supply';
       showToast('Returned to Supply Page');
+    } else if (currentProjectsView === 'details') {
+      if (window.projectNavigationContext === 'worklist' || (window.lastPmWorklistView && ['yts', 'wip', 'hold', 'nr'].includes(window.lastPmWorklistView))) {
+        const origin = window.projectWorklistOrigin || window.lastPmWorklistView || 'wip';
+        currentModule = 'worklist';
+        currentWorklistView = origin;
+        const targetView = origin.toUpperCase();
+        window.projectNavigationContext = null;
+        window.projectWorklistOrigin = null;
+        window.lastPmWorklistView = null;
+        try {
+          sessionStorage.removeItem('nexus_project_context');
+          sessionStorage.removeItem('nexus_project_worklist_origin');
+          sessionStorage.removeItem('nexus_project_site_id');
+        } catch(e) {}
+        showToast(`Returned to ${targetView}`);
+      } else {
+        currentProjectsView = 'main';
+        currentProjectsSubpage = 'projects';
+        showToast('Returned to Projects List');
+      }
     } else if (window.lastPmWorklistView && ['yts', 'wip', 'hold', 'nr'].includes(window.lastPmWorklistView)) {
       currentModule = 'worklist';
       currentWorklistView = window.lastPmWorklistView;
       const targetView = window.lastPmWorklistView.toUpperCase();
       window.lastPmWorklistView = null;
       showToast(`Returned to ${targetView}`);
-    } else if (currentProjectsView === 'details' || currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentProjectsView === 'project_infra' || currentProjectsView === 'project_dpr' || currentProjectsView === 'project_boq' || currentProjectsView === 'project_approvals' || currentProjectsView === 'project_service_vendor') {
+    } else {
       currentProjectsView = 'main';
       currentProjectsSubpage = 'projects';
       showToast('Returned to Projects List');
-    } else {
-      currentModule = 'worklist';
-      currentWorklistView = (getAuthenticatedUserRole() === 'Project Manager' || getAuthenticatedUserRole() === 'Commercial Manager') ? 'new_project' : 'payment';
-      showToast('Returned to Worklist');
     }
   } else if (currentModule === 'inventory') {
     if (currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
@@ -7421,10 +7556,25 @@ function renderApp() {
   document.querySelectorAll('.nav-icon-item').forEach(btn => {
     btn.classList.remove('active-nav-tab');
   });
-  // indus_towers is a sub-section of master — glow the Master icon for both
-  const navModule = (currentModule === 'indus_towers') ? 'master' : currentModule;
+
+  const isWorklistProjectsFlow = (currentModule === 'projects') && (
+    window.projectNavigationContext === 'worklist' ||
+    Boolean(window.lastPmWorklistView && ['yts', 'wip', 'hold', 'nr'].includes(window.lastPmWorklistView))
+  );
+
+  // In Flow B (Worklist flow), the Home (Projects) icon must NOT glow/highlight at any point
+  let navModule = (currentModule === 'indus_towers') ? 'master' : currentModule;
+  if (isWorklistProjectsFlow) {
+    navModule = 'worklist';
+  }
+
   const activeNavBtn = document.querySelector(`.nav-icon-item[data-module="${navModule}"]`);
   if (activeNavBtn) activeNavBtn.classList.add('active-nav-tab');
+
+  if (isWorklistProjectsFlow) {
+    const navProjectsBtn = document.getElementById('navBtnProjects');
+    if (navProjectsBtn) navProjectsBtn.classList.remove('active-nav-tab');
+  }
 
   if (currentModule === 'master') {
     if (currentMasterView === 'hr_policies') {
@@ -12047,8 +12197,11 @@ window.renderExpensesSummaryDetailsTable = function() {
   let items = window.expensesSummaryDataStore || [];
 
   for (const [colKey, allowedSet] of Object.entries(window.activeExpensesSummaryItemFilters || {})) {
-    if (allowedSet && allowedSet instanceof Set) {
-      items = items.filter(it => allowedSet.has(String(it[colKey] !== undefined ? it[colKey] : '')));
+    if (allowedSet && allowedSet instanceof Set && allowedSet.size > 0) {
+      items = items.filter(it => {
+        const itemVal = String(it[colKey] !== undefined ? it[colKey] : '').trim().toLowerCase();
+        return Array.from(allowedSet).some(s => String(s).trim().toLowerCase() === itemVal);
+      });
     }
   }
 
@@ -12080,7 +12233,7 @@ window.renderExpensesSummaryDetailsTable = function() {
   if (items.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No expense records match filter.</td>
+        <td colspan="8" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No expense records match filter.</td>
       </tr>
     `;
     return;
@@ -12097,35 +12250,46 @@ window.renderExpensesSummaryDetailsTable = function() {
         ${item.requestBy || ''}
       </td>
       <!-- 3. Expense Type -->
-      <td style="text-align: left !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #e2e8f0;" title="${(item.expenseType || '').replace(/"/g, '&quot;')}">
-        ${item.expenseType || ''}
+      <td style="text-align: left !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #e2e8f0; cursor: pointer;" title="${(item.expenseType || '').replace(/"/g, '&quot;')}" onclick="filterExpensesSummaryByType('${(item.expenseType || '').replace(/'/g, "\\'")}'); return false;">
+        <a href="#" onclick="event.preventDefault(); event.stopPropagation(); filterExpensesSummaryByType('${(item.expenseType || '').replace(/'/g, "\\'")}'); return false;" class="clickable-expense-type-link" style="color: #0454e4 !important; font-weight: 600; text-decoration: none !important; cursor: pointer;">
+          ${item.expenseType || ''}
+        </a>
       </td>
-      <!-- 4. Amount - Request -->
-      <td style="text-align: right !important; padding: 10px 8px; color: #0f172a; font-size: 0.92rem; font-weight: 600; white-space: nowrap; border: 1px solid #e2e8f0;">
-        ${item.request || item.amount || '0.00'}
-      </td>
-      <!-- 5. Amount - Approved -->
-      <td style="text-align: right !important; padding: 10px 8px; color: #0454e4; font-size: 0.92rem; font-weight: 600; white-space: nowrap; border: 1px solid #e2e8f0;">
-        ${item.approved || item.amount || '0.00'}
-      </td>
-      <!-- 6. Uom -->
+      <!-- 4. Uom -->
       <td style="text-align: center !important; padding: 10px 6px; color: #1e293b; font-size: 0.92rem; white-space: nowrap; border: 1px solid #e2e8f0;">
         ${item.uom || ''}
       </td>
-      <!-- 7. Qty -->
+      <!-- 5. Qty -->
       <td style="text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; white-space: nowrap; border: 1px solid #e2e8f0;">
         ${item.qty || '0.00'}
       </td>
-      <!-- 8. Rate -->
+      <!-- 6. Rate -->
       <td style="text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; white-space: nowrap; border: 1px solid #e2e8f0;">
         ${item.rate || '0.00'}
       </td>
-      <!-- 9. Status -->
+      <!-- 7. Amount -->
+      <td style="text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 600; white-space: nowrap; border: 1px solid #e2e8f0;">
+        ${item.amount || item.approved || item.request || '0.00'}
+      </td>
+      <!-- 8. Status -->
       <td style="text-align: left !important; padding: 10px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 1px solid #e2e8f0;" title="${(item.status || '').replace(/"/g, '&quot;')}">
         ${item.status || ''}
       </td>
     </tr>
   `).join('');
+};
+
+window.filterExpensesSummaryByType = function(type) {
+  window.activeExpensesSummaryItemFilters = window.activeExpensesSummaryItemFilters || {};
+  const targetType = (type || '').trim();
+
+  if (targetType) {
+    window.activeExpensesSummaryItemFilters['expenseType'] = new Set([targetType]);
+  } else {
+    delete window.activeExpensesSummaryItemFilters['expenseType'];
+  }
+
+  renderExpensesSummaryDetailsTable();
 };
 
 window.openExpensesSummaryColFilter = function(colKey, event) {
@@ -12197,13 +12361,173 @@ window.openExpensesSummaryModal = function(titleText) {
   }
 };
 
+window.activeExpenseSummaryOverviewFilters = window.activeExpenseSummaryOverviewFilters || {};
+window.currentExpenseSummaryOverviewFilterCol = null;
+
+window.renderExpenseSummaryOverviewTable = function() {
+  const tbody = document.getElementById('tblExpenseSummaryOverviewBody');
+  if (!tbody) return;
+
+  let items = getExpenseItemsList();
+
+  if (window.activeExpenseSummaryOverviewFilters && window.activeExpenseSummaryOverviewFilters['itemName']) {
+    const allowed = window.activeExpenseSummaryOverviewFilters['itemName'];
+    items = items.filter(it => allowed.has(it.itemName));
+  }
+
+  const btn = document.getElementById('btnExpenseSummaryOverviewFilter');
+  if (btn) {
+    if (window.activeExpenseSummaryOverviewFilters && window.activeExpenseSummaryOverviewFilters['itemName']) {
+      btn.classList.add('has-active-filter');
+    } else {
+      btn.classList.remove('has-active-filter');
+    }
+  }
+
+  const dataStore = window.expensesSummaryDataStore || [];
+
+  const itemsWithAmount = items.map(it => {
+    const matchingRecords = dataStore.filter(r => (r.expenseType || '').trim().toLowerCase() === (it.itemName || '').trim().toLowerCase());
+    let amt = 0;
+    if (matchingRecords.length > 0) {
+      amt = matchingRecords.reduce((acc, r) => {
+        const val = parseFloat(String(r.amount || r.approved || r.request || '0').replace(/,/g, ''));
+        return acc + (isNaN(val) ? 0 : val);
+      }, 0);
+    }
+    return {
+      ...it,
+      amount: amt > 0 ? (typeof formatIndianCurrencyNumber === 'function' ? formatIndianCurrencyNumber(amt) : amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })) : '0.00'
+    };
+  });
+
+  if (itemsWithAmount.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="2" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No items found</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = itemsWithAmount.map((item, idx) => `
+    <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'}; cursor: pointer;" onclick="openExistingExpensesSummaryModal('${(item.itemName || '').replace(/'/g, "\\'")}');" title="Click to view ${item.itemName} details">
+      <td style="padding: 12px 18px; text-align: left; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0;">
+        <a href="#" onclick="event.preventDefault(); event.stopPropagation(); openExistingExpensesSummaryModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: none; cursor: pointer;">
+          ${item.itemName}
+        </a>
+      </td>
+      <td style="width: 15ch; padding: 12px 18px; text-align: right; color: #0454e4; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; cursor: pointer;" onclick="event.preventDefault(); event.stopPropagation(); openExistingExpensesSummaryModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;">
+        ${item.amount}
+      </td>
+    </tr>
+  `).join('');
+};
+
+window.openExpenseSummaryOverviewModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(card => card.style.display = 'none');
+  }
+
+  const modal = document.getElementById('pmExpenseSummaryOverviewModal');
+  if (!modal) return;
+  modal.classList.remove('card-dimmed-blurred');
+
+  renderExpenseSummaryOverviewTable();
+  modal.style.display = 'block';
+  if (overlay) overlay.style.display = 'flex';
+};
+
+window.closeExpenseSummaryOverviewModal = function() {
+  const modal = document.getElementById('pmExpenseSummaryOverviewModal');
+  if (modal) modal.style.display = 'none';
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) {
+    const visibleCards = overlay.querySelectorAll('.side-form-card:not([style*="display: none"]), .side-contact-popup:not([style*="display: none"])');
+    if (visibleCards.length === 0) {
+      overlay.style.display = 'none';
+    }
+  }
+};
+
+window.openExistingExpensesSummaryModal = function(itemName) {
+  const overviewModal = document.getElementById('pmExpenseSummaryOverviewModal');
+  if (overviewModal) overviewModal.style.display = 'none';
+
+  window.activeExpensesSummaryItemFilters = {};
+  if (itemName) {
+    window.activeExpensesSummaryItemFilters['expenseType'] = new Set([itemName.trim()]);
+  }
+
+  window.expenseSummaryOpenedFromOverview = true;
+  openExpensesSummaryModal('Expense Summary');
+};
+
+window.openExpenseSummaryOverviewFilter = function(colKey, event) {
+  if (event) event.stopPropagation();
+  window.currentExpenseSummaryOverviewFilterCol = colKey;
+  const dropdown = document.getElementById('excelFilterDropdown');
+  const searchInput = document.getElementById('filterSearchInput');
+  const chkList = document.getElementById('filterCheckboxList');
+  const chkSelectAll = document.getElementById('chkFilterSelectAll');
+
+  if (!dropdown) return;
+  if (searchInput) searchInput.value = '';
+
+  const allItems = getExpenseItemsList();
+  const uniqueValues = Array.from(new Set(allItems.map(r => r.itemName)))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const activeSet = window.activeExpenseSummaryOverviewFilters[colKey];
+
+  if (chkList) {
+    chkList.innerHTML = uniqueValues.map(val => {
+      const isChecked = activeSet ? activeSet.has(val) : true;
+      const displayLabel = val === '' ? '(Blanks)' : val;
+      return `
+        <label class="excel-checkbox-item excel-filter-dynamic-item" data-val="${val}">
+          <input type="checkbox" value="${val}" ${isChecked ? 'checked' : ''} />
+          <span class="chk-label">${displayLabel}</span>
+        </label>
+      `;
+    }).join('');
+  }
+
+  if (chkSelectAll) {
+    chkSelectAll.checked = !activeSet || activeSet.size === uniqueValues.length;
+    chkSelectAll.indeterminate = activeSet && activeSet.size > 0 && activeSet.size < uniqueValues.length;
+  }
+
+  dropdown.dataset.filterContext = 'expenseSummaryOverview';
+  dropdown.style.display = 'flex';
+  const btn = event.currentTarget || event.target;
+  const rect = btn.getBoundingClientRect();
+  dropdown.style.position = 'fixed';
+  dropdown.style.top = `${rect.bottom + 4}px`;
+  dropdown.style.left = `${Math.min(rect.left, window.innerWidth - 240)}px`;
+  dropdown.style.zIndex = '99999';
+};
+
 window.closeExpensesSummaryModal = function() {
   const modal = document.getElementById('expensesSummaryModal');
   const repModal = document.getElementById('expenseItemRepresentativeModal');
   const overlay = document.getElementById('sideFormOverlay');
   if (modal) modal.style.display = 'none';
   if (repModal) repModal.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
+
+  delete window.activeExpensesSummaryItemFilters['expenseType'];
+
+  const overviewModal = document.getElementById('pmExpenseSummaryOverviewModal');
+  if (window.expenseSummaryOpenedFromOverview && overviewModal) {
+    window.expenseSummaryOpenedFromOverview = false;
+    renderExpenseSummaryOverviewTable();
+    overviewModal.style.display = 'block';
+  } else if (overlay) {
+    overlay.style.display = 'none';
+  }
 };
 
 window.openExpenseItemRepresentativeModal = function(itemName) {
@@ -12633,6 +12957,15 @@ window.closeInventoryStockLedgerModal = function() {
 };
 
 window.openProjectDetailPage = function(projId, customerName) {
+  window.projectNavigationContext = 'projects';
+  window.lastPmWorklistView = null;
+  window.projectWorklistOrigin = null;
+  try {
+    sessionStorage.setItem('nexus_project_context', 'projects');
+    sessionStorage.removeItem('nexus_project_worklist_origin');
+    sessionStorage.removeItem('nexus_project_site_id');
+  } catch(e) {}
+
   currentModule = 'projects';
   currentProjectsView = 'details';
   selectedProjectId = projId || 'proj-1';
@@ -12666,7 +12999,14 @@ window.openPmSiteProjectLandingPage = function(rowId) {
 
   window.activePmProjectRow = row;
   selectedProjectId = row.id || rowId;
-  window.lastPmWorklistView = currentWorklistView; // keeps YTS / WIP / HOLD / NR
+  window.projectNavigationContext = 'worklist';
+  window.projectWorklistOrigin = currentWorklistView || 'wip';
+  window.lastPmWorklistView = currentWorklistView || 'wip'; // keeps YTS / WIP / HOLD / NR
+  try {
+    sessionStorage.setItem('nexus_project_context', 'worklist');
+    sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
+    sessionStorage.setItem('nexus_project_site_id', String(rowId));
+  } catch(e) {}
 
   currentModule = 'projects';
   currentProjectsView = 'details';
@@ -13339,9 +13679,17 @@ window.openExpenseDetailsModal = function() {
   const modal = document.getElementById('pmExpenseDetailsModal');
   if (!modal) return;
   modal.classList.remove('card-dimmed-blurred');
+  modal.classList.remove('wide-expense-mode');
+  modal.style.setProperty('width', '620px', 'important');
+
+  const inlineContainer = document.getElementById('expenseDetailsInlineTableContainer');
+  if (inlineContainer) inlineContainer.style.display = 'none';
 
   const addItemModal = document.getElementById('pmAddItemNameModal');
   if (addItemModal) addItemModal.style.display = 'none';
+
+  const editExpModal = document.getElementById('pmEditExpenseModal');
+  if (editExpModal) editExpModal.style.display = 'none';
 
   renderExpenseDetailsTable();
   modal.style.display = 'block';
@@ -13352,8 +13700,13 @@ window.closeExpenseDetailsModal = function() {
   const modal = document.getElementById('pmExpenseDetailsModal');
   if (modal) {
     modal.classList.remove('card-dimmed-blurred');
+    modal.classList.remove('wide-expense-mode');
+    modal.style.setProperty('width', '620px', 'important');
     modal.style.display = 'none';
   }
+
+  const inlineContainer = document.getElementById('expenseDetailsInlineTableContainer');
+  if (inlineContainer) inlineContainer.style.display = 'none';
 
   const addItemModal = document.getElementById('pmAddItemNameModal');
   if (addItemModal) addItemModal.style.display = 'none';
@@ -13364,6 +13717,12 @@ window.closeExpenseDetailsModal = function() {
   const addExpEntryModal = document.getElementById('pmAddExpenseEntryModal');
   if (addExpEntryModal) addExpEntryModal.style.display = 'none';
 
+  const editExpModal = document.getElementById('pmEditExpenseModal');
+  if (editExpModal) editExpModal.style.display = 'none';
+
+  const transferModal = document.getElementById('pmTransferDetailsModal');
+  if (transferModal) transferModal.style.display = 'none';
+
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) {
     const visibleCards = overlay.querySelectorAll('.side-form-card:not([style*="display: none"]), .side-contact-popup:not([style*="display: none"])');
@@ -13373,6 +13732,348 @@ window.closeExpenseDetailsModal = function() {
   }
 };
 
+window.expenseDetailsInlineItems = window.expenseDetailsInlineItems || [
+  {
+    id: 'exp-inline-1',
+    description: 'Civil Foundation Work & Excavation',
+    uom: 'Nos',
+    qty: '120.00',
+    rate: '2500.00',
+    amount: '300000.00',
+    remarks: 'Approved foundation excavation',
+    doc: ''
+  }
+];
+window.currentEditingExpenseInlineIndex = -1;
+
+window.renderExpenseDetailsInlineTable = function() {
+  const tbody = document.getElementById('tblExpenseDetailsInlineBody');
+  if (!tbody) return;
+
+  if (!window.expenseDetailsInlineItems || window.expenseDetailsInlineItems.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No expense records added yet.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = window.expenseDetailsInlineItems.map((row, idx) => {
+    const qtyVal = parseFloat(String(row.qty || '0').replace(/,/g, '')) || 0;
+    const rateVal = parseFloat(String(row.rate || '0').replace(/,/g, '')) || 0;
+    const amtVal = parseFloat(String(row.amount || (qtyVal * rateVal)).replace(/,/g, '')) || (qtyVal * rateVal);
+    const formattedQty = qtyVal.toFixed(2);
+    const formattedRate = rateVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formattedAmt = amtVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    return `
+      <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
+          <a href="#" onclick="openEditExpenseModal(${idx}); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
+            ${row.description || ''}
+          </a>
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${row.uom || 'Nos'}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${formattedQty}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${formattedRate}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${formattedAmt}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.toggleExpenseDetailsInlineTable = function() {
+  const modal = document.getElementById('pmExpenseDetailsModal');
+  const container = document.getElementById('expenseDetailsInlineTableContainer');
+  if (!container) return;
+
+  const isVisible = container.style.display !== 'none';
+  if (isVisible) {
+    container.style.display = 'none';
+    if (modal) {
+      modal.classList.remove('wide-expense-mode');
+      modal.style.setProperty('width', '620px', 'important');
+    }
+  } else {
+    window.renderExpenseDetailsInlineTable();
+    container.style.display = 'block';
+    if (modal) {
+      modal.classList.add('wide-expense-mode');
+      modal.style.setProperty('width', '1040px', 'important');
+    }
+  }
+};
+
+window.openEditExpenseModal = function(index) {
+  window.currentEditingExpenseInlineIndex = index;
+  const modal = document.getElementById('pmEditExpenseModal');
+  const parentModal = document.getElementById('pmExpenseDetailsModal');
+  if (!modal) return;
+
+  const row = (window.expenseDetailsInlineItems && window.expenseDetailsInlineItems[index]) || {};
+  const selDesc = document.getElementById('selEditExpenseDescription');
+  const inpQty = document.getElementById('inpEditExpenseQty');
+  const inpRate = document.getElementById('inpEditExpenseRate');
+  const inpRemarks = document.getElementById('inpEditExpenseRemarks');
+  const lblDoc = document.getElementById('lblEditExpensePdfName');
+  const fileInput = document.getElementById('inpEditExpensePdfFile');
+
+  if (selDesc) {
+    if (row.description) {
+      let matched = false;
+      for (let i = 0; i < selDesc.options.length; i++) {
+        if (selDesc.options[i].value === row.description) {
+          selDesc.selectedIndex = i;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        const newOpt = document.createElement('option');
+        newOpt.value = row.description;
+        newOpt.textContent = row.description;
+        selDesc.appendChild(newOpt);
+        selDesc.value = row.description;
+      }
+    } else {
+      selDesc.selectedIndex = 0;
+    }
+  }
+
+  const qtyNum = parseFloat(String(row.qty || '0').replace(/,/g, '')) || 0;
+  const rateNum = parseFloat(String(row.rate || '0').replace(/,/g, '')) || 0;
+
+  if (inpQty) inpQty.value = qtyNum > 0 ? qtyNum.toFixed(2) : (row.qty || '');
+  if (inpRate) inpRate.value = rateNum > 0 ? rateNum.toFixed(2) : (row.rate || '');
+  if (inpRemarks) inpRemarks.value = row.remarks || '';
+  if (lblDoc) lblDoc.textContent = row.doc || '';
+  if (fileInput) fileInput.value = '';
+
+  if (parentModal) parentModal.classList.add('card-dimmed-blurred');
+  modal.style.display = 'block';
+};
+
+window.closeEditExpenseModal = function() {
+  const modal = document.getElementById('pmEditExpenseModal');
+  if (modal) modal.style.display = 'none';
+
+  const parentModal = document.getElementById('pmExpenseDetailsModal');
+  if (parentModal) parentModal.classList.remove('card-dimmed-blurred');
+};
+
+window.handleEditExpensePdfFile = function(input) {
+  const lblDoc = document.getElementById('lblEditExpensePdfName');
+  if (input && input.files && input.files[0]) {
+    const fileName = input.files[0].name;
+    if (lblDoc) lblDoc.textContent = fileName;
+    if (typeof showToast === 'function') showToast(`Document selected: ${fileName}`);
+  }
+};
+
+window.saveEditedExpenseItem = function() {
+  const idx = window.currentEditingExpenseInlineIndex;
+  if (idx < 0 || !window.expenseDetailsInlineItems || !window.expenseDetailsInlineItems[idx]) {
+    if (typeof showToast === 'function') showToast('No item selected to edit');
+    return;
+  }
+
+  const selDesc = document.getElementById('selEditExpenseDescription');
+  const inpQty = document.getElementById('inpEditExpenseQty');
+  const inpRate = document.getElementById('inpEditExpenseRate');
+  const inpRemarks = document.getElementById('inpEditExpenseRemarks');
+  const lblDoc = document.getElementById('lblEditExpensePdfName');
+
+  const descVal = selDesc ? selDesc.value.trim() : window.expenseDetailsInlineItems[idx].description;
+  const qtyVal = inpQty ? parseFloat(inpQty.value.replace(/,/g, '')) || 0 : parseFloat(window.expenseDetailsInlineItems[idx].qty) || 0;
+  const rateVal = inpRate ? parseFloat(inpRate.value.replace(/,/g, '')) || 0 : parseFloat(window.expenseDetailsInlineItems[idx].rate) || 0;
+  const remarksVal = inpRemarks ? inpRemarks.value.trim() : '';
+  const docVal = lblDoc ? lblDoc.textContent.trim() : '';
+  const amtVal = qtyVal * rateVal;
+
+  window.expenseDetailsInlineItems[idx] = {
+    ...window.expenseDetailsInlineItems[idx],
+    description: descVal,
+    qty: qtyVal.toFixed(2),
+    rate: rateVal.toFixed(2),
+    amount: amtVal.toFixed(2),
+    remarks: remarksVal,
+    doc: docVal
+  };
+
+  window.renderExpenseDetailsInlineTable();
+  window.closeEditExpenseModal();
+  if (typeof showToast === 'function') showToast('Expense updated successfully');
+};
+
+window.submitExpenseDetailsInlineTable = function() {
+  window.openTransferDetailsModal();
+};
+
+window.openTransferDetailsModal = window.openPmTransferDetailsModal = function() {
+  const modal = document.getElementById('pmTransferDetailsModal');
+  const parentModal = document.getElementById('pmExpenseDetailsModal');
+  if (!modal) return;
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'flex';
+
+  modal.classList.remove('card-dimmed-blurred');
+
+  // Populate Member Account Names from pmMembersDataStore
+  const selMember = document.getElementById('selTransferMemberAccountName');
+  if (selMember) {
+    let memberNames = [];
+    if (typeof pmMembersDataStore !== 'undefined' && Array.isArray(pmMembersDataStore) && pmMembersDataStore.length > 0) {
+      memberNames = pmMembersDataStore.map(m => m.name).filter(Boolean);
+    }
+    const defaultMembers = ['Karthik Raja', 'Priya Sharma', 'Suresh Kumar', 'Aakash Sharma', 'Vikram Patel'];
+    defaultMembers.forEach(m => {
+      if (!memberNames.includes(m)) memberNames.push(m);
+    });
+    selMember.innerHTML = memberNames.map((name, i) => `<option value="${name}" ${i === 0 ? 'selected' : ''}>${name}</option>`).join('');
+  }
+
+  // Populate Service Vendor Names from projectServiceVendorData
+  const selSv = document.getElementById('selTransferServiceVendorName');
+  if (selSv) {
+    let svNames = [];
+    if (typeof projectServiceVendorData !== 'undefined' && Array.isArray(projectServiceVendorData) && projectServiceVendorData.length > 0) {
+      svNames = projectServiceVendorData.map(v => v.serviceVendorName).filter(Boolean);
+    }
+    const defaultSv = ['Sri Balaji Electricals', 'Apex Civil Constructions', 'Apex Height Solutions', 'Vertex Power Solutions'];
+    defaultSv.forEach(v => {
+      if (!svNames.includes(v)) svNames.push(v);
+    });
+    selSv.innerHTML = svNames.map((name, i) => `<option value="${name}" ${i === 0 ? 'selected' : ''}>${name}</option>`).join('');
+  }
+
+  // Populate Supply Vendor Names
+  const selSup = document.getElementById('selTransferSupplyVendorName');
+  if (selSup) {
+    let supNames = [];
+    if (typeof masterVendorData !== 'undefined' && Array.isArray(masterVendorData) && masterVendorData.length > 0) {
+      const supplyVendors = masterVendorData.filter(v => (v.businessType || v.vendorType || '').toLowerCase().includes('supply'));
+      if (supplyVendors.length > 0) {
+        supNames = supplyVendors.map(v => v.vendorName || v.vendor_name || v.name).filter(Boolean);
+      } else {
+        supNames = masterVendorData.map(v => v.vendorName || v.vendor_name || v.name).filter(Boolean);
+      }
+    }
+    const defaultSup = ['Guindy Hub Supplies', 'Ambattur Supplies', 'Sri Balaji Supplies', 'Steel Craft Supplies', 'Global Tech Supplies'];
+    defaultSup.forEach(v => {
+      if (!supNames.includes(v)) supNames.push(v);
+    });
+    selSup.innerHTML = supNames.map((name, i) => `<option value="${name}" ${i === 0 ? 'selected' : ''}>${name}</option>`).join('');
+  }
+
+  // Reset inputs
+  const inpAccName = document.getElementById('inpTransferNewAccountName');
+  if (inpAccName) inpAccName.value = '';
+  const inpAccNum = document.getElementById('inpTransferAccountNumber');
+  if (inpAccNum) inpAccNum.value = '';
+  const inpBankName = document.getElementById('inpTransferBankName');
+  if (inpBankName) inpBankName.value = '';
+  const inpIfsc = document.getElementById('inpTransferIfscCode');
+  if (inpIfsc) inpIfsc.value = '';
+  const inpWp = document.getElementById('inpTransferWhatsappNumber');
+  if (inpWp) inpWp.value = '';
+  const inpGstToggle = document.getElementById('inpTransferGstToggle');
+  if (inpGstToggle) inpGstToggle.checked = false;
+  const inpGstNum = document.getElementById('inpTransferGstNumber');
+  if (inpGstNum) inpGstNum.value = '';
+  const inpLegalName = document.getElementById('inpTransferLegalName');
+  if (inpLegalName) inpLegalName.value = '';
+
+  const selTransferTo = document.getElementById('selTransferToOption');
+  if (selTransferTo) {
+    selTransferTo.value = 'Self';
+  }
+  window.handleTransferToChange('Self');
+
+  if (parentModal) parentModal.classList.add('card-dimmed-blurred');
+  modal.style.display = 'block';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '99999', 'important');
+  modal.style.setProperty('width', '620px', 'important');
+};
+
+window.closeTransferDetailsModal = window.closePmTransferDetailsModal = function() {
+  const modal = document.getElementById('pmTransferDetailsModal');
+  if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
+    modal.style.display = 'none';
+  }
+
+  const parentModal = document.getElementById('pmExpenseDetailsModal');
+  if (parentModal) parentModal.classList.remove('card-dimmed-blurred');
+};
+
+window.handleTransferToChange = function(transferTo) {
+  const rowOtherEmployee = document.getElementById('rowTransferOtherEmployee');
+  const rowServiceVendor = document.getElementById('rowTransferServiceVendor');
+  const rowSupplyVendor = document.getElementById('rowTransferSupplyVendor');
+  const groupNewAccount = document.getElementById('groupTransferNewAccount');
+  const rowGstToggle = document.getElementById('rowTransferGstToggle');
+  const groupGstFields = document.getElementById('groupTransferGstFields');
+  const inpGstToggle = document.getElementById('inpTransferGstToggle');
+
+  // Hide all dynamic sections first
+  if (rowOtherEmployee) rowOtherEmployee.style.display = 'none';
+  if (rowServiceVendor) rowServiceVendor.style.display = 'none';
+  if (rowSupplyVendor) rowSupplyVendor.style.display = 'none';
+  if (groupNewAccount) groupNewAccount.style.display = 'none';
+  if (rowGstToggle) rowGstToggle.style.display = 'none';
+  if (groupGstFields) groupGstFields.style.display = 'none';
+  if (inpGstToggle) inpGstToggle.checked = false;
+
+  if (transferTo === 'Self') {
+    // only submit icon appears
+    return;
+  } else if (transferTo === 'Other Employee') {
+    if (rowOtherEmployee) rowOtherEmployee.style.display = 'flex';
+    return;
+  } else if (transferTo === 'Service Vendor') {
+    if (rowServiceVendor) rowServiceVendor.style.display = 'flex';
+    if (rowGstToggle) rowGstToggle.style.display = 'flex';
+  } else if (transferTo === 'Supply Vendor') {
+    if (rowSupplyVendor) rowSupplyVendor.style.display = 'flex';
+    if (rowGstToggle) rowGstToggle.style.display = 'flex';
+  } else if (transferTo === 'New Account') {
+    if (groupNewAccount) groupNewAccount.style.display = 'flex';
+    if (rowGstToggle) rowGstToggle.style.display = 'flex';
+  }
+};
+
+window.handleTransferGstToggle = function(isChecked) {
+  const groupGstFields = document.getElementById('groupTransferGstFields');
+  if (groupGstFields) {
+    groupGstFields.style.display = isChecked ? 'flex' : 'none';
+  }
+};
+
+window.submitTransferDetails = window.submitPmTransferDetails = function() {
+  const selTransferTo = document.getElementById('selTransferToOption');
+  const transferTo = selTransferTo ? selTransferTo.value : 'Self';
+
+  if (typeof showToast === 'function') {
+    showToast(`Transfer details for ${transferTo} submitted successfully`);
+  }
+
+  window.closeTransferDetailsModal();
+};
+
 let addExpenseItemsDataStore = [
   { id: 'exp-1', description: 'Civil Foundation Work & Excavation', uom: 'Sq.Ft', qty: 120.00, rate: 2500.00, amount: 300000.00, remarks: 'Site phase 1' },
   { id: 'exp-2', description: 'Electrical Cabling & Termination', uom: 'Mtr', qty: 450.00, rate: 350.00, amount: 157500.00, remarks: 'Power cables' },
@@ -13380,6 +14081,34 @@ let addExpenseItemsDataStore = [
 ];
 
 window.selectedExpenseEntryPdfName = '';
+window.expenseTableOpenedFrom = 'details';
+
+window.openExpenseTypeDetailsModal = function(expenseType) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('pmAddExpenseTableModal');
+  if (modal) {
+    window.expenseTableOpenedFrom = 'landing';
+    const titleBadge = document.getElementById('lblPmAddExpenseTableTitle');
+    if (titleBadge) {
+      titleBadge.textContent = expenseType || 'Expense Details';
+    }
+
+    // Keep table data empty for now as requested
+    addExpenseItemsDataStore = [];
+    renderAddExpenseTable();
+
+    modal.classList.remove('card-dimmed-blurred');
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
 
 window.openAddExpenseTableModal = function(itemName) {
   const overlay = document.getElementById('sideFormOverlay');
@@ -13392,6 +14121,11 @@ window.openAddExpenseTableModal = function(itemName) {
 
   const modal = document.getElementById('pmAddExpenseTableModal');
   if (modal) {
+    window.expenseTableOpenedFrom = 'details';
+    const titleBadge = document.getElementById('lblPmAddExpenseTableTitle');
+    if (titleBadge && itemName) {
+      titleBadge.textContent = itemName;
+    }
     modal.classList.remove('card-dimmed-blurred');
     renderAddExpenseTable();
     modal.style.display = 'block';
@@ -13405,7 +14139,7 @@ window.closeAddExpenseTableModal = function() {
 
   const parentModal = document.getElementById('pmExpenseDetailsModal');
   const overlay = document.getElementById('sideFormOverlay');
-  if (parentModal) {
+  if (window.expenseTableOpenedFrom === 'details' && parentModal) {
     parentModal.style.display = 'block';
   } else if (overlay) {
     overlay.style.display = 'none';
@@ -13439,22 +14173,22 @@ window.renderAddExpenseTable = function() {
   tbody.innerHTML = addExpenseItemsDataStore.map((row, idx) => {
     const qtyVal = parseFloat(row.qty) || 0;
     const rateVal = parseFloat(row.rate) || 0;
-    const amtVal = parseFloat(row.amount) || 0;
+    const amtVal = parseFloat(row.amount || (qtyVal * rateVal)) || 0;
     return `
       <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
-        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 12px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
+        <td style="width: 40%; text-align: left !important; padding: 10px 14px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
           ${row.description || ''}
         </td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 12%; text-align: center !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${row.uom || 'Nos'}
         </td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 14%; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${qtyVal.toFixed(2)}
         </td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 16%; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${rateVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
-        <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 18%; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${amtVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
       </tr>
@@ -13783,7 +14517,9 @@ function renderProjectsToolbar() {
   if (currentProjectsView === 'project_service_vendor') {
     const hasSelectedRow = projectServiceVendorData.some(d => d.selected);
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         ${hasSelectedRow ? `
           <button type="button" class="tool-btn" id="btnServiceVendorDelete" title="Delete" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteSelectedServiceVendor(); return false;">
@@ -13801,7 +14537,9 @@ function renderProjectsToolbar() {
     const hasSelectedRow = projectApprovalsData.some(d => d.selected);
     const isEditing = Boolean(window.editingApprovalRowId);
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 14px;"></div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 14px;">
+        ${universalBackBtnHtml}
+      </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnApprovalsAddActivity" title="Add Activity" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAddActivityModal(); return false;">
           <img src="icons/Add.svg" alt="Add Activity" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -13824,6 +14562,7 @@ function renderProjectsToolbar() {
   if (currentProjectsView === 'project_boq') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Summation" style="width: 26px; height: 26px; display: block; object-fit: contain;">
           <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; line-height: 1;">11,00,000.00</span>
@@ -13861,7 +14600,9 @@ function renderProjectsToolbar() {
   }
   if (currentProjectsView === 'project_dpr') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnDprPoleMount" title="Pole Mount Details" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openPmPoleMountDetailsModal(); return false;">
           <img src="icons/pole.svg?v=${Date.now()}" alt="Pole Mount" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -13911,7 +14652,9 @@ function renderProjectsToolbar() {
   }
   if (currentProjectsView === 'project_infra') {
     toolbar.innerHTML = `
-      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;"></div>
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
+      </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <button type="button" class="tool-btn" id="btnPmInfraAddStn" title="Add Infra" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openPmAddStnFromInfra(); return false;">
           <img src="icons/Add.svg" alt="Add Infra" style="width: 26px; height: 26px; display: block;">
@@ -13934,6 +14677,7 @@ function renderProjectsToolbar() {
   if (currentProjectsView === 'project_material') {
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
+        ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 10px; padding-left: 0;" title="Total Material Amount">
           <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
           <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
@@ -13963,9 +14707,9 @@ function renderProjectsToolbar() {
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpensesSummaryModal('Expense Summary'); return false;" title="Open Expense Summary">
+          <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpenseSummaryOverviewModal(); return false;" title="Open Expense Summary">
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block; cursor: pointer;">
-            <a href="#" onclick="openExpensesSummaryModal('Expense Summary'); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
+            <a href="#" onclick="openExpenseSummaryOverviewModal(); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="icons/Paid _ Received.svg" alt="Paid / Received" style="width: 28px; height: 28px; display: block;">
@@ -14556,9 +15300,7 @@ function renderProjectsFooter() {
     detailTabs.push({ key: 'infra', label: 'Infra' });
   }
   detailTabs.push({ key: 'dpr', label: 'DPR' });
-  if (!isFromYtsWipHoldNr) {
-    detailTabs.push({ key: 'boq', label: 'BOQ' });
-  }
+  detailTabs.push({ key: 'boq', label: 'BOQ' });
   if (featSettings.additionalApproval) {
     detailTabs.push({ key: 'additional_approve', label: 'Additional Approve' });
   }
@@ -22035,7 +22777,7 @@ function applyFiltersAndRender() {
             <td>${row.expenseHead}</td>
             <td style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${row.transferTo}</td>
             <td class="td-amount cell-approved" style="text-align: right !important; padding-right: 14px; color: #0454e4 !important; font-weight: 600;"><span class="text-approved" style="color: #0454e4 !important; font-weight: 600;">${row.approvedAmount || ''}</span></td>
-            <td class="td-amount cell-transferred" style="text-align: right !important; padding-right: 14px; cursor: pointer;" onclick="openPaymentReceiptModal('Payment Receipt', 'Paid Amount'); return false;"><a href="#" class="text-transferred" onclick="event.preventDefault(); event.stopPropagation(); openPaymentReceiptModal('Payment Receipt', 'Paid Amount'); return false;" style="color: #008744 !important; font-weight: 600; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer;">${row.transferredAmount || ''}</a></td>
+            <td class="td-amount cell-transferred" style="text-align: right !important; padding-right: 14px; color: #008744 !important; font-weight: 600;"><span class="text-transferred" style="color: #008744 !important; font-weight: 600; text-decoration: none !important;">${row.transferredAmount || ''}</span></td>
             <td class="td-amount cell-payable" style="text-align: right !important; padding-right: 14px; color: #ef4444 !important; font-weight: 600;"><span class="text-payable" style="color: #ef4444 !important; font-weight: 600;">${row.payableAmount || ''}</span></td>
             <td class="td-center">${row.ageing}</td>
           </tr>
@@ -22180,7 +22922,11 @@ function applyFiltersAndRender() {
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.requestDate || ''}</td>
           <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${row.requestBy || ''}</td>
-          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; color: #1e293b;">${row.expenseType || row.expenseDescription || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; cursor: pointer;" onclick="openExpenseTypeDetailsModal('${(row.expenseType || row.expenseDescription || '').replace(/'/g, "\\'")}'); return false;">
+            <a href="#" class="td-link-blue" onclick="event.preventDefault(); event.stopPropagation(); openExpenseTypeDetailsModal('${(row.expenseType || row.expenseDescription || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4 !important; font-weight: 600; text-decoration: none !important; cursor: pointer;">
+              ${row.expenseType || row.expenseDescription || ''}
+            </a>
+          </td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.request || ''}</td>
           <td class="cell-approved" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: #0454e4 !important; font-weight: 600;">
             <span class="text-approved" style="color: #0454e4 !important; font-weight: 600;">${row.approved || ''}</span>
@@ -32701,7 +33447,7 @@ window.closeRfqCompareModal = function() {
 // 12. TRANSFER DETAILS MODAL (PAYMENT SUBPAGES SUBMIT ACTION)
 // ==========================================================================
 
-window.openTransferDetailsModal = function() {
+window.openPaymentTransferDetailsModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -32731,7 +33477,7 @@ window.openTransferDetailsModal = function() {
   }
 };
 
-window.closeTransferDetailsModal = function() {
+window.closePaymentTransferDetailsModal = function() {
   const modal = document.getElementById('transferDetailsModal');
   if (modal) modal.style.display = 'none';
   const overlay = document.getElementById('sideFormOverlay');
@@ -32756,7 +33502,7 @@ window.togglePartialPaymentField = function(isChecked) {
   }
 };
 
-window.submitTransferDetails = function() {
+window.submitPaymentTransferDetails = function() {
   const chkPartial = document.getElementById('chkPartialPayment');
   const inpProcess = document.getElementById('inpProcessPayment');
 
@@ -32767,7 +33513,9 @@ window.submitTransferDetails = function() {
   }
 
   showToast('Transfer Details Submitted Successfully!');
-  closeTransferDetailsModal();
+  if (typeof closePaymentTransferDetailsModal === 'function') {
+    closePaymentTransferDetailsModal();
+  }
 };
 
 window.submitPoSupplier = function() {

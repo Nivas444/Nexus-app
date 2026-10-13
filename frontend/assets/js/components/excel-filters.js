@@ -412,6 +412,15 @@
           showToast('Filter cleared');
           return;
         }
+        if (dropdown.dataset.filterContext === 'expenseSummaryOverview') {
+          if (window.currentExpenseSummaryOverviewFilterCol) {
+            delete window.activeExpenseSummaryOverviewFilters[window.currentExpenseSummaryOverviewFilterCol];
+            if (typeof renderExpenseSummaryOverviewTable === 'function') renderExpenseSummaryOverviewTable();
+          }
+          closeExcelFilter();
+          showToast('Filter cleared');
+          return;
+        }
         closeExcelFilter();
       });
     }
@@ -765,6 +774,23 @@
             window.activePmMaterialDetailFilters[window.currentPmMaterialDetailFilterCol] = new Set(checkedItems);
           }
           if (typeof renderPmMaterialDetailTable === 'function') renderPmMaterialDetailTable();
+          closeExcelFilter();
+          showToast('Filter applied');
+          return;
+        }
+
+        if (dropdown.dataset.filterContext === 'expenseSummaryOverview') {
+          if (!window.currentExpenseSummaryOverviewFilterCol) return;
+          const checkedItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]:checked'))
+            .map(chk => chk.value);
+          const allItems = Array.from(document.querySelectorAll('.excel-filter-dynamic-item input[type="checkbox"]'))
+            .map(chk => chk.value);
+          if (checkedItems.length === allItems.length) {
+            delete window.activeExpenseSummaryOverviewFilters[window.currentExpenseSummaryOverviewFilterCol];
+          } else {
+            window.activeExpenseSummaryOverviewFilters[window.currentExpenseSummaryOverviewFilterCol] = new Set(checkedItems);
+          }
+          if (typeof renderExpenseSummaryOverviewTable === 'function') renderExpenseSummaryOverviewTable();
           closeExcelFilter();
           showToast('Filter applied');
           return;

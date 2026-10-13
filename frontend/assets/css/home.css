@@ -2075,7 +2075,8 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 .side-form-card.card-dimmed-blurred~.side-form-card,
 #pmMembersModal.card-dimmed-blurred~#pmAddMemberModal,
 #dprSurveyReportModal.card-dimmed-blurred~#dprAddSurveyItemModal,
-#pmExpenseDetailsModal.card-dimmed-blurred~#pmAddItemNameModal {
+#pmExpenseDetailsModal.card-dimmed-blurred~#pmAddItemNameModal,
+#pmExpenseDetailsModal.card-dimmed-blurred~#pmEditExpenseModal {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
@@ -2106,7 +2107,8 @@ input[type="radio"].gbpa-row-radio:focus-visible {
 #viewBankCard,
 #viewOfficeLocationCard,
 #addBulkUploadCard,
-#bulkUploadCard {
+#bulkUploadCard,
+#pmTransferDetailsModal {
   position: fixed !important;
   top: 50% !important;
   left: 50% !important;
@@ -4465,17 +4467,22 @@ a:visited,
 /* ==========================================================================
    TRANSFER DETAILS MODAL & PAYMENT SUBPAGES SUBMIT BUTTON
    ========================================================================== */
-#transferDetailsModal .toggle-slide-slider {
+#transferDetailsModal .toggle-slide-slider,
+#pmTransferDetailsModal .toggle-slide-slider {
   background-color: #ef4444 !important;
 }
 
 #transferDetailsModal .toggle-slide-switch input:checked + .toggle-slide-slider,
-#transferDetailsModal input:checked + .toggle-slide-slider {
+#transferDetailsModal input:checked + .toggle-slide-slider,
+#pmTransferDetailsModal .toggle-slide-switch input:checked + .toggle-slide-slider,
+#pmTransferDetailsModal input:checked + .toggle-slide-slider {
   background-color: #22c55e !important;
 }
 
 #transferDetailsModal .toggle-slide-switch input:not(:checked) + .toggle-slide-slider,
-#transferDetailsModal input:not(:checked) + .toggle-slide-slider {
+#transferDetailsModal input:not(:checked) + .toggle-slide-slider,
+#pmTransferDetailsModal .toggle-slide-switch input:not(:checked) + .toggle-slide-slider,
+#pmTransferDetailsModal input:not(:checked) + .toggle-slide-slider {
   background-color: #ef4444 !important;
 }
 
@@ -4670,10 +4677,18 @@ a:visited,
 #serviceVendorInvoiceAmountPanel,
 #pmAddActivityModal,
 #pmExpenseDetailsModal,
+#pmExpenseSummaryOverviewModal,
 #pmAddItemNameModal,
 #pmAddExpenseEntryModal,
+#pmEditExpenseModal,
+#pmTransferDetailsModal,
 #paymentReceiptModal {
   width: 620px !important;
+  max-width: 96vw !important;
+}
+
+#pmExpenseDetailsModal.wide-expense-mode {
+  width: 1040px !important;
   max-width: 96vw !important;
 }
 
@@ -4688,14 +4703,25 @@ tr td.cell-approved span {
 
 .projects-data-row td.cell-transferred,
 .projects-data-row td.cell-transferred a,
-.projects-data-row td .text-transferred,
-tr td.cell-transferred,
-tr td.cell-transferred a {
+.projects-data-row td .text-transferred {
   color: #008744 !important;
   font-weight: 600 !important;
   text-decoration: underline !important;
   text-underline-offset: 3px !important;
   cursor: pointer !important;
+}
+
+.worklist-table-full td.cell-transferred,
+.worklist-table-full td.cell-transferred a,
+.worklist-table-full td.cell-transferred span,
+.worklist-table-full td .text-transferred,
+#worklistTable td.cell-transferred,
+#worklistTable td.cell-transferred a,
+#worklistTable td.cell-transferred span {
+  color: #008744 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  cursor: default !important;
 }
 
 .projects-data-row td.cell-payable,
@@ -4712,6 +4738,7 @@ tr td.cell-payable span {
   max-width: 96vw !important;
 }
 
+.side-form-container:has(#pmExpenseSummaryOverviewModal:not([style*="display: none"])),
 .side-form-container:has(#pmExpenseDetailsModal:not([style*="display: none"])),
 .side-form-container:has(#expenseItemRepresentativeModal:not([style*="display: none"])),
 .side-form-container:has(#expensesSummaryModal:not([style*="display: none"])) {
@@ -4720,13 +4747,17 @@ tr td.cell-payable span {
 }
 
 .side-form-container:has(#pmAddExpenseTableModal:not([style*="display: none"])) {
-  max-width: 1020px !important;
+  max-width: 1360px !important;
   width: 98vw !important;
 }
 
 #pmAddExpenseTableModal {
-  width: 960px !important;
+  width: 1300px !important;
   max-width: 96vw !important;
+}
+
+#pmAddExpenseTableModal .contact-table-wrap {
+  overflow-x: hidden !important;
 }
 
 #expenseItemRepresentativeModal {

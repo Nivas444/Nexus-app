@@ -5422,6 +5422,13 @@
                 style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
                 <img src="icons/Add.svg" alt="Add" width="28" height="28">
               </button>
+              <button type="button" class="toolbar-icon-btn" id="btnAddExpenseYellowBtn" title="add expense" onclick="toggleExpenseDetailsInlineTable()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <svg viewBox="0 0 300 300" width="28" height="28">
+                  <path fill="#f59e0b" d="M150,282.71a26.54,26.54,0,0,1-26.54-26.54V43.83a26.54,26.54,0,1,1,53.08,0V256.17A26.54,26.54,0,0,1,150,282.71Z"/>
+                  <path fill="#f59e0b" d="M43.83,176.54a26.54,26.54,0,0,1,0-53.08H256.17a26.54,26.54,0,0,1,0,53.08Z"/>
+                </svg>
+              </button>
               <button type="button" class="side-form-close-btn" id="btnClosePmExpenseDetailsModal" onclick="closeExpenseDetailsModal()"
                 aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
             </div>
@@ -5444,6 +5451,49 @@
                 <!-- Dynamically populated rows -->
               </tbody>
             </table>
+
+            <!-- Table opened when user clicks yellow + icon below last row of existing table -->
+            <div id="expenseDetailsInlineTableContainer" style="display: none; margin-top: 24px; padding-top: 18px; border-top: 1.5px solid #cbd5e1;">
+              <div style="overflow-x: auto;">
+                <table class="projects-custom-table" id="tblExpenseDetailsInlineTable" style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; margin: 0 auto;">
+                  <colgroup>
+                    <col style="width: 40ch;">
+                    <col style="width: 15ch;">
+                    <col style="width: 15ch;">
+                    <col style="width: 15ch;">
+                    <col style="width: 15ch;">
+                  </colgroup>
+                  <thead>
+                    <tr style="background-color: #8c9399;">
+                      <th style="width: 40ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                        <span>Expense Description</span>
+                      </th>
+                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                        <span>Uom</span>
+                      </th>
+                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                        <span>Qty</span>
+                      </th>
+                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                        <span>Rate</span>
+                      </th>
+                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                        <span>Amount</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="tblExpenseDetailsInlineBody">
+                    <!-- Dynamically populated rows -->
+                  </tbody>
+                </table>
+              </div>
+              <!-- Submit icon below the last row as centered -->
+              <div style="display: flex; justify-content: center; align-items: center; padding-top: 18px;">
+                <button type="button" class="btn-card-submit-inside" id="btnSubmitExpenseDetailsInline" title="Submit" onclick="openTransferDetailsModal()" style="background: none; border: none; cursor: pointer; padding: 0;">
+                  <img src="icons/Submit.svg" alt="Submit" width="34" height="34">
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -5493,17 +5543,13 @@
 
         <!-- Add Expense Table Modal Tab (Triggered by clicking Item Name in Expense Details table) -->
         <div class="side-form-card project-info-modal-card" id="pmAddExpenseTableModal"
-          style="display: none; width: 960px !important; max-width: 96vw; margin: auto;">
+          style="display: none; width: 1300px !important; max-width: 96vw; margin: auto;">
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div class="side-form-title-badge" id="lblPmAddExpenseTableTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
               Add Expense
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
-              <button type="button" class="toolbar-icon-btn" id="btnAddExpenseEntryBtn" title="Add Expense" onclick="openAddExpenseEntryFormModal()"
-                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
-                <img src="icons/Add.svg" alt="Add" width="28" height="28">
-              </button>
               <button type="button" class="side-form-close-btn" id="btnClosePmAddExpenseTableModal" onclick="closeAddExpenseTableModal()"
                 aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
             </div>
@@ -5513,30 +5559,30 @@
             <span id="lblAddExpenseTotalSum" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">0.00</span>
           </div>
 
-          <div class="contact-table-wrap" style="padding: 0 24px 24px; overflow-x: auto;">
+          <div class="contact-table-wrap" style="padding: 0 24px 24px; overflow-x: hidden;">
             <table class="projects-custom-table" id="tblAddExpenseTable" style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
               <colgroup>
-                <col style="width: 40ch;">
-                <col style="width: 15ch;">
-                <col style="width: 15ch;">
-                <col style="width: 15ch;">
-                <col style="width: 18ch;">
+                <col style="width: 40%;">
+                <col style="width: 12%;">
+                <col style="width: 14%;">
+                <col style="width: 16%;">
+                <col style="width: 18%;">
               </colgroup>
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 40ch; white-space: nowrap;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 40%; white-space: nowrap;">
                     <span>Expense Description</span>
                   </th>
-                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 15ch; white-space: nowrap;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 12%; white-space: nowrap;">
                     <span>Uom</span>
                   </th>
-                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 15ch; white-space: nowrap;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 14%; white-space: nowrap;">
                     <span>Qty</span>
                   </th>
-                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 15ch; white-space: nowrap;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 16%; white-space: nowrap;">
                     <span>Rate</span>
                   </th>
-                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 18ch; white-space: nowrap;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; width: 18%; white-space: nowrap;">
                     <span>Amount</span>
                   </th>
                 </tr>
@@ -5626,6 +5672,222 @@
                 </button>
                 <span id="lblExpenseEntryPdfName" style="font-size: 0.85rem; color: #64748b; margin-top: 2px;"></span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Expense Form Modal Tab (Triggered by clicking Expense Description link in table below last row) -->
+        <div class="side-form-card" id="pmEditExpenseModal"
+          style="display: none; width: 620px !important; max-width: 96vw;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmEditExpenseTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Edit Expense
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSaveEditExpenseBtn" title="Save" onclick="saveEditedExpenseItem()"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                <img src="icons/Save.svg" alt="Save" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePmEditExpenseModal" onclick="closeEditExpenseModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- Field 1: Expense Description as dropdown with options -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Expense Description</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selEditExpenseDescription" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Civil Foundation Work & Excavation">Civil Foundation Work & Excavation</option>
+                  <option value="Electrical Cabling & Termination">Electrical Cabling & Termination</option>
+                  <option value="Equipment Rental & Crane Hire">Equipment Rental & Crane Hire</option>
+                  <option value="Site Diesel Generator Fuel">Site Diesel Generator Fuel</option>
+                  <option value="Soil Testing & Geotech Survey">Soil Testing & Geotech Survey</option>
+                  <option value="Tower Structural Erection">Tower Structural Erection</option>
+                  <option value="Earthing & Surge Protection">Earthing & Surge Protection</option>
+                  <option value="Manpower & Labour Charges">Manpower & Labour Charges</option>
+                  <option value="Material Transportation & Logistics">Material Transportation & Logistics</option>
+                  <option value="Miscellaneous Site Operations">Miscellaneous Site Operations</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Field 2: Qty as typeable input box -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Qty</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" id="inpEditExpenseQty" placeholder="0.00" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Field 3: Rate as typeable input box -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Rate</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" id="inpEditExpenseRate" placeholder="0.00" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Field 4: Remarks as typeable input box -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Remarks</label>
+              <div style="flex: 1;">
+                <input type="text" id="inpEditExpenseRemarks" placeholder="Enter remarks" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Field 5: Attach Documents field with pdf upload icon as centered -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Attach Documents</label>
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <input type="file" id="inpEditExpensePdfFile" accept=".pdf,application/pdf" style="display: none;" onchange="handleEditExpensePdfFile(this)">
+                <button type="button" id="btnUploadEditExpensePdf" onclick="document.getElementById('inpEditExpensePdfFile').click()"
+                  style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;" title="Upload PDF">
+                  <img src="icons/PDF Upload.svg" alt="Upload PDF" style="width: 32px; height: 32px; display: block;">
+                </button>
+                <span id="lblEditExpensePdfName" style="font-size: 0.85rem; color: #64748b; margin-top: 2px;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transfer Details Modal Tab (Triggered by Submit icon in Expense Details tab) -->
+        <div class="side-form-card side-contact-popup" id="pmTransferDetailsModal"
+          style="display: none; width: 620px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmTransferDetailsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Transfer details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePmTransferDetailsModal" onclick="closeTransferDetailsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Transfer To dropdown -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transfer To</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selTransferToOption" class="form-input-control" onchange="handleTransferToChange(this.value)"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Self" selected>Self</option>
+                  <option value="Other Employee">Other Employee</option>
+                  <option value="Service Vendor">Service Vendor</option>
+                  <option value="Supply Vendor">Supply Vendor</option>
+                  <option value="New Account">New Account</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Other Employee -> Account Name dropdown (List of members from members tab) -->
+            <div class="pm-field-row" id="rowTransferOtherEmployee" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Account Name</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selTransferMemberAccountName" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <!-- Dynamically populated from pmMembersDataStore -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Service Vendor -> Service Vendor Name dropdown (List of service vendor names from service vendor table) -->
+            <div class="pm-field-row" id="rowTransferServiceVendor" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Service Vendor Name</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selTransferServiceVendorName" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <!-- Dynamically populated from projectServiceVendorData -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Supply Vendor -> Supply Vendor Name dropdown (List of supply vendor names) -->
+            <div class="pm-field-row" id="rowTransferSupplyVendor" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Supply Vendor Name</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selTransferSupplyVendorName" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <!-- Dynamically populated from master supply vendors -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 5. New Account -> Account Number, Bank Name, IFSC Code, Whatsapp Number -->
+            <div id="groupTransferNewAccount" style="display: none; flex-direction: column; gap: 16px;">
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Account Number</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpTransferAccountNumber" placeholder="Enter Account Number"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Bank Name</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpTransferBankName" placeholder="Enter Bank Name"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">IFSC Code</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpTransferIfscCode" placeholder="Enter IFSC Code"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Whatsapp Number</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpTransferWhatsappNumber" placeholder="Enter Whatsapp Number"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. GST field name as left side and toggle as center -->
+            <div class="pm-field-row" id="rowTransferGstToggle" style="display: none; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left; margin: 0;">GST</label>
+              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                <label class="toggle-slide-switch" style="margin: 0; position: relative; display: inline-block;">
+                  <input type="checkbox" id="inpTransferGstToggle" onchange="handleTransferGstToggle(this.checked)">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 7. GST details (Shown when GST toggle is enabled) -->
+            <div id="groupTransferGstFields" style="display: none; flex-direction: column; gap: 16px;">
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">GST Number</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpTransferGstNumber" placeholder="Enter GST Number"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Legal Name</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpTransferLegalName" placeholder="Enter Legal Name"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit icon centered at bottom -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 10px;">
+              <button type="button" class="btn-card-submit-inside" id="btnTransferDetailsSubmit" title="Submit" onclick="submitTransferDetails()" style="background: none; border: none; cursor: pointer; padding: 0;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34">
+              </button>
             </div>
           </div>
         </div>
@@ -9447,6 +9709,47 @@
           </form>
         </div>
 
+        <!-- Expense Summary Overview Modal Tab (Triggered first when user clicks summation value) -->
+        <div class="side-form-card project-info-modal-card" id="pmExpenseSummaryOverviewModal"
+          style="display: none; width: 620px !important; max-width: 96vw; margin: auto;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmExpenseSummaryOverviewTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Expense Summary
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseExpenseSummaryOverviewModal" onclick="closeExpenseSummaryOverviewModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div class="contact-table-wrap" style="padding: 0 24px 24px; overflow-x: hidden;">
+            <table class="projects-custom-table" id="tblExpenseSummaryOverviewTable" style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+              <colgroup>
+                <col style="width: auto;">
+                <col style="width: 15ch;">
+              </colgroup>
+              <thead>
+                <tr style="background-color: #8c9399;">
+                  <th style="text-align: center !important; vertical-align: middle; padding: 12px 14px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                    <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                      <span>Item name</span>
+                      <button type="button" class="contact-th-filter-btn" id="btnExpenseSummaryOverviewFilter" onclick="openExpenseSummaryOverviewFilter('itemName', event)" title="Filter Item name" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
+                    </div>
+                  </th>
+                  <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 12px 14px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblExpenseSummaryOverviewBody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Expense Summary Modal Tab (Triggered by clicking blue Summation amount in Project Expenses toolbar) -->
         <div class="side-form-card side-contact-popup" id="expensesSummaryModal"
           style="display: none; width: 1260px !important; max-width: 96vw; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); overflow: hidden; margin: auto;">
@@ -9477,64 +9780,54 @@
                 <col style="width: 15ch;">
                 <col style="width: 20ch;">
                 <col style="width: 24ch;">
-                <col style="width: 14ch;">
-                <col style="width: 14ch;">
-                <col style="width: 8ch;">
                 <col style="width: 8ch;">
                 <col style="width: 10ch;">
+                <col style="width: 12ch;">
+                <col style="width: 15ch;">
                 <col style="width: 18ch;">
               </colgroup>
               <thead>
                 <tr style="background-color: #8c9399;">
-                  <!-- 1. Request Date: 15ch & center (rowspan 2) -->
-                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                  <!-- 1. Request Date: 15ch & center -->
+                  <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <span>Request Date</span>
                   </th>
-                  <!-- 2. Request By: 20ch & left (rowspan 2) -->
-                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                  <!-- 2. Request By: 20ch & left -->
+                  <th style="width: 20ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
                       <span>Request By</span>
                       <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryReqByFilter" onclick="openExpensesSummaryColFilter('requestBy', event)" title="Filter Request By" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
                     </div>
                   </th>
-                  <!-- 3. Expense Type: 24ch & left (rowspan 2) -->
-                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                  <!-- 3. Expense Type: 24ch & left -->
+                  <th style="width: 24ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
                       <span>Expense Type</span>
                       <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryTypeFilter" onclick="openExpensesSummaryColFilter('expenseType', event)" title="Filter Expense Type" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
                     </div>
                   </th>
-                  <!-- 4. Amount: colspan 2 & center -->
-                  <th colspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
-                    <span>Amount</span>
-                  </th>
-                  <!-- 5. Uom: 8ch & center (rowspan 2) -->
-                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 6px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                  <!-- 4. Uom: 8ch & center -->
+                  <th style="width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <span>Uom</span>
                   </th>
-                  <!-- 6. Qty: 8ch & right (rowspan 2) -->
-                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                  <!-- 5. Qty: 10ch & right -->
+                  <th style="width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <span>Qty</span>
                   </th>
-                  <!-- 7. Rate: 10ch & right (rowspan 2) -->
-                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                  <!-- 6. Rate: 12ch & right -->
+                  <th style="width: 12ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <span>Rate</span>
                   </th>
-                  <!-- 8. Status: 18ch & left (rowspan 2) -->
-                  <th rowspan="2" style="text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                  <!-- 7. Amount: 15ch & right -->
+                  <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                    <span>Amount</span>
+                  </th>
+                  <!-- 8. Status: 18ch & left -->
+                  <th style="width: 18ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                     <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
                       <span>Status</span>
                       <button type="button" class="contact-th-filter-btn" id="btnExpensesSummaryStatusFilter" onclick="openExpensesSummaryColFilter('status', event)" title="Filter Status" style="color: #ffffff; background: transparent; border: none; cursor: pointer; font-size: 11px;">▼</button>
                     </div>
-                  </th>
-                </tr>
-                <tr style="background-color: #8c9399;">
-                  <!-- Subcolumns under Amount -->
-                  <th style="text-align: center !important; vertical-align: middle; padding: 8px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
-                    <span>Request</span>
-                  </th>
-                  <th style="text-align: center !important; vertical-align: middle; padding: 8px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
-                    <span>Approved</span>
                   </th>
                 </tr>
               </thead>

@@ -6908,6 +6908,9 @@ function parseUrlAndApplyState() {
     } else if (role === 'Commercial Manager') {
       const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
+    } else if (role === 'Warehouse Manager') {
+      const warehouseViews = ['pr', 'grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'payment', 'supply'];
+      currentWorklistView = warehouseViews.includes(viewParam) ? viewParam : 'pr';
     } else {
       if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
         currentWorklistView = viewParam;
@@ -6930,6 +6933,8 @@ function parseUrlAndApplyState() {
       currentWorklistView = 'new_project';
     } else if (role === 'Commercial Manager') {
       currentWorklistView = 'new_project';
+    } else if (role === 'Warehouse Manager') {
+      currentWorklistView = 'pr';
     } else {
       currentWorklistView = (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') ? viewParam : 'payment';
     }
@@ -7037,6 +7042,30 @@ function applyRoleBasedNavigation() {
       currentWorklistView = 'new_project';
       updateURL();
     }
+  } else if (role === 'Warehouse Manager') {
+    // Exactly 4 navigation icons in order: Home, Worklist, Profile, Sign Out
+    if (navProjects) { navProjects.style.display = 'inline-flex'; navProjects.style.order = '1'; }
+    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
+
+    // Hide unauthorized navigation items
+    if (navMaster) navMaster.style.display = 'none';
+    if (navAccounts) navAccounts.style.display = 'none';
+    if (navAdmin) navAdmin.style.display = 'none';
+    if (navPurchase) navPurchase.style.display = 'none';
+    if (navInventory) navInventory.style.display = 'none';
+
+    // Route Protection: If currentModule is restricted for Warehouse Manager, redirect to Worklist
+    const allowedModules = ['worklist', 'projects', 'profile'];
+    if (!allowedModules.includes(currentModule)) {
+      if (typeof showToast === 'function') {
+        showToast('Access Restricted: Warehouse Manager role does not have permission for this module.', 'warning');
+      }
+      currentModule = 'worklist';
+      currentWorklistView = 'pr';
+      updateURL();
+    }
   } else {
     // Admin role: All 9 navigation items are visible and accessible
     [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
@@ -7094,6 +7123,14 @@ function switchModule(moduleName) {
       }
       return;
     }
+  } else if (role === 'Warehouse Manager') {
+    const allowedModules = ['worklist', 'projects', 'profile'];
+    if (!allowedModules.includes(moduleName)) {
+      if (typeof showToast === 'function') {
+        showToast(`Access Restricted: Warehouse Manager does not have permission to access ${moduleName}.`, 'warning');
+      }
+      return;
+    }
   }
 
   if (currentModule === moduleName) return;
@@ -7110,7 +7147,11 @@ function switchModule(moduleName) {
   } else if (moduleName === 'indus_towers') {
     currentIndusSubpage = 'site';
   } else if (moduleName === 'worklist') {
-    currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
+    if (role === 'Warehouse Manager') {
+      currentWorklistView = 'pr';
+    } else {
+      currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
+    }
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
     currentProjectsView = 'main';
@@ -7461,11 +7502,18 @@ function goBackSubpage() {
   } else if (currentModule === 'profile') {
     const role = getAuthenticatedUserRole();
     currentModule = 'worklist';
-    currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
+    if (role === 'Warehouse Manager') {
+      currentWorklistView = 'pr';
+    } else {
+      currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
+    }
     showToast('Returned to Worklist');
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
-    if (role === 'Project Manager') {
+    if (role === 'Warehouse Manager') {
+      currentWorklistView = 'pr';
+      showToast('Returned to PR');
+    } else if (role === 'Project Manager') {
       if (['project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment'].includes(currentWorklistView)) {
         isProjectPaymentEditing = false;
         isSubpageEditing = false;
@@ -7533,11 +7581,11 @@ const universalBackBtnHtml = `
 
 function renderApp() {
   applyRoleBasedNavigation();
+  const role = getAuthenticatedUserRole();
   const bannerTitle = document.getElementById('pageBannerTitle');
 
   const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
   if (pmSubmitArea) {
-    const role = getAuthenticatedUserRole();
     const isPmStatusView = (currentModule === 'worklist' && role === 'Project Manager' && ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView));
     if (!isPmStatusView) {
       pmSubmitArea.style.display = 'none';
@@ -7762,6 +7810,19 @@ function renderApp() {
             </div>
           </div>
         `;
+      } else if (role === 'Warehouse Manager') {
+        const warehouseTitles = {
+          pr: 'PR',
+          grn: 'GRN',
+          min: 'MIN',
+          mrn: 'MRN',
+          mtn: 'MTN',
+          stn: 'STN',
+          srn: 'SRN',
+          payment: 'Payment',
+          supply: 'Supply'
+        };
+        bannerTitle.textContent = warehouseTitles[currentWorklistView] || 'PR';
       } else {
         bannerTitle.textContent = "Work List";
       }
@@ -17246,6 +17307,13 @@ function renderAccountsFooter() {
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
+  const role = getAuthenticatedUserRole();
+  if (role === 'Warehouse Manager') {
+    currentDataset = [];
+    filteredDataset = [];
+    return;
+  }
+
   if (currentWorklistView === 'stn') {
     currentDataset = worklistStnData.map(item => ({ ...item }));
     filteredDataset = [...currentDataset];
@@ -17257,7 +17325,6 @@ function loadWorklistDataset() {
     return;
   }
 
-  const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
     if (currentWorklistView === 'new_project') {
       currentDataset = commercialWorklistData.map(item => ({
@@ -18213,6 +18280,13 @@ function renderWorklistToolbar() {
   if (!toolbar) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Warehouse Manager') {
+    toolbar.innerHTML = '';
+    toolbar.style.display = 'none';
+    return;
+  }
+  toolbar.style.display = 'flex';
+
   if (role === 'Project Manager') {
     if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
       const hasSelected = currentDataset.some(r => r.selected);
@@ -18908,6 +18982,51 @@ function renderWorklistFooter() {
   if (!footer) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Warehouse Manager') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+
+    const warehouseTabs = [
+      { id: 'btnToggleWmPr', view: 'pr', label: 'PR' },
+      { id: 'btnToggleWmGrn', view: 'grn', label: 'GRN' },
+      { id: 'btnToggleWmMin', view: 'min', label: 'MIN' },
+      { id: 'btnToggleWmMrn', view: 'mrn', label: 'MRN' },
+      { id: 'btnToggleWmMtn', view: 'mtn', label: 'MTN' },
+      { id: 'btnToggleWmStn', view: 'stn', label: 'STN' },
+      { id: 'btnToggleWmSrn', view: 'srn', label: 'SRN' },
+      { id: 'btnToggleWmPayment', view: 'payment', label: 'Payment' },
+      { id: 'btnToggleWmSupply', view: 'supply', label: 'Supply' }
+    ];
+
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        ${warehouseTabs.map((tab, idx) => `
+          ${idx > 0 ? '<div class="segmented-divider"></div>' : ''}
+          <button type="button" class="segmented-btn ${currentWorklistView === tab.view ? 'active' : ''}" id="${tab.id}">
+            ${tab.label}
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    warehouseTabs.forEach(tab => {
+      document.getElementById(tab.id)?.addEventListener('click', () => {
+        if (currentWorklistView !== tab.view) {
+          currentWorklistView = tab.view;
+          activeColumnFilters = {};
+          updateURL();
+          renderApp();
+          showToast(`Switched to Worklist • ${tab.label}`);
+        }
+      });
+    });
+    return;
+  }
+
   if (role === 'Project Manager') {
     if (currentWorklistView === 'jms_detail') {
       footer.style.display = 'none';
@@ -19185,9 +19304,12 @@ function renderWorklistTableHead() {
     } else {
       tableEl.style.minWidth = '';
       tableEl.style.width = '';
-      tableEl.style.tableLayout = '';
-      if (containerEl) containerEl.style.overflowX = '';
     }
+  }
+
+  if (role === 'Warehouse Manager') {
+    thead.innerHTML = '';
+    return;
   }
 
   if (role === 'Project Manager') {
@@ -20573,6 +20695,35 @@ function applyFiltersAndRender() {
   }
 
   const role = getAuthenticatedUserRole();
+  if (currentModule === 'worklist' && role === 'Warehouse Manager') {
+    const warehouseTitles = {
+      pr: 'PR',
+      grn: 'GRN',
+      min: 'MIN',
+      mrn: 'MRN',
+      mtn: 'MTN',
+      stn: 'STN',
+      srn: 'SRN',
+      payment: 'Payment',
+      supply: 'Supply'
+    };
+    const activeTitle = warehouseTitles[currentWorklistView] || 'PR';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="12" class="empty-data-row" style="text-align: center; padding: 72px 24px; border: none;">
+          <div style="max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
+            <div style="width: 56px; height: 56px; border-radius: 12px; background: rgba(4, 84, 228, 0.08); display: flex; align-items: center; justify-content: center;">
+              <img src="icons/Worklist.svg" alt="${activeTitle}" width="32" height="32" style="opacity: 0.85;">
+            </div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #1e293b; letter-spacing: -0.2px;">${activeTitle}</div>
+            <div style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">This section is currently being configured for Warehouse Manager operations.</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
   if (currentModule === 'worklist' && role === 'Project Manager') {
     if (currentWorklistView === 'new_project') {
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.siteName)) {

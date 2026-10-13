@@ -211,6 +211,16 @@
       department: 'Project Management',
       phone: '+91 98765 00003',
       location: 'Chennai, India'
+    },
+    {
+      email: 'warehouse@nexus.com',
+      aliases: ['warehouse', 'warehouse@nexus.com'],
+      pwdHash: '0e842cbe0341154ee33e0ed3bc18282cd69e016a8d56fda05ec92e7ff20a0f31',
+      name: 'Warehouse Manager',
+      role: 'Warehouse Manager',
+      department: 'Warehouse Operations',
+      phone: '+91 98765 00004',
+      location: 'Chennai, India'
     }
   ];
 
@@ -235,8 +245,8 @@
               role: apiRes.user.role,
               token: apiRes.user.token,
               permissions: apiRes.user.permissions || [],
-              department: apiRes.user.role === 'Project Manager' ? 'Project Management' : (apiRes.user.role === 'Commercial Manager' ? 'Commercial Operations' : 'Executive Management'),
-              phone: apiRes.user.role === 'Project Manager' ? '+91 98765 00003' : (apiRes.user.role === 'Commercial Manager' ? '+91 98765 00002' : '+91 98765 43210'),
+              department: apiRes.user.role === 'Project Manager' ? 'Project Management' : (apiRes.user.role === 'Commercial Manager' ? 'Commercial Operations' : (apiRes.user.role === 'Warehouse Manager' ? 'Warehouse Operations' : 'Executive Management')),
+              phone: apiRes.user.role === 'Project Manager' ? '+91 98765 00003' : (apiRes.user.role === 'Commercial Manager' ? '+91 98765 00002' : (apiRes.user.role === 'Warehouse Manager' ? '+91 98765 00004' : '+91 98765 43210')),
               location: 'Chennai, India'
             };
             sessionStorage.setItem('nexus_user', JSON.stringify(profile));

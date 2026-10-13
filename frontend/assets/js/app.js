@@ -286,6 +286,8 @@ function initFormSubmission() {
             window.location.href = 'home.html?module=worklist&view=new_project';
           } else if (userProfile.role === 'Commercial Manager') {
             window.location.href = 'home.html?module=worklist&view=new_project';
+          } else if (userProfile.role === 'Warehouse Manager') {
+            window.location.href = 'home.html?module=worklist&view=pr';
           } else {
             window.location.href = 'home.html?module=worklist&view=payment';
           }

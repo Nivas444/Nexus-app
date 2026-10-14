@@ -5651,15 +5651,100 @@ th.wm-qty-sub-header {
   border-top: 1px solid #ffffff !important;
 }
 
-/* White horizontal dividing line under GRN Qty & Amount column headers */
+/* White horizontal dividing line under GRN & MIN Qty column headers */
 .wm-grn-header-qty,
 .wm-grn-header-amount,
 th.wm-grn-header-qty,
-th.wm-grn-header-amount {
+th.wm-grn-header-amount,
+.wm-min-header-qty,
+th.wm-min-header-qty {
   border-bottom: 1px solid #ffffff !important;
 }
 
 .wm-grn-sub-header,
-th.wm-grn-sub-header {
+th.wm-grn-sub-header,
+.wm-min-sub-header,
+th.wm-min-sub-header {
+  border-top: 1px solid #ffffff !important;
+}
+
+#wmMinSiteModal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  animation: none !important;
+  z-index: 99999 !important;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+#wmMinSiteModal.card-dimmed-blurred {
+  filter: blur(5px) brightness(0.65) opacity(0.7) !important;
+  pointer-events: none !important;
+}
+
+/* White horizontal dividing line under MIN Qty column header */
+.wm-min-header-qty,
+th.wm-min-header-qty {
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.wm-min-sub-header,
+th.wm-min-sub-header {
+  border-top: 1px solid #ffffff !important;
+}
+
+#wmMrnSiteModal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  animation: none !important;
+  z-index: 99999 !important;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+#wmMrnSiteModal.card-dimmed-blurred {
+  filter: blur(5px) brightness(0.65) opacity(0.7) !important;
+  pointer-events: none !important;
+}
+
+/* White horizontal dividing line under MRN Qty column header */
+.wm-mrn-header-qty,
+th.wm-mrn-header-qty {
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.wm-mrn-sub-header,
+th.wm-mrn-sub-header {
+  border-top: 1px solid #ffffff !important;
+}
+
+#wmSupplyCustomerModal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  animation: none !important;
+  z-index: 99999 !important;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+
+#wmSupplyCustomerModal.card-dimmed-blurred {
+  filter: blur(5px) brightness(0.65) opacity(0.7) !important;
+  pointer-events: none !important;
+}
+
+/* White horizontal dividing line under Supply Qty column header */
+.wm-supply-header-qty,
+th.wm-supply-header-qty {
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.wm-supply-sub-header,
+th.wm-supply-sub-header {
   border-top: 1px solid #ffffff !important;
 }

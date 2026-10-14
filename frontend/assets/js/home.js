@@ -6909,8 +6909,15 @@ function parseUrlAndApplyState() {
       const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
     } else if (role === 'Warehouse Manager') {
-      const warehouseViews = ['pr', 'grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'payment', 'supply'];
+      const warehouseViews = ['pr', 'grn', 'min', 'min_detail', 'mrn', 'mrn_detail', 'mtn', 'stn', 'srn', 'payment', 'supply'];
       currentWorklistView = warehouseViews.includes(viewParam) ? viewParam : 'pr';
+      if (viewParam === 'min_detail') {
+        const siteParam = urlParams.get('site_id');
+        if (siteParam) activeWmMinRowId = siteParam;
+      } else if (viewParam === 'mrn_detail') {
+        const siteParam = urlParams.get('site_id');
+        if (siteParam) activeWmMrnRowId = siteParam;
+      }
     } else {
       if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
         currentWorklistView = viewParam;
@@ -7380,7 +7387,11 @@ function updateURL() {
     url.searchParams.delete('customer');
   }
 
-  if (currentModule !== 'projects') {
+  if (currentModule === 'worklist' && currentWorklistView === 'min_detail' && activeWmMinRowId) {
+    url.searchParams.set('site_id', activeWmMinRowId);
+  } else if (currentModule === 'worklist' && currentWorklistView === 'mrn_detail' && activeWmMrnRowId) {
+    url.searchParams.set('site_id', activeWmMrnRowId);
+  } else if (currentModule !== 'projects') {
     url.searchParams.delete('context');
     url.searchParams.delete('origin');
     url.searchParams.delete('site_id');
@@ -7511,6 +7522,20 @@ function goBackSubpage() {
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
     if (role === 'Warehouse Manager') {
+      if (currentWorklistView === 'min_detail') {
+        currentWorklistView = 'min';
+        updateURL();
+        renderApp();
+        showToast('Returned to MIN');
+        return;
+      }
+      if (currentWorklistView === 'mrn_detail') {
+        currentWorklistView = 'mrn';
+        updateURL();
+        renderApp();
+        showToast('Returned to MRN');
+        return;
+      }
       currentWorklistView = 'pr';
       showToast('Returned to PR');
     } else if (role === 'Project Manager') {
@@ -7590,6 +7615,31 @@ function renderApp() {
     if (!isPmStatusView) {
       pmSubmitArea.style.display = 'none';
     }
+  }
+
+  const minDetailSubmitArea = document.getElementById('wmMinDetailSubmitArea');
+  if (minDetailSubmitArea && (currentModule !== 'worklist' || currentWorklistView !== 'min_detail')) {
+    minDetailSubmitArea.style.display = 'none';
+  }
+
+  const mrnDetailSubmitArea = document.getElementById('wmMrnDetailSubmitArea');
+  if (mrnDetailSubmitArea && (currentModule !== 'worklist' || currentWorklistView !== 'mrn_detail')) {
+    mrnDetailSubmitArea.style.display = 'none';
+  }
+
+  const mtnSubmitArea = document.getElementById('wmMtnSubmitArea');
+  if (mtnSubmitArea && (currentModule !== 'worklist' || currentWorklistView !== 'mtn')) {
+    mtnSubmitArea.style.display = 'none';
+  }
+
+  const stnSubmitArea = document.getElementById('wmStnSubmitArea');
+  if (stnSubmitArea && (currentModule !== 'worklist' || currentWorklistView !== 'stn')) {
+    stnSubmitArea.style.display = 'none';
+  }
+
+  const srnSubmitArea = document.getElementById('wmSrnSubmitArea');
+  if (srnSubmitArea && (currentModule !== 'worklist' || currentWorklistView !== 'srn')) {
+    srnSubmitArea.style.display = 'none';
   }
 
   if (window.isStandaloneMode) {
@@ -7811,18 +7861,54 @@ function renderApp() {
           </div>
         `;
       } else if (role === 'Warehouse Manager') {
-        const warehouseTitles = {
-          pr: 'PR',
-          grn: 'GRN',
-          min: 'MIN',
-          mrn: 'MRN',
-          mtn: 'MTN',
-          stn: 'STN',
-          srn: 'SRN',
-          payment: 'Payment',
-          supply: 'Supply'
-        };
-        bannerTitle.textContent = warehouseTitles[currentWorklistView] || 'PR';
+        if (currentWorklistView === 'min_detail' || currentWorklistView === 'mrn_detail') {
+          const isMrn = (currentWorklistView === 'mrn_detail');
+          const dataStore = isMrn ? wmMrnDataStore : wmMinDataStore;
+          const activeRowId = isMrn ? activeWmMrnRowId : activeWmMinRowId;
+          const row = dataStore.find(r => r.id === activeRowId) || (currentDataset && currentDataset.find(r => r.id === activeRowId)) || dataStore[0];
+          const pId = row ? (row.projectId || (isMrn ? 'PRJ-IND-3910' : 'PRJ-IND-4091')) : (isMrn ? 'PRJ-IND-3910' : 'PRJ-IND-4091');
+          const pType = row ? (row.projectType || (isMrn ? 'Upgrade' : 'New Build')) : (isMrn ? 'Upgrade' : 'New Build');
+          const subType = row ? (row.subProjectType || (isMrn ? 'Solar Power Hybrid 10kVA' : 'Ground Based Tower 40M')) : (isMrn ? 'Solar Power Hybrid 10kVA' : 'Ground Based Tower 40M');
+          const pPo = row ? (row.poNo || (isMrn ? 'PO-2026-0792 (0-Opex)' : 'PO-2026-0814 (0-Opex)')) : (isMrn ? 'PO-2026-0792 (0-Opex)' : 'PO-2026-0814 (0-Opex)');
+          const sId = row ? (row.siteId || (isMrn ? 'SITE-IND-105' : 'SITE-IND-104')) : (isMrn ? 'SITE-IND-105' : 'SITE-IND-104');
+          const sName = row ? (row.siteName || (isMrn ? 'BSNL Phase IX Site 42' : 'Airtel Tower Site - Hub 104')) : (isMrn ? 'BSNL Phase IX Site 42' : 'Airtel Tower Site - Hub 104');
+
+          bannerTitle.innerHTML = `
+            <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
+              <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+                <a href="#" onclick="openProjectInfoModal('${row && row.id ? row.id : ''}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Project Details">${pId} / ${pType} / ${subType}</a>
+                <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pId} / ${pType} / ${subType}', event)" title="Copy Project Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                  <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+                </button>
+              </div>
+              <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+                <a href="#" onclick="openPoCapexModal('${pPo}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Capex PO Details">${pPo}</a>
+                <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pPo}', event)" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                  <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+                </button>
+              </div>
+              <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
+                <a href="#" onclick="openSiteInfoModal('${sId} / ${sName}'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open Site Details">${sId} / ${sName}</a>
+                <button type="button" class="btn-banner-copy" onclick="copyBannerText('${sId} / ${sName}', event)" title="Copy Site Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+                  <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          const warehouseTitles = {
+            pr: 'PR',
+            grn: 'GRN',
+            min: 'MIN',
+            mrn: 'MRN',
+            mtn: 'MTN',
+            stn: 'STN',
+            srn: 'SRN',
+            payment: 'Payment',
+            supply: 'Supply'
+          };
+          bannerTitle.textContent = warehouseTitles[currentWorklistView] || 'PR';
+        }
       } else {
         bannerTitle.textContent = "Work List";
       }
@@ -17944,83 +18030,499 @@ let wmMinDataStore = [
   {
     id: 'wm-min-1',
     selected: false,
+    isHighlighted: false,
+    siteId: 'SITE-IND-104',
     siteName: 'Airtel Tower Site - Hub 104',
     requestDate: '12-10-2026',
     requestBy: 'Rajesh Sharma',
     projectId: 'PRJ-IND-4091',
     projectType: 'New Build',
     subProjectType: 'Ground Based Tower 40M',
+    poNo: 'PO-2026-0814 (0-Opex)',
     status: 'Ready To Dispatch',
-    ageing: '2 Days'
+    ageing: '2 Days',
+    transport: {
+      logisticsName: 'V-Trans India Ltd',
+      freightCharges: 22000.00,
+      cgstIgst: 1980.00,
+      sgst: 1980.00,
+      totalAmount: 25960.00
+    },
+    items: [
+      {
+        id: 'min-1-1',
+        itemCode: 'ITEM-CBL-001',
+        itemName: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
+        requestQty: 350.00,
+        issuedQty: 350.00,
+        stockQty: 500.00,
+        remark: 'Urgent for line 1',
+        selected: false,
+        materialDescription: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
+        uom: 'Mtr',
+        mirQty: 350.00,
+        minQty: 350.00,
+        rate: 420.00,
+        amount: 147000.00
+      },
+      {
+        id: 'min-1-2',
+        itemCode: 'ITEM-OFC-002',
+        itemName: '24F Single Mode Armoured Optical Fiber Cable',
+        requestQty: 800.00,
+        issuedQty: 800.00,
+        stockQty: 1200.00,
+        remark: 'Primary backbone link',
+        selected: false,
+        materialDescription: '24F Single Mode Armoured Optical Fiber Cable',
+        uom: 'Mtr',
+        mirQty: 800.00,
+        minQty: 800.00,
+        rate: 95.00,
+        amount: 76000.00
+      },
+      {
+        id: 'min-1-3',
+        itemCode: 'ITEM-ERT-003',
+        itemName: 'Copper Bonded Chemical Earthing Electrode 3M',
+        requestQty: 25.00,
+        issuedQty: 25.00,
+        stockQty: 40.00,
+        remark: 'Standard ground grid',
+        selected: false,
+        materialDescription: 'Copper Bonded Chemical Earthing Electrode 3M',
+        uom: 'Set',
+        mirQty: 25.00,
+        minQty: 25.00,
+        rate: 3200.00,
+        amount: 80000.00
+      },
+      {
+        id: 'min-1-4',
+        itemCode: 'ITEM-FAS-004',
+        itemName: 'Hot Dip Galvanized Nut Bolts Grade 8.8 M16x50',
+        requestQty: 180.00,
+        issuedQty: 180.00,
+        stockQty: 250.00,
+        remark: 'Tower leg assembly',
+        selected: false,
+        materialDescription: 'Hot Dip Galvanized Nut Bolts Grade 8.8 M16x50',
+        uom: 'Kg',
+        mirQty: 180.00,
+        minQty: 180.00,
+        rate: 145.00,
+        amount: 26100.00
+      }
+    ]
   },
   {
     id: 'wm-min-2',
     selected: false,
+    isHighlighted: false,
+    siteId: 'SITE-JIO-205',
     siteName: 'Jio Fiber ODC Site Alpha',
     requestDate: '10-10-2026',
     requestBy: 'Vikram Patel',
     projectId: 'PRJ-IND-4092',
     projectType: 'Upgrade',
     subProjectType: 'Rooftop Pole Mast 15M',
+    poNo: 'PO-2026-0820 (0-Opex)',
     status: 'To Be Prepare',
-    ageing: '4 Days'
+    ageing: '4 Days',
+    transport: {
+      logisticsName: 'Blue Dart Surface Logistics',
+      freightCharges: 18500.00,
+      cgstIgst: 1665.00,
+      sgst: 1665.00,
+      totalAmount: 21830.00
+    },
+    items: [
+      {
+        id: 'min-2-1',
+        itemCode: 'ITEM-CAB-101',
+        itemName: 'Outdoor Telecom Pole Mount Equipment Cabinet',
+        requestQty: 8.00,
+        issuedQty: 8.00,
+        stockQty: 15.00,
+        remark: 'ODC enclosure',
+        selected: false,
+        materialDescription: 'Outdoor Telecom Pole Mount Equipment Cabinet',
+        uom: 'Set',
+        mirQty: 8.00,
+        minQty: 8.00,
+        rate: 24500.00,
+        amount: 196000.00
+      },
+      {
+        id: 'min-2-2',
+        itemCode: 'ITEM-BAT-102',
+        itemName: '48V 100AH LiFePO4 Lithium Battery Module',
+        requestQty: 12.00,
+        issuedQty: 12.00,
+        stockQty: 20.00,
+        remark: 'Backup power pack',
+        selected: false,
+        materialDescription: '48V 100AH LiFePO4 Lithium Battery Module',
+        uom: 'Nos',
+        mirQty: 12.00,
+        minQty: 12.00,
+        rate: 38000.00,
+        amount: 456000.00
+      },
+      {
+        id: 'min-2-3',
+        itemCode: 'ITEM-FDF-103',
+        itemName: 'Fiber Distribution Frame (FDF) 48 Ports Rack Mount',
+        requestQty: 15.00,
+        issuedQty: 15.00,
+        stockQty: 30.00,
+        remark: 'Rack mount unit',
+        selected: false,
+        materialDescription: 'Fiber Distribution Frame (FDF) 48 Ports Rack Mount',
+        uom: 'Nos',
+        mirQty: 15.00,
+        minQty: 15.00,
+        rate: 4200.00,
+        amount: 63000.00
+      },
+      {
+        id: 'min-2-4',
+        itemCode: 'ITEM-SPD-104',
+        itemName: 'Class B+C Surge Protection Device 40kA 4P',
+        requestQty: 20.00,
+        issuedQty: 20.00,
+        stockQty: 45.00,
+        remark: 'Lightning protection',
+        selected: false,
+        materialDescription: 'Class B+C Surge Protection Device 40kA 4P',
+        uom: 'Nos',
+        mirQty: 20.00,
+        minQty: 20.00,
+        rate: 2850.00,
+        amount: 57000.00
+      }
+    ]
   },
   {
     id: 'wm-min-3',
     selected: false,
+    isHighlighted: false,
+    siteId: 'SITE-BSNL-042',
     siteName: 'BSNL Phase IX Site 42',
     requestDate: '13-10-2026',
     requestBy: 'Suresh Kumar',
     projectId: 'PRJ-IND-4095',
     projectType: 'Macro Tower',
     subProjectType: 'Monopole Tower 30M',
+    poNo: 'PO-2026-0835 (0-Opex)',
     status: 'Stock Not Available',
-    ageing: '1 Day'
+    ageing: '1 Day',
+    transport: {
+      logisticsName: 'TCI Freight Logistics',
+      freightCharges: 28000.00,
+      cgstIgst: 2520.00,
+      sgst: 2520.00,
+      totalAmount: 33040.00
+    },
+    items: [
+      {
+        id: 'min-3-1',
+        itemCode: 'ITEM-TWR-201',
+        itemName: '30M Monopole High Mast Steel Sections',
+        requestQty: 2.00,
+        issuedQty: 2.00,
+        stockQty: 5.00,
+        remark: 'Heavy structural section',
+        selected: false,
+        materialDescription: '30M Monopole High Mast Steel Sections',
+        uom: 'Set',
+        mirQty: 2.00,
+        minQty: 2.00,
+        rate: 185000.00,
+        amount: 370000.00
+      },
+      {
+        id: 'min-3-2',
+        itemCode: 'ITEM-AVL-202',
+        itemName: 'Aviation Obstruction LED Warning Light Dual Lamp',
+        requestQty: 4.00,
+        issuedQty: 4.00,
+        stockQty: 12.00,
+        remark: 'Top mast lighting',
+        selected: false,
+        materialDescription: 'Aviation Obstruction LED Warning Light Dual Lamp',
+        uom: 'Nos',
+        mirQty: 4.00,
+        minQty: 4.00,
+        rate: 8500.00,
+        amount: 34000.00
+      },
+      {
+        id: 'min-3-3',
+        itemCode: 'ITEM-TRY-203',
+        itemName: 'Galvanized Cable Ladder Tray 300mm x 3M',
+        requestQty: 90.00,
+        issuedQty: 90.00,
+        stockQty: 180.00,
+        remark: 'Vertical run pathway',
+        selected: false,
+        materialDescription: 'Galvanized Cable Ladder Tray 300mm x 3M',
+        uom: 'Mtr',
+        mirQty: 90.00,
+        minQty: 90.00,
+        rate: 850.00,
+        amount: 76500.00
+      }
+    ]
   },
   {
     id: 'wm-min-4',
     selected: false,
+    isHighlighted: false,
+    siteId: 'SITE-VI-088',
     siteName: 'Vodafone Idea Cell Site 88',
     requestDate: '09-10-2026',
     requestBy: 'Karthik Raja',
     projectId: 'PRJ-IND-4098',
     projectType: 'New Build',
     subProjectType: '4 Legged Lattice Tower',
+    poNo: 'PO-2026-0841 (0-Opex)',
     status: 'Ready To Dispatch',
-    ageing: '5 Days'
+    ageing: '5 Days',
+    transport: {
+      logisticsName: 'GATI KWE Logistics',
+      freightCharges: 32000.00,
+      cgstIgst: 2880.00,
+      sgst: 2880.00,
+      totalAmount: 37760.00
+    },
+    items: [
+      {
+        id: 'min-4-1',
+        itemCode: 'ITEM-STR-301',
+        itemName: '4-Legged Angular Steel Lattice Tower Structural Members',
+        requestQty: 3.00,
+        issuedQty: 3.00,
+        stockQty: 8.00,
+        remark: 'Base erection pack',
+        selected: false,
+        materialDescription: '4-Legged Angular Steel Lattice Tower Structural Members',
+        uom: 'Set',
+        mirQty: 3.00,
+        minQty: 3.00,
+        rate: 220000.00,
+        amount: 660000.00
+      },
+      {
+        id: 'min-4-2',
+        itemCode: 'ITEM-BKT-302',
+        itemName: 'Antenna Mount Offset Brackets Galvanized',
+        requestQty: 18.00,
+        issuedQty: 18.00,
+        stockQty: 35.00,
+        remark: 'Sector antenna mount',
+        selected: false,
+        materialDescription: 'Antenna Mount Offset Brackets Galvanized',
+        uom: 'Nos',
+        mirQty: 18.00,
+        minQty: 18.00,
+        rate: 3400.00,
+        amount: 61200.00
+      },
+      {
+        id: 'min-4-3',
+        itemCode: 'ITEM-COA-303',
+        itemName: '1/2 Inch Flexible RF Coaxial Feeder Cable',
+        requestQty: 400.00,
+        issuedQty: 400.00,
+        stockQty: 850.00,
+        remark: 'Feeder run jumper',
+        selected: false,
+        materialDescription: '1/2 Inch Flexible RF Coaxial Feeder Cable',
+        uom: 'Mtr',
+        mirQty: 400.00,
+        minQty: 400.00,
+        rate: 165.00,
+        amount: 66000.00
+      }
+    ]
   }
 ];
 
 let wmMrnDataStore = [
   {
     id: 'wm-mrn-1',
+    siteId: 'SITE-IND-105',
     siteName: 'BSNL Phase IX Site 42',
     completionDate: '08-10-2026',
     submitBy: 'Amitabh Verma',
     projectId: 'PRJ-IND-3910',
     projectType: 'Upgrade',
     subProjectType: 'Solar Power Hybrid 10kVA',
-    ageing: '3 Days'
+    poNo: 'PO-2026-0792 (0-Opex)',
+    ageing: '3 Days',
+    isHighlighted: false,
+    transport: {
+      logisticsName: 'V-Trans Logistics Ltd',
+      freightCharges: 14500.00,
+      cgstIgst: 1305.00,
+      sgst: 1305.00,
+      totalAmount: 17110.00
+    },
+    items: [
+      {
+        id: 'mrn-1-1',
+        selected: false,
+        isTicked: false,
+        materialDescription: '48V 100Ah Lithium Ion Battery Module LFP',
+        uom: 'Nos',
+        stockQty: 8.00,
+        mrrQty: 4.00,
+        mrnQty: 4.00,
+        rate: 45000.00,
+        amount: 180000.00
+      },
+      {
+        id: 'mrn-1-2',
+        selected: false,
+        isTicked: false,
+        materialDescription: '5kW Hybrid Solar Inverter Pure Sine Wave',
+        uom: 'Nos',
+        stockQty: 4.00,
+        mrrQty: 2.00,
+        mrnQty: 2.00,
+        rate: 62000.00,
+        amount: 124000.00
+      },
+      {
+        id: 'mrn-1-3',
+        selected: false,
+        isTicked: false,
+        materialDescription: 'Mono PERC Solar PV Panels 540W Tier-1',
+        uom: 'Nos',
+        stockQty: 24.00,
+        mrrQty: 12.00,
+        mrnQty: 12.00,
+        rate: 11500.00,
+        amount: 138000.00
+      }
+    ]
   },
   {
     id: 'wm-mrn-2',
+    siteId: 'SITE-IND-106',
     siteName: 'Airtel Cell Site Pune North',
     completionDate: '11-10-2026',
     submitBy: 'Pooja Hegde',
     projectId: 'PRJ-IND-3911',
     projectType: 'Maintenance',
     subProjectType: 'Tower Maintenance',
-    ageing: '1 Day'
+    poNo: 'PO-2026-0793 (0-Opex)',
+    ageing: '1 Day',
+    isHighlighted: false,
+    transport: {
+      logisticsName: 'GATI KWE Logistics',
+      freightCharges: 12000.00,
+      cgstIgst: 1080.00,
+      sgst: 1080.00,
+      totalAmount: 14160.00
+    },
+    items: [
+      {
+        id: 'mrn-2-1',
+        selected: false,
+        isTicked: false,
+        materialDescription: 'Aviation LED Warning Obstruction Light',
+        uom: 'Nos',
+        stockQty: 6.00,
+        mrrQty: 2.00,
+        mrnQty: 2.00,
+        rate: 8500.00,
+        amount: 17000.00
+      },
+      {
+        id: 'mrn-2-2',
+        selected: false,
+        isTicked: false,
+        materialDescription: 'Lightning Arrester Copper Early Streamer 3M',
+        uom: 'Set',
+        stockQty: 5.00,
+        mrrQty: 1.00,
+        mrnQty: 1.00,
+        rate: 18500.00,
+        amount: 18500.00
+      },
+      {
+        id: 'mrn-2-3',
+        selected: false,
+        isTicked: false,
+        materialDescription: 'Heavy Galvanized Guy Wire Ropes 12mm x 100M',
+        uom: 'Roll',
+        stockQty: 10.00,
+        mrrQty: 3.00,
+        mrnQty: 3.00,
+        rate: 14200.00,
+        amount: 42600.00
+      }
+    ]
   },
   {
     id: 'wm-mrn-3',
+    siteId: 'SITE-IND-107',
     siteName: 'Indus Telecom Hub Delta-9',
     completionDate: '06-10-2026',
     submitBy: 'Sunil Narine',
     projectId: 'PRJ-IND-3915',
     projectType: 'New Build',
     subProjectType: 'Ground Based Tower 40M',
-    ageing: '5 Days'
+    poNo: 'PO-2026-0794 (0-Opex)',
+    ageing: '5 Days',
+    isHighlighted: false,
+    transport: {
+      logisticsName: 'TCI Freight Logistics',
+      freightCharges: 22000.00,
+      cgstIgst: 1980.00,
+      sgst: 1980.00,
+      totalAmount: 25960.00
+    },
+    items: [
+      {
+        id: 'mrn-3-1',
+        selected: false,
+        isTicked: false,
+        materialDescription: '40M Angular Galvanized Steel Tower Sections',
+        uom: 'Set',
+        stockQty: 3.00,
+        mrrQty: 1.00,
+        mrnQty: 1.00,
+        rate: 285000.00,
+        amount: 285000.00
+      },
+      {
+        id: 'mrn-3-2',
+        selected: false,
+        isTicked: false,
+        materialDescription: 'High Grade Anchor Foundation Bolts M36 x 1.5M',
+        uom: 'Set',
+        stockQty: 16.00,
+        mrrQty: 8.00,
+        mrnQty: 8.00,
+        rate: 7500.00,
+        amount: 60000.00
+      },
+      {
+        id: 'mrn-3-3',
+        selected: false,
+        isTicked: false,
+        materialDescription: 'Hot Dip Galvanized Ladder Cable Tray 300mm',
+        uom: 'Mtr',
+        stockQty: 120.00,
+        mrrQty: 40.00,
+        mrnQty: 40.00,
+        rate: 950.00,
+        amount: 38000.00
+      }
+    ]
   }
 ];
 
@@ -18197,7 +18699,53 @@ let wmSupplyDataStore = [
     orderId: 'ORD-AIR-1029',
     orderValue: 450000.00,
     status: 'Ready To Dispatch',
-    ageing: '2 Days'
+    ageing: '2 Days',
+    isHighlighted: false,
+    transport: {
+      transporterName: 'V-Trans Logistics Ltd',
+      vehicleNo: 'TN-09-AB-1234',
+      driverName: 'Ramesh Kumar',
+      whatsappNo: '9876543210',
+      ewayBill: true
+    },
+    items: [
+      {
+        id: 'sup-1-item-1',
+        materialDescription: '24-Port Gigabit Managed L2 PoE Switch',
+        uom: 'NOS',
+        stockQty: 150.00,
+        mirQty: 100.00,
+        invoiceQty: 100.00,
+        rate: 2450.00,
+        amount: 245000.00,
+        selected: false,
+        isHighlighted: false
+      },
+      {
+        id: 'sup-1-item-2',
+        materialDescription: 'Cat6 UTP Solid Copper Cable Drum (305m)',
+        uom: 'DRUM',
+        stockQty: 80.00,
+        mirQty: 40.00,
+        invoiceQty: 40.00,
+        rate: 3200.00,
+        amount: 128000.00,
+        selected: false,
+        isHighlighted: false
+      },
+      {
+        id: 'sup-1-item-3',
+        materialDescription: '1U Rack Mount Fiber Patch Panel 24-Port',
+        uom: 'NOS',
+        stockQty: 60.00,
+        mirQty: 30.00,
+        invoiceQty: 30.00,
+        rate: 2566.67,
+        amount: 77000.00,
+        selected: false,
+        isHighlighted: false
+      }
+    ]
   },
   {
     id: 'wm-sup-2',
@@ -18206,7 +18754,41 @@ let wmSupplyDataStore = [
     orderId: 'ORD-JIO-5541',
     orderValue: 780000.00,
     status: 'To Be Prepare',
-    ageing: '3 Days'
+    ageing: '3 Days',
+    isHighlighted: false,
+    transport: {
+      transporterName: 'Nexus Fleet Logistics',
+      vehicleNo: 'TN-22-CD-5678',
+      driverName: 'Muthu Vel',
+      whatsappNo: '9840123456',
+      ewayBill: true
+    },
+    items: [
+      {
+        id: 'sup-2-item-1',
+        materialDescription: '48V 100Ah Lithium-ion Battery Pack Rackmount',
+        uom: 'SET',
+        stockQty: 40.00,
+        mirQty: 10.00,
+        invoiceQty: 10.00,
+        rate: 45000.00,
+        amount: 450000.00,
+        selected: false,
+        isHighlighted: false
+      },
+      {
+        id: 'sup-2-item-2',
+        materialDescription: 'Single Phase Automatic Voltage Regulator 10kVA',
+        uom: 'NOS',
+        stockQty: 25.00,
+        mirQty: 15.00,
+        invoiceQty: 15.00,
+        rate: 22000.00,
+        amount: 330000.00,
+        selected: false,
+        isHighlighted: false
+      }
+    ]
   },
   {
     id: 'wm-sup-3',
@@ -18215,7 +18797,41 @@ let wmSupplyDataStore = [
     orderId: 'ORD-VI-3320',
     orderValue: 310000.00,
     status: 'Ready To Dispatch',
-    ageing: '5 Days'
+    ageing: '5 Days',
+    isHighlighted: false,
+    transport: {
+      transporterName: 'Express Cargo Movers',
+      vehicleNo: 'TN-14-EF-9012',
+      driverName: 'Suresh Raina',
+      whatsappNo: '9791122334',
+      ewayBill: false
+    },
+    items: [
+      {
+        id: 'sup-3-item-1',
+        materialDescription: 'Outdoor Telecom RRU Mounting Bracket Heavy Duty',
+        uom: 'SET',
+        stockQty: 120.00,
+        mirQty: 50.00,
+        invoiceQty: 50.00,
+        rate: 4200.00,
+        amount: 210000.00,
+        selected: false,
+        isHighlighted: false
+      },
+      {
+        id: 'sup-3-item-2',
+        materialDescription: 'Grounding Copper Busbar Kit 50x5mm with Insulators',
+        uom: 'KIT',
+        stockQty: 90.00,
+        mirQty: 40.00,
+        invoiceQty: 40.00,
+        rate: 2500.00,
+        amount: 100000.00,
+        selected: false,
+        isHighlighted: false
+      }
+    ]
   },
   {
     id: 'wm-sup-4',
@@ -18224,7 +18840,41 @@ let wmSupplyDataStore = [
     orderId: 'ORD-IND-8812',
     orderValue: 1250000.00,
     status: 'To Be Prepare',
-    ageing: '1 Day'
+    ageing: '1 Day',
+    isHighlighted: false,
+    transport: {
+      transporterName: 'Central Logistics Division',
+      vehicleNo: 'KA-01-GH-3456',
+      driverName: 'Anand Verma',
+      whatsappNo: '9880198765',
+      ewayBill: true
+    },
+    items: [
+      {
+        id: 'sup-4-item-1',
+        materialDescription: '15kVA Silent Diesel Generator Set CPCB-II',
+        uom: 'SET',
+        stockQty: 10.00,
+        mirQty: 4.00,
+        invoiceQty: 4.00,
+        rate: 250000.00,
+        amount: 1000000.00,
+        selected: false,
+        isHighlighted: false
+      },
+      {
+        id: 'sup-4-item-2',
+        materialDescription: 'Surge Protection Device Type 1+2 4-Pole 50kA',
+        uom: 'NOS',
+        stockQty: 80.00,
+        mirQty: 25.00,
+        invoiceQty: 25.00,
+        rate: 10000.00,
+        amount: 250000.00,
+        selected: false,
+        isHighlighted: false
+      }
+    ]
   }
 ];
 
@@ -18518,6 +19168,18 @@ window.openWmGrnTransportModal = function() {
   const prevModal = document.getElementById('wmGrnSupplierModal');
   if (prevModal) prevModal.classList.add('card-dimmed-blurred');
 
+  // Show GRN fields, hide MIN fields
+  const grnFields = document.getElementById('wmGrnTransportFields');
+  const minFields = document.getElementById('wmMinTransportFields');
+  if (grnFields) grnFields.style.display = 'flex';
+  if (minFields) minFields.style.display = 'none';
+
+  // Toggle Header Icons: Show PDF, Hide Printer
+  const lblPdf = document.getElementById('lblWmGrnTransportPdf');
+  const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  if (lblPdf) lblPdf.style.display = 'flex';
+  if (btnPrint) btnPrint.style.display = 'none';
+
   const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
   const t = (row && row.transport) ? row.transport : {
     logisticsName: 'V-Trans India Ltd',
@@ -18556,6 +19218,31 @@ window.closeWmGrnTransportModal = function() {
   if (modal) modal.style.display = 'none';
   const prevModal = document.getElementById('wmGrnSupplierModal');
   if (prevModal) prevModal.classList.remove('card-dimmed-blurred');
+  const minModal = document.getElementById('wmMinSiteModal');
+  if (minModal) minModal.classList.remove('card-dimmed-blurred');
+  const mrnModal = document.getElementById('wmMrnSiteModal');
+  if (mrnModal) mrnModal.classList.remove('card-dimmed-blurred');
+  const supplyModal = document.getElementById('wmSupplyCustomerModal');
+  if (supplyModal) supplyModal.classList.remove('card-dimmed-blurred');
+  if (currentWorklistView === 'min') {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  } else if (currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail') {
+    const isMrnOpen = (mrnModal && mrnModal.style.display !== 'none');
+    if (!isMrnOpen) {
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+  } else if (currentWorklistView === 'supply') {
+    const isSupplyOpen = (supplyModal && supplyModal.style.display !== 'none');
+    if (!isSupplyOpen) {
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+  } else if (['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.calculateWmTransportTotal = function() {
@@ -18575,7 +19262,146 @@ window.handleWmGrnTransportPdfUpload = function(event) {
   }
 };
 
+window.handleWmMinTransportPrint = function() {
+  window.print();
+};
+
+window.handleWmMinTransportTypeChange = function(type) {
+  const isRental = (type === 'Rental');
+
+  const inpTrans = document.getElementById('inpWmMinTransporterName');
+  const selTrans = document.getElementById('selWmMinTransporterName');
+  if (inpTrans) inpTrans.style.display = isRental ? 'block' : 'none';
+  if (selTrans) selTrans.style.display = isRental ? 'none' : 'block';
+
+  const inpVeh = document.getElementById('inpWmMinVehicleNo');
+  const selVeh = document.getElementById('selWmMinVehicleNo');
+  if (inpVeh) inpVeh.style.display = isRental ? 'block' : 'none';
+  if (selVeh) selVeh.style.display = isRental ? 'none' : 'block';
+
+  const inpDriver = document.getElementById('inpWmMinDriverName');
+  const selDriver = document.getElementById('selWmMinDriverName');
+  if (inpDriver) inpDriver.style.display = isRental ? 'block' : 'none';
+  if (selDriver) selDriver.style.display = isRental ? 'none' : 'block';
+
+  const rowWhatsapp = document.getElementById('rowWmMinWhatsappNo');
+  if (rowWhatsapp) rowWhatsapp.style.display = isRental ? 'flex' : 'none';
+};
+
 window.saveWmTransportDetails = function() {
+  if (['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    const rowId = (typeof activeWmTransferRowId !== 'undefined') ? activeWmTransferRowId : null;
+    const storeMap = {
+      mtn: typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : [],
+      stn: typeof wmStnDataStore !== 'undefined' ? wmStnDataStore : [],
+      srn: typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : []
+    };
+    const targetStore = storeMap[currentWorklistView] || (activeWmTransferView ? storeMap[activeWmTransferView] : []);
+    const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+                (targetStore && targetStore.find(r => r.id === rowId)) ||
+                (currentDataset && currentDataset.find(r => r.selected));
+
+    if (row) {
+      if (!row.transport) row.transport = {};
+      row.transport.logisticsName = document.getElementById('inpWmLogisticsName')?.value || 'V-Trans Logistics Ltd';
+      row.transport.freightCharges = parseFloat(document.getElementById('inpWmFreightCharges')?.value) || 0;
+      row.transport.cgstIgst = parseFloat(document.getElementById('inpWmTransportCgstIgst')?.value) || 0;
+      row.transport.sgst = parseFloat(document.getElementById('inpWmTransportSgst')?.value) || 0;
+      row.transport.totalAmount = parseFloat(document.getElementById('inpWmTransportTotalAmount')?.value) || 0;
+      row.isHighlighted = true;
+    }
+
+    if (targetStore && row) {
+      const storeRow = targetStore.find(r => r.id === row.id);
+      if (storeRow) storeRow.isHighlighted = true;
+    }
+
+    closeWmGrnTransportModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    renderWorklistTableBody();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Task completed successfully!');
+    }
+    return;
+  }
+
+  if (currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail') {
+    const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+    if (row) {
+      if (!row.transport) row.transport = {};
+      row.transport.logisticsName = document.getElementById('inpWmLogisticsName')?.value || 'V-Trans Logistics Ltd';
+      row.transport.freightCharges = parseFloat(document.getElementById('inpWmFreightCharges')?.value) || 0;
+      row.transport.cgstIgst = parseFloat(document.getElementById('inpWmTransportCgstIgst')?.value) || 0;
+      row.transport.sgst = parseFloat(document.getElementById('inpWmTransportSgst')?.value) || 0;
+      row.transport.totalAmount = parseFloat(document.getElementById('inpWmTransportTotalAmount')?.value) || 0;
+    }
+
+    closeWmGrnTransportModal();
+    openWmGrnTransportPaymentModal();
+    return;
+  }
+
+  if (currentWorklistView === 'supply') {
+    const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId));
+    if (row) {
+      if (!row.transport) row.transport = {};
+      row.transport.transporterName = document.getElementById('inpWmSupplyTransporterName')?.value || '';
+      row.transport.vehicleNo = document.getElementById('inpWmSupplyVehicleNo')?.value || '';
+      row.transport.driverName = document.getElementById('inpWmSupplyDriverName')?.value || '';
+      row.transport.whatsappNo = document.getElementById('inpWmSupplyWhatsappNo')?.value || '';
+      row.transport.ewayBill = document.getElementById('tglWmSupplyEwayBill')?.checked || false;
+      row.isHighlighted = true;
+    }
+    if (currentDataset && Array.isArray(currentDataset)) {
+      const cur = currentDataset.find(r => r.id === activeWmSupplyRowId);
+      if (cur) cur.isHighlighted = true;
+    }
+
+    closeWmGrnTransportModal();
+    closeWmSupplyCustomerModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    renderWorklistTableBody();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Task completed successfully!');
+    }
+    return;
+  }
+
+  if (currentWorklistView === 'min') {
+    const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted));
+    if (row) {
+      if (!row.transport) row.transport = {};
+      const tType = document.getElementById('selWmMinTransportType')?.value || 'Rental';
+      row.transport.transportType = tType;
+      if (tType === 'Rental') {
+        row.transport.transporterName = document.getElementById('inpWmMinTransporterName')?.value || '';
+        row.transport.vehicleNo = document.getElementById('inpWmMinVehicleNo')?.value || '';
+        row.transport.driverName = document.getElementById('inpWmMinDriverName')?.value || '';
+        row.transport.whatsappNo = document.getElementById('inpWmMinWhatsappNo')?.value || '';
+      } else {
+        row.transport.transporterName = document.getElementById('selWmMinTransporterName')?.value || '';
+        row.transport.vehicleNo = document.getElementById('selWmMinVehicleNo')?.value || '';
+        row.transport.driverName = document.getElementById('selWmMinDriverName')?.value || '';
+        row.transport.whatsappNo = '';
+      }
+      row.transport.ewayBill = document.getElementById('tglWmMinEwayBill')?.checked || false;
+    }
+
+    closeWmGrnTransportModal();
+    openWmGrnTransportPaymentModal();
+    return;
+  }
+
   const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
   if (row) {
     if (!row.transport) row.transport = {};
@@ -18591,9 +19417,27 @@ window.saveWmTransportDetails = function() {
 };
 
 // Transport Payment Modal Functions
+window.openWmPaymentTransportModal = function() {
+  openWmGrnTransportPaymentModal();
+};
+window.openWmTransportPaymentFromPaymentPage = window.openWmPaymentTransportModal;
+
 window.openWmGrnTransportPaymentModal = function() {
   const prevModal = document.getElementById('wmGrnSupplierModal');
   if (prevModal) prevModal.classList.add('card-dimmed-blurred');
+  const minModal = document.getElementById('wmMinSiteModal');
+  if (minModal) minModal.classList.add('card-dimmed-blurred');
+  const mrnModal = document.getElementById('wmMrnSiteModal');
+  if (mrnModal) mrnModal.classList.add('card-dimmed-blurred');
+  const supplyModal = document.getElementById('wmSupplyCustomerModal');
+  if (supplyModal) supplyModal.classList.add('card-dimmed-blurred');
+
+  const isMin = (currentWorklistView === 'min');
+  const optOtherEmp = document.getElementById('optWmBeneficiaryOtherEmployee');
+  if (optOtherEmp) {
+    optOtherEmp.value = isMin ? 'Driver' : 'Other Employee';
+    optOtherEmp.textContent = isMin ? 'Driver' : 'Other Employee';
+  }
 
   const selBeneficiary = document.getElementById('selWmBeneficiaryType');
   if (selBeneficiary) selBeneficiary.value = 'Self';
@@ -18605,6 +19449,7 @@ window.openWmGrnTransportPaymentModal = function() {
 
   const modal = document.getElementById('wmGrnTransportPaymentModal');
   if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
     modal.style.display = 'block';
     modal.style.position = 'fixed';
     modal.style.top = '50%';
@@ -18613,6 +19458,8 @@ window.openWmGrnTransportPaymentModal = function() {
     modal.style.margin = '0';
     modal.style.animation = 'none';
   }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
 };
 
 window.closeWmGrnTransportPaymentModal = function() {
@@ -18620,6 +19467,31 @@ window.closeWmGrnTransportPaymentModal = function() {
   if (modal) modal.style.display = 'none';
   const prevModal = document.getElementById('wmGrnSupplierModal');
   if (prevModal) prevModal.classList.remove('card-dimmed-blurred');
+  const minModal = document.getElementById('wmMinSiteModal');
+  if (minModal) minModal.classList.remove('card-dimmed-blurred');
+  const mrnModal = document.getElementById('wmMrnSiteModal');
+  if (mrnModal) mrnModal.classList.remove('card-dimmed-blurred');
+  const supplyModal = document.getElementById('wmSupplyCustomerModal');
+  if (supplyModal) supplyModal.classList.remove('card-dimmed-blurred');
+  if (currentWorklistView === 'min') {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  } else if (currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail') {
+    const isMrnOpen = (mrnModal && mrnModal.style.display !== 'none');
+    if (!isMrnOpen) {
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+  } else if (currentWorklistView === 'supply') {
+    const isSupplyOpen = (supplyModal && supplyModal.style.display !== 'none');
+    if (!isSupplyOpen) {
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+  } else if (currentWorklistView === 'payment' || ['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
 };
 
 window.handleWmBeneficiaryTypeChange = function(type) {
@@ -18630,8 +19502,47 @@ window.handleWmBeneficiaryTypeChange = function(type) {
   const selAccountName = document.getElementById('selWmPaymentAccountName');
   const inpNewAccountName = document.getElementById('inpWmPaymentNewAccountName');
   const lblAccountName = document.getElementById('lblWmPaymentAccountName');
+  const rowFc = document.getElementById('rowWmPaymentFreightCharges');
+  const rowAdv = document.getElementById('rowWmPaymentAdvancePayment');
 
-  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  const row = (currentWorklistView === 'min')
+    ? (wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)))
+    : ((currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail')
+        ? (wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)))
+        : (['mtn', 'stn', 'srn'].includes(currentWorklistView)
+            ? (currentDataset && currentDataset.find(r => r.id === (typeof activeWmTransferRowId !== 'undefined' ? activeWmTransferRowId : '')))
+            : wmGrnDataStore.find(r => r.id === activeWmGrnRowId)));
+
+  const isMin = (currentWorklistView === 'min');
+
+  if (isMin && type === 'Driver') {
+    if (rowTransferType) rowTransferType.style.display = 'flex';
+    if (rowAccountName) rowAccountName.style.display = 'flex';
+    if (lblAccountName) lblAccountName.textContent = 'Driver Name';
+    if (selAccountName) {
+      selAccountName.style.display = 'block';
+      const drivers = ['Ramesh Kumar', 'Muthu Vel', 'Suresh Raina', 'Karthik Raja', 'Anand Verma'];
+      selAccountName.innerHTML = drivers.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+    if (inpNewAccountName) inpNewAccountName.style.display = 'none';
+    if (rowAccountNumber) rowAccountNumber.style.display = 'none';
+    if (rowIfscCode) rowIfscCode.style.display = 'none';
+    if (rowFc) {
+      rowFc.style.display = 'flex';
+      const inpFc = document.getElementById('inpWmPaymentFreightCharges');
+      if (inpFc && !inpFc.value) inpFc.value = '15000.00';
+    }
+    if (rowAdv) {
+      rowAdv.style.display = 'flex';
+      const inpAdv = document.getElementById('inpWmPaymentAdvancePayment');
+      if (inpAdv && !inpAdv.value) inpAdv.value = '5000.00';
+    }
+    return;
+  }
+
+  // Hide Driver-specific fields when not Driver
+  if (rowFc) rowFc.style.display = 'none';
+  if (rowAdv) rowAdv.style.display = 'none';
 
   if (type === 'Self') {
     if (rowTransferType) rowTransferType.style.display = 'flex';
@@ -18659,7 +19570,7 @@ window.handleWmBeneficiaryTypeChange = function(type) {
     if (lblAccountName) lblAccountName.textContent = 'Transport Vendor Name';
     if (selAccountName) {
       selAccountName.style.display = 'block';
-      const defaultLogistics = (row && row.transport && row.transport.logisticsName) || 'V-Trans India Ltd';
+      const defaultLogistics = (row && row.transport && (row.transport.logisticsName || row.transport.transporterName)) || 'V-Trans India Ltd';
       const vendors = [defaultLogistics, 'TCI Freight Logistics', 'Blue Dart Surface Logistics', 'GATI KWE Logistics'];
       const uniqueVendors = Array.from(new Set(vendors));
       selAccountName.innerHTML = uniqueVendors.map(v => `<option value="${v}">${v}</option>`).join('');
@@ -18690,18 +19601,206 @@ window.handleWmBeneficiaryTypeChange = function(type) {
 };
 
 window.submitWmTransportPayment = function() {
-  const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+  if (['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    const rowId = (typeof activeWmTransferRowId !== 'undefined') ? activeWmTransferRowId : null;
+    const storeMap = {
+      mtn: typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : [],
+      stn: typeof wmStnDataStore !== 'undefined' ? wmStnDataStore : [],
+      srn: typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : []
+    };
+    const targetStore = storeMap[currentWorklistView] || (activeWmTransferView ? storeMap[activeWmTransferView] : []);
+    const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+                (targetStore && targetStore.find(r => r.id === rowId)) ||
+                (currentDataset && currentDataset.find(r => r.selected));
+
+    if (row) {
+      row.isHighlighted = true;
+      if (!row.transportPayment) row.transportPayment = {};
+      const ben = document.getElementById('selWmBeneficiaryType')?.value;
+      row.transportPayment.beneficiaryType = ben;
+      row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
+      if (ben === 'Other Employee' || ben === 'Transport Vendor') {
+        row.transportPayment.accountName = document.getElementById('selWmPaymentAccountName')?.value;
+      } else if (ben === 'New Account') {
+        row.transportPayment.accountName = document.getElementById('inpWmPaymentNewAccountName')?.value;
+        row.transportPayment.accountNumber = document.getElementById('inpWmPaymentAccountNumber')?.value;
+        row.transportPayment.ifscCode = document.getElementById('inpWmPaymentIfscCode')?.value;
+      }
+    }
+
+    if (targetStore && row) {
+      const storeRow = targetStore.find(r => r.id === row.id);
+      if (storeRow) storeRow.isHighlighted = true;
+    }
+
+    closeWmGrnTransportPaymentModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    renderWorklistTableBody();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport Payment completed and submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Task completed successfully!');
+    }
+    return;
+  }
+
+  if (currentWorklistView === 'payment') {
+    const ben = document.getElementById('selWmBeneficiaryType')?.value;
+    let payeeName = 'Transport Logistics Partner';
+    if (ben === 'Self') {
+      payeeName = 'Warehouse Manager (Self)';
+    } else if (ben === 'Other Employee' || ben === 'Driver' || ben === 'Transport Vendor') {
+      payeeName = document.getElementById('selWmPaymentAccountName')?.value || 'Transport Logistics Partner';
+    } else if (ben === 'New Account') {
+      payeeName = document.getElementById('inpWmPaymentNewAccountName')?.value || 'New Transport Payee';
+    }
+    const amt = parseFloat(document.getElementById('inpWmPaymentFreightCharges')?.value) || 22000.00;
+    const adv = parseFloat(document.getElementById('inpWmPaymentAdvancePayment')?.value) || 0.00;
+    const payable = Math.max(0, amt - adv);
+
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+
+    const newPaymentRow = {
+      id: 'wm-pay-' + (wmPaymentDataStore.length + 1),
+      requestDate: dateStr,
+      expenseName: 'Transport & Logistics Freight',
+      transferTo: payeeName,
+      requestAmount: amt,
+      approvedAmount: amt,
+      paidAmount: adv,
+      payableAmount: payable,
+      pendingWith: 'Accounts Dept',
+      ageing: '0 Days'
+    };
+    wmPaymentDataStore.unshift(newPaymentRow);
+    currentDataset = wmPaymentDataStore.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+
+    closeWmGrnTransportPaymentModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    renderWorklistToolbar();
+    renderWorklistTableBody();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport Payment completed and submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Task completed successfully!');
+    }
+    return;
+  }
+
+  if (currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail') {
+    const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+    if (row) {
+      row.isHighlighted = true;
+      if (row.items && Array.isArray(row.items)) {
+        row.items.forEach(it => {
+          if (it.selected) {
+            it.isTicked = true;
+          }
+        });
+      }
+      if (!row.transportPayment) row.transportPayment = {};
+      const ben = document.getElementById('selWmBeneficiaryType')?.value;
+      row.transportPayment.beneficiaryType = ben;
+      row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
+      if (ben === 'Other Employee' || ben === 'Transport Vendor') {
+        row.transportPayment.accountName = document.getElementById('selWmPaymentAccountName')?.value;
+      } else if (ben === 'New Account') {
+        row.transportPayment.accountName = document.getElementById('inpWmPaymentNewAccountName')?.value;
+        row.transportPayment.accountNumber = document.getElementById('inpWmPaymentAccountNumber')?.value;
+        row.transportPayment.ifscCode = document.getElementById('inpWmPaymentIfscCode')?.value;
+      }
+    }
+    if (currentDataset && Array.isArray(currentDataset)) {
+      const cur = currentDataset.find(r => r.id === activeWmMrnRowId);
+      if (cur) cur.isHighlighted = true;
+    }
+
+    // Close modals
+    closeWmGrnTransportPaymentModal();
+    closeWmGrnTransportModal();
+    closeWmMrnSiteModal();
+
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    // Return to MRN view so the highlighted row is visible
+    currentWorklistView = 'mrn';
+    updateURL();
+    renderApp();
+
+    // Show Task Completed SVG popup
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport Payment completed and submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Task completed successfully!');
+    }
+    return;
+  }
+
+  if (currentWorklistView === 'min') {
+    const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted));
+    if (row) {
+      row.isHighlighted = true;
+      if (!row.transportPayment) row.transportPayment = {};
+      const ben = document.getElementById('selWmBeneficiaryType')?.value;
+      row.transportPayment.beneficiaryType = ben;
+      row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
+      if (ben === 'Driver') {
+        row.transportPayment.driverName = document.getElementById('selWmPaymentAccountName')?.value;
+        row.transportPayment.freightCharges = document.getElementById('inpWmPaymentFreightCharges')?.value;
+        row.transportPayment.advancePayment = document.getElementById('inpWmPaymentAdvancePayment')?.value;
+      }
+    }
+    if (currentDataset && Array.isArray(currentDataset)) {
+      const cur = currentDataset.find(r => r.id === activeWmMinRowId) || currentDataset.find(r => r.isHighlighted);
+      if (cur) cur.isHighlighted = true;
+    }
+
+    // Close modals
+    closeWmGrnTransportPaymentModal();
+    closeWmGrnTransportModal();
+    closeWmMinSiteModal();
+    closeWmMrnSiteModal();
+
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    // Re-render table with highlighted row
+    applyFiltersAndRender();
+
+    // Show Task Completed SVG popup
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport Payment completed and submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Task completed successfully!');
+    }
+    return;
+  }
+
+  const row = (currentWorklistView === 'min')
+    ? (wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted)))
+    : wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
   if (row) {
     row.isHighlighted = true;
   }
   if (currentDataset && Array.isArray(currentDataset)) {
-    const cur = currentDataset.find(r => r.id === activeWmGrnRowId);
+    const cur = currentDataset.find(r => r.id === (currentWorklistView === 'min' ? (activeWmMinRowId || row?.id) : activeWmGrnRowId)) || (currentWorklistView === 'min' ? currentDataset.find(r => r.isHighlighted) : null);
     if (cur) cur.isHighlighted = true;
   }
 
   // Close modals
   closeWmGrnTransportPaymentModal();
   closeWmGrnSupplierModal();
+  closeWmMinSiteModal();
+  closeWmMrnSiteModal();
 
   // Re-render table with highlighted row
   applyFiltersAndRender();
@@ -18712,6 +19811,1068 @@ window.submitWmTransportPayment = function() {
   } else if (typeof showToast === 'function') {
     showToast('Task completed successfully!');
   }
+};
+
+window.submitWmMinMainBatch = function() {
+  openWmMinTransportModal();
+};
+
+// Warehouse Manager MIN Detail Page Navigation & Submission
+window.openWmMinDetail = function(minId) {
+  activeWmMinRowId = minId;
+  isWmMinEditing = false;
+  currentModule = 'worklist';
+  currentWorklistView = 'min_detail';
+  activeColumnFilters = {};
+  const row = wmMinDataStore.find(r => r.id === minId) || (currentDataset && currentDataset.find(r => r.id === minId));
+  if (row && !row.isHighlighted && row.items) {
+    row.items.forEach(it => {
+      it.selected = false;
+      it.isTicked = false;
+    });
+  }
+  updateURL();
+  renderApp();
+};
+
+window.submitWmMinDetailPage = function() {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || wmMinDataStore[0];
+  if (row) {
+    row.isHighlighted = true;
+    if (row.items && Array.isArray(row.items)) {
+      row.items.forEach(it => {
+        if (it.isTicked) {
+          it.selected = true;
+        }
+      });
+    }
+  }
+  if (currentDataset && Array.isArray(currentDataset)) {
+    const cur = currentDataset.find(r => r.id === activeWmMinRowId);
+    if (cur) cur.isHighlighted = true;
+  }
+
+  currentWorklistView = 'min';
+  updateURL();
+  renderApp();
+
+  showToast(`MIN details submitted for ${row ? row.siteName : 'site'}!`);
+};
+
+// Warehouse Manager MIN Site Modal States & Functions
+let activeWmMinRowId = null;
+let isWmMinEditing = false;
+
+window.openWmMinSiteModal = function(minId) {
+  openWmMinDetail(minId);
+};
+
+window.closeWmMinSiteModal = function() {
+  const modal = document.getElementById('wmMinSiteModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('card-dimmed-blurred');
+  }
+
+  const transportModal = document.getElementById('wmGrnTransportModal');
+  const paymentModal = document.getElementById('wmGrnTransportPaymentModal');
+  const anyOtherOpen = (transportModal && transportModal.style.display !== 'none') ||
+                       (paymentModal && paymentModal.style.display !== 'none');
+
+  if (!anyOtherOpen) {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.copyWmMinHeaderValue = function(type, label) {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
+  if (!row) return;
+
+  let textToCopy = '';
+  if (type === 'projectInfo') {
+    textToCopy = `${row.projectId || ''} / ${row.projectType || ''} / ${row.subProjectType || ''}`;
+  } else if (type === 'poNo') {
+    textToCopy = row.poNo || 'PO-2026-0814 (0-Opex)';
+  } else if (type === 'siteInfo') {
+    textToCopy = `${row.siteId || 'SITE-IND-104'} / ${row.siteName || ''}`;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast(`${label} copied to clipboard!`);
+    }).catch(() => {
+      showToast(`Copied ${label}`);
+    });
+  } else {
+    showToast(`${label} copied to clipboard!`);
+  }
+};
+
+window.renderWmMinSiteItems = function() {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
+  if (!row || !row.items) return;
+
+  if (currentWorklistView === 'min_detail') {
+    renderWorklistTableBody();
+    const hasSelected = (row.items || []).some(it => it.selected);
+    const btnTick = document.getElementById('btnWmMinTick');
+    const btnEdit = document.getElementById('btnWmMinEdit');
+    if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+    if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+    const hasTicked = (row.items || []).some(it => it.isTicked);
+    const minDetailSubmitArea = document.getElementById('wmMinDetailSubmitArea');
+    if (minDetailSubmitArea) {
+      minDetailSubmitArea.style.display = hasTicked ? 'flex' : 'none';
+    }
+
+    const totalSum = (row.items || []).reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+    const lblDetailSum = document.getElementById('lblWmMinDetailTotalSum');
+    if (lblDetailSum) {
+      lblDetailSum.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return;
+  }
+
+  const tbody = document.getElementById('tblWmMinItemsBody');
+  if (!tbody) return;
+
+  // Summation next to header design
+  const totalSum = row.items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+  const lblSum = document.getElementById('lblWmMinTotalSum');
+  if (lblSum) {
+    lblSum.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    lblSum.style.color = '#0454e4';
+  }
+
+  const hasSelected = row.items.some(it => it.selected);
+
+  // Toggle tick and edit icons visibility near close icon
+  const btnTick = document.getElementById('btnWmMinTick');
+  const btnEdit = document.getElementById('btnWmMinEdit');
+  if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+  tbody.innerHTML = row.items.map(item => {
+    const isSelected = !!item.selected;
+    const isTicked = !!item.isTicked;
+    const rowBg = isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff');
+    const rowBorder = isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
+    return `
+      <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
+        <!-- 1. Select: circle checkbox with green marker, multiselect -->
+        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+          <input type="checkbox" class="pr-circle-checkbox" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handleWmMinItemSelect('${item.id}', this.checked)">
+        </td>
+        <!-- 2. Material Description: 40ch & left -->
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+          ${item.materialDescription || ''}
+        </td>
+        <!-- 3. Uom: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+          ${item.uom || ''}
+        </td>
+        <!-- 4a. Stock: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+          ${Number(item.stockQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 4b. MIR: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+          ${Number(item.mirQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 4c. MIN: 15ch & right (editable when user clicks edit icon for selected rows) -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+          ${isWmMinEditing && isSelected ? `
+            <input type="number" step="0.01" class="form-input-control wm-min-editable-input" data-item-id="${item.id}" value="${Number(item.minQty || 0).toFixed(2)}"
+              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+              oninput="handleWmMinQtyInput('${item.id}', this.value)"
+              onkeydown="if(event.key === 'Enter') handleWmMinEditToggle();">
+          ` : `
+            <span>${Number(item.minQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          `}
+        </td>
+        <!-- 5. Rate: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+          ${Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 6. Amount: 15ch & right -->
+        <td id="tdWmMinAmount_${item.id}" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 600;">
+          ${Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.handleWmMinItemSelect = function(itemId, isChecked) {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
+  if (!row || !row.items) return;
+
+  const item = row.items.find(it => it.id === itemId);
+  if (item) {
+    item.selected = isChecked;
+  }
+
+  renderWmMinSiteItems();
+};
+
+window.handleWmMinQtyInput = function(itemId, val) {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
+  if (!row || !row.items) return;
+
+  const item = row.items.find(it => it.id === itemId);
+  if (item) {
+    const num = parseFloat(val) || 0;
+    item.minQty = num;
+    item.amount = num * (Number(item.rate) || 0);
+
+    const tdAmount = document.getElementById(`tdWmMinAmount_${item.id}`);
+    if (tdAmount) {
+      tdAmount.textContent = item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    const totalSum = row.items.reduce((s, it) => s + (Number(it.amount) || 0), 0);
+    const lblSum = document.getElementById('lblWmMinTotalSum');
+    if (lblSum) {
+      lblSum.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    const lblDetailSum = document.getElementById('lblWmMinDetailTotalSum');
+    if (lblDetailSum) {
+      lblDetailSum.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  }
+};
+
+window.handleWmMinEditToggle = function() {
+  isWmMinEditing = !isWmMinEditing;
+  const editImg = document.getElementById('imgWmMinEdit');
+  const btnEdit = document.getElementById('btnWmMinEdit');
+  if (editImg) {
+    editImg.src = isWmMinEditing ? 'icons/Save.svg' : 'icons/Edit.svg';
+  }
+  if (btnEdit) {
+    btnEdit.title = isWmMinEditing ? 'Save MIN Qty' : 'Edit Selected MIN Qty';
+  }
+
+  renderWmMinSiteItems();
+
+  if (isWmMinEditing) {
+    const firstInput = document.querySelector('.wm-min-editable-input');
+    if (firstInput) {
+      firstInput.focus();
+      firstInput.select();
+    }
+  } else {
+    showToast('MIN quantities updated successfully!');
+  }
+};
+
+window.handleWmMinTick = function() {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
+  if (!row || !row.items) return;
+
+  row.items.forEach(it => {
+    if (it.selected) {
+      it.isTicked = true;
+    }
+  });
+
+  renderWmMinSiteItems();
+  showToast('Selected MIN item(s) validated successfully!');
+};
+
+window.handleWmMinCsvUpload = function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (file) {
+    showToast(`CSV "${file.name}" uploaded successfully`);
+  }
+};
+
+window.submitWmMinSiteModal = function() {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
+  if (row) {
+    row.isHighlighted = true;
+    if (row.items && Array.isArray(row.items)) {
+      row.items.forEach(it => {
+        it.selected = true;
+        it.isTicked = true;
+      });
+    }
+  }
+  if (currentDataset && Array.isArray(currentDataset)) {
+    const cur = currentDataset.find(r => r.id === activeWmMinRowId);
+    if (cur) cur.isHighlighted = true;
+  }
+
+  closeWmMinSiteModal();
+  applyFiltersAndRender();
+  showToast(`MIN for ${row ? row.siteName : 'site'} submitted and highlighted!`);
+};
+
+window.openWmMinTransportModal = function() {
+  const row = (currentDataset && currentDataset.find(r => r.isHighlighted)) || wmMinDataStore.find(r => r.id === activeWmMinRowId) || wmMinDataStore[0];
+
+  // Show MIN fields, hide GRN fields
+  const grnFields = document.getElementById('wmGrnTransportFields');
+  const minFields = document.getElementById('wmMinTransportFields');
+  if (grnFields) grnFields.style.display = 'none';
+  if (minFields) minFields.style.display = 'flex';
+
+  // Toggle Header Icons: Hide PDF, Show Printer
+  const lblPdf = document.getElementById('lblWmGrnTransportPdf');
+  const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  if (lblPdf) lblPdf.style.display = 'none';
+  if (btnPrint) btnPrint.style.display = 'inline-flex';
+
+  const t = (row && row.transport) ? row.transport : {
+    transportType: 'Rental',
+    transporterName: 'V-Trans Logistics',
+    vehicleNo: 'TN-09-AB-1234',
+    driverName: 'Ramesh Kumar',
+    whatsappNo: '9876543210',
+    ewayBill: false
+  };
+
+  const selType = document.getElementById('selWmMinTransportType');
+  if (selType) {
+    selType.value = t.transportType || 'Rental';
+  }
+  handleWmMinTransportTypeChange(t.transportType || 'Rental');
+
+  const inpTrans = document.getElementById('inpWmMinTransporterName');
+  const selTrans = document.getElementById('selWmMinTransporterName');
+  if (inpTrans) inpTrans.value = t.transporterName || '';
+  if (selTrans && t.transporterName) selTrans.value = t.transporterName;
+
+  const inpVeh = document.getElementById('inpWmMinVehicleNo');
+  const selVeh = document.getElementById('selWmMinVehicleNo');
+  if (inpVeh) inpVeh.value = t.vehicleNo || '';
+  if (selVeh && t.vehicleNo) selVeh.value = t.vehicleNo;
+
+  const inpDriver = document.getElementById('inpWmMinDriverName');
+  const selDriver = document.getElementById('selWmMinDriverName');
+  if (inpDriver) inpDriver.value = t.driverName || '';
+  if (selDriver && t.driverName) selDriver.value = t.driverName;
+
+  const inpWhatsapp = document.getElementById('inpWmMinWhatsappNo');
+  if (inpWhatsapp) inpWhatsapp.value = t.whatsappNo || '';
+
+  const tglEway = document.getElementById('tglWmMinEwayBill');
+  if (tglEway) tglEway.checked = Boolean(t.ewayBill);
+
+  const modal = document.getElementById('wmGrnTransportModal');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
+};
+
+// Warehouse Manager MRN Site Modal States & Functions
+let activeWmMrnRowId = null;
+let isWmMrnEditing = false;
+
+window.openWmMrnDetail = function(mrnId) {
+  activeWmMrnRowId = mrnId;
+  isWmMrnEditing = false;
+  currentModule = 'worklist';
+  currentWorklistView = 'mrn_detail';
+  activeColumnFilters = {};
+  const row = wmMrnDataStore.find(r => r.id === mrnId) || (currentDataset && currentDataset.find(r => r.id === mrnId));
+  if (row && !row.isHighlighted && row.items) {
+    row.items.forEach(it => {
+      it.selected = false;
+      it.isTicked = false;
+    });
+  }
+  updateURL();
+  renderApp();
+};
+
+window.submitWmMrnDetailPage = function() {
+  openWmMrnTransportModal();
+};
+
+window.handleWmMrnCloseDetail = function() {
+  currentWorklistView = 'mrn';
+  updateURL();
+  renderApp();
+  showToast('Returned to MRN');
+};
+
+window.openWmMrnSiteModal = function(mrnId) {
+  openWmMrnDetail(mrnId);
+};
+
+window.closeWmMrnSiteModal = function() {
+  const modal = document.getElementById('wmMrnSiteModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('card-dimmed-blurred');
+  }
+
+  const transportModal = document.getElementById('wmGrnTransportModal');
+  const paymentModal = document.getElementById('wmGrnTransportPaymentModal');
+  const anyOtherOpen = (transportModal && transportModal.style.display !== 'none') ||
+                       (paymentModal && paymentModal.style.display !== 'none');
+
+  if (!anyOtherOpen) {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.copyWmMrnHeaderValue = function(type, label) {
+  const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId));
+  if (!row) return;
+
+  let textToCopy = '';
+  if (type === 'projectInfo') {
+    textToCopy = `${row.projectId || ''} / ${row.projectType || ''} / ${row.subProjectType || ''}`;
+  } else if (type === 'poNo') {
+    textToCopy = row.poNo || 'PO-2026-0792 (0-Opex)';
+  } else if (type === 'siteInfo') {
+    textToCopy = `${row.siteId || 'SITE-IND-105'} / ${row.siteName || ''}`;
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      showToast(`${label} copied to clipboard!`);
+    }).catch(() => {
+      showToast(`Copied ${label}`);
+    });
+  } else {
+    showToast(`${label} copied to clipboard!`);
+  }
+};
+
+window.renderWmMrnSiteItems = function() {
+  const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+  if (!row || !row.items) return;
+
+  // Summation below header design
+  const totalSum = row.items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+  const totalSumFormatted = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const lblSum = document.getElementById('lblWmMrnTotalSum');
+  if (lblSum) {
+    lblSum.textContent = totalSumFormatted;
+    lblSum.style.color = '#0454e4';
+  }
+  const lblDetailSum = document.getElementById('lblWmMrnDetailTotalSum');
+  if (lblDetailSum) {
+    lblDetailSum.textContent = totalSumFormatted;
+  }
+
+  const hasSelected = row.items.some(it => it.selected);
+
+  // Toggle tick and edit icons visibility near close icon
+  const btnTick = document.getElementById('btnWmMrnTick');
+  const btnEdit = document.getElementById('btnWmMrnEdit');
+  if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+  // Toggle submit MRN icon when row is selected
+  const mrnDetailSubmitArea = document.getElementById('wmMrnDetailSubmitArea');
+  if (mrnDetailSubmitArea) {
+    mrnDetailSubmitArea.style.display = hasSelected ? 'flex' : 'none';
+  }
+
+  if (currentWorklistView === 'mrn_detail') {
+    renderWorklistTableBody();
+    return;
+  }
+
+  const tbody = document.getElementById('tblWmMrnItemsBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = row.items.map(item => {
+    const isSelected = !!item.selected;
+    const isTicked = !!item.isTicked;
+    const rowBg = isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff');
+    const rowBorder = isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
+    return `
+      <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
+        <!-- 1. Select: circle checkbox with green marker, multiselect -->
+        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+          <input type="checkbox" class="pr-circle-checkbox" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handleWmMrnItemSelect('${item.id}', this.checked)">
+        </td>
+        <!-- 2. Material Description: 40ch & left -->
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+          ${item.materialDescription || ''}
+        </td>
+        <!-- 3. Uom: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+          ${item.uom || ''}
+        </td>
+        <!-- 4a. Stock: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+          ${Number(item.stockQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 4b. MRR: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+          ${Number(item.mrrQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 4c. MRN: 15ch & right (editable when user clicks edit icon for selected rows) -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+          ${isWmMrnEditing && isSelected ? `
+            <input type="number" step="0.01" class="form-input-control wm-mrn-editable-input" data-item-id="${item.id}" value="${Number(item.mrnQty || 0).toFixed(2)}"
+              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+              oninput="handleWmMrnQtyInput('${item.id}', this.value)"
+              onkeydown="if(event.key === 'Enter') handleWmMrnEditToggle();">
+          ` : `
+            <span>${Number(item.mrnQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          `}
+        </td>
+        <!-- 5. Rate: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+          ${Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 6. Amount: 15ch & right -->
+        <td id="tdWmMrnAmount_${item.id}" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 600;">
+          ${Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.handleWmMrnItemSelect = function(itemId, isChecked) {
+  const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+  if (!row || !row.items) return;
+
+  const item = row.items.find(it => it.id === itemId);
+  if (item) {
+    item.selected = isChecked;
+  }
+
+  renderWmMrnSiteItems();
+};
+
+window.handleWmMrnQtyInput = function(itemId, val) {
+  const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+  if (!row || !row.items) return;
+
+  const item = row.items.find(it => it.id === itemId);
+  if (item) {
+    const num = parseFloat(val) || 0;
+    item.mrnQty = num;
+    item.amount = num * (Number(item.rate) || 0);
+
+    const tdAmount = document.getElementById(`tdWmMrnAmount_${item.id}`);
+    if (tdAmount) {
+      tdAmount.textContent = item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    const totalSum = row.items.reduce((s, it) => s + (Number(it.amount) || 0), 0);
+    const totalSumFormatted = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const lblSum = document.getElementById('lblWmMrnTotalSum');
+    if (lblSum) {
+      lblSum.textContent = totalSumFormatted;
+    }
+    const lblDetailSum = document.getElementById('lblWmMrnDetailTotalSum');
+    if (lblDetailSum) {
+      lblDetailSum.textContent = totalSumFormatted;
+    }
+  }
+};
+
+window.handleWmMrnEditToggle = function() {
+  isWmMrnEditing = !isWmMrnEditing;
+  const editImg = document.getElementById('imgWmMrnEdit');
+  const btnEdit = document.getElementById('btnWmMrnEdit');
+  if (editImg) {
+    editImg.src = isWmMrnEditing ? 'icons/Save.svg' : 'icons/Edit.svg';
+  }
+  if (btnEdit) {
+    btnEdit.title = isWmMrnEditing ? 'Save MRN Qty' : 'Edit Selected MRN Qty';
+  }
+
+  renderWmMrnSiteItems();
+
+  if (isWmMrnEditing) {
+    const firstInput = document.querySelector('.wm-mrn-editable-input');
+    if (firstInput) {
+      firstInput.focus();
+      firstInput.select();
+    }
+  } else {
+    showToast('MRN quantities updated successfully!');
+  }
+};
+
+window.handleWmMrnTick = function() {
+  const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId));
+  if (!row || !row.items) return;
+
+  row.items.forEach(it => {
+    if (it.selected) {
+      it.isTicked = true;
+    }
+  });
+
+  renderWmMrnSiteItems();
+  showToast('Selected MRN item(s) validated successfully!');
+};
+
+window.handleWmMrnCsvUpload = function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (file) {
+    showToast(`CSV "${file.name}" uploaded successfully`);
+  }
+};
+
+window.submitWmMrnSiteModal = function() {
+  openWmMrnTransportModal();
+};
+
+window.openWmMrnTransportModal = function() {
+  const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+
+  const mrnModal = document.getElementById('wmMrnSiteModal');
+  if (mrnModal) mrnModal.classList.add('card-dimmed-blurred');
+
+  // Show GRN fields, hide MIN fields
+  const grnFields = document.getElementById('wmGrnTransportFields');
+  const minFields = document.getElementById('wmMinTransportFields');
+  if (grnFields) grnFields.style.display = 'flex';
+  if (minFields) minFields.style.display = 'none';
+
+  // Toggle Header Icons: Show PDF, Hide Printer
+  const lblPdf = document.getElementById('lblWmGrnTransportPdf');
+  const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  if (lblPdf) lblPdf.style.display = 'flex';
+  if (btnPrint) btnPrint.style.display = 'none';
+
+  const t = (row && row.transport) ? row.transport : {
+    logisticsName: 'V-Trans Logistics Ltd',
+    freightCharges: 14500.00,
+    cgstIgst: 1305.00,
+    sgst: 1305.00,
+    totalAmount: 17110.00
+  };
+
+  const inpLog = document.getElementById('inpWmLogisticsName');
+  const inpFc = document.getElementById('inpWmFreightCharges');
+  const inpCgst = document.getElementById('inpWmTransportCgstIgst');
+  const inpSgst = document.getElementById('inpWmTransportSgst');
+  const inpTot = document.getElementById('inpWmTransportTotalAmount');
+
+  if (inpLog) inpLog.value = t.logisticsName || 'V-Trans Logistics Ltd';
+  if (inpFc) inpFc.value = Number(t.freightCharges || 0).toFixed(2);
+  if (inpCgst) inpCgst.value = Number(t.cgstIgst || 0).toFixed(2);
+  if (inpSgst) inpSgst.value = Number(t.sgst || 0).toFixed(2);
+  if (inpTot) inpTot.value = Number(t.totalAmount || 0).toFixed(2);
+
+  const modal = document.getElementById('wmGrnTransportModal');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
+};
+
+// ==========================================================================
+// Warehouse Manager Transfer (MTN, STN, SRN) States & Submission Functions
+// ==========================================================================
+let activeWmTransferRowId = null;
+let activeWmTransferView = null;
+
+window.openWmTransportModalForTransfer = function(row) {
+  activeWmTransferRowId = row ? row.id : null;
+  activeWmTransferView = currentWorklistView;
+
+  // Show GRN fields, hide MIN fields
+  const grnFields = document.getElementById('wmGrnTransportFields');
+  const minFields = document.getElementById('wmMinTransportFields');
+  if (grnFields) grnFields.style.display = 'flex';
+  if (minFields) minFields.style.display = 'none';
+
+  // Toggle Header Icons: Show PDF, Hide Printer
+  const lblPdf = document.getElementById('lblWmGrnTransportPdf');
+  const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  if (lblPdf) lblPdf.style.display = 'flex';
+  if (btnPrint) btnPrint.style.display = 'none';
+
+  const t = (row && row.transport) ? row.transport : {
+    logisticsName: 'V-Trans Logistics Ltd',
+    freightCharges: 14500.00,
+    cgstIgst: 1305.00,
+    sgst: 1305.00,
+    totalAmount: 17110.00
+  };
+
+  const inpLog = document.getElementById('inpWmLogisticsName');
+  const inpFc = document.getElementById('inpWmFreightCharges');
+  const inpCgst = document.getElementById('inpWmTransportCgstIgst');
+  const inpSgst = document.getElementById('inpWmTransportSgst');
+  const inpTot = document.getElementById('inpWmTransportTotalAmount');
+
+  if (inpLog) inpLog.value = t.logisticsName || 'V-Trans Logistics Ltd';
+  if (inpFc) inpFc.value = Number(t.freightCharges || 0).toFixed(2);
+  if (inpCgst) inpCgst.value = Number(t.cgstIgst || 0).toFixed(2);
+  if (inpSgst) inpSgst.value = Number(t.sgst || 0).toFixed(2);
+  if (inpTot) inpTot.value = Number(t.totalAmount || 0).toFixed(2);
+
+  const modal = document.getElementById('wmGrnTransportModal');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
+};
+
+window.openWmTransportPaymentModalForTransfer = function(row) {
+  activeWmTransferRowId = row ? row.id : null;
+  activeWmTransferView = currentWorklistView;
+  openWmGrnTransportPaymentModal();
+};
+
+window.submitWmMtnRows = function() {
+  submitWmTransferWorkflow('mtn');
+};
+
+window.submitWmStnRows = function() {
+  submitWmTransferWorkflow('stn');
+};
+
+window.submitWmSrnRows = function() {
+  submitWmTransferWorkflow('srn');
+};
+
+window.submitWmTransferWorkflow = function(viewType) {
+  const storeMap = {
+    mtn: typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : [],
+    stn: typeof wmStnDataStore !== 'undefined' ? wmStnDataStore : [],
+    srn: typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : []
+  };
+  const store = storeMap[viewType] || [];
+  const dataset = (currentDataset && currentDataset.length > 0) ? currentDataset : store;
+  const selectedRow = dataset.find(r => r.selected);
+  if (!selectedRow) {
+    showToast('Please select a row first.');
+    return;
+  }
+
+  const statusStr = (selectedRow.status || '').toLowerCase().trim();
+  const isDispatch = statusStr.includes('dispatch');
+  const isReceive = statusStr.includes('receive');
+
+  if (isDispatch) {
+    openWmTransportModalForTransfer(selectedRow);
+  } else if (isReceive) {
+    openWmTransportPaymentModalForTransfer(selectedRow);
+  } else {
+    openWmTransportModalForTransfer(selectedRow);
+  }
+};
+
+// ==========================================================================
+// Warehouse Manager Supply Customer Modal States & Functions
+// ==========================================================================
+let activeWmSupplyRowId = null;
+let isWmSupplyEditing = false;
+
+window.openWmSupplyCustomerModal = function(rowId) {
+  activeWmSupplyRowId = rowId;
+  isWmSupplyEditing = false;
+  const row = wmSupplyDataStore.find(r => r.id === rowId) || (currentDataset && currentDataset.find(r => r.id === rowId)) || wmSupplyDataStore[0];
+  if (row && row.items) {
+    row.items.forEach(it => {
+      it.selected = false;
+    });
+  }
+
+  const lblCustomer = document.getElementById('lblWmSupplyCustomerName');
+  if (lblCustomer) lblCustomer.textContent = row.customerName || 'Customer Name';
+
+  const lblOrder = document.getElementById('lblWmSupplyOrderId');
+  if (lblOrder) lblOrder.textContent = row.orderId || 'ORD-001';
+
+  const totalSum = (row.items || []).reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+  const lblSum = document.getElementById('lblWmSupplyTotalSum');
+  if (lblSum) lblSum.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const btnTick = document.getElementById('btnWmSupplyTick');
+  if (btnTick) btnTick.style.display = 'none';
+
+  const btnEdit = document.getElementById('btnWmSupplyEdit');
+  if (btnEdit) {
+    btnEdit.style.display = 'none';
+    const imgEdit = document.getElementById('imgWmSupplyEdit');
+    if (imgEdit) imgEdit.src = 'icons/Edit.svg';
+    btnEdit.title = 'Edit Invoice Qty';
+  }
+
+  const hasTicked = (row.items || []).some(it => it.isTicked || it.isHighlighted);
+  const submitArea = document.getElementById('wmSupplyTableSubmitArea');
+  if (submitArea) {
+    submitArea.style.display = hasTicked ? 'flex' : 'none';
+  }
+
+  renderWmSupplyItems();
+
+  const modal = document.getElementById('wmSupplyCustomerModal');
+  if (modal) {
+    modal.classList.remove('card-dimmed-blurred');
+    modal.style.display = 'flex';
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
+};
+
+window.closeWmSupplyCustomerModal = function() {
+  const modal = document.getElementById('wmSupplyCustomerModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+  isWmSupplyEditing = false;
+  const imgEdit = document.getElementById('imgWmSupplyEdit');
+  if (imgEdit) imgEdit.src = 'icons/Edit.svg';
+};
+
+window.renderWmSupplyItems = function() {
+  const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId)) || wmSupplyDataStore[0];
+  const tbody = document.getElementById('tblWmSupplyItemsBody');
+  if (!tbody || !row || !row.items) return;
+
+  tbody.innerHTML = row.items.map(item => {
+    const isSelected = !!item.selected;
+    const isHighlighted = !!item.isHighlighted || !!item.isTicked;
+    let bgColor = '#ffffff';
+    if (isHighlighted) {
+      bgColor = '#dcfce7';
+    } else if (isSelected) {
+      bgColor = '#f0fdf4';
+    }
+
+    return `
+      <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${bgColor};">
+        <!-- 1. Select: circle radio / checkbox with multiselect -->
+        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+          <input type="checkbox" class="pr-circle-checkbox" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handleWmSupplyItemSelect('${item.id}', this.checked)">
+        </td>
+        <!-- 2. Material Description: 40ch & left content, center header -->
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+          ${item.materialDescription || ''}
+        </td>
+        <!-- 3. Uom: 10ch & center -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+          ${item.uom || ''}
+        </td>
+        <!-- 4a. Stock: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b;">
+          ${Number(item.stockQty || 0).toFixed(2)}
+        </td>
+        <!-- 4b. MIR: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b;">
+          ${Number(item.mirQty || 0).toFixed(2)}
+        </td>
+        <!-- 4c. Invoice: 15ch & right (editable when edit clicked) -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 6px 14px; color: #1e293b; font-weight: 600;">
+          ${isWmSupplyEditing && isSelected ? `
+            <input type="number" step="0.01" class="form-input-control wm-supply-editable-input" data-item-id="${item.id}" value="${Number(item.invoiceQty || 0).toFixed(2)}"
+              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+              onkeydown="if(event.key === 'Enter') handleWmSupplyEditToggle();">
+          ` : `
+            <span>${Number(item.invoiceQty || 0).toFixed(2)}</span>
+          `}
+        </td>
+        <!-- 5. Rate: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b;">
+          ${Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <!-- 6. Amount: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 700;">
+          ${Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.handleWmSupplyItemSelect = function(itemId, isChecked) {
+  const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId));
+  if (!row || !row.items) return;
+
+  if (isWmSupplyEditing) {
+    document.querySelectorAll('.wm-supply-editable-input').forEach(input => {
+      const id = input.getAttribute('data-item-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = row.items.find(i => i.id === id);
+        if (item) {
+          item.invoiceQty = val;
+          item.amount = val * (Number(item.rate) || 0);
+        }
+      }
+    });
+  }
+
+  const it = row.items.find(i => i.id === itemId);
+  if (it) it.selected = isChecked;
+
+  const hasSelected = row.items.some(i => i.selected);
+  const btnTick = document.getElementById('btnWmSupplyTick');
+  const btnEdit = document.getElementById('btnWmSupplyEdit');
+  if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+  if (!hasSelected && isWmSupplyEditing) {
+    isWmSupplyEditing = false;
+    const imgEdit = document.getElementById('imgWmSupplyEdit');
+    if (imgEdit) imgEdit.src = 'icons/Edit.svg';
+  }
+
+  renderWmSupplyItems();
+};
+
+window.handleWmSupplyEditToggle = function() {
+  const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId));
+  if (!row || !row.items) return;
+
+  const imgEdit = document.getElementById('imgWmSupplyEdit');
+  const btnEdit = document.getElementById('btnWmSupplyEdit');
+
+  if (!isWmSupplyEditing) {
+    isWmSupplyEditing = true;
+    if (imgEdit) imgEdit.src = 'icons/Save.svg';
+    if (btnEdit) btnEdit.title = 'Save Invoice Qty';
+    renderWmSupplyItems();
+    setTimeout(() => {
+      const firstInput = document.querySelector('.wm-supply-editable-input');
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+      }
+    }, 50);
+  } else {
+    // Save edits
+    document.querySelectorAll('.wm-supply-editable-input').forEach(input => {
+      const id = input.getAttribute('data-item-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = row.items.find(i => i.id === id);
+        if (item) {
+          item.invoiceQty = val;
+          item.amount = val * (Number(item.rate) || 0);
+        }
+      }
+    });
+
+    const totalSum = row.items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+    row.orderValue = totalSum;
+    const lblSum = document.getElementById('lblWmSupplyTotalSum');
+    if (lblSum) lblSum.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    isWmSupplyEditing = false;
+    if (imgEdit) imgEdit.src = 'icons/Edit.svg';
+    if (btnEdit) btnEdit.title = 'Edit Invoice Qty';
+    renderWmSupplyItems();
+    showToast('Invoice quantities updated successfully');
+  }
+};
+
+window.handleWmSupplyTick = function() {
+  const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId));
+  if (!row || !row.items) return;
+
+  row.items.forEach(it => {
+    if (it.selected) {
+      it.isTicked = true;
+      it.isHighlighted = true;
+      it.selected = false;
+    }
+  });
+
+  const btnTick = document.getElementById('btnWmSupplyTick');
+  const btnEdit = document.getElementById('btnWmSupplyEdit');
+  if (btnTick) btnTick.style.display = 'none';
+  if (btnEdit) btnEdit.style.display = 'none';
+
+  const submitArea = document.getElementById('wmSupplyTableSubmitArea');
+  if (submitArea) submitArea.style.display = 'flex';
+
+  renderWmSupplyItems();
+  showToast('Selected item(s) confirmed successfully!');
+};
+
+window.submitWmSupplyCustomerModal = function() {
+  openWmSupplyTransportModal();
+};
+
+window.openWmSupplyTransportModal = function() {
+  const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId)) || wmSupplyDataStore[0];
+
+  const supplyModal = document.getElementById('wmSupplyCustomerModal');
+  if (supplyModal) supplyModal.classList.add('card-dimmed-blurred');
+
+  // Show Supply transport fields, hide GRN and MIN fields
+  const grnFields = document.getElementById('wmGrnTransportFields');
+  const minFields = document.getElementById('wmMinTransportFields');
+  const supplyFields = document.getElementById('wmSupplyTransportFields');
+  if (grnFields) grnFields.style.display = 'none';
+  if (minFields) minFields.style.display = 'none';
+  if (supplyFields) supplyFields.style.display = 'flex';
+
+  // Toggle Header Icons: Hide PDF Upload, Show Printer Icon
+  const lblPdf = document.getElementById('lblWmGrnTransportPdf');
+  const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  if (lblPdf) lblPdf.style.display = 'none';
+  if (btnPrint) btnPrint.style.display = 'inline-flex';
+
+  const t = (row && row.transport) ? row.transport : {
+    transporterName: 'Nexus Fleet Logistics',
+    vehicleNo: 'TN-09-AB-1234',
+    driverName: 'Ramesh Kumar',
+    whatsappNo: '9876543210',
+    ewayBill: true
+  };
+
+  const inpTrans = document.getElementById('inpWmSupplyTransporterName');
+  const inpVeh = document.getElementById('inpWmSupplyVehicleNo');
+  const inpDriver = document.getElementById('inpWmSupplyDriverName');
+  const inpWa = document.getElementById('inpWmSupplyWhatsappNo');
+  const tglEway = document.getElementById('tglWmSupplyEwayBill');
+
+  if (inpTrans) inpTrans.value = t.transporterName || '';
+  if (inpVeh) inpVeh.value = t.vehicleNo || '';
+  if (inpDriver) inpDriver.value = t.driverName || '';
+  if (inpWa) inpWa.value = t.whatsappNo || '';
+  if (tglEway) tglEway.checked = !!t.ewayBill;
+
+  const modal = document.getElementById('wmGrnTransportModal');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
 };
 
 // ==========================================================================
@@ -18731,12 +20892,24 @@ function loadWorklistDataset() {
       return;
     }
     if (currentWorklistView === 'min') {
-      currentDataset = wmMinDataStore.map(item => ({ ...item }));
+      currentDataset = wmMinDataStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'min_detail') {
+      const activeMinRow = wmMinDataStore.find(r => r.id === activeWmMinRowId) || wmMinDataStore[0];
+      currentDataset = (activeMinRow && activeMinRow.items) ? activeMinRow.items : [];
       filteredDataset = [...currentDataset];
       return;
     }
     if (currentWorklistView === 'mrn') {
-      currentDataset = wmMrnDataStore.map(item => ({ ...item }));
+      currentDataset = wmMrnDataStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'mrn_detail') {
+      const activeMrnRow = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+      currentDataset = (activeMrnRow && activeMrnRow.items) ? activeMrnRow.items : [];
       filteredDataset = [...currentDataset];
       return;
     }
@@ -19730,6 +21903,99 @@ function renderWorklistToolbar() {
       `;
       return;
     }
+    if (currentWorklistView === 'min_detail') {
+      const activeMinRow = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || wmMinDataStore[0];
+      const items = (activeMinRow && activeMinRow.items) ? activeMinRow.items : [];
+      const totalSum = items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+      const totalSumFormatted = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const hasSelected = items.some(it => it.selected);
+
+      toolbar.style.display = 'flex';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          ${universalBackBtnHtml}
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Amount">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblWmMinDetailTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalSumFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <label for="fileWmMinCsvUpload" style="cursor: pointer; margin: 0; display: inline-flex; align-items: center;" title="Upload CSV">
+            <input type="file" id="fileWmMinCsvUpload" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleWmMinCsvUpload(event)">
+            <img src="icons/CSV upload.svg" alt="CSV Upload" width="28" height="28">
+          </label>
+          <button type="button" class="side-top-icon-btn" id="btnWmMinTick" title="Confirm / Validate" onclick="handleWmMinTick()"
+            style="background: transparent; border: none; cursor: pointer; padding: 0; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;">
+            <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+          </button>
+          <button type="button" class="side-top-icon-btn" id="btnWmMinEdit" title="${isWmMinEditing ? 'Save MIN Qty' : 'Edit Selected MIN Qty'}" onclick="handleWmMinEditToggle()"
+            style="background: transparent; border: none; cursor: pointer; padding: 0; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;">
+            <img src="icons/${isWmMinEditing ? 'Save' : 'Edit'}.svg" id="imgWmMinEdit" alt="Edit" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'mrn_detail') {
+      const activeMrnRow = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+      const items = (activeMrnRow && activeMrnRow.items) ? activeMrnRow.items : [];
+      const totalSum = items.reduce((sum, it) => sum + (Number(it.amount) || 0), 0);
+      const totalSumFormatted = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const hasSelected = items.some(it => it.selected);
+
+      toolbar.style.display = 'flex';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
+          ${universalBackBtnHtml}
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Amount">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblWmMrnDetailTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalSumFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <label for="fileWmMrnCsvUpload" style="cursor: pointer; margin: 0; display: inline-flex; align-items: center;" title="Upload CSV">
+            <input type="file" id="fileWmMrnCsvUpload" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleWmMrnCsvUpload(event)">
+            <img src="icons/CSV upload.svg" alt="CSV Upload" width="28" height="28">
+          </label>
+          <button type="button" class="side-top-icon-btn" id="btnWmMrnTick" title="Confirm / Validate" onclick="handleWmMrnTick()"
+            style="background: transparent; border: none; cursor: pointer; padding: 0; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;">
+            <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+          </button>
+          <button type="button" class="side-top-icon-btn" id="btnWmMrnEdit" title="${isWmMrnEditing ? 'Save MRN Qty' : 'Edit Selected MRN Qty'}" onclick="handleWmMrnEditToggle()"
+            style="background: transparent; border: none; cursor: pointer; padding: 0; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;">
+            <img src="icons/${isWmMrnEditing ? 'Save' : 'Edit'}.svg" id="imgWmMrnEdit" alt="Edit" width="28" height="28">
+          </button>
+          <button type="button" class="side-top-icon-btn" id="btnWmMrnClose" title="Close" onclick="handleWmMrnCloseDetail()"
+            style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+            <img src="icons/Cancel.svg" alt="Close" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'payment') {
+      const paymentRows = (currentDataset && currentDataset.length > 0) ? currentDataset : wmPaymentDataStore;
+      const totalSum = paymentRows.reduce((sum, r) => sum + (Number(r.approvedAmount || 0)), 0);
+      const totalSumFormatted = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      toolbar.style.display = 'flex';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 8px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Amount">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblWmPaymentTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalSumFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <button type="button" class="toolbar-icon-btn" id="btnWmPaymentAddTransport" title="Transport Payment"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="openWmPaymentTransportModal()">
+            <img src="icons/Add.svg" alt="Add Transport Payment" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
     toolbar.innerHTML = '';
     toolbar.style.display = 'none';
     return;
@@ -20432,6 +22698,11 @@ function renderWorklistFooter() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Warehouse Manager') {
+    if (currentWorklistView === 'min_detail' || currentWorklistView === 'mrn_detail') {
+      footer.style.display = 'none';
+      footer.innerHTML = '';
+      return;
+    }
     footer.style.display = 'flex';
     footer.style.justifyContent = 'flex-start';
     footer.style.alignItems = 'center';
@@ -20755,7 +23026,17 @@ function renderWorklistTableHead() {
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = 'auto';
       if (containerEl) containerEl.style.overflowX = 'auto';
-    } else if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn'].includes(currentWorklistView)) {
+    } else if (role === 'Warehouse Manager' && currentWorklistView === 'payment') {
+      tableEl.style.minWidth = '175ch';
+      tableEl.style.width = '100%';
+      tableEl.style.tableLayout = 'fixed';
+      if (containerEl) containerEl.style.overflowX = 'auto';
+    } else if (role === 'Warehouse Manager' && (currentWorklistView === 'min_detail' || currentWorklistView === 'mrn_detail')) {
+      tableEl.style.minWidth = '1200px';
+      tableEl.style.width = '100%';
+      tableEl.style.tableLayout = '';
+      if (containerEl) containerEl.style.overflowX = 'auto';
+    } else if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'supply'].includes(currentWorklistView)) {
       tableEl.style.minWidth = '0';
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = 'fixed';
@@ -20918,6 +23199,96 @@ function renderWorklistTableHead() {
         </tr>
       `;
       rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'min_detail') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 70px, centered header -->
+          <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+            <span>Select</span>
+          </th>
+          <!-- 2. Material Description: 40ch, center header -->
+          <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Material Description</span>
+          </th>
+          <!-- 3. Uom: 10ch, center header -->
+          <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Uom</span>
+          </th>
+          <!-- 4. Qty: center header spanning 3 columns: Stock, MIR, MIN -->
+          <th colspan="3" class="wm-min-header-qty" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Qty</span>
+          </th>
+          <!-- 5. Rate: 15ch, center header -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Rate</span>
+          </th>
+          <!-- 6. Amount: 15ch, center header -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+        <tr class="master-view-header">
+          <!-- 4a. Stock: 15ch, center header -->
+          <th class="wm-min-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+            <span>Stock</span>
+          </th>
+          <!-- 4b. MIR: 15ch, center header -->
+          <th class="wm-min-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+            <span>MIR</span>
+          </th>
+          <!-- 4c. MIN: 15ch, center header -->
+          <th class="wm-min-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+            <span>MIN</span>
+          </th>
+        </tr>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'mrn_detail') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 70px, centered header -->
+          <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+            <span>Select</span>
+          </th>
+          <!-- 2. Material Description: 40ch, center header -->
+          <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Material Description</span>
+          </th>
+          <!-- 3. Uom: 10ch, center header -->
+          <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Uom</span>
+          </th>
+          <!-- 4. Qty: center header spanning 3 columns: Stock, MRR, MRN -->
+          <th colspan="3" class="wm-mrn-header-qty" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Qty</span>
+          </th>
+          <!-- 5. Rate: 15ch, center header -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Rate</span>
+          </th>
+          <!-- 6. Amount: 15ch, center header -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+        <tr class="master-view-header">
+          <!-- 4a. Stock: 15ch, center header -->
+          <th class="wm-mrn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+            <span>Stock</span>
+          </th>
+          <!-- 4b. MRR: 15ch, center header -->
+          <th class="wm-mrn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+            <span>MRR</span>
+          </th>
+          <!-- 4c. MRN: 15ch, center header -->
+          <th class="wm-mrn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+            <span>MRN</span>
+          </th>
+        </tr>
+      `;
       return;
     }
     if (currentWorklistView === 'mrn') {
@@ -22648,6 +25019,18 @@ function applyFiltersAndRender() {
   if (wmSubmitArea) {
     wmSubmitArea.style.display = 'none';
   }
+  const wmMinSubmitArea = document.getElementById('wmMinSubmitArea');
+  if (wmMinSubmitArea) {
+    wmMinSubmitArea.style.display = 'none';
+  }
+  const wmMinDetailSubmitArea = document.getElementById('wmMinDetailSubmitArea');
+  if (wmMinDetailSubmitArea) {
+    wmMinDetailSubmitArea.style.display = 'none';
+  }
+  const wmMrnDetailSubmitArea = document.getElementById('wmMrnDetailSubmitArea');
+  if (wmMrnDetailSubmitArea) {
+    wmMrnDetailSubmitArea.style.display = 'none';
+  }
 
   const tableContainer = document.querySelector('.table-container-full');
   const worklistTableEl = document.getElementById('worklistTable');
@@ -22659,7 +25042,7 @@ function applyFiltersAndRender() {
       tableContainer.style.overflowX = 'auto';
       tableContainer.style.width = '';
     }
-    if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'payment', 'supply'].includes(currentWorklistView)) {
+    if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'supply'].includes(currentWorklistView)) {
       tableContainer.style.marginTop = '24px';
     } else {
       tableContainer.style.marginTop = '';
@@ -22675,7 +25058,7 @@ function applyFiltersAndRender() {
       worklistTableEl.style.width = '100%';
       worklistTableEl.style.tableLayout = 'auto';
     } else if (role === 'Warehouse Manager' && currentWorklistView === 'payment') {
-      worklistTableEl.style.minWidth = '170ch';
+      worklistTableEl.style.minWidth = '175ch';
       worklistTableEl.style.width = '100%';
       worklistTableEl.style.tableLayout = 'fixed';
       if (tableContainer) tableContainer.style.overflowX = 'auto';
@@ -22836,15 +25219,21 @@ function applyFiltersAndRender() {
 
       tbody.innerHTML = filteredDataset.map(row => {
         const isRowSelected = !!row.selected;
+        const isHighlighted = !!row.isHighlighted;
+        const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
+        const rowBorder = isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
             <!-- 1. Select: circle radio, multiselect, green marker -->
             <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
               <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
             </td>
-            <!-- 2. Site Name: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
-              ${row.siteName || ''}
+            <!-- 2. Site Name: 25ch & left, clickable to open MIN detail page -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <a href="#" onclick="openWmMinDetail('${row.id}'); return false;" style="color: #0454e4; font-weight: 600; text-decoration: none; cursor: pointer;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+                ${row.siteName || ''}
+              </a>
             </td>
             <!-- 3. Request Date: 15ch & left -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
@@ -22877,6 +25266,172 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
+      const hasHighlighted = (currentDataset || []).some(r => r.isHighlighted);
+      const minSubmitArea = document.getElementById('wmMinSubmitArea');
+      if (minSubmitArea) {
+        minSubmitArea.style.display = hasHighlighted ? 'flex' : 'none';
+      }
+      return;
+    }
+
+    if (currentWorklistView === 'min_detail') {
+      const activeMinRow = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || wmMinDataStore[0];
+      const items = (activeMinRow && activeMinRow.items) ? activeMinRow.items : [];
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = items.map(item => {
+        const isSelected = !!item.selected;
+        const isTicked = !!item.isTicked;
+        const rowBg = isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff');
+        const rowBorder = isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
+        return `
+          <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
+            <!-- 1. Select: circle checkbox with green marker, multiselect -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handleWmMinItemSelect('${item.id}', this.checked)">
+            </td>
+            <!-- 2. Material Description: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+              ${item.materialDescription || ''}
+            </td>
+            <!-- 3. Uom: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${item.uom || ''}
+            </td>
+            <!-- 4a. Stock: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(item.stockQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4b. MIR: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(item.mirQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4c. MIN: 15ch & right (editable when user clicks edit icon for selected rows) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+              ${isWmMinEditing && isSelected ? `
+                <input type="number" step="0.01" class="form-input-control wm-min-editable-input" data-item-id="${item.id}" value="${Number(item.minQty || 0).toFixed(2)}"
+                  style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+                  oninput="handleWmMinQtyInput('${item.id}', this.value)"
+                  onkeydown="if(event.key === 'Enter') handleWmMinEditToggle();">
+              ` : `
+                <span>${Number(item.minQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              `}
+            </td>
+            <!-- 5. Rate: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 6. Amount: 15ch & right -->
+            <td id="tdWmMinAmount_${item.id}" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 600;">
+              ${Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const hasSelected = items.some(it => it.selected);
+      const btnTick = document.getElementById('btnWmMinTick');
+      const btnEdit = document.getElementById('btnWmMinEdit');
+      if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+      if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+      const hasTicked = items.some(it => it.isTicked);
+      const minDetailSubmitArea = document.getElementById('wmMinDetailSubmitArea');
+      if (minDetailSubmitArea) {
+        minDetailSubmitArea.style.display = hasTicked ? 'flex' : 'none';
+      }
+      return;
+    }
+
+    if (currentWorklistView === 'mrn_detail') {
+      const activeMrnRow = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+      const items = (activeMrnRow && activeMrnRow.items) ? activeMrnRow.items : [];
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = items.map(item => {
+        const isSelected = !!item.selected;
+        const isTicked = !!item.isTicked;
+        const rowBg = isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff');
+        const rowBorder = isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
+        return `
+          <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
+            <!-- 1. Select: circle checkbox with green marker, multiselect -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handleWmMrnItemSelect('${item.id}', this.checked)">
+            </td>
+            <!-- 2. Material Description: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+              ${item.materialDescription || ''}
+            </td>
+            <!-- 3. Uom: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${item.uom || ''}
+            </td>
+            <!-- 4a. Stock: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(item.stockQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4b. MRR: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(item.mrrQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4c. MRN: 15ch & right (editable when user clicks edit icon for selected rows) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+              ${isWmMrnEditing && isSelected ? `
+                <input type="number" step="0.01" class="form-input-control wm-mrn-editable-input" data-item-id="${item.id}" value="${Number(item.mrnQty || 0).toFixed(2)}"
+                  style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+                  oninput="handleWmMrnQtyInput('${item.id}', this.value)"
+                  onkeydown="if(event.key === 'Enter') handleWmMrnEditToggle();">
+              ` : `
+                <span>${Number(item.mrnQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              `}
+            </td>
+            <!-- 5. Rate: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 6. Amount: 15ch & right -->
+            <td id="tdWmMrnAmount_${item.id}" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 600;">
+              ${Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const hasSelected = items.some(it => it.selected);
+      const btnTick = document.getElementById('btnWmMrnTick');
+      const btnEdit = document.getElementById('btnWmMrnEdit');
+      if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+      if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+      // Submit MRN icon should appear when user selects row in select column
+      const mrnDetailSubmitArea = document.getElementById('wmMrnDetailSubmitArea');
+      if (mrnDetailSubmitArea) {
+        mrnDetailSubmitArea.style.display = hasSelected ? 'flex' : 'none';
+      }
       return;
     }
 
@@ -22901,11 +25456,17 @@ function applyFiltersAndRender() {
       }
 
       tbody.innerHTML = filteredDataset.map(row => {
+        const isHighlighted = !!row.isHighlighted;
+        const rowBg = isHighlighted ? '#dcfce7 !important' : '#ffffff';
+        const rowBorder = isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
-            <!-- 1. Site Name: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
-              ${row.siteName || ''}
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
+            <!-- 1. Site Name: 25ch & left, clickable to open MRN detail subpage -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <a href="#" onclick="openWmMrnDetail('${row.id}'); return false;" style="color: #0454e4; font-weight: 600; text-decoration: none; cursor: pointer;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+                ${row.siteName || ''}
+              </a>
             </td>
             <!-- 2. Completion Date: 15ch & left -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
@@ -22958,9 +25519,13 @@ function applyFiltersAndRender() {
       }
 
       tbody.innerHTML = filteredDataset.map(row => {
+        const isHighlighted = !!row.isHighlighted;
         const isRowSelected = !!row.selected;
+        const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
+        const rowBorder = isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
             <!-- 1. Select: circle radio, multiselect, green marker -->
             <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
               <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
@@ -22996,6 +25561,12 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
+      const hasMtnSelected = filteredDataset.some(r => r.selected);
+      const mtnSubmitArea = document.getElementById('wmMtnSubmitArea');
+      if (mtnSubmitArea) {
+        mtnSubmitArea.style.display = hasMtnSelected ? 'flex' : 'none';
+      }
       return;
     }
 
@@ -23025,9 +25596,13 @@ function applyFiltersAndRender() {
       }
 
       tbody.innerHTML = filteredDataset.map(row => {
+        const isHighlighted = !!row.isHighlighted;
         const isRowSelected = !!row.selected;
+        const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
+        const rowBorder = isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
             <!-- 1. Select: circle radio, multiselect, green marker -->
             <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
               <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
@@ -23067,6 +25642,12 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
+      const hasStnSelected = filteredDataset.some(r => r.selected);
+      const stnSubmitArea = document.getElementById('wmStnSubmitArea');
+      if (stnSubmitArea) {
+        stnSubmitArea.style.display = hasStnSelected ? 'flex' : 'none';
+      }
       return;
     }
 
@@ -23096,9 +25677,13 @@ function applyFiltersAndRender() {
       }
 
       tbody.innerHTML = filteredDataset.map(row => {
+        const isHighlighted = !!row.isHighlighted;
         const isRowSelected = !!row.selected;
+        const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
+        const rowBorder = isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
             <!-- 1. Select: circle radio, multiselect, green marker -->
             <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
               <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
@@ -23138,6 +25723,12 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
+      const hasSrnSelected = filteredDataset.some(r => r.selected);
+      const srnSubmitArea = document.getElementById('wmSrnSubmitArea');
+      if (srnSubmitArea) {
+        srnSubmitArea.style.display = hasSrnSelected ? 'flex' : 'none';
+      }
       return;
     }
 
@@ -23227,15 +25818,16 @@ function applyFiltersAndRender() {
       }
 
       tbody.innerHTML = filteredDataset.map(row => {
+        const isRowHighlighted = !!row.isHighlighted;
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowHighlighted ? '#dcfce7' : '#ffffff'};">
             <!-- 1. Submission Date: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
               ${row.submissionDate || ''}
             </td>
             <!-- 2. Customer Name: 25ch & left -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.customerName || '').replace(/"/g, '&quot;')}">
-              ${row.customerName || ''}
+              <span class="cell-customer-link" style="color: #0454e4; cursor: pointer; text-decoration: underline;" onclick="openWmSupplyCustomerModal('${row.id}')">${row.customerName || ''}</span>
             </td>
             <!-- 3. Order ID: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">

@@ -129,6 +129,48 @@
       </button>
     </div>
 
+    <!-- Centered Submit Area for Warehouse Manager MIN when one or more rows are highlighted -->
+    <div id="wmMinSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmMinSubmitBatch" onclick="submitWmMinMainBatch()" title="Submit MIN" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
+    <!-- Centered Submit Area for Warehouse Manager MIN Detail Page -->
+    <div id="wmMinDetailSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmMinDetailSubmit" onclick="submitWmMinDetailPage()" title="Submit MIN Items" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
+    <!-- Centered Submit Area for Warehouse Manager MRN Detail Page -->
+    <div id="wmMrnDetailSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmMrnDetailSubmit" onclick="submitWmMrnDetailPage()" title="Submit MRN Items" aria-label="Submit MRN" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
+    <!-- Centered Submit Area for Warehouse Manager MTN Page -->
+    <div id="wmMtnSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmMtnSubmit" onclick="submitWmMtnRows()" title="Submit MTN" aria-label="Submit MTN" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
+    <!-- Centered Submit Area for Warehouse Manager STN Page -->
+    <div id="wmStnSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmStnSubmit" onclick="submitWmStnRows()" title="Submit STN" aria-label="Submit STN" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
+    <!-- Centered Submit Area for Warehouse Manager SRN Page -->
+    <div id="wmSrnSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmSrnSubmit" onclick="submitWmSrnRows()" title="Submit SRN" aria-label="Submit SRN" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
     <!-- Bottom View Switcher Toggles (In Left Below Corner) -->
     <div class="worklist-footer-bar" id="worklistFooterBar">
       <!-- Injected dynamically by home.js based on Master vs Worklist -->
@@ -13222,6 +13264,342 @@
     </div>
   </div>
 
+  <!-- Warehouse Manager: MIN Site Details Modal -->
+  <div class="side-form-card" id="wmMinSiteModal"
+    style="display: none; width: 95vw !important; max-width: 1380px !important; max-height: 90vh !important; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column; animation: none !important;">
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; background: #ffffff; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; height: 100%;">
+        <!-- Slanted Green Header Badge: Project Details, PO No Details, Site Details -->
+        <div class="side-form-title-badge" id="lblWmMinHeaderBadge"
+          style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 50px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 24px; margin: 0; white-space: nowrap;">
+          <!-- 1. Left: Project Details + Copy Button -->
+          <div style="display: inline-flex; align-items: center; gap: 6px;">
+            <span id="lblWmMinHeaderProjectInfo" style="font-weight: 700; color: #ffffff;">Project ID / Project Type / Sub-Project Type</span>
+            <button type="button" class="btn-pm-copy" id="btnWmMinCopyProjectInfo" onclick="copyWmMinHeaderValue('projectInfo', 'Project Details')" title="Copy Project Details" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+              <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+            </button>
+          </div>
+          <!-- 2. Center: PO No Details + Copy Button -->
+          <div style="display: inline-flex; align-items: center; gap: 6px;">
+            <span id="lblWmMinHeaderPoInfo" onclick="openPoCapexModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Capex PO Details">PO No (0-Opex)</span>
+            <button type="button" class="btn-pm-copy" id="btnWmMinCopyPoInfo" onclick="copyWmMinHeaderValue('poNo', 'PO No')" title="Copy PO No" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+              <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+            </button>
+          </div>
+          <!-- 3. Right: Site Details + Copy Button -->
+          <div style="display: inline-flex; align-items: center; gap: 6px;">
+            <span id="lblWmMinHeaderSiteInfo" onclick="openSiteInfoModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Site Details">Site ID / Site Name</span>
+            <button type="button" class="btn-pm-copy" id="btnWmMinCopySiteInfo" onclick="copyWmMinHeaderValue('siteInfo', 'Site Details')" title="Copy Site Details" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+              <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+            </button>
+          </div>
+        </div>
+        <!-- Summation icon with value NEXT TO header design NOT below -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: 20px;">
+          <img src="icons/summation.svg" alt="Summation" width="22" height="22" style="display: block;" title="Total Amount">
+          <div id="lblWmMinTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</div>
+        </div>
+      </div>
+      <!-- Top Right Icons near close icon -->
+      <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+        <!-- CSV upload icon -->
+        <label for="fileWmMinCsvUpload" style="cursor: pointer; margin: 0; display: flex; align-items: center;" title="Upload CSV">
+          <input type="file" id="fileWmMinCsvUpload" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleWmMinCsvUpload(event)">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" width="28" height="28">
+        </label>
+        <!-- Tick icon: appears when user select the row using select column -->
+        <button type="button" class="side-top-icon-btn" id="btnWmMinTick" title="Confirm / Validate" onclick="handleWmMinTick()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+        </button>
+        <!-- Edit icon: appears when user select the row using select column -->
+        <button type="button" class="side-top-icon-btn" id="btnWmMinEdit" title="Edit Selected MIN Qty" onclick="handleWmMinEditToggle()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Edit.svg" id="imgWmMinEdit" alt="Edit" width="28" height="28">
+        </button>
+        <!-- Close icon -->
+        <button type="button" class="side-form-close-btn" id="btnCloseWmMinSiteModal" onclick="closeWmMinSiteModal()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+      </div>
+    </div>
+
+    <div style="padding: 16px 24px 20px; overflow-y: auto; max-height: calc(90vh - 52px); display: flex; flex-direction: column;">
+      <!-- Table -->
+      <div class="table-container-full" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; background: #ffffff;">
+        <table class="master-preview-table" id="tblWmMinItems" style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+          <thead>
+            <tr class="master-view-header">
+              <!-- 1. Select: circle radio / checkbox with multiselect, NO radio on header -->
+              <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+                <span>Select</span>
+              </th>
+              <!-- 2. Material Description: 40ch, center header -->
+              <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Material Description</span>
+              </th>
+              <!-- 3. Uom: 10ch, center header -->
+              <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Uom</span>
+              </th>
+              <!-- 4. Qty: center header spanning 3 columns: Stock, MIR, MIN -->
+              <th colspan="3" class="wm-min-header-qty" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+                <span>Qty</span>
+              </th>
+              <!-- 5. Rate: 15ch, center header -->
+              <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Rate</span>
+              </th>
+              <!-- 6. Amount: 15ch, center header -->
+              <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Amount</span>
+              </th>
+            </tr>
+            <tr class="master-view-header">
+              <!-- 4a. Stock: 15ch, center header -->
+              <th class="wm-min-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Stock</span>
+              </th>
+              <!-- 4b. MIR: 15ch, center header -->
+              <th class="wm-min-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>MIR</span>
+              </th>
+              <!-- 4c. MIN: 15ch, center header -->
+              <th class="wm-min-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>MIN</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tblWmMinItemsBody">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Submit icon area at last row of the table - CENTERED IN TAB -->
+      <div id="wmMinTableSubmitArea" style="display: flex; width: 100%; justify-content: center; align-items: center; margin-top: 18px; padding: 6px 0 10px 0;">
+        <button type="button" id="btnWmMinTableSubmit" title="Submit MIN Items" onclick="submitWmMinSiteModal()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+          <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouse Manager: MRN Site Details Modal -->
+  <div class="side-form-card" id="wmMrnSiteModal"
+    style="display: none; width: 95vw !important; max-width: 1380px !important; max-height: 90vh !important; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column; animation: none !important;">
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; background: #ffffff; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; height: 100%;">
+        <!-- Slanted Green Header Badge: Project Details, PO No Details, Site Details -->
+        <div class="side-form-title-badge" id="lblWmMrnHeaderBadge"
+          style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 50px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 24px; margin: 0; white-space: nowrap;">
+          <!-- 1. Left: Project Details + Copy Button -->
+          <div style="display: inline-flex; align-items: center; gap: 6px;">
+            <span id="lblWmMrnHeaderProjectInfo" style="font-weight: 700; color: #ffffff;">Project ID / Project Type / Sub-Project Type</span>
+            <button type="button" class="btn-pm-copy" id="btnWmMrnCopyProjectInfo" onclick="copyWmMrnHeaderValue('projectInfo', 'Project Details')" title="Copy Project Details" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+              <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+            </button>
+          </div>
+          <!-- 2. Center: PO No Details + Copy Button -->
+          <div style="display: inline-flex; align-items: center; gap: 6px;">
+            <span id="lblWmMrnHeaderPoInfo" onclick="openPoCapexModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Capex PO Details">PO No (0-Opex)</span>
+            <button type="button" class="btn-pm-copy" id="btnWmMrnCopyPoInfo" onclick="copyWmMrnHeaderValue('poNo', 'PO No')" title="Copy PO No" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+              <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+            </button>
+          </div>
+          <!-- 3. Right: Site Details + Copy Button -->
+          <div style="display: inline-flex; align-items: center; gap: 6px;">
+            <span id="lblWmMrnHeaderSiteInfo" onclick="openSiteInfoModal(this.textContent)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Site Details">Site ID / Site Name</span>
+            <button type="button" class="btn-pm-copy" id="btnWmMrnCopySiteInfo" onclick="copyWmMrnHeaderValue('siteInfo', 'Site Details')" title="Copy Site Details" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; opacity: 0.95;">
+              <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 16px; height: 16px; display: block;">
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Top Right Icons near close icon -->
+      <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+        <!-- CSV upload icon -->
+        <label for="fileWmMrnCsvUpload" style="cursor: pointer; margin: 0; display: flex; align-items: center;" title="Upload CSV">
+          <input type="file" id="fileWmMrnCsvUpload" accept=".csv, .xlsx, .xls" style="display: none;" onchange="handleWmMrnCsvUpload(event)">
+          <img src="icons/CSV upload.svg" alt="CSV Upload" width="28" height="28">
+        </label>
+        <!-- Tick icon: appears when user select the row using select column -->
+        <button type="button" class="side-top-icon-btn" id="btnWmMrnTick" title="Confirm / Validate" onclick="handleWmMrnTick()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+        </button>
+        <!-- Edit icon: appears when user select the row using select column -->
+        <button type="button" class="side-top-icon-btn" id="btnWmMrnEdit" title="Edit Selected MRN Qty" onclick="handleWmMrnEditToggle()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Edit.svg" id="imgWmMrnEdit" alt="Edit" width="28" height="28">
+        </button>
+        <!-- Close icon -->
+        <button type="button" class="side-form-close-btn" id="btnCloseWmMrnSiteModal" onclick="closeWmMrnSiteModal()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+      </div>
+    </div>
+
+    <!-- Below the header design: Summation icon with values -->
+    <div style="padding: 14px 24px 20px; overflow-y: auto; max-height: calc(90vh - 52px); display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 0 4px;">
+        <img src="icons/summation.svg" alt="Summation" width="22" height="22" style="display: block;" title="Total Amount">
+        <div id="lblWmMrnTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</div>
+      </div>
+
+      <!-- Table with centered headers -->
+      <div class="table-container-full" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; background: #ffffff;">
+        <table class="master-preview-table" id="tblWmMrnItems" style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+          <thead>
+            <tr class="master-view-header">
+              <!-- 1. Select: circle radio / checkbox with multiselect, NO radio on header -->
+              <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+                <span>Select</span>
+              </th>
+              <!-- 2. Material Description: 40ch, center header -->
+              <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Material Description</span>
+              </th>
+              <!-- 3. Uom: 10ch, center header -->
+              <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Uom</span>
+              </th>
+              <!-- 4. Qty: center header spanning 3 columns: Stock, MRR, MRN -->
+              <th colspan="3" class="wm-mrn-header-qty" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+                <span>Qty</span>
+              </th>
+              <!-- 5. Rate: 15ch, center header -->
+              <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Rate</span>
+              </th>
+              <!-- 6. Amount: 15ch, center header -->
+              <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Amount</span>
+              </th>
+            </tr>
+            <tr class="master-view-header">
+              <!-- 4a. Stock: 15ch, center header -->
+              <th class="wm-mrn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Stock</span>
+              </th>
+              <!-- 4b. MRR: 15ch, center header -->
+              <th class="wm-mrn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>MRR</span>
+              </th>
+              <!-- 4c. MRN: 15ch, center header -->
+              <th class="wm-mrn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>MRN</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tblWmMrnItemsBody">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Submit icon area at last row of the table - CENTERED IN TAB -->
+      <div id="wmMrnTableSubmitArea" style="display: flex; width: 100%; justify-content: center; align-items: center; margin-top: 18px; padding: 6px 0 10px 0;">
+        <button type="button" id="btnWmMrnTableSubmit" title="Submit MRN Items" onclick="submitWmMrnSiteModal()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+          <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouse Manager: Supply Customer Details Modal (Similar to GRN modal) -->
+  <div class="side-form-card" id="wmSupplyCustomerModal"
+    style="display: none; width: 95vw !important; max-width: 1380px !important; max-height: 90vh !important; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column; animation: none !important;">
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; background: #ffffff; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; height: 100%;">
+        <div class="side-form-title-badge" id="lblWmSupplyHeaderBadge"
+          style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 50px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 14px; margin: 0; white-space: nowrap;">
+          <span id="lblWmSupplyCustomerName">Customer Name</span>
+          <span style="opacity: 0.8; font-weight: 400; font-size: 0.95rem;">|</span>
+          <span id="lblWmSupplyOrderId" style="font-weight: 600; font-size: 1rem;">ORD-AIR-1029</span>
+        </div>
+        <!-- Summation icon with value next to header design -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: 20px;">
+          <img src="icons/summation.svg" alt="Summation" width="20" height="20" style="display: block;">
+          <div id="lblWmSupplyTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</div>
+        </div>
+      </div>
+      <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+        <!-- Edit icon: appears only when row is selected -->
+        <button type="button" class="side-top-icon-btn" id="btnWmSupplyEdit" title="Edit Invoice Qty" onclick="handleWmSupplyEditToggle()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Edit.svg" id="imgWmSupplyEdit" alt="Edit" width="28" height="28">
+        </button>
+        <!-- Tick icon: appears only when row is selected -->
+        <button type="button" class="side-top-icon-btn" id="btnWmSupplyTick" title="Confirm / Validate" onclick="handleWmSupplyTick()"
+          style="background: transparent; border: none; cursor: pointer; padding: 0; display: none; align-items: center; justify-content: center;">
+          <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+        </button>
+        <!-- Close icon -->
+        <button type="button" class="side-form-close-btn" id="btnCloseWmSupplyCustomerModal" onclick="closeWmSupplyCustomerModal()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+      </div>
+    </div>
+
+    <div style="padding: 16px 24px 20px; overflow-y: auto; max-height: calc(90vh - 52px); display: flex; flex-direction: column;">
+      <!-- Table -->
+      <div class="table-container-full" style="border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; background: #ffffff;">
+        <table class="master-preview-table" id="tblWmSupplyItems" style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+          <thead>
+            <tr class="master-view-header">
+              <!-- 1. Select: circle radio / checkbox with multiselect -->
+              <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+                <span>Select</span>
+              </th>
+              <!-- 2. Material Description: 40ch & left content, center header -->
+              <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Material Description</span>
+              </th>
+              <!-- 3. Uom: 10ch & center -->
+              <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Uom</span>
+              </th>
+              <!-- 4. Qty: center header spanning 3 columns: Stock, MIR, Invoice -->
+              <th colspan="3" class="wm-supply-header-qty" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+                <span>Qty</span>
+              </th>
+              <!-- 5. Rate: 15ch & right content, center header -->
+              <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Rate</span>
+              </th>
+              <!-- 6. Amount: 15ch & right content, center header -->
+              <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+                <span>Amount</span>
+              </th>
+            </tr>
+            <tr class="master-view-header">
+              <!-- 4a. Stock: 15ch & right content, center header -->
+              <th class="wm-supply-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Stock</span>
+              </th>
+              <!-- 4b. MIR: 15ch & right content, center header -->
+              <th class="wm-supply-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>MIR</span>
+              </th>
+              <!-- 4c. Invoice: 15ch & right content, center header -->
+              <th class="wm-supply-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+                <span>Invoice</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tblWmSupplyItemsBody">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Submit icon area below the last row of the table - CENTERED IN TAB -->
+      <div id="wmSupplyTableSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; margin-top: 18px; padding: 6px 0 10px 0;">
+        <button type="button" id="btnWmSupplyTableSubmit" title="Proceed to Transport Details" onclick="submitWmSupplyCustomerModal()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+          <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Warehouse Manager: Transport Details Modal -->
   <div class="side-form-card" id="wmGrnTransportModal"
     style="display: none; width: 560px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; animation: none !important;">
@@ -13231,11 +13609,16 @@
         Transport Details
       </div>
       <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
-        <!-- PDF Upload icon -->
-        <label for="fileWmGrnTransportPdf" style="cursor: pointer; margin: 0; display: flex; align-items: center;" title="Upload Transport PDF">
+        <!-- PDF Upload icon (For GRN and other pages) -->
+        <label for="fileWmGrnTransportPdf" id="lblWmGrnTransportPdf" style="cursor: pointer; margin: 0; display: flex; align-items: center;" title="Upload Transport PDF">
           <input type="file" id="fileWmGrnTransportPdf" accept=".pdf" style="display: none;" onchange="handleWmGrnTransportPdfUpload(event)">
           <img src="icons/PDF Upload.svg" alt="PDF Upload" width="28" height="28">
         </label>
+        <!-- Printer icon (For MIN page) -->
+        <button type="button" class="side-top-icon-btn" id="btnWmMinTransportPrint" title="Print Transport Details" onclick="handleWmMinTransportPrint()"
+          style="display: none; background: transparent; border: none; cursor: pointer; padding: 0; align-items: center; justify-content: center;">
+          <img src="icons/Printer.svg" alt="Print" width="28" height="28">
+        </button>
         <!-- Close icon -->
         <button type="button" class="side-form-close-btn" id="btnCloseWmGrnTransportModal" onclick="closeWmGrnTransportModal()"
           aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
@@ -13244,56 +13627,193 @@
     <div style="height: 14px;"></div>
 
     <form id="frmWmTransportDetails" onsubmit="event.preventDefault(); saveWmTransportDetails();" style="padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 16px;">
-      <!-- 1. Logistics Name -->
-      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Logistics Name</label>
-        <div style="flex: 1;">
-          <input type="text" class="form-input-control" id="inpWmLogisticsName" placeholder="Enter Logistics Name"
-            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+      <!-- GRN / Default Transport Details Fields -->
+      <div id="wmGrnTransportFields" style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- 1. Logistics Name -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Logistics Name</label>
+          <div style="flex: 1;">
+            <input type="text" class="form-input-control" id="inpWmLogisticsName" placeholder="Enter Logistics Name"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 2. Freight Charges -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Freight Charges</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmFreightCharges" placeholder="Enter Freight Charges" oninput="calculateWmTransportTotal()"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 3. CGST/IGST -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">CGST/IGST</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmTransportCgstIgst" placeholder="Enter CGST/IGST" oninput="calculateWmTransportTotal()"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 4. SGST -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">SGST</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmTransportSgst" placeholder="Enter SGST" oninput="calculateWmTransportTotal()"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 5. Total Amount -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Total Amount</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmTransportTotalAmount" placeholder="Enter Total Amount"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
         </div>
       </div>
 
-      <!-- 2. Freight Charges -->
-      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Freight Charges</label>
-        <div style="flex: 1;">
-          <input type="number" step="0.01" class="form-input-control" id="inpWmFreightCharges" placeholder="Enter Freight Charges" oninput="calculateWmTransportTotal()"
-            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+      <!-- MIN Transport Details Fields (Rental vs In-House) -->
+      <div id="wmMinTransportFields" style="display: none; flex-direction: column; gap: 16px;">
+        <!-- 1. Transport Type -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transport Type</label>
+          <div style="flex: 1; position: relative;">
+            <select id="selWmMinTransportType" class="form-input-control" onchange="handleWmMinTransportTypeChange(this.value)"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+              <option value="Rental" selected>Rental</option>
+              <option value="In-House">In-House</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2. Transporter Name -->
+        <div class="pm-field-row" id="rowWmMinTransporterName" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transporter Name</label>
+          <div style="flex: 1; position: relative;">
+            <input type="text" class="form-input-control" id="inpWmMinTransporterName" placeholder="Enter Transporter Name"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+            <select id="selWmMinTransporterName" class="form-input-control"
+              style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+              <option value="Nexus Fleet Logistics" selected>Nexus Fleet Logistics</option>
+              <option value="In-House Division Hub-A">In-House Division Hub-A</option>
+              <option value="In-House Division Hub-B">In-House Division Hub-B</option>
+              <option value="Central Logistics Fleet">Central Logistics Fleet</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. Vehicle No -->
+        <div class="pm-field-row" id="rowWmMinVehicleNo" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Vehicle No</label>
+          <div style="flex: 1; position: relative;">
+            <input type="text" class="form-input-control" id="inpWmMinVehicleNo" placeholder="Enter Vehicle No"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+            <select id="selWmMinVehicleNo" class="form-input-control"
+              style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+              <option value="TN-09-AB-1234 (Tata 407)" selected>TN-09-AB-1234 (Tata 407)</option>
+              <option value="TN-22-CD-5678 (Eicher Pro)">TN-22-CD-5678 (Eicher Pro)</option>
+              <option value="TN-14-EF-9012 (Mahindra Bolero)">TN-14-EF-9012 (Mahindra Bolero)</option>
+              <option value="KA-01-GH-3456 (Ashok Leyland Dost)">KA-01-GH-3456 (Ashok Leyland Dost)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. Driver Name -->
+        <div class="pm-field-row" id="rowWmMinDriverName" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Driver Name</label>
+          <div style="flex: 1; position: relative;">
+            <input type="text" class="form-input-control" id="inpWmMinDriverName" placeholder="Enter Driver Name"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+            <select id="selWmMinDriverName" class="form-input-control"
+              style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+              <option value="Ramesh Kumar" selected>Ramesh Kumar</option>
+              <option value="Muthu Vel">Muthu Vel</option>
+              <option value="Suresh Raina">Suresh Raina</option>
+              <option value="Karthik Raja">Karthik Raja</option>
+              <option value="Anand Verma">Anand Verma</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 5. Whatsapp No (Visible for Rental, removed/hidden for In-House) -->
+        <div class="pm-field-row" id="rowWmMinWhatsappNo" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Whatsapp No</label>
+          <div style="flex: 1;">
+            <input type="tel" class="form-input-control" id="inpWmMinWhatsappNo" placeholder="Enter Whatsapp No"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 6. E-way Bill (Centered Toggle, left-aligned label) -->
+        <div class="pm-field-row" id="rowWmMinEwayBill" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">E-way Bill</label>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+            <label class="toggle-slide-switch" style="margin: 0;">
+              <input type="checkbox" id="tglWmMinEwayBill">
+              <span class="toggle-slide-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
 
-      <!-- 3. CGST/IGST -->
-      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">CGST/IGST</label>
-        <div style="flex: 1;">
-          <input type="number" step="0.01" class="form-input-control" id="inpWmTransportCgstIgst" placeholder="Enter CGST/IGST" oninput="calculateWmTransportTotal()"
-            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+      <!-- Supply Transport Details Fields (Transporter Name, Vehicle No, Driver Name, Whatsapp No as typeable input box and E-way Bill as toggle centered) -->
+      <div id="wmSupplyTransportFields" style="display: none; flex-direction: column; gap: 16px;">
+        <!-- 1. Transporter Name -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transporter Name</label>
+          <div style="flex: 1;">
+            <input type="text" class="form-input-control" id="inpWmSupplyTransporterName" placeholder="Enter Transporter Name"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 2. Vehicle No -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Vehicle No</label>
+          <div style="flex: 1;">
+            <input type="text" class="form-input-control" id="inpWmSupplyVehicleNo" placeholder="Enter Vehicle No"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 3. Driver Name -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Driver Name</label>
+          <div style="flex: 1;">
+            <input type="text" class="form-input-control" id="inpWmSupplyDriverName" placeholder="Enter Driver Name"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 4. Whatsapp No -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Whatsapp No</label>
+          <div style="flex: 1;">
+            <input type="tel" class="form-input-control" id="inpWmSupplyWhatsappNo" placeholder="Enter Whatsapp No"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 5. E-way Bill (Centered Toggle, left-aligned label) -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">E-way Bill</label>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+            <label class="toggle-slide-switch" style="margin: 0;">
+              <input type="checkbox" id="tglWmSupplyEwayBill">
+              <span class="toggle-slide-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
 
-      <!-- 4. SGST -->
-      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">SGST</label>
-        <div style="flex: 1;">
-          <input type="number" step="0.01" class="form-input-control" id="inpWmTransportSgst" placeholder="Enter SGST" oninput="calculateWmTransportTotal()"
-            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
-        </div>
-      </div>
-
-      <!-- 5. Total Amount -->
-      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-        <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Total Amount</label>
-        <div style="flex: 1;">
-          <input type="number" step="0.01" class="form-input-control" id="inpWmTransportTotalAmount" placeholder="Enter Total Amount"
-            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
-        </div>
-      </div>
-
-      <!-- Centered save icon below last field -->
+      <!-- Centered submit icon below last field -->
       <div style="display: flex; justify-content: center; align-items: center; margin-top: 10px;">
-        <button type="button" id="btnWmTransportSave" title="Save Transport Details" onclick="saveWmTransportDetails()"
+        <button type="button" id="btnWmTransportSave" title="Submit Transport Details" onclick="saveWmTransportDetails()"
           style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;">
-          <img src="icons/Save.svg" alt="Save" width="34" height="34">
+          <img src="icons/Submit.svg" alt="Submit" width="34" height="34">
         </button>
       </div>
     </form>
@@ -13320,7 +13840,7 @@
           <select id="selWmBeneficiaryType" class="form-input-control" onchange="handleWmBeneficiaryTypeChange(this.value)"
             style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
             <option value="Self" selected>Self</option>
-            <option value="Other Employee">Other Employee</option>
+            <option value="Other Employee" id="optWmBeneficiaryOtherEmployee">Other Employee</option>
             <option value="Transport Vendor">Transport Vendor</option>
             <option value="New Account">New Account</option>
           </select>
@@ -13349,6 +13869,24 @@
           </select>
           <input type="text" class="form-input-control" id="inpWmPaymentNewAccountName" placeholder="Enter Account Name"
             style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 3a. Freight Charges (For MIN Driver selection) -->
+      <div class="pm-field-row" id="rowWmPaymentFreightCharges" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Freight Charges</label>
+        <div style="flex: 1;">
+          <input type="number" step="0.01" class="form-input-control" id="inpWmPaymentFreightCharges" placeholder="Enter Freight Charges"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 3b. Advance Payment (For MIN Driver selection) -->
+      <div class="pm-field-row" id="rowWmPaymentAdvancePayment" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Advance Payment</label>
+        <div style="flex: 1;">
+          <input type="number" step="0.01" class="form-input-control" id="inpWmPaymentAdvancePayment" placeholder="Enter Advance Payment"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
         </div>
       </div>
 

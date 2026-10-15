@@ -4502,9 +4502,14 @@
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">BOQ Date</label>
               <div style="flex: 1; position: relative; display: flex; align-items: center;">
-                <input type="text" id="inpPmStnBoqDate" class="form-input-control" placeholder="DD-MM-YYYY" style="width: 100%; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 40px 0 14px; font-size: 0.92rem; outline: none;">
-                <button type="button" id="btnPmStnBoqDateCalendar" style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center;">
-                  <img src="icons/google-calendar.svg" alt="Calendar" style="width: 20px; height: 20px;">
+                <input type="text" id="inpPmStnBoqDate" class="form-input-control date-picker-input nexus-cal-input" placeholder="DD - MM - YYYY" readonly
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(this, document.getElementById('btnPmStnBoqDateCalendar')); }"
+                  style="width: 100%; height: 38px; border: 1px solid #000000; border-radius: 8px; padding: 0 40px 0 14px; font-size: 0.92rem; outline: none; cursor: pointer; background: #ffffff;">
+                <button type="button" id="btnPmStnBoqDateCalendar" class="input-pdf-badge btn-calendar-trigger"
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(document.getElementById('inpPmStnBoqDate'), this); }"
+                  title="Select Date" aria-label="Select Date"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" style="width: 20px; height: 20px; pointer-events: none;">
                 </button>
               </div>
             </div>
@@ -5460,7 +5465,7 @@
 
         <!-- Expense Details Modal Tab -->
         <div class="side-form-card project-info-modal-card" id="pmExpenseDetailsModal"
-          style="display: none; width: 620px !important; max-width: 96vw; margin: auto;">
+          style="display: none; width: 820px !important; max-width: 96vw; margin: auto;">
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div class="side-form-title-badge" id="lblPmExpenseDetailsTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
@@ -5503,30 +5508,30 @@
 
             <!-- Table opened when user clicks yellow + icon below last row of existing table -->
             <div id="expenseDetailsInlineTableContainer" style="display: none; margin-top: 24px; padding-top: 18px; border-top: 1.5px solid #cbd5e1;">
-              <div style="overflow-x: auto;">
+              <div style="overflow: visible;">
                 <table class="projects-custom-table" id="tblExpenseDetailsInlineTable" style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; margin: 0 auto;">
                   <colgroup>
-                    <col style="width: 40ch;">
-                    <col style="width: 15ch;">
-                    <col style="width: 15ch;">
-                    <col style="width: 15ch;">
-                    <col style="width: 15ch;">
+                    <col style="width: 28ch;">
+                    <col style="width: 8ch;">
+                    <col style="width: 10ch;">
+                    <col style="width: 12ch;">
+                    <col style="width: 14ch;">
                   </colgroup>
                   <thead>
                     <tr style="background-color: #8c9399;">
-                      <th style="width: 40ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                      <th style="width: 28ch; min-width: 28ch; max-width: 28ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                         <span>Expense Description</span>
                       </th>
-                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                      <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                         <span>Uom</span>
                       </th>
-                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                      <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                         <span>Qty</span>
                       </th>
-                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                      <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                         <span>Rate</span>
                       </th>
-                      <th style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
+                      <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #ffffff !important; font-weight: 700; font-family: 'Outfit', sans-serif; background-color: #8c9399 !important; border: 1px solid #ffffff; white-space: nowrap;">
                         <span>Amount</span>
                       </th>
                     </tr>
@@ -13209,12 +13214,12 @@
               <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
                 <span>Rate</span>
               </th>
-              <!-- 5. Qty: center header spanning 4 columns with horizontal white line under it -->
-              <th colspan="4" class="wm-grn-header-qty" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+              <!-- 5. Qty: center header spanning 3 columns with horizontal white line under it -->
+              <th colspan="3" class="wm-grn-header-qty" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
                 <span>Qty</span>
               </th>
-              <!-- 6. Amount: center header spanning 3 columns with horizontal white line under it -->
-              <th colspan="3" class="wm-grn-header-amount" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+              <!-- 6. Amount: center header spanning 4 columns with horizontal white line under it -->
+              <th colspan="4" class="wm-grn-header-amount" style="width: 60ch; min-width: 60ch; max-width: 60ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
                 <span>Amount</span>
               </th>
             </tr>
@@ -13223,27 +13228,27 @@
               <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
                 <span>PO</span>
               </th>
-              <!-- 5b. Invoice Qty: 10ch & right content, center header -->
+              <!-- 5b. Invoice: 10ch & right content, center header -->
               <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
-                <span>Invoice Qty</span>
+                <span>Invoice</span>
               </th>
-              <!-- 5c. Receivable: 10ch & right content, center header -->
+              <!-- 5c. Received Qty: 10ch & right content, center header -->
               <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
-                <span>Receivable</span>
+                <span>Received Qty</span>
               </th>
-              <!-- 5d. Taxable: 10ch & right content, center header -->
-              <th class="wm-grn-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
+              <!-- 6a. Taxable: 15ch & right content, center header -->
+              <th class="wm-grn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
                 <span>Taxable</span>
               </th>
-              <!-- 6a. CGST: 15ch & right content, center header -->
+              <!-- 6b. CGST: 15ch & right content, center header -->
               <th class="wm-grn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
                 <span>CGST</span>
               </th>
-              <!-- 6b. SGST: 15ch & right content, center header -->
+              <!-- 6c. SGST: 15ch & right content, center header -->
               <th class="wm-grn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
                 <span>SGST</span>
               </th>
-              <!-- 6c. Total: 15ch & right content, center header -->
+              <!-- 6d. Total: 15ch & right content, center header -->
               <th class="wm-grn-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 8px;">
                 <span>Total</span>
               </th>
@@ -13747,19 +13752,39 @@
           </div>
         </div>
 
-        <!-- 6. E-way Bill (Centered Toggle, left-aligned label) -->
-        <div class="pm-field-row" id="rowWmMinEwayBill" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">E-way Bill</label>
-          <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
-            <label class="toggle-slide-switch" style="margin: 0;">
-              <input type="checkbox" id="tglWmMinEwayBill">
-              <span class="toggle-slide-slider"></span>
-            </label>
+      </div>
+
+      <!-- MRN Transport Details Fields (Logistics Name, Freight Charges, Advance Pay) -->
+      <div id="wmMrnTransportFields" style="display: none; flex-direction: column; gap: 16px;">
+        <!-- 1. Logistics Name -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Logistics Name</label>
+          <div style="flex: 1;">
+            <input type="text" class="form-input-control" id="inpWmMrnLogisticsName" placeholder="Enter Logistics Name"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 2. Freight Charges -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Freight Charges</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmMrnFreightCharges" placeholder="Enter Freight Charges"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 3. Advance Pay -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Advance Pay</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmMrnAdvancePay" placeholder="Enter Advance Pay"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
           </div>
         </div>
       </div>
 
-      <!-- Supply Transport Details Fields (Transporter Name, Vehicle No, Driver Name, Whatsapp No as typeable input box and E-way Bill as toggle centered) -->
+      <!-- Supply Transport Details Fields (Transporter Name as typeable input box) -->
       <div id="wmSupplyTransportFields" style="display: none; flex-direction: column; gap: 16px;">
         <!-- 1. Transporter Name -->
         <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
@@ -13767,44 +13792,6 @@
           <div style="flex: 1;">
             <input type="text" class="form-input-control" id="inpWmSupplyTransporterName" placeholder="Enter Transporter Name"
               style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
-          </div>
-        </div>
-
-        <!-- 2. Vehicle No -->
-        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Vehicle No</label>
-          <div style="flex: 1;">
-            <input type="text" class="form-input-control" id="inpWmSupplyVehicleNo" placeholder="Enter Vehicle No"
-              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
-          </div>
-        </div>
-
-        <!-- 3. Driver Name -->
-        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Driver Name</label>
-          <div style="flex: 1;">
-            <input type="text" class="form-input-control" id="inpWmSupplyDriverName" placeholder="Enter Driver Name"
-              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
-          </div>
-        </div>
-
-        <!-- 4. Whatsapp No -->
-        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Whatsapp No</label>
-          <div style="flex: 1;">
-            <input type="tel" class="form-input-control" id="inpWmSupplyWhatsappNo" placeholder="Enter Whatsapp No"
-              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
-          </div>
-        </div>
-
-        <!-- 5. E-way Bill (Centered Toggle, left-aligned label) -->
-        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">E-way Bill</label>
-          <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
-            <label class="toggle-slide-switch" style="margin: 0;">
-              <input type="checkbox" id="tglWmSupplyEwayBill">
-              <span class="toggle-slide-slider"></span>
-            </label>
           </div>
         </div>
       </div>
@@ -13819,7 +13806,173 @@
     </form>
   </div>
 
-  <!-- Warehouse Manager: Transport Payment Modal -->
+  <!-- Warehouse Manager: MIN E-Way Modal Tab -->
+  <div class="side-form-card" id="wmMinEwayModal"
+    style="display: none; width: 440px !important; max-width: 95vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; animation: none !important;">
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+      <div class="side-form-title-badge"
+        style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+        E-Way
+      </div>
+      <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+        <button type="button" class="side-form-close-btn" id="btnCloseWmMinEwayModal" onclick="closeWmMinEwayModal()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+      </div>
+    </div>
+    <div style="height: 14px;"></div>
+
+    <div style="padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 20px;">
+      <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">E-way Bill</label>
+        <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+          <label class="toggle-slide-switch" style="margin: 0;">
+            <input type="checkbox" id="tglWmMinEwayModal" onchange="handleWmMinEwayToggle(this.checked)">
+            <span class="toggle-slide-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Centered submit icon below the field -->
+      <div style="display: flex; justify-content: center; align-items: center; margin-top: 10px;">
+        <button type="button" id="btnWmMinEwaySubmit" title="Submit E-Way" onclick="submitWmMinEwayModal()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+          <img src="icons/Submit.svg" alt="Submit" width="34" height="34">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouse Manager: Payment Add Expenses Combined Modal (Unified Seamless Tab) -->
+  <div class="side-form-card" id="wmPaymentExpensesModal"
+    style="display: none; width: 980px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; animation: none !important;">
+    
+    <!-- Header at Top-Left Corner of Tab -->
+    <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 50px; width: 100%; box-sizing: border-box; margin: 0;">
+      <div class="side-form-title-badge"
+        style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 50px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+        Add Expenses
+      </div>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+        <button type="button" id="btnWmSaveExpenseEntry" title="Save Expense" onclick="saveWmPaymentExpenseEntry()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+          <img src="icons/Save.svg" alt="Save" width="28" height="28">
+        </button>
+        <button type="button" class="side-form-close-btn" onclick="closeWmPaymentExpensesModal()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+      </div>
+    </div>
+
+    <!-- Seamless Content Area (No Inner Card Border) -->
+    <div style="padding: 14px 22px 18px; display: flex; flex-direction: column; gap: 12px;">
+      <!-- Form Fields (Directly in tab, no nested border) -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- 1. Expense Description -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Expense Description</label>
+          <div style="flex: 1; position: relative;">
+            <select id="selWmExpenseDescription" class="form-input-control"
+              style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+              <option value="Civil Foundation Work & Excavation">Civil Foundation Work & Excavation</option>
+              <option value="Electrical Cabling & Termination">Electrical Cabling & Termination</option>
+              <option value="Equipment Rental & Crane Hire">Equipment Rental & Crane Hire</option>
+              <option value="Site Diesel Generator Fuel">Site Diesel Generator Fuel</option>
+              <option value="Soil Testing & Geotech Survey">Soil Testing & Geotech Survey</option>
+              <option value="Tower Structural Erection">Tower Structural Erection</option>
+              <option value="Earthing & Surge Protection">Earthing & Surge Protection</option>
+              <option value="Manpower & Labour Charges">Manpower & Labour Charges</option>
+              <option value="Material Transportation & Logistics">Material Transportation & Logistics</option>
+              <option value="Miscellaneous Site Operations">Miscellaneous Site Operations</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2. Qty -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Qty</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" min="0" id="inpWmExpenseQty" placeholder="0.00" class="form-input-control"
+              style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 3. Rate -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Rate</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" min="0" id="inpWmExpenseRate" placeholder="0.00" class="form-input-control"
+              style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 4. Remarks -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Remarks</label>
+          <div style="flex: 1;">
+            <input type="text" id="inpWmExpenseRemarks" placeholder="Enter remarks" class="form-input-control"
+              style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 5. Attach Documents -->
+        <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Attach Documents</label>
+          <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <input type="file" id="inpWmExpensePdfFile" accept=".pdf,application/pdf" style="display: none;" onchange="handleWmExpensePdfFile(this)">
+            <button type="button" id="btnUploadWmExpensePdf" onclick="document.getElementById('inpWmExpensePdfFile').click()"
+              style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;" title="Upload PDF">
+              <img src="icons/PDF Upload.svg" alt="Upload PDF" style="width: 30px; height: 30px; display: block;">
+            </button>
+            <span id="lblWmExpensePdfName" style="font-size: 0.8rem; color: #64748b; margin-top: 2px;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summation at Left Top of Table -->
+      <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-top: 2px; margin-bottom: 2px;">
+        <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block;">
+        <span id="lblWmExpensesTotalSum" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+      </div>
+
+      <!-- Table Container with Centered Headers and Reduced Column Widths -->
+      <div class="contact-table-wrap" style="padding: 0; overflow: visible;">
+        <table class="projects-custom-table" id="tblWmExpensesTable" style="width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden;">
+          <thead>
+            <tr style="background-color: #8c9399;">
+              <th style="width: 28ch; min-width: 28ch; max-width: 28ch; text-align: center !important; vertical-align: middle; padding: 8px 10px; color: #ffffff !important; font-weight: 700; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                <span>Expense Description</span>
+              </th>
+              <th style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px; color: #ffffff !important; font-weight: 700; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                <span>Uom</span>
+              </th>
+              <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 8px 6px; color: #ffffff !important; font-weight: 700; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                <span>Qty</span>
+              </th>
+              <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 8px 6px; color: #ffffff !important; font-weight: 700; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                <span>Rate</span>
+              </th>
+              <th style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: center !important; vertical-align: middle; padding: 8px 6px; color: #ffffff !important; font-weight: 700; background-color: #8c9399 !important; border: 1px solid #ffffff;">
+                <span>Amount</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="tblWmExpensesTableBody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Centered Submit Icon below table -->
+      <div style="display: flex; justify-content: center; align-items: center; margin-top: 4px;">
+        <button type="button" id="btnWmPaymentExpensesSubmit" title="Proceed to Transport Payment" onclick="submitWmPaymentExpensesModal()"
+          style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+          <img src="icons/Submit.svg" alt="Submit" width="34" height="34">
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
   <div class="side-form-card" id="wmGrnTransportPaymentModal"
     style="display: none; width: 560px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100002 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; animation: none !important;">
     <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
@@ -13872,20 +14025,20 @@
         </div>
       </div>
 
-      <!-- 3a. Freight Charges (For MIN Driver selection) -->
-      <div class="pm-field-row" id="rowWmPaymentFreightCharges" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
-        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Freight Charges</label>
-        <div style="flex: 1;">
-          <input type="number" step="0.01" class="form-input-control" id="inpWmPaymentFreightCharges" placeholder="Enter Freight Charges"
-            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
-        </div>
-      </div>
-
-      <!-- 3b. Advance Payment (For MIN Driver selection) -->
+      <!-- 3a. Advance Payment -->
       <div class="pm-field-row" id="rowWmPaymentAdvancePayment" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
         <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Advance Payment</label>
         <div style="flex: 1;">
           <input type="number" step="0.01" class="form-input-control" id="inpWmPaymentAdvancePayment" placeholder="Enter Advance Payment"
+            style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- 3b. Freight Charges -->
+      <div class="pm-field-row" id="rowWmPaymentFreightCharges" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+        <label style="min-width: 180px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Freight Charges</label>
+        <div style="flex: 1;">
+          <input type="number" step="0.01" class="form-input-control" id="inpWmPaymentFreightCharges" placeholder="Enter Freight Charges"
             style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
         </div>
       </div>

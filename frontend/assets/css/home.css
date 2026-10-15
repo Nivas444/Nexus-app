@@ -4717,8 +4717,12 @@ a:visited,
 
 #pmAddServiceVendorModal,
 #serviceVendorInvoiceAmountPanel,
+#pmExpenseDetailsModal {
+  width: 820px !important;
+  max-width: 96vw !important;
+}
+
 #pmAddActivityModal,
-#pmExpenseDetailsModal,
 #pmExpenseSummaryOverviewModal,
 #pmAddItemNameModal,
 #pmAddExpenseEntryModal,
@@ -4730,7 +4734,7 @@ a:visited,
 }
 
 #pmExpenseDetailsModal.wide-expense-mode {
-  width: 1040px !important;
+  width: 1100px !important;
   max-width: 96vw !important;
 }
 

@@ -1079,6 +1079,9 @@ const inventoryData = [
   {
     id: "inv-1",
     productDescription: "24 Port Patch Panel Loaded Cat 6 with Cable Management",
+    productName: "24 Port Patch Panel Loaded Cat 6 with Cable Management",
+    productCode: "PP-CAT6-24P",
+    productMake: "Schneider Electric",
     whCode: "WH-DEL-01",
     productHead: "Passive Networking",
     productType: "Patch Panel",
@@ -1090,6 +1093,9 @@ const inventoryData = [
   {
     id: "inv-2",
     productDescription: "6U Wall Mount Network Rack with Fan and PDU Complete Kit",
+    productName: "6U Wall Mount Network Rack with Fan and PDU Complete Kit",
+    productCode: "RCK-WM-6U",
+    productMake: "Valrack",
     whCode: "WH-MUM-02",
     productHead: "Racks & Enclosures",
     productType: "Rack System",
@@ -7050,21 +7056,21 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Warehouse Manager') {
-    // Exactly 4 navigation icons in order: Home, Worklist, Profile, Sign Out
-    if (navProjects) { navProjects.style.display = 'inline-flex'; navProjects.style.order = '1'; }
+    // Exactly 4 navigation icons in order: Inventory, Worklist, Profile, Sign Out
+    if (navInventory) { navInventory.style.display = 'inline-flex'; navInventory.style.order = '1'; }
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
     if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
     if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
+    if (navProjects) navProjects.style.display = 'none';
     if (navAccounts) navAccounts.style.display = 'none';
     if (navAdmin) navAdmin.style.display = 'none';
     if (navPurchase) navPurchase.style.display = 'none';
-    if (navInventory) navInventory.style.display = 'none';
 
     // Route Protection: If currentModule is restricted for Warehouse Manager, redirect to Worklist
-    const allowedModules = ['worklist', 'projects', 'profile'];
+    const allowedModules = ['worklist', 'inventory', 'profile'];
     if (!allowedModules.includes(currentModule)) {
       if (typeof showToast === 'function') {
         showToast('Access Restricted: Warehouse Manager role does not have permission for this module.', 'warning');
@@ -7131,7 +7137,7 @@ function switchModule(moduleName) {
       return;
     }
   } else if (role === 'Warehouse Manager') {
-    const allowedModules = ['worklist', 'projects', 'profile'];
+    const allowedModules = ['worklist', 'inventory', 'profile'];
     if (!allowedModules.includes(moduleName)) {
       if (typeof showToast === 'function') {
         showToast(`Access Restricted: Warehouse Manager does not have permission to access ${moduleName}.`, 'warning');
@@ -7485,10 +7491,17 @@ function goBackSubpage() {
       currentInventoryView = 'main';
       showToast('Returned to Inventory');
     } else {
-      currentModule = 'projects';
-      currentProjectsSubpage = 'projects';
-      currentProjectsView = 'main';
-      showToast('Returned to Projects');
+      const role = getAuthenticatedUserRole();
+      if (role === 'Warehouse Manager') {
+        currentModule = 'worklist';
+        currentWorklistView = 'pr';
+        showToast('Returned to Worklist');
+      } else {
+        currentModule = 'projects';
+        currentProjectsSubpage = 'projects';
+        currentProjectsView = 'main';
+        showToast('Returned to Projects');
+      }
     }
   } else if (currentModule === 'indus_towers') {
     if (currentIndusSubpage === 'project_type_details') {
@@ -7982,8 +7995,20 @@ function renderApp() {
     renderProjectsFooter();
   } else if (currentModule === 'inventory') {
     if (bannerTitle) {
-      if (currentInventoryView === 'product_details' || currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
-        bannerTitle.innerHTML = `<span class="banner-title-underline" style="font-weight: 700; color: #ffffff; font-size: 1.15rem;">${selectedInventoryProductName || 'Product Description'}</span>`;
+      if (currentInventoryView === 'product_details') {
+        const invRow = inventoryData.find(r => r.id === selectedInventoryProductId) || inventoryData[0] || {};
+        const pName = invRow.productName || invRow.productDescription || selectedInventoryProductName || 'Product Name';
+        const pCode = invRow.productCode || 'PP-CAT6-24P';
+        const pMake = invRow.productMake || invRow.make || 'Schneider Electric';
+        bannerTitle.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; font-weight: 400; color: #ffffff; font-size: 1.12rem; letter-spacing: 0.2px;">
+            <div style="font-weight: 400;"><span style="font-weight: 400;">Product Name : </span><span style="font-weight: 400;">${pName}</span></div>
+            <div style="font-weight: 400;"><span style="font-weight: 400;">Product Code : </span><span style="font-weight: 400;">${pCode}</span></div>
+            <div style="font-weight: 400;"><span style="font-weight: 400;">Product Make : </span><span style="font-weight: 400;">${pMake}</span></div>
+          </div>
+        `;
+      } else if (currentInventoryView === 'stock_price' || currentInventoryView === 'stock_ledger') {
+        bannerTitle.innerHTML = `<span class="banner-title-underline" style="font-weight: 400; color: #ffffff; font-size: 1.15rem;">${selectedInventoryProductName || 'Product Description'}</span>`;
       } else {
         bannerTitle.textContent = "Inventory";
       }
@@ -13856,12 +13881,16 @@ window.renderExpenseDetailsTable = function() {
   tbody.innerHTML = items.map((item, idx) => `
     <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
       <td style="padding: 12px 18px; text-align: left; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0;">
-        <a href="#" onclick="openEditExpenseModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
+        <a href="#" onclick="openWmPaymentAddExpensesModal('${(item.itemName || '').replace(/'/g, "\\'")}'); return false;" class="clickable-item-name-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
           ${item.itemName}
         </a>
       </td>
     </tr>
   `).join('');
+};
+
+window.openEditExpenseModal = function(itemName) {
+  openWmPaymentAddExpensesModal(itemName);
 };
 
 window.openExpenseDetailsModal = function() {
@@ -13877,7 +13906,7 @@ window.openExpenseDetailsModal = function() {
   if (!modal) return;
   modal.classList.remove('card-dimmed-blurred');
   modal.classList.remove('wide-expense-mode');
-  modal.style.setProperty('width', '620px', 'important');
+  modal.style.setProperty('width', '820px', 'important');
 
   const inlineContainer = document.getElementById('expenseDetailsInlineTableContainer');
   if (inlineContainer) inlineContainer.style.display = 'none';
@@ -13898,7 +13927,7 @@ window.closeExpenseDetailsModal = function() {
   if (modal) {
     modal.classList.remove('card-dimmed-blurred');
     modal.classList.remove('wide-expense-mode');
-    modal.style.setProperty('width', '620px', 'important');
+    modal.style.setProperty('width', '820px', 'important');
     modal.style.display = 'none';
   }
 
@@ -13966,19 +13995,21 @@ window.renderExpenseDetailsInlineTable = function() {
 
     return `
       <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
-        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
-          ${row.description || ''}
+        <td style="width: 28ch; min-width: 28ch; max-width: 28ch; text-align: left !important; padding: 10px 12px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
+          <a href="#" onclick="openEditExpenseModal(${idx}); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
+            ${row.description || ''}
+          </a>
         </td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; padding: 10px 6px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${row.uom || 'Nos'}
         </td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${formattedQty}
         </td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${formattedRate}
         </td>
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
+        <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${formattedAmt}
         </td>
       </tr>
@@ -13996,14 +14027,14 @@ window.toggleExpenseDetailsInlineTable = function() {
     container.style.display = 'none';
     if (modal) {
       modal.classList.remove('wide-expense-mode');
-      modal.style.setProperty('width', '620px', 'important');
+      modal.style.setProperty('width', '820px', 'important');
     }
   } else {
     window.renderExpenseDetailsInlineTable();
     container.style.display = 'block';
     if (modal) {
       modal.classList.add('wide-expense-mode');
-      modal.style.setProperty('width', '1040px', 'important');
+      modal.style.setProperty('width', '1100px', 'important');
     }
   }
 };
@@ -15656,7 +15687,10 @@ function renderInventoryToolbar() {
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
       </div>
     `;
-    toolbar.querySelector('.btn-universal-back')?.addEventListener('click', () => {
+    const backBtn = toolbar.querySelector('#btnUniversalBack') || toolbar.querySelector('.btn-back-action') || toolbar.querySelector('.btn-universal-back');
+    backBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       currentInventoryView = 'main';
       activeColumnFilters = {};
       updateURL();
@@ -19021,7 +19055,7 @@ window.renderWmGrnSupplierItems = function() {
           ${Number(item.invoiceQty || 0).toFixed(2)}
         </td>
         <!-- 5c. Receivable (Received): 10ch & right (editable when edit clicked) -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 6px 8px; color: #1e293b; font-weight: 600;">
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 6px 8px; color: #1e293b; font-weight: 400;">
           ${isWmGrnEditing && isSelected ? `
             <input type="number" step="0.01" class="form-input-control wm-grn-editable-input" data-item-id="${item.id}" value="${Number(item.receivedQty || 0).toFixed(2)}"
               style="width: 100%; height: 30px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;"
@@ -19030,8 +19064,8 @@ window.renderWmGrnSupplierItems = function() {
             <span>${Number(item.receivedQty || 0).toFixed(2)}</span>
           `}
         </td>
-        <!-- 5d. Taxable: 10ch & right -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+        <!-- 5d. Taxable: 15ch & right -->
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
           ${Number(item.taxableQty || 0).toFixed(2)}
         </td>
         <!-- 6a. CGST: 15ch & right -->
@@ -19043,7 +19077,7 @@ window.renderWmGrnSupplierItems = function() {
           ${Number(item.sgst || 0).toFixed(2)}
         </td>
         <!-- 6c. Total: 15ch & right -->
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 700;">
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 400;">
           ${Number(item.totalAmount || 0).toFixed(2)}
         </td>
       </tr>
@@ -19168,11 +19202,15 @@ window.openWmGrnTransportModal = function() {
   const prevModal = document.getElementById('wmGrnSupplierModal');
   if (prevModal) prevModal.classList.add('card-dimmed-blurred');
 
-  // Show GRN fields, hide MIN fields
+  // Show GRN fields, hide MIN, MRN, Supply fields
   const grnFields = document.getElementById('wmGrnTransportFields');
   const minFields = document.getElementById('wmMinTransportFields');
+  const mrnFields = document.getElementById('wmMrnTransportFields');
+  const supplyFields = document.getElementById('wmSupplyTransportFields');
   if (grnFields) grnFields.style.display = 'flex';
   if (minFields) minFields.style.display = 'none';
+  if (mrnFields) mrnFields.style.display = 'none';
+  if (supplyFields) supplyFields.style.display = 'none';
 
   // Toggle Header Icons: Show PDF, Hide Printer
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
@@ -19301,44 +19339,73 @@ window.saveWmTransportDetails = function() {
                 (targetStore && targetStore.find(r => r.id === rowId)) ||
                 (currentDataset && currentDataset.find(r => r.selected));
 
-    if (row) {
-      if (!row.transport) row.transport = {};
-      row.transport.logisticsName = document.getElementById('inpWmLogisticsName')?.value || 'V-Trans Logistics Ltd';
-      row.transport.freightCharges = parseFloat(document.getElementById('inpWmFreightCharges')?.value) || 0;
-      row.transport.cgstIgst = parseFloat(document.getElementById('inpWmTransportCgstIgst')?.value) || 0;
-      row.transport.sgst = parseFloat(document.getElementById('inpWmTransportSgst')?.value) || 0;
-      row.transport.totalAmount = parseFloat(document.getElementById('inpWmTransportTotalAmount')?.value) || 0;
+    const statusStr = (row && row.status ? row.status : '').toLowerCase().trim();
+    const isReceive = statusStr.includes('receiv');
+
+    if (row && !row.transport) row.transport = {};
+
+    if (!isReceive) {
+      // Dispatch flow: save MIN transport details, then proceed to transport payment tab
+      const tType = document.getElementById('selWmMinTransportType')?.value || 'Rental';
+      row.transport.transportType = tType;
+      if (tType === 'Rental') {
+        row.transport.transporterName = document.getElementById('inpWmMinTransporterName')?.value || '';
+        row.transport.vehicleNo = document.getElementById('inpWmMinVehicleNo')?.value || '';
+        row.transport.driverName = document.getElementById('inpWmMinDriverName')?.value || '';
+        row.transport.whatsappNo = document.getElementById('inpWmMinWhatsappNo')?.value || '';
+      } else {
+        row.transport.transporterName = document.getElementById('selWmMinTransporterName')?.value || '';
+        row.transport.vehicleNo = document.getElementById('selWmMinVehicleNo')?.value || '';
+        row.transport.driverName = document.getElementById('selWmMinDriverName')?.value || '';
+        row.transport.whatsappNo = '';
+      }
+      row.transport.ewayBill = Boolean((row.transport && row.transport.ewayBill) || row.ewayBill);
+
+      closeWmGrnTransportModal();
+      openWmGrnTransportPaymentModal();
+      return;
+    } else {
+      // Receive flow: save MRN transport details and complete
+      const inpLog = document.getElementById('inpWmMrnLogisticsName') || document.getElementById('inpWmLogisticsName');
+      const inpFc = document.getElementById('inpWmMrnFreightCharges') || document.getElementById('inpWmFreightCharges');
+      const inpAdv = document.getElementById('inpWmMrnAdvancePay');
+      row.transport.logisticsName = inpLog?.value || 'V-Trans Logistics Ltd';
+      row.transport.freightCharges = parseFloat(inpFc?.value) || 0;
+      row.transport.advancePay = parseFloat(inpAdv?.value) || 0;
       row.isHighlighted = true;
+
+      if (targetStore && row) {
+        const storeRow = targetStore.find(r => r.id === row.id);
+        if (storeRow) storeRow.isHighlighted = true;
+      }
+
+      closeWmGrnTransportModal();
+      activeWmTransferView = null;
+      activeWmTransferRowId = null;
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+
+      renderWorklistTableBody();
+
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
+      } else if (typeof showToast === 'function') {
+        showToast('Task completed successfully!');
+      }
+      return;
     }
-
-    if (targetStore && row) {
-      const storeRow = targetStore.find(r => r.id === row.id);
-      if (storeRow) storeRow.isHighlighted = true;
-    }
-
-    closeWmGrnTransportModal();
-    const overlay = document.getElementById('sideFormOverlay');
-    if (overlay) overlay.style.display = 'none';
-
-    renderWorklistTableBody();
-
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
-    } else if (typeof showToast === 'function') {
-      showToast('Task completed successfully!');
-    }
-    return;
   }
 
   if (currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail') {
     const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
     if (row) {
       if (!row.transport) row.transport = {};
-      row.transport.logisticsName = document.getElementById('inpWmLogisticsName')?.value || 'V-Trans Logistics Ltd';
-      row.transport.freightCharges = parseFloat(document.getElementById('inpWmFreightCharges')?.value) || 0;
-      row.transport.cgstIgst = parseFloat(document.getElementById('inpWmTransportCgstIgst')?.value) || 0;
-      row.transport.sgst = parseFloat(document.getElementById('inpWmTransportSgst')?.value) || 0;
-      row.transport.totalAmount = parseFloat(document.getElementById('inpWmTransportTotalAmount')?.value) || 0;
+      const inpLog = document.getElementById('inpWmMrnLogisticsName') || document.getElementById('inpWmLogisticsName');
+      const inpFc = document.getElementById('inpWmMrnFreightCharges') || document.getElementById('inpWmFreightCharges');
+      const inpAdv = document.getElementById('inpWmMrnAdvancePay');
+      row.transport.logisticsName = inpLog?.value || 'V-Trans Logistics Ltd';
+      row.transport.freightCharges = parseFloat(inpFc?.value) || 0;
+      row.transport.advancePay = parseFloat(inpAdv?.value) || 0;
     }
 
     closeWmGrnTransportModal();
@@ -19351,10 +19418,7 @@ window.saveWmTransportDetails = function() {
     if (row) {
       if (!row.transport) row.transport = {};
       row.transport.transporterName = document.getElementById('inpWmSupplyTransporterName')?.value || '';
-      row.transport.vehicleNo = document.getElementById('inpWmSupplyVehicleNo')?.value || '';
-      row.transport.driverName = document.getElementById('inpWmSupplyDriverName')?.value || '';
-      row.transport.whatsappNo = document.getElementById('inpWmSupplyWhatsappNo')?.value || '';
-      row.transport.ewayBill = document.getElementById('tglWmSupplyEwayBill')?.checked || false;
+      row.transport.ewayBill = Boolean((row.transport && row.transport.ewayBill) || row.ewayBill);
       row.isHighlighted = true;
     }
     if (currentDataset && Array.isArray(currentDataset)) {
@@ -19394,7 +19458,7 @@ window.saveWmTransportDetails = function() {
         row.transport.driverName = document.getElementById('selWmMinDriverName')?.value || '';
         row.transport.whatsappNo = '';
       }
-      row.transport.ewayBill = document.getElementById('tglWmMinEwayBill')?.checked || false;
+      row.transport.ewayBill = Boolean((row.transport && row.transport.ewayBill) || row.ewayBill);
     }
 
     closeWmGrnTransportModal();
@@ -19416,13 +19480,363 @@ window.saveWmTransportDetails = function() {
   showToast('Transport details saved successfully');
 };
 
+// Warehouse Manager: Payment Add Expenses Combined Modal (Top Form + Bottom Table in single tab)
+let wmExpensesDataStore = [
+  {
+    id: 'wm-exp-1',
+    description: 'Civil Foundation Work & Excavation',
+    uom: 'Sq.Ft',
+    qty: 120,
+    rate: 10000,
+    amount: 1200000,
+    remarks: 'Foundation excavation charges',
+    pdf: ''
+  }
+];
+window.selectedWmExpensePdfName = '';
+window.editingWmExpenseId = null;
+window.pmExpenseSourceModalOpen = false;
+
+window.openWmPaymentAddExpensesModal = function(itemName) {
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const modal = document.getElementById('wmPaymentExpensesModal');
+  if (!modal) return;
+
+  // Determine if opened from Project Manager Expense Details modal
+  const pmDetailsModal = document.getElementById('pmExpenseDetailsModal');
+  const isFromPmExpenses = (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_expenses') ||
+                           (pmDetailsModal && pmDetailsModal.style.display !== 'none');
+  window.pmExpenseSourceModalOpen = isFromPmExpenses;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'wmPaymentExpensesModal' && card.id !== 'pmExpenseDetailsModal') {
+      card.style.display = 'none';
+    }
+  });
+
+  modal.classList.remove('card-dimmed-blurred');
+  modal.style.display = 'block';
+  overlay.style.display = 'flex';
+
+  const descEl = document.getElementById('selWmExpenseDescription');
+  if (itemName && descEl) {
+    let found = false;
+    for (let i = 0; i < descEl.options.length; i++) {
+      if (descEl.options[i].value === itemName) {
+        descEl.selectedIndex = i;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = itemName;
+      opt.textContent = itemName;
+      descEl.appendChild(opt);
+      descEl.value = itemName;
+    }
+
+    // Check if an existing row matches this item name
+    const existingRow = wmExpensesDataStore.find(r => r.description.toLowerCase() === itemName.toLowerCase());
+    if (existingRow) {
+      window.editingWmExpenseId = existingRow.id;
+      if (document.getElementById('inpWmExpenseQty')) document.getElementById('inpWmExpenseQty').value = existingRow.qty;
+      if (document.getElementById('inpWmExpenseRate')) document.getElementById('inpWmExpenseRate').value = existingRow.rate;
+      if (document.getElementById('inpWmExpenseRemarks')) document.getElementById('inpWmExpenseRemarks').value = existingRow.remarks || '';
+      if (existingRow.pdf && document.getElementById('lblWmExpensePdfName')) {
+        document.getElementById('lblWmExpensePdfName').textContent = existingRow.pdf;
+        window.selectedWmExpensePdfName = existingRow.pdf;
+      }
+    } else {
+      window.editingWmExpenseId = null;
+      if (document.getElementById('inpWmExpenseQty')) document.getElementById('inpWmExpenseQty').value = '';
+      if (document.getElementById('inpWmExpenseRate')) document.getElementById('inpWmExpenseRate').value = '';
+      if (document.getElementById('inpWmExpenseRemarks')) document.getElementById('inpWmExpenseRemarks').value = '';
+      if (document.getElementById('lblWmExpensePdfName')) document.getElementById('lblWmExpensePdfName').textContent = '';
+      window.selectedWmExpensePdfName = '';
+    }
+  } else {
+    window.editingWmExpenseId = null;
+  }
+
+  renderWmExpensesTable();
+};
+
+window.editWmExpenseRecord = function(id) {
+  const row = wmExpensesDataStore.find(r => r.id === id);
+  if (!row) return;
+  window.editingWmExpenseId = row.id;
+
+  const descEl = document.getElementById('selWmExpenseDescription');
+  if (descEl) {
+    let found = false;
+    for (let i = 0; i < descEl.options.length; i++) {
+      if (descEl.options[i].value === row.description) {
+        descEl.selectedIndex = i;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const opt = document.createElement('option');
+      opt.value = row.description;
+      opt.textContent = row.description;
+      descEl.appendChild(opt);
+      descEl.value = row.description;
+    }
+  }
+
+  if (document.getElementById('inpWmExpenseQty')) document.getElementById('inpWmExpenseQty').value = row.qty;
+  if (document.getElementById('inpWmExpenseRate')) document.getElementById('inpWmExpenseRate').value = row.rate;
+  if (document.getElementById('inpWmExpenseRemarks')) document.getElementById('inpWmExpenseRemarks').value = row.remarks || '';
+  if (row.pdf && document.getElementById('lblWmExpensePdfName')) {
+    document.getElementById('lblWmExpensePdfName').textContent = row.pdf;
+    window.selectedWmExpensePdfName = row.pdf;
+  }
+  showToast('Loaded ' + row.description + ' for editing');
+};
+
+window.closeWmPaymentExpensesModal = function() {
+  const modal = document.getElementById('wmPaymentExpensesModal');
+  if (modal) modal.style.display = 'none';
+  window.editingWmExpenseId = null;
+
+  if (window.pmExpenseSourceModalOpen) {
+    window.pmExpenseSourceModalOpen = false;
+    const parentModal = document.getElementById('pmExpenseDetailsModal');
+    if (parentModal) parentModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+};
+
+window.handleWmExpensePdfFile = function(input) {
+  if (input && input.files && input.files[0]) {
+    const file = input.files[0];
+    window.selectedWmExpensePdfName = file.name;
+    const lbl = document.getElementById('lblWmExpensePdfName');
+    if (lbl) {
+      lbl.textContent = file.name;
+      lbl.style.color = '#0454e4';
+      lbl.style.fontWeight = '500';
+    }
+    showToast('PDF selected: ' + file.name);
+  }
+};
+
+window.renderWmExpensesTable = function() {
+  const tbody = document.getElementById('tblWmExpensesTableBody');
+  const sumEl = document.getElementById('lblWmExpensesTotalSum');
+  if (!tbody) return;
+
+  let totalSum = 0;
+  wmExpensesDataStore.forEach(item => {
+    const amt = parseFloat(item.amount) || 0;
+    totalSum += amt;
+  });
+
+  if (sumEl) {
+    sumEl.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  if (wmExpensesDataStore.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem;">No expense records added yet.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = wmExpensesDataStore.map((row, idx) => {
+    const qtyVal = parseFloat(row.qty) || 0;
+    const rateVal = parseFloat(row.rate) || 0;
+    const amtVal = parseFloat(row.amount || (qtyVal * rateVal)) || 0;
+    return `
+      <tr onclick="editWmExpenseRecord('${row.id}')" style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'}; cursor: pointer;" title="Click to edit ${row.description}">
+        <td style="width: 28ch; min-width: 28ch; max-width: 28ch; text-align: left !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-size: 0.92rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
+          ${row.description || ''}
+        </td>
+        <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 6px; color: #1e293b; font-size: 0.92rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${row.uom || 'Nos'}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-size: 0.92rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${qtyVal.toFixed(2)}
+        </td>
+        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-size: 0.92rem; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${rateVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-size: 0.92rem; font-weight: 600; border: 1px solid #e2e8f0; white-space: nowrap;">
+          ${amtVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.saveWmPaymentExpenseEntry = function() {
+  const descEl = document.getElementById('selWmExpenseDescription');
+  const qtyEl = document.getElementById('inpWmExpenseQty');
+  const rateEl = document.getElementById('inpWmExpenseRate');
+  const remEl = document.getElementById('inpWmExpenseRemarks');
+
+  const desc = descEl ? descEl.value : 'Civil Foundation Work & Excavation';
+  const qty = parseFloat(qtyEl ? qtyEl.value : 0) || 0;
+  const rate = parseFloat(rateEl ? rateEl.value : 0) || 0;
+  const remarks = remEl ? remEl.value.trim() : '';
+
+  if (qty <= 0) {
+    showToast('Please enter a valid Quantity.');
+    if (qtyEl) qtyEl.focus();
+    return;
+  }
+  if (rate <= 0) {
+    showToast('Please enter a valid Rate.');
+    if (rateEl) rateEl.focus();
+    return;
+  }
+
+  const amount = qty * rate;
+  let uom = 'Nos';
+  const dLower = desc.toLowerCase();
+  if (dLower.includes('civil') || dLower.includes('foundation') || dLower.includes('survey')) uom = 'Sq.Ft';
+  else if (dLower.includes('cable') || dLower.includes('cabling')) uom = 'Mtr';
+  else if (dLower.includes('fuel') || dLower.includes('generator')) uom = 'Ltr';
+  else if (dLower.includes('manpower') || dLower.includes('labour')) uom = 'Mandays';
+  else if (dLower.includes('equipment') || dLower.includes('rental')) uom = 'Hours';
+
+  if (window.editingWmExpenseId) {
+    const editIdx = wmExpensesDataStore.findIndex(r => r.id === window.editingWmExpenseId);
+    if (editIdx !== -1) {
+      wmExpensesDataStore[editIdx] = {
+        ...wmExpensesDataStore[editIdx],
+        description: desc,
+        uom: uom,
+        qty: qty,
+        rate: rate,
+        amount: amount,
+        remarks: remarks,
+        pdf: window.selectedWmExpensePdfName || wmExpensesDataStore[editIdx].pdf || ''
+      };
+      showToast('Expense detail updated successfully!');
+    }
+    window.editingWmExpenseId = null;
+  } else {
+    const existingIdx = wmExpensesDataStore.findIndex(r => r.description.toLowerCase() === desc.toLowerCase());
+    if (existingIdx !== -1) {
+      wmExpensesDataStore[existingIdx] = {
+        ...wmExpensesDataStore[existingIdx],
+        uom: uom,
+        qty: qty,
+        rate: rate,
+        amount: amount,
+        remarks: remarks,
+        pdf: window.selectedWmExpensePdfName || wmExpensesDataStore[existingIdx].pdf || ''
+      };
+      showToast('Expense detail updated successfully!');
+    } else {
+      wmExpensesDataStore.push({
+        id: 'wm-exp-' + Date.now(),
+        description: desc,
+        uom: uom,
+        qty: qty,
+        rate: rate,
+        amount: amount,
+        remarks: remarks,
+        pdf: window.selectedWmExpensePdfName || ''
+      });
+      showToast('Expense detail saved successfully!');
+    }
+  }
+
+  renderWmExpensesTable();
+
+  // Reset fields
+  if (qtyEl) qtyEl.value = '';
+  if (rateEl) rateEl.value = '';
+  if (remEl) remEl.value = '';
+  const fileLbl = document.getElementById('lblWmExpensePdfName');
+  const fileInp = document.getElementById('inpWmExpensePdfFile');
+  if (fileLbl) fileLbl.textContent = '';
+  if (fileInp) fileInp.value = '';
+  window.selectedWmExpensePdfName = '';
+};
+
+window.submitWmPaymentExpensesModal = function() {
+  const modal = document.getElementById('wmPaymentExpensesModal');
+  if (modal) modal.style.display = 'none';
+
+  if (window.pmExpenseSourceModalOpen) {
+    window.pmExpenseSourceModalOpen = false;
+    window.editingWmExpenseId = null;
+    showToast('Expense details submitted successfully!');
+    const parentModal = document.getElementById('pmExpenseDetailsModal');
+    if (parentModal) parentModal.style.display = 'block';
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'flex';
+    return;
+  }
+
+  // Then only transport payment tab should appear
+  openWmGrnTransportPaymentModal();
+};
+
 // Transport Payment Modal Functions
 window.openWmPaymentTransportModal = function() {
-  openWmGrnTransportPaymentModal();
+  openWmPaymentAddExpensesModal();
 };
 window.openWmTransportPaymentFromPaymentPage = window.openWmPaymentTransportModal;
 
+window.openWmPaymentReceiptModal = function(rowId) {
+  const row = (currentDataset && currentDataset.find(r => r.id === rowId)) || 
+              (typeof wmPaymentDataStore !== 'undefined' && wmPaymentDataStore.find(r => r.id === rowId));
+  
+  const tbody = document.getElementById('tblPaymentReceiptBody');
+  if (tbody) {
+    if (row && Number(row.paidAmount || 0) > 0) {
+      const paidVal = Number(row.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const dateVal = row.requestDate || '12/10/2026';
+      const recNo = 'REC-2026-' + (row.id ? String(row.id).replace(/\D/g, '').padStart(3, '0') : '901');
+      tbody.innerHTML = `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+            ${dateVal}
+          </td>
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">
+            ${recNo}
+          </td>
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem; font-weight: 600;">
+            ${paidVal}
+          </td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">12/08/2026</td>
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">REC-2026-901</td>
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem; font-weight: 600;">5,00,000.00</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">25/08/2026</td>
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem;">REC-2026-902</td>
+          <td style="text-align: center; width: 15ch; min-width: 15ch; max-width: 15ch; padding: 12px 8px; color: #334155; font-size: 0.9rem; font-weight: 600;">6,00,000.00</td>
+        </tr>
+      `;
+    }
+  }
+  openPaymentReceiptModal('Payment Receipt', 'Paid Amount');
+};
+
 window.openWmGrnTransportPaymentModal = function() {
+  const expModal = document.getElementById('wmPaymentExpensesModal');
+  if (expModal) expModal.style.display = 'none';
   const prevModal = document.getElementById('wmGrnSupplierModal');
   if (prevModal) prevModal.classList.add('card-dimmed-blurred');
   const minModal = document.getElementById('wmMinSiteModal');
@@ -19446,6 +19860,37 @@ window.openWmGrnTransportPaymentModal = function() {
   if (selTransfer) selTransfer.value = 'NET Banking';
 
   handleWmBeneficiaryTypeChange('Self');
+
+  if (currentWorklistView === 'grn' || currentWorklistView === 'payment' || ['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    const transferRowId = (typeof activeWmTransferRowId !== 'undefined' && activeWmTransferRowId) ? activeWmTransferRowId : activeWmGrnRowId;
+    const storeMap = {
+      mtn: typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : [],
+      stn: typeof wmStnDataStore !== 'undefined' ? wmStnDataStore : [],
+      srn: typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : [],
+      grn: typeof wmGrnDataStore !== 'undefined' ? wmGrnDataStore : []
+    };
+    const targetStore = storeMap[currentWorklistView] || (activeWmTransferView ? storeMap[activeWmTransferView] : wmGrnDataStore);
+    const row = (currentDataset && currentDataset.find(r => r.id === transferRowId)) ||
+                (targetStore && targetStore.find(r => r.id === transferRowId)) ||
+                (currentDataset && currentDataset.find(r => r.selected)) ||
+                (targetStore && targetStore[0]);
+    const inpAdv = document.getElementById('inpWmPaymentAdvancePayment');
+    const inpFc = document.getElementById('inpWmPaymentFreightCharges');
+    if (inpAdv) {
+      const advVal = (row && row.transportPayment && row.transportPayment.advancePayment) || (row && row.transport && (row.transport.advancePayment || row.transport.advancePay)) || '5000.00';
+      inpAdv.value = String(advVal).replace(/,/g, '');
+    }
+    if (inpFc) {
+      let fcVal = (row && row.transportPayment && row.transportPayment.freightCharges) || (row && row.transport && row.transport.freightCharges);
+      if (!fcVal && currentWorklistView === 'payment' && typeof wmExpensesDataStore !== 'undefined' && wmExpensesDataStore.length > 0) {
+        const totalExp = wmExpensesDataStore.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+        fcVal = totalExp.toFixed(2);
+      } else if (!fcVal) {
+        fcVal = '14500.00';
+      }
+      inpFc.value = String(fcVal).replace(/,/g, '');
+    }
+  }
 
   const modal = document.getElementById('wmGrnTransportPaymentModal');
   if (modal) {
@@ -19540,9 +19985,29 @@ window.handleWmBeneficiaryTypeChange = function(type) {
     return;
   }
 
-  // Hide Driver-specific fields when not Driver
-  if (rowFc) rowFc.style.display = 'none';
-  if (rowAdv) rowAdv.style.display = 'none';
+  // Handle GRN, Transfer, and Payment pages: Advance Payment and Freight Charges fields are always visible as typeable input boxes
+  if (currentWorklistView === 'grn' || currentWorklistView === 'payment' || ['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    if (rowAdv) {
+      rowAdv.style.display = 'flex';
+      const inpAdv = document.getElementById('inpWmPaymentAdvancePayment');
+      if (inpAdv && (!inpAdv.value || inpAdv.value === '')) {
+        const advVal = (row && row.transportPayment && row.transportPayment.advancePayment) || (row && row.transport && (row.transport.advancePayment || row.transport.advancePay)) || '5000.00';
+        inpAdv.value = String(advVal).replace(/,/g, '');
+      }
+    }
+    if (rowFc) {
+      rowFc.style.display = 'flex';
+      const inpFc = document.getElementById('inpWmPaymentFreightCharges');
+      if (inpFc && (!inpFc.value || inpFc.value === '')) {
+        const fcVal = (row && row.transportPayment && row.transportPayment.freightCharges) || (row && row.transport && row.transport.freightCharges) || '14500.00';
+        inpFc.value = String(fcVal).replace(/,/g, '');
+      }
+    }
+  } else {
+    // Hide Driver-specific fields when not Driver and not GRN/Transfer
+    if (rowFc) rowFc.style.display = 'none';
+    if (rowAdv) rowAdv.style.display = 'none';
+  }
 
   if (type === 'Self') {
     if (rowTransferType) rowTransferType.style.display = 'flex';
@@ -19619,6 +20084,8 @@ window.submitWmTransportPayment = function() {
       const ben = document.getElementById('selWmBeneficiaryType')?.value;
       row.transportPayment.beneficiaryType = ben;
       row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
+      row.transportPayment.advancePayment = document.getElementById('inpWmPaymentAdvancePayment')?.value;
+      row.transportPayment.freightCharges = document.getElementById('inpWmPaymentFreightCharges')?.value;
       if (ben === 'Other Employee' || ben === 'Transport Vendor') {
         row.transportPayment.accountName = document.getElementById('selWmPaymentAccountName')?.value;
       } else if (ben === 'New Account') {
@@ -19634,6 +20101,9 @@ window.submitWmTransportPayment = function() {
     }
 
     closeWmGrnTransportPaymentModal();
+    closeWmGrnTransportModal();
+    activeWmTransferView = null;
+    activeWmTransferRowId = null;
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
 
@@ -19790,6 +20260,12 @@ window.submitWmTransportPayment = function() {
     : wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
   if (row) {
     row.isHighlighted = true;
+    if (!row.transportPayment) row.transportPayment = {};
+    const ben = document.getElementById('selWmBeneficiaryType')?.value;
+    row.transportPayment.beneficiaryType = ben;
+    row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
+    row.transportPayment.advancePayment = document.getElementById('inpWmPaymentAdvancePayment')?.value;
+    row.transportPayment.freightCharges = document.getElementById('inpWmPaymentFreightCharges')?.value;
   }
   if (currentDataset && Array.isArray(currentDataset)) {
     const cur = currentDataset.find(r => r.id === (currentWorklistView === 'min' ? (activeWmMinRowId || row?.id) : activeWmGrnRowId)) || (currentWorklistView === 'min' ? currentDataset.find(r => r.isHighlighted) : null);
@@ -19835,7 +20311,83 @@ window.openWmMinDetail = function(minId) {
   renderApp();
 };
 
-window.submitWmMinDetailPage = function() {
+window.openWmMinEwayModal = function() {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || wmMinDataStore[0];
+  const tgl = document.getElementById('tglWmMinEwayModal');
+  if (tgl) {
+    tgl.checked = Boolean(row && ((row.transport && row.transport.ewayBill) || row.ewayBill));
+  }
+  const modal = document.getElementById('wmMinEwayModal');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.animation = 'none';
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'block';
+};
+
+window.closeWmMinEwayModal = function() {
+  const modal = document.getElementById('wmMinEwayModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.handleWmMinEwayToggle = function(isChecked) {
+  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || wmMinDataStore[0];
+  if (row) {
+    if (!row.transport) row.transport = {};
+    row.transport.ewayBill = Boolean(isChecked);
+    row.ewayBill = Boolean(isChecked);
+  }
+};
+
+window.submitWmMinEwayModal = function() {
+  const isChecked = document.getElementById('tglWmMinEwayModal')?.checked || false;
+  handleWmMinEwayToggle(isChecked);
+  closeWmMinEwayModal();
+
+  if (currentWorklistView === 'supply') {
+    const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId)) || wmSupplyDataStore[0];
+    if (row) {
+      if (!row.transport) row.transport = {};
+      row.transport.ewayBill = Boolean(isChecked);
+      row.ewayBill = Boolean(isChecked);
+    }
+    openWmSupplyTransportModal();
+    return;
+  }
+
+  if (['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    const rowId = (typeof activeWmTransferRowId !== 'undefined') ? activeWmTransferRowId : null;
+    const storeMap = {
+      mtn: typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : [],
+      stn: typeof wmStnDataStore !== 'undefined' ? wmStnDataStore : [],
+      srn: typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : []
+    };
+    const targetStore = storeMap[currentWorklistView] || (activeWmTransferView ? storeMap[activeWmTransferView] : []);
+    const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+                (targetStore && targetStore.find(r => r.id === rowId)) ||
+                (currentDataset && currentDataset.find(r => r.selected));
+    if (row) {
+      if (!row.transport) row.transport = {};
+      row.transport.ewayBill = Boolean(isChecked);
+      row.ewayBill = Boolean(isChecked);
+    }
+    openWmMinTransportModal(row);
+    return;
+  }
+
+  const minModal = document.getElementById('wmMinSiteModal');
+  if (minModal && minModal.style.display !== 'none') {
+    closeWmMinSiteModal();
+  }
+
   const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || wmMinDataStore[0];
   if (row) {
     row.isHighlighted = true;
@@ -19857,6 +20409,10 @@ window.submitWmMinDetailPage = function() {
   renderApp();
 
   showToast(`MIN details submitted for ${row ? row.siteName : 'site'}!`);
+};
+
+window.submitWmMinDetailPage = function() {
+  openWmMinEwayModal();
 };
 
 // Warehouse Manager MIN Site Modal States & Functions
@@ -20091,40 +20647,28 @@ window.handleWmMinCsvUpload = function(event) {
 };
 
 window.submitWmMinSiteModal = function() {
-  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
-  if (row) {
-    row.isHighlighted = true;
-    if (row.items && Array.isArray(row.items)) {
-      row.items.forEach(it => {
-        it.selected = true;
-        it.isTicked = true;
-      });
-    }
-  }
-  if (currentDataset && Array.isArray(currentDataset)) {
-    const cur = currentDataset.find(r => r.id === activeWmMinRowId);
-    if (cur) cur.isHighlighted = true;
-  }
-
-  closeWmMinSiteModal();
-  applyFiltersAndRender();
-  showToast(`MIN for ${row ? row.siteName : 'site'} submitted and highlighted!`);
+  openWmMinEwayModal();
 };
 
-window.openWmMinTransportModal = function() {
-  const row = (currentDataset && currentDataset.find(r => r.isHighlighted)) || wmMinDataStore.find(r => r.id === activeWmMinRowId) || wmMinDataStore[0];
+window.openWmMinTransportModal = function(transferRow) {
+  const row = transferRow || (typeof activeWmTransferRowId !== 'undefined' && activeWmTransferRowId && currentDataset && currentDataset.find(r => r.id === activeWmTransferRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted)) || wmMinDataStore.find(r => r.id === activeWmMinRowId) || wmMinDataStore[0];
 
-  // Show MIN fields, hide GRN fields
+  // Show MIN fields, hide GRN, MRN, Supply fields
   const grnFields = document.getElementById('wmGrnTransportFields');
   const minFields = document.getElementById('wmMinTransportFields');
+  const mrnFields = document.getElementById('wmMrnTransportFields');
+  const supplyFields = document.getElementById('wmSupplyTransportFields');
   if (grnFields) grnFields.style.display = 'none';
   if (minFields) minFields.style.display = 'flex';
+  if (mrnFields) mrnFields.style.display = 'none';
+  if (supplyFields) supplyFields.style.display = 'none';
 
-  // Toggle Header Icons: Hide PDF, Show Printer
+  // Toggle Header Icons: Hide PDF, Show Printer ONLY IF ewayBill toggle is enabled
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
   if (lblPdf) lblPdf.style.display = 'none';
-  if (btnPrint) btnPrint.style.display = 'inline-flex';
+  const hasEway = Boolean((row && row.transport && row.transport.ewayBill) || (row && row.ewayBill));
+  if (btnPrint) btnPrint.style.display = hasEway ? 'inline-flex' : 'none';
 
   const t = (row && row.transport) ? row.transport : {
     transportType: 'Rental',
@@ -20158,9 +20702,6 @@ window.openWmMinTransportModal = function() {
 
   const inpWhatsapp = document.getElementById('inpWmMinWhatsappNo');
   if (inpWhatsapp) inpWhatsapp.value = t.whatsappNo || '';
-
-  const tglEway = document.getElementById('tglWmMinEwayBill');
-  if (tglEway) tglEway.checked = Boolean(t.ewayBill);
 
   const modal = document.getElementById('wmGrnTransportModal');
   if (modal) {
@@ -20434,17 +20975,21 @@ window.submitWmMrnSiteModal = function() {
   openWmMrnTransportModal();
 };
 
-window.openWmMrnTransportModal = function() {
-  const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
+window.openWmMrnTransportModal = function(transferRow) {
+  const row = transferRow || (typeof activeWmTransferRowId !== 'undefined' && activeWmTransferRowId && currentDataset && currentDataset.find(r => r.id === activeWmTransferRowId)) || wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)) || wmMrnDataStore[0];
 
   const mrnModal = document.getElementById('wmMrnSiteModal');
   if (mrnModal) mrnModal.classList.add('card-dimmed-blurred');
 
-  // Show GRN fields, hide MIN fields
+  // Show MRN fields, hide GRN, MIN, Supply fields
   const grnFields = document.getElementById('wmGrnTransportFields');
   const minFields = document.getElementById('wmMinTransportFields');
-  if (grnFields) grnFields.style.display = 'flex';
+  const mrnFields = document.getElementById('wmMrnTransportFields');
+  const supplyFields = document.getElementById('wmSupplyTransportFields');
+  if (grnFields) grnFields.style.display = 'none';
   if (minFields) minFields.style.display = 'none';
+  if (mrnFields) mrnFields.style.display = 'flex';
+  if (supplyFields) supplyFields.style.display = 'none';
 
   // Toggle Header Icons: Show PDF, Hide Printer
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
@@ -20455,22 +21000,16 @@ window.openWmMrnTransportModal = function() {
   const t = (row && row.transport) ? row.transport : {
     logisticsName: 'V-Trans Logistics Ltd',
     freightCharges: 14500.00,
-    cgstIgst: 1305.00,
-    sgst: 1305.00,
-    totalAmount: 17110.00
+    advancePay: 5000.00
   };
 
-  const inpLog = document.getElementById('inpWmLogisticsName');
-  const inpFc = document.getElementById('inpWmFreightCharges');
-  const inpCgst = document.getElementById('inpWmTransportCgstIgst');
-  const inpSgst = document.getElementById('inpWmTransportSgst');
-  const inpTot = document.getElementById('inpWmTransportTotalAmount');
+  const inpLog = document.getElementById('inpWmMrnLogisticsName') || document.getElementById('inpWmLogisticsName');
+  const inpFc = document.getElementById('inpWmMrnFreightCharges') || document.getElementById('inpWmFreightCharges');
+  const inpAdv = document.getElementById('inpWmMrnAdvancePay');
 
   if (inpLog) inpLog.value = t.logisticsName || 'V-Trans Logistics Ltd';
   if (inpFc) inpFc.value = Number(t.freightCharges || 0).toFixed(2);
-  if (inpCgst) inpCgst.value = Number(t.cgstIgst || 0).toFixed(2);
-  if (inpSgst) inpSgst.value = Number(t.sgst || 0).toFixed(2);
-  if (inpTot) inpTot.value = Number(t.totalAmount || 0).toFixed(2);
+  if (inpAdv) inpAdv.value = t.advancePay !== undefined ? Number(t.advancePay || 0).toFixed(2) : (t.freightCharges ? (Number(t.freightCharges) * 0.5).toFixed(2) : '5000.00');
 
   const modal = document.getElementById('wmGrnTransportModal');
   if (modal) {
@@ -20496,11 +21035,15 @@ window.openWmTransportModalForTransfer = function(row) {
   activeWmTransferRowId = row ? row.id : null;
   activeWmTransferView = currentWorklistView;
 
-  // Show GRN fields, hide MIN fields
+  // Show GRN fields, hide MIN, MRN, Supply fields
   const grnFields = document.getElementById('wmGrnTransportFields');
   const minFields = document.getElementById('wmMinTransportFields');
+  const mrnFields = document.getElementById('wmMrnTransportFields');
+  const supplyFields = document.getElementById('wmSupplyTransportFields');
   if (grnFields) grnFields.style.display = 'flex';
   if (minFields) minFields.style.display = 'none';
+  if (mrnFields) mrnFields.style.display = 'none';
+  if (supplyFields) supplyFields.style.display = 'none';
 
   // Toggle Header Icons: Show PDF, Hide Printer
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
@@ -20574,16 +21117,19 @@ window.submitWmTransferWorkflow = function(viewType) {
     return;
   }
 
+  activeWmTransferRowId = selectedRow.id;
+  activeWmTransferView = viewType;
+
   const statusStr = (selectedRow.status || '').toLowerCase().trim();
-  const isDispatch = statusStr.includes('dispatch');
   const isReceive = statusStr.includes('receive');
 
-  if (isDispatch) {
-    openWmTransportModalForTransfer(selectedRow);
-  } else if (isReceive) {
-    openWmTransportPaymentModalForTransfer(selectedRow);
+  if (isReceive) {
+    activeWmMrnRowId = selectedRow.id;
+    openWmMrnTransportModal(selectedRow);
   } else {
-    openWmTransportModalForTransfer(selectedRow);
+    // Dispatch flow: E-way bill -> MIN transport details -> Transport payment
+    activeWmMinRowId = selectedRow.id;
+    openWmMinEwayModal();
   }
 };
 
@@ -20733,10 +21279,13 @@ window.handleWmSupplyItemSelect = function(itemId, isChecked) {
   if (it) it.selected = isChecked;
 
   const hasSelected = row.items.some(i => i.selected);
+  const hasTicked = row.items.some(i => i.isTicked);
   const btnTick = document.getElementById('btnWmSupplyTick');
   const btnEdit = document.getElementById('btnWmSupplyEdit');
   if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
   if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
+  const submitArea = document.getElementById('wmSupplyTableSubmitArea');
+  if (submitArea) submitArea.style.display = (hasSelected || hasTicked) ? 'flex' : 'none';
 
   if (!hasSelected && isWmSupplyEditing) {
     isWmSupplyEditing = false;
@@ -20818,7 +21367,18 @@ window.handleWmSupplyTick = function() {
 };
 
 window.submitWmSupplyCustomerModal = function() {
-  openWmSupplyTransportModal();
+  const row = wmSupplyDataStore.find(r => r.id === activeWmSupplyRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmSupplyRowId));
+  if (row && row.items) {
+    row.items.forEach(it => {
+      if (it.selected) {
+        it.isTicked = true;
+        it.isHighlighted = true;
+      }
+    });
+  }
+  const supplyModal = document.getElementById('wmSupplyCustomerModal');
+  if (supplyModal) supplyModal.classList.add('card-dimmed-blurred');
+  openWmMinEwayModal();
 };
 
 window.openWmSupplyTransportModal = function() {
@@ -20827,39 +21387,30 @@ window.openWmSupplyTransportModal = function() {
   const supplyModal = document.getElementById('wmSupplyCustomerModal');
   if (supplyModal) supplyModal.classList.add('card-dimmed-blurred');
 
-  // Show Supply transport fields, hide GRN and MIN fields
+  // Show Supply transport fields, hide GRN, MIN, and MRN fields
   const grnFields = document.getElementById('wmGrnTransportFields');
   const minFields = document.getElementById('wmMinTransportFields');
+  const mrnFields = document.getElementById('wmMrnTransportFields');
   const supplyFields = document.getElementById('wmSupplyTransportFields');
   if (grnFields) grnFields.style.display = 'none';
   if (minFields) minFields.style.display = 'none';
+  if (mrnFields) mrnFields.style.display = 'none';
   if (supplyFields) supplyFields.style.display = 'flex';
 
-  // Toggle Header Icons: Hide PDF Upload, Show Printer Icon
+  // Toggle Header Icons: Hide PDF Upload, Show Printer Icon if E-way bill is present/enabled
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
   if (lblPdf) lblPdf.style.display = 'none';
-  if (btnPrint) btnPrint.style.display = 'inline-flex';
+  const hasEway = Boolean((row && row.transport && row.transport.ewayBill) || (row && row.ewayBill));
+  if (btnPrint) btnPrint.style.display = hasEway ? 'inline-flex' : 'none';
 
   const t = (row && row.transport) ? row.transport : {
     transporterName: 'Nexus Fleet Logistics',
-    vehicleNo: 'TN-09-AB-1234',
-    driverName: 'Ramesh Kumar',
-    whatsappNo: '9876543210',
     ewayBill: true
   };
 
   const inpTrans = document.getElementById('inpWmSupplyTransporterName');
-  const inpVeh = document.getElementById('inpWmSupplyVehicleNo');
-  const inpDriver = document.getElementById('inpWmSupplyDriverName');
-  const inpWa = document.getElementById('inpWmSupplyWhatsappNo');
-  const tglEway = document.getElementById('tglWmSupplyEwayBill');
-
-  if (inpTrans) inpTrans.value = t.transporterName || '';
-  if (inpVeh) inpVeh.value = t.vehicleNo || '';
-  if (inpDriver) inpDriver.value = t.driverName || '';
-  if (inpWa) inpWa.value = t.whatsappNo || '';
-  if (tglEway) tglEway.checked = !!t.ewayBill;
+  if (inpTrans) inpTrans.value = t.transporterName || 'Nexus Fleet Logistics';
 
   const modal = document.getElementById('wmGrnTransportModal');
   if (modal) {
@@ -20874,6 +21425,7 @@ window.openWmSupplyTransportModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'block';
 };
+
 
 // ==========================================================================
 // 4. WORKLIST MODULE RENDERERS
@@ -21987,10 +22539,10 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
-          <button type="button" class="toolbar-icon-btn" id="btnWmPaymentAddTransport" title="Transport Payment"
+          <button type="button" class="toolbar-icon-btn" id="btnWmPaymentAddTransport" title="Add Expenses"
             style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
-            onclick="openWmPaymentTransportModal()">
-            <img src="icons/Add.svg" alt="Add Transport Payment" width="28" height="28">
+            onclick="openWmPaymentAddExpensesModal()">
+            <img src="icons/Add.svg" alt="Add Expenses" width="28" height="28">
           </button>
         </div>
       `;
@@ -23602,17 +24154,17 @@ function renderWorklistTableHead() {
     if (currentWorklistView === 'supply') {
       thead.innerHTML = `
         <tr class="master-view-header">
-          <!-- 1. Submission Date: 15ch, center header, NO filter -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-              <span>Submission Date</span>
-            </div>
-          </th>
-          <!-- 2. Customer Name: 25ch, center header, filterable -->
+          <!-- 1. Customer Name: 25ch, center header, filterable -->
           <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Customer Name</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 2. Submission Date: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Submission Date</span>
             </div>
           </th>
           <!-- 3. Order ID: 15ch, center header, NO filter -->
@@ -25775,9 +26327,9 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
               ${Number(row.approvedAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
-            <!-- 4c. Paid: 15ch & right -->
+            <!-- 4c. Paid: 15ch & right (Clickable to open Payment Receipt modal from Service Vendor) -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
-              ${Number(row.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <a href="#" class="cell-paid-receipt-link clickable-project-link" style="color: #0454e4; cursor: pointer; text-decoration: underline; font-weight: 600;" onclick="openWmPaymentReceiptModal('${row.id}'); return false;">${Number(row.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</a>
             </td>
             <!-- 4d. Payable: 15ch & right -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
@@ -25821,13 +26373,13 @@ function applyFiltersAndRender() {
         const isRowHighlighted = !!row.isHighlighted;
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowHighlighted ? '#dcfce7' : '#ffffff'};">
-            <!-- 1. Submission Date: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
-              ${row.submissionDate || ''}
-            </td>
-            <!-- 2. Customer Name: 25ch & left -->
+            <!-- 1. Customer Name: 25ch & left -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.customerName || '').replace(/"/g, '&quot;')}">
               <span class="cell-customer-link" style="color: #0454e4; cursor: pointer; text-decoration: underline;" onclick="openWmSupplyCustomerModal('${row.id}')">${row.customerName || ''}</span>
+            </td>
+            <!-- 2. Submission Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.submissionDate || ''}
             </td>
             <!-- 3. Order ID: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
@@ -28128,7 +28680,9 @@ function applyFiltersAndRender() {
             <a href="#" class="clickable-project-link" onclick="openServiceVendorInvoiceAmountModal('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; cursor: pointer;" title="View Invoice Amount Details">${row.invoiceAmount || row.totalAmount || ''}</a>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.tdsDeduction || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.paidAmount || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">
+            <a href="#" class="clickable-project-link" onclick="openPaymentReceiptModal('Payment Receipt', 'Paid Amount'); return false;" style="color: #0454e4; text-decoration: underline; cursor: pointer;" title="View Payment Receipt">${row.paidAmount || ''}</a>
+          </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.paidDate || ''}</td>
         </tr>
       `).join('');
@@ -28345,24 +28899,24 @@ function applyFiltersAndRender() {
     } else if (currentInventoryView === 'product_details') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="inventory-data-row" data-row-id="${row.id}">
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 500;">${row.invoiceNo || ''}</td>
-          <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; padding: 10px 14px;">${row.vendorName || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.docDate || ''}</td>
-          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px;">${row.qtyDoc || ''}</td>
-          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px;">${row.qtyStock || ''}</td>
-          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px;">${row.qtyTotal || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px;">${row.purchasePrice || ''}</td>
-          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.transportation || ''}</td>
-          <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px;">${row.unloadingOther || ''}</td>
-          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px;">${row.stockPrice || ''}</td>
-          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.newPrice || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 400;">${row.invoiceNo || ''}</td>
+          <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; padding: 10px 14px; font-weight: 400;">${row.vendorName || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px; font-weight: 400;">${row.docDate || ''}</td>
+          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.qtyDoc || ''}</td>
+          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.qtyStock || ''}</td>
+          <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.qtyTotal || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.purchasePrice || ''}</td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.transportation || ''}</td>
+          <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.unloadingOther || ''}</td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.stockPrice || ''}</td>
+          <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; font-weight: 400;">${row.newPrice || ''}</td>
         </tr>
       `).join('');
     } else {
       tbody.innerHTML = filteredDataset.map(row => `
-        <tr class="inventory-data-row" data-row-id="${row.id}">
-          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">
-            <a href="#" onclick="openInventoryProductDetails('${row.id}', '${(row.productDescription || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; cursor: pointer; font-weight: 500;">${row.productDescription || ''}</a>
+        <tr class="inventory-data-row" data-row-id="${row.id}" style="cursor: pointer;" onclick="if (!event.target.closest('a')) openInventoryProductDetails('${row.id}', '${(row.productDescription || '').replace(/'/g, "\\'")}');">
+          <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 400; color: #1e293b;">
+            <a href="#" onclick="openInventoryProductDetails('${row.id}', '${(row.productDescription || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; cursor: pointer; font-weight: 400;">${row.productDescription || ''}</a>
           </td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.whCode || ''}</td>
           <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px;">${row.productHead || ''}</td>

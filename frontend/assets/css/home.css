@@ -5450,8 +5450,6 @@ body.standalone-mode .worklist-main-full {
 #pmAddSurveyItemsModal textarea,
 #pmAddCivilWorksModal select,
 #pmAddCivilWorksModal input,
-#pmAddStnMaterialsModal input,
-#pmAddStnMaterialsModal select,
 #pmAddSrnMaterialsModal input,
 #pmAddSrnMaterialsModal select,
 #pmAddCamMaterialsModal input,
@@ -5467,8 +5465,6 @@ body.standalone-mode .worklist-main-full {
 #pmAddSurveyItemsModal textarea:focus,
 #pmAddCivilWorksModal select:focus,
 #pmAddCivilWorksModal input:focus,
-#pmAddStnMaterialsModal input:focus,
-#pmAddStnMaterialsModal select:focus,
 #pmAddSrnMaterialsModal input:focus,
 #pmAddSrnMaterialsModal select:focus,
 #pmAddCamMaterialsModal input:focus,
@@ -5476,6 +5472,24 @@ body.standalone-mode .worklist-main-full {
   border: 1px solid #000000 !important;
   outline: none !important;
   box-shadow: none !important;
+}
+
+#pmAddStnMaterialsModal input,
+#pmAddStnMaterialsModal select,
+#pmAddStnMaterialsModal .pm-custom-select {
+  border: 1.5px solid #cbd5e1 !important;
+  border-color: #cbd5e1 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#pmAddStnMaterialsModal input:focus,
+#pmAddStnMaterialsModal select:focus,
+#pmAddStnMaterialsModal .pm-custom-select:focus {
+  border: 1.5px solid #00cba0 !important;
+  border-color: #00cba0 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(0, 203, 160, 0.15) !important;
 }
 
 #pmAddCivilWorksModal .pm-field-label {
@@ -5731,6 +5745,8 @@ th.wm-mrn-sub-header {
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
+  width: 96vw !important;
+  max-width: 1560px !important;
   margin: 0 !important;
   animation: none !important;
   z-index: 99999 !important;

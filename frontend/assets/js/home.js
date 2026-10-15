@@ -13831,7 +13831,14 @@ window.toggleSelectAllPmMembers = function() {
 // ==========================================================================
 window.customExpenseItemNames = window.customExpenseItemNames || [];
 window.activeExpenseItemFilters = window.activeExpenseItemFilters || {};
-window.currentExpenseItemFilterCol = null;
+window.normalizeExpenseCategory = function(name) {
+  if (!name) return 'Operational Expenses';
+  const lower = String(name).toLowerCase().trim();
+  if (lower.includes('operational')) return 'Operational Expenses';
+  if (lower.includes('non-standard') || lower.includes('non standard')) return 'Non-standard Expenses';
+  if (lower.includes('service vendor') || lower.includes('vendor payment')) return 'Service Vendor Payment';
+  return String(name).trim();
+};
 
 window.getExpenseItemsList = function() {
   let activeRow = null;
@@ -13844,14 +13851,10 @@ window.getExpenseItemsList = function() {
   const featSettings = getSiteFeatureSettings(activeRow || selectedProjectId);
 
   const items = [
-    { id: 'exp-item-op', itemName: 'Operational Expenses' }
+    { id: 'exp-item-op', itemName: 'Operational Expenses' },
+    { id: 'exp-item-nonstd', itemName: 'Non-standard Expenses' },
+    { id: 'exp-item-sv', itemName: 'Service Vendor Payment' }
   ];
-  if (featSettings && featSettings.additionalApproval) {
-    items.push({ id: 'exp-item-nonstd', itemName: 'Non-standard Expenses' });
-  }
-  if (featSettings && featSettings.serviceContract) {
-    items.push({ id: 'exp-item-sv', itemName: 'Service Vendor Payment' });
-  }
   (window.customExpenseItemNames || []).forEach((name, idx) => {
     items.push({ id: `exp-item-custom-${idx + 1}`, itemName: name });
   });
@@ -13976,7 +13979,11 @@ window.renderExpenseDetailsInlineTable = function() {
   const tbody = document.getElementById('tblExpenseDetailsInlineBody');
   if (!tbody) return;
 
-  if (!window.expenseDetailsInlineItems || window.expenseDetailsInlineItems.length === 0) {
+  const allItems = (typeof wmExpensesDataStore !== 'undefined' && wmExpensesDataStore.length > 0)
+    ? wmExpensesDataStore
+    : (window.expenseDetailsInlineItems || []);
+
+  if (allItems.length === 0) {
     tbody.innerHTML = `
       <tr>
         <td colspan="5" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem; border: 1px solid #e2e8f0;">No expense records added yet.</td>
@@ -13985,20 +13992,19 @@ window.renderExpenseDetailsInlineTable = function() {
     return;
   }
 
-  tbody.innerHTML = window.expenseDetailsInlineItems.map((row, idx) => {
+  tbody.innerHTML = allItems.map((row, idx) => {
     const qtyVal = parseFloat(String(row.qty || '0').replace(/,/g, '')) || 0;
     const rateVal = parseFloat(String(row.rate || '0').replace(/,/g, '')) || 0;
     const amtVal = parseFloat(String(row.amount || (qtyVal * rateVal)).replace(/,/g, '')) || (qtyVal * rateVal);
     const formattedQty = qtyVal.toFixed(2);
     const formattedRate = rateVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const formattedAmt = amtVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const catLabel = row.category || 'Operational Expenses';
 
     return `
       <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
-        <td style="width: 28ch; min-width: 28ch; max-width: 28ch; text-align: left !important; padding: 10px 12px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')}">
-          <a href="#" onclick="openEditExpenseModal(${idx}); return false;" class="clickable-expense-desc-link" style="color: #0454e4; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;">
-            ${row.description || ''}
-          </a>
+        <td style="width: 28ch; min-width: 28ch; max-width: 28ch; text-align: left !important; padding: 10px 12px; color: #1e293b; font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(row.description || '').replace(/"/g, '&quot;')} (${catLabel})">
+          ${row.description || ''}
         </td>
         <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; padding: 10px 6px; color: #1e293b; font-size: 0.95rem; border: 1px solid #e2e8f0; white-space: nowrap;">
           ${row.uom || 'Nos'}
@@ -14364,13 +14370,22 @@ window.openExpenseTypeDetailsModal = function(expenseType) {
   const modal = document.getElementById('pmAddExpenseTableModal');
   if (modal) {
     window.expenseTableOpenedFrom = 'landing';
+    const normCategory = (typeof normalizeExpenseCategory === 'function')
+      ? normalizeExpenseCategory(expenseType)
+      : (expenseType || 'Operational Expenses');
     const titleBadge = document.getElementById('lblPmAddExpenseTableTitle');
     if (titleBadge) {
-      titleBadge.textContent = expenseType || 'Expense Details';
+      titleBadge.textContent = expenseType || normCategory || 'Expense Details';
     }
 
-    // Keep table data empty for now as requested
-    addExpenseItemsDataStore = [];
+    // Load items for this specific category from wmExpensesDataStore
+    const allStore = (typeof wmExpensesDataStore !== 'undefined') ? wmExpensesDataStore : [];
+    addExpenseItemsDataStore = allStore.filter(r => {
+      const cat = (typeof normalizeExpenseCategory === 'function')
+        ? normalizeExpenseCategory(r.category || 'Operational Expenses')
+        : (r.category || 'Operational Expenses');
+      return cat === normCategory;
+    });
     renderAddExpenseTable();
 
     modal.classList.remove('card-dimmed-blurred');
@@ -14540,8 +14555,12 @@ window.saveNewExpenseEntry = function() {
   else if (dLower.includes('manpower') || dLower.includes('labour')) uom = 'Mandays';
   else if (dLower.includes('equipment') || dLower.includes('rental')) uom = 'Hours';
 
-  addExpenseItemsDataStore.push({
+  const catTitle = document.getElementById('lblPmAddExpenseTableTitle')?.textContent || 'Operational Expenses';
+  const normCat = (typeof normalizeExpenseCategory === 'function') ? normalizeExpenseCategory(catTitle) : catTitle;
+
+  const newEntry = {
     id: 'exp-' + Date.now(),
+    category: normCat,
     description: desc,
     uom: uom,
     qty: qty,
@@ -14549,7 +14568,12 @@ window.saveNewExpenseEntry = function() {
     amount: amount,
     remarks: remarks,
     pdf: window.selectedExpenseEntryPdfName || ''
-  });
+  };
+
+  addExpenseItemsDataStore.push(newEntry);
+  if (typeof wmExpensesDataStore !== 'undefined') {
+    wmExpensesDataStore.push({ ...newEntry, id: 'wm-exp-' + Date.now() });
+  }
 
   renderAddExpenseTable();
 
@@ -19215,8 +19239,10 @@ window.openWmGrnTransportModal = function() {
   // Toggle Header Icons: Show PDF, Hide Printer
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
   if (lblPdf) lblPdf.style.display = 'flex';
   if (btnPrint) btnPrint.style.display = 'none';
+  if (btnPdfDownload) btnPdfDownload.style.display = 'none';
 
   const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
   const t = (row && row.transport) ? row.transport : {
@@ -19254,6 +19280,8 @@ window.openWmGrnTransportModal = function() {
 window.closeWmGrnTransportModal = function() {
   const modal = document.getElementById('wmGrnTransportModal');
   if (modal) modal.style.display = 'none';
+  const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
+  if (btnPdfDownload) btnPdfDownload.style.display = 'none';
   const prevModal = document.getElementById('wmGrnSupplierModal');
   if (prevModal) prevModal.classList.remove('card-dimmed-blurred');
   const minModal = document.getElementById('wmMinSiteModal');
@@ -19291,6 +19319,20 @@ window.calculateWmTransportTotal = function() {
 
   const inpTot = document.getElementById('inpWmTransportTotalAmount');
   if (inpTot) inpTot.value = total.toFixed(2);
+};
+
+window.calculateWmMrnPayable = function() {
+  const fc = parseFloat(document.getElementById('inpWmMrnFreightCharges')?.value) || 0;
+  const adv = parseFloat(document.getElementById('inpWmMrnAdvancePay')?.value) || 0;
+  const payable = fc - adv;
+  const inpPayable = document.getElementById('inpWmMrnPayable');
+  if (inpPayable) {
+    inpPayable.value = payable.toFixed(2);
+  }
+};
+
+window.handleWmMrnTransportPdfDownload = function() {
+  showToast('MRN Transport details PDF downloaded successfully');
 };
 
 window.handleWmGrnTransportPdfUpload = function(event) {
@@ -19369,9 +19411,11 @@ window.saveWmTransportDetails = function() {
       const inpLog = document.getElementById('inpWmMrnLogisticsName') || document.getElementById('inpWmLogisticsName');
       const inpFc = document.getElementById('inpWmMrnFreightCharges') || document.getElementById('inpWmFreightCharges');
       const inpAdv = document.getElementById('inpWmMrnAdvancePay');
+      const inpPayable = document.getElementById('inpWmMrnPayable');
       row.transport.logisticsName = inpLog?.value || 'V-Trans Logistics Ltd';
       row.transport.freightCharges = parseFloat(inpFc?.value) || 0;
       row.transport.advancePay = parseFloat(inpAdv?.value) || 0;
+      row.transport.payable = parseFloat(inpPayable?.value) || 0;
       row.isHighlighted = true;
 
       if (targetStore && row) {
@@ -19403,13 +19447,39 @@ window.saveWmTransportDetails = function() {
       const inpLog = document.getElementById('inpWmMrnLogisticsName') || document.getElementById('inpWmLogisticsName');
       const inpFc = document.getElementById('inpWmMrnFreightCharges') || document.getElementById('inpWmFreightCharges');
       const inpAdv = document.getElementById('inpWmMrnAdvancePay');
+      const inpPayable = document.getElementById('inpWmMrnPayable');
       row.transport.logisticsName = inpLog?.value || 'V-Trans Logistics Ltd';
       row.transport.freightCharges = parseFloat(inpFc?.value) || 0;
       row.transport.advancePay = parseFloat(inpAdv?.value) || 0;
+      row.transport.payable = parseFloat(inpPayable?.value) || 0;
+      row.isHighlighted = true;
+      if (row.items && Array.isArray(row.items)) {
+        row.items.forEach(it => {
+          if (it.selected) {
+            it.isTicked = true;
+          }
+        });
+      }
+    }
+    if (currentDataset && Array.isArray(currentDataset)) {
+      const cur = currentDataset.find(r => r.id === activeWmMrnRowId);
+      if (cur) cur.isHighlighted = true;
     }
 
     closeWmGrnTransportModal();
-    openWmGrnTransportPaymentModal();
+    closeWmMrnSiteModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    currentWorklistView = 'mrn';
+    updateURL();
+    renderApp();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Task completed successfully!');
+    }
     return;
   }
 
@@ -19441,7 +19511,7 @@ window.saveWmTransportDetails = function() {
     return;
   }
 
-  if (currentWorklistView === 'min') {
+  if (currentWorklistView === 'min' || currentWorklistView === 'min_detail') {
     const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted));
     if (row) {
       if (!row.transport) row.transport = {};
@@ -19484,18 +19554,64 @@ window.saveWmTransportDetails = function() {
 let wmExpensesDataStore = [
   {
     id: 'wm-exp-1',
+    category: 'Operational Expenses',
     description: 'Civil Foundation Work & Excavation',
     uom: 'Sq.Ft',
-    qty: 120,
-    rate: 10000,
-    amount: 1200000,
+    qty: 120.00,
+    rate: 2500.00,
+    amount: 300000.00,
     remarks: 'Foundation excavation charges',
+    pdf: ''
+  },
+  {
+    id: 'wm-exp-2',
+    category: 'Operational Expenses',
+    description: 'Electrical Cabling & Termination',
+    uom: 'Mtr',
+    qty: 450.00,
+    rate: 350.00,
+    amount: 157500.00,
+    remarks: 'Power cables',
+    pdf: ''
+  },
+  {
+    id: 'wm-exp-3',
+    category: 'Operational Expenses',
+    description: 'Site Diesel Generator Fuel',
+    uom: 'Ltr',
+    qty: 650.00,
+    rate: 92.50,
+    amount: 60125.00,
+    remarks: 'DG fuel',
+    pdf: ''
+  },
+  {
+    id: 'wm-exp-4',
+    category: 'Non-standard Expenses',
+    description: 'Soil Testing & Geotech Survey',
+    uom: 'Nos',
+    qty: 2.00,
+    rate: 22500.00,
+    amount: 45000.00,
+    remarks: 'Soil bearing test',
+    pdf: ''
+  },
+  {
+    id: 'wm-exp-5',
+    category: 'Service Vendor Payment',
+    description: 'Tower Structural Erection',
+    uom: 'Nos',
+    qty: 1.00,
+    rate: 150000.00,
+    amount: 150000.00,
+    remarks: 'Vendor erection fee',
     pdf: ''
   }
 ];
 window.selectedWmExpensePdfName = '';
 window.editingWmExpenseId = null;
 window.pmExpenseSourceModalOpen = false;
+window.currentActiveExpenseCategory = 'Operational Expenses';
 
 window.openWmPaymentAddExpensesModal = function(itemName) {
   const overlay = document.getElementById('sideFormOverlay');
@@ -19521,47 +19637,26 @@ window.openWmPaymentAddExpensesModal = function(itemName) {
   modal.style.display = 'block';
   overlay.style.display = 'flex';
 
-  const descEl = document.getElementById('selWmExpenseDescription');
-  if (itemName && descEl) {
-    let found = false;
-    for (let i = 0; i < descEl.options.length; i++) {
-      if (descEl.options[i].value === itemName) {
-        descEl.selectedIndex = i;
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      const opt = document.createElement('option');
-      opt.value = itemName;
-      opt.textContent = itemName;
-      descEl.appendChild(opt);
-      descEl.value = itemName;
-    }
+  const normalizedCat = (typeof normalizeExpenseCategory === 'function')
+    ? normalizeExpenseCategory(itemName || 'Operational Expenses')
+    : (itemName || 'Operational Expenses');
+  window.currentActiveExpenseCategory = normalizedCat;
 
-    // Check if an existing row matches this item name
-    const existingRow = wmExpensesDataStore.find(r => r.description.toLowerCase() === itemName.toLowerCase());
-    if (existingRow) {
-      window.editingWmExpenseId = existingRow.id;
-      if (document.getElementById('inpWmExpenseQty')) document.getElementById('inpWmExpenseQty').value = existingRow.qty;
-      if (document.getElementById('inpWmExpenseRate')) document.getElementById('inpWmExpenseRate').value = existingRow.rate;
-      if (document.getElementById('inpWmExpenseRemarks')) document.getElementById('inpWmExpenseRemarks').value = existingRow.remarks || '';
-      if (existingRow.pdf && document.getElementById('lblWmExpensePdfName')) {
-        document.getElementById('lblWmExpensePdfName').textContent = existingRow.pdf;
-        window.selectedWmExpensePdfName = existingRow.pdf;
-      }
-    } else {
-      window.editingWmExpenseId = null;
-      if (document.getElementById('inpWmExpenseQty')) document.getElementById('inpWmExpenseQty').value = '';
-      if (document.getElementById('inpWmExpenseRate')) document.getElementById('inpWmExpenseRate').value = '';
-      if (document.getElementById('inpWmExpenseRemarks')) document.getElementById('inpWmExpenseRemarks').value = '';
-      if (document.getElementById('lblWmExpensePdfName')) document.getElementById('lblWmExpensePdfName').textContent = '';
-      window.selectedWmExpensePdfName = '';
-    }
-  } else {
-    window.editingWmExpenseId = null;
+  // Reset top form inputs for fresh entry into this category
+  window.editingWmExpenseId = null;
+  if (document.getElementById('inpWmExpenseQty')) document.getElementById('inpWmExpenseQty').value = '';
+  if (document.getElementById('inpWmExpenseRate')) document.getElementById('inpWmExpenseRate').value = '';
+  if (document.getElementById('inpWmExpenseRemarks')) document.getElementById('inpWmExpenseRemarks').value = '';
+  if (document.getElementById('lblWmExpensePdfName')) document.getElementById('lblWmExpensePdfName').textContent = '';
+  if (document.getElementById('inpWmExpensePdfFile')) document.getElementById('inpWmExpensePdfFile').value = '';
+  window.selectedWmExpensePdfName = '';
+
+  const titleEl = document.getElementById('lblWmPaymentExpensesTitle');
+  if (titleEl) {
+    titleEl.textContent = 'Add Expenses';
   }
 
+  // Render bottom table with records specifically belonging to this category
   renderWmExpensesTable();
 };
 
@@ -19635,8 +19730,19 @@ window.renderWmExpensesTable = function() {
   const sumEl = document.getElementById('lblWmExpensesTotalSum');
   if (!tbody) return;
 
+  const activeCategory = (typeof normalizeExpenseCategory === 'function')
+    ? normalizeExpenseCategory(window.currentActiveExpenseCategory || 'Operational Expenses')
+    : (window.currentActiveExpenseCategory || 'Operational Expenses');
+
+  const categoryItems = (typeof wmExpensesDataStore !== 'undefined' ? wmExpensesDataStore : []).filter(r => {
+    const rCat = (typeof normalizeExpenseCategory === 'function')
+      ? normalizeExpenseCategory(r.category || 'Operational Expenses')
+      : (r.category || 'Operational Expenses');
+    return rCat === activeCategory;
+  });
+
   let totalSum = 0;
-  wmExpensesDataStore.forEach(item => {
+  categoryItems.forEach(item => {
     const amt = parseFloat(item.amount) || 0;
     totalSum += amt;
   });
@@ -19645,16 +19751,16 @@ window.renderWmExpensesTable = function() {
     sumEl.textContent = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  if (wmExpensesDataStore.length === 0) {
+  if (categoryItems.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem;">No expense records added yet.</td>
+        <td colspan="5" style="text-align: center; padding: 20px; color: #64748b; font-size: 0.95rem;">No expense records added for ${activeCategory} yet.</td>
       </tr>
     `;
     return;
   }
 
-  tbody.innerHTML = wmExpensesDataStore.map((row, idx) => {
+  tbody.innerHTML = categoryItems.map((row, idx) => {
     const qtyVal = parseFloat(row.qty) || 0;
     const rateVal = parseFloat(row.rate) || 0;
     const amtVal = parseFloat(row.amount || (qtyVal * rateVal)) || 0;
@@ -19711,11 +19817,16 @@ window.saveWmPaymentExpenseEntry = function() {
   else if (dLower.includes('manpower') || dLower.includes('labour')) uom = 'Mandays';
   else if (dLower.includes('equipment') || dLower.includes('rental')) uom = 'Hours';
 
+  const activeCategory = (typeof normalizeExpenseCategory === 'function')
+    ? normalizeExpenseCategory(window.currentActiveExpenseCategory || 'Operational Expenses')
+    : (window.currentActiveExpenseCategory || 'Operational Expenses');
+
   if (window.editingWmExpenseId) {
     const editIdx = wmExpensesDataStore.findIndex(r => r.id === window.editingWmExpenseId);
     if (editIdx !== -1) {
       wmExpensesDataStore[editIdx] = {
         ...wmExpensesDataStore[editIdx],
+        category: activeCategory,
         description: desc,
         uom: uom,
         qty: qty,
@@ -19728,7 +19839,12 @@ window.saveWmPaymentExpenseEntry = function() {
     }
     window.editingWmExpenseId = null;
   } else {
-    const existingIdx = wmExpensesDataStore.findIndex(r => r.description.toLowerCase() === desc.toLowerCase());
+    const existingIdx = wmExpensesDataStore.findIndex(r => {
+      const rCat = (typeof normalizeExpenseCategory === 'function')
+        ? normalizeExpenseCategory(r.category || 'Operational Expenses')
+        : (r.category || 'Operational Expenses');
+      return rCat === activeCategory && r.description.toLowerCase() === desc.toLowerCase();
+    });
     if (existingIdx !== -1) {
       wmExpensesDataStore[existingIdx] = {
         ...wmExpensesDataStore[existingIdx],
@@ -19743,6 +19859,7 @@ window.saveWmPaymentExpenseEntry = function() {
     } else {
       wmExpensesDataStore.push({
         id: 'wm-exp-' + Date.now(),
+        category: activeCategory,
         description: desc,
         uom: uom,
         qty: qty,
@@ -19756,6 +19873,9 @@ window.saveWmPaymentExpenseEntry = function() {
   }
 
   renderWmExpensesTable();
+  if (typeof renderExpenseDetailsInlineTable === 'function') {
+    renderExpenseDetailsInlineTable();
+  }
 
   // Reset fields
   if (qtyEl) qtyEl.value = '';
@@ -19775,6 +19895,9 @@ window.submitWmPaymentExpensesModal = function() {
   if (window.pmExpenseSourceModalOpen) {
     window.pmExpenseSourceModalOpen = false;
     window.editingWmExpenseId = null;
+    if (typeof renderExpenseDetailsInlineTable === 'function') {
+      renderExpenseDetailsInlineTable();
+    }
     showToast('Expense details submitted successfully!');
     const parentModal = document.getElementById('pmExpenseDetailsModal');
     if (parentModal) parentModal.style.display = 'block';
@@ -19846,7 +19969,8 @@ window.openWmGrnTransportPaymentModal = function() {
   const supplyModal = document.getElementById('wmSupplyCustomerModal');
   if (supplyModal) supplyModal.classList.add('card-dimmed-blurred');
 
-  const isMin = (currentWorklistView === 'min');
+  const isMinOrTransfer = ['min', 'min_detail', 'mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && ['min', 'min_detail', 'mtn', 'stn', 'srn'].includes(activeWmTransferView));
+  const isMin = (currentWorklistView === 'min' || currentWorklistView === 'min_detail');
   const optOtherEmp = document.getElementById('optWmBeneficiaryOtherEmployee');
   if (optOtherEmp) {
     optOtherEmp.value = isMin ? 'Driver' : 'Other Employee';
@@ -19859,36 +19983,94 @@ window.openWmGrnTransportPaymentModal = function() {
   const selTransfer = document.getElementById('selWmTransferType');
   if (selTransfer) selTransfer.value = 'NET Banking';
 
-  handleWmBeneficiaryTypeChange('Self');
-
-  if (currentWorklistView === 'grn' || currentWorklistView === 'payment' || ['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
-    const transferRowId = (typeof activeWmTransferRowId !== 'undefined' && activeWmTransferRowId) ? activeWmTransferRowId : activeWmGrnRowId;
+  let activeRow = null;
+  if (currentWorklistView === 'min' || currentWorklistView === 'min_detail') {
+    activeRow = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted)) || wmMinDataStore[0];
+  } else if (['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+    const transferRowId = (typeof activeWmTransferRowId !== 'undefined' && activeWmTransferRowId) ? activeWmTransferRowId : null;
     const storeMap = {
       mtn: typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : [],
       stn: typeof wmStnDataStore !== 'undefined' ? wmStnDataStore : [],
-      srn: typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : [],
-      grn: typeof wmGrnDataStore !== 'undefined' ? wmGrnDataStore : []
+      srn: typeof wmSrnDataStore !== 'undefined' ? wmSrnDataStore : []
     };
-    const targetStore = storeMap[currentWorklistView] || (activeWmTransferView ? storeMap[activeWmTransferView] : wmGrnDataStore);
-    const row = (currentDataset && currentDataset.find(r => r.id === transferRowId)) ||
+    const targetStore = storeMap[currentWorklistView] || (activeWmTransferView ? storeMap[activeWmTransferView] : []);
+    activeRow = (currentDataset && currentDataset.find(r => r.id === transferRowId)) ||
                 (targetStore && targetStore.find(r => r.id === transferRowId)) ||
                 (currentDataset && currentDataset.find(r => r.selected)) ||
                 (targetStore && targetStore[0]);
-    const inpAdv = document.getElementById('inpWmPaymentAdvancePayment');
-    const inpFc = document.getElementById('inpWmPaymentFreightCharges');
-    if (inpAdv) {
-      const advVal = (row && row.transportPayment && row.transportPayment.advancePayment) || (row && row.transport && (row.transport.advancePayment || row.transport.advancePay)) || '5000.00';
-      inpAdv.value = String(advVal).replace(/,/g, '');
+  } else {
+    activeRow = wmGrnDataStore.find(r => r.id === activeWmGrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmGrnRowId)) || wmGrnDataStore[0];
+  }
+
+  const transportType = (activeRow && activeRow.transport && activeRow.transport.transportType) || document.getElementById('selWmMinTransportType')?.value || 'Rental';
+
+  const rowBeneficiary = document.getElementById('rowWmPaymentBeneficiaryType');
+  const rowTransfer = document.getElementById('rowWmPaymentTransferType');
+  const rowFuelCard = document.getElementById('rowWmPaymentFuelCard');
+  const rowFastag = document.getElementById('rowWmPaymentFastag');
+  const rowAccountName = document.getElementById('rowWmPaymentAccountName');
+  const rowAccountNumber = document.getElementById('rowWmPaymentAccountNumber');
+  const rowIfscCode = document.getElementById('rowWmPaymentIfscCode');
+  const rowWhatsapp = document.getElementById('rowWmPaymentWhatsappNo');
+  const rowAdv = document.getElementById('rowWmPaymentAdvancePayment');
+  const rowFc = document.getElementById('rowWmPaymentFreightCharges');
+
+  if (isMinOrTransfer) {
+    // Permanently remove Advance Payment and Freight Charges from transport payment tab in min, mtn, stn, srn alone
+    if (rowAdv) rowAdv.style.display = 'none';
+    if (rowFc) rowFc.style.display = 'none';
+
+    if (transportType === 'In-House') {
+      // In-House: Select Beneficiary Type and Transfer Type disappear, Fuel card and FASTag appear as typeable input boxes
+      if (rowBeneficiary) rowBeneficiary.style.display = 'none';
+      if (rowTransfer) rowTransfer.style.display = 'none';
+      if (rowAccountName) rowAccountName.style.display = 'none';
+      if (rowAccountNumber) rowAccountNumber.style.display = 'none';
+      if (rowIfscCode) rowIfscCode.style.display = 'none';
+      if (rowWhatsapp) rowWhatsapp.style.display = 'none';
+
+      if (rowFuelCard) rowFuelCard.style.display = 'flex';
+      if (rowFastag) rowFastag.style.display = 'flex';
+
+      const inpFuel = document.getElementById('inpWmPaymentFuelCard');
+      const inpFastag = document.getElementById('inpWmPaymentFastag');
+      if (inpFuel) inpFuel.value = (activeRow && activeRow.transportPayment && activeRow.transportPayment.fuelCard) || '';
+      if (inpFastag) inpFastag.value = (activeRow && activeRow.transportPayment && activeRow.transportPayment.fastag) || '';
+    } else {
+      // Rental
+      if (rowBeneficiary) rowBeneficiary.style.display = 'flex';
+      if (rowTransfer) rowTransfer.style.display = 'flex';
+      if (rowFuelCard) rowFuelCard.style.display = 'none';
+      if (rowFastag) rowFastag.style.display = 'none';
+
+      handleWmBeneficiaryTypeChange(selBeneficiary ? selBeneficiary.value : 'Self');
     }
-    if (inpFc) {
-      let fcVal = (row && row.transportPayment && row.transportPayment.freightCharges) || (row && row.transport && row.transport.freightCharges);
-      if (!fcVal && currentWorklistView === 'payment' && typeof wmExpensesDataStore !== 'undefined' && wmExpensesDataStore.length > 0) {
-        const totalExp = wmExpensesDataStore.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-        fcVal = totalExp.toFixed(2);
-      } else if (!fcVal) {
-        fcVal = '14500.00';
+  } else {
+    // GRN / Payment view
+    if (rowBeneficiary) rowBeneficiary.style.display = 'flex';
+    if (rowTransfer) rowTransfer.style.display = 'flex';
+    if (rowFuelCard) rowFuelCard.style.display = 'none';
+    if (rowFastag) rowFastag.style.display = 'none';
+
+    handleWmBeneficiaryTypeChange(selBeneficiary ? selBeneficiary.value : 'Self');
+
+    if (currentWorklistView === 'grn' || currentWorklistView === 'payment') {
+      const inpAdv = document.getElementById('inpWmPaymentAdvancePayment');
+      const inpFc = document.getElementById('inpWmPaymentFreightCharges');
+      if (inpAdv) {
+        const advVal = (activeRow && activeRow.transportPayment && activeRow.transportPayment.advancePayment) || (activeRow && activeRow.transport && (activeRow.transport.advancePayment || activeRow.transport.advancePay)) || '5000.00';
+        inpAdv.value = String(advVal).replace(/,/g, '');
       }
-      inpFc.value = String(fcVal).replace(/,/g, '');
+      if (inpFc) {
+        let fcVal = (activeRow && activeRow.transportPayment && activeRow.transportPayment.freightCharges) || (activeRow && activeRow.transport && activeRow.transport.freightCharges);
+        if (!fcVal && currentWorklistView === 'payment' && typeof wmExpensesDataStore !== 'undefined' && wmExpensesDataStore.length > 0) {
+          const totalExp = wmExpensesDataStore.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+          fcVal = totalExp.toFixed(2);
+        } else if (!fcVal) {
+          fcVal = '14500.00';
+        }
+        inpFc.value = String(fcVal).replace(/,/g, '');
+      }
     }
   }
 
@@ -19950,7 +20132,9 @@ window.handleWmBeneficiaryTypeChange = function(type) {
   const rowFc = document.getElementById('rowWmPaymentFreightCharges');
   const rowAdv = document.getElementById('rowWmPaymentAdvancePayment');
 
-  const row = (currentWorklistView === 'min')
+  const isMinOrTransfer = ['min', 'min_detail', 'mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && ['min', 'min_detail', 'mtn', 'stn', 'srn'].includes(activeWmTransferView));
+
+  const row = (currentWorklistView === 'min' || currentWorklistView === 'min_detail')
     ? (wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)))
     : ((currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail')
         ? (wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId)))
@@ -19958,7 +20142,7 @@ window.handleWmBeneficiaryTypeChange = function(type) {
             ? (currentDataset && currentDataset.find(r => r.id === (typeof activeWmTransferRowId !== 'undefined' ? activeWmTransferRowId : '')))
             : wmGrnDataStore.find(r => r.id === activeWmGrnRowId)));
 
-  const isMin = (currentWorklistView === 'min');
+  const isMin = (currentWorklistView === 'min' || currentWorklistView === 'min_detail');
 
   if (isMin && type === 'Driver') {
     if (rowTransferType) rowTransferType.style.display = 'flex';
@@ -19972,21 +20156,18 @@ window.handleWmBeneficiaryTypeChange = function(type) {
     if (inpNewAccountName) inpNewAccountName.style.display = 'none';
     if (rowAccountNumber) rowAccountNumber.style.display = 'none';
     if (rowIfscCode) rowIfscCode.style.display = 'none';
-    if (rowFc) {
-      rowFc.style.display = 'flex';
-      const inpFc = document.getElementById('inpWmPaymentFreightCharges');
-      if (inpFc && !inpFc.value) inpFc.value = '15000.00';
-    }
-    if (rowAdv) {
-      rowAdv.style.display = 'flex';
-      const inpAdv = document.getElementById('inpWmPaymentAdvancePayment');
-      if (inpAdv && !inpAdv.value) inpAdv.value = '5000.00';
-    }
+    // Permanently remove advance payment and freight charges from MIN, MTN, STN, SRN
+    if (rowFc) rowFc.style.display = 'none';
+    if (rowAdv) rowAdv.style.display = 'none';
     return;
   }
 
-  // Handle GRN, Transfer, and Payment pages: Advance Payment and Freight Charges fields are always visible as typeable input boxes
-  if (currentWorklistView === 'grn' || currentWorklistView === 'payment' || ['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+  // Handle GRN, Transfer, and Payment pages
+  if (isMinOrTransfer) {
+    // Permanently remove Advance Payment and Freight Charges from transport payment tab in min, mtn, stn, srn alone
+    if (rowFc) rowFc.style.display = 'none';
+    if (rowAdv) rowAdv.style.display = 'none';
+  } else if (currentWorklistView === 'grn' || currentWorklistView === 'payment') {
     if (rowAdv) {
       rowAdv.style.display = 'flex';
       const inpAdv = document.getElementById('inpWmPaymentAdvancePayment');
@@ -20081,17 +20262,22 @@ window.submitWmTransportPayment = function() {
     if (row) {
       row.isHighlighted = true;
       if (!row.transportPayment) row.transportPayment = {};
-      const ben = document.getElementById('selWmBeneficiaryType')?.value;
-      row.transportPayment.beneficiaryType = ben;
-      row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
-      row.transportPayment.advancePayment = document.getElementById('inpWmPaymentAdvancePayment')?.value;
-      row.transportPayment.freightCharges = document.getElementById('inpWmPaymentFreightCharges')?.value;
-      if (ben === 'Other Employee' || ben === 'Transport Vendor') {
-        row.transportPayment.accountName = document.getElementById('selWmPaymentAccountName')?.value;
-      } else if (ben === 'New Account') {
-        row.transportPayment.accountName = document.getElementById('inpWmPaymentNewAccountName')?.value;
-        row.transportPayment.accountNumber = document.getElementById('inpWmPaymentAccountNumber')?.value;
-        row.transportPayment.ifscCode = document.getElementById('inpWmPaymentIfscCode')?.value;
+      const tType = (row.transport && row.transport.transportType) || document.getElementById('selWmMinTransportType')?.value || 'Rental';
+      row.transportPayment.transportType = tType;
+      if (tType === 'In-House') {
+        row.transportPayment.fuelCard = document.getElementById('inpWmPaymentFuelCard')?.value || '';
+        row.transportPayment.fastag = document.getElementById('inpWmPaymentFastag')?.value || '';
+      } else {
+        const ben = document.getElementById('selWmBeneficiaryType')?.value;
+        row.transportPayment.beneficiaryType = ben;
+        row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
+        if (ben === 'Other Employee' || ben === 'Transport Vendor') {
+          row.transportPayment.accountName = document.getElementById('selWmPaymentAccountName')?.value;
+        } else if (ben === 'New Account') {
+          row.transportPayment.accountName = document.getElementById('inpWmPaymentNewAccountName')?.value;
+          row.transportPayment.accountNumber = document.getElementById('inpWmPaymentAccountNumber')?.value;
+          row.transportPayment.ifscCode = document.getElementById('inpWmPaymentIfscCode')?.value;
+        }
       }
     }
 
@@ -20215,18 +20401,29 @@ window.submitWmTransportPayment = function() {
     return;
   }
 
-  if (currentWorklistView === 'min') {
+  if (currentWorklistView === 'min' || currentWorklistView === 'min_detail') {
     const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted));
     if (row) {
       row.isHighlighted = true;
       if (!row.transportPayment) row.transportPayment = {};
-      const ben = document.getElementById('selWmBeneficiaryType')?.value;
-      row.transportPayment.beneficiaryType = ben;
-      row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
-      if (ben === 'Driver') {
-        row.transportPayment.driverName = document.getElementById('selWmPaymentAccountName')?.value;
-        row.transportPayment.freightCharges = document.getElementById('inpWmPaymentFreightCharges')?.value;
-        row.transportPayment.advancePayment = document.getElementById('inpWmPaymentAdvancePayment')?.value;
+      const tType = (row.transport && row.transport.transportType) || document.getElementById('selWmMinTransportType')?.value || 'Rental';
+      row.transportPayment.transportType = tType;
+      if (tType === 'In-House') {
+        row.transportPayment.fuelCard = document.getElementById('inpWmPaymentFuelCard')?.value || '';
+        row.transportPayment.fastag = document.getElementById('inpWmPaymentFastag')?.value || '';
+      } else {
+        const ben = document.getElementById('selWmBeneficiaryType')?.value;
+        row.transportPayment.beneficiaryType = ben;
+        row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
+        if (ben === 'Driver') {
+          row.transportPayment.driverName = document.getElementById('selWmPaymentAccountName')?.value;
+        } else if (ben === 'Other Employee' || ben === 'Transport Vendor') {
+          row.transportPayment.accountName = document.getElementById('selWmPaymentAccountName')?.value;
+        } else if (ben === 'New Account') {
+          row.transportPayment.accountName = document.getElementById('inpWmPaymentNewAccountName')?.value;
+          row.transportPayment.accountNumber = document.getElementById('inpWmPaymentAccountNumber')?.value;
+          row.transportPayment.ifscCode = document.getElementById('inpWmPaymentIfscCode')?.value;
+        }
       }
     }
     if (currentDataset && Array.isArray(currentDataset)) {
@@ -20255,7 +20452,7 @@ window.submitWmTransportPayment = function() {
     return;
   }
 
-  const row = (currentWorklistView === 'min')
+  const row = (currentWorklistView === 'min' || currentWorklistView === 'min_detail')
     ? (wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted)))
     : wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
   if (row) {
@@ -20666,7 +20863,9 @@ window.openWmMinTransportModal = function(transferRow) {
   // Toggle Header Icons: Hide PDF, Show Printer ONLY IF ewayBill toggle is enabled
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
   if (lblPdf) lblPdf.style.display = 'none';
+  if (btnPdfDownload) btnPdfDownload.style.display = 'none';
   const hasEway = Boolean((row && row.transport && row.transport.ewayBill) || (row && row.ewayBill));
   if (btnPrint) btnPrint.style.display = hasEway ? 'inline-flex' : 'none';
 
@@ -20991,11 +21190,13 @@ window.openWmMrnTransportModal = function(transferRow) {
   if (mrnFields) mrnFields.style.display = 'flex';
   if (supplyFields) supplyFields.style.display = 'none';
 
-  // Toggle Header Icons: Show PDF, Hide Printer
+  // Toggle Header Icons: Hide PDF Upload, Show PDF Download, Hide Printer
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
-  if (lblPdf) lblPdf.style.display = 'flex';
+  const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
+  if (lblPdf) lblPdf.style.display = 'none';
   if (btnPrint) btnPrint.style.display = 'none';
+  if (btnPdfDownload) btnPdfDownload.style.display = 'inline-flex';
 
   const t = (row && row.transport) ? row.transport : {
     logisticsName: 'V-Trans Logistics Ltd',
@@ -21010,6 +21211,8 @@ window.openWmMrnTransportModal = function(transferRow) {
   if (inpLog) inpLog.value = t.logisticsName || 'V-Trans Logistics Ltd';
   if (inpFc) inpFc.value = Number(t.freightCharges || 0).toFixed(2);
   if (inpAdv) inpAdv.value = t.advancePay !== undefined ? Number(t.advancePay || 0).toFixed(2) : (t.freightCharges ? (Number(t.freightCharges) * 0.5).toFixed(2) : '5000.00');
+
+  calculateWmMrnPayable();
 
   const modal = document.getElementById('wmGrnTransportModal');
   if (modal) {
@@ -21032,57 +21235,23 @@ let activeWmTransferRowId = null;
 let activeWmTransferView = null;
 
 window.openWmTransportModalForTransfer = function(row) {
-  activeWmTransferRowId = row ? row.id : null;
-  activeWmTransferView = currentWorklistView;
-
-  // Show GRN fields, hide MIN, MRN, Supply fields
-  const grnFields = document.getElementById('wmGrnTransportFields');
-  const minFields = document.getElementById('wmMinTransportFields');
-  const mrnFields = document.getElementById('wmMrnTransportFields');
-  const supplyFields = document.getElementById('wmSupplyTransportFields');
-  if (grnFields) grnFields.style.display = 'flex';
-  if (minFields) minFields.style.display = 'none';
-  if (mrnFields) mrnFields.style.display = 'none';
-  if (supplyFields) supplyFields.style.display = 'none';
-
-  // Toggle Header Icons: Show PDF, Hide Printer
-  const lblPdf = document.getElementById('lblWmGrnTransportPdf');
-  const btnPrint = document.getElementById('btnWmMinTransportPrint');
-  if (lblPdf) lblPdf.style.display = 'flex';
-  if (btnPrint) btnPrint.style.display = 'none';
-
-  const t = (row && row.transport) ? row.transport : {
-    logisticsName: 'V-Trans Logistics Ltd',
-    freightCharges: 14500.00,
-    cgstIgst: 1305.00,
-    sgst: 1305.00,
-    totalAmount: 17110.00
-  };
-
-  const inpLog = document.getElementById('inpWmLogisticsName');
-  const inpFc = document.getElementById('inpWmFreightCharges');
-  const inpCgst = document.getElementById('inpWmTransportCgstIgst');
-  const inpSgst = document.getElementById('inpWmTransportSgst');
-  const inpTot = document.getElementById('inpWmTransportTotalAmount');
-
-  if (inpLog) inpLog.value = t.logisticsName || 'V-Trans Logistics Ltd';
-  if (inpFc) inpFc.value = Number(t.freightCharges || 0).toFixed(2);
-  if (inpCgst) inpCgst.value = Number(t.cgstIgst || 0).toFixed(2);
-  if (inpSgst) inpSgst.value = Number(t.sgst || 0).toFixed(2);
-  if (inpTot) inpTot.value = Number(t.totalAmount || 0).toFixed(2);
-
-  const modal = document.getElementById('wmGrnTransportModal');
-  if (modal) {
-    modal.style.display = 'block';
-    modal.style.position = 'fixed';
-    modal.style.top = '50%';
-    modal.style.left = '50%';
-    modal.style.transform = 'translate(-50%, -50%)';
-    modal.style.margin = '0';
-    modal.style.animation = 'none';
+  if (row) {
+    const statusStr = (row.status || '').toLowerCase().trim();
+    if (statusStr.includes('receive')) {
+      activeWmTransferRowId = row.id;
+      activeWmTransferView = currentWorklistView;
+      activeWmMrnRowId = row.id;
+      openWmMrnTransportModal(row);
+      return;
+    } else {
+      activeWmTransferRowId = row.id;
+      activeWmTransferView = currentWorklistView;
+      activeWmMinRowId = row.id;
+      openWmMinEwayModal();
+      return;
+    }
   }
-  const overlay = document.getElementById('sideFormOverlay');
-  if (overlay) overlay.style.display = 'block';
+  submitWmTransferWorkflow(currentWorklistView);
 };
 
 window.openWmTransportPaymentModalForTransfer = function(row) {
@@ -21215,41 +21384,41 @@ window.renderWmSupplyItems = function() {
     return `
       <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${bgColor};">
         <!-- 1. Select: circle radio / checkbox with multiselect -->
-        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+        <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 4px;">
           <input type="checkbox" class="pr-circle-checkbox" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handleWmSupplyItemSelect('${item.id}', this.checked)">
         </td>
-        <!-- 2. Material Description: 40ch & left content, center header -->
-        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+        <!-- 2. Material Description: auto width with min-width & left content, center header -->
+        <td style="width: auto; min-width: 28ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
           ${item.materialDescription || ''}
         </td>
-        <!-- 3. Uom: 10ch & center -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+        <!-- 3. Uom: 8ch & center -->
+        <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; color: #1e293b;">
           ${item.uom || ''}
         </td>
-        <!-- 4a. Stock: 15ch & right -->
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b;">
+        <!-- 4a. Stock: 10ch & right -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
           ${Number(item.stockQty || 0).toFixed(2)}
         </td>
-        <!-- 4b. MIR: 15ch & right -->
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b;">
+        <!-- 4b. MIR: 9ch & right -->
+        <td style="width: 9ch; min-width: 9ch; max-width: 9ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
           ${Number(item.mirQty || 0).toFixed(2)}
         </td>
-        <!-- 4c. Invoice: 15ch & right (editable when edit clicked) -->
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 6px 14px; color: #1e293b; font-weight: 600;">
+        <!-- 4c. Invoice: 10ch & right (editable when edit clicked) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 6px 8px; color: #1e293b; font-weight: 600;">
           ${isWmSupplyEditing && isSelected ? `
             <input type="number" step="0.01" class="form-input-control wm-supply-editable-input" data-item-id="${item.id}" value="${Number(item.invoiceQty || 0).toFixed(2)}"
-              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
               onkeydown="if(event.key === 'Enter') handleWmSupplyEditToggle();">
           ` : `
             <span>${Number(item.invoiceQty || 0).toFixed(2)}</span>
           `}
         </td>
-        <!-- 5. Rate: 15ch & right -->
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b;">
+        <!-- 5. Rate: 11ch & right -->
+        <td style="width: 11ch; min-width: 11ch; max-width: 11ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
           ${Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
-        <!-- 6. Amount: 15ch & right -->
-        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 700;">
+        <!-- 6. Amount: 13ch & right -->
+        <td style="width: 13ch; min-width: 13ch; max-width: 13ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b; font-weight: 700;">
           ${Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
       </tr>
@@ -21400,7 +21569,9 @@ window.openWmSupplyTransportModal = function() {
   // Toggle Header Icons: Hide PDF Upload, Show Printer Icon if E-way bill is present/enabled
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
   if (lblPdf) lblPdf.style.display = 'none';
+  if (btnPdfDownload) btnPdfDownload.style.display = 'none';
   const hasEway = Boolean((row && row.transport && row.transport.ewayBill) || (row && row.ewayBill));
   if (btnPrint) btnPrint.style.display = hasEway ? 'inline-flex' : 'none';
 

@@ -22200,52 +22200,106 @@ window.handlePurchaseSupplierOptChange = function() {
   }
 };
 
+window.purchaseRfqSelectedTerms = null;
+
 window.openPurchaseSelectSupplierModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   const modal = document.getElementById('purchaseSelectSupplierModal');
   if (!modal) return;
 
-  let vendorNames = [];
-  if (typeof masterVendorData !== 'undefined' && Array.isArray(masterVendorData) && masterVendorData.length > 0) {
-    vendorNames = masterVendorData.map(v => v.vendorName || v.vendor_name || v.name).filter(Boolean);
-  }
-  const defaultVendors = [
-    'Apex Infra Solutions Pvt Ltd',
-    'Delta Towers & Heavy Engg',
-    'KEC Power & Cabling Corp',
-    'Sterling & Wilson Infra',
-    'Polycab Wires & Cables',
-    'Schneider Electric India Pvt Ltd',
-    'Larsen & Toubro Ltd',
-    'Tata Communications Ltd',
-    'Sri Balaji Electricals'
-  ];
-  defaultVendors.forEach(v => {
-    if (!vendorNames.includes(v)) vendorNames.push(v);
-  });
+  const isRfqFlow = (currentWorklistView === 'rfq' || !!activePurchaseRfqId);
+  const prSec = document.getElementById('purchaseSupplierPrSection');
+  const rfqSec = document.getElementById('purchaseSupplierRfqSection');
 
-  const menu = document.getElementById('menuPurchaseSupplierOptions');
-  if (menu) {
-    menu.innerHTML = vendorNames.map(name => `
-      <label class="supplier-dropdown-option" style="display: flex; align-items: center; gap: 12px; padding: 9px 16px; cursor: pointer; user-select: none;">
-        <input type="checkbox" class="pr-circle-checkbox purchase-supplier-opt-chk" value="${name.replace(/"/g, '&quot;')}" onchange="handlePurchaseSupplierOptChange()">
-        <span style="color: #1e293b; font-size: 0.92rem; font-weight: 500; pointer-events: none;">${name}</span>
-      </label>
-    `).join('');
-    menu.style.display = 'none';
-  }
+  if (isRfqFlow && rfqSec) {
+    if (prSec) prSec.style.display = 'none';
+    rfqSec.style.display = 'flex';
 
-  const selSupplier = document.getElementById('selPurchaseSupplierName');
-  if (selSupplier) {
-    selSupplier.innerHTML = vendorNames.map(name => `
-      <option value="${name}">${name}</option>
-    `).join('');
-  }
+    // Blur previous tab if opened from RFQ Received modal
+    const rfqRecModal = document.getElementById('purchaseRfqReceivedModal');
+    if (rfqRecModal && rfqRecModal.style.display !== 'none') {
+      rfqRecModal.style.filter = 'blur(4px)';
+    }
 
-  const lbl = document.getElementById('lblPurchaseSupplierDropdownSelected');
-  if (lbl) {
-    lbl.textContent = 'Select Supplier';
-    lbl.style.color = '#64748b';
+    // Populate supplier field dropdown options from selected supplier name(s) in RFQ table
+    let candidateRfqs = purchaseRfqDataStore.filter(r => r.selected);
+    if (candidateRfqs.length === 0) {
+      if (activePurchaseRfqId) {
+        const activeR = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId);
+        if (activeR) candidateRfqs = [activeR];
+      }
+    }
+    if (candidateRfqs.length === 0) {
+      candidateRfqs = purchaseRfqDataStore.filter(r => (r.status || '').toLowerCase().includes('received'));
+    }
+    if (candidateRfqs.length === 0) {
+      candidateRfqs = [...purchaseRfqDataStore];
+    }
+
+    const selSupplier = document.getElementById('selPurchaseRfqSupplierName');
+    if (selSupplier) {
+      selSupplier.innerHTML = candidateRfqs.map(r => `
+        <option value="${r.id}" ${r.id === activePurchaseRfqId ? 'selected' : ''}>${r.supplierName || ''} (${r.rfqNo || ''})</option>
+      `).join('');
+      if (candidateRfqs.length > 0 && !activePurchaseRfqId) {
+        activePurchaseRfqId = candidateRfqs[0].id;
+      }
+      selSupplier.onchange = function() {
+        activePurchaseRfqId = this.value;
+      };
+    }
+
+    const inpSupplier = document.getElementById('inpPurchaseRfqSupplierName');
+    if (inpSupplier) {
+      const currentRfq = candidateRfqs.find(r => r.id === activePurchaseRfqId) || candidateRfqs[0];
+      inpSupplier.value = currentRfq ? (currentRfq.supplierName || '') : '';
+    }
+  } else {
+    if (rfqSec) rfqSec.style.display = 'none';
+    if (prSec) prSec.style.display = 'flex';
+
+    let vendorNames = [];
+    if (typeof masterVendorData !== 'undefined' && Array.isArray(masterVendorData) && masterVendorData.length > 0) {
+      vendorNames = masterVendorData.map(v => v.vendorName || v.vendor_name || v.name).filter(Boolean);
+    }
+    const defaultVendors = [
+      'Apex Infra Solutions Pvt Ltd',
+      'Delta Towers & Heavy Engg',
+      'KEC Power & Cabling Corp',
+      'Sterling & Wilson Infra',
+      'Polycab Wires & Cables',
+      'Schneider Electric India Pvt Ltd',
+      'Larsen & Toubro Ltd',
+      'Tata Communications Ltd',
+      'Sri Balaji Electricals'
+    ];
+    defaultVendors.forEach(v => {
+      if (!vendorNames.includes(v)) vendorNames.push(v);
+    });
+
+    const menu = document.getElementById('menuPurchaseSupplierOptions');
+    if (menu) {
+      menu.innerHTML = vendorNames.map(name => `
+        <label class="supplier-dropdown-option" style="display: flex; align-items: center; gap: 12px; padding: 9px 16px; cursor: pointer; user-select: none;">
+          <input type="checkbox" class="pr-circle-checkbox purchase-supplier-opt-chk" value="${name.replace(/"/g, '&quot;')}" onchange="handlePurchaseSupplierOptChange()">
+          <span style="color: #1e293b; font-size: 0.92rem; font-weight: 500; pointer-events: none;">${name}</span>
+        </label>
+      `).join('');
+      menu.style.display = 'none';
+    }
+
+    const selSupplier = document.getElementById('selPurchaseSupplierName');
+    if (selSupplier) {
+      selSupplier.innerHTML = vendorNames.map(name => `
+        <option value="${name}">${name}</option>
+      `).join('');
+    }
+
+    const lbl = document.getElementById('lblPurchaseSupplierDropdownSelected');
+    if (lbl) {
+      lbl.textContent = 'Select Supplier';
+      lbl.style.color = '#64748b';
+    }
   }
 
   if (overlay) {
@@ -22269,9 +22323,96 @@ window.closePurchaseSelectSupplierModal = function() {
   if (overlay) overlay.style.display = 'none';
   const menu = document.getElementById('menuPurchaseSupplierOptions');
   if (menu) menu.style.display = 'none';
+
+  // Restore blur if previously set
+  const rfqRecModal = document.getElementById('purchaseRfqReceivedModal');
+  if (rfqRecModal) rfqRecModal.style.filter = 'none';
 };
 
 window.submitPurchaseSelectSupplier = function() {
+  const rfqSec = document.getElementById('purchaseSupplierRfqSection');
+  const isRfqFlow = (currentWorklistView === 'rfq' || (rfqSec && rfqSec.style.display !== 'none'));
+
+  if (isRfqFlow) {
+    // Identify chosen RFQ row
+    const selSupplier = document.getElementById('selPurchaseRfqSupplierName');
+    const chosenId = selSupplier?.value || activePurchaseRfqId;
+    const chosenRfq = purchaseRfqDataStore.find(r => r.id === chosenId) ||
+                      (currentDataset && currentDataset.find(r => r.id === chosenId)) ||
+                      purchaseRfqDataStore.find(r => (r.status || '').toLowerCase().includes('received')) ||
+                      purchaseRfqDataStore[0];
+
+    if (!chosenRfq) {
+      if (typeof showToast === 'function') showToast('No RFQ selected');
+      return;
+    }
+
+    // Disappear the RFQ received row from RFQ table
+    purchaseRfqDataStore = purchaseRfqDataStore.filter(r => r.id !== chosenRfq.id);
+
+    // Move to PO table with status Approval Pending
+    const newPoNo = chosenRfq.poNo || (chosenRfq.rfqNo ? chosenRfq.rfqNo.replace('RFQ', 'PO') : `PO-${new Date().getFullYear()}-${String(purchasePoDataStore.length + 1).padStart(3, '0')}`);
+    const newPo = {
+      id: `po-${Date.now()}`,
+      supplierName: chosenRfq.supplierName || 'Selected Supplier',
+      poNo: newPoNo,
+      poDate: chosenRfq.date || new Date().toISOString().slice(0, 10),
+      poValue: chosenRfq.rfqValue || 0,
+      status: 'Approval Pending',
+      items: (chosenRfq.items || []).map(it => {
+        const qty = Number(it.qty || 0);
+        const rate = Number(it.newRate || it.rate || it.lastPurchaseRate || 0);
+        const basic = qty * rate;
+        const cgst = basic * 0.09;
+        const sgst = basic * 0.09;
+        const total = basic + cgst + sgst;
+        return {
+          id: it.id || `po-it-${Date.now()}`,
+          desc: it.materialDescription || it.desc || '',
+          materialDescription: it.materialDescription || it.desc || '',
+          uom: it.uom || 'Nos',
+          qty: qty,
+          rate: rate,
+          basic: basic,
+          cgst: cgst,
+          sgst: sgst,
+          total: total,
+          selected: false
+        };
+      }),
+      transport: chosenRfq.terms || window.purchaseRfqSelectedTerms || {}
+    };
+
+    purchasePoDataStore.unshift(newPo);
+
+    // Unblur and close modals
+    const rfqRecModal = document.getElementById('purchaseRfqReceivedModal');
+    if (rfqRecModal) {
+      rfqRecModal.style.filter = 'none';
+      rfqRecModal.style.display = 'none';
+    }
+    window.closePurchaseSelectSupplierModal();
+
+    if (currentWorklistView === 'rfq') {
+      currentDataset = purchaseRfqDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'po') {
+      currentDataset = purchasePoDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+    }
+
+    applyFiltersAndRender();
+    updatePurchaseRfqSelectionUI();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('RFQ moved to PO with Approval Pending status!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('RFQ moved to PO table with status Approval Pending');
+    }
+    return;
+  }
+
+  // PR Flow
   const checkedBoxes = Array.from(document.querySelectorAll('.purchase-supplier-opt-chk:checked'));
   let selectedSuppliers = checkedBoxes.map(chk => chk.value);
 
@@ -22285,23 +22426,6 @@ window.submitPurchaseSelectSupplier = function() {
   if (selectedSuppliers.length === 0) {
     if (typeof showToast === 'function') {
       showToast('Please select at least one supplier');
-    }
-    return;
-  }
-
-  if (currentWorklistView === 'rfq') {
-    purchaseRfqDataStore = purchaseRfqDataStore.filter(r => !r.selected);
-    currentDataset = purchaseRfqDataStore.map(item => ({ ...item }));
-    filteredDataset = [...currentDataset];
-
-    window.closePurchaseSelectSupplierModal();
-    applyFiltersAndRender();
-    updatePurchaseRfqSelectionUI();
-
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('RFQ submitted successfully!', 'Task Completed');
-    } else if (typeof showToast === 'function') {
-      showToast('RFQ submitted successfully!');
     }
     return;
   }
@@ -22320,6 +22444,116 @@ window.submitPurchaseSelectSupplier = function() {
   } else if (typeof showToast === 'function') {
     showToast('PR submitted successfully!');
   }
+};
+
+// --- TERMS MODAL HANDLERS ---
+window.openPurchaseAddTermsModal = function() {
+  const modal = document.getElementById('purchaseAddTermsModal');
+  if (!modal) return;
+
+  // Blur the previous tab (purchaseRfqPendingModal, purchaseRfqReceivedModal, etc.)
+  const pendingModal = document.getElementById('purchaseRfqPendingModal');
+  if (pendingModal && pendingModal.style.display !== 'none') {
+    pendingModal.style.filter = 'blur(4px)';
+  }
+  const recModal = document.getElementById('purchaseRfqReceivedModal');
+  if (recModal && recModal.style.display !== 'none') {
+    recModal.style.filter = 'blur(4px)';
+  }
+
+  if (window.purchaseRfqSelectedTerms) {
+    const transpEl = document.getElementById('inpPurchaseTransportation');
+    const payTermsEl = document.getElementById('inpPurchasePaymentTerms');
+    if (transpEl) transpEl.value = window.purchaseRfqSelectedTerms.transportation;
+    if (payTermsEl) payTermsEl.value = window.purchaseRfqSelectedTerms.paymentTerms;
+  }
+
+  modal.style.display = 'block';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '100002', 'important');
+};
+
+window.closePurchaseAddTermsModal = function() {
+  const modal = document.getElementById('purchaseAddTermsModal');
+  if (modal) modal.style.display = 'none';
+
+  // Restore blur on previous tabs
+  const pendingModal = document.getElementById('purchaseRfqPendingModal');
+  if (pendingModal) pendingModal.style.filter = 'none';
+  const recModal = document.getElementById('purchaseRfqReceivedModal');
+  if (recModal) recModal.style.filter = 'none';
+};
+
+window.submitPurchaseAddTerms = function() {
+  const transpEl = document.getElementById('inpPurchaseTransportation');
+  const payTermsEl = document.getElementById('inpPurchasePaymentTerms');
+  const transp = transpEl ? transpEl.value : 'Including';
+  const payTerms = payTermsEl ? payTermsEl.value : 'Advance';
+
+  window.purchaseRfqSelectedTerms = {
+    transportation: transp,
+    paymentTerms: payTerms
+  };
+
+  const badge = document.getElementById('purchaseRfqSelectedTermsBadge');
+  const textEl = document.getElementById('lblPurchaseRfqSelectedTermsText');
+  if (badge && textEl) {
+    textEl.textContent = `Terms: ${transp}, ${payTerms}`;
+    badge.style.display = 'inline-flex';
+  }
+
+  // Restore blur and close modals
+  const pendingModal = document.getElementById('purchaseRfqPendingModal');
+  if (pendingModal) {
+    pendingModal.style.filter = 'none';
+    pendingModal.style.display = 'none';
+  }
+  const recModal = document.getElementById('purchaseRfqReceivedModal');
+  if (recModal) {
+    recModal.style.filter = 'none';
+  }
+  window.closePurchaseAddTermsModal();
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // Change RFQ Pending to RFQ Received in respective row status column
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (rfq) {
+    rfq.status = 'RFQ Received';
+    rfq.terms = {
+      transportation: transp,
+      paymentTerms: payTerms
+    };
+    const curRow = currentDataset && currentDataset.find(r => r.id === rfq.id);
+    if (curRow) {
+      curRow.status = 'RFQ Received';
+      curRow.terms = rfq.terms;
+    }
+    const filtRow = filteredDataset && filteredDataset.find(r => r.id === rfq.id);
+    if (filtRow) {
+      filtRow.status = 'RFQ Received';
+      filtRow.terms = rfq.terms;
+    }
+  }
+
+  applyFiltersAndRender();
+
+  // Task completion popup
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('RFQ terms saved. Status changed to RFQ Received!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Status changed to RFQ Received');
+  }
+};
+
+window.removePurchaseRfqSelectedTerms = function() {
+  window.purchaseRfqSelectedTerms = null;
+  const badge = document.getElementById('purchaseRfqSelectedTermsBadge');
+  if (badge) badge.style.display = 'none';
 };
 
 // Close supplier options dropdown on outside click
@@ -22560,12 +22794,6 @@ function ensureRfqItems(rfq, type) {
   if (Array.isArray(rfq.items) && rfq.items.length > 0) return;
 
   if (type === 'pending' || (rfq.status || '').toLowerCase().includes('pending')) {
-    const totalVal = Number(rfq.rfqValue || 245000);
-    const item1Total = Math.round(totalVal * 0.72);
-    const item2Total = totalVal - item1Total;
-    const base1 = item1Total / 1.18;
-    const base2 = item2Total / 1.18;
-
     rfq.items = [
       {
         id: `${rfq.id}-it-1`,
@@ -22573,10 +22801,10 @@ function ensureRfqItems(rfq, type) {
         materialDescription: 'GI Angular Tower Member 60x60x6mm',
         uom: 'Mtr',
         qty: 100.00,
-        rate: +(base1 / 100).toFixed(2),
+        rate: '',
         gstPercent: 18,
-        gstAmount: +(base1 * 0.18).toFixed(2),
-        total: item1Total
+        gstAmount: '',
+        total: ''
       },
       {
         id: `${rfq.id}-it-2`,
@@ -22584,10 +22812,10 @@ function ensureRfqItems(rfq, type) {
         materialDescription: 'M24 High Tensile Foundation Bolts Grade 8.8',
         uom: 'Nos',
         qty: 50.00,
-        rate: +(base2 / 50).toFixed(2),
+        rate: '',
         gstPercent: 18,
-        gstAmount: +(base2 * 0.18).toFixed(2),
-        total: item2Total
+        gstAmount: '',
+        total: ''
       }
     ];
   } else {
@@ -22682,7 +22910,7 @@ window.renderPurchaseRfqPendingTable = function() {
   if (items.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align: center; padding: 36px; color: #64748b;">No items found in this RFQ.</td>
+        <td colspan="8" style="text-align: center; padding: 36px; color: #64748b;">No items found in this RFQ.</td>
       </tr>
     `;
     updatePurchaseRfqPendingSelectionUI();
@@ -22692,10 +22920,12 @@ window.renderPurchaseRfqPendingTable = function() {
   tbody.innerHTML = items.map(item => {
     const isSelected = !!item.selected;
     const qtyVal = Number(item.qty || 0).toFixed(2);
-    const rateVal = Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const gstPct = item.gstPercent !== undefined ? item.gstPercent : 18;
-    const gstAmt = Number(item.gstAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const totVal = Number(item.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const rateVal = (item.rate !== undefined && item.rate !== '' && item.rate !== null) ? item.rate : '';
+    const gstAmtVal = (item.gstAmount !== undefined && item.gstAmount !== '' && item.gstAmount !== null) ? item.gstAmount : '';
+    const totalVal = (item.total !== undefined && item.total !== '' && item.total !== null && Number(item.total) > 0)
+      ? Number(item.total).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : '-';
 
     return `
       <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isSelected ? '#f0fdf4' : '#ffffff'};">
@@ -22711,41 +22941,133 @@ window.renderPurchaseRfqPendingTable = function() {
         <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 4px; color: #1e293b;">
           ${item.uom || ''}
         </td>
-        <!-- 4. Qty: 10ch & right with decimal .00 (editable if isPurchaseRfqPendingEditing & isSelected) -->
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-weight: 500;">
-          ${isPurchaseRfqPendingEditing && isSelected ? `
-            <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-pending-inp-qty" data-item-id="${item.id}" value="${qtyVal}"
-              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
-          ` : `
-            <span>${qtyVal}</span>
-          `}
+        <!-- 4. Qty: 10ch & right with decimal .00 (editable input with default value) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 6px 8px; color: #1e293b; font-weight: 500;">
+          <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-pending-inp-qty" data-item-id="${item.id}" value="${qtyVal}"
+            oninput="handlePurchaseRfqPendingItemCalc('${item.id}')"
+            style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #cbd5e1; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
         </td>
-        <!-- 5. Rate: 12ch & right (editable if isPurchaseRfqPendingEditing & isSelected) -->
-        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-weight: 500;">
-          ${isPurchaseRfqPendingEditing && isSelected ? `
-            <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-pending-inp-rate" data-item-id="${item.id}" value="${Number(item.rate || 0).toFixed(2)}"
-              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
-          ` : `
-            <span>${rateVal}</span>
-          `}
+        <!-- 5. Rate: 12ch & right (editable input) -->
+        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; vertical-align: middle; padding: 6px 8px; color: #1e293b;">
+          <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-pending-inp-rate" data-item-id="${item.id}" value="${rateVal}" placeholder="0.00"
+            oninput="handlePurchaseRfqPendingItemCalc('${item.id}')"
+            style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #cbd5e1; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
         </td>
         <!-- 6. GST %: 6ch & center -->
         <td style="width: 6ch; min-width: 6ch; max-width: 6ch; text-align: center !important; vertical-align: middle; padding: 8px 4px; color: #1e293b;">
           ${gstPct}%
         </td>
-        <!-- 7. GST ₹: 16ch & right -->
-        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b;">
-          ${gstAmt}
+        <!-- 7. GST ₹: 16ch & right (editable input) -->
+        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; vertical-align: middle; padding: 6px 8px; color: #1e293b;">
+          <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-pending-inp-gst" data-item-id="${item.id}" value="${gstAmtVal}" placeholder="0.00"
+            oninput="handlePurchaseRfqPendingItemCalc('${item.id}', true)"
+            style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #cbd5e1; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
         </td>
         <!-- 8. Total: 20ch & right -->
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
-          ${totVal}
+          <span id="purchaseRfqPendingItemTotal-${item.id}">${totalVal}</span>
         </td>
       </tr>
     `;
   }).join('');
 
   updatePurchaseRfqPendingSelectionUI();
+};
+
+window.handlePurchaseRfqPendingItemCalc = function(itemId, isManualGst) {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+  const item = (rfq.items || []).find(i => String(i.id) === String(itemId));
+  if (!item) return;
+
+  const rowEl = document.querySelector(`tr[data-item-id="${itemId}"]`);
+  if (!rowEl) return;
+
+  const inpQty = rowEl.querySelector('.purchase-rfq-pending-inp-qty');
+  const inpRate = rowEl.querySelector('.purchase-rfq-pending-inp-rate');
+  const inpGst = rowEl.querySelector('.purchase-rfq-pending-inp-gst');
+  const totalSpan = document.getElementById(`purchaseRfqPendingItemTotal-${itemId}`);
+
+  const qty = parseFloat(inpQty ? inpQty.value : item.qty) || 0;
+  const rawRate = inpRate ? inpRate.value : '';
+  const rate = parseFloat(rawRate);
+  const gstPct = item.gstPercent !== undefined ? item.gstPercent : 18;
+
+  let gstAmt = 0;
+  if (isManualGst && inpGst && inpGst.value !== '') {
+    gstAmt = parseFloat(inpGst.value) || 0;
+  } else if (!isNaN(rate) && rate > 0) {
+    gstAmt = qty * rate * (gstPct / 100);
+    if (inpGst && !isManualGst) {
+      inpGst.value = gstAmt > 0 ? gstAmt.toFixed(2) : '';
+    }
+  } else if (inpGst && inpGst.value !== '') {
+    gstAmt = parseFloat(inpGst.value) || 0;
+  }
+
+  const baseTotal = (!isNaN(rate) && rate > 0) ? (qty * rate) : 0;
+  const totalVal = baseTotal > 0 ? (baseTotal + gstAmt) : (gstAmt > 0 ? gstAmt : 0);
+
+  item.qty = qty;
+  item.rate = (!isNaN(rate) && rawRate !== '') ? rate : '';
+  item.gstAmount = (inpGst && inpGst.value !== '') ? gstAmt : '';
+  item.total = totalVal > 0 ? totalVal : '';
+
+  if (totalSpan) {
+    totalSpan.textContent = totalVal > 0 ? Number(totalVal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
+  }
+
+  updatePurchaseRfqPendingSummation();
+};
+
+window.submitPurchaseRfqPending = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (rfq) {
+    const qtyInputs = document.querySelectorAll('.purchase-rfq-pending-inp-qty');
+    const rateInputs = document.querySelectorAll('.purchase-rfq-pending-inp-rate');
+    const gstInputs = document.querySelectorAll('.purchase-rfq-pending-inp-gst');
+
+    qtyInputs.forEach(inp => {
+      const itId = inp.dataset.itemId;
+      const it = (rfq.items || []).find(i => String(i.id) === String(itId));
+      if (it) it.qty = parseFloat(inp.value) || 0;
+    });
+
+    rateInputs.forEach(inp => {
+      const itId = inp.dataset.itemId;
+      const it = (rfq.items || []).find(i => String(i.id) === String(itId));
+      if (it && inp.value !== '') it.rate = parseFloat(inp.value) || 0;
+    });
+
+    gstInputs.forEach(inp => {
+      const itId = inp.dataset.itemId;
+      const it = (rfq.items || []).find(i => String(i.id) === String(itId));
+      if (it && inp.value !== '') it.gstAmount = parseFloat(inp.value) || 0;
+    });
+
+    (rfq.items || []).forEach(it => {
+      const q = Number(it.qty || 0);
+      const r = Number(it.rate || 0);
+      let g = (it.gstAmount !== undefined && it.gstAmount !== '') ? Number(it.gstAmount) : (r > 0 ? (q * r * ((it.gstPercent || 18) / 100)) : 0);
+      it.gstAmount = g;
+      it.total = (q * r) + g;
+      it.newRate = r;
+    });
+
+    const sumTotal = (rfq.items || []).reduce((acc, it) => acc + (Number(it.total) || 0), 0);
+    if (sumTotal > 0) {
+      rfq.rfqValue = sumTotal;
+      const curRow = currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId);
+      if (curRow) curRow.rfqValue = sumTotal;
+      const fltRow = filteredDataset && filteredDataset.find(r => r.id === activePurchaseRfqId);
+      if (fltRow) fltRow.rfqValue = sumTotal;
+    }
+  }
+  window.openPurchaseAddTermsModal();
+};
+
+window.submitPurchaseRfqReceived = function() {
+  window.openPurchaseSelectSupplierModal();
 };
 
 window.handlePurchaseRfqPendingRowSelect = function(itemId, isChecked) {
@@ -22783,7 +23105,7 @@ window.updatePurchaseRfqPendingSelectionUI = function() {
 
   const submitArea = document.getElementById('purchaseRfqPendingSubmitArea');
   if (submitArea) {
-    submitArea.style.display = hasSelected ? 'flex' : 'none';
+    submitArea.style.display = 'flex';
   }
 };
 
@@ -22859,34 +23181,12 @@ window.togglePurchaseRfqPendingEdit = function() {
 window.closePurchaseRfqPendingModal = function() {
   const modal = document.getElementById('purchaseRfqPendingModal');
   const overlay = document.getElementById('sideFormOverlay');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.style.display = 'none';
+    modal.style.filter = 'none';
+  }
   if (overlay) overlay.style.display = 'none';
   isPurchaseRfqPendingEditing = false;
-};
-
-// --- ADD TERMS MODAL ---
-window.openPurchaseAddTermsModal = function() {
-  const modal = document.getElementById('purchaseAddTermsModal');
-  if (!modal) return;
-  modal.style.display = 'block';
-};
-
-window.closePurchaseAddTermsModal = function() {
-  const modal = document.getElementById('purchaseAddTermsModal');
-  if (modal) modal.style.display = 'none';
-};
-
-window.submitPurchaseAddTerms = function() {
-  window.closePurchaseAddTermsModal();
-  window.closePurchaseRfqPendingModal();
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Terms added successfully!', 'Task Completed');
-  } else if (typeof showToast === 'function') {
-    showToast('Terms added successfully!');
-  }
-
-  applyFiltersAndRender();
 };
 
 // --- RFQ RECEIVED MODAL ---
@@ -23187,19 +23487,37 @@ window.openPurchaseAddPaymentModal = function() {
   }
 
   // Reset fields
-  const selExp = document.getElementById('selPurchasePaymentExpenseType');
-  if (selExp) selExp.value = 'Salary Advance';
-
   const inpInv = document.getElementById('inpPurchasePaymentInvoiceNo');
   if (inpInv) inpInv.value = '';
 
   const inpDate = document.getElementById('inpPurchasePaymentInvoiceDate');
+  const btnCal = document.getElementById('btnPurchasePaymentCalendar');
   if (inpDate) {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
-    inpDate.value = `${yyyy}-${mm}-${dd}`;
+    inpDate.value = `${dd}-${mm}-${yyyy}`;
+
+    if (typeof window.attachNexusCalendar === 'function') {
+      window.attachNexusCalendar('inpPurchasePaymentInvoiceDate', 'btnPurchasePaymentCalendar');
+    }
+    if (btnCal) {
+      btnCal.onclick = function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (typeof window.openNexusCalendar === 'function') {
+          window.openNexusCalendar(inpDate, btnCal);
+        }
+      };
+    }
+    inpDate.onclick = function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (typeof window.openNexusCalendar === 'function') {
+        window.openNexusCalendar(inpDate, btnCal || inpDate);
+      }
+    };
   }
 
   const inpTaxable = document.getElementById('inpPurchasePaymentTaxableAmount');
@@ -23582,10 +23900,7 @@ function renderPurchasePoApprovalPendingTable(row) {
 
   tbody.innerHTML = (row.items || []).map(it => {
     return `
-      <tr data-item-id="${it.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${it.selected ? '#f0fdf4' : '#ffffff'};">
-        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
-          <input type="checkbox" class="pr-circle-checkbox purchase-po-approval-item-chk" ${it.selected ? 'checked' : ''} onchange="handlePurchasePoApprovalPendingRowSelect('${row.id}', '${it.id}', this.checked)">
-        </td>
+      <tr data-item-id="${it.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
         <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;" title="${(it.desc || '').replace(/"/g, '&quot;')}">
           ${it.desc || ''}
         </td>
@@ -23634,11 +23949,10 @@ function updatePurchasePoApprovalPendingUI(row) {
     lbl.style.color = '#0454e4';
   }
 
-  const hasSelected = (row.items || []).some(it => it.selected);
   const area = document.getElementById('purchasePoApprovalPendingSubmitArea');
   const btnSubmit = document.getElementById('btnPurchasePoApprovalPendingSubmit');
-  if (area) area.style.display = hasSelected ? 'flex' : 'none';
-  if (btnSubmit) btnSubmit.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (area) area.style.display = 'none';
+  if (btnSubmit) btnSubmit.style.display = 'none';
 }
 
 window.submitPurchasePoApprovalPending = function() {
@@ -23689,6 +24003,8 @@ window.openPurchasePoDispatchPendingModal = function(rowId) {
     modal.style.setProperty('left', '50%', 'important');
     modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
     modal.style.setProperty('z-index', '99999', 'important');
+    modal.style.setProperty('width', '1560px', 'important');
+    modal.style.setProperty('max-width', '98vw', 'important');
   }
   if (overlay) overlay.style.display = 'flex';
 
@@ -23732,6 +24048,9 @@ function renderPurchasePoDispatchPendingTable(row) {
         </td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
           ${it.uom || ''}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.rate || it.lastPurchaseRate || it.newRate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </td>
         <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
           ${Number(it.poQty ?? it.qty ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -28795,7 +29114,7 @@ function applyFiltersAndRender() {
             </td>
             <!-- 2. Supplier Name: 25ch & left, clickable -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" title="${(row.supplierName || '').replace(/"/g, '&quot;')}" onclick="handlePurchaseRfqSupplierClick('${row.id}')">
-              <span class="purchase-rfq-supplier-link" style="color: #0454e4; text-decoration: underline; cursor: pointer;">${row.supplierName || ''}</span>
+              <span class="purchase-rfq-supplier-link" style="color: #0454e4; cursor: pointer;">${row.supplierName || ''}</span>
             </td>
             <!-- 3. Date: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
@@ -28888,8 +29207,8 @@ function applyFiltersAndRender() {
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.vendorName || '').replace(/"/g, '&quot;')}">
               ${row.vendorName || ''}
             </td>
-            <!-- 2. Invoice#: 15ch & center, blue color & underline -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500; text-decoration: underline; cursor: pointer;" onclick="openPurchasePaymentInvoiceDetailsModal('${row.id}')" title="View Invoice Details">
+            <!-- 2. Invoice#: 15ch & center, blue color, no underline, clickable -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500; cursor: pointer;" onclick="openPurchasePaymentInvoiceDetailsModal('${row.id}')" title="View Invoice Details">
               ${row.invoiceNo || ''}
             </td>
             <!-- 3. Invoice Date: 15ch & center -->
@@ -28897,11 +29216,11 @@ function applyFiltersAndRender() {
               ${row.invoiceDate || ''}
             </td>
             <!-- 4a. Invoice: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #0454e4; font-weight: 600; text-decoration: underline; cursor: pointer;" onclick="openPurchasePaymentInvoiceDetailsModal('${row.id}')" title="View Invoice Details">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #0454e4; font-weight: 600; cursor: pointer;" onclick="openPurchasePaymentInvoiceDetailsModal('${row.id}')" title="View Invoice Details">
               ${Number(row.invoiceAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
             <!-- 4b. Paid: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #15803d; font-weight: 600; text-decoration: underline; cursor: pointer;" onclick="openPurchasePaymentPaidDetailsModal('${row.id}')" title="View Paid Details">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #15803d; font-weight: 600; cursor: pointer;" onclick="openPurchasePaymentPaidDetailsModal('${row.id}')" title="View Paid Details">
               ${Number(row.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
             <!-- 4c. Payable: 15ch & right (no vertical line after content) -->
@@ -35447,6 +35766,9 @@ function initSideFormEvents() {
 
   // Attach to Invoice Due Date modal input
   attachNexusCalendar('inpInvoiceDueDate', 'btnInvoiceDueDateCalendar');
+
+  // Attach to Purchase Payment modal date input
+  attachNexusCalendar('inpPurchasePaymentInvoiceDate', 'btnPurchasePaymentCalendar');
 
   const setupHrEditToggle = (btnId, name) => {
     const btn = document.getElementById(btnId);

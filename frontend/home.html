@@ -6042,9 +6042,9 @@
           </div>
           <div style="height: 14px;"></div>
 
-          <form id="frmPurchaseSelectSupplier" onsubmit="event.preventDefault(); submitPurchaseSelectSupplier();" style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
-            <!-- 1. Supplier: dropdown with circle radio options for multiselect -->
-            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
+          <form id="frmPurchaseSelectSupplier" onsubmit="event.preventDefault(); submitPurchaseSelectSupplier();" style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 18px;">
+            <!-- PR Workflow Section: dropdown with circle radio options for multiselect -->
+            <div id="purchaseSupplierPrSection" class="pm-field-row" style="display: none; flex-direction: column; gap: 8px;">
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                 <label style="min-width: 90px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Supplier</label>
                 <div style="flex: 1; position: relative;" id="purchaseSupplierDropdownContainer">
@@ -6063,8 +6063,21 @@
               <select id="selPurchaseSupplierName" multiple style="display: none;"></select>
             </div>
 
-            <!-- Centered submit icon below the field -->
-            <div style="display: flex; justify-content: center; align-items: center; padding-top: 6px;">
+            <!-- RFQ Workflow Section -->
+            <div id="purchaseSupplierRfqSection" style="display: flex; flex-direction: column; gap: 18px;">
+              <!-- 1. Supplier Name: dropdown with options from selected supplier name in rfq table -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 130px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Supplier Name</label>
+                <div style="flex: 1; position: relative;">
+                  <select id="selPurchaseRfqSupplierName" class="form-input-control"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Centered submit icon below the last field -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 8px;">
               <button type="button" class="btn-card-submit-inside" id="btnPurchaseSupplierModalSubmit" title="Submit" onclick="submitPurchaseSelectSupplier()" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
                 <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
               </button>
@@ -6155,19 +6168,7 @@
           <div style="padding: 16px 28px 24px; overflow-y: auto; max-height: calc(90vh - 52px);">
             <form id="frmPurchaseAddPayment" onsubmit="event.preventDefault(); savePurchaseAddPayment();" style="display: flex; flex-direction: column; gap: 14px;">
               
-              <!-- 1. Expense Type: dropdown with options -->
-              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
-                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Expense Type</label>
-                <div style="flex: 1; position: relative;">
-                  <select id="selPurchasePaymentExpenseType" class="form-input-control"
-                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
-                    <option value="Salary Advance">Salary Advance</option>
-                    <option value="GST Purchase">GST Purchase</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- 2. Supplier Name: dropdown with options -->
+              <!-- 1. Supplier Name: dropdown with options -->
               <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                 <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Supplier Name</label>
                 <div style="flex: 1; position: relative;">
@@ -6178,7 +6179,7 @@
                 </div>
               </div>
 
-              <!-- 3. Invoice No: typeable input box -->
+              <!-- 2. Invoice No: typeable input box -->
               <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                 <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Invoice No</label>
                 <div style="flex: 1;">
@@ -6187,17 +6188,16 @@
                 </div>
               </div>
 
-              <!-- 4. Invoice Date: with calendar icon E:\Freelance\frontend\icons\google-calendar.svg with its function workable -->
+              <!-- 3. Invoice Date: with calendar icon E:\Freelance\frontend\icons\google-calendar.svg with its function workable -->
               <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
                 <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Invoice Date</label>
                 <div style="flex: 1; position: relative; display: flex; align-items: center;">
-                  <input type="date" class="form-input-control" id="inpPurchasePaymentInvoiceDate" onclick="if(this.showPicker) this.showPicker();"
-                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 46px 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none; background: #ffffff;">
-                  <span class="btn-purchase-payment-calendar-trigger" id="btnPurchasePaymentCalendar" title="Select Invoice Date"
-                    onclick="const inp = document.getElementById('inpPurchasePaymentInvoiceDate'); if (inp) { if (inp.showPicker) inp.showPicker(); else inp.focus(); }"
-                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; padding: 2px;">
+                  <input type="text" class="form-input-control nexus-cal-input" id="inpPurchasePaymentInvoiceDate" placeholder="DD-MM-YYYY" readonly
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 46px 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none; background: #ffffff; cursor: pointer;">
+                  <button type="button" class="btn-purchase-payment-calendar-trigger btn-calendar-trigger" id="btnPurchasePaymentCalendar" title="Select Invoice Date"
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; padding: 2px; background: transparent; border: none;">
                     <img src="icons/google-calendar.svg" alt="Calendar" width="24" height="24" style="display: block; pointer-events: none;">
-                  </span>
+                  </button>
                 </div>
               </div>
 
@@ -6418,9 +6418,9 @@
               </tbody>
             </table>
 
-            <!-- Submit icon centered below the last row (appears when user selects row) -->
-            <div id="purchaseRfqPendingSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 18px 0 4px 0;">
-              <button type="button" id="btnPurchaseRfqPendingSubmit" onclick="openPurchaseAddTermsModal()" title="Submit"
+            <!-- Submit icon centered below the last row -->
+            <div id="purchaseRfqPendingSubmitArea" style="display: flex; width: 100%; justify-content: center; align-items: center; padding: 18px 0 4px 0;">
+              <button type="button" id="btnPurchaseRfqPendingSubmit" onclick="submitPurchaseRfqPending()" title="Submit"
                 style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
                 <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
               </button>
@@ -6452,8 +6452,6 @@
                   style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
                   <option value="Including" selected>Including</option>
                   <option value="Extra at actual">Extra at actual</option>
-                  <option value="Ex-Works">Ex-Works</option>
-                  <option value="Door Delivery">Door Delivery</option>
                 </select>
               </div>
             </div>
@@ -6464,11 +6462,10 @@
               <div style="flex: 1; position: relative;">
                 <select id="inpPurchasePaymentTerms" class="form-input-control"
                   style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
-                  <option value="Within 30 days from the Invoice Date" selected>Within 30 days from the Invoice Date</option>
-                  <option value="Advance">Advance</option>
-                  <option value="Within 15 days from the Invoice Date">Within 15 days from the Invoice Date</option>
-                  <option value="Within 45 days from the Invoice Date">Within 45 days from the Invoice Date</option>
-                  <option value="Immediate on Delivery">Immediate on Delivery</option>
+                  <option value="Advance" selected>Advance</option>
+                  <option value="7 days credit">7 days credit</option>
+                  <option value="15 days credit">15 days credit</option>
+                  <option value="30 days credit">30 days credit</option>
                 </select>
               </div>
             </div>
@@ -6552,6 +6549,14 @@
                 <!-- Dynamically rendered -->
               </tbody>
             </table>
+
+            <!-- Submit icon centered below the last row -->
+            <div id="purchaseRfqReceivedSubmitArea" style="display: flex; width: 100%; justify-content: center; align-items: center; padding: 18px 0 4px 0;">
+              <button type="button" id="btnPurchaseRfqReceivedSubmit" onclick="openPurchaseSelectSupplierModal()" title="Submit"
+                style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
           </div>
         </div>
 
@@ -6607,9 +6612,6 @@
             <table id="tblPurchasePoApprovalPending" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
                 <tr class="master-view-header">
-                  <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
-                    <span>Select</span>
-                  </th>
                   <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 12px;">
                     <span>Material Description</span>
                   </th>
@@ -6645,20 +6647,12 @@
                 <!-- Dynamically rendered -->
               </tbody>
             </table>
-
-            <!-- Submit icon centered below the last row (appears when user selects row) -->
-            <div id="purchasePoApprovalPendingSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 18px 0 4px 0;">
-              <button type="button" id="btnPurchasePoApprovalPendingSubmit" onclick="submitPurchasePoApprovalPending()" title="Submit"
-                style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
-                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
-              </button>
-            </div>
           </div>
         </div>
 
         <!-- Purchase Manager: PO Dispatch Pending Detail Modal Tab -->
         <div class="side-form-card side-contact-popup" id="purchasePoDispatchPendingModal"
-          style="display: none; width: 1280px !important; max-width: 98vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          style="display: none; width: 1560px !important; max-width: 98vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
           <!-- Header: Title Badge, Summation next to header design, and Icons (Tick, Edit, Close) -->
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; align-items: center; height: 52px; margin-bottom: 8px;">
             <div class="side-form-title-badge" id="lblPurchasePoDispatchPendingTitle"
@@ -6688,7 +6682,7 @@
           </div>
 
           <!-- Table Container -->
-          <div style="padding: 12px 24px 16px; overflow-x: hidden !important; overflow-y: auto; max-height: calc(90vh - 140px);">
+          <div style="padding: 12px 24px 16px; overflow-x: auto !important; overflow-y: auto; max-height: calc(90vh - 140px);">
             <table id="tblPurchasePoDispatchPending" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
               <thead>
                 <tr class="master-view-header">
@@ -6700,6 +6694,9 @@
                   </th>
                   <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
                     <span>Uom</span>
+                  </th>
+                  <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Rate</span>
                   </th>
                   <th colspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
                     <span>Qty</span>

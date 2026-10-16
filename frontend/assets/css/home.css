@@ -912,6 +912,13 @@ input[type="checkbox"].pr-circle-checkbox:focus-visible {
   box-shadow: inset 0 0 0 3.5px #ffffff !important;
 }
 
+.supplier-dropdown-option {
+  transition: background-color 0.15s ease;
+}
+.supplier-dropdown-option:hover {
+  background-color: #f1f5f9 !important;
+}
+
 .req-link {
   color: #2563eb;
   font-weight: 600;
@@ -5667,6 +5674,26 @@ th.wm-qty-col-header {
 .master-view-header th.wm-qty-sub-header,
 th.wm-qty-sub-header {
   border-top: 1px solid #ffffff !important;
+}
+
+/* White horizontal dividing line under Purchase PR & Payment headers and Ageing column */
+.master-view-header th.purchase-amount-col-header,
+th.purchase-amount-col-header {
+  border-bottom: 1px solid #ffffff !important;
+}
+
+.master-view-header th.purchase-amount-sub-header,
+th.purchase-amount-sub-header {
+  border-top: 1px solid #ffffff !important;
+}
+
+.master-view-header th.purchase-ageing-header,
+th.purchase-ageing-header {
+  border-left: 1px solid #ffffff !important;
+}
+
+.worklist-table-full tbody td.purchase-payment-ageing-cell {
+  border-left: none !important;
 }
 
 /* White horizontal dividing line under GRN & MIN Qty column headers */

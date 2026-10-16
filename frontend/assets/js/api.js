@@ -221,6 +221,16 @@
       department: 'Warehouse Operations',
       phone: '+91 98765 00004',
       location: 'Chennai, India'
+    },
+    {
+      email: 'purchase@nexus.com',
+      aliases: ['purchase', 'purchase@nexus.com'],
+      pwdHash: '4747443f7b0863d63c33a567bd84ebc73495aed21f4d81db502b7a04cb5c1df8',
+      name: 'Purchase Manager',
+      role: 'Purchase Manager',
+      department: 'Purchase Operations',
+      phone: '+91 98765 00005',
+      location: 'Chennai, India'
     }
   ];
 
@@ -245,8 +255,8 @@
               role: apiRes.user.role,
               token: apiRes.user.token,
               permissions: apiRes.user.permissions || [],
-              department: apiRes.user.role === 'Project Manager' ? 'Project Management' : (apiRes.user.role === 'Commercial Manager' ? 'Commercial Operations' : (apiRes.user.role === 'Warehouse Manager' ? 'Warehouse Operations' : 'Executive Management')),
-              phone: apiRes.user.role === 'Project Manager' ? '+91 98765 00003' : (apiRes.user.role === 'Commercial Manager' ? '+91 98765 00002' : (apiRes.user.role === 'Warehouse Manager' ? '+91 98765 00004' : '+91 98765 43210')),
+              department: apiRes.user.role === 'Project Manager' ? 'Project Management' : (apiRes.user.role === 'Commercial Manager' ? 'Commercial Operations' : (apiRes.user.role === 'Warehouse Manager' ? 'Warehouse Operations' : (apiRes.user.role === 'Purchase Manager' ? 'Purchase Operations' : 'Executive Management'))),
+              phone: apiRes.user.role === 'Project Manager' ? '+91 98765 00003' : (apiRes.user.role === 'Commercial Manager' ? '+91 98765 00002' : (apiRes.user.role === 'Warehouse Manager' ? '+91 98765 00004' : (apiRes.user.role === 'Purchase Manager' ? '+91 98765 00005' : '+91 98765 43210'))),
               location: 'Chennai, India'
             };
             sessionStorage.setItem('nexus_user', JSON.stringify(profile));
@@ -258,8 +268,12 @@
             return { success: true, user: profile };
           }
         } catch (apiErr) {
-          // If backend returned 401 Unauthorized, reject immediately
-          if (apiErr && (apiErr.status === 401 || apiErr.statusCode === 401)) {
+          // If backend returned 401 Unauthorized, check if email is in FRONTEND_USERS_CONFIG before rejecting
+          const isFrontendUser = FRONTEND_USERS_CONFIG.some(u => 
+            u.email.toLowerCase() === normalized || 
+            (u.aliases && u.aliases.includes(normalized))
+          );
+          if (!isFrontendUser && apiErr && (apiErr.status === 401 || apiErr.statusCode === 401)) {
             const err = new Error('Invalid email or password');
             err.status = 401;
             err.detail = 'Invalid email or password';

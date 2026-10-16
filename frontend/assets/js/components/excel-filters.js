@@ -198,7 +198,9 @@
       qy: "Qy",
       customerName: "Customer Name",
       orderValue: "Order Value",
-      status: "Status"
+      status: "Status",
+      supplierName: "Supplier Name",
+      rfqNo: "RFQ#"
     };
     return map[colKey] || colKey;
   }

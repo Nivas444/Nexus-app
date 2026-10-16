@@ -6924,6 +6924,9 @@ function parseUrlAndApplyState() {
         const siteParam = urlParams.get('site_id');
         if (siteParam) activeWmMrnRowId = siteParam;
       }
+    } else if (role === 'Purchase Manager') {
+      const purchaseViews = ['pr', 'rfq', 'po', 'payment'];
+      currentWorklistView = purchaseViews.includes(viewParam) ? viewParam : 'pr';
     } else {
       if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
         currentWorklistView = viewParam;
@@ -6947,6 +6950,8 @@ function parseUrlAndApplyState() {
     } else if (role === 'Commercial Manager') {
       currentWorklistView = 'new_project';
     } else if (role === 'Warehouse Manager') {
+      currentWorklistView = 'pr';
+    } else if (role === 'Purchase Manager') {
       currentWorklistView = 'pr';
     } else {
       currentWorklistView = (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') ? viewParam : 'payment';
@@ -6999,6 +7004,11 @@ function applyRoleBasedNavigation() {
   const navInventory = document.getElementById('navBtnInventory');
   const navProfile = document.getElementById('navBtnProfile');
   const btnSignout = document.getElementById('btnPowerOff');
+
+  // Reset ordering on all primary navigation icons before applying role-specific layout
+  [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
+    if (btn) btn.style.order = '';
+  });
 
   if (role === 'Project Manager') {
     // Exactly 4 items visible for Project Manager in order:
@@ -7079,6 +7089,30 @@ function applyRoleBasedNavigation() {
       currentWorklistView = 'pr';
       updateURL();
     }
+  } else if (role === 'Purchase Manager') {
+    // Exactly 3 navigation icons in order: Profile, Worklist, Sign Out
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '1'; }
+    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+
+    // Hide unauthorized navigation items
+    if (navMaster) navMaster.style.display = 'none';
+    if (navProjects) navProjects.style.display = 'none';
+    if (navAccounts) navAccounts.style.display = 'none';
+    if (navAdmin) navAdmin.style.display = 'none';
+    if (navPurchase) navPurchase.style.display = 'none';
+    if (navInventory) navInventory.style.display = 'none';
+
+    // Route Protection: If currentModule is restricted for Purchase Manager, redirect to Worklist
+    const allowedModules = ['worklist', 'profile'];
+    if (!allowedModules.includes(currentModule)) {
+      if (typeof showToast === 'function') {
+        showToast('Access Restricted: Purchase Manager role does not have permission for this module.', 'warning');
+      }
+      currentModule = 'worklist';
+      currentWorklistView = 'pr';
+      updateURL();
+    }
   } else {
     // Admin role: All 9 navigation items are visible and accessible
     [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
@@ -7144,6 +7178,14 @@ function switchModule(moduleName) {
       }
       return;
     }
+  } else if (role === 'Purchase Manager') {
+    const allowedModules = ['worklist', 'profile'];
+    if (!allowedModules.includes(moduleName)) {
+      if (typeof showToast === 'function') {
+        showToast(`Access Restricted: Purchase Manager does not have permission to access ${moduleName}.`, 'warning');
+      }
+      return;
+    }
   }
 
   if (currentModule === moduleName) return;
@@ -7161,6 +7203,8 @@ function switchModule(moduleName) {
     currentIndusSubpage = 'site';
   } else if (moduleName === 'worklist') {
     if (role === 'Warehouse Manager') {
+      currentWorklistView = 'pr';
+    } else if (role === 'Purchase Manager') {
       currentWorklistView = 'pr';
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
@@ -7526,7 +7570,7 @@ function goBackSubpage() {
   } else if (currentModule === 'profile') {
     const role = getAuthenticatedUserRole();
     currentModule = 'worklist';
-    if (role === 'Warehouse Manager') {
+    if (role === 'Warehouse Manager' || role === 'Purchase Manager') {
       currentWorklistView = 'pr';
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
@@ -7534,7 +7578,10 @@ function goBackSubpage() {
     showToast('Returned to Worklist');
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
-    if (role === 'Warehouse Manager') {
+    if (role === 'Purchase Manager') {
+      currentWorklistView = 'pr';
+      showToast('Returned to PR');
+    } else if (role === 'Warehouse Manager') {
       if (currentWorklistView === 'min_detail') {
         currentWorklistView = 'min';
         updateURL();
@@ -7922,6 +7969,14 @@ function renderApp() {
           };
           bannerTitle.textContent = warehouseTitles[currentWorklistView] || 'PR';
         }
+      } else if (role === 'Purchase Manager') {
+        const purchaseTitles = {
+          pr: 'PR',
+          rfq: 'RFQ',
+          po: 'PO',
+          payment: 'Payment'
+        };
+        bannerTitle.textContent = purchaseTitles[currentWorklistView] || 'PR';
       } else {
         bannerTitle.textContent = "Work List";
       }
@@ -21599,10 +21654,2557 @@ window.openWmSupplyTransportModal = function() {
 
 
 // ==========================================================================
+// Purchase Manager Worklist Data Stores & State Handlers
+// ==========================================================================
+let isPurchasePrEditing = false;
+
+let purchasePrDataStore = [
+  {
+    id: 'pm-pr-1',
+    selected: false,
+    submitBy: 'Rajesh Kumar (Warehouse)',
+    submissionDate: '12-10-2026',
+    materialHead: 'Tower Structure',
+    materialDescription: '40M Galvanized Tubular Telecom Tower Mast Structure',
+    uom: 'Nos',
+    stockQty: 25.00,
+    prQty: 10.00
+  },
+  {
+    id: 'pm-pr-2',
+    selected: false,
+    submitBy: 'Vikram Singh (Site Engg)',
+    submissionDate: '12-10-2026',
+    materialHead: 'Power Cable',
+    materialDescription: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
+    uom: 'Mtr',
+    stockQty: 150.00,
+    prQty: 500.00
+  },
+  {
+    id: 'pm-pr-3',
+    selected: false,
+    submitBy: 'Anand Sharma (Stores)',
+    submissionDate: '13-10-2026',
+    materialHead: 'Optical Fiber',
+    materialDescription: '24F Single Mode Armoured Optical Fiber Cable',
+    uom: 'Mtr',
+    stockQty: 80.00,
+    prQty: 1200.00
+  },
+  {
+    id: 'pm-pr-4',
+    selected: false,
+    submitBy: 'Pooja Patel (Site Team)',
+    submissionDate: '13-10-2026',
+    materialHead: 'Earthing Rod',
+    materialDescription: 'Copper Bonded Chemical Earthing Electrode 3M',
+    uom: 'Set',
+    stockQty: 15.00,
+    prQty: 30.00
+  },
+  {
+    id: 'pm-pr-5',
+    selected: false,
+    submitBy: 'Suresh Verma (Ops)',
+    submissionDate: '14-10-2026',
+    materialHead: 'Anchor Bolts',
+    materialDescription: 'High Tensile Foundation Anchor Bolts M24 x 1000mm',
+    uom: 'Nos',
+    stockQty: 40.00,
+    prQty: 160.00
+  }
+];
+
+let purchaseRfqDataStore = [
+  {
+    id: 'pm-rfq-1',
+    selected: false,
+    supplierName: 'Apex Infra Solutions Pvt Ltd',
+    date: '10-10-2026',
+    rfqNo: 'RFQ-2026-0891',
+    rfqValue: 245000.00,
+    status: 'RFQ Pending',
+    items: [
+      {
+        id: 'pm-rfq-1-it-1',
+        selected: false,
+        materialDescription: 'GI Angular Tower Member 60x60x6mm',
+        uom: 'Mtr',
+        qty: 100.00,
+        rate: 1500.00,
+        gstPercent: 18,
+        gstAmount: 27000.00,
+        total: 177000.00
+      },
+      {
+        id: 'pm-rfq-1-it-2',
+        selected: false,
+        materialDescription: 'M24 High Tensile Foundation Bolts Grade 8.8',
+        uom: 'Nos',
+        qty: 50.00,
+        rate: 1152.54,
+        gstPercent: 18,
+        gstAmount: 10372.86,
+        total: 68000.00
+      }
+    ]
+  },
+  {
+    id: 'pm-rfq-2',
+    selected: false,
+    supplierName: 'Delta Towers & Heavy Engg',
+    date: '11-10-2026',
+    rfqNo: 'RFQ-2026-0892',
+    rfqValue: 1875000.00,
+    status: 'RFQ Received',
+    items: [
+      {
+        id: 'pm-rfq-2-it-1',
+        selected: false,
+        highlighted: false,
+        materialDescription: '40M Ground Based Galvanized Tower Structure',
+        uom: 'Nos',
+        qty: 1.00,
+        lastPurchaseRate: 1200000.00,
+        newRate: 1250000.00,
+        total: 1250000.00
+      },
+      {
+        id: 'pm-rfq-2-it-2',
+        selected: false,
+        highlighted: false,
+        materialDescription: 'Delta Heavy Duty Mast Flange 450mm',
+        uom: 'Nos',
+        qty: 25.00,
+        lastPurchaseRate: 24000.00,
+        newRate: 25000.00,
+        total: 625000.00
+      }
+    ]
+  },
+  {
+    id: 'pm-rfq-3',
+    selected: false,
+    supplierName: 'KEC Power & Cabling Corp',
+    date: '12-10-2026',
+    rfqNo: 'RFQ-2026-0893',
+    rfqValue: 960000.00,
+    status: 'RFQ Received',
+    items: [
+      {
+        id: 'pm-rfq-3-it-1',
+        selected: false,
+        highlighted: false,
+        materialDescription: '3.5C x 185 Sq.mm XLPE Armoured Aluminium Cable',
+        uom: 'Mtr',
+        qty: 800.00,
+        lastPurchaseRate: 1150.00,
+        newRate: 1200.00,
+        total: 960000.00
+      }
+    ]
+  },
+  {
+    id: 'pm-rfq-4',
+    selected: false,
+    supplierName: 'Sterling & Wilson Infra',
+    date: '13-10-2026',
+    rfqNo: 'RFQ-2026-0894',
+    rfqValue: 420000.00,
+    status: 'RFQ Pending',
+    items: [
+      {
+        id: 'pm-rfq-4-it-1',
+        selected: false,
+        materialDescription: '15kVA Single Phase Silent Diesel Generator',
+        uom: 'Set',
+        qty: 1.00,
+        rate: 355932.20,
+        gstPercent: 18,
+        gstAmount: 64067.80,
+        total: 420000.00
+      }
+    ]
+  },
+  {
+    id: 'pm-rfq-5',
+    selected: false,
+    supplierName: 'Polycab Wires & Cables',
+    date: '14-10-2026',
+    rfqNo: 'RFQ-2026-0895',
+    rfqValue: 1450000.00,
+    status: 'RFQ Received',
+    items: [
+      {
+        id: 'pm-rfq-5-it-1',
+        selected: false,
+        highlighted: false,
+        materialDescription: '4C x 95 Sq.mm Armoured Copper Power Cable',
+        uom: 'Mtr',
+        qty: 1000.00,
+        lastPurchaseRate: 1400.00,
+        newRate: 1450.00,
+        total: 1450000.00
+      }
+    ]
+  }
+];
+
+let purchasePoDataStore = [
+  {
+    id: 'pm-po-1',
+    supplierName: 'Apex Infra Solutions Pvt Ltd',
+    poNo: 'PO-2026-4401',
+    poDate: '05-10-2026',
+    poValue: 1832540.00,
+    status: 'Approval Pending',
+    items: [
+      { id: 'item-1', desc: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable', uom: 'Mtr', qty: 500, rate: 1200.00, basic: 600000.00, cgst: 54000.00, sgst: 54000.00, total: 708000.00, poQty: 500, invQty: 500, selected: false, highlighted: false },
+      { id: 'item-2', desc: '11KV HT XLPE Insulated Armoured Cable 3C x 185 Sq.mm', uom: 'Mtr', qty: 300, rate: 1800.00, basic: 540000.00, cgst: 48600.00, sgst: 48600.00, total: 637200.00, poQty: 300, invQty: 300, selected: false, highlighted: false },
+      { id: 'item-3', desc: 'Heavy Duty GI Cable Trays 300x50x2mm with Coupler Plates', uom: 'Nos', qty: 200, rate: 850.00, basic: 170000.00, cgst: 15300.00, sgst: 15300.00, total: 200600.00, poQty: 200, invQty: 200, selected: false, highlighted: false },
+      { id: 'item-4', desc: 'Outdoor End Termination Kit 11KV Heat Shrinkable', uom: 'Set', qty: 40, rate: 4200.00, basic: 168000.00, cgst: 15120.00, sgst: 15120.00, total: 198240.00, poQty: 40, invQty: 40, selected: false, highlighted: false },
+      { id: 'item-5', desc: 'Tinned Copper Cable Lugs Heavy Duty 185 Sq.mm', uom: 'Nos', qty: 600, rate: 125.00, basic: 75000.00, cgst: 6750.00, sgst: 6750.00, total: 88500.00, poQty: 600, invQty: 600, selected: false, highlighted: false }
+    ],
+    transport: {
+      logisticsName: 'VRL Logistics',
+      transportCharges: 15000.00,
+      gstEnabled: false,
+      gstAmount: 0.00,
+      totalAmount: 15000.00
+    }
+  },
+  {
+    id: 'pm-po-2',
+    supplierName: 'Delta Towers & Heavy Engg',
+    poNo: 'PO-2026-4402',
+    poDate: '08-10-2026',
+    poValue: 1718080.00,
+    status: 'Dispatch Pending',
+    items: [
+      { id: 'item-1', desc: 'Galvanized Structural Steel Angle 50x50x5mm', uom: 'MT', qty: 10, rate: 65000.00, basic: 650000.00, cgst: 58500.00, sgst: 58500.00, total: 767000.00, poQty: 10, invQty: 10, selected: false, highlighted: false },
+      { id: 'item-2', desc: 'High Tensile Tower Foundation Fasteners & Bolts M24', uom: 'Set', qty: 250, rate: 1800.00, basic: 450000.00, cgst: 40500.00, sgst: 40500.00, total: 531000.00, poQty: 250, invQty: 250, selected: false, highlighted: false },
+      { id: 'item-3', desc: 'Hot Dip Galvanized Step Bolts with Hex Nuts & Washers', uom: 'Kg', qty: 500, rate: 160.00, basic: 80000.00, cgst: 7200.00, sgst: 7200.00, total: 94400.00, poQty: 500, invQty: 500, selected: false, highlighted: false },
+      { id: 'item-4', desc: 'Tower Base Plate Stiffeners Grade E250 Fe410W', uom: 'Nos', qty: 80, rate: 2400.00, basic: 192000.00, cgst: 17280.00, sgst: 17280.00, total: 226560.00, poQty: 80, invQty: 80, selected: false, highlighted: false },
+      { id: 'item-5', desc: 'Anti-Climbing Device Galvanized Barbed Wire Guard', uom: 'Set', qty: 15, rate: 5600.00, basic: 84000.00, cgst: 7560.00, sgst: 7560.00, total: 99120.00, poQty: 15, invQty: 15, selected: false, highlighted: false }
+    ],
+    transport: {
+      logisticsName: 'TCI Express',
+      transportCharges: 22000.00,
+      gstEnabled: true,
+      gstAmount: 3960.00,
+      totalAmount: 25960.00
+    }
+  },
+  {
+    id: 'pm-po-3',
+    supplierName: 'KEC Power & Cabling Corp',
+    poNo: 'PO-2026-4403',
+    poDate: '10-10-2026',
+    poValue: 892080.00,
+    status: 'In-Transit',
+    items: [
+      { id: 'item-1', desc: 'Earthing Copper Strip 25x3mm Bare Conductor', uom: 'Mtr', qty: 800, rate: 450.00, basic: 360000.00, cgst: 32400.00, sgst: 32400.00, total: 424800.00, poQty: 800, invQty: 800, selected: false, highlighted: false },
+      { id: 'item-2', desc: 'Chemical Earthing Electrode Compound 25kg Bag', uom: 'Bag', qty: 60, rate: 1100.00, basic: 66000.00, cgst: 5940.00, sgst: 5940.00, total: 77880.00, poQty: 60, invQty: 60, selected: false, highlighted: false },
+      { id: 'item-3', desc: 'Heavy Duty GI Perforated Cable Tray 300x50mm', uom: 'Nos', qty: 250, rate: 750.00, basic: 187500.00, cgst: 16875.00, sgst: 16875.00, total: 221250.00, poQty: 250, invQty: 250, selected: false, highlighted: false },
+      { id: 'item-4', desc: 'Copper Bonded Earth Rod 17.2mm Dia 3 Mtr Length', uom: 'Nos', qty: 45, rate: 2200.00, basic: 99000.00, cgst: 8910.00, sgst: 8910.00, total: 116820.00, poQty: 45, invQty: 45, selected: false, highlighted: false },
+      { id: 'item-5', desc: 'GI Earth Inspection Chamber with Cover 300x300mm', uom: 'Nos', qty: 30, rate: 1450.00, basic: 43500.00, cgst: 3915.00, sgst: 3915.00, total: 51330.00, poQty: 30, invQty: 30, selected: false, highlighted: false }
+    ],
+    transport: {
+      logisticsName: 'Blue Dart Express',
+      transportCharges: 18500.00,
+      gstEnabled: true,
+      gstAmount: 3330.00,
+      totalAmount: 21830.00
+    }
+  },
+  {
+    id: 'pm-po-4',
+    supplierName: 'Sterling & Wilson Infra',
+    poNo: 'PO-2026-4404',
+    poDate: '11-10-2026',
+    poValue: 659620.00,
+    status: 'Approval Pending',
+    items: [
+      { id: 'item-1', desc: 'Solar Module Mounting Structure C-Channel Cold Formed', uom: 'Set', qty: 60, rate: 5200.00, basic: 312000.00, cgst: 28080.00, sgst: 28080.00, total: 368160.00, poQty: 60, invQty: 60, selected: false, highlighted: false },
+      { id: 'item-2', desc: 'Hot Dip Galvanized Purlin Section 80x40x2mm 6 Mtr', uom: 'Nos', qty: 120, rate: 1650.00, basic: 198000.00, cgst: 17820.00, sgst: 17820.00, total: 233640.00, poQty: 120, invQty: 120, selected: false, highlighted: false },
+      { id: 'item-3', desc: 'Aluminium Mid Clamps with SS304 Allen Bolt M8', uom: 'Nos', qty: 500, rate: 65.00, basic: 32500.00, cgst: 2925.00, sgst: 2925.00, total: 38350.00, poQty: 500, invQty: 500, selected: false, highlighted: false },
+      { id: 'item-4', desc: 'Aluminium End Clamps with EPDM Rubber Padding', uom: 'Nos', qty: 300, rate: 55.00, basic: 16500.00, cgst: 1485.00, sgst: 1485.00, total: 19470.00, poQty: 300, invQty: 300, selected: false, highlighted: false }
+    ],
+    transport: {
+      logisticsName: 'Safexpress',
+      transportCharges: 12000.00,
+      gstEnabled: false,
+      gstAmount: 0.00,
+      totalAmount: 12000.00
+    }
+  },
+  {
+    id: 'pm-po-5',
+    supplierName: 'Polycab Wires & Cables',
+    poNo: 'PO-2026-4405',
+    poDate: '12-10-2026',
+    poValue: 1644920.00,
+    status: 'In-Transit',
+    items: [
+      { id: 'item-1', desc: 'FR PVC Insulated Single Core Copper Wire 4 Sq.mm', uom: 'Coil', qty: 200, rate: 2800.00, basic: 560000.00, cgst: 50400.00, sgst: 50400.00, total: 660800.00, poQty: 200, invQty: 200, selected: false, highlighted: false },
+      { id: 'item-2', desc: 'FR PVC Insulated Single Core Copper Wire 2.5 Sq.mm', uom: 'Coil', qty: 250, rate: 1950.00, basic: 487500.00, cgst: 43875.00, sgst: 43875.00, total: 575250.00, poQty: 250, invQty: 250, selected: false, highlighted: false },
+      { id: 'item-3', desc: 'FRLS Multi-Strand Flexible Wire 1.5 Sq.mm 90m', uom: 'Coil', qty: 180, rate: 1350.00, basic: 243000.00, cgst: 21870.00, sgst: 21870.00, total: 286740.00, poQty: 180, invQty: 180, selected: false, highlighted: false },
+      { id: 'item-4', desc: 'Industrial Armoured Control Cable 7C x 1.5 Sq.mm', uom: 'Mtr', qty: 600, rate: 145.00, basic: 87000.00, cgst: 7830.00, sgst: 7830.00, total: 102660.00, poQty: 600, invQty: 600, selected: false, highlighted: false },
+      { id: 'item-5', desc: 'Heavy Duty Compression Cable Glands 25mm Brass', uom: 'Nos', qty: 150, rate: 110.00, basic: 16500.00, cgst: 1485.00, sgst: 1485.00, total: 19470.00, poQty: 150, invQty: 150, selected: false, highlighted: false }
+    ],
+    transport: {
+      logisticsName: 'Delhivery Supply Chain',
+      transportCharges: 25000.00,
+      gstEnabled: true,
+      gstAmount: 4500.00,
+      totalAmount: 29500.00
+    }
+  }
+];
+
+let purchasePaymentDataStore = [
+  {
+    id: 'pm-pay-1',
+    vendorName: 'Apex Infra Solutions Pvt Ltd',
+    invoiceNo: 'INV-2026-1021',
+    invoiceDate: '18-09-2026',
+    invoiceAmount: 1250000.00,
+    basicAmount: 1059322.03,
+    cgst: 95338.98,
+    sgst: 95338.98,
+    igst: 0.00,
+    paidAmount: 800000.00,
+    payableAmount: 450000.00,
+    ageing: '28 Days',
+    status: 'Partially Paid',
+    payments: [
+      { date: '20-09-2026', receiptNo: 'RCP-2026-081', paidAmount: 500000.00 },
+      { date: '28-09-2026', receiptNo: 'RCP-2026-092', paidAmount: 300000.00 }
+    ]
+  },
+  {
+    id: 'pm-pay-2',
+    vendorName: 'Delta Towers & Heavy Engg',
+    invoiceNo: 'INV-2026-1022',
+    invoiceDate: '25-09-2026',
+    invoiceAmount: 1875000.00,
+    basicAmount: 1588983.05,
+    cgst: 143008.47,
+    sgst: 143008.47,
+    igst: 0.00,
+    paidAmount: 1875000.00,
+    payableAmount: 0.00,
+    ageing: '21 Days',
+    status: 'Paid',
+    payments: [
+      { date: '28-09-2026', receiptNo: 'RCP-2026-104', paidAmount: 1000000.00 },
+      { date: '05-10-2026', receiptNo: 'RCP-2026-118', paidAmount: 875000.00 }
+    ]
+  },
+  {
+    id: 'pm-pay-3',
+    vendorName: 'KEC Power & Cabling Corp',
+    invoiceNo: 'INV-2026-1023',
+    invoiceDate: '01-10-2026',
+    invoiceAmount: 960000.00,
+    basicAmount: 813559.32,
+    cgst: 73220.34,
+    sgst: 73220.34,
+    igst: 0.00,
+    paidAmount: 400000.00,
+    payableAmount: 560000.00,
+    ageing: '15 Days',
+    status: 'Partially Paid',
+    payments: [
+      { date: '08-10-2026', receiptNo: 'RCP-2026-135', paidAmount: 400000.00 }
+    ]
+  },
+  {
+    id: 'pm-pay-4',
+    vendorName: 'Sterling & Wilson Infra',
+    invoiceNo: 'INV-2026-1024',
+    invoiceDate: '05-10-2026',
+    invoiceAmount: 560000.00,
+    basicAmount: 474576.27,
+    cgst: 42711.86,
+    sgst: 42711.86,
+    igst: 0.00,
+    paidAmount: 0.00,
+    payableAmount: 560000.00,
+    ageing: '11 Days',
+    status: 'Pending',
+    payments: []
+  },
+  {
+    id: 'pm-pay-5',
+    vendorName: 'Polycab Wires & Cables',
+    invoiceNo: 'INV-2026-1025',
+    invoiceDate: '10-10-2026',
+    invoiceAmount: 1450000.00,
+    basicAmount: 1228813.56,
+    cgst: 110593.22,
+    sgst: 110593.22,
+    igst: 0.00,
+    paidAmount: 1000000.00,
+    payableAmount: 450000.00,
+    ageing: '6 Days',
+    status: 'Partially Paid',
+    payments: [
+      { date: '12-10-2026', receiptNo: 'RCP-2026-162', paidAmount: 600000.00 },
+      { date: '15-10-2026', receiptNo: 'RCP-2026-174', paidAmount: 400000.00 }
+    ]
+  }
+];
+
+window.handlePurchasePrEditToggle = function() {
+  if (!isPurchasePrEditing) {
+    isPurchasePrEditing = true;
+    renderWorklistToolbar();
+    applyFiltersAndRender();
+    setTimeout(() => {
+      const firstInput = document.querySelector('.purchase-pr-editable-input');
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+      }
+    }, 50);
+  } else {
+    // Save edits
+    const inputs = document.querySelectorAll('.purchase-pr-editable-input');
+    inputs.forEach(input => {
+      const rowId = input.getAttribute('data-row-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = purchasePrDataStore.find(r => r.id === rowId);
+        if (item) item.prQty = val;
+        const curItem = currentDataset && currentDataset.find(r => r.id === rowId);
+        if (curItem) curItem.prQty = val;
+      }
+    });
+
+    isPurchasePrEditing = false;
+    renderWorklistToolbar();
+    applyFiltersAndRender();
+    if (typeof showToast === 'function') {
+      showToast('PR quantity updated successfully');
+    }
+  }
+};
+
+window.handlePurchasePrRowSelect = function(rowId, isChecked) {
+  if (isPurchasePrEditing) {
+    document.querySelectorAll('.purchase-pr-editable-input').forEach(input => {
+      const id = input.getAttribute('data-row-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = purchasePrDataStore.find(r => r.id === id);
+        if (item) item.prQty = val;
+        const curItem = currentDataset && currentDataset.find(r => r.id === id);
+        if (curItem) curItem.prQty = val;
+      }
+    });
+  }
+
+  const row = currentDataset && currentDataset.find(r => r.id === rowId);
+  if (row) row.selected = isChecked;
+  const storeRow = purchasePrDataStore.find(r => r.id === rowId);
+  if (storeRow) storeRow.selected = isChecked;
+
+  const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+  if (!hasSelected && isPurchasePrEditing) {
+    isPurchasePrEditing = false;
+  }
+
+  renderWorklistToolbar();
+  applyFiltersAndRender();
+  updatePurchasePrSelectionUI();
+};
+
+window.toggleSelectAllPurchasePr = function(isChecked) {
+  if (isPurchasePrEditing) {
+    document.querySelectorAll('.purchase-pr-editable-input').forEach(input => {
+      const id = input.getAttribute('data-row-id');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val >= 0) {
+        const item = purchasePrDataStore.find(r => r.id === id);
+        if (item) item.prQty = val;
+        const curItem = currentDataset && currentDataset.find(r => r.id === id);
+        if (curItem) curItem.prQty = val;
+      }
+    });
+  }
+
+  if (currentDataset) currentDataset.forEach(r => r.selected = isChecked);
+  purchasePrDataStore.forEach(r => r.selected = isChecked);
+
+  if (!isChecked && isPurchasePrEditing) {
+    isPurchasePrEditing = false;
+  }
+
+  renderWorklistToolbar();
+  applyFiltersAndRender();
+  updatePurchasePrSelectionUI();
+};
+
+function updatePurchasePrSelectionUI() {
+  if (!currentDataset) return;
+  const total = currentDataset.length;
+  const selectedCount = currentDataset.filter(r => r.selected).length;
+  const chkAll = document.getElementById('chkSelectAllPurchasePr');
+  if (chkAll) {
+    chkAll.checked = (total > 0 && selectedCount === total);
+    chkAll.indeterminate = (selectedCount > 0 && selectedCount < total);
+  }
+
+  const btnEdit = document.getElementById('btnPurchasePrEdit');
+  if (btnEdit) {
+    btnEdit.style.display = selectedCount > 0 ? 'inline-flex' : 'none';
+  }
+
+  const submitArea = document.getElementById('purchasePrSubmitArea');
+  if (submitArea) {
+    submitArea.style.display = selectedCount > 0 ? 'flex' : 'none';
+  }
+}
+
+// --------------------------------------------------------------------------
+// Purchase Manager: Select Supplier Modal Handlers (Multiselect Circle Radios)
+// --------------------------------------------------------------------------
+window.togglePurchaseSupplierDropdown = function() {
+  const menu = document.getElementById('menuPurchaseSupplierOptions');
+  if (!menu) return;
+  menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
+};
+
+window.handlePurchaseSupplierOptChange = function() {
+  const checkedBoxes = Array.from(document.querySelectorAll('.purchase-supplier-opt-chk:checked'));
+  const selectedNames = checkedBoxes.map(chk => chk.value);
+  const lbl = document.getElementById('lblPurchaseSupplierDropdownSelected');
+  if (lbl) {
+    if (selectedNames.length === 0) {
+      lbl.textContent = 'Select Supplier';
+      lbl.style.color = '#64748b';
+    } else {
+      lbl.textContent = selectedNames.join(', ');
+      lbl.style.color = '#0f172a';
+    }
+  }
+
+  // Synchronize hidden select
+  const sel = document.getElementById('selPurchaseSupplierName');
+  if (sel) {
+    Array.from(sel.options).forEach(opt => {
+      opt.selected = selectedNames.includes(opt.value);
+    });
+  }
+};
+
+window.openPurchaseSelectSupplierModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('purchaseSelectSupplierModal');
+  if (!modal) return;
+
+  let vendorNames = [];
+  if (typeof masterVendorData !== 'undefined' && Array.isArray(masterVendorData) && masterVendorData.length > 0) {
+    vendorNames = masterVendorData.map(v => v.vendorName || v.vendor_name || v.name).filter(Boolean);
+  }
+  const defaultVendors = [
+    'Apex Infra Solutions Pvt Ltd',
+    'Delta Towers & Heavy Engg',
+    'KEC Power & Cabling Corp',
+    'Sterling & Wilson Infra',
+    'Polycab Wires & Cables',
+    'Schneider Electric India Pvt Ltd',
+    'Larsen & Toubro Ltd',
+    'Tata Communications Ltd',
+    'Sri Balaji Electricals'
+  ];
+  defaultVendors.forEach(v => {
+    if (!vendorNames.includes(v)) vendorNames.push(v);
+  });
+
+  const menu = document.getElementById('menuPurchaseSupplierOptions');
+  if (menu) {
+    menu.innerHTML = vendorNames.map(name => `
+      <label class="supplier-dropdown-option" style="display: flex; align-items: center; gap: 12px; padding: 9px 16px; cursor: pointer; user-select: none;">
+        <input type="checkbox" class="pr-circle-checkbox purchase-supplier-opt-chk" value="${name.replace(/"/g, '&quot;')}" onchange="handlePurchaseSupplierOptChange()">
+        <span style="color: #1e293b; font-size: 0.92rem; font-weight: 500; pointer-events: none;">${name}</span>
+      </label>
+    `).join('');
+    menu.style.display = 'none';
+  }
+
+  const selSupplier = document.getElementById('selPurchaseSupplierName');
+  if (selSupplier) {
+    selSupplier.innerHTML = vendorNames.map(name => `
+      <option value="${name}">${name}</option>
+    `).join('');
+  }
+
+  const lbl = document.getElementById('lblPurchaseSupplierDropdownSelected');
+  if (lbl) {
+    lbl.textContent = 'Select Supplier';
+    lbl.style.color = '#64748b';
+  }
+
+  if (overlay) {
+    overlay.style.display = 'flex';
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => c.style.display = 'none');
+  }
+
+  modal.style.display = 'block';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '99999', 'important');
+};
+
+window.closePurchaseSelectSupplierModal = function() {
+  const modal = document.getElementById('purchaseSelectSupplierModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+  const menu = document.getElementById('menuPurchaseSupplierOptions');
+  if (menu) menu.style.display = 'none';
+};
+
+window.submitPurchaseSelectSupplier = function() {
+  const checkedBoxes = Array.from(document.querySelectorAll('.purchase-supplier-opt-chk:checked'));
+  let selectedSuppliers = checkedBoxes.map(chk => chk.value);
+
+  if (selectedSuppliers.length === 0) {
+    const sel = document.getElementById('selPurchaseSupplierName');
+    if (sel && sel.value) {
+      selectedSuppliers = [sel.value];
+    }
+  }
+
+  if (selectedSuppliers.length === 0) {
+    if (typeof showToast === 'function') {
+      showToast('Please select at least one supplier');
+    }
+    return;
+  }
+
+  if (currentWorklistView === 'rfq') {
+    purchaseRfqDataStore = purchaseRfqDataStore.filter(r => !r.selected);
+    currentDataset = purchaseRfqDataStore.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+
+    window.closePurchaseSelectSupplierModal();
+    applyFiltersAndRender();
+    updatePurchaseRfqSelectionUI();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('RFQ submitted successfully!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('RFQ submitted successfully!');
+    }
+    return;
+  }
+
+  // Remove/process selected PR rows from active PR worklist
+  purchasePrDataStore = purchasePrDataStore.filter(r => !r.selected);
+  currentDataset = purchasePrDataStore.map(item => ({ ...item }));
+  filteredDataset = [...currentDataset];
+
+  window.closePurchaseSelectSupplierModal();
+  applyFiltersAndRender();
+  updatePurchasePrSelectionUI();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('PR submitted successfully!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('PR submitted successfully!');
+  }
+};
+
+// Close supplier options dropdown on outside click
+document.addEventListener('click', function(e) {
+  const container = document.getElementById('purchaseSupplierDropdownContainer');
+  const menu = document.getElementById('menuPurchaseSupplierOptions');
+  if (container && menu && menu.style.display === 'block') {
+    if (!container.contains(e.target) && !menu.contains(e.target)) {
+      menu.style.display = 'none';
+    }
+  }
+});
+
+// --------------------------------------------------------------------------
+// Purchase Manager: Add Product Modal Handlers & Catalog
+// --------------------------------------------------------------------------
+function getCompanyMasterProductsMap() {
+  const catalog = {};
+
+  const seedProducts = [
+    { head: 'Tower Structure', desc: '40M Galvanized Tubular Telecom Tower Mast Structure', uom: 'Nos' },
+    { head: 'Tower Structure', desc: '30M Angular Lattice Guyed Mast Tower Section', uom: 'Nos' },
+    { head: 'Tower Structure', desc: 'Tower Antenna Mount Fixture Bracket Galvanized', uom: 'Set' },
+    { head: 'Tower Structure', desc: 'Lightning Arrester Copper Spike 1.5M with Base', uom: 'Nos' },
+    { head: 'Power Cable', desc: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable', uom: 'Mtr' },
+    { head: 'Power Cable', desc: '2C x 16 Sq.mm Copper Submersible Cable', uom: 'Mtr' },
+    { head: 'Power Cable', desc: '1C x 35 Sq.mm Flexible Copper Cable', uom: 'Mtr' },
+    { head: 'Optical Fiber', desc: '24F Single Mode Armoured Optical Fiber Cable', uom: 'Mtr' },
+    { head: 'Optical Fiber', desc: '48F Duct Optical Fiber Cable G.652D', uom: 'Mtr' },
+    { head: 'Optical Fiber', desc: 'Fiber Joint Closure Dome Type 96 Fibers Heat Shrink', uom: 'Nos' },
+    { head: 'Optical Fiber', desc: 'Optical Distribution Frame 24 Port SC/UPC', uom: 'Nos' },
+    { head: 'Earthing Rod', desc: 'Copper Bonded Chemical Earthing Electrode 3M', uom: 'Set' },
+    { head: 'Earthing Rod', desc: '25x3 mm Galvanized Iron Earthing Strip Flat', uom: 'Mtr' },
+    { head: 'Anchor Bolts', desc: 'High Tensile Foundation Anchor Bolts M24 x 1000mm', uom: 'Nos' },
+    { head: 'Anchor Bolts', desc: 'Galvanized Hex Nut and Washer Bolt M16 x 75mm Grade 8.8', uom: 'Kg' },
+    { head: 'Anchor Bolts', desc: 'Stainless Steel Band Clamping Buckle 3/4 inch', uom: 'Pkt' },
+    { head: 'Power Backup', desc: 'Diesel Generator 15kVA Silent Canopy AMF', uom: 'Nos' },
+    { head: 'Power Backup', desc: 'SMPS Power Plant 48V 100A with Rectifier Modules', uom: 'Nos' },
+    { head: 'Control Panel', desc: '100A 4-Pole Auto Mains Failure (AMF) Panel', uom: 'Nos' },
+    { head: 'Control Panel', desc: 'Outdoor Telecom Equipment Enclosure IP55', uom: 'Nos' }
+  ];
+
+  seedProducts.forEach(item => {
+    if (!catalog[item.head]) catalog[item.head] = [];
+    catalog[item.head].push({ desc: item.desc, uom: item.uom });
+  });
+
+  if (typeof masterProductsData !== 'undefined' && Array.isArray(masterProductsData)) {
+    masterProductsData.forEach(p => {
+      const head = p.productHead || p.productCategory || 'Tower Infrastructure';
+      const desc = p.productName || p.description || p.item_description;
+      const uom = p.uom || p.saleUom || 'Nos';
+      if (head && desc) {
+        if (!catalog[head]) catalog[head] = [];
+        if (!catalog[head].some(x => x.desc === desc)) {
+          catalog[head].push({ desc, uom });
+        }
+      }
+    });
+  }
+
+  if (typeof indusProductMaterialsData !== 'undefined' && Array.isArray(indusProductMaterialsData)) {
+    indusProductMaterialsData.forEach(m => {
+      const head = m.material_head || m.materialHead;
+      const desc = m.material_description || m.materialDescription;
+      const uom = m.uom || 'Nos';
+      if (head && desc) {
+        if (!catalog[head]) catalog[head] = [];
+        if (!catalog[head].some(x => x.desc === desc)) {
+          catalog[head].push({ desc, uom });
+        }
+      }
+    });
+  }
+
+  return catalog;
+}
+
+window.handlePurchaseAddMaterialHeadChange = function(head) {
+  const selDesc = document.getElementById('selPurchaseAddMaterialDescription');
+  if (!selDesc) return;
+  const catalog = getCompanyMasterProductsMap();
+  const items = catalog[head] || [];
+  selDesc.innerHTML = items.map(item => `<option value="${item.desc}">${item.desc}</option>`).join('');
+};
+
+window.openPurchaseAddProductModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('purchaseAddProductModal');
+  if (!modal) return;
+
+  const catalog = getCompanyMasterProductsMap();
+  const heads = Object.keys(catalog);
+
+  const selHead = document.getElementById('selPurchaseAddMaterialHead');
+  if (selHead) {
+    selHead.innerHTML = heads.map((h, idx) => `<option value="${h}" ${idx === 0 ? 'selected' : ''}>${h}</option>`).join('');
+    if (heads.length > 0) {
+      window.handlePurchaseAddMaterialHeadChange(heads[0]);
+    }
+  }
+
+  const inpQty = document.getElementById('inpPurchaseAddQty');
+  if (inpQty) {
+    inpQty.value = '';
+    inpQty.onblur = function() {
+      const val = parseFloat(this.value);
+      if (!isNaN(val) && val >= 0) {
+        this.value = val.toFixed(2);
+      }
+    };
+  }
+
+  if (overlay) {
+    overlay.style.display = 'flex';
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => c.style.display = 'none');
+  }
+
+  modal.style.display = 'block';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '99999', 'important');
+  modal.style.setProperty('width', '560px', 'important');
+};
+
+window.closePurchaseAddProductModal = function() {
+  const modal = document.getElementById('purchaseAddProductModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.savePurchaseAddProduct = function() {
+  const selHead = document.getElementById('selPurchaseAddMaterialHead');
+  const selDesc = document.getElementById('selPurchaseAddMaterialDescription');
+  const inpQty = document.getElementById('inpPurchaseAddQty');
+
+  const head = selHead ? selHead.value : 'Tower Structure';
+  const desc = selDesc ? selDesc.value : '';
+  const qtyVal = inpQty ? parseFloat(inpQty.value) : 0;
+
+  if (isNaN(qtyVal) || qtyVal <= 0) {
+    if (typeof showToast === 'function') {
+      showToast('Please enter a valid quantity greater than 0');
+    }
+    return;
+  }
+  if (!desc) {
+    if (typeof showToast === 'function') {
+      showToast('Please select a material description');
+    }
+    return;
+  }
+
+  const catalog = getCompanyMasterProductsMap();
+  const items = catalog[head] || [];
+  const meta = items.find(i => i.desc === desc) || { uom: 'Nos' };
+
+  const today = new Date();
+  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const year = today.getFullYear();
+  const dateStr = `${day}-${month}-${year}`;
+
+  const newId = 'pm-pr-' + Date.now();
+  const newRow = {
+    id: newId,
+    selected: false,
+    submitBy: 'Purchase Manager',
+    submissionDate: dateStr,
+    materialHead: head,
+    materialDescription: desc,
+    uom: meta.uom || 'Nos',
+    stockQty: 0.00,
+    prQty: Number(qtyVal.toFixed(2))
+  };
+
+  purchasePrDataStore.unshift(newRow);
+  if (!currentDataset) currentDataset = [];
+  currentDataset.unshift(newRow);
+  filteredDataset = [...currentDataset];
+
+  window.closePurchaseAddProductModal();
+  applyFiltersAndRender();
+  updatePurchasePrSelectionUI();
+
+  if (typeof showToast === 'function') {
+    showToast('Product added to PR successfully');
+  }
+};
+
+window.handlePurchaseRfqRowSelect = function(rowId, isChecked) {
+  const row = currentDataset && currentDataset.find(r => r.id === rowId);
+  if (row) row.selected = isChecked;
+  const storeRow = purchaseRfqDataStore.find(r => r.id === rowId);
+  if (storeRow) storeRow.selected = isChecked;
+
+  applyFiltersAndRender();
+  updatePurchaseRfqSelectionUI();
+};
+
+window.toggleSelectAllPurchaseRfq = function(isChecked) {
+  if (currentDataset) currentDataset.forEach(r => r.selected = isChecked);
+  purchaseRfqDataStore.forEach(r => r.selected = isChecked);
+
+  applyFiltersAndRender();
+  updatePurchaseRfqSelectionUI();
+};
+
+function updatePurchaseRfqSelectionUI() {
+  if (!currentDataset) return;
+  const total = currentDataset.length;
+  const selectedCount = currentDataset.filter(r => r.selected).length;
+  const chkAll = document.getElementById('chkSelectAllPurchaseRfq');
+  if (chkAll) {
+    chkAll.checked = (total > 0 && selectedCount === total);
+    chkAll.indeterminate = (selectedCount > 0 && selectedCount < total);
+  }
+
+  const submitArea = document.getElementById('purchaseRfqSubmitArea');
+  if (submitArea) {
+    submitArea.style.display = selectedCount > 0 ? 'flex' : 'none';
+  }
+}
+
+// --------------------------------------------------------------------------
+// Purchase Manager: RFQ Detail Modals (RFQ Pending & RFQ Received)
+// --------------------------------------------------------------------------
+let activePurchaseRfqId = null;
+let isPurchaseRfqPendingEditing = false;
+let isPurchaseRfqReceivedEditing = false;
+
+function ensureRfqItems(rfq, type) {
+  if (!rfq) return;
+  if (Array.isArray(rfq.items) && rfq.items.length > 0) return;
+
+  if (type === 'pending' || (rfq.status || '').toLowerCase().includes('pending')) {
+    const totalVal = Number(rfq.rfqValue || 245000);
+    const item1Total = Math.round(totalVal * 0.72);
+    const item2Total = totalVal - item1Total;
+    const base1 = item1Total / 1.18;
+    const base2 = item2Total / 1.18;
+
+    rfq.items = [
+      {
+        id: `${rfq.id}-it-1`,
+        selected: false,
+        materialDescription: 'GI Angular Tower Member 60x60x6mm',
+        uom: 'Mtr',
+        qty: 100.00,
+        rate: +(base1 / 100).toFixed(2),
+        gstPercent: 18,
+        gstAmount: +(base1 * 0.18).toFixed(2),
+        total: item1Total
+      },
+      {
+        id: `${rfq.id}-it-2`,
+        selected: false,
+        materialDescription: 'M24 High Tensile Foundation Bolts Grade 8.8',
+        uom: 'Nos',
+        qty: 50.00,
+        rate: +(base2 / 50).toFixed(2),
+        gstPercent: 18,
+        gstAmount: +(base2 * 0.18).toFixed(2),
+        total: item2Total
+      }
+    ];
+  } else {
+    const totalVal = Number(rfq.rfqValue || 1875000);
+    const item1Total = Math.round(totalVal * 0.67);
+    const item2Total = totalVal - item1Total;
+
+    rfq.items = [
+      {
+        id: `${rfq.id}-it-1`,
+        selected: false,
+        highlighted: false,
+        materialDescription: '40M Ground Based Galvanized Tower Structure',
+        uom: 'Nos',
+        qty: 1.00,
+        lastPurchaseRate: Math.round(item1Total * 0.95),
+        newRate: item1Total,
+        total: item1Total
+      },
+      {
+        id: `${rfq.id}-it-2`,
+        selected: false,
+        highlighted: false,
+        materialDescription: 'Delta Heavy Duty Mast Flange 450mm',
+        uom: 'Nos',
+        qty: 25.00,
+        lastPurchaseRate: Math.round((item2Total / 25) * 0.96),
+        newRate: Math.round(item2Total / 25),
+        total: item2Total
+      }
+    ];
+  }
+}
+
+window.handlePurchaseRfqSupplierClick = function(rowId) {
+  const row = purchaseRfqDataStore.find(r => r.id === rowId) || (currentDataset && currentDataset.find(r => r.id === rowId));
+  if (!row) return;
+
+  const status = (row.status || '').toLowerCase();
+  if (status.includes('pending')) {
+    window.openPurchaseRfqPendingModal(row.id);
+  } else {
+    window.openPurchaseRfqReceivedModal(row.id);
+  }
+};
+
+// --- RFQ PENDING MODAL ---
+window.openPurchaseRfqPendingModal = function(rfqId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('purchaseRfqPendingModal');
+  if (!modal) return;
+
+  activePurchaseRfqId = rfqId;
+  isPurchaseRfqPendingEditing = false;
+
+  const rfq = purchaseRfqDataStore.find(r => r.id === rfqId) || (currentDataset && currentDataset.find(r => r.id === rfqId));
+  if (!rfq) return;
+
+  ensureRfqItems(rfq, 'pending');
+
+  const titleEl = document.getElementById('lblPurchaseRfqPendingTitle');
+  if (titleEl) {
+    titleEl.textContent = `${rfq.supplierName || 'Supplier'} - ${rfq.rfqNo || 'RFQ'}`;
+    titleEl.title = titleEl.textContent;
+  }
+
+  updatePurchaseRfqPendingSummation();
+
+  const editBtn = document.getElementById('btnPurchaseRfqPendingEdit');
+  const editImg = document.getElementById('imgPurchaseRfqPendingEdit');
+  if (editBtn) editBtn.style.display = 'none';
+  if (editImg) {
+    editImg.src = 'icons/Edit.svg';
+    editImg.alt = 'Edit';
+  }
+
+  renderPurchaseRfqPendingTable();
+
+  if (overlay) {
+    overlay.style.display = 'flex';
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+  }
+  modal.style.display = 'flex';
+};
+
+window.renderPurchaseRfqPendingTable = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  const tbody = document.getElementById('tblBodyPurchaseRfqPending');
+  if (!tbody || !rfq) return;
+
+  const items = rfq.items || [];
+  if (items.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 36px; color: #64748b;">No items found in this RFQ.</td>
+      </tr>
+    `;
+    updatePurchaseRfqPendingSelectionUI();
+    return;
+  }
+
+  tbody.innerHTML = items.map(item => {
+    const isSelected = !!item.selected;
+    const qtyVal = Number(item.qty || 0).toFixed(2);
+    const rateVal = Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const gstPct = item.gstPercent !== undefined ? item.gstPercent : 18;
+    const gstAmt = Number(item.gstAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const totVal = Number(item.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    return `
+      <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isSelected ? '#f0fdf4' : '#ffffff'};">
+        <!-- 1. Select: 70px, centered circle checkbox with green marker, multiselect -->
+        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 8px 4px;">
+          <input type="checkbox" class="pr-circle-checkbox purchase-rfq-pending-item-chk" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handlePurchaseRfqPendingRowSelect('${item.id}', this.checked)">
+        </td>
+        <!-- 2. Material Description: 36ch & left -->
+        <td style="width: 36ch; min-width: 36ch; max-width: 36ch; text-align: left !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+          ${item.materialDescription || ''}
+        </td>
+        <!-- 3. Uom: 8ch & center -->
+        <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 4px; color: #1e293b;">
+          ${item.uom || ''}
+        </td>
+        <!-- 4. Qty: 10ch & right with decimal .00 (editable if isPurchaseRfqPendingEditing & isSelected) -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-weight: 500;">
+          ${isPurchaseRfqPendingEditing && isSelected ? `
+            <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-pending-inp-qty" data-item-id="${item.id}" value="${qtyVal}"
+              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
+          ` : `
+            <span>${qtyVal}</span>
+          `}
+        </td>
+        <!-- 5. Rate: 12ch & right (editable if isPurchaseRfqPendingEditing & isSelected) -->
+        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-weight: 500;">
+          ${isPurchaseRfqPendingEditing && isSelected ? `
+            <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-pending-inp-rate" data-item-id="${item.id}" value="${Number(item.rate || 0).toFixed(2)}"
+              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
+          ` : `
+            <span>${rateVal}</span>
+          `}
+        </td>
+        <!-- 6. GST %: 6ch & center -->
+        <td style="width: 6ch; min-width: 6ch; max-width: 6ch; text-align: center !important; vertical-align: middle; padding: 8px 4px; color: #1e293b;">
+          ${gstPct}%
+        </td>
+        <!-- 7. GST ₹: 16ch & right -->
+        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b;">
+          ${gstAmt}
+        </td>
+        <!-- 8. Total: 20ch & right -->
+        <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+          ${totVal}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updatePurchaseRfqPendingSelectionUI();
+};
+
+window.handlePurchaseRfqPendingRowSelect = function(itemId, isChecked) {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+
+  const item = (rfq.items || []).find(it => it.id === itemId);
+  if (item) item.selected = isChecked;
+
+  renderPurchaseRfqPendingTable();
+};
+
+function updatePurchaseRfqPendingSummation() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  const lbl = document.getElementById('lblPurchaseRfqPendingSummationVal');
+  if (!lbl || !rfq) return;
+
+  const total = (rfq.items || []).reduce((acc, it) => acc + (it.total || 0), 0) || rfq.rfqValue || 0;
+  lbl.style.color = '#0454e4';
+  lbl.textContent = Number(total).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+window.updatePurchaseRfqPendingSelectionUI = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+
+  const items = rfq.items || [];
+  const selectedCount = items.filter(it => it.selected).length;
+  const hasSelected = selectedCount > 0;
+
+  const editBtn = document.getElementById('btnPurchaseRfqPendingEdit');
+  if (editBtn) {
+    editBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+
+  const submitArea = document.getElementById('purchaseRfqPendingSubmitArea');
+  if (submitArea) {
+    submitArea.style.display = hasSelected ? 'flex' : 'none';
+  }
+};
+
+window.togglePurchaseRfqPendingEdit = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+
+  const editImg = document.getElementById('imgPurchaseRfqPendingEdit');
+  const editBtn = document.getElementById('btnPurchaseRfqPendingEdit');
+
+  if (!isPurchaseRfqPendingEditing) {
+    isPurchaseRfqPendingEditing = true;
+    if (editImg) {
+      editImg.src = 'icons/Save.svg';
+      editImg.alt = 'Save';
+    }
+    if (editBtn) editBtn.title = 'Save';
+    renderPurchaseRfqPendingTable();
+    if (typeof showToast === 'function') {
+      showToast('Editing selected row(s) Qty and Rate');
+    }
+  } else {
+    // Save
+    const qtyInputs = document.querySelectorAll('.purchase-rfq-pending-inp-qty');
+    const rateInputs = document.querySelectorAll('.purchase-rfq-pending-inp-rate');
+
+    qtyInputs.forEach(inp => {
+      const itId = inp.dataset.itemId;
+      const item = (rfq.items || []).find(it => it.id === itId);
+      if (item) {
+        item.qty = parseFloat(inp.value) || 0;
+      }
+    });
+
+    rateInputs.forEach(inp => {
+      const itId = inp.dataset.itemId;
+      const item = (rfq.items || []).find(it => it.id === itId);
+      if (item) {
+        item.rate = parseFloat(inp.value) || 0;
+      }
+    });
+
+    (rfq.items || []).forEach(item => {
+      const base = (item.qty || 0) * (item.rate || 0);
+      const gstPct = item.gstPercent !== undefined ? item.gstPercent : 18;
+      item.gstAmount = base * (gstPct / 100);
+      item.total = base + item.gstAmount;
+    });
+
+    const sumTotal = (rfq.items || []).reduce((acc, it) => acc + (it.total || 0), 0);
+    rfq.rfqValue = sumTotal;
+
+    const currentRfqRow = currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId);
+    if (currentRfqRow) currentRfqRow.rfqValue = sumTotal;
+
+    updatePurchaseRfqPendingSummation();
+
+    isPurchaseRfqPendingEditing = false;
+    if (editImg) {
+      editImg.src = 'icons/Edit.svg';
+      editImg.alt = 'Edit';
+    }
+    if (editBtn) editBtn.title = 'Edit';
+
+    renderPurchaseRfqPendingTable();
+    applyFiltersAndRender();
+    if (typeof showToast === 'function') {
+      showToast('RFQ items saved successfully');
+    }
+  }
+};
+
+window.closePurchaseRfqPendingModal = function() {
+  const modal = document.getElementById('purchaseRfqPendingModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  isPurchaseRfqPendingEditing = false;
+};
+
+// --- ADD TERMS MODAL ---
+window.openPurchaseAddTermsModal = function() {
+  const modal = document.getElementById('purchaseAddTermsModal');
+  if (!modal) return;
+  modal.style.display = 'block';
+};
+
+window.closePurchaseAddTermsModal = function() {
+  const modal = document.getElementById('purchaseAddTermsModal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.submitPurchaseAddTerms = function() {
+  window.closePurchaseAddTermsModal();
+  window.closePurchaseRfqPendingModal();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Terms added successfully!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Terms added successfully!');
+  }
+
+  applyFiltersAndRender();
+};
+
+// --- RFQ RECEIVED MODAL ---
+window.openPurchaseRfqReceivedModal = function(rfqId) {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('purchaseRfqReceivedModal');
+  if (!modal) return;
+
+  activePurchaseRfqId = rfqId;
+  isPurchaseRfqReceivedEditing = false;
+
+  const rfq = purchaseRfqDataStore.find(r => r.id === rfqId) || (currentDataset && currentDataset.find(r => r.id === rfqId));
+  if (!rfq) return;
+
+  ensureRfqItems(rfq, 'received');
+
+  const titleEl = document.getElementById('lblPurchaseRfqReceivedTitle');
+  if (titleEl) {
+    titleEl.textContent = `${rfq.supplierName || 'Supplier'} - ${rfq.rfqNo || 'RFQ'}`;
+    titleEl.title = titleEl.textContent;
+  }
+
+  updatePurchaseRfqReceivedSummation();
+
+  const editImg = document.getElementById('imgPurchaseRfqReceivedEdit');
+  const editBtn = document.getElementById('btnPurchaseRfqReceivedEdit');
+  const tickBtn = document.getElementById('btnPurchaseRfqHighlight');
+  if (editImg) {
+    editImg.src = 'icons/Edit.svg';
+    editImg.alt = 'Edit';
+  }
+  if (editBtn) {
+    editBtn.title = 'Edit';
+    editBtn.style.display = 'none';
+  }
+  if (tickBtn) {
+    tickBtn.style.display = 'none';
+  }
+
+  renderPurchaseRfqReceivedTable();
+
+  if (overlay) {
+    overlay.style.display = 'flex';
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+  }
+  modal.style.display = 'flex';
+};
+
+window.renderPurchaseRfqReceivedTable = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  const tbody = document.getElementById('tblBodyPurchaseRfqReceived');
+  if (!tbody || !rfq) return;
+
+  const items = rfq.items || [];
+  if (items.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 36px; color: #64748b;">No items found in this RFQ.</td>
+      </tr>
+    `;
+    updatePurchaseRfqReceivedSelectionUI();
+    return;
+  }
+
+  tbody.innerHTML = items.map(item => {
+    const isSelected = !!item.selected;
+    const isHighlighted = !!item.highlighted;
+    const qtyVal = Number(item.qty || 0).toFixed(2);
+    const lastRateVal = Number(item.lastPurchaseRate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const newRateVal = Number(item.newRate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    let rowBg = '#ffffff';
+    if (isHighlighted) {
+      rowBg = '#dcfce7';
+    } else if (isSelected) {
+      rowBg = '#f0fdf4';
+    }
+
+    return `
+      <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${isHighlighted ? 'border-left: 4px solid #16a34a;' : ''}">
+        <!-- 1. Select: 70px, centered circle checkbox with green marker, multiselect -->
+        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 8px 4px;">
+          <input type="checkbox" class="pr-circle-checkbox purchase-rfq-received-item-chk" data-item-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="handlePurchaseRfqReceivedRowSelect('${item.id}', this.checked)">
+        </td>
+        <!-- 2. Material Description: 36ch & left -->
+        <td style="width: 36ch; min-width: 36ch; max-width: 36ch; text-align: left !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(item.materialDescription || '').replace(/"/g, '&quot;')}">
+          ${item.materialDescription || ''}
+        </td>
+        <!-- 3. Uom: 8ch & center -->
+        <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 8px 4px; color: #1e293b;">
+          ${item.uom || ''}
+        </td>
+        <!-- 4. Qty: 10ch & right with decimal .00 -->
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-weight: 500;">
+          ${qtyVal}
+        </td>
+        <!-- 5. Last Purchase: 16ch & right -->
+        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-weight: 500;">
+          ${lastRateVal}
+        </td>
+        <!-- 6. New: 16ch & right (editable if isPurchaseRfqReceivedEditing & isSelected) -->
+        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; vertical-align: middle; padding: 8px 8px; color: #1e293b; font-weight: 600;">
+          ${isPurchaseRfqReceivedEditing && isSelected ? `
+            <input type="number" step="0.01" min="0" class="form-input-control purchase-rfq-received-inp-new" data-item-id="${item.id}" value="${Number(item.newRate || 0).toFixed(2)}"
+              style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 6px; font-size: 0.9rem; outline: none; background: #ffffff; box-sizing: border-box;">
+          ` : `
+            <span>${newRateVal}</span>
+          `}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  updatePurchaseRfqReceivedSelectionUI();
+};
+
+window.handlePurchaseRfqReceivedRowSelect = function(itemId, isChecked) {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+
+  const item = (rfq.items || []).find(it => it.id === itemId);
+  if (item) item.selected = isChecked;
+
+  renderPurchaseRfqReceivedTable();
+};
+
+window.updatePurchaseRfqReceivedSelectionUI = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+
+  const items = rfq.items || [];
+  const hasSelected = items.some(it => it.selected);
+
+  const editBtn = document.getElementById('btnPurchaseRfqReceivedEdit');
+  if (editBtn) {
+    editBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+
+  const tickBtn = document.getElementById('btnPurchaseRfqHighlight');
+  if (tickBtn) {
+    tickBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+};
+
+window.highlightPurchaseRfqReceivedSelectedRow = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+
+  const selectedItems = (rfq.items || []).filter(it => it.selected);
+  if (selectedItems.length === 0) {
+    if (typeof showToast === 'function') {
+      showToast('Please select a row to highlight');
+    }
+    return;
+  }
+
+  selectedItems.forEach(it => {
+    it.highlighted = !it.highlighted;
+  });
+
+  renderPurchaseRfqReceivedTable();
+  if (typeof showToast === 'function') {
+    showToast('Selected row(s) highlighted');
+  }
+};
+
+window.togglePurchaseRfqReceivedEdit = function() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  if (!rfq) return;
+
+  const selectedItems = (rfq.items || []).filter(it => it.selected);
+  const editImg = document.getElementById('imgPurchaseRfqReceivedEdit');
+  const editBtn = document.getElementById('btnPurchaseRfqReceivedEdit');
+
+  if (!isPurchaseRfqReceivedEditing) {
+    if (selectedItems.length === 0) {
+      if (typeof showToast === 'function') {
+        showToast('Please select a row to edit');
+      }
+      return;
+    }
+    isPurchaseRfqReceivedEditing = true;
+    if (editImg) {
+      editImg.src = 'icons/Save.svg';
+      editImg.alt = 'Save';
+    }
+    if (editBtn) editBtn.title = 'Save';
+    renderPurchaseRfqReceivedTable();
+    if (typeof showToast === 'function') {
+      showToast('Editing selected row(s) New rate');
+    }
+  } else {
+    // Save mode
+    const newInputs = document.querySelectorAll('.purchase-rfq-received-inp-new');
+    newInputs.forEach(inp => {
+      const itId = inp.dataset.itemId;
+      const item = (rfq.items || []).find(it => it.id === itId);
+      if (item) {
+        item.newRate = parseFloat(inp.value) || 0;
+        item.total = (item.qty || 0) * item.newRate;
+      }
+    });
+
+    const sumTotal = (rfq.items || []).reduce((acc, it) => acc + (it.total || ((it.qty || 0) * (it.newRate || 0)) || 0), 0);
+    rfq.rfqValue = sumTotal;
+
+    const currentRfqRow = currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId);
+    if (currentRfqRow) currentRfqRow.rfqValue = sumTotal;
+
+    updatePurchaseRfqReceivedSummation();
+
+    isPurchaseRfqReceivedEditing = false;
+    if (editImg) {
+      editImg.src = 'icons/Edit.svg';
+      editImg.alt = 'Edit';
+    }
+    if (editBtn) editBtn.title = 'Edit';
+
+    renderPurchaseRfqReceivedTable();
+    applyFiltersAndRender();
+    if (typeof showToast === 'function') {
+      showToast('New rate saved successfully');
+    }
+  }
+};
+
+function updatePurchaseRfqReceivedSummation() {
+  const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
+  const lbl = document.getElementById('lblPurchaseRfqReceivedSummationVal');
+  if (!lbl || !rfq) return;
+
+  const total = (rfq.items || []).reduce((acc, it) => acc + (it.total || ((it.qty || 0) * (it.newRate || 0)) || 0), 0) || rfq.rfqValue || 0;
+  lbl.style.color = '#0454e4';
+  lbl.textContent = Number(total).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+window.openPurchaseRfqDocInstructionsModal = function() {
+  const modal = document.getElementById('purchaseRfqDocModal');
+  if (!modal) return;
+  modal.style.display = 'block';
+};
+
+window.closePurchaseRfqDocInstructionsModal = function() {
+  const modal = document.getElementById('purchaseRfqDocModal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.closePurchaseRfqReceivedModal = function() {
+  const modal = document.getElementById('purchaseRfqReceivedModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  isPurchaseRfqReceivedEditing = false;
+};
+
+window.handlePurchasePaymentAdd = function() {
+  window.openPurchaseAddPaymentModal();
+};
+
+window.updatePurchaseAddPaymentModalSum = function() {
+  const taxable = parseFloat(document.getElementById('inpPurchasePaymentTaxableAmount')?.value) || 0;
+  const cgst = parseFloat(document.getElementById('inpPurchasePaymentCgstAmount')?.value) || 0;
+  const sgst = parseFloat(document.getElementById('inpPurchasePaymentSgstAmount')?.value) || 0;
+  const total = taxable + cgst + sgst;
+  const sumEl = document.getElementById('lblPurchaseAddPaymentSummationVal');
+  if (sumEl) {
+    sumEl.textContent = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+};
+
+window.openPurchaseAddPaymentModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('purchaseAddPaymentModal');
+  if (!modal) return;
+
+  // Populate supplier dropdown
+  const selSupplier = document.getElementById('selPurchasePaymentSupplierName');
+  if (selSupplier) {
+    const vendors = [
+      'Apex Infra Solutions Pvt Ltd',
+      'Delta Towers & Heavy Engg',
+      'KEC Power & Cabling Corp',
+      'Sterling & Wilson Infra',
+      'Polycab Wires & Cables',
+      'Larsen & Toubro Ltd',
+      'Schneider Electric India',
+      'Tata Communications Ltd',
+      'Sri Balaji Electricals'
+    ];
+    if (Array.isArray(purchasePaymentDataStore)) {
+      purchasePaymentDataStore.forEach(p => {
+        if (p.vendorName && !vendors.includes(p.vendorName)) {
+          vendors.push(p.vendorName);
+        }
+      });
+    }
+    selSupplier.innerHTML = vendors.map(v => `<option value="${v.replace(/"/g, '&quot;')}">${v}</option>`).join('');
+  }
+
+  // Reset fields
+  const selExp = document.getElementById('selPurchasePaymentExpenseType');
+  if (selExp) selExp.value = 'Salary Advance';
+
+  const inpInv = document.getElementById('inpPurchasePaymentInvoiceNo');
+  if (inpInv) inpInv.value = '';
+
+  const inpDate = document.getElementById('inpPurchasePaymentInvoiceDate');
+  if (inpDate) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    inpDate.value = `${yyyy}-${mm}-${dd}`;
+  }
+
+  const inpTaxable = document.getElementById('inpPurchasePaymentTaxableAmount');
+  if (inpTaxable) {
+    inpTaxable.value = '';
+    inpTaxable.onblur = function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v) && v >= 0) this.value = v.toFixed(2);
+      window.updatePurchaseAddPaymentModalSum();
+    };
+  }
+
+  const inpCgst = document.getElementById('inpPurchasePaymentCgstAmount');
+  if (inpCgst) {
+    inpCgst.value = '';
+    inpCgst.onblur = function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v) && v >= 0) this.value = v.toFixed(2);
+      window.updatePurchaseAddPaymentModalSum();
+    };
+  }
+
+  const inpSgst = document.getElementById('inpPurchasePaymentSgstAmount');
+  if (inpSgst) {
+    inpSgst.value = '';
+    inpSgst.onblur = function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v) && v >= 0) this.value = v.toFixed(2);
+      window.updatePurchaseAddPaymentModalSum();
+    };
+  }
+
+  const inpRemarks = document.getElementById('inpPurchasePaymentRemarks');
+  if (inpRemarks) inpRemarks.value = '';
+
+  window.updatePurchaseAddPaymentModalSum();
+
+  if (overlay) {
+    overlay.style.display = 'flex';
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => c.style.display = 'none');
+  }
+
+  modal.style.display = 'flex';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '99999', 'important');
+  modal.style.setProperty('width', '600px', 'important');
+};
+
+window.closePurchaseAddPaymentModal = function() {
+  const modal = document.getElementById('purchaseAddPaymentModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.savePurchaseAddPayment = function() {
+  const selExp = document.getElementById('selPurchasePaymentExpenseType');
+  const selSupplier = document.getElementById('selPurchasePaymentSupplierName');
+  const inpInv = document.getElementById('inpPurchasePaymentInvoiceNo');
+  const inpDate = document.getElementById('inpPurchasePaymentInvoiceDate');
+  const inpTaxable = document.getElementById('inpPurchasePaymentTaxableAmount');
+  const inpCgst = document.getElementById('inpPurchasePaymentCgstAmount');
+  const inpSgst = document.getElementById('inpPurchasePaymentSgstAmount');
+  const inpRemarks = document.getElementById('inpPurchasePaymentRemarks');
+
+  const expType = selExp ? selExp.value : 'Salary Advance';
+  const supplier = selSupplier ? selSupplier.value : 'Apex Infra Solutions Pvt Ltd';
+  const invNo = inpInv ? inpInv.value.trim() : '';
+  const invDateVal = inpDate ? inpDate.value : '';
+
+  if (!invNo) {
+    if (typeof showToast === 'function') showToast('Please enter an Invoice No');
+    return;
+  }
+
+  let formattedDate = '';
+  if (invDateVal) {
+    const parts = invDateVal.split('-');
+    if (parts.length === 3) {
+      formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    } else {
+      formattedDate = invDateVal;
+    }
+  } else {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    formattedDate = `${dd}-${mm}-${today.getFullYear()}`;
+  }
+
+  const taxable = parseFloat(inpTaxable ? inpTaxable.value : 0) || 0;
+  const cgst = parseFloat(inpCgst ? inpCgst.value : 0) || 0;
+  const sgst = parseFloat(inpSgst ? inpSgst.value : 0) || 0;
+  const totalInvoice = taxable + cgst + sgst;
+  const remarks = inpRemarks ? inpRemarks.value.trim() : '';
+
+  const newRow = {
+    id: 'pm-pay-' + Date.now(),
+    expenseType: expType,
+    vendorName: supplier,
+    invoiceNo: invNo,
+    invoiceDate: formattedDate,
+    taxableAmount: taxable,
+    cgstAmount: cgst,
+    sgstAmount: sgst,
+    remarks: remarks,
+    basicAmount: taxable,
+    cgst: cgst,
+    sgst: sgst,
+    igst: 0.00,
+    invoiceAmount: Number(totalInvoice.toFixed(2)),
+    paidAmount: 0.00,
+    payableAmount: Number(totalInvoice.toFixed(2)),
+    ageing: '0 Days',
+    status: 'Pending',
+    payments: []
+  };
+
+  purchasePaymentDataStore.unshift(newRow);
+  currentDataset = purchasePaymentDataStore.map(item => ({ ...item }));
+  filteredDataset = [...currentDataset];
+
+  window.closePurchaseAddPaymentModal();
+  applyFiltersAndRender();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Payment added successfully!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Payment added successfully!');
+  }
+};
+
+window.openPurchasePaymentInvoiceDetailsModal = function(rowId) {
+  const row = (Array.isArray(purchasePaymentDataStore) && purchasePaymentDataStore.find(r => r.id === rowId)) ||
+              (Array.isArray(currentDataset) && currentDataset.find(r => r.id === rowId)) ||
+              (Array.isArray(purchasePaymentDataStore) && purchasePaymentDataStore[0]);
+  if (!row) return;
+
+  const titleBadge = document.getElementById('lblPurchasePaymentInvoiceDetailsTitle');
+  if (titleBadge) {
+    titleBadge.textContent = row.invoiceNo || 'Invoice Details';
+  }
+
+  const sumVal = document.getElementById('lblPurchasePaymentInvoiceDetailsSumVal');
+  if (sumVal) {
+    sumVal.textContent = Number(row.invoiceAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  const basic = row.basicAmount != null ? row.basicAmount : (row.taxableAmount || (Number(row.invoiceAmount || 0) / 1.18));
+  const cgst = row.cgst != null ? row.cgst : (row.cgstAmount || ((Number(row.invoiceAmount || 0) - basic) / 2));
+  const sgst = row.sgst != null ? row.sgst : (row.sgstAmount || ((Number(row.invoiceAmount || 0) - basic) / 2));
+  const igst = row.igst != null ? row.igst : 0.00;
+
+  const inpBasic = document.getElementById('inpPurchasePaymentDetailBasic');
+  if (inpBasic) inpBasic.value = Number(basic).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpCgst = document.getElementById('inpPurchasePaymentDetailCgst');
+  if (inpCgst) inpCgst.value = Number(cgst).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpSgst = document.getElementById('inpPurchasePaymentDetailSgst');
+  if (inpSgst) inpSgst.value = Number(sgst).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const inpIgst = document.getElementById('inpPurchasePaymentDetailIgst');
+  if (inpIgst) inpIgst.value = Number(igst).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('purchasePaymentInvoiceDetailsModal');
+  if (!modal) return;
+
+  if (overlay) {
+    overlay.style.display = 'flex';
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => c.style.display = 'none');
+  }
+
+  modal.style.display = 'flex';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '99999', 'important');
+  modal.style.setProperty('width', '580px', 'important');
+};
+
+window.closePurchasePaymentInvoiceDetailsModal = function() {
+  const modal = document.getElementById('purchasePaymentInvoiceDetailsModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openPurchasePaymentPaidDetailsModal = function(rowId) {
+  const row = (Array.isArray(purchasePaymentDataStore) && purchasePaymentDataStore.find(r => r.id === rowId)) ||
+              (Array.isArray(currentDataset) && currentDataset.find(r => r.id === rowId)) ||
+              (Array.isArray(purchasePaymentDataStore) && purchasePaymentDataStore[0]);
+  if (!row) return;
+
+  const titleBadge = document.getElementById('lblPurchasePaymentPaidDetailsTitle');
+  if (titleBadge) {
+    titleBadge.textContent = row.invoiceNo || 'Payment Details';
+  }
+
+  const tbody = document.getElementById('tblBodyPurchasePaymentPaidDetails');
+  if (tbody) {
+    const payments = (Array.isArray(row.payments) && row.payments.length > 0)
+      ? row.payments
+      : (Number(row.paidAmount || 0) > 0
+          ? [{ date: row.invoiceDate || '18-09-2026', receiptNo: 'RCP-' + (row.invoiceNo ? row.invoiceNo.replace('INV-', '') : '2026-001'), paidAmount: Number(row.paidAmount || 0) }]
+          : []);
+
+    if (payments.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.95rem; font-weight: 500; border-bottom: 1px solid #e2e8f0;">
+            No payment receipts recorded yet
+          </td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = payments.map((p, idx) => `
+        <tr style="border-bottom: 1px solid #e2e8f0; background: #ffffff;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 500;">
+            ${p.date || ''}
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-size: 0.95rem; font-weight: 500;">
+            ${p.receiptNo || ''}
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #15803d; font-size: 0.95rem; font-weight: 600;">
+            ${Number(p.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('purchasePaymentPaidDetailsModal');
+  if (!modal) return;
+
+  if (overlay) {
+    overlay.style.display = 'flex';
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => c.style.display = 'none');
+  }
+
+  modal.style.display = 'flex';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '99999', 'important');
+  modal.style.setProperty('width', '580px', 'important');
+};
+
+window.closePurchasePaymentPaidDetailsModal = function() {
+  const modal = document.getElementById('purchasePaymentPaidDetailsModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+// ==========================================================================
+// PURCHASE MANAGER - PO MODALS & WORKFLOWS
+// ==========================================================================
+
+let activePurchasePoRowId = null;
+let isPurchasePoDispatchEditing = false;
+
+function ensurePurchasePoItems(row) {
+  if (!row) return;
+  if (!row.items || !Array.isArray(row.items) || row.items.length < 4) {
+    const itemVals = [
+      { desc: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable', uom: 'Mtr', qty: 500, rate: 1200.00 },
+      { desc: '11KV HT XLPE Insulated Armoured Cable 3C x 185 Sq.mm', uom: 'Mtr', qty: 300, rate: 1800.00 },
+      { desc: 'Heavy Duty GI Cable Trays 300x50x2mm with Coupler Plates', uom: 'Nos', qty: 200, rate: 850.00 },
+      { desc: 'Outdoor End Termination Kit 11KV Heat Shrinkable', uom: 'Set', qty: 40, rate: 4200.00 },
+      { desc: 'Tinned Copper Cable Lugs Heavy Duty 185 Sq.mm', uom: 'Nos', qty: 600, rate: 125.00 }
+    ];
+    row.items = itemVals.map((iv, idx) => {
+      const basic = Math.round(iv.qty * iv.rate * 100) / 100;
+      const cgst = Math.round(basic * 0.09 * 100) / 100;
+      const sgst = Math.round(basic * 0.09 * 100) / 100;
+      const tot = Math.round((basic + cgst + sgst) * 100) / 100;
+      return {
+        id: `item-${idx + 1}`,
+        desc: iv.desc,
+        uom: iv.uom,
+        qty: iv.qty,
+        rate: iv.rate,
+        basic: basic,
+        cgst: cgst,
+        sgst: sgst,
+        total: tot,
+        poQty: iv.qty,
+        invQty: iv.qty,
+        selected: false,
+        highlighted: false
+      };
+    });
+    row.poValue = row.items.reduce((acc, it) => acc + it.total, 0);
+  }
+  if (!row.transport) {
+    row.transport = {
+      logisticsName: 'VRL Logistics',
+      transportCharges: 15000.00,
+      gstEnabled: false,
+      gstAmount: 0.00,
+      totalAmount: 15000.00
+    };
+  }
+}
+
+window.handlePurchasePoSupplierClick = function(rowId) {
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  activePurchasePoRowId = row.id;
+  ensurePurchasePoItems(row);
+
+  const status = (row.status || '').trim();
+  if (status === 'Approval Pending') {
+    openPurchasePoApprovalPendingModal(row.id);
+  } else if (status === 'Dispatch Pending') {
+    openPurchasePoDispatchPendingModal(row.id);
+  } else if (status === 'In-Transit') {
+    openPurchasePoInTransitModal(row.id);
+  } else {
+    openPurchasePoApprovalPendingModal(row.id);
+  }
+};
+
+// --------------------------------------------------------------------------
+// 1. APPROVAL PENDING MODAL
+// --------------------------------------------------------------------------
+window.openPurchasePoApprovalPendingModal = function(rowId) {
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  activePurchasePoRowId = row.id;
+  ensurePurchasePoItems(row);
+
+  // Reset selections
+  (row.items || []).forEach(it => { it.selected = false; });
+
+  const modal = document.getElementById('purchasePoApprovalPendingModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.setProperty('top', '50%', 'important');
+    modal.style.setProperty('left', '50%', 'important');
+    modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+    modal.style.setProperty('z-index', '99999', 'important');
+  }
+  if (overlay) overlay.style.display = 'flex';
+
+  const titleEl = document.getElementById('lblPurchasePoApprovalPendingTitle') || document.getElementById('titlePurchasePoApprovalPending');
+  if (titleEl) {
+    titleEl.textContent = `${row.supplierName || 'Supplier'} - ${row.poNo || 'PO'}`;
+    titleEl.title = titleEl.textContent;
+  }
+
+  renderPurchasePoApprovalPendingTable(row);
+  updatePurchasePoApprovalPendingUI(row);
+};
+
+window.closePurchasePoApprovalPendingModal = function() {
+  const modal = document.getElementById('purchasePoApprovalPendingModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+function renderPurchasePoApprovalPendingTable(row) {
+  const tbody = document.getElementById('tblBodyPurchasePoApprovalPending') || document.getElementById('tbodyPurchasePoApprovalPending');
+  if (!tbody) return;
+
+  tbody.innerHTML = (row.items || []).map(it => {
+    return `
+      <tr data-item-id="${it.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${it.selected ? '#f0fdf4' : '#ffffff'};">
+        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+          <input type="checkbox" class="pr-circle-checkbox purchase-po-approval-item-chk" ${it.selected ? 'checked' : ''} onchange="handlePurchasePoApprovalPendingRowSelect('${row.id}', '${it.id}', this.checked)">
+        </td>
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;" title="${(it.desc || '').replace(/"/g, '&quot;')}">
+          ${it.desc || ''}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+          ${it.uom || ''}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.qty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.basic || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.cgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.sgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
+          ${Number(it.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.handlePurchasePoApprovalPendingRowSelect = function(rowId, itemId, isChecked) {
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  const it = (row.items || []).find(i => String(i.id) === String(itemId));
+  if (it) it.selected = !!isChecked;
+
+  updatePurchasePoApprovalPendingUI(row);
+  renderPurchasePoApprovalPendingTable(row);
+};
+
+function updatePurchasePoApprovalPendingUI(row) {
+  const sumVal = (row.items || []).reduce((acc, it) => acc + Number(it.total || 0), 0);
+  const lbl = document.getElementById('lblPurchasePoApprovalPendingSummationVal');
+  if (lbl) {
+    lbl.textContent = Number(sumVal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    lbl.style.color = '#0454e4';
+  }
+
+  const hasSelected = (row.items || []).some(it => it.selected);
+  const area = document.getElementById('purchasePoApprovalPendingSubmitArea');
+  const btnSubmit = document.getElementById('btnPurchasePoApprovalPendingSubmit');
+  if (area) area.style.display = hasSelected ? 'flex' : 'none';
+  if (btnSubmit) btnSubmit.style.display = hasSelected ? 'inline-flex' : 'none';
+}
+
+window.submitPurchasePoApprovalPending = function() {
+  if (!activePurchasePoRowId) return;
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  const storeRow = (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  const filteredRow = (filteredDataset || []).find(r => String(r.id) === String(activePurchasePoRowId));
+
+  if (row) row.status = 'Dispatch Pending';
+  if (storeRow) storeRow.status = 'Dispatch Pending';
+  if (filteredRow) filteredRow.status = 'Dispatch Pending';
+
+  closePurchasePoApprovalPendingModal();
+
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('PO Approved successfully and moved to Dispatch Pending!', 'Task Completed');
+  }
+};
+
+// --------------------------------------------------------------------------
+// 2. DISPATCH PENDING MODAL
+// --------------------------------------------------------------------------
+window.openPurchasePoDispatchPendingModal = function(rowId) {
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  activePurchasePoRowId = row.id;
+  ensurePurchasePoItems(row);
+  isPurchasePoDispatchEditing = false;
+
+  // Reset selections
+  (row.items || []).forEach(it => { it.selected = false; });
+
+  const tickBtn = document.getElementById('btnPurchasePoDispatchHighlight');
+  const editBtn = document.getElementById('btnPurchasePoDispatchEdit');
+  if (tickBtn) tickBtn.style.display = 'none';
+  if (editBtn) editBtn.style.display = 'none';
+
+  const modal = document.getElementById('purchasePoDispatchPendingModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.setProperty('top', '50%', 'important');
+    modal.style.setProperty('left', '50%', 'important');
+    modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+    modal.style.setProperty('z-index', '99999', 'important');
+  }
+  if (overlay) overlay.style.display = 'flex';
+
+  const titleEl = document.getElementById('lblPurchasePoDispatchPendingTitle') || document.getElementById('titlePurchasePoDispatchPending');
+  if (titleEl) {
+    titleEl.textContent = `${row.supplierName || 'Supplier'} - ${row.poNo || 'PO'}`;
+    titleEl.title = titleEl.textContent;
+  }
+
+  renderPurchasePoDispatchPendingTable(row);
+  updatePurchasePoDispatchPendingUI(row);
+};
+
+window.closePurchasePoDispatchPendingModal = function() {
+  const modal = document.getElementById('purchasePoDispatchPendingModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+function renderPurchasePoDispatchPendingTable(row) {
+  const tbody = document.getElementById('tblBodyPurchasePoDispatchPending') || document.getElementById('tbodyPurchasePoDispatchPending');
+  if (!tbody) return;
+
+  tbody.innerHTML = (row.items || []).map(it => {
+    const isHighlighted = !!it.highlighted;
+    const isSelected = !!it.selected;
+    const bg = isHighlighted ? '#dcfce7' : (isSelected ? '#f0fdf4' : '#ffffff');
+
+    const invoiceCell = isPurchasePoDispatchEditing && isSelected ? `
+      <input type="number" step="0.01" class="form-control form-control-sm" value="${Number(it.invQty ?? it.qty ?? 0).toFixed(2)}" onchange="updatePurchasePoItemInvQty('${row.id}', '${it.id}', this.value)" style="width: 80px; text-align: right; margin: 0 auto; padding: 2px 4px; font-size: 0.85rem;">
+    ` : `${Number(it.invQty ?? it.qty ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    return `
+      <tr data-item-id="${it.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${bg}; ${isHighlighted ? 'border-left: 4px solid #16a34a;' : ''} transition: background-color 0.2s ease;">
+        <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+          <input type="checkbox" class="pr-circle-checkbox purchase-po-dispatch-item-chk" ${isSelected ? 'checked' : ''} onchange="handlePurchasePoDispatchRowSelect('${row.id}', '${it.id}', this.checked)">
+        </td>
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;" title="${(it.desc || '').replace(/"/g, '&quot;')}">
+          ${it.desc || ''}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+          ${it.uom || ''}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.poQty ?? it.qty ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${invoiceCell}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.basic || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.cgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.sgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
+          ${Number(it.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.handlePurchasePoDispatchRowSelect = function(rowId, itemId, isChecked) {
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  const it = (row.items || []).find(i => String(i.id) === String(itemId));
+  if (it) it.selected = !!isChecked;
+
+  updatePurchasePoDispatchPendingUI(row);
+  renderPurchasePoDispatchPendingTable(row);
+};
+
+window.highlightPurchasePoDispatchSelectedRow = function() {
+  if (!activePurchasePoRowId) return;
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  if (!row) return;
+
+  (row.items || []).forEach(it => {
+    if (it.selected) {
+      it.highlighted = !it.highlighted;
+    }
+  });
+  renderPurchasePoDispatchPendingTable(row);
+};
+
+window.togglePurchasePoDispatchEdit = function() {
+  if (!activePurchasePoRowId) return;
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  if (!row) return;
+
+  const editImg = document.getElementById('imgPurchasePoDispatchEdit');
+  if (!isPurchasePoDispatchEditing) {
+    isPurchasePoDispatchEditing = true;
+    if (editImg) editImg.src = 'icons/Save.svg';
+  } else {
+    isPurchasePoDispatchEditing = false;
+    if (editImg) editImg.src = 'icons/Edit.svg';
+  }
+  renderPurchasePoDispatchPendingTable(row);
+};
+
+window.updatePurchasePoItemInvQty = function(rowId, itemId, val) {
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  const it = (row.items || []).find(i => String(i.id) === String(itemId));
+  if (it) {
+    const num = parseFloat(val) || 0;
+    it.invQty = num;
+    const basic = Math.round(num * Number(it.rate || 0) * 100) / 100;
+    const cgst = Math.round(basic * 0.09 * 100) / 100;
+    const sgst = Math.round(basic * 0.09 * 100) / 100;
+    it.basic = basic;
+    it.cgst = cgst;
+    it.sgst = sgst;
+    it.total = Math.round((basic + cgst + sgst) * 100) / 100;
+    updatePurchasePoDispatchPendingUI(row);
+  }
+};
+
+function updatePurchasePoDispatchPendingUI(row) {
+  const sumVal = (row.items || []).reduce((acc, it) => acc + Number(it.total || 0), 0);
+  const lbl = document.getElementById('lblPurchasePoDispatchPendingSummationVal');
+  if (lbl) {
+    lbl.textContent = Number(sumVal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    lbl.style.color = '#0454e4';
+  }
+
+  const hasSelected = (row.items || []).some(it => it.selected);
+  const area = document.getElementById('purchasePoDispatchPendingSubmitArea');
+  const btnSubmit = document.getElementById('btnPurchasePoDispatchPendingSubmit');
+  if (area) area.style.display = hasSelected ? 'flex' : 'none';
+  if (btnSubmit) btnSubmit.style.display = hasSelected ? 'inline-flex' : 'none';
+
+  const tickBtn = document.getElementById('btnPurchasePoDispatchHighlight');
+  const editBtn = document.getElementById('btnPurchasePoDispatchEdit');
+  if (tickBtn) tickBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (editBtn) editBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+}
+
+// --------------------------------------------------------------------------
+// 3. TRANSPORT DETAILS MODAL
+// --------------------------------------------------------------------------
+window.openPurchasePoTransportDetailsModal = function(rowId) {
+  const idToUse = rowId || activePurchasePoRowId;
+  const row = (currentDataset || []).find(r => String(r.id) === String(idToUse)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(idToUse));
+  if (!row) return;
+  activePurchasePoRowId = row.id;
+  ensurePurchasePoItems(row);
+
+  const dispModal = document.getElementById('purchasePoDispatchPendingModal');
+  if (dispModal) dispModal.style.display = 'none';
+
+  const modal = document.getElementById('purchasePoTransportDetailsModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.setProperty('top', '50%', 'important');
+    modal.style.setProperty('left', '50%', 'important');
+    modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+    modal.style.setProperty('z-index', '99999', 'important');
+  }
+  if (overlay) overlay.style.display = 'flex';
+
+  const titleEl = document.getElementById('lblPurchasePoTransportDetailsTitle');
+  if (titleEl) {
+    titleEl.textContent = 'Transport Details';
+    titleEl.title = 'Transport Details';
+  }
+
+  const t = row.transport || {};
+  const ddl = document.getElementById('selPurchasePoLogisticsName') || document.getElementById('ddlPurchasePoLogisticsName');
+  if (ddl && t.logisticsName) ddl.value = t.logisticsName;
+
+  const txtCharges = document.getElementById('inpPurchasePoTransportCharges') || document.getElementById('txtPurchasePoTransportCharges');
+  if (txtCharges) txtCharges.value = t.transportCharges || '';
+
+  const chkGst = document.getElementById('inpPurchasePoGstToggle') || document.getElementById('chkPurchasePoGst');
+  if (chkGst) {
+    chkGst.checked = !!t.gstEnabled;
+    togglePurchasePoGstFields(chkGst.checked);
+  }
+
+  const txtGst = document.getElementById('inpPurchasePoGstAmount') || document.getElementById('txtPurchasePoGstAmount');
+  if (txtGst) txtGst.value = t.gstAmount || '';
+
+  const txtTotal = document.getElementById('inpPurchasePoTotalAmount') || document.getElementById('txtPurchasePoTransportTotalAmount');
+  if (txtTotal) txtTotal.value = t.totalAmount || '';
+};
+
+window.closePurchasePoTransportDetailsModal = function() {
+  const modal = document.getElementById('purchasePoTransportDetailsModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.togglePurchasePoGstFields = function(isEnabled) {
+  const rowGst = document.getElementById('rowPurchasePoGstAmount');
+  const rowTotal = document.getElementById('rowPurchasePoTotalAmount') || document.getElementById('rowPurchasePoTransportTotal');
+  if (rowGst) rowGst.style.display = isEnabled ? 'flex' : 'none';
+  if (rowTotal) rowTotal.style.display = isEnabled ? 'flex' : 'none';
+  calculatePurchasePoTransportTotal();
+};
+
+window.calculatePurchasePoTransportTotal = function() {
+  const txtCharges = document.getElementById('inpPurchasePoTransportCharges') || document.getElementById('txtPurchasePoTransportCharges');
+  const chkGst = document.getElementById('inpPurchasePoGstToggle') || document.getElementById('chkPurchasePoGst');
+  const txtGst = document.getElementById('inpPurchasePoGstAmount') || document.getElementById('txtPurchasePoGstAmount');
+  const txtTotal = document.getElementById('inpPurchasePoTotalAmount') || document.getElementById('txtPurchasePoTransportTotalAmount');
+
+  const charges = parseFloat(txtCharges?.value) || 0;
+  if (chkGst && chkGst.checked) {
+    let gstVal = parseFloat(txtGst?.value);
+    if (isNaN(gstVal) || gstVal === 0) {
+      gstVal = Math.round(charges * 0.18 * 100) / 100;
+      if (txtGst) txtGst.value = gstVal;
+    }
+    if (txtTotal) txtTotal.value = (charges + gstVal).toFixed(2);
+  } else {
+    if (txtGst) txtGst.value = '';
+    if (txtTotal) txtTotal.value = charges.toFixed(2);
+  }
+};
+
+window.submitPurchasePoTransportDetails = function() {
+  if (!activePurchasePoRowId) return;
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  if (row) {
+    const ddl = document.getElementById('selPurchasePoLogisticsName') || document.getElementById('ddlPurchasePoLogisticsName');
+    const txtCharges = document.getElementById('inpPurchasePoTransportCharges') || document.getElementById('txtPurchasePoTransportCharges');
+    const chkGst = document.getElementById('inpPurchasePoGstToggle') || document.getElementById('chkPurchasePoGst');
+    const txtGst = document.getElementById('inpPurchasePoGstAmount') || document.getElementById('txtPurchasePoGstAmount');
+    const txtTotal = document.getElementById('inpPurchasePoTotalAmount') || document.getElementById('txtPurchasePoTransportTotalAmount');
+
+    row.transport = {
+      logisticsName: ddl ? ddl.value : 'VRL Logistics',
+      transportCharges: parseFloat(txtCharges?.value) || 0,
+      gstEnabled: chkGst ? chkGst.checked : false,
+      gstAmount: parseFloat(txtGst?.value) || 0,
+      totalAmount: parseFloat(txtTotal?.value) || (parseFloat(txtCharges?.value) || 0)
+    };
+  }
+
+  const modal = document.getElementById('purchasePoTransportDetailsModal');
+  if (modal) modal.style.display = 'none';
+
+  openPurchasePoUploadDocumentsModal(activePurchasePoRowId);
+};
+
+// --------------------------------------------------------------------------
+// 4. UPLOAD DOCUMENTS MODAL
+// --------------------------------------------------------------------------
+window.openPurchasePoUploadDocumentsModal = function(rowId) {
+  const idToUse = rowId || activePurchasePoRowId;
+  const row = (currentDataset || []).find(r => String(r.id) === String(idToUse)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(idToUse));
+  if (!row) return;
+  activePurchasePoRowId = row.id;
+
+  const modal = document.getElementById('purchasePoUploadDocumentsModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.setProperty('top', '50%', 'important');
+    modal.style.setProperty('left', '50%', 'important');
+    modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+    modal.style.setProperty('z-index', '99999', 'important');
+  }
+  if (overlay) overlay.style.display = 'flex';
+
+  const titleEl = document.getElementById('lblPurchasePoUploadDocumentsTitle');
+  if (titleEl) {
+    titleEl.textContent = 'Upload Documents';
+    titleEl.title = 'Upload Documents';
+  }
+
+  const lblInv = document.getElementById('lblPurchasePoInvoiceDocName') || document.getElementById('lblPurchasePoInvoiceFileName');
+  const lblLr = document.getElementById('lblPurchasePoLrDocName') || document.getElementById('lblPurchasePoLrFileName');
+  if (lblInv) {
+    lblInv.textContent = '';
+    lblInv.style.color = '#64748b';
+    lblInv.style.fontWeight = '500';
+  }
+  if (lblLr) {
+    lblLr.textContent = '';
+    lblLr.style.color = '#64748b';
+    lblLr.style.fontWeight = '500';
+  }
+};
+
+window.closePurchasePoUploadDocumentsModal = function() {
+  const modal = document.getElementById('purchasePoUploadDocumentsModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.handlePurchasePoFileSelect = function(input, labelId) {
+  if (input && input.files && input.files[0]) {
+    const lbl = document.getElementById(labelId);
+    if (lbl) {
+      lbl.textContent = input.files[0].name;
+      lbl.style.color = '#0454e4';
+      lbl.style.fontWeight = '600';
+    }
+  }
+};
+
+window.submitPurchasePoUploadDocuments = function() {
+  if (!activePurchasePoRowId) return;
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  const storeRow = (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  const filteredRow = (filteredDataset || []).find(r => String(r.id) === String(activePurchasePoRowId));
+
+  if (row) row.status = 'In-Transit';
+  if (storeRow) storeRow.status = 'In-Transit';
+  if (filteredRow) filteredRow.status = 'In-Transit';
+
+  closePurchasePoUploadDocumentsModal();
+
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Documents uploaded and PO status updated to In-Transit!', 'Task Completed');
+  }
+};
+
+// --------------------------------------------------------------------------
+// 5. IN-TRANSIT MODAL
+// --------------------------------------------------------------------------
+window.openPurchasePoInTransitModal = function(rowId) {
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+  activePurchasePoRowId = row.id;
+  ensurePurchasePoItems(row);
+
+  const modal = document.getElementById('purchasePoInTransitModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.setProperty('top', '50%', 'important');
+    modal.style.setProperty('left', '50%', 'important');
+    modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+    modal.style.setProperty('z-index', '99999', 'important');
+  }
+  if (overlay) overlay.style.display = 'flex';
+
+  const titleEl = document.getElementById('lblPurchasePoInTransitTitle') || document.getElementById('titlePurchasePoInTransit');
+  if (titleEl) {
+    titleEl.textContent = `${row.supplierName || 'Supplier'} - ${row.poNo || 'PO'}`;
+    titleEl.title = titleEl.textContent;
+  }
+
+  renderPurchasePoInTransitTable(row);
+
+  const sumVal = (row.items || []).reduce((acc, it) => acc + Number(it.total || 0), 0);
+  const lbl = document.getElementById('lblPurchasePoInTransitSummationVal');
+  if (lbl) {
+    lbl.textContent = Number(sumVal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    lbl.style.color = '#0454e4';
+  }
+};
+
+window.closePurchasePoInTransitModal = function() {
+  const modal = document.getElementById('purchasePoInTransitModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('card-dimmed-blurred');
+  }
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+function renderPurchasePoInTransitTable(row) {
+  const tbody = document.getElementById('tblBodyPurchasePoInTransit') || document.getElementById('tbodyPurchasePoInTransit');
+  if (!tbody) return;
+
+  tbody.innerHTML = (row.items || []).map(it => {
+    return `
+      <tr data-item-id="${it.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+        <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;" title="${(it.desc || '').replace(/"/g, '&quot;')}">
+          ${it.desc || ''}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+          ${it.uom || ''}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.poQty ?? it.qty ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.invQty ?? it.qty ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.basic || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.cgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; color: #1e293b;">
+          ${Number(it.sgst || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
+          ${Number(it.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// --------------------------------------------------------------------------
+// 6. TRANSPORT VIEW MODAL (FROM IN-TRANSIT)
+// --------------------------------------------------------------------------
+window.openPurchasePoTransportViewModal = function() {
+  if (!activePurchasePoRowId) return;
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  if (!row) return;
+
+  const titleEl = document.getElementById('lblPurchasePoTransportViewTitle');
+  if (titleEl) {
+    titleEl.textContent = 'Transport Details';
+    titleEl.title = 'Transport Details';
+  }
+
+  const t = row.transport || {};
+  const txtLogistics = document.getElementById('txtPurchasePoViewLogisticsName') || document.getElementById('viewPurchasePoLogisticsName');
+  if (txtLogistics) txtLogistics.value = t.logisticsName || 'VRL Logistics';
+
+  const txtCharges = document.getElementById('txtPurchasePoViewTransportCharges') || document.getElementById('viewPurchasePoTransportCharges');
+  if (txtCharges) {
+    txtCharges.value = Number(t.totalAmount || t.transportCharges || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  const inTransitModal = document.getElementById('purchasePoInTransitModal');
+  if (inTransitModal) inTransitModal.classList.add('card-dimmed-blurred');
+
+  const modal = document.getElementById('purchasePoTransportViewModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.setProperty('top', '50%', 'important');
+    modal.style.setProperty('left', '50%', 'important');
+    modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+    modal.style.setProperty('z-index', '100001', 'important');
+  }
+};
+
+window.closePurchasePoTransportViewModal = function() {
+  const modal = document.getElementById('purchasePoTransportViewModal');
+  if (modal) modal.style.display = 'none';
+  const inTransitModal = document.getElementById('purchasePoInTransitModal');
+  if (inTransitModal) inTransitModal.classList.remove('card-dimmed-blurred');
+};
+
+window.downloadPurchasePoTransportPdf = function() {
+  const link = document.createElement('a');
+  link.href = 'sample.pdf';
+  link.download = `Transport_Details_${activePurchasePoRowId || 'PO'}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Transport Details PDF downloaded successfully!', 'Task Completed');
+  }
+};
+
+// ==========================================================================
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
   const role = getAuthenticatedUserRole();
+  if (role === 'Purchase Manager') {
+    if (currentWorklistView === 'pr') {
+      currentDataset = purchasePrDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'rfq') {
+      currentDataset = purchaseRfqDataStore.map(item => ({
+        ...item,
+        items: item.items ? item.items.map(it => ({ ...it })) : []
+      }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'po') {
+      currentDataset = purchasePoDataStore.map(item => ({
+        ...item,
+        items: item.items ? item.items.map(it => ({ ...it })) : [],
+        transport: item.transport ? { ...item.transport } : {}
+      }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'payment') {
+      currentDataset = purchasePaymentDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    currentDataset = [];
+    filteredDataset = [];
+    return;
+  }
   if (role === 'Warehouse Manager') {
     if (currentWorklistView === 'pr') {
       currentDataset = wmPrDataStore.map(item => ({ ...item }));
@@ -22605,6 +25207,52 @@ function renderWorklistToolbar() {
   if (!toolbar) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Purchase Manager') {
+    if (currentWorklistView === 'pr') {
+      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+      toolbar.style.display = 'flex';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <button type="button" class="toolbar-icon-btn" id="btnPurchasePrEdit" title="${isPurchasePrEditing ? 'Save' : 'Edit'}"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;"
+            onclick="handlePurchasePrEditToggle()">
+            <img src="${isPurchasePrEditing ? 'icons/Save.svg' : 'icons/Edit.svg'}" alt="${isPurchasePrEditing ? 'Save' : 'Edit'}" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnPurchasePrAddProduct" title="Add Product"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="openPurchaseAddProductModal()">
+            <img src="icons/Add.svg" alt="Add Product" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'payment') {
+      const totalAmount = (filteredDataset || currentDataset || []).reduce((acc, r) => acc + (Number(r.invoiceAmount) || 0), 0);
+      const totalAmountFormatted = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      toolbar.style.display = 'flex';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 20px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Amount">
+            <img src="icons/summation.svg" alt="Summation" width="26" height="26" style="vertical-align: middle; display: block; object-fit: contain;">
+            <span id="lblPurchasePaymentSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalAmountFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <button type="button" class="toolbar-icon-btn" id="btnPurchasePaymentAdd" title="Add Payment"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="handlePurchasePaymentAdd()">
+            <img src="icons/Add.svg" alt="Add Payment" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+    toolbar.innerHTML = '';
+    toolbar.style.display = 'none';
+    return;
+  }
   if (role === 'Warehouse Manager') {
     if (currentWorklistView === 'pr') {
       const hasSelected = currentDataset && currentDataset.some(r => r.selected);
@@ -23420,6 +26068,47 @@ function renderWorklistFooter() {
   if (!footer) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Purchase Manager') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+
+    const purchaseTabs = [
+      { id: 'btnTogglePmPr', view: 'pr', label: 'PR' },
+      { id: 'btnTogglePmRfq', view: 'rfq', label: 'RFQ' },
+      { id: 'btnTogglePmPo', view: 'po', label: 'PO' },
+      { id: 'btnTogglePmPayment', view: 'payment', label: 'Payment' }
+    ];
+
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        ${purchaseTabs.map((tab, idx) => `
+          ${idx > 0 ? '<div class="segmented-divider"></div>' : ''}
+          <button type="button" class="segmented-btn ${currentWorklistView === tab.view ? 'active' : ''}" id="${tab.id}">
+            ${tab.label}
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    purchaseTabs.forEach(tab => {
+      document.getElementById(tab.id)?.addEventListener('click', () => {
+        if (currentWorklistView !== tab.view) {
+          currentWorklistView = tab.view;
+          isPurchasePrEditing = false;
+          activeColumnFilters = {};
+          updateURL();
+          renderApp();
+          showToast(`Switched to Worklist • ${tab.label}`);
+        }
+      });
+    });
+    return;
+  }
+
   if (role === 'Warehouse Manager') {
     if (currentWorklistView === 'min_detail' || currentWorklistView === 'mrn_detail') {
       footer.style.display = 'none';
@@ -23764,10 +26453,185 @@ function renderWorklistTableHead() {
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = 'fixed';
       if (containerEl) containerEl.style.overflowX = 'hidden';
+    } else if (role === 'Purchase Manager') {
+      if (currentWorklistView === 'pr') {
+        tableEl.style.minWidth = '1200px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+        if (containerEl) {
+          containerEl.style.overflowX = 'auto';
+          containerEl.style.marginTop = '0px';
+        }
+      } else if (currentWorklistView === 'rfq') {
+        tableEl.style.minWidth = '1050px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+        if (containerEl) {
+          containerEl.style.overflowX = 'auto';
+          containerEl.style.marginTop = '18px';
+        }
+      } else if (currentWorklistView === 'po') {
+        tableEl.style.minWidth = '950px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+        if (containerEl) {
+          containerEl.style.overflowX = 'auto';
+          containerEl.style.marginTop = '18px';
+        }
+      } else if (currentWorklistView === 'payment') {
+        tableEl.style.minWidth = '1300px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+        if (containerEl) {
+          containerEl.style.overflowX = 'auto';
+          containerEl.style.marginTop = '0px';
+        }
+      }
     } else {
       tableEl.style.minWidth = '';
       tableEl.style.width = '';
+      if (containerEl) containerEl.style.marginTop = '';
     }
+  }
+
+  if (role === 'Purchase Manager') {
+    if (currentWorklistView === 'pr') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Select</span>
+          </th>
+          <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Submit By</span>
+          </th>
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Submission Date</span>
+          </th>
+          <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Material Head</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialHead'] ? 'has-active-filter' : ''}" data-filter-col="materialHead" title="Filter Material Head">&#9660;</button>
+            </div>
+          </th>
+          <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Material Description</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialDescription'] ? 'has-active-filter' : ''}" data-filter-col="materialDescription" title="Filter Material Description">&#9660;</button>
+            </div>
+          </th>
+          <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Uom</span>
+          </th>
+          <th colspan="2" class="wm-qty-col-header" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Qty</span>
+          </th>
+        </tr>
+        <tr class="master-view-header">
+          <th class="wm-qty-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Stock</span>
+          </th>
+          <th class="wm-qty-sub-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>PR</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'rfq') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Supplier Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['supplierName'] ? 'has-active-filter' : ''}" data-filter-col="supplierName" title="Filter Supplier Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Date</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>RFQ#</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['rfqNo'] ? 'has-active-filter' : ''}" data-filter-col="rfqNo" title="Filter RFQ#">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>RFQ Value</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Status</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'po') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Supplier Name</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>PO No</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>PO Date</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>PO Value</span>
+          </th>
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <span>Status</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'payment') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Vendor Name</span>
+          </th>
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Invoice#</span>
+          </th>
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Invoice Date</span>
+          </th>
+          <th colspan="3" class="purchase-amount-col-header" style="width: 45ch; min-width: 45ch; max-width: 45ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Amount</span>
+          </th>
+          <th rowspan="2" class="purchase-ageing-header" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-left: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Ageing</span>
+          </th>
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Status</span>
+          </th>
+        </tr>
+        <tr class="master-view-header">
+          <th class="purchase-amount-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Invoice</span>
+          </th>
+          <th class="purchase-amount-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Paid</span>
+          </th>
+          <th class="purchase-amount-sub-header" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 1px solid #ffffff !important; border-right: 1px solid #ffffff !important; padding: 6px 10px;">
+            <span>Payable</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    thead.innerHTML = '';
+    return;
   }
 
   if (role === 'Warehouse Manager') {
@@ -25754,6 +28618,10 @@ function applyFiltersAndRender() {
   if (wmMrnDetailSubmitArea) {
     wmMrnDetailSubmitArea.style.display = 'none';
   }
+  const purchaseSubmitArea = document.getElementById('purchasePrSubmitArea');
+  if (purchaseSubmitArea) {
+    purchaseSubmitArea.style.display = 'none';
+  }
 
   const tableContainer = document.querySelector('.table-container-full');
   const worklistTableEl = document.getElementById('worklistTable');
@@ -25790,11 +28658,270 @@ function applyFiltersAndRender() {
       worklistTableEl.style.width = '100%';
       worklistTableEl.style.tableLayout = 'fixed';
       if (tableContainer) tableContainer.style.overflowX = 'hidden';
+    } else if (role === 'Purchase Manager') {
+      if (currentWorklistView === 'pr') {
+        worklistTableEl.style.minWidth = '1200px';
+        worklistTableEl.style.width = '100%';
+        worklistTableEl.style.tableLayout = 'fixed';
+        if (tableContainer) {
+          tableContainer.style.overflowX = 'auto';
+          tableContainer.style.marginTop = '0px';
+        }
+      } else if (currentWorklistView === 'rfq') {
+        worklistTableEl.style.minWidth = '1050px';
+        worklistTableEl.style.width = '100%';
+        worklistTableEl.style.tableLayout = 'fixed';
+        if (tableContainer) {
+          tableContainer.style.overflowX = 'auto';
+          tableContainer.style.marginTop = '18px';
+        }
+      } else if (currentWorklistView === 'po') {
+        worklistTableEl.style.minWidth = '950px';
+        worklistTableEl.style.width = '100%';
+        worklistTableEl.style.tableLayout = 'fixed';
+        if (tableContainer) {
+          tableContainer.style.overflowX = 'auto';
+          tableContainer.style.marginTop = '18px';
+        }
+      } else if (currentWorklistView === 'payment') {
+        worklistTableEl.style.minWidth = '1300px';
+        worklistTableEl.style.width = '100%';
+        worklistTableEl.style.tableLayout = 'fixed';
+        if (tableContainer) {
+          tableContainer.style.overflowX = 'auto';
+          tableContainer.style.marginTop = '0px';
+        }
+      }
     } else {
       worklistTableEl.style.minWidth = '';
       worklistTableEl.style.width = '100%';
       worklistTableEl.style.tableLayout = '';
+      if (tableContainer) tableContainer.style.marginTop = '';
     }
+  }
+
+  if (currentModule === 'worklist' && role === 'Purchase Manager') {
+    filteredDataset = (currentDataset || []).filter(row => {
+      for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+        if (!allowedSet || allowedSet.size === 0) continue;
+        const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+        if (!allowedSet.has(cellVal)) return false;
+      }
+      return true;
+    });
+
+    if (currentWorklistView === 'pr') {
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No PR items found. Click + to add product.
+            </td>
+          </tr>
+        `;
+        updatePurchasePrSelectionUI();
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isRowSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+            <!-- 1. Select: 70px, centered circle checkbox with green marker, multiselect -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox purchase-pr-checkbox" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="handlePurchasePrRowSelect('${row.id}', this.checked)">
+            </td>
+            <!-- 2. Submit By: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.submitBy || '').replace(/"/g, '&quot;')}">
+              ${row.submitBy || ''}
+            </td>
+            <!-- 3. Submission Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.submissionDate || ''}
+            </td>
+            <!-- 4. Material Head: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialHead || '').replace(/"/g, '&quot;')}">
+              ${row.materialHead || ''}
+            </td>
+            <!-- 5. Material Description: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">
+              ${row.materialDescription || ''}
+            </td>
+            <!-- 6. Uom: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.uom || ''}
+            </td>
+            <!-- 7. Stock: 10ch & right with .00 -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
+              ${Number(row.stockQty || 0).toFixed(2)}
+            </td>
+            <!-- 8. PR: 10ch & right with .00 (editable input in edit mode) -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+              ${isPurchasePrEditing && isRowSelected ? `
+                <input type="number" step="0.01" class="form-input-control purchase-pr-editable-input" data-row-id="${row.id}" value="${Number(row.prQty || 0).toFixed(2)}"
+                  style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
+                  onkeydown="if(event.key === 'Enter') handlePurchasePrEditToggle();">
+              ` : `
+                <span>${Number(row.prQty || 0).toFixed(2)}</span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      updatePurchasePrSelectionUI();
+      return;
+    }
+
+    if (currentWorklistView === 'rfq') {
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No RFQ records found.
+            </td>
+          </tr>
+        `;
+        updatePurchaseRfqSelectionUI();
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isRowSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
+            <!-- 1. Select: 70px, centered circle checkbox with green marker, multiselect -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox purchase-rfq-checkbox" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="handlePurchaseRfqRowSelect('${row.id}', this.checked)">
+            </td>
+            <!-- 2. Supplier Name: 25ch & left, clickable -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;" title="${(row.supplierName || '').replace(/"/g, '&quot;')}" onclick="handlePurchaseRfqSupplierClick('${row.id}')">
+              <span class="purchase-rfq-supplier-link" style="color: #0454e4; text-decoration: underline; cursor: pointer;">${row.supplierName || ''}</span>
+            </td>
+            <!-- 3. Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.date || ''}
+            </td>
+            <!-- 4. RFQ#: 15ch & center, regular black font -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #000000; font-weight: 500;">
+              ${row.rfqNo || ''}
+            </td>
+            <!-- 5. RFQ Value: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.rfqValue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 6. Status: 15ch & center, regular black font (2 categories: RFQ Pending, RFQ Received) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #000000; font-weight: 500;">
+              ${row.status || 'RFQ Pending'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      updatePurchaseRfqSelectionUI();
+      return;
+    }
+
+    if (currentWorklistView === 'po') {
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No PO records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+            <!-- 1. Supplier Name: 25ch & left, dark blue clickable -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; font-weight: 500; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" class="purchase-po-supplier-link" onclick="handlePurchasePoSupplierClick('${row.id}')" title="${(row.supplierName || '').replace(/"/g, '&quot;')}">
+              ${row.supplierName || ''}
+            </td>
+            <!-- 2. PO No: 15ch & center, regular black font -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #000000; font-weight: 500;">
+              ${row.poNo || ''}
+            </td>
+            <!-- 3. PO Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.poDate || ''}
+            </td>
+            <!-- 4. PO Value: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.poValue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 5. Status: 20ch & left, regular black font (3 categories: Approval Pending, Dispatch Pending, In-Transit) -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #000000; font-weight: 500;">
+              ${row.status || 'Approval Pending'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'payment') {
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No payment records found.
+            </td>
+          </tr>
+        `;
+        const sumEl = document.getElementById('lblPurchasePaymentSum');
+        if (sumEl) sumEl.textContent = '0.00';
+        return;
+      }
+
+      // Update toolbar sum dynamically
+      const totalAmount = (filteredDataset || []).reduce((acc, r) => acc + (Number(r.invoiceAmount) || 0), 0);
+      const totalAmountFormatted = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const sumEl = document.getElementById('lblPurchasePaymentSum');
+      if (sumEl) sumEl.textContent = totalAmountFormatted;
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+            <!-- 1. Vendor Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.vendorName || '').replace(/"/g, '&quot;')}">
+              ${row.vendorName || ''}
+            </td>
+            <!-- 2. Invoice#: 15ch & center, blue color & underline -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500; text-decoration: underline; cursor: pointer;" onclick="openPurchasePaymentInvoiceDetailsModal('${row.id}')" title="View Invoice Details">
+              ${row.invoiceNo || ''}
+            </td>
+            <!-- 3. Invoice Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.invoiceDate || ''}
+            </td>
+            <!-- 4a. Invoice: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #0454e4; font-weight: 600; text-decoration: underline; cursor: pointer;" onclick="openPurchasePaymentInvoiceDetailsModal('${row.id}')" title="View Invoice Details">
+              ${Number(row.invoiceAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4b. Paid: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #15803d; font-weight: 600; text-decoration: underline; cursor: pointer;" onclick="openPurchasePaymentPaidDetailsModal('${row.id}')" title="View Paid Details">
+              ${Number(row.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 4c. Payable: 15ch & right (no vertical line after content) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #b91c1c; font-weight: 600; border-right: none !important;">
+              ${Number(row.payableAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 5. Ageing: 10ch & center (no vertical line separating from Amount column in content) -->
+            <td class="purchase-payment-ageing-cell" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; border-left: none !important;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 6. Status: 15ch & left, regular black font -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #000000; font-weight: 500;">
+              ${row.status || 'Pending'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+    return;
   }
 
   if (currentModule === 'worklist' && role === 'Warehouse Manager') {
@@ -29444,18 +32571,25 @@ function renderProfileModule() {
   const footer = document.getElementById('worklistFooterBar');
 
   if (bannerTitle) bannerTitle.textContent = "Profile";
-  if (toolbar) toolbar.innerHTML = `<div class="toolbar-left">${universalBackBtnHtml}</div><div class="toolbar-right"></div>`;
+  if (toolbar) {
+    toolbar.style.display = 'flex';
+    toolbar.innerHTML = `<div class="toolbar-left">${universalBackBtnHtml}</div><div class="toolbar-right"></div>`;
+  }
   if (footer) footer.innerHTML = '';
 
   const user = (typeof NexusApi !== 'undefined' && NexusApi.auth) ? NexusApi.auth.getStoredUser() : null;
   const role = user ? (user.role || 'Admin') : (sessionStorage.getItem('nexus_role') || 'Admin');
-  const email = user ? (user.email || (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : 'commercial@nexus.com'))) : (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : 'commercial@nexus.com'));
-  const name = user ? (user.name || (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : 'Commercial Manager'))) : (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : 'Commercial Manager'));
+  const email = user ? (user.email || (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com'))))) : (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com'))));
+  const name = user ? (user.name || (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager'))))) : (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager'))));
   const permissionsText = role === 'Admin'
     ? 'Full System Administrator Access (All Modules)'
     : (role === 'Project Manager'
       ? 'Role-Based Access: Worklist, Home / Projects, Profile'
-      : 'Role-Based Access: Master, Home / Projects, Worklist, Profile');
+      : (role === 'Warehouse Manager'
+        ? 'Role-Based Access: Worklist, Inventory, Profile'
+        : (role === 'Purchase Manager'
+          ? 'Role-Based Access: Profile, Worklist'
+          : 'Role-Based Access: Master, Home / Projects, Worklist, Profile')));
 
   if (thead) {
     thead.innerHTML = `

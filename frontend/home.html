@@ -129,6 +129,20 @@
       </button>
     </div>
 
+    <!-- Centered Submit Area for Purchase Manager PR when user selects row -->
+    <div id="purchasePrSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnPurchasePrSubmitBatch" onclick="openPurchaseSelectSupplierModal()" title="Submit PR" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
+    <!-- Centered Submit Area for Purchase Manager RFQ when user selects row -->
+    <div id="purchaseRfqSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnPurchaseRfqSubmitBatch" onclick="openPurchaseSelectSupplierModal()" title="Select Supplier" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
     <!-- Centered Submit Area for Warehouse Manager MIN when one or more rows are highlighted -->
     <div id="wmMinSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
       <button type="button" id="btnWmMinSubmitBatch" onclick="submitWmMinMainBatch()" title="Submit MIN" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
@@ -6011,6 +6025,967 @@
               </div>
             </div>
           </form>
+        </div>
+
+        <!-- Purchase Manager: Select Supplier Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchaseSelectSupplierModal"
+          style="display: none; width: 480px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: visible !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPurchaseSelectSupplierTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Select Supplier
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchaseSelectSupplierModal" onclick="closePurchaseSelectSupplierModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <form id="frmPurchaseSelectSupplier" onsubmit="event.preventDefault(); submitPurchaseSelectSupplier();" style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Supplier: dropdown with circle radio options for multiselect -->
+            <div class="pm-field-row" style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 90px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Supplier</label>
+                <div style="flex: 1; position: relative;" id="purchaseSupplierDropdownContainer">
+                  <button type="button" id="btnPurchaseSupplierDropdown" onclick="togglePurchaseSupplierDropdown()"
+                    style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; cursor: pointer; color: #0f172a; box-sizing: border-box; text-align: left; display: flex; align-items: center; justify-content: space-between; outline: none;">
+                    <span id="lblPurchaseSupplierDropdownSelected" style="color: #64748b; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 290px;">Select Supplier</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Options menu with circle radio buttons for multiselect -->
+              <div id="menuPurchaseSupplierOptions"
+                style="display: none; width: 100%; max-height: 180px; overflow-y: auto; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08); padding: 4px 0; box-sizing: border-box;">
+              </div>
+
+              <select id="selPurchaseSupplierName" multiple style="display: none;"></select>
+            </div>
+
+            <!-- Centered submit icon below the field -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 6px;">
+              <button type="button" class="btn-card-submit-inside" id="btnPurchaseSupplierModalSubmit" title="Submit" onclick="submitPurchaseSelectSupplier()" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Purchase Manager: Add Product Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchaseAddProductModal"
+          style="display: none; width: 560px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPurchaseAddProductTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Product
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchaseAddProductModal" onclick="closePurchaseAddProductModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <form id="frmPurchaseAddProduct" onsubmit="event.preventDefault(); savePurchaseAddProduct();" style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 18px;">
+            <!-- 1. Material Head: dropdown with options from company master products -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Material Head</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selPurchaseAddMaterialHead" class="form-input-control" onchange="handlePurchaseAddMaterialHeadChange(this.value)"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <!-- Populated dynamically with Material Heads -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Material Descriptions: dropdown with options from company master products -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Material Descriptions</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selPurchaseAddMaterialDescription" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <!-- Populated dynamically based on selected Material Head -->
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Qty: typeable input with decimal .00 -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Qty</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" class="form-input-control" id="inpPurchaseAddQty" placeholder="0.00"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Centered submit icon below last field -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 10px;">
+              <button type="button" class="btn-card-submit-inside" id="btnPurchaseAddProductSubmit" title="Submit" onclick="savePurchaseAddProduct()" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Purchase Manager: Add Payment Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchaseAddPaymentModal"
+          style="display: none; width: 600px !important; max-width: 96vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          
+          <!-- Header: Title Badge ("Add Payment"), Summation next to header design (NOT below), and Red Close Button -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; flex-shrink: 0; background: #ffffff;">
+            <div style="display: flex; align-items: center; height: 100%;">
+              <div class="side-form-title-badge" id="lblPurchaseAddPaymentTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Add Payment
+              </div>
+              <!-- Summation icon with value next to header design -->
+              <div id="boxPurchaseAddPaymentSummation" style="display: flex; align-items: center; gap: 8px; margin-left: 20px;">
+                <img src="icons/summation.svg" alt="Summation" width="22" height="22" style="display: block;">
+                <span id="lblPurchaseAddPaymentSummationVal" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchaseAddPaymentModal" onclick="closePurchaseAddPaymentModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body with 8 fields -->
+          <div style="padding: 16px 28px 24px; overflow-y: auto; max-height: calc(90vh - 52px);">
+            <form id="frmPurchaseAddPayment" onsubmit="event.preventDefault(); savePurchaseAddPayment();" style="display: flex; flex-direction: column; gap: 14px;">
+              
+              <!-- 1. Expense Type: dropdown with options -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Expense Type</label>
+                <div style="flex: 1; position: relative;">
+                  <select id="selPurchasePaymentExpenseType" class="form-input-control"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                    <option value="Salary Advance">Salary Advance</option>
+                    <option value="GST Purchase">GST Purchase</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 2. Supplier Name: dropdown with options -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Supplier Name</label>
+                <div style="flex: 1; position: relative;">
+                  <select id="selPurchasePaymentSupplierName" class="form-input-control"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                    <!-- Populated dynamically -->
+                  </select>
+                </div>
+              </div>
+
+              <!-- 3. Invoice No: typeable input box -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Invoice No</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpPurchasePaymentInvoiceNo" placeholder="Enter Invoice No"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+
+              <!-- 4. Invoice Date: with calendar icon E:\Freelance\frontend\icons\google-calendar.svg with its function workable -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Invoice Date</label>
+                <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                  <input type="date" class="form-input-control" id="inpPurchasePaymentInvoiceDate" onclick="if(this.showPicker) this.showPicker();"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 46px 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none; background: #ffffff;">
+                  <span class="btn-purchase-payment-calendar-trigger" id="btnPurchasePaymentCalendar" title="Select Invoice Date"
+                    onclick="const inp = document.getElementById('inpPurchasePaymentInvoiceDate'); if (inp) { if (inp.showPicker) inp.showPicker(); else inp.focus(); }"
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; padding: 2px;">
+                    <img src="icons/google-calendar.svg" alt="Calendar" width="24" height="24" style="display: block; pointer-events: none;">
+                  </span>
+                </div>
+              </div>
+
+              <!-- 5. Taxable Amount: typeable input box -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Taxable Amount</label>
+                <div style="flex: 1;">
+                  <input type="number" step="0.01" min="0" class="form-input-control" id="inpPurchasePaymentTaxableAmount" placeholder="0.00" oninput="updatePurchaseAddPaymentModalSum()"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+
+              <!-- 6. CGST Amount: typeable input box -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">CGST Amount</label>
+                <div style="flex: 1;">
+                  <input type="number" step="0.01" min="0" class="form-input-control" id="inpPurchasePaymentCgstAmount" placeholder="0.00" oninput="updatePurchaseAddPaymentModalSum()"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+
+              <!-- 7. SGST Amount: typeable input box -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">SGST Amount</label>
+                <div style="flex: 1;">
+                  <input type="number" step="0.01" min="0" class="form-input-control" id="inpPurchasePaymentSgstAmount" placeholder="0.00" oninput="updatePurchaseAddPaymentModalSum()"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+
+              <!-- 8. Remarks: typeable input box -->
+              <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Remarks</label>
+                <div style="flex: 1;">
+                  <input type="text" class="form-input-control" id="inpPurchasePaymentRemarks" placeholder="Enter remarks"
+                    style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+                </div>
+              </div>
+
+              <!-- Centered submit icon below last field -->
+              <div style="display: flex; justify-content: center; align-items: center; padding-top: 8px; margin-top: 4px;">
+                <button type="button" class="btn-card-submit-inside" id="btnPurchaseAddPaymentSubmit" title="Submit" onclick="savePurchaseAddPayment()"
+                  style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                  <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: Payment Invoice Breakdown Details Modal -->
+        <div class="side-form-card side-contact-popup" id="purchasePaymentInvoiceDetailsModal"
+          style="display: none; width: 580px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          
+          <!-- Header: Title Badge (Respective Invoice No), Summation next to header design (NOT below), and Red Close Button -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; flex-shrink: 0; background: #ffffff;">
+            <div style="display: flex; align-items: center; height: 100%;">
+              <div class="side-form-title-badge" id="lblPurchasePaymentInvoiceDetailsTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                INV-2026-1021
+              </div>
+              <!-- Summation icon with value next to header design -->
+              <div id="boxPurchasePaymentInvoiceDetailsSummation" style="display: flex; align-items: center; gap: 8px; margin-left: 20px;">
+                <img src="icons/summation.svg" alt="Summation" width="22" height="22" style="display: block;">
+                <span id="lblPurchasePaymentInvoiceDetailsSumVal" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePaymentInvoiceDetailsModal" onclick="closePurchasePaymentInvoiceDetailsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Body: Basic Amount, CGST, SGST, IGST as input box which only show details not editable -->
+          <div style="padding: 20px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Basic Amount -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Basic Amount</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpPurchasePaymentDetailBasic" readonly
+                  style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; box-sizing: border-box; outline: none; cursor: default;">
+              </div>
+            </div>
+
+            <!-- 2. CGST -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">CGST</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpPurchasePaymentDetailCgst" readonly
+                  style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; box-sizing: border-box; outline: none; cursor: default;">
+              </div>
+            </div>
+
+            <!-- 3. SGST -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">SGST</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpPurchasePaymentDetailSgst" readonly
+                  style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; box-sizing: border-box; outline: none; cursor: default;">
+              </div>
+            </div>
+
+            <!-- 4. IGST -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">IGST</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpPurchasePaymentDetailIgst" readonly
+                  style="width: 100%; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; box-sizing: border-box; outline: none; cursor: default;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: Payment Paid Details Modal -->
+        <div class="side-form-card side-contact-popup" id="purchasePaymentPaidDetailsModal"
+          style="display: none; width: 580px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          
+          <!-- Header: Title Badge (Respective Invoice No) and Red Close Button -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; flex-shrink: 0; background: #ffffff;">
+            <div style="display: flex; align-items: center; height: 100%;">
+              <div class="side-form-title-badge" id="lblPurchasePaymentPaidDetailsTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                INV-2026-1021
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePaymentPaidDetailsModal" onclick="closePurchasePaymentPaidDetailsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Body: Table where headers are centered, Date 15ch&center, Receipt# 15ch&center, Paid Amount 15ch&right -->
+          <div style="padding: 16px 24px 24px; overflow-x: auto;">
+            <table id="tblPurchasePaymentPaidDetails" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">
+                    <span>Date</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">
+                    <span>Receipt#</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 8px 6px;">
+                    <span>Paid Amount</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblBodyPurchasePaymentPaidDetails">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: RFQ Pending Detail Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchaseRfqPendingModal"
+          style="display: none; width: 1200px !important; max-width: 98vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          <!-- Header: Title Badge, Summation next to header design, and Edit Icon near Close -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; align-items: center; height: 52px; margin-bottom: 8px;">
+            <div class="side-form-title-badge" id="lblPurchaseRfqPendingTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap; max-width: 60%; overflow: hidden; text-overflow: ellipsis;">
+              Supplier Name - RFQ#
+            </div>
+            <!-- Summation icon with value next to the header design (not below) -->
+            <div id="boxPurchaseRfqPendingSummation" style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+              <img src="icons/summation.svg" alt="Sum" width="22" height="22" style="display: block;">
+              <span id="lblPurchaseRfqPendingSummationVal" style="font-weight: 700; font-size: 1.05rem; color: #0454e4;">0.00</span>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <!-- Edit Icon (visible when row is selected) -->
+              <button type="button" id="btnPurchaseRfqPendingEdit" onclick="togglePurchaseRfqPendingEdit()" title="Edit"
+                style="display: none; background: transparent; border: none; cursor: pointer; padding: 2px; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img id="imgPurchaseRfqPendingEdit" src="icons/Edit.svg" alt="Edit" width="22" height="22" style="display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePurchaseRfqPendingModal" onclick="closePurchaseRfqPendingModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div style="padding: 12px 24px 16px; overflow-x: hidden !important; overflow-y: auto; max-height: calc(90vh - 140px);">
+            <table id="tblPurchaseRfqPending" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Select</span>
+                  </th>
+                  <th rowspan="2" style="width: 36ch; min-width: 36ch; max-width: 36ch; text-align: left !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 12px;">
+                    <span>Material Description</span>
+                  </th>
+                  <th rowspan="2" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Uom</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Qty</span>
+                  </th>
+                  <th rowspan="2" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Rate</span>
+                  </th>
+                  <th colspan="2" style="width: 22ch; min-width: 22ch; max-width: 22ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>GST</span>
+                  </th>
+                  <th rowspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 12px;">
+                    <span>Total</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th style="width: 6ch; min-width: 6ch; max-width: 6ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>%</span>
+                  </th>
+                  <th style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>₹</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblBodyPurchaseRfqPending">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+
+            <!-- Submit icon centered below the last row (appears when user selects row) -->
+            <div id="purchaseRfqPendingSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 18px 0 4px 0;">
+              <button type="button" id="btnPurchaseRfqPendingSubmit" onclick="openPurchaseAddTermsModal()" title="Submit"
+                style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: Add Terms Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchaseAddTermsModal"
+          style="display: none; width: 500px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPurchaseAddTermsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Terms
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchaseAddTermsModal" onclick="closePurchaseAddTermsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <form id="frmPurchaseAddTerms" onsubmit="event.preventDefault(); submitPurchaseAddTerms();" style="padding: 18px 28px 28px; display: flex; flex-direction: column; gap: 18px;">
+            <!-- 1. Transportation: dropdown with options -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transportation</label>
+              <div style="flex: 1; position: relative;">
+                <select id="inpPurchaseTransportation" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Including" selected>Including</option>
+                  <option value="Extra at actual">Extra at actual</option>
+                  <option value="Ex-Works">Ex-Works</option>
+                  <option value="Door Delivery">Door Delivery</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Payment Terms: dropdown with options -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Payment Terms</label>
+              <div style="flex: 1; position: relative;">
+                <select id="inpPurchasePaymentTerms" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="Within 30 days from the Invoice Date" selected>Within 30 days from the Invoice Date</option>
+                  <option value="Advance">Advance</option>
+                  <option value="Within 15 days from the Invoice Date">Within 15 days from the Invoice Date</option>
+                  <option value="Within 45 days from the Invoice Date">Within 45 days from the Invoice Date</option>
+                  <option value="Immediate on Delivery">Immediate on Delivery</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Centered submit icon below the last field -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 10px;">
+              <button type="button" class="btn-card-submit-inside" id="btnPurchaseSubmitTerms" title="Submit" onclick="submitPurchaseAddTerms()" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Purchase Manager: RFQ Received Detail Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchaseRfqReceivedModal"
+          style="display: none; width: 1100px !important; max-width: 98vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          <!-- Header: Title Badge, Summation next to header design, and Icons (Doc, Highlighting, Edit, Close) -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; align-items: center; height: 52px; margin-bottom: 8px;">
+            <div class="side-form-title-badge" id="lblPurchaseRfqReceivedTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap; max-width: 55%; overflow: hidden; text-overflow: ellipsis;">
+              Supplier Name - RFQ#
+            </div>
+            <!-- Summation icon with value next to the header design (not below) -->
+            <div id="boxPurchaseRfqReceivedSummation" style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+              <img src="icons/summation.svg" alt="Sum" width="22" height="22" style="display: block;">
+              <span id="lblPurchaseRfqReceivedSummationVal" style="font-weight: 700; font-size: 1.05rem; color: #0454e4;">0.00</span>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <!-- Doc icon (opens instructions popup) -->
+              <button type="button" id="btnPurchaseRfqDoc" onclick="openPurchaseRfqDocInstructionsModal()" title="Document Instructions"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Notes _ Remarks 2.svg" alt="Doc" width="22" height="22" style="display: block;">
+              </button>
+              <!-- Highlighting / Tick icon (highlights selected row) -->
+              <button type="button" id="btnPurchaseRfqHighlight" onclick="highlightPurchaseRfqReceivedSelectedRow()" title="Highlight Selected"
+                style="display: none; background: transparent; border: none; cursor: pointer; padding: 2px; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img id="imgPurchaseRfqHighlight" src="icons/tick.svg" alt="Select" width="22" height="22" style="display: block;">
+              </button>
+              <!-- Edit icon -->
+              <button type="button" id="btnPurchaseRfqReceivedEdit" onclick="togglePurchaseRfqReceivedEdit()" title="Edit"
+                style="display: none; background: transparent; border: none; cursor: pointer; padding: 2px; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img id="imgPurchaseRfqReceivedEdit" src="icons/Edit.svg" alt="Edit" width="22" height="22" style="display: block;">
+              </button>
+              <!-- Close button -->
+              <button type="button" class="side-form-close-btn" id="btnClosePurchaseRfqReceived" onclick="closePurchaseRfqReceivedModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div style="padding: 12px 24px 16px; overflow-x: hidden !important; overflow-y: auto; max-height: calc(90vh - 120px);">
+            <table id="tblPurchaseRfqReceived" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Select</span>
+                  </th>
+                  <th rowspan="2" style="width: 36ch; min-width: 36ch; max-width: 36ch; text-align: left !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 12px;">
+                    <span>Material Description</span>
+                  </th>
+                  <th rowspan="2" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Uom</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Qty</span>
+                  </th>
+                  <th colspan="2" style="width: 32ch; min-width: 32ch; max-width: 32ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Rate</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Last Purchase</span>
+                  </th>
+                  <th style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>New</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblBodyPurchaseRfqReceived">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: RFQ Doc Instructions Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchaseRfqDocModal"
+          style="display: none; width: 540px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPurchaseRfqDocTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Document Instructions
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchaseRfqDoc" onclick="closePurchaseRfqDocInstructionsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 12px;"></div>
+
+          <div style="padding: 16px 28px 28px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #00cba0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <span style="font-weight: 800; color: #00cba0; font-size: 1.05rem; line-height: 1.4;">1.</span>
+              <span style="font-size: 0.95rem; font-weight: 600; color: #1e293b; line-height: 1.5;">Transport Charges Including / Extra at actual</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 18px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #00cba0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <span style="font-weight: 800; color: #00cba0; font-size: 1.05rem; line-height: 1.4;">2.</span>
+              <span style="font-size: 0.95rem; font-weight: 600; color: #1e293b; line-height: 1.5;">Payment Should pay as advance / Within 30 days from the Invoice Date</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: PO Approval Pending Detail Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchasePoApprovalPendingModal"
+          style="display: none; width: 1340px !important; max-width: 98vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          <!-- Header: Title Badge, Summation next to header design, and Close Button -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; align-items: center; height: 52px; margin-bottom: 8px;">
+            <div class="side-form-title-badge" id="lblPurchasePoApprovalPendingTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap; max-width: 60%; overflow: hidden; text-overflow: ellipsis;">
+              Supplier Name - PO#
+            </div>
+            <!-- Summation icon with value next to the header design (not below) -->
+            <div id="boxPurchasePoApprovalPendingSummation" style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+              <img src="icons/summation.svg" alt="Sum" width="22" height="22" style="display: block;">
+              <span id="lblPurchasePoApprovalPendingSummationVal" style="font-weight: 700; font-size: 1.05rem; color: #0454e4;">0.00</span>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePoApprovalPendingModal" onclick="closePurchasePoApprovalPendingModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div style="padding: 12px 24px 16px; overflow-x: auto !important; overflow-y: auto; max-height: calc(90vh - 140px);">
+            <table id="tblPurchasePoApprovalPending" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Select</span>
+                  </th>
+                  <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 12px;">
+                    <span>Material Description</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Uom</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Qty</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Rate</span>
+                  </th>
+                  <th colspan="4" style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Basic</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>CGST</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>SGST</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Total</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblBodyPurchasePoApprovalPending">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+
+            <!-- Submit icon centered below the last row (appears when user selects row) -->
+            <div id="purchasePoApprovalPendingSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 18px 0 4px 0;">
+              <button type="button" id="btnPurchasePoApprovalPendingSubmit" onclick="submitPurchasePoApprovalPending()" title="Submit"
+                style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: PO Dispatch Pending Detail Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchasePoDispatchPendingModal"
+          style="display: none; width: 1280px !important; max-width: 98vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          <!-- Header: Title Badge, Summation next to header design, and Icons (Tick, Edit, Close) -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; align-items: center; height: 52px; margin-bottom: 8px;">
+            <div class="side-form-title-badge" id="lblPurchasePoDispatchPendingTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap; max-width: 55%; overflow: hidden; text-overflow: ellipsis;">
+              Supplier Name - PO#
+            </div>
+            <!-- Summation icon with value next to the header design (not below) -->
+            <div id="boxPurchasePoDispatchPendingSummation" style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+              <img src="icons/summation.svg" alt="Sum" width="22" height="22" style="display: block;">
+              <span id="lblPurchasePoDispatchPendingSummationVal" style="font-weight: 700; font-size: 1.05rem; color: #0454e4;">0.00</span>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <!-- Tick / Highlighting icon -->
+              <button type="button" id="btnPurchasePoDispatchHighlight" onclick="highlightPurchasePoDispatchSelectedRow()" title="Highlight Selected"
+                style="display: none; background: transparent; border: none; cursor: pointer; padding: 2px; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img id="imgPurchasePoDispatchHighlight" src="icons/tick.svg" alt="Highlight" width="22" height="22" style="display: block;">
+              </button>
+              <!-- Edit icon -->
+              <button type="button" id="btnPurchasePoDispatchEdit" onclick="togglePurchasePoDispatchEdit()" title="Edit"
+                style="display: none; background: transparent; border: none; cursor: pointer; padding: 2px; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img id="imgPurchasePoDispatchEdit" src="icons/Edit.svg" alt="Edit" width="22" height="22" style="display: block;">
+              </button>
+              <!-- Close button -->
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePoDispatchPendingModal" onclick="closePurchasePoDispatchPendingModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div style="padding: 12px 24px 16px; overflow-x: hidden !important; overflow-y: auto; max-height: calc(90vh - 140px);">
+            <table id="tblPurchasePoDispatchPending" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Select</span>
+                  </th>
+                  <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 12px;">
+                    <span>Material Description</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Uom</span>
+                  </th>
+                  <th colspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Qty</span>
+                  </th>
+                  <th colspan="4" style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>PO</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Invoice</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Basic</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>CGST</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>SGST</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Total</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblBodyPurchasePoDispatchPending">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+
+            <!-- Submit icon centered below the last row (appears when user selects row) -->
+            <div id="purchasePoDispatchPendingSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 18px 0 4px 0;">
+              <button type="button" id="btnPurchasePoDispatchPendingSubmit" onclick="openPurchasePoTransportDetailsModal()" title="Submit"
+                style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: PO Transport Details Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchasePoTransportDetailsModal"
+          style="display: none; width: 540px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPurchasePoTransportDetailsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Transport Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePoTransportDetailsModal" onclick="closePurchasePoTransportDetailsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 12px;"></div>
+
+          <form id="frmPurchasePoTransportDetails" onsubmit="event.preventDefault(); submitPurchasePoTransportDetails();" style="padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Logistics Name: dropdown with options -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 150px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Logistics Name</label>
+              <div style="flex: 1; position: relative;">
+                <select id="selPurchasePoLogisticsName" class="form-input-control"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
+                  <option value="VRL Logistics">VRL Logistics</option>
+                  <option value="TCI Express">TCI Express</option>
+                  <option value="Blue Dart Express">Blue Dart Express</option>
+                  <option value="Safexpress">Safexpress</option>
+                  <option value="Delhivery Supply Chain">Delhivery Supply Chain</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Transport charges: typeable input box -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 150px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transport charges</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" class="form-input-control" id="inpPurchasePoTransportCharges" placeholder="0.00" oninput="calculatePurchasePoTransportTotal()"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- 3. GST: toggle (keep toggle as center not its field name) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 150px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">GST</label>
+              <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+                <div class="toggle-switch-container" style="display: flex; justify-content: center; align-items: center; margin: 0 auto;">
+                  <label class="toggle-slide-switch">
+                    <input type="checkbox" id="inpPurchasePoGstToggle" onchange="togglePurchasePoGstFields(this.checked)">
+                    <span class="toggle-slide-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. GST Amount (appears when GST toggle is enabled) -->
+            <div class="pm-field-row" id="rowPurchasePoGstAmount" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 150px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">GST Amount</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" class="form-input-control" id="inpPurchasePoGstAmount" placeholder="0.00" oninput="calculatePurchasePoTransportTotal()"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- 5. Total Amount (appears when GST toggle is enabled) -->
+            <div class="pm-field-row" id="rowPurchasePoTotalAmount" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 150px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Total Amount</label>
+              <div style="flex: 1;">
+                <input type="number" step="0.01" min="0" class="form-input-control" id="inpPurchasePoTotalAmount" placeholder="0.00"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+              </div>
+            </div>
+
+            <!-- Submit icon below the last field as centered -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 10px;">
+              <button type="button" class="btn-card-submit-inside" id="btnPurchasePoTransportSubmit" title="Submit" onclick="submitPurchasePoTransportDetails()" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Purchase Manager: PO Upload Documents Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchasePoUploadDocumentsModal"
+          style="display: none; width: 540px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100002 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPurchasePoUploadDocumentsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Upload Documents
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePoUploadDocumentsModal" onclick="closePurchasePoUploadDocumentsModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 12px;"></div>
+
+          <form id="frmPurchasePoUploadDocuments" onsubmit="event.preventDefault(); submitPurchasePoUploadDocuments();" style="padding: 16px 28px 24px; display: flex; flex-direction: column; gap: 20px;">
+            <!-- 1. Invoice Documents (with pdf upload icon as center not field name) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Invoice Documents</label>
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <input type="file" id="inpPurchasePoInvoiceDocFile" accept=".pdf" style="display: none;" onchange="handlePurchasePoFileSelect(this, 'lblPurchasePoInvoiceDocName')">
+                <div onclick="document.getElementById('inpPurchasePoInvoiceDocFile').click()" title="Upload Invoice PDF"
+                  style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 64px; height: 48px; border-radius: 8px; border: none; background: transparent; transition: all 0.2s ease;">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" width="30" height="30" style="display: block;">
+                </div>
+                <span id="lblPurchasePoInvoiceDocName" style="font-size: 0.8rem; color: #0284c7; font-weight: 500; margin-top: 4px; text-align: center; word-break: break-all;"></span>
+              </div>
+            </div>
+
+            <!-- 2. LR Documents (with pdf upload icon as center not field name) -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">LR Documents</label>
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <input type="file" id="inpPurchasePoLrDocFile" accept=".pdf" style="display: none;" onchange="handlePurchasePoFileSelect(this, 'lblPurchasePoLrDocName')">
+                <div onclick="document.getElementById('inpPurchasePoLrDocFile').click()" title="Upload LR PDF"
+                  style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 64px; height: 48px; border-radius: 8px; border: none; background: transparent; transition: all 0.2s ease;">
+                  <img src="icons/PDF Upload.svg" alt="PDF Upload" width="30" height="30" style="display: block;">
+                </div>
+                <span id="lblPurchasePoLrDocName" style="font-size: 0.8rem; color: #0284c7; font-weight: 500; margin-top: 4px; text-align: center; word-break: break-all;"></span>
+              </div>
+            </div>
+
+            <!-- Submit icon below the last field as centered -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 10px;">
+              <button type="button" class="btn-card-submit-inside" id="btnPurchasePoUploadDocumentsSubmit" title="Submit" onclick="submitPurchasePoUploadDocuments()" style="background: none; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Purchase Manager: PO In-Transit Detail Modal Tab -->
+        <div class="side-form-card side-contact-popup" id="purchasePoInTransitModal"
+          style="display: none; width: 1240px !important; max-width: 98vw; max-height: 90vh; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 99999 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column;">
+          <!-- Header: Title Badge, Summation next to header design, Transport Icon & Close Button -->
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; align-items: center; height: 52px; margin-bottom: 8px;">
+            <div class="side-form-title-badge" id="lblPurchasePoInTransitTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap; max-width: 55%; overflow: hidden; text-overflow: ellipsis;">
+              Supplier Name - PO#
+            </div>
+            <!-- Summation icon with value next to the header design (not below) -->
+            <div id="boxPurchasePoInTransitSummation" style="display: flex; align-items: center; gap: 8px; margin-left: 16px;">
+              <img src="icons/summation.svg" alt="Sum" width="22" height="22" style="display: block;">
+              <span id="lblPurchasePoInTransitSummationVal" style="font-weight: 700; font-size: 1.05rem; color: #0454e4;">0.00</span>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <!-- Transport Icon on top right of the table -->
+              <button type="button" id="btnPurchasePoInTransitTransport" onclick="openPurchasePoTransportViewModal()" title="Transport Details"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Vehicle.svg" alt="Transport" width="22" height="22" style="display: block;">
+              </button>
+              <!-- Close button -->
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePoInTransitModal" onclick="closePurchasePoInTransitModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Table Container (Notice: NO Select column as requested!) -->
+          <div style="padding: 12px 24px 16px; overflow-x: hidden !important; overflow-y: auto; max-height: calc(90vh - 140px);">
+            <table id="tblPurchasePoInTransit" class="nexus-table-master" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+              <thead>
+                <tr class="master-view-header">
+                  <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 12px;">
+                    <span>Material Description</span>
+                  </th>
+                  <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Uom</span>
+                  </th>
+                  <th colspan="2" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Qty</span>
+                  </th>
+                  <th colspan="4" style="width: 50ch; min-width: 50ch; max-width: 50ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 2px solid #ffffff !important; padding: 6px 4px;">
+                    <span>Amount</span>
+                  </th>
+                </tr>
+                <tr class="master-view-header">
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>PO</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Invoice</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Basic</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>CGST</span>
+                  </th>
+                  <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>SGST</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-top: 2px solid #ffffff !important; padding: 6px 8px;">
+                    <span>Total</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tblBodyPurchasePoInTransit">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Purchase Manager: PO Transport View Modal Tab (In-Transit) -->
+        <div class="side-form-card side-contact-popup" id="purchasePoTransportViewModal"
+          style="display: none; width: 540px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPurchasePoTransportViewTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap; max-width: calc(100% - 110px); overflow: hidden; text-overflow: ellipsis;">
+              Transport Details
+            </div>
+            <!-- PDF Download Icon near close icon -->
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px; flex-shrink: 0; z-index: 10;">
+              <button type="button" id="btnPurchasePoTransportPdfDownload" onclick="downloadPurchasePoTransportPdf()" title="Download PDF"
+                style="background: transparent; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/PDF Download.svg" alt="Download PDF" width="22" height="22" style="display: block;">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnClosePurchasePoTransportViewModal" onclick="closePurchasePoTransportViewModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; display: inline-flex !important; align-items: center; justify-content: center; width: 32px; height: 32px;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 12px;"></div>
+
+          <div style="padding: 16px 28px 28px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Logistics Name: viewable field only -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 150px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Logistics Name</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="txtPurchasePoViewLogisticsName" readonly
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; box-sizing: border-box; outline: none; cursor: default;">
+              </div>
+            </div>
+
+            <!-- 2. Transport Charges: viewable field only -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label style="min-width: 150px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Transport Charges</label>
+              <div style="flex: 1;">
+                <input type="text" class="form-input-control" id="txtPurchasePoViewTransportCharges" readonly
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; padding: 0 14px; font-size: 0.95rem; font-weight: 500; color: #1e293b; box-sizing: border-box; outline: none; cursor: default;">
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Payment Receipt Modal Tab (Supply Subpage / Service Vendor / Project Details) -->

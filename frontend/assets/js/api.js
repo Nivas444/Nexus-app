@@ -183,13 +183,23 @@
 
   const FRONTEND_USERS_CONFIG = [
     {
+      email: 'master@nexus.com',
+      aliases: ['master', 'master@nexus.com'],
+      pwdHash: 'e7bc2f973afb8dfaf00fadfb19596741108be08ab4a107c6a799c429b684c64a',
+      name: 'Master',
+      role: 'Master',
+      department: 'Executive Management',
+      phone: '+91 98765 43210',
+      location: 'Chennai, India'
+    },
+    {
       email: 'admin@nexus.com',
       aliases: ['admin', 'admin@nexus.com'],
       pwdHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
-      name: 'Administrator',
-      role: 'Admin',
-      department: 'Executive Management',
-      phone: '+91 98765 43210',
+      name: 'Admin Manager',
+      role: 'Admin Manager',
+      department: 'Administration',
+      phone: '+91 98765 00001',
       location: 'Chennai, India'
     },
     {
@@ -248,15 +258,21 @@
             body: JSON.stringify({ email: normalized, password })
           });
           if (apiRes && apiRes.success && apiRes.user) {
+            const feUser = FRONTEND_USERS_CONFIG.find(u => 
+              u.email.toLowerCase() === normalized || 
+              (u.aliases && u.aliases.includes(normalized))
+            );
+            const effectiveRole = feUser ? feUser.role : (apiRes.user.role === 'Admin' ? 'Master' : apiRes.user.role);
+            const effectiveName = feUser ? feUser.name : (apiRes.user.role === 'Admin' ? 'Master' : apiRes.user.name);
             const profile = {
               id: apiRes.user.id,
               email: apiRes.user.email,
-              name: apiRes.user.name,
-              role: apiRes.user.role,
+              name: effectiveName,
+              role: effectiveRole,
               token: apiRes.user.token,
               permissions: apiRes.user.permissions || [],
-              department: apiRes.user.role === 'Project Manager' ? 'Project Management' : (apiRes.user.role === 'Commercial Manager' ? 'Commercial Operations' : (apiRes.user.role === 'Warehouse Manager' ? 'Warehouse Operations' : (apiRes.user.role === 'Purchase Manager' ? 'Purchase Operations' : 'Executive Management'))),
-              phone: apiRes.user.role === 'Project Manager' ? '+91 98765 00003' : (apiRes.user.role === 'Commercial Manager' ? '+91 98765 00002' : (apiRes.user.role === 'Warehouse Manager' ? '+91 98765 00004' : (apiRes.user.role === 'Purchase Manager' ? '+91 98765 00005' : '+91 98765 43210'))),
+              department: effectiveRole === 'Admin Manager' ? 'Administration' : (effectiveRole === 'Project Manager' ? 'Project Management' : (effectiveRole === 'Commercial Manager' ? 'Commercial Operations' : (effectiveRole === 'Warehouse Manager' ? 'Warehouse Operations' : (effectiveRole === 'Purchase Manager' ? 'Purchase Operations' : 'Executive Management')))),
+              phone: effectiveRole === 'Admin Manager' ? '+91 98765 00001' : (effectiveRole === 'Project Manager' ? '+91 98765 00003' : (effectiveRole === 'Commercial Manager' ? '+91 98765 00002' : (effectiveRole === 'Warehouse Manager' ? '+91 98765 00004' : (effectiveRole === 'Purchase Manager' ? '+91 98765 00005' : '+91 98765 43210')))),
               location: 'Chennai, India'
             };
             sessionStorage.setItem('nexus_user', JSON.stringify(profile));
@@ -299,12 +315,15 @@
           role: user.role,
           department: user.department,
           phone: user.phone,
-          location: user.location
+          location: user.location,
+          token: 'offline_token_' + Date.now()
         };
         sessionStorage.setItem('nexus_user', JSON.stringify(profile));
         sessionStorage.setItem('nexus_role', profile.role);
+        sessionStorage.setItem('nexus_token', profile.token);
         localStorage.setItem('nexus_user', JSON.stringify(profile));
         localStorage.setItem('nexus_role', profile.role);
+        localStorage.setItem('nexus_token', profile.token);
         return { success: true, user: profile };
       },
 
@@ -317,10 +336,12 @@
           const raw = sessionStorage.getItem('nexus_user') || localStorage.getItem('nexus_user');
           if (!raw) return null;
           if (raw.startsWith('{')) {
-            return JSON.parse(raw);
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.role === 'Admin') parsed.role = 'Master';
+            return parsed;
           }
-          const role = sessionStorage.getItem('nexus_role') || localStorage.getItem('nexus_role') || 'Admin';
-          return { email: raw, role, name: raw };
+          const role = sessionStorage.getItem('nexus_role') || localStorage.getItem('nexus_role') || 'Master';
+          return { email: raw, role: role === 'Admin' ? 'Master' : role, name: raw };
         } catch (e) {
           return null;
         }
@@ -328,10 +349,10 @@
 
       getUserRole() {
         const user = this.getStoredUser();
-        if (user && user.role) return user.role;
+        if (user && user.role) return user.role === 'Admin' ? 'Master' : user.role;
         const role = sessionStorage.getItem('nexus_role') || localStorage.getItem('nexus_role');
-        if (role) return role;
-        return 'Admin';
+        if (role) return role === 'Admin' ? 'Master' : role;
+        return 'Master';
       },
 
       logout() {
@@ -340,6 +361,7 @@
         sessionStorage.removeItem('nexus_token');
         localStorage.removeItem('nexus_user');
         localStorage.removeItem('nexus_role');
+        localStorage.removeItem('nexus_token');
         window.location.href = 'index.html';
       }
     },

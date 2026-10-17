@@ -113,6 +113,13 @@
       </table>
     </div>
 
+    <!-- Centered Submit Area for Admin Manager Worklist (Attendance & Salary) when any row is highlighted -->
+    <div id="adminManagerSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnAdminManagerSubmit" onclick="handleAdminManagerSubmit()" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
 
 
     <!-- Centered Submit Area for YTS/WIP/HOLD/NR when all rows selected -->
@@ -178,12 +185,14 @@
       </button>
     </div>
 
+
     <!-- Centered Submit Area for Warehouse Manager SRN Page -->
     <div id="wmSrnSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
       <button type="button" id="btnWmSrnSubmit" onclick="submitWmSrnRows()" title="Submit SRN" aria-label="Submit SRN" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
         <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
       </button>
     </div>
+
 
     <!-- Bottom View Switcher Toggles (In Left Below Corner) -->
     <div class="worklist-footer-bar" id="worklistFooterBar">
@@ -197,6 +206,220 @@
     <div class="side-form-container">
 
       <div class="side-form-cards-row">
+        <!-- Admin Manager -> Salary Deduction Card -->
+        <div class="side-form-card" id="salaryDeductionCard" style="display: none; width: 440px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge">Deduction</div>
+              <div class="metric-item metric-total" style="display: inline-flex; align-items: center; gap: 6px;" title="Total Deduction">
+                <img src="icons/summation.svg" alt="Summation" width="22" height="22" style="vertical-align: middle; display: block;">
+                <span id="lblDeductionSumValue" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-right: 14px;">
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <div class="side-form-body" style="padding: 18px 24px;">
+            <div class="form-row-group" style="margin-bottom: 14px;">
+              <label class="form-label" style="font-weight: 600; color: #475569; font-size: 0.9rem; margin-bottom: 6px; display: block;">EPF</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpDeductionEPF" value="1,800.00" readonly style="background: #f8fafc; cursor: default;">
+              </div>
+            </div>
+
+            <div class="form-row-group" style="margin-bottom: 14px;">
+              <label class="form-label" style="font-weight: 600; color: #475569; font-size: 0.9rem; margin-bottom: 6px; display: block;">ESI</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpDeductionESI" value="250.00" readonly style="background: #f8fafc; cursor: default;">
+              </div>
+            </div>
+
+            <div class="form-row-group" style="margin-bottom: 14px;">
+              <label class="form-label" style="font-weight: 600; color: #475569; font-size: 0.9rem; margin-bottom: 6px; display: block;">PT</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpDeductionPT" value="200.00" readonly style="background: #f8fafc; cursor: default;">
+              </div>
+            </div>
+
+            <div class="form-row-group" style="margin-bottom: 14px;">
+              <label class="form-label" style="font-weight: 600; color: #475569; font-size: 0.9rem; margin-bottom: 6px; display: block;">LWF</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpDeductionLWF" value="950.00" readonly style="background: #f8fafc; cursor: default;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Manager -> Salary Days Card -->
+        <div class="side-form-card" id="salaryDaysCard" style="display: none; width: 640px !important; min-width: 620px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge">Salary Days</div>
+            </div>
+            <div class="side-header-top-icons" style="margin-right: 14px;">
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <div class="side-form-body" style="padding: 24px; overflow: hidden;">
+            <div style="overflow: visible; width: 100%;">
+              <table class="table-nexus" style="width: 100%; border-collapse: collapse; margin-top: 4px;">
+                <thead>
+                  <tr style="background-color: #8c9399 !important;">
+                    <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; font-weight: 700; color: #ffffff !important; background-color: #8c9399 !important; font-size: 0.88rem; border-right: 1.5px solid #ffffff !important;">Total</th>
+                    <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; font-weight: 700; color: #ffffff !important; background-color: #8c9399 !important; font-size: 0.88rem; border-right: 1.5px solid #ffffff !important;">Worked</th>
+                    <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; font-weight: 700; color: #ffffff !important; background-color: #8c9399 !important; font-size: 0.88rem; border-right: 1.5px solid #ffffff !important;">Leave</th>
+                    <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; font-weight: 700; color: #ffffff !important; background-color: #8c9399 !important; font-size: 0.88rem; border-right: 1.5px solid #ffffff !important;">LOP</th>
+                    <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; font-weight: 700; color: #ffffff !important; background-color: #8c9399 !important; font-size: 0.88rem; border-right: none !important;">Holidays</th>
+                  </tr>
+                </thead>
+                <tbody id="tbSalaryDaysBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Manager -> Add Payment Request Card -->
+        <div class="side-form-card" id="addPaymentRequestCard" style="display: none; width: 540px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge">Add Payment Request</div>
+              <div class="metric-item metric-total" style="display: inline-flex; align-items: center; gap: 6px;" title="Amount Sum">
+                <img src="icons/summation.svg" alt="Summation" width="22" height="22" style="vertical-align: middle; display: block;">
+                <span id="lblAddPaymentSumValue" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 12px; margin-right: 14px;">
+              <input type="file" id="inpAdminPaymentPdfFile" accept=".pdf" style="display: none;" onchange="handleAdminPaymentPdfSelected(this)">
+              <button type="button" class="side-top-icon-btn" id="btnAdminPaymentPdfUpload" title="Upload PDF" onclick="document.getElementById('inpAdminPaymentPdfFile').click()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;">
+                <img src="icons/PDF Upload.svg" alt="Upload PDF" width="26" height="26">
+              </button>
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <form class="side-form-body" id="frmAddPaymentRequest" onsubmit="event.preventDefault();" style="padding: 20px 24px; max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+            <!-- 1. Expense Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="selPaymentExpenseType">Expense Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selPaymentExpenseType" onchange="handlePaymentExpenseTypeChange()">
+                  <option value="Salary Advance">Salary Advance</option>
+                  <option value="Travelling">Travelling</option>
+                  <option value="Office">Office</option>
+                  <option value="Payroll Tax">Payroll Tax</option>
+                  <option value="Salary">Salary</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Expense Description -->
+            <div class="form-row-group" id="grpAdminPaymentExpenseDesc">
+              <label class="form-label" for="selPaymentExpenseDesc">Expense Description</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="selPaymentExpenseDesc" onchange="updatePaymentGstVisibility()">
+                  <option value="Salary Advance">Salary Advance</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. From & 4. To dropdown fields (Only for Travelling) - one-by-one -->
+            <div id="grpAdminPaymentFromTo" style="display: none; flex-direction: column; gap: 14px;">
+              <!-- 3. From -->
+              <div class="form-row-group">
+                <label class="form-label" for="selPaymentFrom">From</label>
+                <div class="form-input-wrap">
+                  <select class="form-select-control" id="selPaymentFrom">
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Pune">Pune</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Bengaluru">Bengaluru</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Kolkata">Kolkata</option>
+                    <option value="Jaipur">Jaipur</option>
+                    <option value="Kochi">Kochi</option>
+                  </select>
+                </div>
+              </div>
+              <!-- 4. To -->
+              <div class="form-row-group">
+                <label class="form-label" for="selPaymentTo">To</label>
+                <div class="form-input-wrap">
+                  <select class="form-select-control" id="selPaymentTo">
+                    <option value="Pune">Pune</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Bengaluru">Bengaluru</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Kolkata">Kolkata</option>
+                    <option value="Jaipur">Jaipur</option>
+                    <option value="Kochi">Kochi</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Amount (typeable input field) -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpPaymentAmount">Amount</label>
+              <div class="form-input-wrap">
+                <input type="number" step="0.01" class="form-input-control" id="inpPaymentAmount" placeholder="Enter amount" oninput="handlePaymentAmountInput()">
+              </div>
+            </div>
+
+            <!-- 6. GST Toggle -->
+            <div class="form-row-group" id="grpAdminPaymentGstToggle" style="display: none;">
+              <label class="form-label" for="chkAdminPaymentGst">GST</label>
+              <div class="form-input-wrap" style="justify-content: center;">
+                <label class="project-info-toggle-switch">
+                  <input type="checkbox" id="chkAdminPaymentGst" onchange="toggleAdminPaymentGstFields()">
+                  <span class="project-info-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 7. GST Fields (Select vendor, Basic, CGST, SGST) -->
+            <div id="grpAdminPaymentGstFields" style="display: none; flex-direction: column; gap: 14px;">
+              <div class="form-row-group">
+                <label class="form-label" for="inpPaymentVendor">Select vendor</label>
+                <div class="form-input-wrap">
+                  <input type="text" class="form-input-control" id="inpPaymentVendor" placeholder="Enter vendor name">
+                </div>
+              </div>
+              <div class="form-row-group">
+                <label class="form-label" for="inpPaymentBasic">Basic</label>
+                <div class="form-input-wrap">
+                  <input type="number" step="0.01" class="form-input-control" id="inpPaymentBasic" placeholder="Enter basic amount">
+                </div>
+              </div>
+              <div class="form-row-group">
+                <label class="form-label" for="inpPaymentCgst">CGST</label>
+                <div class="form-input-wrap">
+                  <input type="number" step="0.01" class="form-input-control" id="inpPaymentCgst" placeholder="Enter CGST amount">
+                </div>
+              </div>
+              <div class="form-row-group">
+                <label class="form-label" for="inpPaymentSgst">SGST</label>
+                <div class="form-input-wrap">
+                  <input type="number" step="0.01" class="form-input-control" id="inpPaymentSgst" placeholder="Enter SGST amount">
+                </div>
+              </div>
+            </div>
+
+            <!-- Centered Submit Icon below the last field -->
+            <div style="display: flex; justify-content: center; align-items: center; padding: 18px 0 6px 0; width: 100%;">
+              <button type="button" id="btnSubmitPaymentRequest" onclick="saveAdminPaymentRequest()" title="Submit Payment Request" aria-label="Submit Payment Request" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- 1A. Main Add Employee Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card side-form-card-wide" id="addEmployeeCard"
           style="display: none; width: 860px !important; min-width: 860px !important;">

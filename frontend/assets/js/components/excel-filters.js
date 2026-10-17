@@ -121,6 +121,7 @@
       transportZone: "Transport Zone",
       employeeId: "Employee ID",
       employeeName: "Employee Name",
+      location: "Location",
       designation: "Designation",
       contactNumber: "Contact Number",
       email: "E-Mail",

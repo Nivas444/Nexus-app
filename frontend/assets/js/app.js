@@ -290,6 +290,8 @@ function initFormSubmission() {
             window.location.href = 'home.html?module=worklist&view=pr';
           } else if (userProfile.role === 'Purchase Manager') {
             window.location.href = 'home.html?module=worklist&view=pr';
+          } else if (userProfile.role === 'Admin Manager') {
+            window.location.href = 'home.html?module=worklist&view=attendance';
           } else {
             window.location.href = 'home.html?module=worklist&view=payment';
           }

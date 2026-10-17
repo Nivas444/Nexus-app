@@ -6927,6 +6927,9 @@ function parseUrlAndApplyState() {
     } else if (role === 'Purchase Manager') {
       const purchaseViews = ['pr', 'rfq', 'po', 'payment'];
       currentWorklistView = purchaseViews.includes(viewParam) ? viewParam : 'pr';
+    } else if (role === 'Admin Manager') {
+      const adminManagerViews = ['attendance', 'salary', 'payment'];
+      currentWorklistView = adminManagerViews.includes(viewParam) ? viewParam : 'attendance';
     } else {
       if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
         currentWorklistView = viewParam;
@@ -6953,6 +6956,8 @@ function parseUrlAndApplyState() {
       currentWorklistView = 'pr';
     } else if (role === 'Purchase Manager') {
       currentWorklistView = 'pr';
+    } else if (role === 'Admin Manager') {
+      currentWorklistView = 'attendance';
     } else {
       currentWorklistView = (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') ? viewParam : 'payment';
     }
@@ -6984,11 +6989,14 @@ function getAuthenticatedUserRole() {
     const raw = sessionStorage.getItem('nexus_user');
     if (raw && raw.startsWith('{')) {
       const u = JSON.parse(raw);
-      return u.role || 'Admin';
+      if (u.role === 'Admin') return 'Master';
+      return u.role || 'Master';
     }
-    return sessionStorage.getItem('nexus_role') || 'Admin';
+    const role = sessionStorage.getItem('nexus_role');
+    if (role === 'Admin') return 'Master';
+    return role || 'Master';
   } catch (e) {
-    return 'Admin';
+    return 'Master';
   }
 }
 
@@ -7113,8 +7121,32 @@ function applyRoleBasedNavigation() {
       currentWorklistView = 'pr';
       updateURL();
     }
+  } else if (role === 'Admin Manager') {
+    // Exactly 3 navigation icons in order: Profile, Worklist, Sign Out
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '1'; }
+    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+
+    // Hide unauthorized navigation items
+    if (navMaster) navMaster.style.display = 'none';
+    if (navProjects) navProjects.style.display = 'none';
+    if (navAccounts) navAccounts.style.display = 'none';
+    if (navAdmin) navAdmin.style.display = 'none';
+    if (navPurchase) navPurchase.style.display = 'none';
+    if (navInventory) navInventory.style.display = 'none';
+
+    // Route Protection: If currentModule is restricted for Admin Manager, redirect to Worklist
+    const allowedModules = ['worklist', 'profile'];
+    if (!allowedModules.includes(currentModule)) {
+      if (typeof showToast === 'function') {
+        showToast('Access Restricted: Admin Manager role does not have permission for this module.', 'warning');
+      }
+      currentModule = 'worklist';
+      currentWorklistView = 'attendance';
+      updateURL();
+    }
   } else {
-    // Admin role: All 9 navigation items are visible and accessible
+    // Master role (and legacy Admin): All 9 navigation items are visible and accessible
     [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
       if (btn) {
         btn.style.display = 'inline-flex';
@@ -7186,6 +7218,14 @@ function switchModule(moduleName) {
       }
       return;
     }
+  } else if (role === 'Admin Manager') {
+    const allowedModules = ['worklist', 'profile'];
+    if (!allowedModules.includes(moduleName)) {
+      if (typeof showToast === 'function') {
+        showToast(`Access Restricted: Admin Manager does not have permission to access ${moduleName}.`, 'warning');
+      }
+      return;
+    }
   }
 
   if (currentModule === moduleName) return;
@@ -7206,6 +7246,8 @@ function switchModule(moduleName) {
       currentWorklistView = 'pr';
     } else if (role === 'Purchase Manager') {
       currentWorklistView = 'pr';
+    } else if (role === 'Admin Manager') {
+      currentWorklistView = 'attendance';
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
     }
@@ -7572,13 +7614,18 @@ function goBackSubpage() {
     currentModule = 'worklist';
     if (role === 'Warehouse Manager' || role === 'Purchase Manager') {
       currentWorklistView = 'pr';
+    } else if (role === 'Admin Manager') {
+      currentWorklistView = 'attendance';
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
     }
     showToast('Returned to Worklist');
   } else if (currentModule === 'worklist') {
     const role = getAuthenticatedUserRole();
-    if (role === 'Purchase Manager') {
+    if (role === 'Admin Manager') {
+      currentWorklistView = 'attendance';
+      showToast('Returned to Attendance');
+    } else if (role === 'Purchase Manager') {
       currentWorklistView = 'pr';
       showToast('Returned to PR');
     } else if (role === 'Warehouse Manager') {
@@ -7977,6 +8024,13 @@ function renderApp() {
           payment: 'Payment'
         };
         bannerTitle.textContent = purchaseTitles[currentWorklistView] || 'PR';
+      } else if (role === 'Admin Manager') {
+        const adminManagerTitles = {
+          attendance: 'Attendance',
+          salary: 'Salary',
+          payment: 'Payment'
+        };
+        bannerTitle.textContent = adminManagerTitles[currentWorklistView] || 'Attendance';
       } else {
         bannerTitle.textContent = "Work List";
       }
@@ -24488,6 +24542,752 @@ window.downloadPurchasePoTransportPdf = function() {
 };
 
 // ==========================================================================
+// Admin Manager Worklist Data Stores & Functions
+// ==========================================================================
+let isAdminAttendanceEditing = false;
+let isAdminPaymentEditing = false;
+
+let adminManagerAttendanceStore = [
+  {
+    id: 'am-att-1',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Rahul Sharma',
+    date: '2026-10-17',
+    location: 'Mumbai HQ',
+    checkIn: '09:15 AM',
+    checkOut: '06:30 PM',
+    totalHrs: '9.25 hrs',
+    status: 'Present'
+  },
+  {
+    id: 'am-att-2',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Priya Patel',
+    date: '2026-10-17',
+    location: 'Pune Site B',
+    checkIn: '09:30 AM',
+    checkOut: '06:00 PM',
+    totalHrs: '8.50 hrs',
+    status: 'Present'
+  },
+  {
+    id: 'am-att-3',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Amit Verma',
+    date: '2026-10-17',
+    location: 'Delhi Hub',
+    checkIn: '-',
+    checkOut: '-',
+    totalHrs: '0.00 hrs',
+    status: 'Absent'
+  },
+  {
+    id: 'am-att-4',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Sneha Kulkarni',
+    date: '2026-10-17',
+    location: 'Bengaluru Tech Park',
+    checkIn: '09:00 AM',
+    checkOut: '05:45 PM',
+    totalHrs: '8.75 hrs',
+    status: 'Present'
+  },
+  {
+    id: 'am-att-5',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Rajesh Nair',
+    date: '2026-10-17',
+    location: 'Kochi Warehouse',
+    checkIn: '-',
+    checkOut: '-',
+    totalHrs: '0.00 hrs',
+    status: 'Leave'
+  },
+  {
+    id: 'am-att-6',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Vikram Singh',
+    date: '2026-10-17',
+    location: 'Jaipur Office',
+    checkIn: '08:45 AM',
+    checkOut: '05:30 PM',
+    totalHrs: '8.75 hrs',
+    status: 'Present'
+  },
+  {
+    id: 'am-att-7',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Ananya Roy',
+    date: '2026-10-17',
+    location: 'Kolkata Center',
+    checkIn: '09:10 AM',
+    checkOut: '06:15 PM',
+    totalHrs: '9.08 hrs',
+    status: 'Present'
+  },
+  {
+    id: 'am-att-8',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Suresh Kumar',
+    date: '2026-10-17',
+    location: 'Chennai DC',
+    checkIn: '09:05 AM',
+    checkOut: '06:00 PM',
+    totalHrs: '8.92 hrs',
+    status: 'Present'
+  }
+];
+
+let adminManagerSalaryStore = [
+  {
+    id: 'am-sal-1',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Rahul Sharma',
+    days: '30',
+    total: '30',
+    worked: '26',
+    leave: '0',
+    lop: '0',
+    holidays: '4',
+    salaryEarned: 48000.00,
+    deduction: 3200.00,
+    netSalary: 44800.00,
+    epf: 1800.00,
+    esi: 250.00,
+    pt: 200.00,
+    lwf: 950.00
+  },
+  {
+    id: 'am-sal-2',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Priya Patel',
+    days: '28',
+    total: '30',
+    worked: '24',
+    leave: '0',
+    lop: '2',
+    holidays: '4',
+    salaryEarned: 42000.00,
+    deduction: 2800.00,
+    netSalary: 39200.00,
+    epf: 1800.00,
+    esi: 0.00,
+    pt: 200.00,
+    lwf: 800.00
+  },
+  {
+    id: 'am-sal-3',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Amit Verma',
+    days: '24',
+    total: '30',
+    worked: '20',
+    leave: '1',
+    lop: '5',
+    holidays: '4',
+    salaryEarned: 36000.00,
+    deduction: 4500.00,
+    netSalary: 31500.00,
+    epf: 1800.00,
+    esi: 500.00,
+    pt: 200.00,
+    lwf: 2000.00
+  },
+  {
+    id: 'am-sal-4',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Sneha Kulkarni',
+    days: '30',
+    total: '30',
+    worked: '26',
+    leave: '0',
+    lop: '0',
+    holidays: '4',
+    salaryEarned: 55000.00,
+    deduction: 4100.00,
+    netSalary: 50900.00,
+    epf: 1800.00,
+    esi: 0.00,
+    pt: 200.00,
+    lwf: 2100.00
+  },
+  {
+    id: 'am-sal-5',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Rajesh Nair',
+    days: '26',
+    total: '30',
+    worked: '22',
+    leave: '1',
+    lop: '3',
+    holidays: '4',
+    salaryEarned: 38000.00,
+    deduction: 2600.00,
+    netSalary: 35400.00,
+    epf: 1800.00,
+    esi: 0.00,
+    pt: 200.00,
+    lwf: 600.00
+  },
+  {
+    id: 'am-sal-6',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Vikram Singh',
+    days: '29',
+    total: '30',
+    worked: '25',
+    leave: '0',
+    lop: '1',
+    holidays: '4',
+    salaryEarned: 44000.00,
+    deduction: 3000.00,
+    netSalary: 41000.00,
+    epf: 1800.00,
+    esi: 0.00,
+    pt: 200.00,
+    lwf: 1000.00
+  },
+  {
+    id: 'am-sal-7',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Ananya Roy',
+    days: '30',
+    total: '30',
+    worked: '26',
+    leave: '0',
+    lop: '0',
+    holidays: '4',
+    salaryEarned: 50000.00,
+    deduction: 3500.00,
+    netSalary: 46500.00,
+    epf: 1800.00,
+    esi: 0.00,
+    pt: 200.00,
+    lwf: 1500.00
+  },
+  {
+    id: 'am-sal-8',
+    selected: false,
+    highlighted: false,
+    employeeName: 'Suresh Kumar',
+    days: '27',
+    total: '30',
+    worked: '23',
+    leave: '1',
+    lop: '2',
+    holidays: '4',
+    salaryEarned: 40000.00,
+    deduction: 2900.00,
+    netSalary: 37100.00,
+    epf: 1800.00,
+    esi: 0.00,
+    pt: 200.00,
+    lwf: 900.00
+  }
+];
+
+let adminManagerPaymentStore = [
+  {
+    id: 'am-pay-1',
+    selected: false,
+    highlighted: false,
+    transferTo: 'Rahul Sharma',
+    date: '2026-10-15',
+    expenseType: 'Salary Advance',
+    remarks: 'Salary Advance',
+    amount: 15000.00,
+    ageing: '2 Days',
+    status: 'Approved'
+  },
+  {
+    id: 'am-pay-2',
+    selected: false,
+    highlighted: false,
+    transferTo: 'Priya Patel',
+    date: '2026-10-14',
+    expenseType: 'Travelling',
+    remarks: 'From Mumbai To Pune',
+    amount: 4850.00,
+    ageing: '3 Days',
+    status: 'Pending'
+  },
+  {
+    id: 'am-pay-3',
+    selected: false,
+    highlighted: false,
+    transferTo: 'Apex Properties',
+    date: '2026-10-12',
+    expenseType: 'Office',
+    remarks: 'Rental',
+    amount: 25000.00,
+    ageing: '5 Days',
+    status: 'Approved'
+  },
+  {
+    id: 'am-pay-4',
+    selected: false,
+    highlighted: false,
+    transferTo: 'State Electricity Board',
+    date: '2026-10-10',
+    expenseType: 'Office',
+    remarks: 'EB',
+    amount: 6150.00,
+    ageing: '7 Days',
+    status: 'Pending'
+  },
+  {
+    id: 'am-pay-5',
+    selected: false,
+    highlighted: false,
+    transferTo: 'Airtel Broadband',
+    date: '2026-10-09',
+    expenseType: 'Office',
+    remarks: 'Internet',
+    amount: 3200.00,
+    ageing: '8 Days',
+    status: 'Approved'
+  },
+  {
+    id: 'am-pay-6',
+    selected: false,
+    highlighted: false,
+    transferTo: 'EPFO Department',
+    date: '2026-10-08',
+    expenseType: 'Payroll Tax',
+    remarks: 'EPF',
+    amount: 12000.00,
+    ageing: '9 Days',
+    status: 'Approved'
+  },
+  {
+    id: 'am-pay-7',
+    selected: false,
+    highlighted: false,
+    transferTo: 'Vikram Singh',
+    date: '2026-10-05',
+    expenseType: 'Salary',
+    remarks: 'Salary',
+    amount: 8500.00,
+    ageing: '12 Days',
+    status: 'Pending'
+  }
+];
+
+window.toggleAdminAttendanceRowSelect = function(rowId) {
+  const row = adminManagerAttendanceStore.find(r => r.id === rowId);
+  if (row) {
+    row.selected = !row.selected;
+  }
+  applyFiltersAndRender();
+};
+
+window.handleAdminAttendanceEditToggle = function() {
+  isAdminAttendanceEditing = !isAdminAttendanceEditing;
+  if (!isAdminAttendanceEditing) {
+    showToast('Attendance status saved successfully!');
+  }
+  applyFiltersAndRender();
+};
+
+window.updateAdminAttendanceRowStatus = function(rowId, statusVal) {
+  const row = adminManagerAttendanceStore.find(r => r.id === rowId);
+  if (row) {
+    row.status = statusVal;
+  }
+};
+
+window.handleAdminAttendanceTick = function() {
+  let count = 0;
+  adminManagerAttendanceStore.forEach(row => {
+    if (row.selected) {
+      row.highlighted = true;
+      // Marker stays present until user reselects it
+      count++;
+    }
+  });
+  isAdminAttendanceEditing = false;
+  applyFiltersAndRender();
+  const amSubmitArea = document.getElementById('adminManagerSubmitArea');
+  if (amSubmitArea) {
+    const hasAnyHighlighted = adminManagerAttendanceStore.some(r => r.highlighted);
+    amSubmitArea.style.display = hasAnyHighlighted ? 'flex' : 'none';
+  }
+  if (count > 0) {
+    showToast(`${count} attendance record(s) approved and highlighted!`);
+  }
+};
+
+window.toggleAdminSalaryRowSelect = function(rowId) {
+  const row = adminManagerSalaryStore.find(r => r.id === rowId);
+  if (row) {
+    row.selected = !row.selected;
+  }
+  applyFiltersAndRender();
+};
+
+window.handleAdminSalaryTick = function() {
+  let count = 0;
+  adminManagerSalaryStore.forEach(row => {
+    if (row.selected) {
+      row.highlighted = true;
+      // Marker stays present until user reselects it
+      count++;
+    }
+  });
+  applyFiltersAndRender();
+  const amSubmitArea = document.getElementById('adminManagerSubmitArea');
+  if (amSubmitArea) {
+    const hasAnyHighlighted = adminManagerSalaryStore.some(r => r.highlighted);
+    amSubmitArea.style.display = hasAnyHighlighted ? 'flex' : 'none';
+  }
+  if (count > 0) {
+    showToast(`${count} salary record(s) approved and highlighted!`);
+  }
+};
+
+window.openSalaryDeductionTab = function(rowId) {
+  const row = adminManagerSalaryStore.find(r => r.id === rowId);
+  if (!row) return;
+
+  const card = document.getElementById('salaryDeductionCard');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!card || !overlay) return;
+
+  const lblSum = document.getElementById('lblDeductionSumValue');
+  if (lblSum) {
+    const totalDeduction = (Number(row.deduction) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    lblSum.textContent = totalDeduction;
+  }
+
+  const empNameEl = document.getElementById('lblDeductionEmpName');
+  if (empNameEl) empNameEl.textContent = row.employeeName || 'Employee';
+
+  const formatRough = (val) => (Number(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const epfEl = document.getElementById('inpDeductionEPF');
+  if (epfEl) epfEl.value = formatRough(row.epf || 1800);
+
+  const esiEl = document.getElementById('inpDeductionESI');
+  if (esiEl) esiEl.value = formatRough(row.esi || 0);
+
+  const ptEl = document.getElementById('inpDeductionPT');
+  if (ptEl) ptEl.value = formatRough(row.pt || 200);
+
+  const lwfEl = document.getElementById('inpDeductionLWF');
+  if (lwfEl) lwfEl.value = formatRough(row.lwf || (row.deduction - 2000));
+
+  // Hide other cards in overlay
+  overlay.querySelectorAll('.side-form-card').forEach(c => {
+    c.style.display = 'none';
+  });
+
+  card.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.openSalaryDaysTab = function(rowId) {
+  const row = adminManagerSalaryStore.find(r => r.id === rowId);
+  if (!row) return;
+
+  const card = document.getElementById('salaryDaysCard');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!card || !overlay) return;
+
+  const tbBody = document.getElementById('tbSalaryDaysBody');
+  if (tbBody) {
+    tbBody.innerHTML = `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 12px 8px; color: #1e293b; font-weight: 500;">
+          ${row.total || '30'}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 12px 8px; color: #1e293b; font-weight: 500;">
+          ${row.worked || '26'}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 12px 8px; color: #1e293b; font-weight: 500;">
+          ${row.leave || '0'}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 12px 8px; color: #dc2626; font-weight: 500;">
+          ${row.lop || '0'}
+        </td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 12px 8px; color: #1e293b; font-weight: 500;">
+          ${row.holidays || '4'}
+        </td>
+      </tr>
+    `;
+  }
+
+  // Hide other cards in overlay
+  overlay.querySelectorAll('.side-form-card').forEach(c => {
+    c.style.display = 'none';
+  });
+
+  card.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.handleAdminManagerSubmit = function() {
+  const amSubmitArea = document.getElementById('adminManagerSubmitArea');
+  if (amSubmitArea) {
+    amSubmitArea.style.display = 'none';
+  }
+  if (currentWorklistView === 'attendance') {
+    adminManagerAttendanceStore = adminManagerAttendanceStore.filter(row => !row.highlighted);
+    currentDataset = adminManagerAttendanceStore;
+    applyFiltersAndRender();
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Attendance submitted successfully!', 'Task Completed');
+    } else {
+      showToast('Attendance submitted successfully!');
+    }
+  } else if (currentWorklistView === 'salary') {
+    adminManagerSalaryStore = adminManagerSalaryStore.filter(row => !row.highlighted);
+    currentDataset = adminManagerSalaryStore;
+    applyFiltersAndRender();
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Salary submitted successfully!', 'Task Completed');
+    } else {
+      showToast('Salary submitted successfully!');
+    }
+  }
+};
+
+window.toggleAdminPaymentRowSelect = function(rowId) {
+  const row = adminManagerPaymentStore.find(r => r.id === rowId);
+  if (row) {
+    row.selected = !row.selected;
+  }
+  applyFiltersAndRender();
+};
+
+window.handleAdminPaymentEditToggle = function() {
+  isAdminPaymentEditing = !isAdminPaymentEditing;
+  if (!isAdminPaymentEditing) {
+    showToast('Payment record updated successfully!');
+  }
+  applyFiltersAndRender();
+};
+
+window.updateAdminPaymentRowExpenseType = function(rowId, expTypeVal) {
+  const row = adminManagerPaymentStore.find(r => r.id === rowId);
+  if (row) {
+    row.expenseType = expTypeVal;
+    if (expTypeVal === 'Travelling') {
+      row.remarks = 'From Mumbai To Pune';
+    } else if (expTypeVal === 'Office') {
+      row.remarks = 'Rental';
+    } else if (expTypeVal === 'Payroll Tax') {
+      row.remarks = 'EPF';
+    } else if (expTypeVal === 'Salary') {
+      row.remarks = 'Salary';
+    } else if (expTypeVal === 'Salary Advance') {
+      row.remarks = 'Salary Advance';
+    }
+  }
+};
+
+window.openAdminPaymentAddModal = function() {
+  const card = document.getElementById('addPaymentRequestCard');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!card || !overlay) return;
+
+  const inpTransferTo = document.getElementById('inpPaymentTransferTo');
+  if (inpTransferTo) inpTransferTo.value = '';
+  const selExpType = document.getElementById('selPaymentExpenseType');
+  if (selExpType) selExpType.value = 'Salary Advance';
+  const inpAmount = document.getElementById('inpPaymentAmount');
+  if (inpAmount) inpAmount.value = '';
+  const lblSum = document.getElementById('lblAddPaymentSumValue');
+  if (lblSum) lblSum.textContent = '0.00';
+  const chkGst = document.getElementById('chkAdminPaymentGst');
+  if (chkGst) chkGst.checked = false;
+  const gstFields = document.getElementById('grpAdminPaymentGstFields');
+  if (gstFields) gstFields.style.display = 'none';
+  const inpVendor = document.getElementById('inpPaymentVendor');
+  if (inpVendor) inpVendor.value = '';
+  const inpBasic = document.getElementById('inpPaymentBasic');
+  if (inpBasic) inpBasic.value = '';
+  const inpCgst = document.getElementById('inpPaymentCgst');
+  if (inpCgst) inpCgst.value = '';
+  const inpSgst = document.getElementById('inpPaymentSgst');
+  if (inpSgst) inpSgst.value = '';
+
+  handlePaymentExpenseTypeChange();
+
+  overlay.querySelectorAll('.side-form-card').forEach(c => {
+    c.style.display = 'none';
+  });
+  card.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.handlePaymentExpenseTypeChange = function() {
+  const selExpType = document.getElementById('selPaymentExpenseType');
+  if (!selExpType) return;
+  const expenseType = selExpType.value;
+  const descGroup = document.getElementById('grpAdminPaymentExpenseDesc');
+  const selDesc = document.getElementById('selPaymentExpenseDesc');
+  const fromToGroup = document.getElementById('grpAdminPaymentFromTo');
+
+  if (expenseType === 'Office') {
+    selDesc.innerHTML = `
+      <option value="Rental">Rental</option>
+      <option value="EB">EB</option>
+      <option value="Internet">Internet</option>
+      <option value="Stationary Purchase">Stationary Purchase</option>
+    `;
+    descGroup.style.display = 'flex';
+  } else if (expenseType === 'Payroll Tax') {
+    selDesc.innerHTML = `
+      <option value="EPF">EPF</option>
+      <option value="ESI">ESI</option>
+      <option value="PT">PT</option>
+      <option value="LWF">LWF</option>
+    `;
+    descGroup.style.display = 'flex';
+  } else if (expenseType === 'Salary Advance') {
+    selDesc.innerHTML = `<option value="Salary Advance">Salary Advance</option>`;
+    descGroup.style.display = 'flex';
+  } else if (expenseType === 'Salary') {
+    selDesc.innerHTML = `<option value="Salary">Salary</option>`;
+    descGroup.style.display = 'flex';
+  } else if (expenseType === 'Travelling') {
+    selDesc.innerHTML = `
+      <option value="Travelling">Travelling</option>
+      <option value="Bus">Bus</option>
+      <option value="Train">Train</option>
+      <option value="Flight">Flight</option>
+      <option value="Local Conveyance">Local Conveyance</option>
+    `;
+    descGroup.style.display = 'flex';
+  }
+
+  if (expenseType === 'Travelling') {
+    fromToGroup.style.display = 'flex';
+  } else {
+    fromToGroup.style.display = 'none';
+  }
+
+  updatePaymentGstVisibility();
+};
+
+window.updatePaymentGstVisibility = function() {
+  const selExpType = document.getElementById('selPaymentExpenseType');
+  const selDesc = document.getElementById('selPaymentExpenseDesc');
+  if (!selExpType || !selDesc) return;
+  const expenseType = selExpType.value;
+  const desc = selDesc.value;
+  const gstToggleGroup = document.getElementById('grpAdminPaymentGstToggle');
+  const chkGst = document.getElementById('chkAdminPaymentGst');
+  const gstFields = document.getElementById('grpAdminPaymentGstFields');
+
+  let showGst = false;
+  if (expenseType === 'Travelling' || expenseType === 'Salary Advance' || expenseType === 'Salary' || expenseType === 'Payroll Tax') {
+    showGst = false;
+  } else if (expenseType === 'Office') {
+    if (desc === 'EB') {
+      showGst = false;
+    } else {
+      showGst = true;
+    }
+  } else {
+    showGst = true;
+  }
+
+  if (gstToggleGroup) {
+    gstToggleGroup.style.display = showGst ? 'flex' : 'none';
+  }
+  if (!showGst) {
+    if (chkGst) chkGst.checked = false;
+    if (gstFields) gstFields.style.display = 'none';
+  }
+};
+
+window.toggleAdminPaymentGstFields = function() {
+  const chkGst = document.getElementById('chkAdminPaymentGst');
+  const gstFields = document.getElementById('grpAdminPaymentGstFields');
+  if (chkGst && gstFields) {
+    gstFields.style.display = chkGst.checked ? 'flex' : 'none';
+  }
+};
+
+window.handlePaymentAmountInput = function() {
+  const val = parseFloat(document.getElementById('inpPaymentAmount').value) || 0;
+  const lblSum = document.getElementById('lblAddPaymentSumValue');
+  if (lblSum) {
+    lblSum.textContent = val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+};
+
+window.handleAdminPaymentPdfSelected = function(input) {
+  if (input && input.files && input.files[0]) {
+    showToast(`PDF document "${input.files[0].name}" attached.`);
+  }
+};
+
+window.saveAdminPaymentRequest = function() {
+  const expenseType = document.getElementById('selPaymentExpenseType').value;
+  const vendorVal = (document.getElementById('inpPaymentVendor')?.value || '').trim();
+  const descVal = document.getElementById('selPaymentExpenseDesc')?.value || '';
+  const transferTo = vendorVal || (expenseType === 'Travelling' ? 'Travel Desk' : (expenseType === 'Office' ? (descVal ? `${descVal} Provider` : 'Office Vendor') : (expenseType === 'Payroll Tax' ? 'EPFO / Tax Dept' : 'Employee')));
+  const amountVal = parseFloat(document.getElementById('inpPaymentAmount').value) || 0;
+  if (amountVal <= 0) {
+    showToast('Please enter a valid amount');
+    return;
+  }
+
+  let remarks = '';
+  if (expenseType === 'Travelling') {
+    const fromVal = document.getElementById('selPaymentFrom').value;
+    const toVal = document.getElementById('selPaymentTo').value;
+    remarks = `From ${fromVal} To ${toVal}`;
+  } else {
+    remarks = document.getElementById('selPaymentExpenseDesc').value;
+  }
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const newRow = {
+    id: 'am-pay-' + Date.now(),
+    selected: false,
+    highlighted: false,
+    transferTo: transferTo,
+    date: todayStr,
+    expenseType: expenseType,
+    remarks: remarks,
+    amount: amountVal,
+    ageing: '1 Day',
+    status: 'Pending'
+  };
+
+  adminManagerPaymentStore.unshift(newRow);
+  if (currentWorklistView === 'payment') {
+    currentDataset = adminManagerPaymentStore;
+    filteredDataset = [...currentDataset];
+    applyFiltersAndRender();
+  }
+
+  closeSideForm();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Payment request added successfully!', 'Task Completed');
+  } else {
+    showToast('Payment request added successfully!');
+  }
+};
+
+// ==========================================================================
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
@@ -24517,6 +25317,26 @@ function loadWorklistDataset() {
     }
     if (currentWorklistView === 'payment') {
       currentDataset = purchasePaymentDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    currentDataset = [];
+    filteredDataset = [];
+    return;
+  }
+  if (role === 'Admin Manager') {
+    if (currentWorklistView === 'attendance') {
+      currentDataset = adminManagerAttendanceStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'salary') {
+      currentDataset = adminManagerSalaryStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'payment') {
+      currentDataset = adminManagerPaymentStore;
       filteredDataset = [...currentDataset];
       return;
     }
@@ -25526,6 +26346,86 @@ function renderWorklistToolbar() {
   if (!toolbar) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Admin Manager') {
+    const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+    toolbar.style.display = 'flex';
+    toolbar.style.height = '52px';
+    toolbar.style.minHeight = '52px';
+
+    if (currentWorklistView === 'attendance') {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAdminAttendanceTick" title="Approve"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; visibility: ${hasSelected ? 'visible' : 'hidden'}; align-items: center; justify-content: center;"
+            onclick="handleAdminAttendanceTick()">
+            <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnAdminAttendanceEdit" title="${isAdminAttendanceEditing ? 'Save' : 'Edit'}"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; visibility: ${hasSelected ? 'visible' : 'hidden'}; align-items: center; justify-content: center;"
+            onclick="handleAdminAttendanceEditToggle()">
+            <img src="icons/${isAdminAttendanceEditing ? 'Save' : 'Edit'}.svg" alt="${isAdminAttendanceEditing ? 'Save' : 'Edit'}" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'salary') {
+      const totalNetSalary = (filteredDataset || currentDataset || []).reduce((acc, r) => {
+        const val = typeof r.netSalary === 'number' ? r.netSalary : parseFloat(String(r.netSalary || '0').replace(/,/g, ''));
+        return acc + (isNaN(val) ? 0 : val);
+      }, 0);
+      const totalNetSalaryFormatted = totalNetSalary.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Net Salary">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblAdminSalaryTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalNetSalaryFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAdminSalaryTick" title="Approve"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; visibility: ${hasSelected ? 'visible' : 'hidden'}; align-items: center; justify-content: center;"
+            onclick="handleAdminSalaryTick()">
+            <img src="icons/Approve.svg" alt="Approve" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'payment') {
+      const totalAmount = (filteredDataset || currentDataset || []).reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+      const totalAmountFormatted = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;">
+          <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Amount">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblAdminPaymentTotalSum" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalAmountFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAdminPaymentEdit" title="${isAdminPaymentEditing ? 'Save' : 'Edit'}"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; visibility: ${hasSelected ? 'visible' : 'hidden'}; align-items: center; justify-content: center;"
+            onclick="handleAdminPaymentEditToggle()">
+            <img src="icons/${isAdminPaymentEditing ? 'Save' : 'Edit'}.svg" alt="${isAdminPaymentEditing ? 'Save' : 'Edit'}" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnAdminPaymentAdd" title="Add Payment"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="openAdminPaymentAddModal()">
+            <img src="icons/Add.svg" alt="Add Payment" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    toolbar.innerHTML = '';
+    toolbar.style.display = 'none';
+    return;
+  }
   if (role === 'Purchase Manager') {
     if (currentWorklistView === 'pr') {
       const hasSelected = currentDataset && currentDataset.some(r => r.selected);
@@ -26428,6 +27328,47 @@ function renderWorklistFooter() {
     return;
   }
 
+  if (role === 'Admin Manager') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+
+    const adminManagerTabs = [
+      { id: 'btnToggleAmAttendance', view: 'attendance', label: 'Attendance' },
+      { id: 'btnToggleAmSalary', view: 'salary', label: 'Salary' },
+      { id: 'btnToggleAmPayment', view: 'payment', label: 'Payment' }
+    ];
+
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        ${adminManagerTabs.map((tab, idx) => `
+          ${idx > 0 ? '<div class="segmented-divider"></div>' : ''}
+          <button type="button" class="segmented-btn ${currentWorklistView === tab.view ? 'active' : ''}" id="${tab.id}">
+            ${tab.label}
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    adminManagerTabs.forEach(tab => {
+      document.getElementById(tab.id)?.addEventListener('click', () => {
+        if (currentWorklistView !== tab.view) {
+          currentWorklistView = tab.view;
+          isAdminAttendanceEditing = false;
+          isAdminPaymentEditing = false;
+          activeColumnFilters = {};
+          updateURL();
+          renderApp();
+          showToast(`Switched to Worklist • ${tab.label}`);
+        }
+      });
+    });
+    return;
+  }
+
   if (role === 'Warehouse Manager') {
     if (currentWorklistView === 'min_detail' || currentWorklistView === 'mrn_detail') {
       footer.style.display = 'none';
@@ -26729,6 +27670,145 @@ function renderWorklistTableHead() {
   if (!thead) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Admin Manager') {
+    const tableEl = document.getElementById("worklistTable") || document.getElementById("tableMain") || document.querySelector(".worklist-custom-table") || (thead ? thead.closest("table") : null);
+    const containerEl = document.querySelector(".table-container-full") || (tableEl ? tableEl.parentElement : null);
+
+    if (currentWorklistView === 'attendance') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1150px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      if (containerEl) {
+        containerEl.style.overflowX = 'auto';
+        containerEl.style.marginTop = '0px';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Employee Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Date</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Location</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['location'] ? 'has-active-filter' : ''}" data-filter-col="location" title="Filter Location">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Check-in</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Check-out</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Total Hrs</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'salary') {
+      if (tableEl) {
+        tableEl.style.minWidth = '950px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      if (containerEl) {
+        containerEl.style.overflowX = 'auto';
+        containerEl.style.marginTop = '0px';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Employee Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['employeeName'] ? 'has-active-filter' : ''}" data-filter-col="employeeName" title="Filter Employee Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Days</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Salary Earned</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Deduction</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Net Salary</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'payment') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1300px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      if (containerEl) {
+        containerEl.style.overflowX = 'auto';
+        containerEl.style.marginTop = '0px';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Transfer To</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Date</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Expense Type</span>
+          </th>
+          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Remarks</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Amount</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Ageing</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Status</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    thead.innerHTML = '';
+    return;
+  }
   const tableEl = document.getElementById("worklistTable") || document.getElementById("tableMain") || document.querySelector(".worklist-custom-table") || (thead ? thead.closest("table") : null);
   const containerEl = document.querySelector(".table-container-full") || (tableEl ? tableEl.parentElement : null);
   if (tableEl) {
@@ -28915,8 +29995,6 @@ function applyFiltersAndRender() {
   const tbody = document.getElementById('worklistTableBody');
   if (!tbody) return;
 
-  const role = getAuthenticatedUserRole();
-
   const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
   if (pmSubmitArea) {
     pmSubmitArea.style.display = 'none';
@@ -28940,6 +30018,230 @@ function applyFiltersAndRender() {
   const purchaseSubmitArea = document.getElementById('purchasePrSubmitArea');
   if (purchaseSubmitArea) {
     purchaseSubmitArea.style.display = 'none';
+  }
+  const amSubmitArea = document.getElementById('adminManagerSubmitArea');
+  if (amSubmitArea) {
+    amSubmitArea.style.display = 'none';
+  }
+
+  const role = getAuthenticatedUserRole();
+  if (role === 'Admin Manager') {
+    filteredDataset = (currentDataset || []).filter(row => {
+      for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+        if (!allowedSet || allowedSet.size === 0) continue;
+        const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+        if (!allowedSet.has(cellVal)) return false;
+      }
+      return true;
+    });
+
+    renderWorklistToolbar();
+
+    const hasAnyHighlighted = (currentDataset || []).some(r => r.highlighted);
+    if (amSubmitArea) {
+      amSubmitArea.style.display = (hasAnyHighlighted && (currentWorklistView === 'attendance' || currentWorklistView === 'salary')) ? 'flex' : 'none';
+    }
+
+    if (currentWorklistView === 'attendance') {
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No attendance records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isSelected = !!row.selected;
+        const isHighlighted = !!row.highlighted;
+        let rowBg = '#ffffff';
+        let rowBorder = 'border-bottom: 1px solid #e2e8f0;';
+        if (isHighlighted) {
+          rowBg = '#dcfce7 !important';
+          rowBorder = 'border-bottom: 1px solid #86efac;';
+        } else if (isSelected) {
+          rowBg = '#f0fdf4 !important';
+        }
+
+        return `
+          <tr data-row-id="${row.id}" style="${rowBorder} background-color: ${rowBg}; transition: background-color 0.15s ease;">
+            <!-- 1. Select: 60px, center circle radio button with green marker, multiselect -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox admin-attendance-checkbox" data-row-id="${row.id}" ${isSelected ? 'checked' : ''} onchange="toggleAdminAttendanceRowSelect('${row.id}')">
+            </td>
+            <!-- 2. Employee Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.employeeName || '').replace(/"/g, '&quot;')}">
+              ${row.employeeName || ''}
+            </td>
+            <!-- 3. Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.date || ''}
+            </td>
+            <!-- 4. Location: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.location || '').replace(/"/g, '&quot;')}">
+              ${row.location || ''}
+            </td>
+            <!-- 5. Check-in: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.checkIn || '-'}
+            </td>
+            <!-- 6. Check-out: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.checkOut || '-'}
+            </td>
+            <!-- 7. Total Hrs: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.totalHrs || '0.00 hrs'}
+            </td>
+            <!-- 8. Status: 10ch & center (editable dropdown with Present, Absent, Leave when editing & row selected) -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 6px 8px;">
+              ${isAdminAttendanceEditing && isSelected ? `
+                <select class="admin-attendance-status-select" data-row-id="${row.id}" onchange="updateAdminAttendanceRowStatus('${row.id}', this.value)" style="width: 100%; height: 30px; border-radius: 4px; border: 1.5px solid #00cba0; background: #ffffff; color: #1e293b; font-size: 0.88rem; outline: none; cursor: pointer; text-align: center; font-weight: 500;">
+                  <option value="Present" ${row.status === 'Present' ? 'selected' : ''}>Present</option>
+                  <option value="Absent" ${row.status === 'Absent' ? 'selected' : ''}>Absent</option>
+                  <option value="Leave" ${row.status === 'Leave' ? 'selected' : ''}>Leave</option>
+                </select>
+              ` : `
+                <span style="font-weight: 600; color: ${row.status === 'Present' ? '#16a34a' : (row.status === 'Absent' ? '#dc2626' : '#d97706')};">
+                  ${row.status || ''}
+                </span>
+              `}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'salary') {
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No salary records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isSelected = !!row.selected;
+        const isHighlighted = !!row.highlighted;
+        let rowBg = '#ffffff';
+        let rowBorder = 'border-bottom: 1px solid #e2e8f0;';
+        if (isHighlighted) {
+          rowBg = '#dcfce7 !important';
+          rowBorder = 'border-bottom: 1px solid #86efac;';
+        } else if (isSelected) {
+          rowBg = '#f0fdf4 !important';
+        }
+
+        return `
+          <tr data-row-id="${row.id}" style="${rowBorder} background-color: ${rowBg}; transition: background-color 0.15s ease;">
+            <!-- 1. Select: 60px, center circle radio button with green marker, multiselect -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox admin-salary-checkbox" data-row-id="${row.id}" ${isSelected ? 'checked' : ''} onchange="toggleAdminSalaryRowSelect('${row.id}')">
+            </td>
+            <!-- 2. Employee Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.employeeName || '').replace(/"/g, '&quot;')}">
+              ${row.employeeName || ''}
+            </td>
+            <!-- 3. Days: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #0454e4;">
+              <a href="javascript:void(0)" onclick="openSalaryDaysTab('${row.id}')" style="color: #0454e4; font-weight: 600; text-decoration: underline; cursor: pointer;">
+                ${row.days || '0'}
+              </a>
+            </td>
+            <!-- 4. Salary Earned: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${Number(row.salaryEarned || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 5. Deduction: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #dc2626; font-weight: 500;">
+              <a href="javascript:void(0)" onclick="openSalaryDeductionTab('${row.id}')" style="color: #dc2626; font-weight: 600; text-decoration: underline; cursor: pointer;">
+                ${Number(row.deduction || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </a>
+            </td>
+            <!-- 6. Net Salary: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #16a34a; font-weight: 600; text-decoration: underline;">
+              ${Number(row.netSalary || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'payment') {
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No payment records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isSelected = !!row.selected;
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isSelected ? '#f0fdf4 !important' : '#ffffff'}; transition: background-color 0.15s ease;">
+            <!-- 1. Select: 60px, center circle radio button with green marker, multiselect -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox admin-payment-checkbox" data-row-id="${row.id}" ${isSelected ? 'checked' : ''} onchange="toggleAdminPaymentRowSelect('${row.id}')">
+            </td>
+            <!-- 2. Transfer To: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.transferTo || '').replace(/"/g, '&quot;')}">
+              ${row.transferTo || ''}
+            </td>
+            <!-- 3. Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.date || ''}
+            </td>
+            <!-- 4. Expense Type: 15ch & left (editable dropdown with 5 options when editing & row selected) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: ${isAdminPaymentEditing && isSelected ? '4px 8px' : '10px 12px'}; color: #1e293b;">
+              ${isAdminPaymentEditing && isSelected ? `
+                <select class="admin-payment-expensetype-select" data-row-id="${row.id}" onchange="updateAdminPaymentRowExpenseType('${row.id}', this.value)" style="width: 100%; height: 30px; border-radius: 4px; border: 1.5px solid #00cba0; background: #ffffff; color: #1e293b; font-size: 0.88rem; outline: none; cursor: pointer; text-align: left; font-weight: 500;">
+                  <option value="Travelling" ${row.expenseType === 'Travelling' ? 'selected' : ''}>Travelling</option>
+                  <option value="Office" ${row.expenseType === 'Office' ? 'selected' : ''}>Office</option>
+                  <option value="Payroll Tax" ${row.expenseType === 'Payroll Tax' ? 'selected' : ''}>Payroll Tax</option>
+                  <option value="Salary" ${row.expenseType === 'Salary' ? 'selected' : ''}>Salary</option>
+                  <option value="Salary Advance" ${row.expenseType === 'Salary Advance' ? 'selected' : ''}>Salary Advance</option>
+                </select>
+              ` : `
+                <span>${row.expenseType || ''}</span>
+              `}
+            </td>
+            <!-- 5. Remarks: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
+              ${row.remarks || ''}
+            </td>
+            <!-- 6. Amount: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 600;">
+              ${Number(row.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </td>
+            <!-- 7. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 8. Status: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 600; color: ${row.status === 'Approved' ? '#16a34a' : (row.status === 'Pending' ? '#d97706' : '#2563eb')};">
+              ${row.status || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    tbody.innerHTML = '';
+    return;
   }
 
   const tableContainer = document.querySelector('.table-container-full');
@@ -32897,18 +34199,23 @@ function renderProfileModule() {
   if (footer) footer.innerHTML = '';
 
   const user = (typeof NexusApi !== 'undefined' && NexusApi.auth) ? NexusApi.auth.getStoredUser() : null;
-  const role = user ? (user.role || 'Admin') : (sessionStorage.getItem('nexus_role') || 'Admin');
-  const email = user ? (user.email || (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com'))))) : (role === 'Admin' ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com'))));
-  const name = user ? (user.name || (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager'))))) : (role === 'Admin' ? 'Administrator' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager'))));
-  const permissionsText = role === 'Admin'
+  const rawRole = user ? (user.role || 'Master') : (sessionStorage.getItem('nexus_role') || 'Master');
+  const role = (rawRole === 'Admin') ? 'Master' : rawRole;
+  const isMaster = (role === 'Master');
+  const isAdminManager = (role === 'Admin Manager');
+  const email = user ? (user.email || (isMaster ? 'master@nexus.com' : (isAdminManager ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com')))))) : (isMaster ? 'master@nexus.com' : (isAdminManager ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com')))));
+  const name = user ? (user.name || (isMaster ? 'Master' : (isAdminManager ? 'Admin Manager' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager')))))) : (isMaster ? 'Master' : (isAdminManager ? 'Admin Manager' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager')))));
+  const permissionsText = isMaster
     ? 'Full System Administrator Access (All Modules)'
-    : (role === 'Project Manager'
-      ? 'Role-Based Access: Worklist, Home / Projects, Profile'
-      : (role === 'Warehouse Manager'
-        ? 'Role-Based Access: Worklist, Inventory, Profile'
-        : (role === 'Purchase Manager'
-          ? 'Role-Based Access: Profile, Worklist'
-          : 'Role-Based Access: Master, Home / Projects, Worklist, Profile')));
+    : (isAdminManager
+      ? 'Role-Based Access: Profile, Worklist'
+      : (role === 'Project Manager'
+        ? 'Role-Based Access: Worklist, Home / Projects, Profile'
+        : (role === 'Warehouse Manager'
+          ? 'Role-Based Access: Worklist, Inventory, Profile'
+          : (role === 'Purchase Manager'
+            ? 'Role-Based Access: Profile, Worklist'
+            : 'Role-Based Access: Master, Home / Projects, Worklist, Profile'))));
 
   if (thead) {
     thead.innerHTML = `
@@ -36592,6 +37899,12 @@ function closeSideForm() {
   if (viewBankCard) viewBankCard.style.display = 'none';
   const addBankCard = document.getElementById('addBankCard');
   if (addBankCard) addBankCard.style.display = 'none';
+  const dedCard = document.getElementById('salaryDeductionCard');
+  if (dedCard) dedCard.style.display = 'none';
+  const daysCard = document.getElementById('salaryDaysCard');
+  if (daysCard) daysCard.style.display = 'none';
+  const payCard = document.getElementById('addPaymentRequestCard');
+  if (payCard) payCard.style.display = 'none';
   currentViewedVendorId = null;
   // Remove blur from any dimmed cards and has-dimmed-card from row
   document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));

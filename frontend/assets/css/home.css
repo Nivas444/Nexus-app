@@ -331,9 +331,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 24px 10px 24px;
+  padding: 8px 24px;
   background: #ffffff;
   gap: 12px;
+  min-height: 52px;
+  height: 52px;
+  box-sizing: border-box;
 }
 
 .toolbar-left {

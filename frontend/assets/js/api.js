@@ -241,6 +241,16 @@
       department: 'Purchase Operations',
       phone: '+91 98765 00005',
       location: 'Chennai, India'
+    },
+    {
+      email: 'account@nexus.com',
+      aliases: ['account', 'account@nexus.com'],
+      pwdHash: '9e6ffcced54981a34671f4f7f3632585461d610e38da76aa63296b3e37b4f0a7',
+      name: 'Accounts Manager',
+      role: 'Accounts Manager',
+      department: 'Finance & Accounts',
+      phone: '+91 98765 00006',
+      location: 'Chennai, India'
     }
   ];
 
@@ -271,8 +281,8 @@
               role: effectiveRole,
               token: apiRes.user.token,
               permissions: apiRes.user.permissions || [],
-              department: effectiveRole === 'Admin Manager' ? 'Administration' : (effectiveRole === 'Project Manager' ? 'Project Management' : (effectiveRole === 'Commercial Manager' ? 'Commercial Operations' : (effectiveRole === 'Warehouse Manager' ? 'Warehouse Operations' : (effectiveRole === 'Purchase Manager' ? 'Purchase Operations' : 'Executive Management')))),
-              phone: effectiveRole === 'Admin Manager' ? '+91 98765 00001' : (effectiveRole === 'Project Manager' ? '+91 98765 00003' : (effectiveRole === 'Commercial Manager' ? '+91 98765 00002' : (effectiveRole === 'Warehouse Manager' ? '+91 98765 00004' : (effectiveRole === 'Purchase Manager' ? '+91 98765 00005' : '+91 98765 43210')))),
+              department: effectiveRole === 'Admin Manager' ? 'Administration' : (effectiveRole === 'Project Manager' ? 'Project Management' : (effectiveRole === 'Commercial Manager' ? 'Commercial Operations' : (effectiveRole === 'Warehouse Manager' ? 'Warehouse Operations' : (effectiveRole === 'Purchase Manager' ? 'Purchase Operations' : (effectiveRole === 'Accounts Manager' ? 'Finance & Accounts' : 'Executive Management'))))),
+              phone: effectiveRole === 'Admin Manager' ? '+91 98765 00001' : (effectiveRole === 'Project Manager' ? '+91 98765 00003' : (effectiveRole === 'Commercial Manager' ? '+91 98765 00002' : (effectiveRole === 'Warehouse Manager' ? '+91 98765 00004' : (effectiveRole === 'Purchase Manager' ? '+91 98765 00005' : (effectiveRole === 'Accounts Manager' ? '+91 98765 00006' : '+91 98765 43210'))))),
               location: 'Chennai, India'
             };
             sessionStorage.setItem('nexus_user', JSON.stringify(profile));

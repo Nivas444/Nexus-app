@@ -6930,6 +6930,13 @@ function parseUrlAndApplyState() {
     } else if (role === 'Admin Manager') {
       const adminManagerViews = ['attendance', 'salary', 'payment'];
       currentWorklistView = adminManagerViews.includes(viewParam) ? viewParam : 'attendance';
+    } else if (role === 'Accounts Manager') {
+      const accountsViews = ['payment', 'receivable', 'bank', 'tds', 'gstr_1', 'gstr_2b', 'gstr_3b'];
+      let normalizedView = viewParam;
+      if (normalizedView === 'gstr1') normalizedView = 'gstr_1';
+      if (normalizedView === 'gstr2b') normalizedView = 'gstr_2b';
+      if (normalizedView === 'gstr3b') normalizedView = 'gstr_3b';
+      currentWorklistView = accountsViews.includes(normalizedView) ? normalizedView : 'payment';
     } else {
       if (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment' || viewParam === 'purchase_payment' || viewParam === 'employee_payment' || viewParam === 'transport_payment' || viewParam === 'accounts_payment' || viewParam === 'admin_payment' || viewParam === 'statutory_payment' || viewParam === 'po_supplier' || viewParam === 'po_rfq_compare') {
         currentWorklistView = viewParam;
@@ -6958,6 +6965,8 @@ function parseUrlAndApplyState() {
       currentWorklistView = 'pr';
     } else if (role === 'Admin Manager') {
       currentWorklistView = 'attendance';
+    } else if (role === 'Accounts Manager') {
+      currentWorklistView = 'payment';
     } else {
       currentWorklistView = (viewParam === 'payment' || viewParam === 'po' || viewParam === 'project_payment') ? viewParam : 'payment';
     }
@@ -7145,6 +7154,30 @@ function applyRoleBasedNavigation() {
       currentWorklistView = 'attendance';
       updateURL();
     }
+  } else if (role === 'Accounts Manager') {
+    // Exactly 3 navigation icons in order: Worklist, Profile, Sign Out (Worklist and Profile swapped)
+    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '1'; }
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '2'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+
+    // Hide unauthorized navigation items
+    if (navMaster) navMaster.style.display = 'none';
+    if (navProjects) navProjects.style.display = 'none';
+    if (navAccounts) navAccounts.style.display = 'none';
+    if (navAdmin) navAdmin.style.display = 'none';
+    if (navPurchase) navPurchase.style.display = 'none';
+    if (navInventory) navInventory.style.display = 'none';
+
+    // Route Protection: If currentModule is restricted for Accounts Manager, redirect to Worklist
+    const allowedModules = ['worklist', 'profile'];
+    if (!allowedModules.includes(currentModule)) {
+      if (typeof showToast === 'function') {
+        showToast('Access Restricted: Accounts Manager role does not have permission for this module.', 'warning');
+      }
+      currentModule = 'worklist';
+      currentWorklistView = 'payment';
+      updateURL();
+    }
   } else {
     // Master role (and legacy Admin): All 9 navigation items are visible and accessible
     [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
@@ -7226,6 +7259,14 @@ function switchModule(moduleName) {
       }
       return;
     }
+  } else if (role === 'Accounts Manager') {
+    const allowedModules = ['worklist', 'profile'];
+    if (!allowedModules.includes(moduleName)) {
+      if (typeof showToast === 'function') {
+        showToast(`Access Restricted: Accounts Manager does not have permission to access ${moduleName}.`, 'warning');
+      }
+      return;
+    }
   }
 
   if (currentModule === moduleName) return;
@@ -7248,6 +7289,8 @@ function switchModule(moduleName) {
       currentWorklistView = 'pr';
     } else if (role === 'Admin Manager') {
       currentWorklistView = 'attendance';
+    } else if (role === 'Accounts Manager') {
+      currentWorklistView = 'payment';
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
     }
@@ -7616,6 +7659,8 @@ function goBackSubpage() {
       currentWorklistView = 'pr';
     } else if (role === 'Admin Manager') {
       currentWorklistView = 'attendance';
+    } else if (role === 'Accounts Manager') {
+      currentWorklistView = 'payment';
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
     }
@@ -7628,6 +7673,9 @@ function goBackSubpage() {
     } else if (role === 'Purchase Manager') {
       currentWorklistView = 'pr';
       showToast('Returned to PR');
+    } else if (role === 'Accounts Manager') {
+      currentWorklistView = 'payment';
+      showToast('Returned to Payment');
     } else if (role === 'Warehouse Manager') {
       if (currentWorklistView === 'min_detail') {
         currentWorklistView = 'min';
@@ -8031,6 +8079,17 @@ function renderApp() {
           payment: 'Payment'
         };
         bannerTitle.textContent = adminManagerTitles[currentWorklistView] || 'Attendance';
+      } else if (role === 'Accounts Manager') {
+        const accountsTitles = {
+          payment: 'Payment',
+          receivable: 'Receivable',
+          bank: 'Bank',
+          tds: 'TDS',
+          gstr_1: 'GSTR 1',
+          gstr_2b: 'GSTR 2B',
+          gstr_3b: 'GSTR 3B'
+        };
+        bannerTitle.textContent = accountsTitles[currentWorklistView] || 'Payment';
       } else {
         bannerTitle.textContent = "Work List";
       }
@@ -25288,6 +25347,1099 @@ window.saveAdminPaymentRequest = function() {
 };
 
 // ==========================================================================
+// Accounts Manager Worklist Data Stores & Handlers
+// ==========================================================================
+let accountsManagerPaymentStore = [
+  {
+    id: 'ACC-PAY-001',
+    selected: false,
+    date: '14/10/2026',
+    expenseType: 'IFT',
+    remarks: 'From HDFC Bank To SBI Bank',
+    transferTo: 'SBI Bank - A/C 9876',
+    amount: 150000.00,
+    ageing: '3 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-002',
+    selected: false,
+    date: '12/10/2026',
+    expenseType: 'Travelling',
+    remarks: 'From Chennai To Bangalore',
+    transferTo: 'Ramesh Kumar (Site Engineer)',
+    amount: 12500.00,
+    ageing: '5 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-003',
+    selected: false,
+    date: '11/10/2026',
+    expenseType: 'Taxes',
+    remarks: 'GST',
+    transferTo: 'GST Portal - State Tax',
+    amount: 84000.00,
+    ageing: '6 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-004',
+    selected: false,
+    date: '10/10/2026',
+    expenseType: 'Salary Advance',
+    remarks: 'Salary Advance for Suresh Babu',
+    transferTo: 'Suresh Babu (Technician)',
+    amount: 25000.00,
+    ageing: '7 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-005',
+    selected: false,
+    date: '08/10/2026',
+    expenseType: 'IFT',
+    remarks: 'From ICICI Bank To Axis Bank',
+    transferTo: 'Axis Bank - A/C 4532',
+    amount: 200000.00,
+    ageing: '9 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-006',
+    selected: false,
+    date: '06/10/2026',
+    expenseType: 'Travelling',
+    remarks: 'From Mumbai To Delhi',
+    transferTo: 'Travel Desk Operations',
+    amount: 18400.00,
+    ageing: '11 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-007',
+    selected: false,
+    date: '05/10/2026',
+    expenseType: 'Taxes',
+    remarks: 'TDS',
+    transferTo: 'Income Tax Department (TDS)',
+    amount: 45000.00,
+    ageing: '12 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-008',
+    selected: false,
+    date: '03/10/2026',
+    expenseType: 'Taxes',
+    remarks: 'Income Tax',
+    transferTo: 'Advance Tax Central Account',
+    amount: 120000.00,
+    ageing: '14 Days',
+    status: 'Pending with'
+  },
+  {
+    id: 'ACC-PAY-009',
+    selected: false,
+    date: '01/10/2026',
+    expenseType: 'Salary Advance',
+    remarks: 'Festival Advance - Site Staff',
+    transferTo: 'Vijayawada Site Supervisor',
+    amount: 35000.00,
+    ageing: '16 Days',
+    status: 'Pending with'
+  }
+];
+
+let accountsManagerReceivableStore = [
+  {
+    id: 'ACC-REC-001',
+    customerName: 'Indus Towers Ltd',
+    invoiceNo: 'INV-2026-0891',
+    invoiceDate: '10/09/2026',
+    dueDate: '10/10/2026',
+    invoiceAmount: 550000.00,
+    deduction: 15000.00,
+    approvedAmount: 535000.00,
+    receivedAmount: 350000.00,
+    receivable: 185000.00,
+    status: 'Partially Paid',
+    ageing: '7 Days',
+    taxBreakup: { basic: 466101.69, cgst: 41949.15, sgst: 41949.16, igst: 0.00 },
+    deductionBreakup: { tds: 11000.00, dn: 0.00, discount: 4000.00, tredsFee: 0.00 },
+    receipts: [
+      { date: '25/09/2026', amount: 200000.00 },
+      { date: '08/10/2026', amount: 150000.00 }
+    ]
+  },
+  {
+    id: 'ACC-REC-002',
+    customerName: 'Bharti Airtel Ltd',
+    invoiceNo: 'INV-2026-0924',
+    invoiceDate: '15/09/2026',
+    dueDate: '15/10/2026',
+    invoiceAmount: 820000.00,
+    deduction: 22000.00,
+    approvedAmount: 798000.00,
+    receivedAmount: 500000.00,
+    receivable: 298000.00,
+    status: 'Partially Paid',
+    ageing: '2 Days',
+    taxBreakup: { basic: 694915.25, cgst: 62542.37, sgst: 62542.38, igst: 0.00 },
+    deductionBreakup: { tds: 16400.00, dn: 3000.00, discount: 0.00, tredsFee: 2600.00 },
+    receipts: [
+      { date: '30/09/2026', amount: 300000.00 },
+      { date: '12/10/2026', amount: 200000.00 }
+    ]
+  },
+  {
+    id: 'ACC-REC-003',
+    customerName: 'Reliance Jio Infocomm',
+    invoiceNo: 'INV-2026-1045',
+    invoiceDate: '22/09/2026',
+    dueDate: '22/10/2026',
+    invoiceAmount: 420000.00,
+    deduction: 10000.00,
+    approvedAmount: 410000.00,
+    receivedAmount: 200000.00,
+    receivable: 210000.00,
+    status: 'Pending',
+    ageing: '0 Days',
+    taxBreakup: { basic: 355932.20, cgst: 0.00, sgst: 0.00, igst: 64067.80 },
+    deductionBreakup: { tds: 8400.00, dn: 0.00, discount: 0.00, tredsFee: 1600.00 },
+    receipts: [
+      { date: '05/10/2026', amount: 200000.00 }
+    ]
+  },
+  {
+    id: 'ACC-REC-004',
+    customerName: 'ATC Telecom Infra',
+    invoiceNo: 'INV-2026-1102',
+    invoiceDate: '28/08/2026',
+    dueDate: '28/09/2026',
+    invoiceAmount: 1250000.00,
+    deduction: 45000.00,
+    approvedAmount: 1205000.00,
+    receivedAmount: 750000.00,
+    receivable: 455000.00,
+    status: 'Overdue',
+    ageing: '19 Days',
+    taxBreakup: { basic: 1059322.03, cgst: 95338.98, sgst: 95338.99, igst: 0.00 },
+    deductionBreakup: { tds: 25000.00, dn: 12000.00, discount: 5000.00, tredsFee: 3000.00 },
+    receipts: [
+      { date: '15/09/2026', amount: 450000.00 },
+      { date: '28/09/2026', amount: 300000.00 }
+    ]
+  },
+  {
+    id: 'ACC-REC-005',
+    customerName: 'Vodafone Idea Ltd',
+    invoiceNo: 'INV-2026-1188',
+    invoiceDate: '05/09/2026',
+    dueDate: '05/10/2026',
+    invoiceAmount: 680000.00,
+    deduction: 18000.00,
+    approvedAmount: 662000.00,
+    receivedAmount: 400000.00,
+    receivable: 262000.00,
+    status: 'Partially Paid',
+    ageing: '12 Days',
+    taxBreakup: { basic: 576271.19, cgst: 51864.40, sgst: 51864.41, igst: 0.00 },
+    deductionBreakup: { tds: 13600.00, dn: 0.00, discount: 4400.00, tredsFee: 0.00 },
+    receipts: [
+      { date: '20/09/2026', amount: 250000.00 },
+      { date: '02/10/2026', amount: 150000.00 }
+    ]
+  }
+];
+
+let accountsManagerBankStore = [
+  {
+    id: 'ACC-BNK-001',
+    selected: false,
+    date: '14/10/2026',
+    bankName: 'HDFC Bank - 0019',
+    particulars: 'IFT to SBI Current A/c',
+    refNo: 'TXN98421045',
+    withdrawal: 150000.00,
+    deposit: 0.00,
+    balance: 1425000.00
+  },
+  {
+    id: 'ACC-BNK-002',
+    selected: false,
+    date: '13/10/2026',
+    bankName: 'State Bank of India - 5421',
+    particulars: 'Client RTGS - Indus Towers',
+    refNo: 'CMS88210943',
+    withdrawal: 0.00,
+    deposit: 350000.00,
+    balance: 1775000.00
+  },
+  {
+    id: 'ACC-BNK-003',
+    selected: false,
+    date: '12/10/2026',
+    bankName: 'ICICI Bank - 8812',
+    particulars: 'Vendor NEFT - Steel Suppliers',
+    refNo: 'NEFT77120934',
+    withdrawal: 74000.00,
+    deposit: 0.00,
+    balance: 1701000.00
+  },
+  {
+    id: 'ACC-BNK-004',
+    selected: false,
+    date: '10/10/2026',
+    bankName: 'Axis Bank - 3390',
+    particulars: 'GST Tax Payment October',
+    refNo: 'UPI33910842',
+    withdrawal: 84000.00,
+    deposit: 0.00,
+    balance: 1617000.00
+  },
+  {
+    id: 'ACC-BNK-005',
+    selected: false,
+    date: '08/10/2026',
+    bankName: 'HDFC Bank - 0019',
+    particulars: 'Client NEFT - Bharti Airtel',
+    refNo: 'RTGS55920194',
+    withdrawal: 0.00,
+    deposit: 500000.00,
+    balance: 2117000.00
+  }
+];
+
+let accountsManagerTdsStore = [
+  {
+    id: 'ACC-TDS-001',
+    panName: 'Precision Infra Pvt Ltd',
+    panNumber: 'AABCP8821K',
+    paymentDate: '12/10/2026',
+    taxCode: '194C - Contractors & Sub-contractors',
+    taxableAmount: 250000.00,
+    tdsDeducted: 5000.00
+  },
+  {
+    id: 'ACC-TDS-002',
+    panName: 'Shree Logistics Transport',
+    panNumber: 'AAECS9912M',
+    paymentDate: '10/10/2026',
+    taxCode: '194C - Contractors & Sub-contractors',
+    taxableAmount: 180000.00,
+    tdsDeducted: 3600.00
+  },
+  {
+    id: 'ACC-TDS-003',
+    panName: 'Apex Engineering Works',
+    panNumber: 'AACCA4451D',
+    paymentDate: '07/10/2026',
+    taxCode: '194J - Fees for Professional Services',
+    taxableAmount: 420000.00,
+    tdsDeducted: 42000.00
+  },
+  {
+    id: 'ACC-TDS-004',
+    panName: 'Balaji Electricals',
+    panNumber: 'BBKPL6620Q',
+    paymentDate: '03/10/2026',
+    taxCode: '194I - Rent for Plant & Equipment',
+    taxableAmount: 95000.00,
+    tdsDeducted: 1900.00
+  },
+  {
+    id: 'ACC-TDS-005',
+    panName: 'Ramesh Kumar & Associates',
+    panNumber: 'AABPR1109R',
+    paymentDate: '29/09/2026',
+    taxCode: '194J - Fees for Professional Services',
+    taxableAmount: 310000.00,
+    tdsDeducted: 31000.00
+  }
+];
+
+let accountsManagerGstr1Store = [
+  {
+    id: 'ACC-GST1-001',
+    customerName: 'Indus Towers Ltd',
+    customerGstNo: '33AABCI1234F1Z5',
+    invoiceNo: 'INV-26-0891',
+    invoiceDate: '05/10/2026',
+    taxableAmount: 350000.00,
+    cgst: 31500.00,
+    sgst: 31500.00,
+    igst: 0.00,
+    totalAmount: 413000.00
+  },
+  {
+    id: 'ACC-GST1-002',
+    customerName: 'Bharti Airtel Ltd',
+    customerGstNo: '33AABCB5678G1Z2',
+    invoiceNo: 'INV-26-0924',
+    invoiceDate: '08/10/2026',
+    taxableAmount: 500000.00,
+    cgst: 0.00,
+    sgst: 0.00,
+    igst: 90000.00,
+    totalAmount: 590000.00
+  },
+  {
+    id: 'ACC-GST1-003',
+    customerName: 'Reliance Jio Infocomm',
+    customerGstNo: '33AABCR9012H1Z9',
+    invoiceNo: 'INV-26-1045',
+    invoiceDate: '11/10/2026',
+    taxableAmount: 280000.00,
+    cgst: 25200.00,
+    sgst: 25200.00,
+    igst: 0.00,
+    totalAmount: 330400.00
+  },
+  {
+    id: 'ACC-GST1-004',
+    customerName: 'ATC Telecom Infra',
+    customerGstNo: '33AABCA3456J1Z6',
+    invoiceNo: 'INV-26-1102',
+    invoiceDate: '13/10/2026',
+    taxableAmount: 420000.00,
+    cgst: 37800.00,
+    sgst: 37800.00,
+    igst: 0.00,
+    totalAmount: 495600.00
+  },
+  {
+    id: 'ACC-GST1-005',
+    customerName: 'Vodafone Idea Ltd',
+    customerGstNo: '33AABCV7890K1Z3',
+    invoiceNo: 'INV-26-1188',
+    invoiceDate: '15/10/2026',
+    taxableAmount: 180000.00,
+    cgst: 16200.00,
+    sgst: 16200.00,
+    igst: 0.00,
+    totalAmount: 212400.00
+  }
+];
+
+let accountsManagerGstr2bStore = [
+  {
+    id: 'ACC-GST2B-001',
+    vendorName: 'Tata Steel Limited',
+    vendorGstNo: '27AAACT2727Q1ZW',
+    invoiceNo: 'TSL-2026-441',
+    invoiceDate: '02/10/2026',
+    taxableAmount: 480000.00,
+    cgst: 43200.00,
+    sgst: 43200.00,
+    igst: 0.00,
+    totalAmount: 566400.00,
+    ageing: '5 Days',
+    status: 'Pending'
+  },
+  {
+    id: 'ACC-GST2B-002',
+    vendorName: 'Polycab India Ltd',
+    vendorGstNo: '24AAACP4920E1ZT',
+    invoiceNo: 'POL-88910',
+    invoiceDate: '06/10/2026',
+    taxableAmount: 260000.00,
+    cgst: 23400.00,
+    sgst: 23400.00,
+    igst: 0.00,
+    totalAmount: 306800.00,
+    ageing: '8 Days',
+    status: 'Pending'
+  },
+  {
+    id: 'ACC-GST2B-003',
+    vendorName: 'Schneider Electric India',
+    vendorGstNo: '29AAACS6354G1Z8',
+    invoiceNo: 'SE-55214',
+    invoiceDate: '09/10/2026',
+    taxableAmount: 190000.00,
+    cgst: 0.00,
+    sgst: 0.00,
+    igst: 34200.00,
+    totalAmount: 224200.00,
+    ageing: '11 Days',
+    status: 'Pending'
+  },
+  {
+    id: 'ACC-GST2B-004',
+    vendorName: 'KEC International',
+    vendorGstNo: '27AAACK1104P1Z3',
+    invoiceNo: 'KEC-0982',
+    invoiceDate: '12/10/2026',
+    taxableAmount: 550000.00,
+    cgst: 49500.00,
+    sgst: 49500.00,
+    igst: 0.00,
+    totalAmount: 649000.00,
+    ageing: '14 Days',
+    status: 'Pending'
+  },
+  {
+    id: 'ACC-GST2B-005',
+    vendorName: 'Havells India Limited',
+    vendorGstNo: '07AAACH0813K1Z1',
+    invoiceNo: 'HVL-3319',
+    invoiceDate: '14/10/2026',
+    taxableAmount: 140000.00,
+    cgst: 0.00,
+    sgst: 0.00,
+    igst: 25200.00,
+    totalAmount: 165200.00,
+    ageing: '17 Days',
+    status: 'Pending'
+  }
+];
+
+let accountsManagerGstr3bStore = [
+  {
+    id: 'ACC-GST3B-001',
+    gstType: 'GSTR 1A',
+    basic: 2450000.00,
+    cgst: 220500.00,
+    sgst: 220500.00,
+    igst: 145000.00
+  },
+  {
+    id: 'ACC-GST3B-002',
+    gstType: 'GSTR 2A',
+    basic: 1820000.00,
+    cgst: 163800.00,
+    sgst: 163800.00,
+    igst: 85000.00
+  },
+  {
+    id: 'ACC-GST3B-003',
+    gstType: 'RCB',
+    basic: 350000.00,
+    cgst: 31500.00,
+    sgst: 31500.00,
+    igst: 18000.00
+  },
+  {
+    id: 'ACC-GST3B-004',
+    gstType: 'GSTR 3B',
+    basic: 630000.00,
+    cgst: 56700.00,
+    sgst: 56700.00,
+    igst: 42000.00
+  }
+];
+
+window.toggleAccountsPaymentRowSelect = function(rowId) {
+  const row = accountsManagerPaymentStore.find(r => r.id === rowId);
+  if (row) {
+    row.selected = !row.selected;
+  }
+  applyFiltersAndRender();
+};
+
+window.toggleAccountsBankRowSelect = function(rowId) {
+  const row = accountsManagerBankStore.find(r => r.id === rowId);
+  if (row) {
+    row.selected = !row.selected;
+  }
+  applyFiltersAndRender();
+};
+
+window.toggleAccountsGstr1RowSelect = function(rowId) {
+  const row = (currentDataset || accountsManagerGstr1Store || []).find(r => r.id === rowId);
+  if (row) {
+    row.selected = !row.selected;
+  }
+  applyFiltersAndRender();
+};
+
+window.toggleAccountsGstr2bRowSelect = function(rowId) {
+  const row = (currentDataset || accountsManagerGstr2bStore || []).find(r => r.id === rowId);
+  if (row) {
+    row.selected = !row.selected;
+  }
+  applyFiltersAndRender();
+};
+
+window.exportAccountsCsv = function(type) {
+  let datasetToExport = filteredDataset && filteredDataset.length > 0 ? filteredDataset : currentDataset;
+  if (!datasetToExport || datasetToExport.length === 0) {
+    showToast('No data available to export.', 'warning');
+    return;
+  }
+  let headers = [];
+  let keys = [];
+
+  if (type === 'receivable') {
+    headers = ['Customer Name', 'Invoice No', 'Invoice Date', 'Due Date', 'Invoice Amount', 'Deduction', 'Approved Amount', 'Received Amount', 'Receivable', 'Status', 'Ageing'];
+    keys = ['customerName', 'invoiceNo', 'invoiceDate', 'dueDate', 'invoiceAmount', 'deduction', 'approvedAmount', 'receivedAmount', 'receivable', 'status', 'ageing'];
+  } else if (type === 'bank') {
+    headers = ['Date', 'Bank Name', 'Particulars', 'Ref. No', 'Withdrawal (Dr)', 'Deposit (Cr)', 'Balance'];
+    keys = ['date', 'bankName', 'particulars', 'refNo', 'withdrawal', 'deposit', 'balance'];
+  } else if (type === 'tds') {
+    headers = ['PAN Name', 'PAN Number', 'Payment Date', 'Tax Code', 'Taxable Amount', 'TDS Deducted'];
+    keys = ['panName', 'panNumber', 'paymentDate', 'taxCode', 'taxableAmount', 'tdsDeducted'];
+  } else if (type === 'gstr_1') {
+    headers = ['Customer Name', 'Customer GST No', 'Invoice No', 'Invoice Date', 'Taxable Amount', 'CGST', 'SGST', 'IGST', 'Total Amount'];
+    keys = ['customerName', 'customerGstNo', 'invoiceNo', 'invoiceDate', 'taxableAmount', 'cgst', 'sgst', 'igst', 'totalAmount'];
+  } else if (type === 'gstr_2b') {
+    headers = ['Vendor Name', 'Vendor GST No', 'Invoice No', 'Invoice Date', 'Taxable Amount', 'CGST', 'SGST', 'IGST', 'Total Amount', 'Ageing', 'Status'];
+    keys = ['vendorName', 'vendorGstNo', 'invoiceNo', 'invoiceDate', 'taxableAmount', 'cgst', 'sgst', 'igst', 'totalAmount', 'ageing', 'status'];
+  }
+
+  const csvRows = [headers.join(',')];
+  datasetToExport.forEach(row => {
+    const values = keys.map(k => {
+      const val = row[k] !== undefined ? String(row[k]) : '';
+      return `"${val.replace(/"/g, '""')}"`;
+    });
+    csvRows.push(values.join(','));
+  });
+
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${type.toUpperCase()}_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast(`${type.toUpperCase()} CSV exported successfully.`);
+};
+
+window.exportAccReceivableCsv = () => exportAccountsCsv('receivable');
+window.exportAccBankCsv = () => exportAccountsCsv('bank');
+window.exportAccTdsCsv = () => exportAccountsCsv('tds');
+window.exportAccGstr1Csv = () => exportAccountsCsv('gstr_1');
+window.exportAccGstr2bCsv = () => exportAccountsCsv('gstr_2b');
+
+window.handleAccPaymentExpenseTypeChange = function(type) {
+  const descSel = document.getElementById('selAccPaymentExpenseDesc');
+  const rowFrom = document.getElementById('rowAccPaymentFrom');
+  const rowTo = document.getElementById('rowAccPaymentTo');
+  const selFrom = document.getElementById('selAccPaymentFrom');
+  const selTo = document.getElementById('selAccPaymentTo');
+
+  if (!descSel) return;
+
+  if (!type) {
+    const typeSel = document.getElementById('selAccPaymentExpenseType');
+    type = typeSel ? typeSel.value : 'IFT';
+  }
+  const normType = String(type).trim().toLowerCase();
+
+  if (normType === 'ift') {
+    descSel.innerHTML = `
+      <option value="Current A/C Transfer" selected>Current A/C Transfer</option>
+      <option value="Inter-account Fund Transfer">Inter-account Fund Transfer</option>
+      <option value="Internal Fund Transfer">Internal Fund Transfer</option>
+      <option value="Liquidity Transfer">Liquidity Transfer</option>
+    `;
+    if (rowFrom) rowFrom.style.setProperty('display', 'flex', 'important');
+    if (rowTo) rowTo.style.setProperty('display', 'flex', 'important');
+    if (selFrom) {
+      selFrom.innerHTML = `
+        <option value="HDFC Bank - 0019" selected>HDFC Bank - 0019</option>
+        <option value="State Bank of India - 5421">State Bank of India - 5421</option>
+        <option value="ICICI Bank - 8812">ICICI Bank - 8812</option>
+        <option value="Axis Bank - 3390">Axis Bank - 3390</option>
+        <option value="Kotak Mahindra Bank - 7741">Kotak Mahindra Bank - 7741</option>
+      `;
+    }
+    if (selTo) {
+      selTo.innerHTML = `
+        <option value="SBI Bank - A/C 9876" selected>SBI Bank - A/C 9876</option>
+        <option value="Axis Bank - A/C 4532">Axis Bank - A/C 4532</option>
+        <option value="ICICI Bank - A/C 8812">ICICI Bank - A/C 8812</option>
+        <option value="HDFC Bank - A/C 0019">HDFC Bank - A/C 0019</option>
+        <option value="Kotak Bank - A/C 7741">Kotak Bank - A/C 7741</option>
+      `;
+    }
+  } else if (normType === 'travelling') {
+    descSel.innerHTML = `
+      <option value="Official Travel Reimbursement" selected>Official Travel Reimbursement</option>
+      <option value="Site Visit Travel">Site Visit Travel</option>
+      <option value="Client Meeting Travel">Client Meeting Travel</option>
+      <option value="Travel Desk Operations">Travel Desk Operations</option>
+    `;
+    if (rowFrom) rowFrom.style.setProperty('display', 'flex', 'important');
+    if (rowTo) rowTo.style.setProperty('display', 'flex', 'important');
+    if (selFrom) {
+      selFrom.innerHTML = `
+        <option value="Chennai" selected>Chennai</option>
+        <option value="Bangalore">Bangalore</option>
+        <option value="Mumbai">Mumbai</option>
+        <option value="Delhi">Delhi</option>
+        <option value="Hyderabad">Hyderabad</option>
+        <option value="Vijayawada">Vijayawada</option>
+      `;
+    }
+    if (selTo) {
+      selTo.innerHTML = `
+        <option value="Bangalore" selected>Bangalore</option>
+        <option value="Chennai">Chennai</option>
+        <option value="Delhi">Delhi</option>
+        <option value="Mumbai">Mumbai</option>
+        <option value="Hyderabad">Hyderabad</option>
+        <option value="Vijayawada">Vijayawada</option>
+      `;
+    }
+  } else if (normType === 'taxes') {
+    descSel.innerHTML = `
+      <option value="Income Tax" selected>Income Tax</option>
+      <option value="GST">GST</option>
+      <option value="TDS">TDS</option>
+    `;
+    if (rowFrom) rowFrom.style.setProperty('display', 'none', 'important');
+    if (rowTo) rowTo.style.setProperty('display', 'none', 'important');
+  } else if (normType === 'salary advance') {
+    descSel.innerHTML = `
+      <option value="Monthly Salary Advance" selected>Monthly Salary Advance</option>
+      <option value="Festival Advance - Site Staff">Festival Advance - Site Staff</option>
+      <option value="Salary Advance for Suresh Babu">Salary Advance for Suresh Babu</option>
+      <option value="Emergency Advance">Emergency Advance</option>
+    `;
+    if (rowFrom) rowFrom.style.setProperty('display', 'none', 'important');
+    if (rowTo) rowTo.style.setProperty('display', 'none', 'important');
+  }
+};
+
+window.handleAccPaymentAdd = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const card = document.getElementById('accPaymentAddCard');
+  const frm = document.getElementById('frmAccPaymentAdd');
+  if (frm) frm.reset();
+  const typeSel = document.getElementById('selAccPaymentExpenseType');
+  if (typeSel) typeSel.value = 'IFT';
+  handleAccPaymentExpenseTypeChange('IFT');
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.display = 'flex';
+  }
+  if (card) card.style.display = 'block';
+};
+
+window.submitAccPaymentRequest = function() {
+  const typeSel = document.getElementById('selAccPaymentExpenseType');
+  const descSel = document.getElementById('selAccPaymentExpenseDesc');
+  const selFrom = document.getElementById('selAccPaymentFrom');
+  const selTo = document.getElementById('selAccPaymentTo');
+  const inpAmount = document.getElementById('inpAccPaymentAmount');
+
+  const expenseType = typeSel ? typeSel.value : 'IFT';
+  const descVal = descSel ? descSel.value : '';
+  const fromVal = selFrom ? selFrom.value : '';
+  const toVal = selTo ? selTo.value : '';
+  const amountVal = inpAmount ? parseFloat(inpAmount.value) : 0;
+
+  if (isNaN(amountVal) || amountVal <= 0) {
+    showToast('Please enter a valid amount.', 'warning');
+    return;
+  }
+
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const dateFormatted = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
+  let remarksStr = '';
+  let transferToStr = '';
+
+  if (expenseType === 'IFT') {
+    remarksStr = `From ${fromVal} To ${toVal}`;
+    transferToStr = toVal;
+  } else if (expenseType === 'Travelling') {
+    remarksStr = `From ${fromVal} To ${toVal}`;
+    transferToStr = 'Travel Desk Operations';
+  } else if (expenseType === 'Taxes') {
+    remarksStr = descVal;
+    transferToStr = `${descVal} Portal / Department`;
+  } else if (expenseType === 'Salary Advance') {
+    remarksStr = descVal;
+    transferToStr = 'Employee Account';
+  }
+
+  const newEntry = {
+    id: `ACC-PAY-${Date.now().toString().slice(-4)}`,
+    selected: false,
+    date: dateFormatted,
+    expenseType: expenseType,
+    remarks: remarksStr,
+    transferTo: transferToStr,
+    amount: amountVal,
+    ageing: '0 Days',
+    status: 'Pending with'
+  };
+
+  accountsManagerPaymentStore.unshift(newEntry);
+  currentDataset = [...accountsManagerPaymentStore];
+  applyFiltersAndRender();
+  closeSideForm();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Payment request added successfully!', 'Task Completed');
+  } else {
+    showToast('Payment request added successfully!');
+  }
+};
+
+window.handleAccReceivableBulkUpload = function() {
+  if (typeof openBulkUploadSidePanel === 'function') {
+    openBulkUploadSidePanel('Receivable');
+  } else if (typeof openBulkUploadModal === 'function') {
+    openBulkUploadModal('Receivable');
+  }
+};
+
+window.handleAccBankAdd = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const card = document.getElementById('accBankAddCard');
+  const frm = document.getElementById('frmAccBankAdd');
+  if (frm) frm.reset();
+
+  const inpDate = document.getElementById('inpAccBankDate');
+  if (inpDate) {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    inpDate.value = `${pad(now.getDate())} - ${pad(now.getMonth() + 1)} - ${now.getFullYear()}`;
+  }
+
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.display = 'flex';
+  }
+  if (card) card.style.display = 'block';
+};
+
+window.submitAccBankEntry = function() {
+  const selBank = document.getElementById('selAccBankSelect');
+  const inpDate = document.getElementById('inpAccBankDate');
+  const inpPart = document.getElementById('inpAccBankParticulars');
+  const inpRef = document.getElementById('inpAccBankRefNo');
+  const selTxn = document.getElementById('selAccBankTxnType');
+  const inpAmt = document.getElementById('inpAccBankAmount');
+
+  const bankName = selBank ? selBank.value : 'HDFC Bank - 0019';
+  const rawDate = inpDate ? inpDate.value : '';
+  const particulars = inpPart ? inpPart.value.trim() : '';
+  const refNo = inpRef ? inpRef.value.trim() : '';
+  const txnType = selTxn ? selTxn.value : 'NET Banking';
+  const amount = inpAmt ? parseFloat(inpAmt.value) : 0;
+
+  if (!particulars) {
+    showToast('Please enter particulars.', 'warning');
+    return;
+  }
+  if (!refNo) {
+    showToast('Please enter reference number.', 'warning');
+    return;
+  }
+  if (isNaN(amount) || amount <= 0) {
+    showToast('Please enter a valid amount.', 'warning');
+    return;
+  }
+
+  let dateFormatted = '';
+  if (rawDate) {
+    const parts = rawDate.split('-').map(s => s.trim());
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        dateFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      } else {
+        dateFormatted = `${parts[0]}/${parts[1]}/${parts[2]}`;
+      }
+    } else {
+      dateFormatted = rawDate;
+    }
+  } else {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    dateFormatted = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+  }
+
+  const lastEntry = accountsManagerBankStore[0];
+  const lastBalance = lastEntry ? (Number(lastEntry.balance) || 1500000) : 1500000;
+  const newBalance = lastBalance + amount;
+
+  const newEntry = {
+    id: `ACC-BNK-${Date.now().toString().slice(-4)}`,
+    selected: false,
+    date: dateFormatted,
+    bankName: bankName,
+    particulars: particulars,
+    refNo: refNo,
+    withdrawal: 0.00,
+    deposit: amount,
+    balance: newBalance
+  };
+
+  accountsManagerBankStore.unshift(newEntry);
+  currentDataset = [...accountsManagerBankStore];
+  applyFiltersAndRender();
+  closeSideForm();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Bank entry added successfully!', 'Task Completed');
+  } else {
+    showToast('Bank entry added successfully!');
+  }
+};
+
+window.handleAccountsManagerSubmit = function() {
+  if (currentWorklistView === 'tds') {
+    openAccAttachChallanModal();
+  } else if (currentWorklistView === 'gstr_3b') {
+    openAccAttachReturnsModal();
+  } else if (currentWorklistView === 'gstr_1') {
+    const selectedRows = (accountsManagerGstr1Store || []).filter(r => r.selected);
+    if (selectedRows.length === 0) {
+      showToast('Please select at least one row to submit.', 'warning');
+      return;
+    }
+    (accountsManagerGstr1Store || []).forEach(r => { if (r.selected) r.selected = false; });
+    currentDataset = [...accountsManagerGstr1Store];
+    applyFiltersAndRender();
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('GSTR 1 submitted successfully!', 'Task Completed');
+    } else {
+      showToast('GSTR 1 submitted successfully!');
+    }
+  } else if (currentWorklistView === 'gstr_2b') {
+    const selectedRows = (accountsManagerGstr2bStore || []).filter(r => r.selected);
+    if (selectedRows.length === 0) {
+      showToast('Please select at least one row to submit.', 'warning');
+      return;
+    }
+    (accountsManagerGstr2bStore || []).forEach(r => { 
+      if (r.selected) {
+        r.selected = false;
+        r.status = 'Submitted';
+      }
+    });
+    currentDataset = [...accountsManagerGstr2bStore];
+    applyFiltersAndRender();
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('GSTR 2B submitted successfully!', 'Task Completed');
+    } else {
+      showToast('GSTR 2B submitted successfully!');
+    }
+  }
+};
+window.handleAccManagerSubmit = window.handleAccountsManagerSubmit;
+
+window.openAccAttachChallanModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const card = document.getElementById('accAttachChallanCard');
+  const saveBtn = document.getElementById('btnSaveAccChallan');
+  const fileLbl = document.getElementById('lblAccChallanFileName');
+  const fileInp = document.getElementById('inpAccChallanPdf');
+  if (fileInp) fileInp.value = '';
+  if (saveBtn) saveBtn.style.display = 'none';
+  if (fileLbl) fileLbl.textContent = 'Click to Upload PDF';
+
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.display = 'flex';
+  }
+  if (card) card.style.display = 'block';
+};
+
+window.handleAccChallanPdfSelected = function(input) {
+  if (input.files && input.files[0]) {
+    const fileName = input.files[0].name;
+    const fileLbl = document.getElementById('lblAccChallanFileName');
+    const saveBtn = document.getElementById('btnSaveAccChallan');
+    if (fileLbl) fileLbl.textContent = fileName;
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+  }
+};
+
+window.saveAccChallanPdf = function() {
+  closeSideForm();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Payment Challan attached successfully!', 'Task Completed');
+  } else {
+    showToast('Payment Challan attached successfully!');
+  }
+};
+
+window.openAccAttachReturnsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const card = document.getElementById('accAttachReturnsCard');
+  const saveBtn = document.getElementById('btnSaveAccReturns');
+  const fileLbl = document.getElementById('lblAccReturnsFileName');
+  const fileInp = document.getElementById('inpAccReturnsPdf');
+  if (fileInp) fileInp.value = '';
+  if (saveBtn) saveBtn.style.display = 'none';
+  if (fileLbl) fileLbl.textContent = 'Click to Upload PDF';
+
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.display = 'flex';
+  }
+  if (card) card.style.display = 'block';
+};
+
+window.handleAccReturnsPdfSelected = function(input) {
+  if (input.files && input.files[0]) {
+    const fileName = input.files[0].name;
+    const fileLbl = document.getElementById('lblAccReturnsFileName');
+    const saveBtn = document.getElementById('btnSaveAccReturns');
+    if (fileLbl) fileLbl.textContent = fileName;
+    if (saveBtn) saveBtn.style.display = 'inline-flex';
+  }
+};
+
+window.saveAccReturnsPdf = function() {
+  closeSideForm();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Payment Returns attached successfully!', 'Task Completed');
+  } else {
+    showToast('Payment Returns attached successfully!');
+  }
+};
+
+function getReceivableTaxBreakup(row) {
+  if (row && row.taxBreakup) return row.taxBreakup;
+  const total = Number(row ? row.invoiceAmount : 0) || 0;
+  const basic = Math.round((total / 1.18) * 100) / 100;
+  const tax = Math.round((total - basic) * 100) / 100;
+  const half = Math.round((tax / 2) * 100) / 100;
+  return { basic, cgst: half, sgst: Math.round((tax - half) * 100) / 100, igst: 0.00 };
+}
+
+function getReceivableDeductionBreakup(row) {
+  if (row && row.deductionBreakup) return row.deductionBreakup;
+  const total = Number(row ? row.deduction : 0) || 0;
+  const tds = Math.round(total * 0.7 * 100) / 100;
+  return { tds, dn: 0.00, discount: Math.round((total - tds) * 100) / 100, tredsFee: 0.00 };
+}
+
+function getReceivableReceipts(row) {
+  if (row && row.receipts && Array.isArray(row.receipts) && row.receipts.length > 0) {
+    return row.receipts;
+  }
+  const amt = Number(row ? row.receivedAmount : 0) || 0;
+  if (amt > 0) {
+    return [{ date: (row && row.invoiceDate) ? row.invoiceDate : '01/10/2026', amount: amt }];
+  }
+  return [];
+}
+
+window.openAccRecInvoiceAmountBreakdown = function(rowId) {
+  const row = (currentDataset || accountsManagerReceivableStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+
+  const badge = document.getElementById('lblAccRecInvAmountBadge');
+  const sumVal = document.getElementById('lblAccRecInvAmountValue');
+  const inpBasic = document.getElementById('inpAccRecBasicAmount');
+  const inpCgst = document.getElementById('inpAccRecCgst');
+  const inpSgst = document.getElementById('inpAccRecSgst');
+  const inpIgst = document.getElementById('inpAccRecIgst');
+  const card = document.getElementById('accRecInvoiceAmountCard');
+  const overlay = document.getElementById('sideFormOverlay');
+
+  const formatCurrency = (val) => (Number(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const breakup = getReceivableTaxBreakup(row);
+
+  if (badge) badge.textContent = row.invoiceNo || 'Invoice Details';
+  if (sumVal) sumVal.textContent = formatCurrency(row.invoiceAmount);
+  if (inpBasic) inpBasic.value = formatCurrency(breakup.basic);
+  if (inpCgst) inpCgst.value = formatCurrency(breakup.cgst);
+  if (inpSgst) inpSgst.value = formatCurrency(breakup.sgst);
+  if (inpIgst) inpIgst.value = formatCurrency(breakup.igst);
+
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.setProperty('display', 'flex', 'important');
+  }
+  if (card) {
+    card.classList.remove('card-dimmed-blurred');
+    card.style.setProperty('display', 'block', 'important');
+  }
+};
+
+window.openAccRecDeductionBreakdown = function(rowId) {
+  const row = (currentDataset || accountsManagerReceivableStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+
+  const badge = document.getElementById('lblAccRecDeductionBadge');
+  const sumVal = document.getElementById('lblAccRecDeductionValue');
+  const inpTds = document.getElementById('inpAccRecTds');
+  const inpDn = document.getElementById('inpAccRecDn');
+  const inpDisc = document.getElementById('inpAccRecDiscount');
+  const inpTreds = document.getElementById('inpAccRecTredsFee');
+  const card = document.getElementById('accRecDeductionCard');
+  const overlay = document.getElementById('sideFormOverlay');
+
+  const formatCurrency = (val) => (Number(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const breakup = getReceivableDeductionBreakup(row);
+
+  if (badge) badge.textContent = row.invoiceNo || 'Invoice Details';
+  if (sumVal) sumVal.textContent = formatCurrency(row.deduction);
+  if (inpTds) inpTds.value = formatCurrency(breakup.tds);
+  if (inpDn) inpDn.value = formatCurrency(breakup.dn);
+  if (inpDisc) inpDisc.value = formatCurrency(breakup.discount);
+  if (inpTreds) inpTreds.value = formatCurrency(breakup.tredsFee);
+
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.setProperty('display', 'flex', 'important');
+  }
+  if (card) {
+    card.classList.remove('card-dimmed-blurred');
+    card.style.setProperty('display', 'block', 'important');
+  }
+};
+
+window.openAccRecReceivedAmountTable = function(rowId) {
+  const row = (currentDataset || accountsManagerReceivableStore || []).find(r => String(r.id) === String(rowId));
+  if (!row) return;
+
+  const badge = document.getElementById('lblAccRecReceivedBadge');
+  const tbody = document.getElementById('tblAccRecReceiptsBody');
+  const card = document.getElementById('accRecReceivedAmountCard');
+  const overlay = document.getElementById('sideFormOverlay');
+
+  const formatCurrency = (val) => (Number(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const receipts = getReceivableReceipts(row);
+
+  if (badge) badge.textContent = row.invoiceNo || 'Invoice Details';
+
+  if (tbody) {
+    if (receipts && receipts.length > 0) {
+      tbody.innerHTML = receipts.map(rc => `
+        <tr style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            ${rc.date || ''}
+          </td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #16a34a; font-weight: 600;">
+            ${formatCurrency(rc.amount)}
+          </td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="2" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.9rem;">
+            No receipts recorded yet.
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.setProperty('display', 'flex', 'important');
+  }
+  if (card) {
+    card.classList.remove('card-dimmed-blurred');
+    card.style.setProperty('display', 'block', 'important');
+  }
+};
+
+// ==========================================================================
 // 4. WORKLIST MODULE RENDERERS
 // ==========================================================================
 function loadWorklistDataset() {
@@ -25337,6 +26489,46 @@ function loadWorklistDataset() {
     }
     if (currentWorklistView === 'payment') {
       currentDataset = adminManagerPaymentStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    currentDataset = [];
+    filteredDataset = [];
+    return;
+  }
+  if (role === 'Accounts Manager') {
+    if (currentWorklistView === 'payment') {
+      currentDataset = accountsManagerPaymentStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'receivable') {
+      currentDataset = accountsManagerReceivableStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'bank') {
+      currentDataset = accountsManagerBankStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'tds') {
+      currentDataset = accountsManagerTdsStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'gstr_1') {
+      currentDataset = accountsManagerGstr1Store;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'gstr_2b') {
+      currentDataset = accountsManagerGstr2bStore;
+      filteredDataset = [...currentDataset];
+      return;
+    }
+    if (currentWorklistView === 'gstr_3b') {
+      currentDataset = accountsManagerGstr3bStore;
       filteredDataset = [...currentDataset];
       return;
     }
@@ -26346,6 +27538,138 @@ function renderWorklistToolbar() {
   if (!toolbar) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Accounts Manager') {
+    toolbar.style.display = 'flex';
+    toolbar.style.height = '52px';
+    toolbar.style.minHeight = '52px';
+    toolbar.style.boxSizing = 'border-box';
+
+    if (currentWorklistView === 'payment') {
+      const totalAmount = (filteredDataset || []).reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+      const totalAmountFormatted = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;">
+          <div class="metric-item metric-total" style="display: inline-flex; align-items: center; gap: 8px;" title="Total Amount">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblAccPaymentSumAmount" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalAmountFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAccPaymentAdd" title="Add Payment"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="handleAccPaymentAdd()">
+            <img src="icons/Add.svg" alt="Add" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'receivable') {
+      const totalReceivable = (filteredDataset || []).reduce((acc, r) => acc + (Number(r.receivable) || 0), 0);
+      const totalReceivableFormatted = totalReceivable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;">
+          <div class="metric-item metric-total" style="display: inline-flex; align-items: center; gap: 8px;" title="Total Receivable">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblAccReceivableSumValue" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalReceivableFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAccReceivableBulkUpload" title="Bulk Upload"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="handleAccReceivableBulkUpload()">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnAccReceivableExportCsv" title="Export CSV"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="exportAccReceivableCsv()">
+            <img src="icons/CSV download.svg" alt="Export CSV" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'bank') {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAccBankExportCsv" title="Export CSV"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="exportAccBankCsv()">
+            <img src="icons/CSV download.svg" alt="Export CSV" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnAccBankAdd" title="Add Transaction"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="handleAccBankAdd()">
+            <img src="icons/Add.svg" alt="Add" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'tds') {
+      const totalTaxable = (filteredDataset || []).reduce((acc, r) => acc + (Number(r.taxableAmount) || 0), 0);
+      const totalTaxableFormatted = totalTaxable.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;">
+          <div class="metric-item metric-total" style="display: inline-flex; align-items: center; gap: 8px;" title="Total Taxable Amount">
+            <img src="icons/summation.svg" alt="Summation" width="24" height="24" style="vertical-align: middle; display: block;">
+            <span id="lblAccTdsSumTaxable" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">${totalTaxableFormatted}</span>
+          </div>
+        </div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAccTdsExportCsv" title="Export CSV"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="exportAccTdsCsv()">
+            <img src="icons/CSV download.svg" alt="Export CSV" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_1') {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAccGstr1ExportCsv" title="Export CSV"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="exportAccGstr1Csv()">
+            <img src="icons/CSV download.svg" alt="Export CSV" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_2b') {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;">
+          <button type="button" class="toolbar-icon-btn" id="btnAccGstr2bExportCsv" title="Export CSV"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="exportAccGstr2bCsv()">
+            <img src="icons/CSV download.svg" alt="Export CSV" width="28" height="28">
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_3b') {
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px; min-height: 36px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto; min-height: 36px;"></div>
+      `;
+      return;
+    }
+
+    toolbar.innerHTML = '';
+    return;
+  }
   if (role === 'Admin Manager') {
     const hasSelected = currentDataset && currentDataset.some(r => r.selected);
     toolbar.style.display = 'flex';
@@ -27369,6 +28693,49 @@ function renderWorklistFooter() {
     return;
   }
 
+  if (role === 'Accounts Manager') {
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'flex-start';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.marginTop = 'auto';
+    footer.style.padding = '24px';
+
+    const accountsManagerTabs = [
+      { id: 'btnToggleAccPayment', view: 'payment', label: 'Payment' },
+      { id: 'btnToggleAccReceivable', view: 'receivable', label: 'Receivable' },
+      { id: 'btnToggleAccBank', view: 'bank', label: 'Bank' },
+      { id: 'btnToggleAccTds', view: 'tds', label: 'TDS' },
+      { id: 'btnToggleAccGstr1', view: 'gstr_1', label: 'GSTR 1' },
+      { id: 'btnToggleAccGstr2b', view: 'gstr_2b', label: 'GSTR 2B' },
+      { id: 'btnToggleAccGstr3b', view: 'gstr_3b', label: 'GSTR 3B' }
+    ];
+
+    footer.innerHTML = `
+      <div class="segmented-toggle-group">
+        ${accountsManagerTabs.map((tab, idx) => `
+          ${idx > 0 ? '<div class="segmented-divider"></div>' : ''}
+          <button type="button" class="segmented-btn ${currentWorklistView === tab.view ? 'active' : ''}" id="${tab.id}">
+            ${tab.label}
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    accountsManagerTabs.forEach(tab => {
+      document.getElementById(tab.id)?.addEventListener('click', () => {
+        if (currentWorklistView !== tab.view) {
+          currentWorklistView = tab.view;
+          activeColumnFilters = {};
+          updateURL();
+          renderApp();
+          showToast(`Switched to Worklist • ${tab.label}`);
+        }
+      });
+    });
+    return;
+  }
+
   if (role === 'Warehouse Manager') {
     if (currentWorklistView === 'min_detail' || currentWorklistView === 'mrn_detail') {
       footer.style.display = 'none';
@@ -27670,6 +29037,349 @@ function renderWorklistTableHead() {
   if (!thead) return;
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Accounts Manager') {
+    const tableEl = document.getElementById("worklistTable") || document.getElementById("tableMain") || document.querySelector(".worklist-custom-table") || (thead ? thead.closest("table") : null);
+    const containerEl = document.querySelector(".table-container-full") || (tableEl ? tableEl.parentElement : null);
+
+    if (containerEl) {
+      containerEl.style.overflowX = 'auto';
+      containerEl.style.marginTop = '0px';
+    }
+
+    if (currentWorklistView === 'payment') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1350px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Date</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Expense Type</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseType'] ? 'has-active-filter' : ''}" data-filter-col="expenseType" title="Filter Expense Type">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Remarks</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Transfer To</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Amount</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Ageing</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'receivable') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1550px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Customer Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Invoice No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceNo'] ? 'has-active-filter' : ''}" data-filter-col="invoiceNo" title="Filter Invoice No">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Invoice Date</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Due Date</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['dueDate'] ? 'has-active-filter' : ''}" data-filter-col="dueDate" title="Filter Due Date">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Invoice Amount</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Deduction</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Approved Amount</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Received Amount</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Receivable</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Ageing</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'bank') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1250px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Date</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Bank Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['bankName'] ? 'has-active-filter' : ''}" data-filter-col="bankName" title="Filter Bank Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Particulars</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['particulars'] ? 'has-active-filter' : ''}" data-filter-col="particulars" title="Filter Particulars">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Ref. No</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Withdrawal (Dr)</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Deposit (Cr)</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Balance</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'tds') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1150px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>PAN Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['panName'] ? 'has-active-filter' : ''}" data-filter-col="panName" title="Filter PAN Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>PAN Number</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Payment Date</span>
+          </th>
+          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Tax Code</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['taxCode'] ? 'has-active-filter' : ''}" data-filter-col="taxCode" title="Filter Tax Code">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Taxable Amount</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>TDS Deducted</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_1') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1300px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 60px, center, no radio button on header -->
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Customer Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['customerName'] ? 'has-active-filter' : ''}" data-filter-col="customerName" title="Filter Customer Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Customer GST No</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Invoice No</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Invoice Date</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceDate'] ? 'has-active-filter' : ''}" data-filter-col="invoiceDate" title="Filter Invoice Date">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Taxable Amount</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>CGST</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>SGST</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>IGST</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Total Amount</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_2b') {
+      if (tableEl) {
+        tableEl.style.minWidth = '1450px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 60px, center, no radio button on header -->
+          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
+            <span>Select</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Vendor Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['vendorName'] ? 'has-active-filter' : ''}" data-filter-col="vendorName" title="Filter Vendor Name">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Vendor GST No</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Invoice No</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Invoice Date</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['invoiceDate'] ? 'has-active-filter' : ''}" data-filter-col="invoiceDate" title="Filter Invoice Date">&#9660;</button>
+            </div>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Taxable Amount</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>CGST</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>SGST</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>IGST</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Total Amount</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Ageing</span>
+          </th>
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_3b') {
+      if (tableEl) {
+        tableEl.style.minWidth = '900px';
+        tableEl.style.width = '100%';
+        tableEl.style.tableLayout = 'fixed';
+      }
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>GST Type</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Basic</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>CGST</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>SGST</span>
+          </th>
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>IGST</span>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+
+    thead.innerHTML = '';
+    return;
+  }
   if (role === 'Admin Manager') {
     const tableEl = document.getElementById("worklistTable") || document.getElementById("tableMain") || document.querySelector(".worklist-custom-table") || (thead ? thead.closest("table") : null);
     const containerEl = document.querySelector(".table-container-full") || (tableEl ? tableEl.parentElement : null);
@@ -27852,6 +29562,13 @@ function renderWorklistTableHead() {
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = 'fixed';
       if (containerEl) containerEl.style.overflowX = 'hidden';
+    } else if (role === 'Accounts Manager') {
+      tableEl.style.minWidth = '0';
+      tableEl.style.width = '100%';
+      tableEl.style.tableLayout = 'fixed';
+      if (containerEl) containerEl.style.overflowX = 'hidden';
+      thead.innerHTML = '';
+      return;
     } else if (role === 'Purchase Manager') {
       if (currentWorklistView === 'pr') {
         tableEl.style.minWidth = '1200px';
@@ -30023,8 +31740,364 @@ function applyFiltersAndRender() {
   if (amSubmitArea) {
     amSubmitArea.style.display = 'none';
   }
+  const accSubmitArea = document.getElementById('accManagerSubmitArea');
+  if (accSubmitArea) {
+    accSubmitArea.style.display = 'none';
+  }
 
   const role = getAuthenticatedUserRole();
+  if (role === 'Accounts Manager') {
+    if (accSubmitArea) {
+      if (['tds', 'gstr_3b'].includes(currentWorklistView)) {
+        accSubmitArea.style.display = 'flex';
+      } else if (['gstr_1', 'gstr_2b'].includes(currentWorklistView)) {
+        const hasSelected = (currentDataset || []).some(r => r.selected);
+        accSubmitArea.style.display = hasSelected ? 'flex' : 'none';
+      } else {
+        accSubmitArea.style.display = 'none';
+      }
+    }
+
+    filteredDataset = (currentDataset || []).filter(row => {
+      for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+        if (!allowedSet || allowedSet.size === 0) continue;
+        const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
+        if (!allowedSet.has(cellVal)) return false;
+      }
+      return true;
+    });
+
+    renderWorklistToolbar();
+
+    if (!filteredDataset || filteredDataset.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="12" class="empty-data-row" style="text-align: center; padding: 48px 24px; border: none; color: #64748b; font-size: 0.95rem;">
+            No records found matching current filters.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    const formatCurrency = (val) => (Number(val) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    if (currentWorklistView === 'payment') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        const rowBg = row.selected ? '#f0fdf4 !important' : '#ffffff';
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; transition: background-color 0.15s ease;">
+            <!-- 1. Select: 60px, center circle radio with green marker, multiselect -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox acc-payment-checkbox" data-row-id="${row.id}" ${row.selected ? 'checked' : ''} onchange="toggleAccountsPaymentRowSelect('${row.id}')">
+            </td>
+            <!-- 2. Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.date || ''}
+            </td>
+            <!-- 3. Expense Type: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.expenseType || '').replace(/"/g, '&quot;')}">
+              ${row.expenseType || ''}
+            </td>
+            <!-- 4. Remarks: 30ch & left -->
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
+              ${row.remarks || ''}
+            </td>
+            <!-- 5. Transfer To: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.transferTo || '').replace(/"/g, '&quot;')}">
+              ${row.transferTo || ''}
+            </td>
+            <!-- 6. Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
+              ${formatCurrency(row.amount)}
+            </td>
+            <!-- 7. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.9rem;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 8. Status: 25ch & center (Only category: Pending with) -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <span style="color: #64748b; font-weight: 500; font-size: 0.9rem;">${row.status || 'Pending with'}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'receivable') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff; transition: background-color 0.15s ease;">
+            <!-- 1. Customer Name: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.customerName || '').replace(/"/g, '&quot;')}">
+              ${row.customerName || ''}
+            </td>
+            <!-- 2. Invoice No: 20ch & center -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 600;">
+              <span style="text-decoration: underline; cursor: pointer;" onclick="openAccRecInvoiceAmountBreakdown('${row.id}')">${row.invoiceNo || ''}</span>
+            </td>
+            <!-- 3. Invoice Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.invoiceDate || ''}
+            </td>
+            <!-- 4. Due Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.dueDate || ''}
+            </td>
+            <!-- 5. Invoice Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; cursor: pointer;" onclick="openAccRecInvoiceAmountBreakdown('${row.id}')" title="View Invoice Amount Breakdown">
+              <span style="cursor: pointer; color: #1e293b; font-weight: 600;">${formatCurrency(row.invoiceAmount)}</span>
+            </td>
+            <!-- 6. Deduction: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #dc2626; cursor: pointer;" onclick="openAccRecDeductionBreakdown('${row.id}')" title="View Deduction Breakdown">
+              <span style="cursor: pointer; color: #dc2626; font-weight: 600;">${formatCurrency(row.deduction)}</span>
+            </td>
+            <!-- 7. Approved Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
+              ${formatCurrency(row.approvedAmount)}
+            </td>
+            <!-- 8. Received Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #16a34a; cursor: pointer;" onclick="openAccRecReceivedAmountTable('${row.id}')" title="View Received Amount Details">
+              <span style="cursor: pointer; color: #16a34a; font-weight: 600;">${formatCurrency(row.receivedAmount)}</span>
+            </td>
+            <!-- 9. Receivable: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; font-weight: 700;">
+              ${formatCurrency(row.receivable)}
+            </td>
+            <!-- 10. Status: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <span style="color: #64748b; font-weight: 500; font-size: 0.85rem;">${row.status || ''}</span>
+            </td>
+            <!-- 11. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.9rem;">
+              ${row.ageing || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'bank') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        const rowBg = row.selected ? '#f0fdf4 !important' : '#ffffff';
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; transition: background-color 0.15s ease;">
+            <!-- 1. Select: 60px, center circle radio with green marker, multiselect -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox acc-bank-checkbox" data-row-id="${row.id}" ${row.selected ? 'checked' : ''} onchange="toggleAccountsBankRowSelect('${row.id}')">
+            </td>
+            <!-- 2. Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.date || ''}
+            </td>
+            <!-- 3. Bank Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.bankName || '').replace(/"/g, '&quot;')}">
+              ${row.bankName || ''}
+            </td>
+            <!-- 4. Particulars: 30ch & left -->
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.particulars || '').replace(/"/g, '&quot;')}">
+              ${row.particulars || ''}
+            </td>
+            <!-- 5. Ref. No: 20ch & left -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-family: monospace;">
+              ${row.refNo || ''}
+            </td>
+            <!-- 6. Withdrawal (Dr): 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: ${Number(row.withdrawal) > 0 ? '#dc2626' : '#64748b'};">
+              ${Number(row.withdrawal) > 0 ? formatCurrency(row.withdrawal) : '-'}
+            </td>
+            <!-- 7. Deposit (Cr): 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: ${Number(row.deposit) > 0 ? '#16a34a' : '#64748b'};">
+              ${Number(row.deposit) > 0 ? formatCurrency(row.deposit) : '-'}
+            </td>
+            <!-- 8. Balance: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 700;">
+              ${formatCurrency(row.balance)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'tds') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff; transition: background-color 0.15s ease;">
+            <!-- 1. PAN Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.panName || '').replace(/"/g, '&quot;')}">
+              ${row.panName || ''}
+            </td>
+            <!-- 2. PAN Number: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-family: monospace; font-weight: 600;">
+              ${row.panNumber || ''}
+            </td>
+            <!-- 3. Payment Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.paymentDate || ''}
+            </td>
+            <!-- 4. Tax Code: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.taxCode || '').replace(/"/g, '&quot;')}">
+              ${row.taxCode || ''}
+            </td>
+            <!-- 5. Taxable Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
+              ${formatCurrency(row.taxableAmount)}
+            </td>
+            <!-- 6. TDS Deducted: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #dc2626; font-weight: 600;">
+              ${formatCurrency(row.tdsDeducted)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_1') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        const rowBg = row.selected ? '#f0fdf4 !important' : '#ffffff';
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; transition: background-color 0.15s ease;">
+            <!-- 1. Select: 60px, center circle radio with green marker, multiselect -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox acc-gstr1-checkbox" data-row-id="${row.id}" ${row.selected ? 'checked' : ''} onchange="toggleAccountsGstr1RowSelect('${row.id}')">
+            </td>
+            <!-- 2. Customer Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.customerName || '').replace(/"/g, '&quot;')}">
+              ${row.customerName || ''}
+            </td>
+            <!-- 3. Customer GST No: 20ch & center -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #475569; font-family: monospace;">
+              ${row.customerGstNo || ''}
+            </td>
+            <!-- 4. Invoice No: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500;">
+              <span style="text-decoration: underline; cursor: pointer;">${row.invoiceNo || ''}</span>
+            </td>
+            <!-- 5. Invoice Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.invoiceDate || ''}
+            </td>
+            <!-- 6. Taxable Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
+              ${formatCurrency(row.taxableAmount)}
+            </td>
+            <!-- 7. CGST: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #475569;">
+              ${formatCurrency(row.cgst)}
+            </td>
+            <!-- 8. SGST: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #475569;">
+              ${formatCurrency(row.sgst)}
+            </td>
+            <!-- 9. IGST: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #475569;">
+              ${formatCurrency(row.igst)}
+            </td>
+            <!-- 10. Total Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 700;">
+              ${formatCurrency(row.totalAmount)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_2b') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        const rowBg = row.selected ? '#f0fdf4 !important' : '#ffffff';
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; transition: background-color 0.15s ease;">
+            <!-- 1. Select: 60px, center circle radio with green marker, multiselect -->
+            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <input type="checkbox" class="pr-circle-checkbox acc-gstr2b-checkbox" data-row-id="${row.id}" ${row.selected ? 'checked' : ''} onchange="toggleAccountsGstr2bRowSelect('${row.id}')">
+            </td>
+            <!-- 2. Vendor Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.vendorName || '').replace(/"/g, '&quot;')}">
+              ${row.vendorName || ''}
+            </td>
+            <!-- 3. Vendor GST No: 20ch & center -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #475569; font-family: monospace;">
+              ${row.vendorGstNo || ''}
+            </td>
+            <!-- 4. Invoice No: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; font-weight: 500;">
+              <span style="text-decoration: underline; cursor: pointer;">${row.invoiceNo || ''}</span>
+            </td>
+            <!-- 5. Invoice Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.invoiceDate || ''}
+            </td>
+            <!-- 6. Taxable Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
+              ${formatCurrency(row.taxableAmount)}
+            </td>
+            <!-- 7. CGST: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #475569;">
+              ${formatCurrency(row.cgst)}
+            </td>
+            <!-- 8. SGST: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #475569;">
+              ${formatCurrency(row.sgst)}
+            </td>
+            <!-- 9. IGST: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #475569;">
+              ${formatCurrency(row.igst)}
+            </td>
+            <!-- 10. Total Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 700;">
+              ${formatCurrency(row.totalAmount)}
+            </td>
+            <!-- 11. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.9rem;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 12. Status: 10ch & center (Only category: Pending) -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              <span style="color: #64748b; font-weight: 500; font-size: 0.9rem;">${row.status || 'Pending'}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    if (currentWorklistView === 'gstr_3b') {
+      tbody.innerHTML = filteredDataset.map(row => {
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff; transition: background-color 0.15s ease;">
+            <!-- 1. GST Type: 10ch & center (Categories: GSTR 1A / GSTR 2A / RCB / GSTR 3B) -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 12px 10px; color: #64748b; font-weight: 500;">
+              ${row.gstType || ''}
+            </td>
+            <!-- 2. Basic: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 12px 14px; color: #1e293b; font-weight: 600;">
+              ${formatCurrency(row.basic)}
+            </td>
+            <!-- 3. CGST: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 12px 14px; color: #475569;">
+              ${formatCurrency(row.cgst)}
+            </td>
+            <!-- 4. SGST: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 12px 14px; color: #475569;">
+              ${formatCurrency(row.sgst)}
+            </td>
+            <!-- 5. IGST: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 12px 14px; color: #475569;">
+              ${formatCurrency(row.igst)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+      return;
+    }
+
+    return;
+  }
   if (role === 'Admin Manager') {
     filteredDataset = (currentDataset || []).filter(row => {
       for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
@@ -34203,19 +36276,22 @@ function renderProfileModule() {
   const role = (rawRole === 'Admin') ? 'Master' : rawRole;
   const isMaster = (role === 'Master');
   const isAdminManager = (role === 'Admin Manager');
-  const email = user ? (user.email || (isMaster ? 'master@nexus.com' : (isAdminManager ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com')))))) : (isMaster ? 'master@nexus.com' : (isAdminManager ? 'admin@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com')))));
-  const name = user ? (user.name || (isMaster ? 'Master' : (isAdminManager ? 'Admin Manager' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager')))))) : (isMaster ? 'Master' : (isAdminManager ? 'Admin Manager' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager')))));
+  const isAccountsManager = (role === 'Accounts Manager');
+  const email = user ? (user.email || (isMaster ? 'master@nexus.com' : (isAdminManager ? 'admin@nexus.com' : (isAccountsManager ? 'account@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com'))))))) : (isMaster ? 'master@nexus.com' : (isAdminManager ? 'admin@nexus.com' : (isAccountsManager ? 'account@nexus.com' : (role === 'Project Manager' ? 'project@nexus.com' : (role === 'Warehouse Manager' ? 'warehouse@nexus.com' : (role === 'Purchase Manager' ? 'purchase@nexus.com' : 'commercial@nexus.com'))))));
+  const name = user ? (user.name || (isMaster ? 'Master' : (isAdminManager ? 'Admin Manager' : (isAccountsManager ? 'Accounts Manager' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager'))))))) : (isMaster ? 'Master' : (isAdminManager ? 'Admin Manager' : (isAccountsManager ? 'Accounts Manager' : (role === 'Project Manager' ? 'Project Manager' : (role === 'Warehouse Manager' ? 'Warehouse Manager' : (role === 'Purchase Manager' ? 'Purchase Manager' : 'Commercial Manager'))))));
   const permissionsText = isMaster
     ? 'Full System Administrator Access (All Modules)'
     : (isAdminManager
       ? 'Role-Based Access: Profile, Worklist'
-      : (role === 'Project Manager'
-        ? 'Role-Based Access: Worklist, Home / Projects, Profile'
-        : (role === 'Warehouse Manager'
-          ? 'Role-Based Access: Worklist, Inventory, Profile'
-          : (role === 'Purchase Manager'
-            ? 'Role-Based Access: Profile, Worklist'
-            : 'Role-Based Access: Master, Home / Projects, Worklist, Profile'))));
+      : (isAccountsManager
+        ? 'Role-Based Access: Profile, Worklist'
+        : (role === 'Project Manager'
+          ? 'Role-Based Access: Worklist, Home / Projects, Profile'
+          : (role === 'Warehouse Manager'
+            ? 'Role-Based Access: Worklist, Inventory, Profile'
+            : (role === 'Purchase Manager'
+              ? 'Role-Based Access: Profile, Worklist'
+              : 'Role-Based Access: Master, Home / Projects, Worklist, Profile')))));
 
   if (thead) {
     thead.innerHTML = `
@@ -36915,8 +38991,15 @@ function initSideFormEvents() {
     closeNexusCalendar();
   }
 
+  let lastCalToggleTime = 0;
   function openNexusCalendar(inputElement, triggerBtn) {
     if (!calDropdown) return;
+    const now = Date.now();
+    if (now - lastCalToggleTime < 250) {
+      return;
+    }
+    lastCalToggleTime = now;
+
     if (calActiveInput === inputElement && calDropdown.style.display === 'block') {
       closeNexusCalendar();
       return;
@@ -36981,6 +39064,8 @@ function initSideFormEvents() {
       if (!calDropdown.contains(e.target) &&
           !e.target.closest('.btn-calendar-trigger') &&
           !e.target.closest('.nexus-cal-input') &&
+          !e.target.closest('#btnAccBankDateCalendar') &&
+          !e.target.closest('#inpAccBankDate') &&
           !e.target.closest('.btn-sub-project-calendar')) {
         closeNexusCalendar();
       }
@@ -47204,7 +49289,7 @@ window.openAddBulkUploadModal = function() {
     } else if (displayName === 'PO Amendment') {
       siteTypeRow.style.display = 'none';
     } else if (displayName === 'Receivable') {
-      siteTypeRow.style.display = 'block';
+      siteTypeRow.style.display = 'flex';
       if (selUploadType) {
         selUploadType.innerHTML = `
           <option value="invoice_status" selected>Invoice status</option>
@@ -47249,10 +49334,14 @@ window.openAddBulkUploadModal = function() {
 window.closeAddBulkUploadModal = function() {
   const panel = document.getElementById('bulkUploadSidePanel');
   const addCard = document.getElementById('addBulkUploadCard');
+  const overlay = document.getElementById('sideFormOverlay');
   if (addCard) addCard.style.display = 'none';
-  if (panel) {
+  if (panel && panel.classList.contains('card-dimmed-blurred')) {
     panel.classList.remove('card-dimmed-blurred');
     panel.style.display = 'block';
+  } else {
+    if (panel) panel.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
   }
 };
 

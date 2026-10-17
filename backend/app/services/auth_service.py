@@ -32,6 +32,33 @@ USERS_DATABASE: Dict[str, Dict[str, Any]] = {
         "password": "project123",
         "role": "Project Manager",
         "permissions": ["worklist", "projects", "profile"]
+    },
+    "warehouse@nexus.com": {
+        "id": "usr-wh-04",
+        "email": "warehouse@nexus.com",
+        "username": "warehouse",
+        "name": "Warehouse Manager",
+        "password": "warehouse123",
+        "role": "Warehouse Manager",
+        "permissions": ["worklist", "profile"]
+    },
+    "purchase@nexus.com": {
+        "id": "usr-pur-05",
+        "email": "purchase@nexus.com",
+        "username": "purchase",
+        "name": "Purchase Manager",
+        "password": "purchase123",
+        "role": "Purchase Manager",
+        "permissions": ["worklist", "profile"]
+    },
+    "account@nexus.com": {
+        "id": "usr-acc-06",
+        "email": "account@nexus.com",
+        "username": "account",
+        "name": "Accounts Manager",
+        "password": "account123",
+        "role": "Accounts Manager",
+        "permissions": ["worklist", "profile"]
     }
 }
 

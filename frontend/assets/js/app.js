@@ -292,6 +292,8 @@ function initFormSubmission() {
             window.location.href = 'home.html?module=worklist&view=pr';
           } else if (userProfile.role === 'Admin Manager') {
             window.location.href = 'home.html?module=worklist&view=attendance';
+          } else if (userProfile.role === 'Accounts Manager') {
+            window.location.href = 'home.html?module=worklist&view=payment';
           } else {
             window.location.href = 'home.html?module=worklist&view=payment';
           }

@@ -120,13 +120,6 @@
       </button>
     </div>
 
-    <!-- Centered Submit Area for Accounts Manager Worklist (TDS, GSTR 1, GSTR 2B, GSTR 3B) -->
-    <div id="accManagerSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
-      <button type="button" id="btnAccManagerSubmit" onclick="handleAccountsManagerSubmit()" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
-        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
-      </button>
-    </div>
-
 
 
     <!-- Centered Submit Area for YTS/WIP/HOLD/NR when all rows selected -->
@@ -200,10 +193,17 @@
       </button>
     </div>
 
-    <!-- Centered Submit Area for Accounts Manager Pages (TDS, GSTR 1, GSTR 2B, GSTR 3B) -->
+    <!-- Centered Submit Area for Accounts Manager Pages (TDS, GSTR 1, GSTR 3B) -->
     <div id="accManagerSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
       <button type="button" id="btnAccManagerSubmit" onclick="handleAccManagerSubmit()" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
         <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
+    <!-- Centered Download Area for Accounts Manager GSTR 2B (Between Table and Bottom Tab) -->
+    <div id="accGstr2bDownloadArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnAccGstr2bDownload" onclick="exportAccGstr2bCsv()" title="Download GSTR 2B" aria-label="Download GSTR 2B" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/CSV download.svg" alt="Download" width="34" height="34" style="display: block;">
       </button>
     </div>
 
@@ -263,6 +263,13 @@
                 <input type="text" class="form-input-control" id="inpDeductionLWF" value="950.00" readonly style="background: #f8fafc; cursor: default;">
               </div>
             </div>
+
+            <div class="form-row-group" style="margin-bottom: 14px;">
+              <label class="form-label" style="font-weight: 600; color: #475569; font-size: 0.9rem; margin-bottom: 6px; display: block;">TDS</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpDeductionTDS" value="500.00" readonly style="background: #f8fafc; cursor: default;">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -301,16 +308,8 @@
           <div class="side-form-header">
             <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
               <div class="side-form-title-badge">Add Payment Request</div>
-              <div class="metric-item metric-total" style="display: inline-flex; align-items: center; gap: 6px;" title="Amount Sum">
-                <img src="icons/summation.svg" alt="Summation" width="22" height="22" style="display: block;">
-                <span id="lblAddPaymentSumValue" style="font-size: 1.15rem; font-weight: 700; color: #0454e4; letter-spacing: -0.2px;">0.00</span>
-              </div>
             </div>
             <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 12px; margin-right: 14px;">
-              <input type="file" id="inpAdminPaymentPdfFile" accept=".pdf" style="display: none;" onchange="handleAdminPaymentPdfSelected(this)">
-              <button type="button" class="side-top-icon-btn" id="btnAdminPaymentPdfUpload" title="Upload PDF" onclick="document.getElementById('inpAdminPaymentPdfFile').click()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;">
-                <img src="icons/PDF Upload.svg" alt="Upload PDF" width="26" height="26">
-              </button>
               <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form">&times;</button>
             </div>
           </div>
@@ -383,6 +382,17 @@
               <label class="form-label" for="inpPaymentAmount">Amount</label>
               <div class="form-input-wrap">
                 <input type="number" step="0.01" class="form-input-control" id="inpPaymentAmount" placeholder="Enter amount" oninput="handlePaymentAmountInput()">
+              </div>
+            </div>
+
+            <!-- Upload PDF (placed after Amount field, center aligned) -->
+            <div class="form-row-group" id="grpAdminPaymentPdfUpload" style="justify-content: center; align-items: center; padding: 6px 0;">
+              <input type="file" id="inpAdminPaymentPdfFile" accept=".pdf" style="display: none;" onchange="handleAdminPaymentPdfSelected(this)">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%;">
+                <button type="button" class="side-top-icon-btn" id="btnAdminPaymentPdfUpload" title="Upload PDF" onclick="document.getElementById('inpAdminPaymentPdfFile').click()" style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; cursor: pointer; padding: 10px 20px; display: inline-flex; align-items: center; gap: 8px; transition: border-color 0.2s, background-color 0.2s;">
+                  <img src="icons/PDF Upload.svg" alt="Upload PDF" width="28" height="28">
+                  <span id="lblAdminPaymentPdfName" style="font-size: 0.88rem; color: #64748b; font-weight: 500;">Attach Document (PDF)</span>
+                </button>
               </div>
             </div>
 
@@ -8668,9 +8678,9 @@
               </div>
             </div>
 
-            <!-- 2. Expense Description (Dropdown taken from remarks options) -->
+            <!-- 2. Expense Description (Dropdown for IFT/Taxes/Salary Advance; Input text for Travelling) -->
             <div class="form-row-group" id="rowAccPaymentExpenseDesc" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
-              <label class="form-label" for="selAccPaymentExpenseDesc" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Expense Description</label>
+              <label class="form-label" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Expense Description</label>
               <div class="form-input-wrap" style="flex: 1;">
                 <select class="form-input-control" id="selAccPaymentExpenseDesc" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                   <option value="Current A/C Transfer" selected>Current A/C Transfer</option>
@@ -8678,32 +8688,48 @@
                   <option value="Internal Fund Transfer">Internal Fund Transfer</option>
                   <option value="Liquidity Transfer">Liquidity Transfer</option>
                 </select>
+                <input type="text" class="form-input-control" id="inpAccPaymentExpenseDesc" placeholder="Enter Travel Purpose / Description" style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
               </div>
             </div>
 
-            <!-- 3. From (Dropdown, visible for IFT & Travelling) -->
+            <!-- 3. From (Dropdown for IFT; Input text for Travelling) -->
             <div class="form-row-group" id="rowAccPaymentFrom" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
-              <label class="form-label" for="selAccPaymentFrom" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">From</label>
+              <label class="form-label" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">From</label>
               <div class="form-input-wrap" style="flex: 1;">
                 <select class="form-input-control" id="selAccPaymentFrom" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                   <option value="HDFC Bank - 0019" selected>HDFC Bank - 0019</option>
                   <option value="State Bank of India - 5421">State Bank of India - 5421</option>
                   <option value="ICICI Bank - 8812">ICICI Bank - 8812</option>
                   <option value="Axis Bank - 3390">Axis Bank - 3390</option>
+                  <option value="Kotak Mahindra Bank - 7741">Kotak Mahindra Bank - 7741</option>
                 </select>
+                <input type="text" class="form-input-control" id="inpAccPaymentFrom" placeholder="Enter From" style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
               </div>
             </div>
 
-            <!-- 4. To (Dropdown, visible for IFT & Travelling) -->
+            <!-- 4. To (Dropdown for IFT; Input text for Travelling) -->
             <div class="form-row-group" id="rowAccPaymentTo" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
-              <label class="form-label" for="selAccPaymentTo" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">To</label>
+              <label class="form-label" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">To</label>
               <div class="form-input-wrap" style="flex: 1;">
                 <select class="form-input-control" id="selAccPaymentTo" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
                   <option value="SBI Bank - A/C 9876" selected>SBI Bank - A/C 9876</option>
                   <option value="Axis Bank - A/C 4532">Axis Bank - A/C 4532</option>
                   <option value="ICICI Bank - A/C 8812">ICICI Bank - A/C 8812</option>
                   <option value="HDFC Bank - A/C 0019">HDFC Bank - A/C 0019</option>
+                  <option value="Kotak Bank - A/C 7741">Kotak Bank - A/C 7741</option>
                 </select>
+                <input type="text" class="form-input-control" id="inpAccPaymentTo" placeholder="Enter To" style="display: none; width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 5. Attach Tickets (Field named Attach Tickets with pdf upload icon as centered alone, no border, no wording) -->
+            <div class="form-row-group" id="rowAccPaymentAttachTickets" style="display: none; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Attach Tickets</label>
+              <div class="form-input-wrap" style="flex: 1; display: flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 4px 0;">
+                <input type="file" id="inpAccPaymentAttachTickets" accept=".pdf,application/pdf" style="display: none;" onchange="handleAccPaymentTicketsSelected(this)">
+                <button type="button" class="toolbar-icon-btn" id="btnAccPaymentAttachTickets" onclick="document.getElementById('inpAccPaymentAttachTickets').click()" title="Attach Tickets" aria-label="Attach Tickets" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                  <img src="icons/PDF Upload.svg" alt="Attach Tickets" width="34" height="34" style="display: block;">
+                </button>
               </div>
             </div>
 
@@ -8718,6 +8744,52 @@
             <!-- Submit Button Below the Last Field (Centered) -->
             <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 14px;">
               <button type="submit" id="btnSubmitAccPaymentRequest" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Accounts Manager -> Payment -> TXN Details Card -->
+        <div class="side-form-card" id="accTxnDetailsCard" style="display: none; width: 520px; max-width: 95vw;">
+          <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
+            <div class="side-form-title-badge" id="lblAccTxnDetailsTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
+              TXN Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto;">
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+            </div>
+          </div>
+
+          <form class="side-form-body" id="frmAccTxnDetails" onsubmit="event.preventDefault(); submitAccTxnDetails();" style="padding: 16px 24px 28px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. UTR Number (Typeable input box) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpAccTxnUtrNumber" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">UTR Number</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpAccTxnUtrNumber" placeholder="Enter UTR Number" required style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 2. TXN Date (with working calendar icon) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpAccTxnDate" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">TXN Date</label>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpAccTxnDate" placeholder="DD - MM - YYYY" readonly
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(this, document.getElementById('btnAccTxnDateCalendar')); }"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 46px 0 14px; font-size: 0.95rem; background: #ffffff; cursor: pointer; color: #0f172a;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnAccTxnDateCalendar"
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(document.getElementById('inpAccTxnDate'), this); }"
+                  title="Select Date" aria-label="Select Date"
+                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; z-index: 5;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="24" height="24" style="width: 24px; height: 24px; pointer-events: none; display: block; object-fit: contain;">
+                </button>
+              </div>
+            </div>
+
+            <!-- Submit Button Below the Last Field (Centered) -->
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 14px;">
+              <button type="submit" id="btnSubmitAccTxnDetails" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
                 <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
               </button>
             </div>
@@ -8823,7 +8895,7 @@
               <button type="button" class="side-top-icon-btn" id="btnSaveAccChallan" onclick="saveAccChallanPdf()" title="Save Challan" style="background: none; border: none; cursor: pointer; padding: 2px; display: none; align-items: center; justify-content: center;">
                 <img src="icons/Save.svg" alt="Save" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
               </button>
-              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAccAttachChallan" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 

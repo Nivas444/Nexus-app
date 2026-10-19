@@ -7177,6 +7177,9 @@ function applyRoleBasedNavigation() {
       currentModule = 'worklist';
       currentWorklistView = 'payment';
       updateURL();
+    } else if (currentModule === 'worklist' && ['attendance', 'salary'].includes(currentWorklistView)) {
+      currentWorklistView = 'payment';
+      updateURL();
     }
   } else {
     // Master role (and legacy Admin): All 9 navigation items are visible and accessible
@@ -24723,7 +24726,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 250.00,
     pt: 200.00,
-    lwf: 950.00
+    lwf: 950.00,
+    tds: 500.00
   },
   {
     id: 'am-sal-2',
@@ -24742,7 +24746,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 0.00,
     pt: 200.00,
-    lwf: 800.00
+    lwf: 800.00,
+    tds: 500.00
   },
   {
     id: 'am-sal-3',
@@ -24761,7 +24766,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 500.00,
     pt: 200.00,
-    lwf: 2000.00
+    lwf: 2000.00,
+    tds: 500.00
   },
   {
     id: 'am-sal-4',
@@ -24780,7 +24786,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 0.00,
     pt: 200.00,
-    lwf: 2100.00
+    lwf: 2100.00,
+    tds: 500.00
   },
   {
     id: 'am-sal-5',
@@ -24799,7 +24806,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 0.00,
     pt: 200.00,
-    lwf: 600.00
+    lwf: 600.00,
+    tds: 500.00
   },
   {
     id: 'am-sal-6',
@@ -24818,7 +24826,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 0.00,
     pt: 200.00,
-    lwf: 1000.00
+    lwf: 1000.00,
+    tds: 500.00
   },
   {
     id: 'am-sal-7',
@@ -24837,7 +24846,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 0.00,
     pt: 200.00,
-    lwf: 1500.00
+    lwf: 1500.00,
+    tds: 500.00
   },
   {
     id: 'am-sal-8',
@@ -24856,7 +24866,8 @@ let adminManagerSalaryStore = [
     epf: 1800.00,
     esi: 0.00,
     pt: 200.00,
-    lwf: 900.00
+    lwf: 900.00,
+    tds: 500.00
   }
 ];
 
@@ -25049,6 +25060,9 @@ window.openSalaryDeductionTab = function(rowId) {
   const lwfEl = document.getElementById('inpDeductionLWF');
   if (lwfEl) lwfEl.value = formatRough(row.lwf || (row.deduction - 2000));
 
+  const tdsEl = document.getElementById('inpDeductionTDS');
+  if (tdsEl) tdsEl.value = formatRough(row.tds !== undefined ? row.tds : 500);
+
   // Hide other cards in overlay
   overlay.querySelectorAll('.side-form-card').forEach(c => {
     c.style.display = 'none';
@@ -25121,6 +25135,20 @@ window.handleAdminManagerSubmit = function() {
     } else {
       showToast('Salary submitted successfully!');
     }
+  } else if (currentWorklistView === 'payment') {
+    const selectedRows = adminManagerPaymentStore.filter(row => row.selected);
+    if (selectedRows.length === 0) {
+      showToast('Please select at least one row to submit.', 'warning');
+      return;
+    }
+    adminManagerPaymentStore.forEach(row => { if (row.selected) row.selected = false; });
+    currentDataset = adminManagerPaymentStore;
+    applyFiltersAndRender();
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Payment submitted successfully!', 'Task Completed');
+    } else {
+      showToast('Payment submitted successfully!');
+    }
   }
 };
 
@@ -25135,9 +25163,22 @@ window.toggleAdminPaymentRowSelect = function(rowId) {
 window.handleAdminPaymentEditToggle = function() {
   isAdminPaymentEditing = !isAdminPaymentEditing;
   if (!isAdminPaymentEditing) {
+    adminManagerPaymentStore.forEach(r => {
+      if (typeof r.amount === 'string') {
+        const clean = parseFloat(r.amount.replace(/,/g, ''));
+        r.amount = isNaN(clean) ? 0 : clean;
+      }
+    });
     showToast('Payment record updated successfully!');
   }
   applyFiltersAndRender();
+};
+
+window.updateAdminPaymentRowAmount = function(rowId, val) {
+  const row = adminManagerPaymentStore.find(r => r.id === rowId);
+  if (row) {
+    row.amount = val;
+  }
 };
 
 window.updateAdminPaymentRowExpenseType = function(rowId, expTypeVal) {
@@ -25171,6 +25212,14 @@ window.openAdminPaymentAddModal = function() {
   if (inpAmount) inpAmount.value = '';
   const lblSum = document.getElementById('lblAddPaymentSumValue');
   if (lblSum) lblSum.textContent = '0.00';
+  const lblPdf = document.getElementById('lblAdminPaymentPdfName');
+  if (lblPdf) {
+    lblPdf.textContent = 'Attach Document (PDF)';
+    lblPdf.style.color = '#64748b';
+    lblPdf.style.fontWeight = '500';
+  }
+  const inpPdf = document.getElementById('inpAdminPaymentPdfFile');
+  if (inpPdf) inpPdf.value = '';
   const chkGst = document.getElementById('chkAdminPaymentGst');
   if (chkGst) chkGst.checked = false;
   const gstFields = document.getElementById('grpAdminPaymentGstFields');
@@ -25293,6 +25342,12 @@ window.handlePaymentAmountInput = function() {
 
 window.handleAdminPaymentPdfSelected = function(input) {
   if (input && input.files && input.files[0]) {
+    const lblPdf = document.getElementById('lblAdminPaymentPdfName');
+    if (lblPdf) {
+      lblPdf.textContent = input.files[0].name;
+      lblPdf.style.color = '#00cba0';
+      lblPdf.style.fontWeight = '600';
+    }
     showToast(`PDF document "${input.files[0].name}" attached.`);
   }
 };
@@ -25616,46 +25671,46 @@ let accountsManagerTdsStore = [
     id: 'ACC-TDS-001',
     panName: 'Precision Infra Pvt Ltd',
     panNumber: 'AABCP8821K',
-    paymentDate: '12/10/2026',
-    taxCode: '194C - Contractors & Sub-contractors',
+    tdsCode: '194C - Contractors & Sub-contractors',
     taxableAmount: 250000.00,
-    tdsDeducted: 5000.00
+    tdsRate: '2%',
+    tdsAmount: 5000.00
   },
   {
     id: 'ACC-TDS-002',
     panName: 'Shree Logistics Transport',
     panNumber: 'AAECS9912M',
-    paymentDate: '10/10/2026',
-    taxCode: '194C - Contractors & Sub-contractors',
+    tdsCode: '194C - Contractors & Sub-contractors',
     taxableAmount: 180000.00,
-    tdsDeducted: 3600.00
+    tdsRate: '2%',
+    tdsAmount: 3600.00
   },
   {
     id: 'ACC-TDS-003',
     panName: 'Apex Engineering Works',
     panNumber: 'AACCA4451D',
-    paymentDate: '07/10/2026',
-    taxCode: '194J - Fees for Professional Services',
+    tdsCode: '194J - Fees for Professional Services',
     taxableAmount: 420000.00,
-    tdsDeducted: 42000.00
+    tdsRate: '10%',
+    tdsAmount: 42000.00
   },
   {
     id: 'ACC-TDS-004',
     panName: 'Balaji Electricals',
     panNumber: 'BBKPL6620Q',
-    paymentDate: '03/10/2026',
-    taxCode: '194I - Rent for Plant & Equipment',
+    tdsCode: '194I - Rent for Plant & Equipment',
     taxableAmount: 95000.00,
-    tdsDeducted: 1900.00
+    tdsRate: '2%',
+    tdsAmount: 1900.00
   },
   {
     id: 'ACC-TDS-005',
     panName: 'Ramesh Kumar & Associates',
     panNumber: 'AABPR1109R',
-    paymentDate: '29/09/2026',
-    taxCode: '194J - Fees for Professional Services',
+    tdsCode: '194J - Fees for Professional Services',
     taxableAmount: 310000.00,
-    tdsDeducted: 31000.00
+    tdsRate: '10%',
+    tdsAmount: 31000.00
   }
 ];
 
@@ -25878,8 +25933,8 @@ window.exportAccountsCsv = function(type) {
     headers = ['Date', 'Bank Name', 'Particulars', 'Ref. No', 'Withdrawal (Dr)', 'Deposit (Cr)', 'Balance'];
     keys = ['date', 'bankName', 'particulars', 'refNo', 'withdrawal', 'deposit', 'balance'];
   } else if (type === 'tds') {
-    headers = ['PAN Name', 'PAN Number', 'Payment Date', 'Tax Code', 'Taxable Amount', 'TDS Deducted'];
-    keys = ['panName', 'panNumber', 'paymentDate', 'taxCode', 'taxableAmount', 'tdsDeducted'];
+    headers = ['PAN Name', 'PAN Number', 'TDS Code', 'Taxable Amount', 'TDS Rate', 'TDS Amount'];
+    keys = ['panName', 'panNumber', 'tdsCode', 'taxableAmount', 'tdsRate', 'tdsAmount'];
   } else if (type === 'gstr_1') {
     headers = ['Customer Name', 'Customer GST No', 'Invoice No', 'Invoice Date', 'Taxable Amount', 'CGST', 'SGST', 'IGST', 'Total Amount'];
     keys = ['customerName', 'customerGstNo', 'invoiceNo', 'invoiceDate', 'taxableAmount', 'cgst', 'sgst', 'igst', 'totalAmount'];
@@ -25914,31 +25969,80 @@ window.exportAccTdsCsv = () => exportAccountsCsv('tds');
 window.exportAccGstr1Csv = () => exportAccountsCsv('gstr_1');
 window.exportAccGstr2bCsv = () => exportAccountsCsv('gstr_2b');
 
+window.handlePageRefresh = function() {
+  activeColumnFilters = {};
+  showToast('Refreshing page data...');
+  setTimeout(() => {
+    window.location.reload();
+  }, 250);
+};
+
 window.handleAccPaymentExpenseTypeChange = function(type) {
-  const descSel = document.getElementById('selAccPaymentExpenseDesc');
-  const rowFrom = document.getElementById('rowAccPaymentFrom');
-  const rowTo = document.getElementById('rowAccPaymentTo');
-  const selFrom = document.getElementById('selAccPaymentFrom');
-  const selTo = document.getElementById('selAccPaymentTo');
-
-  if (!descSel) return;
-
   if (!type) {
     const typeSel = document.getElementById('selAccPaymentExpenseType');
     type = typeSel ? typeSel.value : 'IFT';
   }
   const normType = String(type).trim().toLowerCase();
 
-  if (normType === 'ift') {
-    descSel.innerHTML = `
-      <option value="Current A/C Transfer" selected>Current A/C Transfer</option>
-      <option value="Inter-account Fund Transfer">Inter-account Fund Transfer</option>
-      <option value="Internal Fund Transfer">Internal Fund Transfer</option>
-      <option value="Liquidity Transfer">Liquidity Transfer</option>
-    `;
-    if (rowFrom) rowFrom.style.setProperty('display', 'flex', 'important');
-    if (rowTo) rowTo.style.setProperty('display', 'flex', 'important');
+  const rowDesc = document.getElementById('rowAccPaymentExpenseDesc');
+  const selDesc = document.getElementById('selAccPaymentExpenseDesc');
+  const inpDesc = document.getElementById('inpAccPaymentExpenseDesc');
+
+  const rowFrom = document.getElementById('rowAccPaymentFrom');
+  const selFrom = document.getElementById('selAccPaymentFrom');
+  const inpFrom = document.getElementById('inpAccPaymentFrom');
+
+  const rowTo = document.getElementById('rowAccPaymentTo');
+  const selTo = document.getElementById('selAccPaymentTo');
+  const inpTo = document.getElementById('inpAccPaymentTo');
+
+  const rowTickets = document.getElementById('rowAccPaymentAttachTickets');
+
+  // Expense Description row is always visible
+  if (rowDesc) rowDesc.style.display = 'flex';
+
+  if (normType === 'travelling') {
+    // When Travelling: NO DROPDOWNS. Typeable input text fields for Expense Description, From, To
+    if (selDesc) selDesc.style.display = 'none';
+    if (inpDesc) {
+      inpDesc.style.display = 'block';
+      inpDesc.placeholder = 'Enter Travel Purpose / Description';
+    }
+
+    if (rowFrom) rowFrom.style.display = 'flex';
+    if (selFrom) selFrom.style.display = 'none';
+    if (inpFrom) {
+      inpFrom.style.display = 'block';
+      inpFrom.placeholder = 'Enter From';
+    }
+
+    if (rowTo) rowTo.style.display = 'flex';
+    if (selTo) selTo.style.display = 'none';
+    if (inpTo) {
+      inpTo.style.display = 'block';
+      inpTo.placeholder = 'Enter To';
+    }
+
+    // Attach Tickets: centered icon alone (only for Travelling)
+    if (rowTickets) rowTickets.style.display = 'flex';
+
+  } else if (normType === 'ift') {
+    // IFT: Dropdowns for Expense Description, From, To. Attach Tickets hidden.
+    if (inpDesc) inpDesc.style.display = 'none';
+    if (selDesc) {
+      selDesc.style.display = 'block';
+      selDesc.innerHTML = `
+        <option value="Current A/C Transfer" selected>Current A/C Transfer</option>
+        <option value="Inter-account Fund Transfer">Inter-account Fund Transfer</option>
+        <option value="Internal Fund Transfer">Internal Fund Transfer</option>
+        <option value="Liquidity Transfer">Liquidity Transfer</option>
+      `;
+    }
+
+    if (rowFrom) rowFrom.style.display = 'flex';
+    if (inpFrom) inpFrom.style.display = 'none';
     if (selFrom) {
+      selFrom.style.display = 'block';
       selFrom.innerHTML = `
         <option value="HDFC Bank - 0019" selected>HDFC Bank - 0019</option>
         <option value="State Bank of India - 5421">State Bank of India - 5421</option>
@@ -25947,7 +26051,11 @@ window.handleAccPaymentExpenseTypeChange = function(type) {
         <option value="Kotak Mahindra Bank - 7741">Kotak Mahindra Bank - 7741</option>
       `;
     }
+
+    if (rowTo) rowTo.style.display = 'flex';
+    if (inpTo) inpTo.style.display = 'none';
     if (selTo) {
+      selTo.style.display = 'block';
       selTo.innerHTML = `
         <option value="SBI Bank - A/C 9876" selected>SBI Bank - A/C 9876</option>
         <option value="Axis Bank - A/C 4532">Axis Bank - A/C 4532</option>
@@ -25956,52 +26064,53 @@ window.handleAccPaymentExpenseTypeChange = function(type) {
         <option value="Kotak Bank - A/C 7741">Kotak Bank - A/C 7741</option>
       `;
     }
-  } else if (normType === 'travelling') {
-    descSel.innerHTML = `
-      <option value="Official Travel Reimbursement" selected>Official Travel Reimbursement</option>
-      <option value="Site Visit Travel">Site Visit Travel</option>
-      <option value="Client Meeting Travel">Client Meeting Travel</option>
-      <option value="Travel Desk Operations">Travel Desk Operations</option>
-    `;
-    if (rowFrom) rowFrom.style.setProperty('display', 'flex', 'important');
-    if (rowTo) rowTo.style.setProperty('display', 'flex', 'important');
-    if (selFrom) {
-      selFrom.innerHTML = `
-        <option value="Chennai" selected>Chennai</option>
-        <option value="Bangalore">Bangalore</option>
-        <option value="Mumbai">Mumbai</option>
-        <option value="Delhi">Delhi</option>
-        <option value="Hyderabad">Hyderabad</option>
-        <option value="Vijayawada">Vijayawada</option>
-      `;
-    }
-    if (selTo) {
-      selTo.innerHTML = `
-        <option value="Bangalore" selected>Bangalore</option>
-        <option value="Chennai">Chennai</option>
-        <option value="Delhi">Delhi</option>
-        <option value="Mumbai">Mumbai</option>
-        <option value="Hyderabad">Hyderabad</option>
-        <option value="Vijayawada">Vijayawada</option>
-      `;
-    }
+
+    if (rowTickets) rowTickets.style.display = 'none';
+
   } else if (normType === 'taxes') {
-    descSel.innerHTML = `
-      <option value="Income Tax" selected>Income Tax</option>
-      <option value="GST">GST</option>
-      <option value="TDS">TDS</option>
-    `;
-    if (rowFrom) rowFrom.style.setProperty('display', 'none', 'important');
-    if (rowTo) rowTo.style.setProperty('display', 'none', 'important');
+    // Taxes: Dropdown for Expense Description. From, To, Attach Tickets hidden.
+    if (inpDesc) inpDesc.style.display = 'none';
+    if (selDesc) {
+      selDesc.style.display = 'block';
+      selDesc.innerHTML = `
+        <option value="Income Tax" selected>Income Tax</option>
+        <option value="GST">GST</option>
+        <option value="TDS">TDS</option>
+      `;
+    }
+
+    if (rowFrom) rowFrom.style.display = 'none';
+    if (rowTo) rowTo.style.display = 'none';
+    if (rowTickets) rowTickets.style.display = 'none';
+
   } else if (normType === 'salary advance') {
-    descSel.innerHTML = `
-      <option value="Monthly Salary Advance" selected>Monthly Salary Advance</option>
-      <option value="Festival Advance - Site Staff">Festival Advance - Site Staff</option>
-      <option value="Salary Advance for Suresh Babu">Salary Advance for Suresh Babu</option>
-      <option value="Emergency Advance">Emergency Advance</option>
-    `;
-    if (rowFrom) rowFrom.style.setProperty('display', 'none', 'important');
-    if (rowTo) rowTo.style.setProperty('display', 'none', 'important');
+    // Salary Advance: Dropdown for Expense Description. From, To, Attach Tickets hidden.
+    if (inpDesc) inpDesc.style.display = 'none';
+    if (selDesc) {
+      selDesc.style.display = 'block';
+      selDesc.innerHTML = `
+        <option value="Monthly Salary Advance" selected>Monthly Salary Advance</option>
+        <option value="Festival Advance - Site Staff">Festival Advance - Site Staff</option>
+        <option value="Salary Advance for Suresh Babu">Salary Advance for Suresh Babu</option>
+        <option value="Emergency Advance">Emergency Advance</option>
+      `;
+    }
+
+    if (rowFrom) rowFrom.style.display = 'none';
+    if (rowTo) rowTo.style.display = 'none';
+    if (rowTickets) rowTickets.style.display = 'none';
+  }
+};
+
+window.handleAccPaymentTicketsSelected = function(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const btn = document.getElementById('btnAccPaymentAttachTickets');
+    if (btn) {
+      btn.title = `Attached: ${file.name}`;
+      btn.style.filter = 'drop-shadow(0 0 4px #16a34a)';
+    }
+    showToast(`Ticket attached: ${file.name}`);
   }
 };
 
@@ -26010,6 +26119,11 @@ window.handleAccPaymentAdd = function() {
   const card = document.getElementById('accPaymentAddCard');
   const frm = document.getElementById('frmAccPaymentAdd');
   if (frm) frm.reset();
+  const btnTicket = document.getElementById('btnAccPaymentAttachTickets');
+  if (btnTicket) {
+    btnTicket.title = 'Attach Tickets';
+    btnTicket.style.filter = 'none';
+  }
   const typeSel = document.getElementById('selAccPaymentExpenseType');
   if (typeSel) typeSel.value = 'IFT';
   handleAccPaymentExpenseTypeChange('IFT');
@@ -26022,16 +26136,26 @@ window.handleAccPaymentAdd = function() {
 
 window.submitAccPaymentRequest = function() {
   const typeSel = document.getElementById('selAccPaymentExpenseType');
-  const descSel = document.getElementById('selAccPaymentExpenseDesc');
-  const selFrom = document.getElementById('selAccPaymentFrom');
-  const selTo = document.getElementById('selAccPaymentTo');
-  const inpAmount = document.getElementById('inpAccPaymentAmount');
-
   const expenseType = typeSel ? typeSel.value : 'IFT';
-  const descVal = descSel ? descSel.value : '';
-  const fromVal = selFrom ? selFrom.value : '';
-  const toVal = selTo ? selTo.value : '';
+  const isTravelling = expenseType.toLowerCase() === 'travelling';
+
+  const descVal = isTravelling 
+    ? (document.getElementById('inpAccPaymentExpenseDesc')?.value || '').trim()
+    : (document.getElementById('selAccPaymentExpenseDesc')?.value || '').trim();
+
+  const fromVal = isTravelling
+    ? (document.getElementById('inpAccPaymentFrom')?.value || '').trim()
+    : (document.getElementById('selAccPaymentFrom')?.value || '').trim();
+
+  const toVal = isTravelling
+    ? (document.getElementById('inpAccPaymentTo')?.value || '').trim()
+    : (document.getElementById('selAccPaymentTo')?.value || '').trim();
+
+  const inpAmount = document.getElementById('inpAccPaymentAmount');
+  const fileInp = document.getElementById('inpAccPaymentAttachTickets');
+
   const amountVal = inpAmount ? parseFloat(inpAmount.value) : 0;
+  const ticketFile = fileInp && fileInp.files && fileInp.files[0] ? fileInp.files[0].name : '';
 
   if (isNaN(amountVal) || amountVal <= 0) {
     showToast('Please enter a valid amount.', 'warning');
@@ -26042,22 +26166,24 @@ window.submitAccPaymentRequest = function() {
   const pad = (n) => String(n).padStart(2, '0');
   const dateFormatted = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
 
-  let remarksStr = '';
-  let transferToStr = '';
-
-  if (expenseType === 'IFT') {
-    remarksStr = `From ${fromVal} To ${toVal}`;
-    transferToStr = toVal;
-  } else if (expenseType === 'Travelling') {
-    remarksStr = `From ${fromVal} To ${toVal}`;
-    transferToStr = 'Travel Desk Operations';
-  } else if (expenseType === 'Taxes') {
-    remarksStr = descVal;
-    transferToStr = `${descVal} Portal / Department`;
-  } else if (expenseType === 'Salary Advance') {
-    remarksStr = descVal;
-    transferToStr = 'Employee Account';
+  let remarksStr = descVal;
+  if (!remarksStr) {
+    if (fromVal && toVal) {
+      remarksStr = `From ${fromVal} To ${toVal}`;
+    } else if (fromVal) {
+      remarksStr = `From ${fromVal}`;
+    } else if (toVal) {
+      remarksStr = `To ${toVal}`;
+    } else if (ticketFile) {
+      remarksStr = `Tickets Attached (${ticketFile})`;
+    } else {
+      remarksStr = expenseType;
+    }
+  } else if (ticketFile) {
+    remarksStr += ` (${ticketFile})`;
   }
+
+  let transferToStr = toVal || fromVal || descVal || 'Department Account';
 
   const newEntry = {
     id: `ACC-PAY-${Date.now().toString().slice(-4)}`,
@@ -26082,6 +26208,7 @@ window.submitAccPaymentRequest = function() {
     showToast('Payment request added successfully!');
   }
 };
+
 
 window.handleAccReceivableBulkUpload = function() {
   if (typeof openBulkUploadSidePanel === 'function') {
@@ -26186,7 +26313,28 @@ window.submitAccBankEntry = function() {
 };
 
 window.handleAccountsManagerSubmit = function() {
-  if (currentWorklistView === 'tds') {
+  if (currentWorklistView === 'payment') {
+    const selectedRows = (accountsManagerPaymentStore || []).filter(r => r.selected);
+    if (selectedRows.length === 0) {
+      showToast('Please select at least one row to submit.', 'warning');
+      return;
+    }
+    openAccTxnDetailsModal();
+  } else if (currentWorklistView === 'bank') {
+    const selectedRows = (accountsManagerBankStore || []).filter(r => r.selected);
+    if (selectedRows.length === 0) {
+      showToast('Please select at least one row to submit.', 'warning');
+      return;
+    }
+    (accountsManagerBankStore || []).forEach(r => { if (r.selected) r.selected = false; });
+    currentDataset = [...accountsManagerBankStore];
+    applyFiltersAndRender();
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Bank transaction submitted successfully!', 'Task Completed');
+    } else {
+      showToast('Bank transaction submitted successfully!');
+    }
+  } else if (currentWorklistView === 'tds') {
     openAccAttachChallanModal();
   } else if (currentWorklistView === 'gstr_3b') {
     openAccAttachReturnsModal();
@@ -26196,7 +26344,7 @@ window.handleAccountsManagerSubmit = function() {
       showToast('Please select at least one row to submit.', 'warning');
       return;
     }
-    (accountsManagerGstr1Store || []).forEach(r => { if (r.selected) r.selected = false; });
+    accountsManagerGstr1Store = accountsManagerGstr1Store.filter(r => !r.selected);
     currentDataset = [...accountsManagerGstr1Store];
     applyFiltersAndRender();
     if (typeof showSvgSuccessPopup === 'function') {
@@ -26226,6 +26374,59 @@ window.handleAccountsManagerSubmit = function() {
   }
 };
 window.handleAccManagerSubmit = window.handleAccountsManagerSubmit;
+
+window.openAccTxnDetailsModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const card = document.getElementById('accTxnDetailsCard');
+  const frm = document.getElementById('frmAccTxnDetails');
+  if (frm) frm.reset();
+  const inpDate = document.getElementById('inpAccTxnDate');
+  if (inpDate) {
+    const today = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    inpDate.value = `${pad(today.getDate())}/${pad(today.getMonth() + 1)}/${today.getFullYear()}`;
+  }
+  if (overlay) {
+    overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+    overlay.style.display = 'flex';
+  }
+  if (card) card.style.display = 'block';
+};
+
+window.submitAccTxnDetails = function() {
+  const utrInput = document.getElementById('inpAccTxnUtrNumber');
+  const dateInput = document.getElementById('inpAccTxnDate');
+  const utrVal = utrInput ? utrInput.value.trim() : '';
+  const dateVal = dateInput ? dateInput.value.trim() : '';
+
+  if (!utrVal) {
+    showToast('Please enter UTR Number.', 'warning');
+    return;
+  }
+  if (!dateVal) {
+    showToast('Please select TXN Date.', 'warning');
+    return;
+  }
+
+  (accountsManagerPaymentStore || []).forEach(r => {
+    if (r.selected) {
+      r.selected = false;
+      r.utrNumber = utrVal;
+      r.txnDate = dateVal;
+      r.status = 'Approved';
+    }
+  });
+
+  currentDataset = [...accountsManagerPaymentStore];
+  applyFiltersAndRender();
+  closeSideForm();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Transaction details submitted successfully!', 'Task Completed');
+  } else {
+    showToast('Transaction details submitted successfully!');
+  }
+};
 
 window.openAccAttachChallanModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
@@ -27560,6 +27761,11 @@ function renderWorklistToolbar() {
             onclick="handleAccPaymentAdd()">
             <img src="icons/Add.svg" alt="Add" width="28" height="28">
           </button>
+          <button type="button" class="toolbar-icon-btn" id="btnAccPaymentRefresh" title="Refresh"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="handlePageRefresh()">
+            <img src="icons/Refresh.svg" alt="Refresh" width="28" height="28">
+          </button>
         </div>
       `;
       return;
@@ -27599,6 +27805,11 @@ function renderWorklistToolbar() {
             style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
             onclick="exportAccBankCsv()">
             <img src="icons/CSV download.svg" alt="Export CSV" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnAccBankRefresh" title="Refresh"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="handlePageRefresh()">
+            <img src="icons/Refresh.svg" alt="Refresh" width="28" height="28">
           </button>
           <button type="button" class="toolbar-icon-btn" id="btnAccBankAdd" title="Add Transaction"
             style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
@@ -29216,20 +29427,20 @@ function renderWorklistTableHead() {
           <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>PAN Number</span>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-            <span>Payment Date</span>
-          </th>
           <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Tax Code</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['taxCode'] ? 'has-active-filter' : ''}" data-filter-col="taxCode" title="Filter Tax Code">&#9660;</button>
+              <span>TDS Code</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['tdsCode'] ? 'has-active-filter' : ''}" data-filter-col="tdsCode" title="Filter TDS Code">&#9660;</button>
             </div>
           </th>
           <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Taxable Amount</span>
           </th>
+          <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>TDS Rate</span>
+          </th>
           <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
-            <span>TDS Deducted</span>
+            <span>TDS Amount</span>
           </th>
         </tr>
       `;
@@ -31744,13 +31955,20 @@ function applyFiltersAndRender() {
   if (accSubmitArea) {
     accSubmitArea.style.display = 'none';
   }
+  const accGstr2bDownloadArea = document.getElementById('accGstr2bDownloadArea');
+  if (accGstr2bDownloadArea) {
+    accGstr2bDownloadArea.style.display = 'none';
+  }
 
   const role = getAuthenticatedUserRole();
   if (role === 'Accounts Manager') {
+    if (accGstr2bDownloadArea) {
+      accGstr2bDownloadArea.style.display = (currentWorklistView === 'gstr_2b') ? 'flex' : 'none';
+    }
     if (accSubmitArea) {
       if (['tds', 'gstr_3b'].includes(currentWorklistView)) {
         accSubmitArea.style.display = 'flex';
-      } else if (['gstr_1', 'gstr_2b'].includes(currentWorklistView)) {
+      } else if (['gstr_1', 'payment', 'bank'].includes(currentWorklistView)) {
         const hasSelected = (currentDataset || []).some(r => r.selected);
         accSubmitArea.style.display = hasSelected ? 'flex' : 'none';
       } else {
@@ -31845,25 +32063,25 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
               ${row.dueDate || ''}
             </td>
-            <!-- 5. Invoice Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; cursor: pointer;" onclick="openAccRecInvoiceAmountBreakdown('${row.id}')" title="View Invoice Amount Breakdown">
-              <span style="cursor: pointer; color: #1e293b; font-weight: 600;">${formatCurrency(row.invoiceAmount)}</span>
+            <!-- 5. Invoice Amount: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; cursor: pointer;" onclick="openAccRecInvoiceAmountBreakdown('${row.id}')" title="View Invoice Amount Breakdown">
+              <span style="cursor: pointer; color: #0454e4; font-weight: 600;">${formatCurrency(row.invoiceAmount)}</span>
             </td>
-            <!-- 6. Deduction: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #dc2626; cursor: pointer;" onclick="openAccRecDeductionBreakdown('${row.id}')" title="View Deduction Breakdown">
+            <!-- 6. Deduction: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #dc2626; cursor: pointer;" onclick="openAccRecDeductionBreakdown('${row.id}')" title="View Deduction Breakdown">
               <span style="cursor: pointer; color: #dc2626; font-weight: 600;">${formatCurrency(row.deduction)}</span>
             </td>
-            <!-- 7. Approved Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
+            <!-- 7. Approved Amount: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
               ${formatCurrency(row.approvedAmount)}
             </td>
-            <!-- 8. Received Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #16a34a; cursor: pointer;" onclick="openAccRecReceivedAmountTable('${row.id}')" title="View Received Amount Details">
+            <!-- 8. Received Amount: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #16a34a; cursor: pointer;" onclick="openAccRecReceivedAmountTable('${row.id}')" title="View Received Amount Details">
               <span style="cursor: pointer; color: #16a34a; font-weight: 600;">${formatCurrency(row.receivedAmount)}</span>
             </td>
-            <!-- 9. Receivable: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; font-weight: 700;">
-              ${formatCurrency(row.receivable)}
+            <!-- 9. Receivable: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-weight: 500;">
+              <span style="color: #64748b; font-weight: 500;">${formatCurrency(row.receivable)}</span>
             </td>
             <!-- 10. Status: 10ch & center -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
@@ -31934,21 +32152,21 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-family: monospace; font-weight: 600;">
               ${row.panNumber || ''}
             </td>
-            <!-- 3. Payment Date: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
-              ${row.paymentDate || ''}
+            <!-- 3. TDS Code: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.tdsCode || '').replace(/"/g, '&quot;')}">
+              ${row.tdsCode || ''}
             </td>
-            <!-- 4. Tax Code: 35ch & left -->
-            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.taxCode || '').replace(/"/g, '&quot;')}">
-              ${row.taxCode || ''}
-            </td>
-            <!-- 5. Taxable Amount: 15ch & right -->
+            <!-- 4. Taxable Amount: 15ch & right -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
               ${formatCurrency(row.taxableAmount)}
             </td>
-            <!-- 6. TDS Deducted: 15ch & right -->
+            <!-- 5. TDS Rate: 12ch & center -->
+            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.tdsRate || ''}
+            </td>
+            <!-- 6. TDS Amount: 15ch & right -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #dc2626; font-weight: 600;">
-              ${formatCurrency(row.tdsDeducted)}
+              ${formatCurrency(row.tdsAmount !== undefined ? row.tdsAmount : row.tdsDeducted)}
             </td>
           </tr>
         `;
@@ -32111,8 +32329,13 @@ function applyFiltersAndRender() {
     renderWorklistToolbar();
 
     const hasAnyHighlighted = (currentDataset || []).some(r => r.highlighted);
+    const hasAnySelected = (currentDataset || []).some(r => r.selected);
     if (amSubmitArea) {
-      amSubmitArea.style.display = (hasAnyHighlighted && (currentWorklistView === 'attendance' || currentWorklistView === 'salary')) ? 'flex' : 'none';
+      if (currentWorklistView === 'payment') {
+        amSubmitArea.style.display = hasAnySelected ? 'flex' : 'none';
+      } else {
+        amSubmitArea.style.display = (hasAnyHighlighted && (currentWorklistView === 'attendance' || currentWorklistView === 'salary')) ? 'flex' : 'none';
+      }
     }
 
     if (currentWorklistView === 'attendance') {
@@ -32277,27 +32500,21 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
               ${row.date || ''}
             </td>
-            <!-- 4. Expense Type: 15ch & left (editable dropdown with 5 options when editing & row selected) -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: ${isAdminPaymentEditing && isSelected ? '4px 8px' : '10px 12px'}; color: #1e293b;">
-              ${isAdminPaymentEditing && isSelected ? `
-                <select class="admin-payment-expensetype-select" data-row-id="${row.id}" onchange="updateAdminPaymentRowExpenseType('${row.id}', this.value)" style="width: 100%; height: 30px; border-radius: 4px; border: 1.5px solid #00cba0; background: #ffffff; color: #1e293b; font-size: 0.88rem; outline: none; cursor: pointer; text-align: left; font-weight: 500;">
-                  <option value="Travelling" ${row.expenseType === 'Travelling' ? 'selected' : ''}>Travelling</option>
-                  <option value="Office" ${row.expenseType === 'Office' ? 'selected' : ''}>Office</option>
-                  <option value="Payroll Tax" ${row.expenseType === 'Payroll Tax' ? 'selected' : ''}>Payroll Tax</option>
-                  <option value="Salary" ${row.expenseType === 'Salary' ? 'selected' : ''}>Salary</option>
-                  <option value="Salary Advance" ${row.expenseType === 'Salary Advance' ? 'selected' : ''}>Salary Advance</option>
-                </select>
-              ` : `
-                <span>${row.expenseType || ''}</span>
-              `}
+            <!-- 4. Expense Type: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b;">
+              <span>${row.expenseType || ''}</span>
             </td>
             <!-- 5. Remarks: 40ch & left -->
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
               ${row.remarks || ''}
             </td>
-            <!-- 6. Amount: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 600;">
-              ${Number(row.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <!-- 6. Amount: 15ch & center (editable input when editing & row selected) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: ${isAdminPaymentEditing && isSelected ? '4px 8px' : '10px 8px'}; color: #1e293b; font-weight: 600;">
+              ${isAdminPaymentEditing && isSelected ? `
+                <input type="text" class="admin-payment-amount-input" data-row-id="${row.id}" value="${row.amount || ''}" oninput="updateAdminPaymentRowAmount('${row.id}', this.value)" style="width: 100%; height: 30px; border-radius: 4px; border: 1.5px solid #00cba0; background: #ffffff; color: #1e293b; font-size: 0.88rem; outline: none; text-align: center; font-weight: 600;">
+              ` : `
+                ${Number(row.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              `}
             </td>
             <!-- 7. Ageing: 10ch & center -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
@@ -34598,11 +34815,11 @@ function applyFiltersAndRender() {
             </td>
             <!-- 7. Received Amount: 15ch & right, clickable to open Received Amount Modal -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
-              <span onclick="openReceivableReceivedAmountModal('${row.id}')" style="color: #0454e4; font-weight: 500; cursor: pointer;" title="View Received Amount Breakdown">${row.receivedAmount || ''}</span>
+              <span onclick="openReceivableReceivedAmountModal('${row.id}')" style="color: #16a34a; font-weight: 600; cursor: pointer;" title="View Received Amount Breakdown">${row.receivedAmount || ''}</span>
             </td>
-            <!-- 8. Receivable: 15ch & right, Regular Black Font Color -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
-              ${row.receivable || ''}
+            <!-- 8. Receivable: 15ch & right, Regular Grey Font Color -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; color: #64748b; vertical-align: middle; padding: 10px 8px;">
+              <span style="color: #64748b;">${row.receivable || ''}</span>
             </td>
             <!-- 9. Ageing: 10ch & center -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">

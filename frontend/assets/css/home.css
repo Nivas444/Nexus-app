@@ -3237,7 +3237,9 @@ td.col-master-vendor-status {
 #invoiceDetailPanel .side-form-close-btn:hover,
 #btnCloseInvoiceDetailPanel:hover,
 #invoiceDueDatePanel .side-form-close-btn:hover,
-#btnCloseInvoiceDueDatePanel:hover {
+#btnCloseInvoiceDueDatePanel:hover,
+#accAttachChallanCard .side-form-close-btn:hover,
+#btnCloseAccAttachChallan:hover {
   transform: none !important;
   color: #dc2626 !important;
 }

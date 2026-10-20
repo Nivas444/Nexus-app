@@ -18,6 +18,8 @@ class IndusGbpaBase(BaseModel):
     budget_percentage: Optional[Union[Decimal, float, str]] = None
     budget_amount: Optional[Union[Decimal, float, str]] = None
     status: Optional[str] = Field("Active", max_length=50)
+    non_standard: Optional[Union[bool, str]] = Field(default=False)
+    nonStandard: Optional[Union[bool, str]] = None
 
 class IndusGbpaCreate(IndusGbpaBase):
     item_name: str = Field(..., min_length=1, max_length=255, description="Item / Product Name")
@@ -38,6 +40,8 @@ class IndusGbpaUpdate(BaseModel):
     budget_percentage: Optional[Union[Decimal, float, str]] = None
     budget_amount: Optional[Union[Decimal, float, str]] = None
     status: Optional[str] = None
+    non_standard: Optional[Union[bool, str]] = None
+    nonStandard: Optional[Union[bool, str]] = None
 
 class IndusGbpaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -70,6 +74,8 @@ class IndusGbpaResponse(BaseModel):
     budget_amount: Optional[Union[str, float, Decimal]] = None
     budgetAmount: Optional[Union[str, float, Decimal]] = None
     status: Optional[str] = "Active"
+    non_standard: Optional[bool] = False
+    nonStandard: Optional[bool] = False
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

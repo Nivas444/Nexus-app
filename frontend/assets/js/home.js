@@ -7019,11 +7019,12 @@ function applyRoleBasedNavigation() {
   const navWorklist = document.getElementById('navBtnWorklist');
   const navPurchase = document.getElementById('navBtnPurchase');
   const navInventory = document.getElementById('navBtnInventory');
+  const navInfraWh = document.getElementById('navBtnInfraWh');
   const navProfile = document.getElementById('navBtnProfile');
   const btnSignout = document.getElementById('btnPowerOff');
 
   // Reset ordering on all primary navigation icons before applying role-specific layout
-  [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
+  [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh, navProfile, btnSignout].forEach(btn => {
     if (btn) btn.style.order = '';
   });
 
@@ -7041,6 +7042,7 @@ function applyRoleBasedNavigation() {
     if (navAdmin) navAdmin.style.display = 'none';
     if (navPurchase) navPurchase.style.display = 'none';
     if (navInventory) navInventory.style.display = 'none';
+    if (navInfraWh) navInfraWh.style.display = 'none';
 
     // Route Protection: If currentModule is restricted for Project Manager, redirect to Worklist
     const allowedModules = ['worklist', 'projects', 'profile'];
@@ -7071,6 +7073,7 @@ function applyRoleBasedNavigation() {
     if (navAdmin) navAdmin.style.display = 'none';
     if (navPurchase) navPurchase.style.display = 'none';
     if (navInventory) navInventory.style.display = 'none';
+    if (navInfraWh) navInfraWh.style.display = 'none';
 
     // Route Protection: If currentModule is restricted for Commercial Manager, redirect to Worklist
     const allowedModules = ['master', 'indus_towers', 'projects', 'worklist', 'profile'];
@@ -7095,6 +7098,7 @@ function applyRoleBasedNavigation() {
     if (navAccounts) navAccounts.style.display = 'none';
     if (navAdmin) navAdmin.style.display = 'none';
     if (navPurchase) navPurchase.style.display = 'none';
+    if (navInfraWh) navInfraWh.style.display = 'none';
 
     // Route Protection: If currentModule is restricted for Warehouse Manager, redirect to Worklist
     const allowedModules = ['worklist', 'inventory', 'profile'];
@@ -7107,21 +7111,22 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Purchase Manager') {
-    // Exactly 3 navigation icons in order: Profile, Worklist, Sign Out
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '1'; }
+    // Exactly 4 navigation icons in order: Purchase, Worklist, Profile, Sign Out
+    if (navPurchase) { navPurchase.style.display = 'inline-flex'; navPurchase.style.order = '1'; }
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
     if (navProjects) navProjects.style.display = 'none';
     if (navAccounts) navAccounts.style.display = 'none';
     if (navAdmin) navAdmin.style.display = 'none';
-    if (navPurchase) navPurchase.style.display = 'none';
     if (navInventory) navInventory.style.display = 'none';
+    if (navInfraWh) navInfraWh.style.display = 'none';
 
     // Route Protection: If currentModule is restricted for Purchase Manager, redirect to Worklist
-    const allowedModules = ['worklist', 'profile'];
+    const allowedModules = ['worklist', 'purchase', 'profile'];
     if (!allowedModules.includes(currentModule)) {
       if (typeof showToast === 'function') {
         showToast('Access Restricted: Purchase Manager role does not have permission for this module.', 'warning');
@@ -7131,21 +7136,22 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Admin Manager') {
-    // Exactly 3 navigation icons in order: Profile, Worklist, Sign Out
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '1'; }
+    // Exactly 4 navigation icons in order: Admin, Worklist, Profile, Sign Out
+    if (navAdmin) { navAdmin.style.display = 'inline-flex'; navAdmin.style.order = '1'; }
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
     if (navProjects) navProjects.style.display = 'none';
     if (navAccounts) navAccounts.style.display = 'none';
-    if (navAdmin) navAdmin.style.display = 'none';
     if (navPurchase) navPurchase.style.display = 'none';
     if (navInventory) navInventory.style.display = 'none';
+    if (navInfraWh) navInfraWh.style.display = 'none';
 
     // Route Protection: If currentModule is restricted for Admin Manager, redirect to Worklist
-    const allowedModules = ['worklist', 'profile'];
+    const allowedModules = ['worklist', 'admin', 'profile'];
     if (!allowedModules.includes(currentModule)) {
       if (typeof showToast === 'function') {
         showToast('Access Restricted: Admin Manager role does not have permission for this module.', 'warning');
@@ -7155,21 +7161,22 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Accounts Manager') {
-    // Exactly 3 navigation icons in order: Worklist, Profile, Sign Out (Worklist and Profile swapped)
-    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '1'; }
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '2'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+    // Exactly 4 navigation icons in order: Accounts, Worklist, Profile, Sign Out
+    if (navAccounts) { navAccounts.style.display = 'inline-flex'; navAccounts.style.order = '1'; }
+    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
     if (navProjects) navProjects.style.display = 'none';
-    if (navAccounts) navAccounts.style.display = 'none';
     if (navAdmin) navAdmin.style.display = 'none';
     if (navPurchase) navPurchase.style.display = 'none';
     if (navInventory) navInventory.style.display = 'none';
+    if (navInfraWh) navInfraWh.style.display = 'none';
 
     // Route Protection: If currentModule is restricted for Accounts Manager, redirect to Worklist
-    const allowedModules = ['worklist', 'profile'];
+    const allowedModules = ['worklist', 'accounts', 'profile'];
     if (!allowedModules.includes(currentModule)) {
       if (typeof showToast === 'function') {
         showToast('Access Restricted: Accounts Manager role does not have permission for this module.', 'warning');
@@ -7182,8 +7189,8 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else {
-    // Master role (and legacy Admin): All 9 navigation items are visible and accessible
-    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navProfile, btnSignout].forEach(btn => {
+    // Master role (and legacy Admin): All 10 navigation items are visible and accessible
+    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh, navProfile, btnSignout].forEach(btn => {
       if (btn) {
         btn.style.display = 'inline-flex';
         btn.style.order = '';
@@ -7247,7 +7254,7 @@ function switchModule(moduleName) {
       return;
     }
   } else if (role === 'Purchase Manager') {
-    const allowedModules = ['worklist', 'profile'];
+    const allowedModules = ['worklist', 'purchase', 'profile'];
     if (!allowedModules.includes(moduleName)) {
       if (typeof showToast === 'function') {
         showToast(`Access Restricted: Purchase Manager does not have permission to access ${moduleName}.`, 'warning');
@@ -7255,7 +7262,7 @@ function switchModule(moduleName) {
       return;
     }
   } else if (role === 'Admin Manager') {
-    const allowedModules = ['worklist', 'profile'];
+    const allowedModules = ['worklist', 'admin', 'profile'];
     if (!allowedModules.includes(moduleName)) {
       if (typeof showToast === 'function') {
         showToast(`Access Restricted: Admin Manager does not have permission to access ${moduleName}.`, 'warning');
@@ -7263,7 +7270,7 @@ function switchModule(moduleName) {
       return;
     }
   } else if (role === 'Accounts Manager') {
-    const allowedModules = ['worklist', 'profile'];
+    const allowedModules = ['worklist', 'accounts', 'profile'];
     if (!allowedModules.includes(moduleName)) {
       if (typeof showToast === 'function') {
         showToast(`Access Restricted: Accounts Manager does not have permission to access ${moduleName}.`, 'warning');
@@ -7553,6 +7560,10 @@ function goBackSubpage() {
     if (currentAdminView === 'attendance' || currentAdminView === 'salary_detail' || currentAdminView === 'epf' || currentAdminView === 'esi' || currentAdminView === 'pt' || currentAdminView === 'lwf') {
       closeAdminSalaryDetailPage();
       return;
+    } else {
+      currentModule = 'worklist';
+      currentWorklistView = 'attendance';
+      showToast('Returned to Worklist');
     }
   } else if (currentModule === 'accounts') {
     if (currentAccountsView === 'tds_payable' || currentAccountsView === 'tds_receivable') {
@@ -7572,7 +7583,14 @@ function goBackSubpage() {
     if (currentPurchaseView === 'supplier_detail') {
       currentPurchaseView = 'main';
       showToast('Returned to Purchase');
+    } else {
+      currentModule = 'worklist';
+      currentWorklistView = 'pr';
+      showToast('Returned to Worklist');
     }
+  } else if (currentModule === 'infra_wh') {
+    currentModule = 'worklist';
+    showToast('Returned to Worklist');
   } else if (currentModule === 'projects') {
     if (currentProjectsView === 'project_service_vendor_detail') {
       currentProjectsView = 'project_service_vendor';
@@ -8321,7 +8339,8 @@ function renderApp() {
     const titleMap = {
       accounts: 'Accounts',
       admin: 'Admin',
-      profile: 'Profile'
+      profile: 'Profile',
+      infra_wh: 'Infra WH'
     };
     if (bannerTitle) bannerTitle.textContent = titleMap[currentModule] || (currentModule.charAt(0).toUpperCase() + currentModule.slice(1));
     renderPlaceholderModule();
@@ -8912,6 +8931,12 @@ function renderIndusTableHead() {
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
           <span>UOM</span>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+          <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+            <span>Non-Standard</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['non_standard'] ? 'has-active-filter' : ''}" data-filter-col="non_standard" title="Filter Non-Standard">&#9660;</button>
+          </div>
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
@@ -31961,7 +31986,7 @@ function applyFiltersAndRender() {
   }
 
   const role = getAuthenticatedUserRole();
-  if (role === 'Accounts Manager') {
+  if (currentModule === 'worklist' && role === 'Accounts Manager') {
     if (accGstr2bDownloadArea) {
       accGstr2bDownloadArea.style.display = (currentWorklistView === 'gstr_2b') ? 'flex' : 'none';
     }
@@ -32316,7 +32341,7 @@ function applyFiltersAndRender() {
 
     return;
   }
-  if (role === 'Admin Manager') {
+  if (currentModule === 'worklist' && role === 'Admin Manager') {
     filteredDataset = (currentDataset || []).filter(row => {
       for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
         if (!allowedSet || allowedSet.size === 0) continue;
@@ -35255,6 +35280,14 @@ function applyFiltersAndRender() {
       // Render Indus Towers -> Products (GBPA) Rows with Select Radio
       tbody.innerHTML = filteredDataset.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
+        const isNonStandardActive = Boolean(
+          row.non_standard === true ||
+          row.nonStandard === true ||
+          String(row.non_standard).toLowerCase() === 'true' ||
+          String(row.nonStandard).toLowerCase() === 'true' ||
+          String(row.non_standard).toLowerCase() === 'active' ||
+          String(row.nonStandard).toLowerCase() === 'active'
+        );
         const rowKey = row.item_id || row.id || '';
         const dispItemName = row.item_name || row.itemName || row.productName || '';
         const dispItemCode = row.item_code || row.itemCode || '';
@@ -35279,6 +35312,9 @@ function applyFiltersAndRender() {
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${dispHsnSacType}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b;">${dispHsnSacCode}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${dispUom}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
+              <span class="status-badge ${isNonStandardActive ? 'status-active' : 'status-inactive'}">${isNonStandardActive ? 'Active' : 'In - Active'}</span>
+            </td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
@@ -36499,15 +36535,15 @@ function renderProfileModule() {
   const permissionsText = isMaster
     ? 'Full System Administrator Access (All Modules)'
     : (isAdminManager
-      ? 'Role-Based Access: Profile, Worklist'
+      ? 'Role-Based Access: Admin, Worklist, Profile'
       : (isAccountsManager
-        ? 'Role-Based Access: Profile, Worklist'
+        ? 'Role-Based Access: Accounts, Worklist, Profile'
         : (role === 'Project Manager'
           ? 'Role-Based Access: Worklist, Home / Projects, Profile'
           : (role === 'Warehouse Manager'
             ? 'Role-Based Access: Worklist, Inventory, Profile'
             : (role === 'Purchase Manager'
-              ? 'Role-Based Access: Profile, Worklist'
+              ? 'Role-Based Access: Purchase, Worklist, Profile'
               : 'Role-Based Access: Master, Home / Projects, Worklist, Profile')))));
 
   if (thead) {
@@ -39860,6 +39896,8 @@ function openSideForm() {
         if (uomSelect) uomSelect.value = 'Pcs';
         const hsnSelect = document.getElementById('inpGbpaHsnSac');
         if (hsnSelect) hsnSelect.value = 'HSN';
+        const nsToggle = document.getElementById('inpGbpaNonStandardToggle');
+        if (nsToggle) nsToggle.checked = false;
         const stToggle = document.getElementById('inpGbpaStatusToggle');
         if (stToggle) stToggle.checked = true;
 
@@ -44654,6 +44692,11 @@ window.openViewGbpaCard = async function(itemId) {
   if (document.getElementById('inpGbpaBudgetPercent')) document.getElementById('inpGbpaBudgetPercent').value = item.budget_percentage || item.budgetPercent || '';
   if (document.getElementById('inpGbpaBudgetAmount')) document.getElementById('inpGbpaBudgetAmount').value = item.budget_amount || item.budgetAmount || '';
 
+  if (document.getElementById('inpGbpaNonStandardToggle')) {
+    const isNs = Boolean(item.non_standard === true || item.nonStandard === true || String(item.non_standard).toLowerCase() === 'true' || String(item.non_standard).toLowerCase() === 'active');
+    document.getElementById('inpGbpaNonStandardToggle').checked = isNs;
+  }
+
   if (document.getElementById('inpGbpaStatusToggle')) {
     document.getElementById('inpGbpaStatusToggle').checked = !((item.status || '').toLowerCase().includes('in'));
   }
@@ -44704,6 +44747,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      const nsChk = document.getElementById('inpGbpaNonStandardToggle');
+      const nonStandard = Boolean(nsChk && nsChk.checked);
+
       const updatePayload = {
         item_name: productName,
         item_description: productDescription,
@@ -44714,6 +44760,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rate: rate,
         budget_percentage: budgetPercent,
         budget_amount: budgetAmount,
+        non_standard: nonStandard,
         status: status
       };
 

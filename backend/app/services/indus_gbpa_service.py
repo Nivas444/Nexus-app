@@ -28,6 +28,18 @@ def _parse_numeric(val: Any) -> Optional[Decimal]:
             return None
     return None
 
+def _parse_bool(val: Any) -> bool:
+    if val is None:
+        return False
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, (int, float)):
+        return bool(val)
+    if isinstance(val, str):
+        cleaned = val.strip().lower()
+        return cleaned in ("true", "1", "active", "yes", "t")
+    return False
+
 def _format_rate(val: Any) -> str:
     if val is None:
         return "0.00"
@@ -40,6 +52,7 @@ def _format_gbpa_response(item: IndusCustomerGbpa) -> IndusGbpaResponse:
     rate_str = _format_rate(item.rate)
     budget_pct_str = f"{float(item.budget_percentage):.0f}" if item.budget_percentage is not None else ""
     budget_amt_str = _format_rate(item.budget_amount) if item.budget_amount is not None else ""
+    ns_bool = bool(item.non_standard) if item.non_standard is not None else False
 
     return IndusGbpaResponse(
         item_id=item.item_id,
@@ -70,6 +83,8 @@ def _format_gbpa_response(item: IndusCustomerGbpa) -> IndusGbpaResponse:
         budget_amount=item.budget_amount,
         budgetAmount=budget_amt_str,
         status=item.status or "Active",
+        non_standard=ns_bool,
+        nonStandard=ns_bool,
         created_at=item.created_at,
         updated_at=item.updated_at
     )
@@ -153,6 +168,7 @@ class IndusGbpaService:
             "gst_rate": _parse_numeric(payload.gst_rate),
             "budget_percentage": _parse_numeric(payload.budget_percentage),
             "budget_amount": _parse_numeric(payload.budget_amount),
+            "non_standard": _parse_bool(payload.non_standard if payload.non_standard is not None else payload.nonStandard),
             "status": payload.status.strip() if payload.status else "Active"
         }
 
@@ -214,6 +230,9 @@ class IndusGbpaService:
             update_dict["budget_amount"] = _parse_numeric(payload.budget_amount)
         if payload.status is not None:
             update_dict["status"] = payload.status.strip() if payload.status else "Active"
+        if payload.non_standard is not None or payload.nonStandard is not None:
+            ns_val = payload.non_standard if payload.non_standard is not None else payload.nonStandard
+            update_dict["non_standard"] = _parse_bool(ns_val)
 
         updated = self.repo.update(item_id, update_dict)
         return _format_gbpa_response(updated)
@@ -344,6 +363,8 @@ class IndusGbpaService:
                 
                 budget_pct = _parse_numeric(get_val("Budget (%)", "Budget %", "Budget Percentage", default=None))
                 budget_amt = _parse_numeric(get_val("Budget (₹)", "Budget Amount", "Budget Rs", default=None))
+                ns_val = get_val("Non-Standard", "Non Standard", "non_standard", "nonstandard", default=None)
+                non_standard_bool = _parse_bool(ns_val) if ns_val is not None else False
 
                 gbpa_record = IndusCustomerGbpa(
                     company_name="Nexus",
@@ -358,6 +379,7 @@ class IndusGbpaService:
                     rate=rate_val,
                     budget_percentage=budget_pct,
                     budget_amount=budget_amt,
+                    non_standard=non_standard_bool,
                     status="Active"
                 )
                 new_records.append(gbpa_record)

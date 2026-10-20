@@ -13,7 +13,7 @@ USERS_DATABASE: Dict[str, Dict[str, Any]] = {
         "name": "Admin User",
         "password": "admin123",
         "role": "Admin",
-        "permissions": ["all", "master", "projects", "accounts", "admin", "worklist", "purchase", "inventory", "profile"]
+        "permissions": ["all", "master", "projects", "accounts", "admin", "worklist", "purchase", "inventory", "infra_wh", "profile"]
     },
     "commercial@nexus.com": {
         "id": "usr-comm-02",
@@ -49,7 +49,7 @@ USERS_DATABASE: Dict[str, Dict[str, Any]] = {
         "name": "Purchase Manager",
         "password": "purchase123",
         "role": "Purchase Manager",
-        "permissions": ["worklist", "profile"]
+        "permissions": ["purchase", "worklist", "profile"]
     },
     "account@nexus.com": {
         "id": "usr-acc-06",
@@ -58,7 +58,7 @@ USERS_DATABASE: Dict[str, Dict[str, Any]] = {
         "name": "Accounts Manager",
         "password": "account123",
         "role": "Accounts Manager",
-        "permissions": ["worklist", "profile"]
+        "permissions": ["accounts", "worklist", "profile"]
     }
 }
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, Text, Numeric, DateTime, func
+from sqlalchemy import Column, BigInteger, String, Text, Numeric, Boolean, DateTime, func
 from app.db.base import Base
 
 class IndusCustomerGbpa(Base):
@@ -23,6 +23,7 @@ class IndusCustomerGbpa(Base):
     budget_percentage = Column(Numeric(5, 2), nullable=True)
     budget_amount = Column(Numeric(14, 2), nullable=True)
     status = Column(String(50), default="Active", nullable=True)
+    non_standard = Column(Boolean, default=False, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

@@ -212,7 +212,15 @@
     try {
       if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
         const resp = await NexusApi.indusGbpa.getAll({ page: 1, page_size: 500 });
-        indusProductsData = (resp && resp.items) ? resp.items : [];
+        const rawItems = (resp && resp.items) ? resp.items : [];
+        indusProductsData = rawItems.map(item => {
+          const isNsActive = Boolean(item.non_standard === true || item.nonStandard === true || String(item.non_standard).toLowerCase() === 'true' || String(item.non_standard).toLowerCase() === 'active');
+          return {
+            ...item,
+            non_standard: isNsActive ? 'Active' : 'In - Active',
+            nonStandard: isNsActive
+          };
+        });
       }
       if (currentIndusSubpage === 'products') {
         currentDataset = [...indusProductsData];
@@ -330,7 +338,14 @@
       if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
         NexusApi.indusGbpa.getAll({ page: 1, page_size: 500 }).then(resp => {
           if (resp && resp.items) {
-            indusProductsData = resp.items;
+            indusProductsData = resp.items.map(item => {
+              const isNsActive = Boolean(item.non_standard === true || item.nonStandard === true || String(item.non_standard).toLowerCase() === 'true' || String(item.non_standard).toLowerCase() === 'active');
+              return {
+                ...item,
+                non_standard: isNsActive ? 'Active' : 'In - Active',
+                nonStandard: isNsActive
+              };
+            });
             if (currentIndusSubpage === 'products') {
               currentDataset = [...indusProductsData];
               if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
@@ -839,6 +854,8 @@
           const hsnSacCode = document.getElementById('inpGbpaHsnSacCode')?.value?.trim() || '';
           const budgetPercent = document.getElementById('inpGbpaBudgetPercent')?.value?.trim() || '';
           const budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value?.trim() || '';
+          const nonStandardToggle = document.getElementById('inpGbpaNonStandardToggle');
+          const nonStandard = Boolean(nonStandardToggle && nonStandardToggle.checked);
           const statusToggle = document.getElementById('inpGbpaStatusToggle');
           const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
   
@@ -873,6 +890,8 @@
             rate: rate,
             budget_percentage: budgetPercent,
             budget_amount: budgetAmount,
+            non_standard: nonStandard,
+            nonStandard: nonStandard,
             status: status
           };
   

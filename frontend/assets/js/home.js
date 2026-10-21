@@ -3285,6 +3285,237 @@ let currentProjectDetailTab = ''; // 'expenses', 'materials', 'infra', 'dpr', 'b
 
 let currentMasterView = 'main'; // 'main' | 'hr_policies'
 let currentCompanyHrTab = 'epf'; // 'epf' | 'esi' | 'pt' | 'lwf' | 'tds' | 'leave' | 'bonus' | 'medical_insurance'
+let currentInfraWhSubpage = 'stn'; // 'stn', 'srn', 'cam'
+
+let infraWhStnData = [
+  {
+    id: "stn-1",
+    stnNo: "STN-2026-001",
+    stnDate: "12/08/2026",
+    boqNo: "BOQ-9011",
+    boqDate: "10/08/2026",
+    projectId: "PRJ-2026-001",
+    siteName: "Guindy Hub Site Alpha",
+    infraCategory: "Tower Infrastructure",
+    qty: 45,
+    status: "BOQ Request Pending",
+    receivedBy: "Karthik Raja",
+    ageing: "3 Days",
+    remarks: "Received @WH location"
+  },
+  {
+    id: "stn-2",
+    stnNo: "STN-2026-002",
+    stnDate: "13/08/2026",
+    boqNo: "BOQ-9012",
+    boqDate: "11/08/2026",
+    projectId: "PRJ-2026-002",
+    siteName: "Velachery Central Cell",
+    infraCategory: "Power & Electrical",
+    qty: 120,
+    status: "BOQ Pending",
+    receivedBy: "Senthil Nathan",
+    ageing: "5 Days",
+    remarks: "I-Map Pending"
+  },
+  {
+    id: "stn-3",
+    stnNo: "STN-2026-003",
+    stnDate: "14/08/2026",
+    boqNo: "BOQ-9013",
+    boqDate: "12/08/2026",
+    projectId: "PRJ-2026-003",
+    siteName: "OMR Sholinganallur Hub",
+    infraCategory: "Civil Structure",
+    qty: 80,
+    status: "Dispatch Request Pending",
+    receivedBy: "Ramesh Kumar",
+    ageing: "2 Days",
+    remarks: "Received @WH location"
+  },
+  {
+    id: "stn-4",
+    stnNo: "STN-2026-004",
+    stnDate: "15/08/2026",
+    boqNo: "BOQ-9014",
+    boqDate: "13/08/2026",
+    projectId: "PRJ-2026-004",
+    siteName: "Tambaram West Tower",
+    infraCategory: "Optical & Telecom",
+    qty: 15,
+    status: "Dispatch Approval Pending",
+    receivedBy: "Manoj Prabhakar",
+    ageing: "7 Days",
+    remarks: "I-Map Pending"
+  },
+  {
+    id: "stn-5",
+    stnNo: "STN-2026-005",
+    stnDate: "16/08/2026",
+    boqNo: "BOQ-9015",
+    boqDate: "14/08/2026",
+    projectId: "PRJ-2026-005",
+    siteName: "Ambattur Estate Node",
+    infraCategory: "DG & Battery Bank",
+    qty: 10,
+    status: "To be Taken",
+    receivedBy: "Vigneshwaran P",
+    ageing: "1 Day",
+    remarks: "Received @WH location"
+  },
+  {
+    id: "stn-6",
+    stnNo: "STN-2026-006",
+    stnDate: "17/08/2026",
+    boqNo: "BOQ-9016",
+    boqDate: "15/08/2026",
+    projectId: "PRJ-2026-006",
+    siteName: "Porur Junction Relay",
+    infraCategory: "Solar & Green Energy",
+    qty: 60,
+    status: "Taken",
+    receivedBy: "Anand Babu",
+    ageing: "4 Days",
+    remarks: "I-Map Pending"
+  },
+  {
+    id: "stn-7",
+    stnNo: "STN-2026-007",
+    stnDate: "18/08/2026",
+    boqNo: "BOQ-9017",
+    boqDate: "16/08/2026",
+    projectId: "PRJ-2026-007",
+    siteName: "Anna Nagar North Site",
+    infraCategory: "Shelter & Security",
+    qty: 35,
+    status: "Received",
+    receivedBy: "Saravanan K",
+    ageing: "6 Days",
+    remarks: "Received @WH location"
+  }
+];
+
+let infraWhSrnData = [
+  {
+    id: "srn-1",
+    srnNo: "SRN-2026-001",
+    srnDate: "10/08/2026",
+    geNo: "GE-88401",
+    geDate: "09/08/2026",
+    boqNo: "BOQ-7001",
+    boqDate: "07/08/2026",
+    projectId: "PRJ-2026-001",
+    siteName: "Guindy Hub Site Alpha",
+    infraCategory: "Tower Infrastructure",
+    qty: 12,
+    status: "BOQ Request Pending",
+    receivedBy: "Karthik Raja",
+    ageing: "4 Days",
+    remarks: "Received @WH location"
+  },
+  {
+    id: "srn-2",
+    srnNo: "SRN-2026-002",
+    srnDate: "11/08/2026",
+    geNo: "GE-88402",
+    geDate: "10/08/2026",
+    boqNo: "BOQ-7002",
+    boqDate: "08/08/2026",
+    projectId: "PRJ-2026-002",
+    siteName: "Velachery Central Cell",
+    infraCategory: "Power & Electrical",
+    qty: 25,
+    status: "BOQ Pending",
+    receivedBy: "Senthil Nathan",
+    ageing: "3 Days",
+    remarks: "I-Map Pending"
+  },
+  {
+    id: "srn-3",
+    srnNo: "SRN-2026-003",
+    srnDate: "12/08/2026",
+    geNo: "GE-88403",
+    geDate: "11/08/2026",
+    boqNo: "BOQ-7003",
+    boqDate: "09/08/2026",
+    projectId: "PRJ-2026-003",
+    siteName: "OMR Sholinganallur Hub",
+    infraCategory: "Civil Structure",
+    qty: 8,
+    status: "Document To be Process",
+    receivedBy: "Ramesh Kumar",
+    ageing: "6 Days",
+    remarks: "Checklist Pending"
+  },
+  {
+    id: "srn-4",
+    srnNo: "SRN-2026-004",
+    srnDate: "13/08/2026",
+    geNo: "GE-88404",
+    geDate: "12/08/2026",
+    boqNo: "BOQ-7004",
+    boqDate: "10/08/2026",
+    projectId: "PRJ-2026-004",
+    siteName: "Tambaram West Tower",
+    infraCategory: "Optical & Telecom",
+    qty: 50,
+    status: "To be Complete",
+    receivedBy: "Manoj Prabhakar",
+    ageing: "2 Days",
+    remarks: "Received @WH location"
+  },
+  {
+    id: "srn-5",
+    srnNo: "SRN-2026-005",
+    srnDate: "14/08/2026",
+    geNo: "GE-88405",
+    geDate: "13/08/2026",
+    boqNo: "BOQ-7005",
+    boqDate: "11/08/2026",
+    projectId: "PRJ-2026-005",
+    siteName: "Ambattur Estate Node",
+    infraCategory: "DG & Battery Bank",
+    qty: 14,
+    status: "E-Way Bill To be Process",
+    receivedBy: "Vigneshwaran P",
+    ageing: "5 Days",
+    remarks: "I-Map Pending"
+  },
+  {
+    id: "srn-6",
+    srnNo: "SRN-2026-006",
+    srnDate: "15/08/2026",
+    geNo: "GE-88406",
+    geDate: "14/08/2026",
+    boqNo: "BOQ-7006",
+    boqDate: "12/08/2026",
+    projectId: "PRJ-2026-006",
+    siteName: "Porur Junction Relay",
+    infraCategory: "Solar & Green Energy",
+    qty: 30,
+    status: "Dispatch Planned",
+    receivedBy: "Anand Babu",
+    ageing: "1 Day",
+    remarks: "Checklist Pending"
+  },
+  {
+    id: "srn-7",
+    srnNo: "SRN-2026-007",
+    srnDate: "16/08/2026",
+    geNo: "GE-88407",
+    geDate: "15/08/2026",
+    boqNo: "BOQ-7007",
+    boqDate: "13/08/2026",
+    projectId: "PRJ-2026-007",
+    siteName: "Anna Nagar North Site",
+    infraCategory: "Shelter & Security",
+    qty: 18,
+    status: "To be Returned",
+    receivedBy: "Saravanan K",
+    ageing: "8 Days",
+    remarks: "Received @WH location"
+  }
+];
 
 let commercialWorklistData = [
   {
@@ -6941,6 +7172,9 @@ function parseUrlAndApplyState() {
     }
   } else if (moduleParam === 'profile') {
     currentModule = 'profile';
+  } else if (moduleParam === 'infra_wh') {
+    currentModule = 'infra_wh';
+    currentInfraWhSubpage = subpageParam || 'stn';
   } else if (moduleParam === 'worklist' || moduleParam) {
     currentModule = 'worklist';
     window.projectNavigationContext = null;
@@ -7407,6 +7641,16 @@ function switchModule(moduleName) {
       sessionStorage.removeItem('nexus_project_worklist_origin');
       sessionStorage.removeItem('nexus_project_site_id');
     } catch(e) {}
+  } else if (moduleName === 'infra_wh') {
+    currentInfraWhSubpage = 'stn';
+    window.projectNavigationContext = null;
+    window.projectWorklistOrigin = null;
+    window.lastPmWorklistView = null;
+    try {
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+      sessionStorage.removeItem('nexus_project_site_id');
+    } catch(e) {}
   }
 
   updateURL();
@@ -7421,6 +7665,7 @@ function switchModule(moduleName) {
     purchase: 'Purchase',
     accounts: 'Accounts',
     admin: 'Admin',
+    infra_wh: 'Infra WH',
     profile: 'Profile'
   };
   showToast(`Navigated to ${moduleTitles[moduleName] || moduleName}`);
@@ -7573,6 +7818,11 @@ function updateURL() {
   } else if (currentModule === 'worklist') {
     url.searchParams.set('view', currentWorklistView);
     url.searchParams.delete('subpage');
+    url.searchParams.delete('tab');
+    url.searchParams.delete('customer');
+  } else if (currentModule === 'infra_wh') {
+    url.searchParams.set('subpage', currentInfraWhSubpage);
+    url.searchParams.delete('view');
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
   } else {
@@ -8382,6 +8632,12 @@ function renderApp() {
     renderAccountsToolbar();
     renderAccountsTableHead();
     renderAccountsFooter();
+  } else if (currentModule === 'infra_wh') {
+    if (bannerTitle) bannerTitle.textContent = 'Infra WH';
+    loadInfraWhDataset();
+    renderInfraWhToolbar();
+    renderInfraWhTableHead();
+    renderInfraWhFooter();
   } else if (currentModule === 'profile') {
     renderProfileModule();
     return;
@@ -8389,8 +8645,7 @@ function renderApp() {
     const titleMap = {
       accounts: 'Accounts',
       admin: 'Admin',
-      profile: 'Profile',
-      infra_wh: 'Infra WH'
+      profile: 'Profile'
     };
     if (bannerTitle) bannerTitle.textContent = titleMap[currentModule] || (currentModule.charAt(0).toUpperCase() + currentModule.slice(1));
     renderPlaceholderModule();
@@ -35145,19 +35400,25 @@ function applyFiltersAndRender() {
   }
 
   if (filteredDataset.length === 0) {
-    const colSpan = currentModule === 'admin'
-      ? (currentAdminView === 'salary_detail' ? 16 : (currentAdminView === 'epf' ? 9 : (currentAdminView === 'pt' ? 9 : (currentAdminView === 'lwf' ? 8 : (currentAdminView === 'esi' ? 8 : (currentAdminView === 'attendance' ? 38 : 8))))))
-      : (currentModule === 'accounts'
-        ? (currentAccountsView === 'gst' ? 14 : (currentAccountsView === 'tds_payable' ? 9 : (currentAccountsView === 'tds_receivable' ? 7 : (currentAccountsView === 'tds' ? 10 : (currentAccountsView === 'purchase' ? 8 : (currentAccountsView === 'payment' ? 8 : (currentAccountsView === 'receipt' ? 7 : (currentAccountsView === 'bank' ? 7 : 8))))))))
-        : (currentModule === 'inventory'
-          ? 8
-          : (currentModule === 'purchase'
-            ? 9
-            : (currentModule === 'projects'
-              ? 14
-              : (currentModule === 'indus_towers'
-                ? (currentIndusSubpage === 'esh' ? 8 : (currentIndusSubpage === 'projects' ? 8 : 10))
-                : (currentModule === 'master' ? (currentMasterView === 'hr_policies' ? 11 : (currentMasterSubpage === 'transport' ? 5 : (currentMasterSubpage === 'customer' ? 7 : 6))) : (currentWorklistView === 'po' ? 6 : 10)))))));
+    if (currentModule === 'infra_wh' && currentInfraWhSubpage === 'cam') {
+      tbody.innerHTML = '';
+      return;
+    }
+    const colSpan = currentModule === 'infra_wh'
+      ? (currentInfraWhSubpage === 'srn' ? 14 : 12)
+      : (currentModule === 'admin'
+        ? (currentAdminView === 'salary_detail' ? 16 : (currentAdminView === 'epf' ? 9 : (currentAdminView === 'pt' ? 9 : (currentAdminView === 'lwf' ? 8 : (currentAdminView === 'esi' ? 8 : (currentAdminView === 'attendance' ? 38 : 8))))))
+        : (currentModule === 'accounts'
+          ? (currentAccountsView === 'gst' ? 14 : (currentAccountsView === 'tds_payable' ? 9 : (currentAccountsView === 'tds_receivable' ? 7 : (currentAccountsView === 'tds' ? 10 : (currentAccountsView === 'purchase' ? 8 : (currentAccountsView === 'payment' ? 8 : (currentAccountsView === 'receipt' ? 7 : (currentAccountsView === 'bank' ? 7 : 8))))))))
+          : (currentModule === 'inventory'
+            ? 8
+            : (currentModule === 'purchase'
+              ? 9
+              : (currentModule === 'projects'
+                ? 14
+                : (currentModule === 'indus_towers'
+                  ? (currentIndusSubpage === 'esh' ? 8 : (currentIndusSubpage === 'projects' ? 8 : 10))
+                  : (currentModule === 'master' ? (currentMasterView === 'hr_policies' ? 11 : (currentMasterSubpage === 'transport' ? 5 : (currentMasterSubpage === 'customer' ? 7 : 6))) : (currentWorklistView === 'po' ? 6 : 10))))))));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -36622,7 +36883,191 @@ function applyFiltersAndRender() {
         </tr>
       `;
     }
+  } else if (currentModule === 'infra_wh') {
+    if (currentInfraWhSubpage === 'stn') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="infra-wh-stn-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.stnNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.stnDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.boqNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.boqDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.projectId || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">${row.siteName || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.qty || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.status || '').replace(/"/g, '&quot;')}">${row.status || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.receivedBy || '').replace(/"/g, '&quot;')}">${row.receivedBy || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.ageing || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">${row.remarks || ''}</td>
+        </tr>
+      `).join('');
+    } else if (currentInfraWhSubpage === 'srn') {
+      tbody.innerHTML = filteredDataset.map(row => `
+        <tr class="infra-wh-srn-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.srnNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.srnDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.geNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.geDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.boqNo || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.boqDate || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.projectId || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">${row.siteName || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.qty || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.status || '').replace(/"/g, '&quot;')}">${row.status || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.receivedBy || '').replace(/"/g, '&quot;')}">${row.receivedBy || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.ageing || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">${row.remarks || ''}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = '';
+    }
   }
+}
+
+// ==========================================================================
+// INFRA WAREHOUSE (INFRA WH) MODULE RENDERERS
+// ==========================================================================
+function loadInfraWhDataset() {
+  if (currentInfraWhSubpage === 'stn') {
+    currentDataset = (infraWhStnData && infraWhStnData.length > 0) ? [...infraWhStnData] : [];
+  } else if (currentInfraWhSubpage === 'srn') {
+    currentDataset = (infraWhSrnData && infraWhSrnData.length > 0) ? [...infraWhSrnData] : [];
+  } else {
+    currentDataset = [];
+  }
+}
+
+function renderInfraWhToolbar() {
+  const toolbar = document.getElementById('worklistToolbar');
+  if (!toolbar) return;
+  toolbar.style.display = 'flex';
+
+  if (currentInfraWhSubpage === 'cam') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;"></div>
+    `;
+    return;
+  }
+
+  toolbar.innerHTML = `
+    <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+    <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+      <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnInfraWhDashboard" data-tooltip="Dashboard" title="Dashboard" style="cursor: pointer;" onclick="openInfraWhDashboard()">
+        <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
+      </button>
+      <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnInfraWhCsvDownload" data-tooltip="Download CSV" title="Download CSV" style="cursor: pointer;" onclick="exportToCsv()">
+        <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+      </button>
+    </div>
+  `;
+}
+
+window.openInfraWhDashboard = function() {
+  showToast(`Infra WH ${currentInfraWhSubpage.toUpperCase()} Dashboard`);
+};
+
+function renderInfraWhTableHead() {
+  const thead = document.getElementById('worklistTableHead');
+  if (!thead) return;
+
+  const createTh = (label, colKey, widthCh, hasFilter) => {
+    const filterBtn = hasFilter ? `
+      <button type="button" class="filter-funnel-btn ${activeColumnFilters[colKey] ? 'has-active-filter' : ''}" data-filter-col="${colKey}" title="Filter ${label}">&#9660;</button>
+    ` : '';
+    return `
+      <th style="width: ${widthCh}ch; min-width: ${widthCh}ch; max-width: ${widthCh}ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+        <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+          <span>${label}</span>
+          ${filterBtn}
+        </div>
+      </th>
+    `;
+  };
+
+  if (currentInfraWhSubpage === 'stn') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        ${createTh('STN No', 'stnNo', 15, true)}
+        ${createTh('STN Date', 'stnDate', 15, true)}
+        ${createTh('BOQ No', 'boqNo', 15, true)}
+        ${createTh('BOQ Date', 'boqDate', 15, true)}
+        ${createTh('Project ID', 'projectId', 15, true)}
+        ${createTh('Site Name', 'siteName', 25, false)}
+        ${createTh('Infra Category', 'infraCategory', 20, true)}
+        ${createTh('Qty', 'qty', 10, true)}
+        ${createTh('Status', 'status', 20, false)}
+        ${createTh('Received By', 'receivedBy', 20, true)}
+        ${createTh('Ageing', 'ageing', 10, true)}
+        ${createTh('Remarks', 'remarks', 20, false)}
+      </tr>
+    `;
+  } else if (currentInfraWhSubpage === 'srn') {
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        ${createTh('SRN No', 'srnNo', 15, true)}
+        ${createTh('SRN Date', 'srnDate', 15, true)}
+        ${createTh('GE No', 'geNo', 15, true)}
+        ${createTh('GE Date', 'geDate', 15, true)}
+        ${createTh('BOQ No', 'boqNo', 15, true)}
+        ${createTh('BOQ Date', 'boqDate', 15, true)}
+        ${createTh('Project ID', 'projectId', 15, true)}
+        ${createTh('Site Name', 'siteName', 25, false)}
+        ${createTh('Infra Category', 'infraCategory', 20, true)}
+        ${createTh('Qty', 'qty', 10, true)}
+        ${createTh('Status', 'status', 20, false)}
+        ${createTh('Received By', 'receivedBy', 20, true)}
+        ${createTh('Ageing', 'ageing', 10, true)}
+        ${createTh('Remarks', 'remarks', 20, false)}
+      </tr>
+    `;
+  } else {
+    thead.innerHTML = '';
+  }
+}
+
+function renderInfraWhFooter() {
+  const footer = document.getElementById('worklistFooterBar');
+  if (!footer) return;
+
+  footer.style.display = 'flex';
+  footer.style.justifyContent = 'flex-start';
+  footer.style.alignItems = 'center';
+  footer.style.width = '100%';
+  footer.style.marginTop = 'auto';
+  footer.style.padding = '24px';
+
+  const subpages = [
+    { key: 'stn', label: 'STN' },
+    { key: 'srn', label: 'SRN' },
+    { key: 'cam', label: 'CAM' }
+  ];
+
+  footer.innerHTML = `
+    <div class="segmented-toggle-group infra-wh-segmented-group">
+      ${subpages.map((sp, idx) => `
+        <button type="button" class="segmented-btn ${currentInfraWhSubpage === sp.key ? 'active' : ''}" data-subpage="${sp.key}">
+          ${sp.label}
+        </button>
+        ${idx < subpages.length - 1 ? '<div class="segmented-divider"></div>' : ''}
+      `).join('')}
+    </div>
+  `;
+
+  footer.querySelectorAll('.segmented-btn[data-subpage]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const spKey = btn.getAttribute('data-subpage');
+      if (currentInfraWhSubpage !== spKey) {
+        currentInfraWhSubpage = spKey;
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast(`Switched to Infra WH &bull; ${btn.textContent.trim()} Page`);
+      }
+    });
+  });
 }
 
 function renderPlaceholderModule() {
@@ -46898,6 +47343,45 @@ function exportToCsv() {
       headers = Object.keys(filteredDataset[0] || {}).filter(k => k !== 'id');
       rows = filteredDataset.map(r => headers.map(h => r[h]));
     }
+  } else if (currentModule === 'infra_wh') {
+    if (currentInfraWhSubpage === 'stn') {
+      headers = ["STN No", "STN Date", "BOQ No", "BOQ Date", "Project ID", "Site Name", "Infra Category", "Qty", "Status", "Received By", "Ageing", "Remarks"];
+      rows = filteredDataset.map(r => [
+        r.stnNo || '',
+        r.stnDate || '',
+        r.boqNo || '',
+        r.boqDate || '',
+        r.projectId || '',
+        r.siteName || '',
+        r.infraCategory || '',
+        r.qty || '',
+        r.status || '',
+        r.receivedBy || '',
+        r.ageing || '',
+        r.remarks || ''
+      ]);
+    } else if (currentInfraWhSubpage === 'srn') {
+      headers = ["SRN No", "SRN Date", "GE No", "GE Date", "BOQ No", "BOQ Date", "Project ID", "Site Name", "Infra Category", "Qty", "Status", "Received By", "Ageing", "Remarks"];
+      rows = filteredDataset.map(r => [
+        r.srnNo || '',
+        r.srnDate || '',
+        r.geNo || '',
+        r.geDate || '',
+        r.boqNo || '',
+        r.boqDate || '',
+        r.projectId || '',
+        r.siteName || '',
+        r.infraCategory || '',
+        r.qty || '',
+        r.status || '',
+        r.receivedBy || '',
+        r.ageing || '',
+        r.remarks || ''
+      ]);
+    } else {
+      headers = [];
+      rows = [];
+    }
   } else if (currentWorklistView === 'po') {
     headers = ["Submission Date", "Submitted BY", "Vendor Name", "PO No", "PO Amount"];
     rows = filteredDataset.map(r => [r.submissionDate, r.submittedBy, r.vendorName, r.poNo, r.poAmount]);
@@ -46906,16 +47390,17 @@ function exportToCsv() {
     rows = filteredDataset.map(r => [r.submitBy, r.submissionDate, r.approvedBy, r.expenseHead, r.transferTo, r.approvedAmount, r.transferredAmount, r.payableAmount, r.ageing]);
   }
 
-  let csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  let csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.map(val => `"${String(val ?? '').replace(/"/g, '""')}"`).join(","))].join("\n");
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `nexus_${currentModule}_${currentIndusSubpage || currentMasterSubpage || currentWorklistView}_${Date.now()}.csv`);
+  const subpageName = currentModule === 'infra_wh' ? currentInfraWhSubpage : (currentIndusSubpage || currentMasterSubpage || currentWorklistView || 'export');
+  link.setAttribute("download", `nexus_${currentModule}_${subpageName}_${Date.now()}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
-  showToast(`Exported ${(currentIndusSubpage || currentMasterSubpage).toUpperCase()} to CSV successfully!`);
+  showToast(`Exported ${subpageName.toUpperCase()} to CSV successfully!`);
 }
 
 // ==========================================================================

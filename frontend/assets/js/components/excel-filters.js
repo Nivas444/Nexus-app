@@ -205,7 +205,13 @@
       transportName: "Transport Name",
       transportType: "Transport Type",
       vehicleType: "Vehicle Type",
-      vehicleNumber: "Vehicle Number"
+      vehicleNumber: "Vehicle Number",
+      stnDate: "STN Date",
+      srnDate: "SRN Date",
+      geNo: "GE No",
+      geDate: "GE Date",
+      infraCategory: "Infra Category",
+      receivedBy: "Received By"
     };
     return map[colKey] || colKey;
   }

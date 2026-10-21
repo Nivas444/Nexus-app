@@ -138,6 +138,56 @@ async function loadMasterExpensesFromApi() {
   }
 }
 
+// Master -> Transport Dataset
+let masterTransportData = [
+  {
+    id: "trans-1",
+    transportName: "SRS Travels",
+    transportType: "Contract",
+    vehicleType: "Tata Ace",
+    vehicleNumber: "TN 01 AB 1234",
+    rentalType: "Per Day",
+    rentalAmount: "2,500.00",
+    haltRent: "500.00",
+    status: "Active"
+  },
+  {
+    id: "trans-2",
+    transportName: "VRL Logistics",
+    transportType: "Dedicated",
+    vehicleType: "Eicher 17ft",
+    vehicleNumber: "KA 04 CD 5678",
+    rentalType: "Per KM",
+    rentalAmount: "45.00",
+    haltRent: "800.00",
+    status: "Active"
+  },
+  {
+    id: "trans-3",
+    transportName: "Navata Road Transport",
+    transportType: "Owned",
+    vehicleType: "Bolero Maxi Truck",
+    vehicleNumber: "AP 09 EF 9012",
+    rentalType: "Monthly",
+    rentalAmount: "45,000.00",
+    haltRent: "0.00",
+    status: "Active"
+  },
+  {
+    id: "trans-4",
+    transportName: "SafeXpress",
+    transportType: "Leased",
+    vehicleType: "Trailer 40ft",
+    vehicleNumber: "MH 12 GH 3456",
+    rentalType: "Per Trip",
+    rentalAmount: "18,000.00",
+    haltRent: "1,200.00",
+    status: "Active"
+  }
+];
+let currentViewedVehicleId = null;
+window.currentViewedVehicleId = null;
+
 
 // Company HR Policies Datasets (Loaded dynamically from PostgreSQL hr_compliance)
 let companyHrEpfData = [];
@@ -3219,7 +3269,7 @@ let selectedPurchaseSupplierId = 'pur-1';
 let selectedPurchaseSupplierName = 'Schneider Electric India Pvt Ltd';
 let selectedPurchasePoNo = 'PO-2026-1042';
 let currentWorklistView = 'payment'; // 'payment' or 'po'
-let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses'
+let currentMasterSubpage = 'employee'; // 'employee', 'customer', 'vendor', 'products', 'expenses', 'transport'
 let currentProjectsSubpage = 'projects'; // 'projects' or 'supply'
 let currentProjectsView = 'main'; // 'main', 'details', 'project_expenses', or 'supply_details'
 let currentInventorySubpage = 'inventory';
@@ -9163,12 +9213,31 @@ function loadMasterDataset() {
     if (typeof loadMasterExpensesFromApi === 'function') {
       loadMasterExpensesFromApi();
     }
+  } else if (currentMasterSubpage === 'transport') {
+    currentDataset = [...masterTransportData];
   }
 }
 
 function renderMasterToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
+
+  if (currentMasterSubpage === 'transport') {
+    toolbar.innerHTML = `
+      <div class="toolbar-left"></div>
+      <div class="toolbar-right">
+        <!-- Blue Add (+) Button on Right -->
+        <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New Vehicle" aria-label="Add Record">
+          <img src="icons/Add.svg" alt="Add" class="toolbar-icon-img" width="30" height="30">
+        </button>
+      </div>
+    `;
+    document.getElementById('btnMasterAdd')?.addEventListener('click', () => {
+      window.currentViewedVehicleId = null;
+      openSideForm();
+    });
+    return;
+  }
 
   if (currentMasterSubpage === 'employee') {
     // Employee Toolbar: Green CSV Upload Icon + Orange Bulk Upload Icon + Blue Add (+) Button on Right
@@ -9255,6 +9324,46 @@ function renderMasterToolbar() {
 function renderMasterTableHead() {
   const thead = document.getElementById('worklistTableHead');
   if (!thead) return;
+
+  if (currentMasterSubpage === 'transport') {
+    // Transport Table Headers: Transport Name (25ch), Transport Type (15ch), Vehicle Type (15ch), Vehicle Number (40ch), Status (10ch) - all headers centered
+    thead.innerHTML = `
+      <tr class="master-view-header">
+        <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Transport Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportName'] ? 'has-active-filter' : ''}" data-filter-col="transportName" title="Filter Transport Name">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Transport Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['transportType'] ? 'has-active-filter' : ''}" data-filter-col="transportType" title="Filter Transport Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Vehicle Type</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vehicleType'] ? 'has-active-filter' : ''}" data-filter-col="vehicleType" title="Filter Vehicle Type">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Vehicle Number</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['vehicleNumber'] ? 'has-active-filter' : ''}" data-filter-col="vehicleNumber" title="Filter Vehicle Number">&#9660;</button>
+          </div>
+        </th>
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important;">
+          <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px; position: relative;">
+            <span>Status</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+          </div>
+        </th>
+      </tr>
+    `;
+    rebindFilterButtons();
+    return;
+  }
 
   if (currentMasterSubpage === 'customer') {
     // Customer Table Headers: Customer Name (25ch), Customer ID (15ch), Business Type (15ch), GST Number (20ch), GST Type (15ch), Invoice Type (15ch), Status (10ch) - all headers centered
@@ -9505,7 +9614,8 @@ function renderMasterFooter() {
         { key: 'customer', label: 'Customer' },
         { key: 'vendor', label: 'Vendor' },
         { key: 'products', label: 'Products' },
-        { key: 'expenses', label: 'Expenses' }
+        { key: 'expenses', label: 'Expenses' },
+        { key: 'transport', label: 'Transport' }
       ];
 
   footer.innerHTML = `
@@ -35047,7 +35157,7 @@ function applyFiltersAndRender() {
               ? 14
               : (currentModule === 'indus_towers'
                 ? (currentIndusSubpage === 'esh' ? 8 : (currentIndusSubpage === 'projects' ? 8 : 10))
-                : (currentModule === 'master' ? (currentMasterView === 'hr_policies' ? 11 : (currentMasterSubpage === 'customer' ? 7 : 6)) : (currentWorklistView === 'po' ? 6 : 10)))))));
+                : (currentModule === 'master' ? (currentMasterView === 'hr_policies' ? 11 : (currentMasterSubpage === 'transport' ? 5 : (currentMasterSubpage === 'customer' ? 7 : 6))) : (currentWorklistView === 'po' ? 6 : 10)))))));
     tbody.innerHTML = `
       <tr>
         <td colspan="${colSpan}" class="empty-data-row">No records match the selected filter criteria.</td>
@@ -35601,6 +35711,25 @@ function applyFiltersAndRender() {
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseCategory || 'Direct Operations').replace(/"/g, '&quot;')}">${row.expenseCategory || 'Direct Operations'}</td>
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis;" title="${(row.expenseHead || '').replace(/"/g, '&quot;')}">${row.expenseHead || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.gst || row.gstRate || '18%'}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
+              <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } else if (currentMasterSubpage === 'transport') {
+      // Render Transport Rows: Transport Name 25ch&left, Transport Type 15ch&center, Vehicle Type 15ch&center, Vehicle Number 40ch&center, Status 10ch&center
+      tbody.innerHTML = filteredDataset.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        const tName = row.transportName || '';
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${tName.replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="openViewVehicleCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${tName}</a>
+            </td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.transportType || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.vehicleType || ''}</td>
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.vehicleNumber || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
@@ -37782,6 +37911,12 @@ function initSideFormEvents() {
       return;
     }
 
+    const isVehicleCardOpen = document.getElementById('addVehicleCard') && document.getElementById('addVehicleCard').style.display === 'block';
+    if (isVehicleCardOpen || (currentModule === 'master' && currentMasterSubpage === 'transport')) {
+      saveVehicleRecord();
+      return;
+    }
+
     if (currentModule === 'master' && currentMasterSubpage === 'products') {
       const productName = document.getElementById('inpProductName')?.value?.trim();
       if (!productName) {
@@ -37898,6 +38033,523 @@ function initSideFormEvents() {
   if (btnSubmitProjectTransport) btnSubmitProjectTransport.addEventListener('click', handleFormSave);
   if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
   if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
+  // Save or Update Master -> Transport Vehicle Record
+  function saveVehicleRecord() {
+    const transportName = document.getElementById('inpVehicleTransportName')?.value?.trim();
+    const transportType = document.getElementById('inpVehicleTransportType')?.value?.trim();
+    const vehicleType = document.getElementById('inpVehicleType')?.value?.trim();
+    const vehicleNumber = document.getElementById('inpVehicleNumber')?.value?.trim();
+    const rentalType = document.getElementById('inpVehicleRentalType')?.value?.trim();
+    const rentalAmount = document.getElementById('inpVehicleRentalAmount')?.value?.trim();
+    const haltRent = document.getElementById('inpVehicleHaltRent')?.value?.trim();
+
+    if (!transportName) {
+      if (typeof showToast === 'function') showToast('Please select Transport Name');
+      return;
+    }
+    if (!vehicleNumber) {
+      if (typeof showToast === 'function') showToast('Please enter Vehicle Number');
+      return;
+    }
+
+    if (window.currentViewedVehicleId) {
+      const idx = masterTransportData.findIndex(v => v.id === window.currentViewedVehicleId);
+      if (idx !== -1) {
+        masterTransportData[idx] = {
+          ...masterTransportData[idx],
+          transportName: transportName,
+          transportType: transportType || 'Contract',
+          vehicleType: vehicleType || 'Tata Ace',
+          vehicleNumber: vehicleNumber,
+          rentalType: rentalType || 'Per Day',
+          rentalAmount: rentalAmount || '0.00',
+          haltRent: haltRent || '0.00'
+        };
+      }
+      window.currentViewedVehicleId = null;
+      currentDataset = [...masterTransportData];
+      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+      closeSideForm();
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Vehicle details updated successfully!', 'Task Completed');
+      } else if (typeof showToast === 'function') {
+        showToast('Vehicle updated successfully!');
+      }
+    } else {
+      const newRecord = {
+        id: 'trans-' + Date.now(),
+        transportName: transportName,
+        transportType: transportType || 'Contract',
+        vehicleType: vehicleType || 'Tata Ace',
+        vehicleNumber: vehicleNumber,
+        rentalType: rentalType || 'Per Day',
+        rentalAmount: rentalAmount || '0.00',
+        haltRent: haltRent || '0.00',
+        status: 'Active'
+      };
+      masterTransportData.unshift(newRecord);
+      currentDataset = [...masterTransportData];
+      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+      closeSideForm();
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Vehicle added successfully!', 'Task Completed');
+      } else if (typeof showToast === 'function') {
+        showToast('Vehicle added successfully!');
+      }
+    }
+  }
+  window.saveVehicleRecord = saveVehicleRecord;
+
+  // View / Edit Master -> Transport Vehicle Record
+  function openViewVehicleCard(id) {
+    const rec = masterTransportData.find(v => v.id === id);
+    if (!rec) return;
+
+    window.currentViewedVehicleId = id;
+    openSideForm();
+
+    const lblTitle = document.getElementById('lblVehicleCardTitle');
+    if (lblTitle) lblTitle.innerText = 'Vehicle Details';
+
+    const setVal = (elId, val) => {
+      const el = document.getElementById(elId);
+      if (el) el.value = val !== undefined && val !== null ? val : '';
+    };
+
+    setVal('inpVehicleTransportName', rec.transportName);
+    setVal('inpVehicleTransportType', rec.transportType);
+    setVal('inpVehicleType', rec.vehicleType);
+    setVal('inpVehicleNumber', rec.vehicleNumber);
+    setVal('inpVehicleRentalType', rec.rentalType);
+    setVal('inpVehicleRentalAmount', rec.rentalAmount);
+    setVal('inpVehicleHaltRent', rec.haltRent);
+  }
+  window.openViewVehicleCard = openViewVehicleCard;
+
+  const btnSubmitTransportVehicle = document.getElementById('btnSubmitVehicle');
+  if (btnSubmitTransportVehicle) btnSubmitTransportVehicle.addEventListener('click', saveVehicleRecord);
+  const btnCloseVehicleForm = document.getElementById('btnCloseVehicleForm');
+  if (btnCloseVehicleForm) btnCloseVehicleForm.addEventListener('click', closeSideForm);
+  // --- Master -> Transport: Vehicle Documents, Contacts, & Bank Details Logic ---
+  let vehicleDocumentsData = [
+    { id: 'vdoc-1', docName: 'RC Copy', expiryDate: '2027-05-15' },
+    { id: 'vdoc-2', docName: 'Vehicle Insurance Certificate', expiryDate: '2026-12-31' },
+    { id: 'vdoc-3', docName: 'Fitness Certificate (FC)', expiryDate: '2027-02-28' },
+    { id: 'vdoc-4', docName: 'Pollution Certificate (PUC)', expiryDate: '2026-11-20' },
+    { id: 'vdoc-5', docName: 'State Goods Permit', expiryDate: '2028-04-10' }
+  ];
+
+  let vehicleContactsData = [
+    { id: 'vc-1', name: 'Ramasamy K', designation: 'Driver', contactNumber: '+91 98765 43210' },
+    { id: 'vc-2', name: 'Murugan P', designation: 'Owner', contactNumber: '+91 94433 11223' },
+    { id: 'vc-3', name: 'Senthil Velan', designation: 'Driver', contactNumber: '+91 98401 23456' }
+  ];
+
+  let vehicleBankData = [
+    { id: 'vb-1', accountName: 'SRS Logistics Pvt Ltd', accountNumber: '50200012345678', bankName: 'HDFC Bank', ifscCode: 'HDFC0001234' },
+    { id: 'vb-2', accountName: 'Murugan P', accountNumber: '30458899120', bankName: 'State Bank of India', ifscCode: 'SBIN0004567' }
+  ];
+
+  let selectedVehicleContactIds = new Set();
+  let selectedVehicleBankIds = new Set();
+
+  // 1. Vehicle Documents
+  function renderVehicleDocsTable() {
+    const tbody = document.getElementById('tbodyVehicleDocs');
+    if (!tbody) return;
+    if (!vehicleDocumentsData || vehicleDocumentsData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="2" class="empty-data-row" style="text-align: center !important; padding: 18px; color: #64748b;">No documents found. Click + to add.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = vehicleDocumentsData.map(doc => `
+      <tr>
+        <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(doc.docName || '').replace(/"/g, '&quot;')}">${doc.docName || ''}</td>
+        <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #334155;">${doc.expiryDate || '-'}</td>
+      </tr>
+    `).join('');
+  }
+  window.renderVehicleDocsTable = renderVehicleDocsTable;
+
+  function openVehicleDocsSidePanel() {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (!overlay) return;
+    document.getElementById('addVehicleCard')?.classList.add('card-dimmed-blurred');
+    const cardsRow = document.querySelector('.side-form-cards-row');
+    if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+    ['vehicleContactSidePanel', 'addVehicleContactCard', 'vehicleBankSidePanel', 'addVehicleBankCard'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    const p = document.getElementById('vehicleDocsSidePanel');
+    if (p) p.style.display = 'block';
+    renderVehicleDocsTable();
+  }
+  window.openVehicleDocsSidePanel = openVehicleDocsSidePanel;
+
+  function closeVehicleDocsSidePanel() {
+    const p = document.getElementById('vehicleDocsSidePanel');
+    if (p) {
+      p.style.display = 'none';
+      p.classList.remove('card-dimmed-blurred');
+    }
+    const addCard = document.getElementById('addVehicleDocCard');
+    if (addCard) addCard.style.display = 'none';
+
+    const isOtherOpen = ['vehicleContactSidePanel', 'vehicleBankSidePanel'].some(id => {
+      const el = document.getElementById(id);
+      return el && el.style.display === 'block';
+    });
+    if (!isOtherOpen) {
+      document.getElementById('addVehicleCard')?.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+    }
+  }
+  window.closeVehicleDocsSidePanel = closeVehicleDocsSidePanel;
+
+  function openAddVehicleDocCard() {
+    document.getElementById('vehicleDocsSidePanel')?.classList.add('card-dimmed-blurred');
+    const card = document.getElementById('addVehicleDocCard');
+    if (card) {
+      card.style.display = 'block';
+      const frm = document.getElementById('frmAddVehicleDoc');
+      if (frm) frm.reset();
+      document.getElementById('inpVehicleDocName')?.focus();
+    }
+  }
+  window.openAddVehicleDocCard = openAddVehicleDocCard;
+
+  function closeAddVehicleDocCard() {
+    const card = document.getElementById('addVehicleDocCard');
+    if (card) card.style.display = 'none';
+    document.getElementById('vehicleDocsSidePanel')?.classList.remove('card-dimmed-blurred');
+  }
+  window.closeAddVehicleDocCard = closeAddVehicleDocCard;
+
+  function submitNewVehicleDoc() {
+    const docName = document.getElementById('inpVehicleDocName')?.value?.trim();
+    const expiryDate = document.getElementById('inpVehicleDocExpiry')?.value?.trim();
+    if (!docName) {
+      if (typeof showToast === 'function') showToast('Please enter Document Name');
+      return;
+    }
+    vehicleDocumentsData.unshift({
+      id: 'vdoc-' + Date.now(),
+      docName: docName,
+      expiryDate: expiryDate || '-'
+    });
+    renderVehicleDocsTable();
+    closeAddVehicleDocCard();
+    if (typeof showToast === 'function') showToast('Document added successfully');
+  }
+  window.submitNewVehicleDoc = submitNewVehicleDoc;
+
+  // 2. Vehicle Contact Details
+  function renderVehicleContactTable() {
+    const tbody = document.getElementById('tbodyVehicleContactDetails');
+    if (!tbody) return;
+    if (!vehicleContactsData || vehicleContactsData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="empty-data-row" style="text-align: center !important; padding: 18px; color: #64748b;">No contact details found. Click + to add.</td></tr>`;
+      updateVehicleContactDeleteVisibility();
+      return;
+    }
+    tbody.innerHTML = vehicleContactsData.map(c => {
+      const isChecked = selectedVehicleContactIds.has(c.id);
+      return `
+        <tr>
+          <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 6px;">
+            <input type="checkbox" class="vehicle-circle-radio chk-vehicle-contact-select" data-id="${c.id}" ${isChecked ? 'checked' : ''} onchange="toggleVehicleContactSelection('${c.id}', this.checked)">
+          </td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(c.name || '').replace(/"/g, '&quot;')}">${c.name || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #334155;">${c.designation || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #334155;">${c.contactNumber || ''}</td>
+        </tr>
+      `;
+    }).join('');
+    updateVehicleContactDeleteVisibility();
+  }
+  window.renderVehicleContactTable = renderVehicleContactTable;
+
+  function toggleVehicleContactSelection(id, checked) {
+    if (checked) {
+      selectedVehicleContactIds.add(id);
+    } else {
+      selectedVehicleContactIds.delete(id);
+    }
+    updateVehicleContactDeleteVisibility();
+  }
+  window.toggleVehicleContactSelection = toggleVehicleContactSelection;
+
+  function updateVehicleContactDeleteVisibility() {
+    const btnDel = document.getElementById('btnVehicleContactDelete');
+    if (btnDel) {
+      btnDel.style.display = selectedVehicleContactIds.size > 0 ? 'inline-flex' : 'none';
+    }
+  }
+
+  function deleteSelectedVehicleContacts() {
+    if (selectedVehicleContactIds.size === 0) return;
+    vehicleContactsData = vehicleContactsData.filter(c => !selectedVehicleContactIds.has(c.id));
+    selectedVehicleContactIds.clear();
+    renderVehicleContactTable();
+    if (typeof showToast === 'function') showToast('Selected contact(s) deleted');
+  }
+  window.deleteSelectedVehicleContacts = deleteSelectedVehicleContacts;
+
+  function openVehicleContactSidePanel() {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (!overlay) return;
+    document.getElementById('addVehicleCard')?.classList.add('card-dimmed-blurred');
+    const cardsRow = document.querySelector('.side-form-cards-row');
+    if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+    ['vehicleDocsSidePanel', 'addVehicleDocCard', 'vehicleBankSidePanel', 'addVehicleBankCard'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    const p = document.getElementById('vehicleContactSidePanel');
+    if (p) p.style.display = 'block';
+    selectedVehicleContactIds.clear();
+    renderVehicleContactTable();
+  }
+  window.openVehicleContactSidePanel = openVehicleContactSidePanel;
+
+  function closeVehicleContactSidePanel() {
+    const p = document.getElementById('vehicleContactSidePanel');
+    if (p) {
+      p.style.display = 'none';
+      p.classList.remove('card-dimmed-blurred');
+    }
+    const addCard = document.getElementById('addVehicleContactCard');
+    if (addCard) addCard.style.display = 'none';
+
+    const isOtherOpen = ['vehicleDocsSidePanel', 'vehicleBankSidePanel'].some(id => {
+      const el = document.getElementById(id);
+      return el && el.style.display === 'block';
+    });
+    if (!isOtherOpen) {
+      document.getElementById('addVehicleCard')?.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+    }
+  }
+  window.closeVehicleContactSidePanel = closeVehicleContactSidePanel;
+
+  function openAddVehicleContactCard() {
+    document.getElementById('vehicleContactSidePanel')?.classList.add('card-dimmed-blurred');
+    const card = document.getElementById('addVehicleContactCard');
+    if (card) {
+      card.style.display = 'block';
+      const frm = document.getElementById('frmAddVehicleContact');
+      if (frm) frm.reset();
+      document.getElementById('inpVehicleContactName')?.focus();
+    }
+  }
+  window.openAddVehicleContactCard = openAddVehicleContactCard;
+
+  function closeAddVehicleContactCard() {
+    const card = document.getElementById('addVehicleContactCard');
+    if (card) card.style.display = 'none';
+    document.getElementById('vehicleContactSidePanel')?.classList.remove('card-dimmed-blurred');
+  }
+  window.closeAddVehicleContactCard = closeAddVehicleContactCard;
+
+  function submitNewVehicleContact() {
+    const name = document.getElementById('inpVehicleContactName')?.value?.trim();
+    const designation = document.getElementById('inpVehicleContactDesignation')?.value?.trim() || 'Driver';
+    const phone = document.getElementById('inpVehicleContactPhone')?.value?.trim();
+
+    if (!name) {
+      if (typeof showToast === 'function') showToast('Please enter Name');
+      return;
+    }
+    vehicleContactsData.unshift({
+      id: 'vc-' + Date.now(),
+      name: name,
+      designation: designation,
+      contactNumber: phone || '-'
+    });
+    renderVehicleContactTable();
+    closeAddVehicleContactCard();
+    if (typeof showToast === 'function') showToast('Contact added successfully');
+  }
+  window.submitNewVehicleContact = submitNewVehicleContact;
+
+  // 3. Vehicle Bank Details
+  function renderVehicleBankTable() {
+    const tbody = document.getElementById('tbodyVehicleBankDetails');
+    if (!tbody) return;
+    if (!vehicleBankData || vehicleBankData.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-data-row" style="text-align: center !important; padding: 18px; color: #64748b;">No bank details found. Click + to add.</td></tr>`;
+      updateVehicleBankDeleteVisibility();
+      return;
+    }
+    tbody.innerHTML = vehicleBankData.map(b => {
+      const isChecked = selectedVehicleBankIds.has(b.id);
+      return `
+        <tr>
+          <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; padding: 10px 6px;">
+            <input type="checkbox" class="vehicle-circle-radio chk-vehicle-bank-select" data-id="${b.id}" ${isChecked ? 'checked' : ''} onchange="toggleVehicleBankSelection('${b.id}', this.checked)">
+          </td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(b.accountName || '').replace(/"/g, '&quot;')}">${b.accountName || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #334155; font-family: monospace;">${b.accountNumber || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #334155;">${b.bankName || ''}</td>
+          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #334155; font-family: monospace;">${b.ifscCode || ''}</td>
+        </tr>
+      `;
+    }).join('');
+    updateVehicleBankDeleteVisibility();
+  }
+  window.renderVehicleBankTable = renderVehicleBankTable;
+
+  function toggleVehicleBankSelection(id, checked) {
+    if (checked) {
+      selectedVehicleBankIds.add(id);
+    } else {
+      selectedVehicleBankIds.delete(id);
+    }
+    updateVehicleBankDeleteVisibility();
+  }
+  window.toggleVehicleBankSelection = toggleVehicleBankSelection;
+
+  function updateVehicleBankDeleteVisibility() {
+    const btnDel = document.getElementById('btnVehicleBankDelete');
+    if (btnDel) {
+      btnDel.style.display = selectedVehicleBankIds.size > 0 ? 'inline-flex' : 'none';
+    }
+  }
+
+  function deleteSelectedVehicleBanks() {
+    if (selectedVehicleBankIds.size === 0) return;
+    vehicleBankData = vehicleBankData.filter(b => !selectedVehicleBankIds.has(b.id));
+    selectedVehicleBankIds.clear();
+    renderVehicleBankTable();
+    if (typeof showToast === 'function') showToast('Selected bank detail(s) deleted');
+  }
+  window.deleteSelectedVehicleBanks = deleteSelectedVehicleBanks;
+
+  function openVehicleBankSidePanel() {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (!overlay) return;
+    document.getElementById('addVehicleCard')?.classList.add('card-dimmed-blurred');
+    const cardsRow = document.querySelector('.side-form-cards-row');
+    if (cardsRow) cardsRow.classList.add('has-dimmed-card');
+
+    ['vehicleDocsSidePanel', 'addVehicleDocCard', 'vehicleContactSidePanel', 'addVehicleContactCard'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    const p = document.getElementById('vehicleBankSidePanel');
+    if (p) p.style.display = 'block';
+    selectedVehicleBankIds.clear();
+    renderVehicleBankTable();
+  }
+  window.openVehicleBankSidePanel = openVehicleBankSidePanel;
+
+  function closeVehicleBankSidePanel() {
+    const p = document.getElementById('vehicleBankSidePanel');
+    if (p) {
+      p.style.display = 'none';
+      p.classList.remove('card-dimmed-blurred');
+    }
+    const addCard = document.getElementById('addVehicleBankCard');
+    if (addCard) addCard.style.display = 'none';
+
+    const isOtherOpen = ['vehicleDocsSidePanel', 'vehicleContactSidePanel'].some(id => {
+      const el = document.getElementById(id);
+      return el && el.style.display === 'block';
+    });
+    if (!isOtherOpen) {
+      document.getElementById('addVehicleCard')?.classList.remove('card-dimmed-blurred');
+      const cardsRow = document.querySelector('.side-form-cards-row');
+      if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
+    }
+  }
+  window.closeVehicleBankSidePanel = closeVehicleBankSidePanel;
+
+  function openAddVehicleBankCard() {
+    document.getElementById('vehicleBankSidePanel')?.classList.add('card-dimmed-blurred');
+    const card = document.getElementById('addVehicleBankCard');
+    if (card) {
+      card.style.display = 'block';
+      const frm = document.getElementById('frmAddVehicleBank');
+      if (frm) frm.reset();
+      document.getElementById('inpVehicleAccountName')?.focus();
+    }
+  }
+  window.openAddVehicleBankCard = openAddVehicleBankCard;
+
+  function closeAddVehicleBankCard() {
+    const card = document.getElementById('addVehicleBankCard');
+    if (card) card.style.display = 'none';
+    document.getElementById('vehicleBankSidePanel')?.classList.remove('card-dimmed-blurred');
+  }
+  window.closeAddVehicleBankCard = closeAddVehicleBankCard;
+
+  function submitNewVehicleBank() {
+    const accName = document.getElementById('inpVehicleAccountName')?.value?.trim();
+    const accNum = document.getElementById('inpVehicleAccountNumber')?.value?.trim();
+    const bankName = document.getElementById('inpVehicleBankName')?.value?.trim();
+    const ifsc = document.getElementById('inpVehicleIfscCode')?.value?.trim();
+
+    if (!accName) {
+      if (typeof showToast === 'function') showToast('Please enter Account Name');
+      return;
+    }
+    if (!accNum) {
+      if (typeof showToast === 'function') showToast('Please enter Account Number');
+      return;
+    }
+    vehicleBankData.unshift({
+      id: 'vb-' + Date.now(),
+      accountName: accName,
+      accountNumber: accNum,
+      bankName: bankName || '-',
+      ifscCode: ifsc || '-'
+    });
+    renderVehicleBankTable();
+    closeAddVehicleBankCard();
+    if (typeof showToast === 'function') showToast('Bank details added successfully');
+  }
+  window.submitNewVehicleBank = submitNewVehicleBank;
+
+  // Header icon bindings for Add Vehicle tab
+  document.getElementById('btnVehicleCardBank')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openVehicleBankSidePanel();
+  });
+  document.getElementById('btnVehicleCardContact')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openVehicleContactSidePanel();
+  });
+  document.getElementById('btnVehicleCardDocs')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openVehicleDocsSidePanel();
+  });
+
+  // Event bindings for Vehicle Documents
+  document.getElementById('btnVehicleDocsAdd')?.addEventListener('click', openAddVehicleDocCard);
+  document.getElementById('btnCloseVehicleDocsPanel')?.addEventListener('click', closeVehicleDocsSidePanel);
+  document.getElementById('btnCloseAddVehicleDocCard')?.addEventListener('click', closeAddVehicleDocCard);
+  document.getElementById('btnSubmitVehicleDoc')?.addEventListener('click', submitNewVehicleDoc);
+
+  // Event bindings for Vehicle Contacts
+  document.getElementById('btnVehicleContactDelete')?.addEventListener('click', deleteSelectedVehicleContacts);
+  document.getElementById('btnVehicleContactAdd')?.addEventListener('click', openAddVehicleContactCard);
+  document.getElementById('btnCloseVehicleContactPanel')?.addEventListener('click', closeVehicleContactSidePanel);
+  document.getElementById('btnCloseAddVehicleContactCard')?.addEventListener('click', closeAddVehicleContactCard);
+  document.getElementById('btnSubmitVehicleContact')?.addEventListener('click', submitNewVehicleContact);
+
+  // Event bindings for Vehicle Banks
+  document.getElementById('btnVehicleBankDelete')?.addEventListener('click', deleteSelectedVehicleBanks);
+  document.getElementById('btnVehicleBankAdd')?.addEventListener('click', openAddVehicleBankCard);
+  document.getElementById('btnCloseVehicleBankPanel')?.addEventListener('click', closeVehicleBankSidePanel);
+  document.getElementById('btnCloseAddVehicleBankCard')?.addEventListener('click', closeAddVehicleBankCard);
+  document.getElementById('btnSubmitVehicleBank')?.addEventListener('click', submitNewVehicleBank);
 
   const btnCloseEmployeeForm = document.getElementById('btnCloseEmployeeForm');
   if (btnCloseEmployeeForm) btnCloseEmployeeForm.addEventListener('click', closeSideForm);
@@ -39792,6 +40444,8 @@ function openSideForm() {
   if (addProductCard) addProductCard.style.display = 'none';
   if (document.getElementById('productPriceCard')) document.getElementById('productPriceCard').style.display = 'none';
   if (addExpenseCard) addExpenseCard.style.display = 'none';
+  const addVehicleCard = document.getElementById('addVehicleCard');
+  if (addVehicleCard) addVehicleCard.style.display = 'none';
   if (addGbpaCard) addGbpaCard.style.display = 'none';
   if (addIndusTowerCard) addIndusTowerCard.style.display = 'none';
 
@@ -40126,6 +40780,16 @@ function openSideForm() {
       currentViewedExpenseId = null;
       isExpenseFormEditing = false;
     }
+  } else if (currentModule === 'master' && currentMasterSubpage === 'transport') {
+    if (addVehicleCard) {
+      addVehicleCard.style.display = 'block';
+      const lblTitle = document.getElementById('lblVehicleCardTitle');
+      if (lblTitle && !window.currentViewedVehicleId) lblTitle.innerText = 'Add Vehicle';
+      if (!window.currentViewedVehicleId) {
+        const frm = document.getElementById('frmAddVehicle');
+        if (frm) frm.reset();
+      }
+    }
   } else {
     if (addCustomerCard) {
       addCustomerCard.style.display = 'block';
@@ -40239,6 +40903,15 @@ function closeSideForm() {
   if (viewBankCard) viewBankCard.style.display = 'none';
   const addBankCard = document.getElementById('addBankCard');
   if (addBankCard) addBankCard.style.display = 'none';
+  const addVehicleCard = document.getElementById('addVehicleCard');
+  if (addVehicleCard) addVehicleCard.style.display = 'none';
+  window.currentViewedVehicleId = null;
+  const vehicleContactCard = document.getElementById('vehicleContactCard');
+  if (vehicleContactCard) vehicleContactCard.style.display = 'none';
+  const vehicleBankCard = document.getElementById('vehicleBankCard');
+  if (vehicleBankCard) vehicleBankCard.style.display = 'none';
+  const vehicleDocsCard = document.getElementById('vehicleDocsCard');
+  if (vehicleDocsCard) vehicleDocsCard.style.display = 'none';
   const dedCard = document.getElementById('salaryDeductionCard');
   if (dedCard) dedCard.style.display = 'none';
   const daysCard = document.getElementById('salaryDaysCard');
@@ -46217,6 +46890,9 @@ function exportToCsv() {
     } else if (currentMasterSubpage === 'expenses') {
       headers = ["Expense Head", "Expense Code", "SAC Code", "Expense Description", "TDS Rate", "GST Rate", "Uom", "Status"];
       rows = filteredDataset.map(r => [r.expenseHead, r.expenseCode, r.sacCode, r.expenseDescription, r.tdsRate, r.gstRate, r.uom, r.status]);
+    } else if (currentMasterSubpage === 'transport') {
+      headers = ["Transport Name", "Transport Type", "Vehicle Type", "Vehicle Number", "Status"];
+      rows = filteredDataset.map(r => [r.transportName, r.transportType, r.vehicleType, r.vehicleNumber, r.status]);
     } else if (currentMasterSubpage === 'employee') {
       headers = ["Employee ID", "Employee Name", "Designation", "Contact Number", "E-Mail", "Status"];
       rows = filteredDataset.map(r => [r.employeeId, r.employeeName, r.designation, r.contactNumber, r.email, r.status]);
@@ -46355,6 +47031,7 @@ function getCurrentBulkPageLabel() {
   if (typeof currentModule !== 'undefined' && currentModule === 'master') {
     if (currentMasterSubpage === 'products') return 'Products';
     if (currentMasterSubpage === 'expenses') return 'Expense';
+    if (currentMasterSubpage === 'transport') return 'Transport';
     return 'Employee';
   }
   if (typeof currentModule !== 'undefined' && (currentModule === 'indus' || currentModule === 'indus_towers' || currentModule === 'customer')) {

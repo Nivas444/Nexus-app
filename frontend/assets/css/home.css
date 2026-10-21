@@ -5642,6 +5642,36 @@ body.standalone-mode .worklist-main-full {
   border-color: #00cba0 !important;
 }
 
+/* Vehicle Circle Radio Checkbox (Green marker, multiple select allowed) */
+.vehicle-circle-radio {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  border: 2px solid #94a3b8 !important;
+  border-radius: 50% !important;
+  outline: none !important;
+  cursor: pointer !important;
+  vertical-align: middle !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  background: #ffffff !important;
+  display: inline-block !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+}
+
+.vehicle-circle-radio:checked {
+  border-color: #16a34a !important;
+  background-color: #16a34a !important;
+  box-shadow: inset 0 0 0 3.5px #ffffff !important;
+}
+
+.vehicle-circle-radio:hover {
+  border-color: #16a34a !important;
+}
+
 /* Warehouse Manager GRN Modals: Strictly Centered on Display */
 #wmGrnSupplierModal {
   position: fixed !important;

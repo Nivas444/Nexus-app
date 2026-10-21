@@ -1603,6 +1603,360 @@
           </form>
         </div>
 
+        <!-- 1F. Master -> Add Vehicle Form Card -->
+        <div class="side-form-card" id="addVehicleCard" style="display: none; width: 520px; max-width: 95vw;">
+          <!-- Header -->
+          <div class="side-form-header">
+            <div class="side-form-title-badge" id="lblVehicleCardTitle">Add Vehicle</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVehicleCardBank" title="Bank Details">
+                <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnVehicleCardContact" title="Contact Details">
+                <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="28" height="28">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnVehicleCardDocs" title="Documents">
+                <img src="icons/Documents.svg" alt="Documents" width="28" height="28">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseVehicleForm" aria-label="Close form">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body -->
+          <form class="side-form-body" id="frmAddVehicle" onsubmit="event.preventDefault();">
+            <!-- 1. Transport Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleTransportName">Transport Name</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpVehicleTransportName">
+                  <option value="" disabled selected hidden>Select Transport Name</option>
+                  <option value="SRS Travels">SRS Travels</option>
+                  <option value="VRL Logistics">VRL Logistics</option>
+                  <option value="Navata Road Transport">Navata Road Transport</option>
+                  <option value="TCI Freight">TCI Freight</option>
+                  <option value="SafeXpress">SafeXpress</option>
+                  <option value="GATI KWE">GATI KWE</option>
+                  <option value="Blue Dart Express">Blue Dart Express</option>
+                  <option value="Delhivery">Delhivery</option>
+                  <option value="Local Transport">Local Transport</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Transport Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleTransportType">Transport Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpVehicleTransportType">
+                  <option value="" disabled selected hidden>Select Transport Type</option>
+                  <option value="Contract" selected>Contract</option>
+                  <option value="Owned">Owned</option>
+                  <option value="Leased">Leased</option>
+                  <option value="Rental">Rental</option>
+                  <option value="Dedicated">Dedicated</option>
+                  <option value="3PL">3PL</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 3. Vehicle Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleType">Vehicle Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpVehicleType">
+                  <option value="" disabled selected hidden>Select Vehicle Type</option>
+                  <option value="Tata Ace" selected>Tata Ace</option>
+                  <option value="Bolero Maxi Truck">Bolero Maxi Truck</option>
+                  <option value="Pick-up 1.5T">Pick-up 1.5T</option>
+                  <option value="Eicher 14ft">Eicher 14ft</option>
+                  <option value="Eicher 17ft">Eicher 17ft</option>
+                  <option value="Eicher 19ft">Eicher 19ft</option>
+                  <option value="Taurus 16T">Taurus 16T</option>
+                  <option value="Trailer 40ft">Trailer 40ft</option>
+                  <option value="Truck 32ft SXL">Truck 32ft SXL</option>
+                  <option value="Truck 32ft MXL">Truck 32ft MXL</option>
+                  <option value="Container">Container</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 4. Vehicle Number -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleNumber">Vehicle Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleNumber" placeholder="e.g. TN 01 AB 1234">
+              </div>
+            </div>
+
+            <!-- 5. Rental Type -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleRentalType">Rental Type</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpVehicleRentalType">
+                  <option value="" disabled selected hidden>Select Rental Type</option>
+                  <option value="Per Day" selected>Per Day</option>
+                  <option value="Per KM">Per KM</option>
+                  <option value="Per Trip">Per Trip</option>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Fixed Rate">Fixed Rate</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 6. Rental Amount -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleRentalAmount">Rental Amount</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleRentalAmount" placeholder="e.g. 2,500.00">
+              </div>
+            </div>
+
+            <!-- 7. Halt Rent -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleHaltRent">Halt Rent</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleHaltRent" placeholder="e.g. 500.00">
+              </div>
+            </div>
+
+            <!-- Submit Icon Centered Below Last Row -->
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; margin-top: 24px; margin-bottom: 12px;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVehicle" title="Submit"
+                aria-label="Submit" style="background: none; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 1G. Vehicle Documents Popup Card -->
+        <div class="side-form-card side-contact-popup" id="vehicleDocsSidePanel"
+          style="display: none; width: 520px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Vehicle Documents</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVehicleDocsAdd" title="Add Document" aria-label="Add Document">
+                <img src="icons/Add.svg" alt="Add Document" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseVehicleDocsPanel" aria-label="Close vehicle documents">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblVehicleDocsPopup">
+              <thead>
+                <tr>
+                  <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+                    <span>Document Name</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+                    <span>Expiry Date</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyVehicleDocs">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 1G-Sub. Add Vehicle Document Card -->
+        <div class="side-form-card" id="addVehicleDocCard" style="display: none; width: 440px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Documents</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddVehicleDocCard" aria-label="Close">&times;</button>
+            </div>
+          </div>
+          <form class="side-form-body" id="frmAddVehicleDoc" onsubmit="event.preventDefault();">
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleDocName">Document Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleDocName" placeholder="e.g. RC Copy">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleDocExpiry">Expiry Date</label>
+              <div class="form-input-wrap">
+                <input type="date" class="form-input-control" id="inpVehicleDocExpiry">
+              </div>
+            </div>
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; margin-top: 24px; margin-bottom: 12px;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVehicleDoc" title="Submit" aria-label="Submit"
+                style="background: none; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 1H. Vehicle Contact Details Popup Card -->
+        <div class="side-form-card side-contact-popup" id="vehicleContactSidePanel"
+          style="display: none; width: 680px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Contact Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVehicleContactDelete" title="Delete Selected"
+                aria-label="Delete Selected" style="display: none; background: transparent; border: none; cursor: pointer; padding: 4px; align-items: center;">
+                <img src="icons/Delete.svg" alt="Delete" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnVehicleContactAdd" title="Add Contact"
+                aria-label="Add Contact">
+                <img src="icons/Add.svg" alt="Add Contact" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseVehicleContactPanel"
+                aria-label="Close contact details">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblVehicleContactPopup">
+              <thead>
+                <tr>
+                  <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important;">
+                    <span>Select</span>
+                  </th>
+                  <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+                    <span>Name</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+                    <span>Designation</span>
+                  </th>
+                  <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important;">
+                    <span>Contact Number</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyVehicleContactDetails">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 1H-Sub. Add Vehicle Contact Details Card -->
+        <div class="side-form-card" id="addVehicleContactCard" style="display: none; width: 440px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Contact Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddVehicleContactCard" aria-label="Close">&times;</button>
+            </div>
+          </div>
+          <form class="side-form-body" id="frmAddVehicleContact" onsubmit="event.preventDefault();">
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleContactName">Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleContactName" placeholder="e.g. Ramesh Kumar">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleContactDesignation">Designation</label>
+              <div class="form-input-wrap">
+                <select class="form-select-control" id="inpVehicleContactDesignation">
+                  <option value="Driver" selected>Driver</option>
+                  <option value="Owner">Owner</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleContactPhone">Contact Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleContactPhone" placeholder="e.g. +91 98765 43210">
+              </div>
+            </div>
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; margin-top: 24px; margin-bottom: 12px;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVehicleContact" title="Submit" aria-label="Submit"
+                style="background: none; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 1I. Vehicle Bank Details Popup Card -->
+        <div class="side-form-card side-contact-popup" id="vehicleBankSidePanel"
+          style="display: none; width: 860px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Bank Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnVehicleBankDelete" title="Delete Selected"
+                aria-label="Delete Selected" style="display: none; background: transparent; border: none; cursor: pointer; padding: 4px; align-items: center;">
+                <img src="icons/Delete.svg" alt="Delete" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnVehicleBankAdd" title="Add Bank Details"
+                aria-label="Add Bank Details">
+                <img src="icons/Add.svg" alt="Add" class="icon-blue" width="24" height="24">
+              </button>
+              <button type="button" class="side-form-close-btn" id="btnCloseVehicleBankPanel"
+                aria-label="Close bank details">&times;</button>
+            </div>
+          </div>
+          <div class="contact-table-wrap" style="padding: 0 16px 16px 16px;">
+            <table class="contact-custom-table" id="tblVehicleBankPopup">
+              <thead>
+                <tr>
+                  <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important;">
+                    <span>Select</span>
+                  </th>
+                  <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important;">
+                    <span>Account Name</span>
+                  </th>
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+                    <span>Account Number</span>
+                  </th>
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+                    <span>Bank Name</span>
+                  </th>
+                  <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important;">
+                    <span>IFSC Code</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="tbodyVehicleBankDetails">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 1I-Sub. Add Vehicle Bank Details Card -->
+        <div class="side-form-card" id="addVehicleBankCard" style="display: none; width: 460px; max-width: 95vw;">
+          <div class="side-form-header">
+            <div class="side-form-title-badge">Add Bank Details</div>
+            <div class="side-header-top-icons">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddVehicleBankCard" aria-label="Close">&times;</button>
+            </div>
+          </div>
+          <form class="side-form-body" id="frmAddVehicleBank" onsubmit="event.preventDefault();">
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleAccountName">Account Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleAccountName" placeholder="e.g. Ramesh Kumar">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleAccountNumber">Account Number</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleAccountNumber" placeholder="e.g. 50200012345678">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleBankName" placeholder="e.g. HDFC Bank">
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleIfscCode">IFSC Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpVehicleIfscCode" placeholder="e.g. HDFC0001234">
+              </div>
+            </div>
+            <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; margin-top: 24px; margin-bottom: 12px;">
+              <button type="button" class="btn-card-submit-inside" id="btnSubmitVehicleBank" title="Submit" aria-label="Submit"
+                style="background: none; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
         <!-- 1B. Indus / Infra Project Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addInfraCard" style="display: none; width: 480px; max-width: 95vw;">
           <!-- Header -->

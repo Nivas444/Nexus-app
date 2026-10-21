@@ -201,7 +201,11 @@
       orderValue: "Order Value",
       status: "Status",
       supplierName: "Supplier Name",
-      rfqNo: "RFQ#"
+      rfqNo: "RFQ#",
+      transportName: "Transport Name",
+      transportType: "Transport Type",
+      vehicleType: "Vehicle Type",
+      vehicleNumber: "Vehicle Number"
     };
     return map[colKey] || colKey;
   }

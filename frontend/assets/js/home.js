@@ -35724,12 +35724,10 @@ function applyFiltersAndRender() {
         const tName = row.transportName || '';
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${tName.replace(/"/g, '&quot;')}">
-              <a href="#" class="req-link td-link-blue" onclick="openViewVehicleCard('${row.id}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${tName}</a>
-            </td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.transportType || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.vehicleType || ''}</td>
-            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; font-family: monospace;">${row.vehicleNumber || ''}</td>
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b; font-weight: 500;" title="${tName.replace(/"/g, '&quot;')}">${tName}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #64748b; font-weight: 500;">${row.transportType || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #64748b; font-weight: 500;">${row.vehicleType || ''}</td>
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #64748b; font-weight: 500; font-family: monospace;">${row.vehicleNumber || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>

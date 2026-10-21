@@ -5830,3 +5830,13 @@ th.wm-supply-header-qty {
 th.wm-supply-sub-header {
   border-top: 1px solid #ffffff !important;
 }
+
+/* Vehicle Bank Details Popup - Extended Width & No Scrollbar */
+#vehicleBankSidePanel {
+  width: 1040px !important;
+  max-width: 96vw !important;
+}
+
+#vehicleBankSidePanel .contact-table-wrap {
+  overflow-x: hidden !important;
+}

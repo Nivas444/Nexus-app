@@ -98,7 +98,8 @@ async function loadMasterProductsFromApi() {
     } catch (err) {
       console.error('Error fetching master products from API:', err);
       if (typeof showToast === 'function') {
-        showToast('Could not load products from database: ' + (err.message || err));
+        const errorCode = (err && (err.status || err.statusCode || err.code)) || 503;
+        showToast(`Couldnt load DataBase: ${errorCode}`);
       }
     }
   }
@@ -126,7 +127,8 @@ async function loadMasterExpensesFromApi() {
     } catch (err) {
       console.error('Error fetching master expenses from API:', err);
       if (typeof showToast === 'function') {
-        showToast('Could not load expenses from database: ' + (err.message || err));
+        const errorCode = (err && (err.status || err.statusCode || err.code)) || 503;
+        showToast(`Couldnt load DataBase: ${errorCode}`);
       }
     }
   }
@@ -137,6 +139,63 @@ async function loadMasterExpensesFromApi() {
     }
   }
 }
+
+// Commercial Manager -> New Projects Dataset (Loaded dynamically from PostgreSQL telecom_project via FastAPI)
+async function loadCommercialProjectsFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.getProjects) {
+    try {
+      const response = await NexusApi.commercial.getProjects();
+      if (response && Array.isArray(response.items)) {
+        commercialWorklistData = response.items;
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching commercial projects from API:', err);
+      if (typeof showToast === 'function') {
+        const errorCode = (err && (err.status || err.statusCode || err.code)) || 503;
+        showToast(`Couldnt load DataBase: ${errorCode}`);
+      }
+    }
+  }
+  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'new_project') {
+    currentDataset = commercialWorklistData.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    } else if (typeof renderWorklistTableBody === 'function') {
+      renderWorklistTableBody();
+    }
+    if (typeof renderWorklistFooter === 'function') {
+      renderWorklistFooter();
+    }
+  } else if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'jms') {
+    syncCommercialJmsDataWithNewProject();
+    const role = getAuthenticatedUserRole();
+    let visibleData = commercialJmsData;
+    if (role !== 'Project Manager') {
+      visibleData = commercialJmsData.filter(item => {
+        const tLower = (item.task || '').trim().toLowerCase();
+        return !tLower.includes('pending') && !tLower.includes('wcc') && !tLower.includes('amend') && tLower !== 'jms approval pending';
+      });
+    }
+    currentDataset = visibleData.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    } else if (typeof renderWorklistTableBody === 'function') {
+      renderWorklistTableBody();
+    }
+    if (typeof renderWorklistFooter === 'function') {
+      renderWorklistFooter();
+    }
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
+  }
+}
+window.loadCommercialProjectsFromApi = loadCommercialProjectsFromApi;
 
 // Master -> Transport Dataset
 let masterTransportData = [
@@ -3517,113 +3576,7 @@ let infraWhSrnData = [
   }
 ];
 
-let commercialWorklistData = [
-  {
-    id: "cw-1",
-    customerName: "Indus Towers Ltd",
-    date: "12/08/2026",
-    poNo: "4500128934",
-    projectId: "PRJ-2026-001",
-    siteId: "IN-123456",
-    siteName: "Guindy Hub",
-    ageing: "12 Days",
-    projectType: "Run project",
-    subProjectType: "Civil",
-    poType: "Opex",
-    raBill: false,
-    selected: false
-  },
-  {
-    id: "cw-2",
-    customerName: "Bharti Airtel Ltd",
-    date: "14/08/2026",
-    poNo: "4500128935",
-    projectId: "PRJ-2026-002",
-    siteId: "IN-123457",
-    siteName: "Ambattur Central",
-    ageing: "18 Days",
-    projectType: "New Build",
-    subProjectType: "Electrical",
-    poType: "Capex",
-    raBill: false,
-    selected: false
-  },
-  {
-    id: "cw-3",
-    customerName: "Reliance Jio Infocomm",
-    date: "16/08/2026",
-    poNo: "4500128936",
-    projectId: "PRJ-2026-003",
-    siteId: "IN-123458",
-    siteName: "Madurai Depot",
-    ageing: "24 Days",
-    projectType: "O&M",
-    subProjectType: "Telecom",
-    poType: "Opex",
-    raBill: false,
-    selected: false
-  },
-  {
-    id: "cw-4",
-    customerName: "Vodafone Idea Ltd",
-    date: "18/08/2026",
-    poNo: "4500128937",
-    projectId: "PRJ-2026-004",
-    siteId: "IN-123459",
-    siteName: "Coimbatore Hub",
-    ageing: "32 Days",
-    projectType: "Energy",
-    subProjectType: "Maintenance",
-    poType: "Capex",
-    raBill: false,
-    selected: false
-  },
-  {
-    id: "cw-5",
-    customerName: "ATC India Pvt Ltd",
-    date: "20/08/2026",
-    poNo: "4500128938",
-    projectId: "PRJ-2026-005",
-    siteId: "IN-123460",
-    siteName: "Chennai North",
-    ageing: "45 Days",
-    projectType: "Safety",
-    subProjectType: "Installation",
-    poType: "Opex",
-    raBill: false,
-    selected: false
-  },
-  {
-    id: "cw-6",
-    customerName: "Indus Towers Ltd",
-    date: "22/08/2026",
-    poNo: "4500128939",
-    projectId: "PRJ-2026-006",
-    siteId: "IN-123461",
-    siteName: "Salem South",
-    ageing: "15 Days",
-    projectType: "Colo",
-    subProjectType: "Survey",
-    poType: "Capex",
-    raBill: false,
-    selected: false
-  },
-  {
-    id: "cw-7",
-    customerName: "Bharti Airtel Ltd",
-    date: "24/08/2026",
-    poNo: "4500128940",
-    projectId: "PRJ-2026-007",
-    siteId: "IN-123462",
-    siteName: "Trichy Central",
-    ageing: "28 Days",
-    projectType: "New Build",
-    subProjectType: "Upgrade",
-    poType: "Opex",
-    raBill: false,
-    selected: false
-  }
-];
+let commercialWorklistData = [];
 
 let pmStatusDataStore = [
   // YTS (Yet to Start) Records
@@ -3891,8 +3844,15 @@ try {
   const savedCw = localStorage.getItem('commercialWorklistData');
   if (savedCw) {
     const parsedCw = JSON.parse(savedCw);
-    if (Array.isArray(parsedCw) && parsedCw.length > 0) {
-      commercialWorklistData = parsedCw;
+    if (Array.isArray(parsedCw) && parsedCw.length >= 4) {
+      const realOnly = parsedCw.filter(r => r && r.id && !String(r.id).startsWith('cw-'));
+      if (realOnly.length >= 4) {
+        commercialWorklistData = realOnly;
+      } else {
+        localStorage.removeItem('commercialWorklistData');
+      }
+    } else {
+      localStorage.removeItem('commercialWorklistData');
     }
   }
   const savedPm = localStorage.getItem('pmStatusDataStore');
@@ -3955,7 +3915,7 @@ const defaultJmsItems = [
     subProjectType: "Electrical",
     supportRequired: "Power Connection Clearance",
     pendingWith: "Site Engineer",
-    remarks: "Awaiting test results",
+    remarks: "Pending verification",
     task: "JMS to be process",
     ageing: "18 Days",
     amount: "₹ 3,80,000.00",
@@ -3966,111 +3926,81 @@ const defaultJmsItems = [
     date: "16/08/2026",
     poNo: "4500128936",
     projectId: "PRJ-2026-003",
-    siteName: "Madurai Depot",
+    siteName: "Velachery Substation",
     siteId: "IN-123458",
-    projectType: "O&M",
-    subProjectType: "Telecom",
-    supportRequired: "Telecom NOC Approval",
-    pendingWith: "Quality Lead",
-    remarks: "Documents submitted",
-    task: "commercial approval to be submit",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    supportRequired: "Site Soil Testing & Topo Survey",
+    pendingWith: "Site Engineer",
+    remarks: "Pending verification",
+    task: "JMS to be validate",
     ageing: "24 Days",
-    amount: "₹ 1,95,000.00",
-    rawAmount: 195000
+    amount: "₹ 6,20,000.00",
+    rawAmount: 620000
   },
   {
     id: "cw-4",
     date: "18/08/2026",
     poNo: "4500128937",
     projectId: "PRJ-2026-004",
-    siteName: "Coimbatore Hub",
+    siteName: "T Nagar Central",
     siteId: "IN-123459",
-    projectType: "Energy",
-    subProjectType: "Maintenance",
-    supportRequired: "Structural Stability Report",
-    pendingWith: "Commercial Lead",
-    remarks: "In review with team",
-    task: "commercial approval pending",
-    ageing: "32 Days",
-    amount: "₹ 4,50,000.00",
-    rawAmount: 450000
+    projectType: "Run project",
+    subProjectType: "Electrical",
+    supportRequired: "Customer email approval for fiber extension",
+    pendingWith: "Fiber Lead",
+    remarks: "Pending verification",
+    task: "JMS to be validate",
+    ageing: "14 Days",
+    amount: "₹ 1,75,000.00",
+    rawAmount: 175000
   },
   {
     id: "cw-5",
     date: "20/08/2026",
-    poNo: "4500128938",
-    projectId: "PRJ-2026-005",
-    siteName: "Chennai North",
-    siteId: "IN-123460",
-    projectType: "Safety",
-    subProjectType: "Installation",
-    supportRequired: "Foundation Quality Check",
-    pendingWith: "Operations Lead",
-    remarks: "Site readiness confirmed",
-    task: "JMS to be process",
-    ageing: "45 Days",
-    amount: "₹ 3,20,000.00",
-    rawAmount: 320000
-  },
-  {
-    id: "cw-6",
-    date: "22/08/2026",
     poNo: "4500128939",
     projectId: "PRJ-2026-006",
     siteName: "Salem South",
     siteId: "IN-123461",
-    projectType: "Colo",
-    subProjectType: "Survey",
-    supportRequired: "Civil Quality Inspection",
-    pendingWith: "Technical Auditor",
-    remarks: "Pre-audit complete",
-    task: "commercial approval to be submit",
-    ageing: "15 Days",
+    projectType: "Run project",
+    subProjectType: "Civil",
+    supportRequired: "Site Survey Documentation",
+    pendingWith: "Civil Lead",
+    remarks: "Pending verification",
+    task: "JMS to be validate",
+    ageing: "10 Days",
     amount: "₹ 2,75,000.00",
     rawAmount: 275000
-  },
-  {
-    id: "cw-7",
-    date: "24/08/2026",
-    poNo: "4500128940",
-    projectId: "PRJ-2026-007",
-    siteName: "Trichy Central",
-    siteId: "IN-123462",
-    projectType: "New Build",
-    subProjectType: "Upgrade",
-    supportRequired: "Soil Testing Certification",
-    pendingWith: "Survey Lead",
-    remarks: "Initial survey logged",
-    task: "commercial approval pending",
-    ageing: "28 Days",
-    amount: "₹ 5,10,000.00",
-    rawAmount: 510000
   }
 ];
 
 let commercialJmsData = [...defaultJmsItems];
 
 function syncCommercialJmsDataWithNewProject() {
-  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData) || commercialWorklistData.length === 0) {
+    commercialJmsData = defaultJmsItems.map(item => ({ ...item }));
+    return;
+  }
   commercialJmsData = commercialWorklistData.map((np, idx) => {
-    const existing = commercialJmsData.find(j => String(j.id) === String(np.id) || j.poNo === np.poNo) || defaultJmsItems[idx % defaultJmsItems.length];
-    const taskOptions = ["JMS to be validate", "JMS to be process", "commercial approval to be submit", "commercial approval pending"];
-    const assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
-    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    const existing = (commercialJmsData || []).find(j => String(j.id) === String(np.id) || j.poNo === np.poNo) || (defaultJmsItems && defaultJmsItems[idx % defaultJmsItems.length]);
+    const npTask = np.task || np.current_task;
+    let assignedTask = npTask || "JMS to be validate";
+    const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
     return {
       id: np.id || `jms-${idx + 1}`,
-      date: np.date || existing.date || "12/08/2026",
-      poNo: np.poNo || existing.poNo || "4500128934",
-      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
-      siteName: np.siteName || existing.siteName || "Guindy Hub",
-      siteId: np.siteId || existing.siteId || "IN-123456",
-      projectType: np.projectType || existing.projectType || "New Build",
-      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
-      supportRequired: existing.supportRequired || "Site Survey Documentation",
-      pendingWith: existing.pendingWith || "Project Manager",
-      remarks: existing.remarks || "Pending verification",
+      date: np.date || (existing && existing.date) || "12/08/2026",
+      poNo: np.poNo || (existing && existing.poNo) || "4500128934",
+      projectId: np.projectId || (existing && existing.projectId) || "PRJ-2026-001",
+      siteName: np.siteName || (existing && existing.siteName) || "Guindy Hub",
+      siteId: np.siteId || (existing && existing.siteId) || "IN-123456",
+      projectType: np.projectType || (existing && existing.projectType) || "New Build",
+      subProjectType: np.subProjectType || (existing && existing.subProjectType) || "Civil",
+      poType: np.poType || (existing && existing.poType) || "Opex",
+      supportRequired: (existing && existing.supportRequired) || "Site Survey Documentation",
+      pendingWith: (existing && existing.pendingWith) || "Project Manager",
+      remarks: (existing && existing.remarks) || "Pending verification",
       task: assignedTask,
-      ageing: np.ageing || existing.ageing || "12 Days",
+      ageing: np.ageing || (existing && existing.ageing) || "12 Days",
       amount: formatIndianCurrency(rawAmt),
       rawAmount: rawAmt
     };
@@ -4287,8 +4217,16 @@ window.openJmsDetailPage = function(rowId) {
   const parentInDataset = (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset))
     ? currentDataset.find(r => String(r.id) === String(rowId))
     : null;
-  if (parentInDataset && parentInDataset.task) {
-    window.selectedJmsParentTask = parentInDataset.task;
+  const parentInJms = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData))
+    ? commercialJmsData.find(r => String(r.id) === String(rowId))
+    : null;
+  const parentRow = parentInDataset || parentInJms;
+  if (parentRow && parentRow.task) {
+    window.selectedJmsParentTask = parentRow.task;
+  }
+  if (parentRow) {
+    window.selectedJmsPoNo = parentRow.poNo;
+    window.selectedJmsSiteId = parentRow.siteId;
   }
   currentWorklistView = 'jms_detail';
   activeColumnFilters = {};
@@ -4296,7 +4234,79 @@ window.openJmsDetailPage = function(rowId) {
   updateURL();
   renderApp();
   showToast('Opening JMS Detail validation page...');
+
+  if (window.selectedJmsPoNo) {
+    loadJmsDetailFromApi(window.selectedJmsPoNo, window.selectedJmsSiteId);
+  }
 };
+
+async function loadJmsDetailFromApi(poNo, siteId) {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.jms && NexusApi.commercial.jms.getPoDetails) {
+    try {
+      const res = await NexusApi.commercial.jms.getPoDetails(poNo, siteId);
+      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+        currentDataset = res.lineItems.map(item => {
+          const rateVal = parseFloat(item.rate) || 0;
+          const qtyVal = parseFloat(item.jmsQty) || 0;
+          const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
+          const isAppr = (item.jmsStatus === 'Approved');
+          return {
+            id: item.id,
+            lineNo: String(item.lineNo || ''),
+            itemCode: item.itemCode || '',
+            itemName: item.itemName || '',
+            uom: item.uom || 'Nos',
+            rate: formatJmsSum(rateVal),
+            rawRate: rateVal,
+            qty: qtyVal.toFixed(2),
+            rawQty: qtyVal,
+            poQty: item.poQty,
+            netMaterialQty: item.netMaterialQty,
+            poDifference: item.poDifference,
+            materialDifference: item.materialDifference,
+            amount: formatJmsSum(amtVal),
+            rawAmount: amtVal,
+            jmsStatus: item.jmsStatus || 'Not Approved',
+            highlighted: isAppr,
+            selected: false
+          };
+        });
+        filteredDataset = [...currentDataset];
+        if (selectedJmsRowId) {
+          jmsDetailItemsMap[selectedJmsRowId] = currentDataset;
+        }
+
+        const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId) || r.poNo === poNo);
+        if (parentRow) {
+          if (res.poType) parentRow.poType = res.poType;
+          if (res.task) {
+            parentRow.task = res.task;
+            window.selectedJmsParentTask = res.task;
+          }
+        }
+
+        const totalEl = document.getElementById('lblJmsDetailTotalAmount');
+        if (totalEl) {
+          totalEl.textContent = formatJmsSum(res.totalJmsAmount || 0);
+        }
+        const payEl = document.getElementById('lblJmsDetailPayableAmount');
+        if (payEl) {
+          payEl.textContent = formatJmsSum(res.totalExpenseAmount || 0);
+        }
+
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+        if (typeof updateJmsDetailActionIcons === 'function') {
+          updateJmsDetailActionIcons();
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load JMS detail from backend, using current dataset:', err);
+    }
+  }
+}
+window.loadJmsDetailFromApi = loadJmsDetailFromApi;
 
 window.backToJmsList = function() {
   currentWorklistView = 'jms';
@@ -4337,9 +4347,6 @@ window.toggleJmsDetailRowSelect = function(lineId) {
   const row = currentDataset.find(r => String(r.id) === String(lineId));
   if (row) {
     row.selected = !row.selected;
-    if (!row.selected && row.highlighted) {
-      row.highlighted = false;
-    }
     applyFiltersAndRender();
     updateJmsDetailActionIcons();
     renderWorklistFooter();
@@ -4350,16 +4357,50 @@ window.toggleJmsDetailSelectAll = function() {
   const anyUnselected = currentDataset.some(r => !r.selected);
   currentDataset.forEach(r => {
     r.selected = anyUnselected;
-    if (!anyUnselected) {
-      r.highlighted = false;
-    }
   });
   applyFiltersAndRender();
   updateJmsDetailActionIcons();
   renderWorklistFooter();
 };
 
-window.highlightSelectedJmsDetailRows = function() {
+window.highlightSelectedJmsDetailRows = async function() {
+  const isValidateTask = (String(window.selectedJmsParentTask || '').trim().toLowerCase() === 'jms to be validate');
+  
+  if (isValidateTask) {
+    const selectedRows = currentDataset.filter(r => r.selected);
+    if (!selectedRows || selectedRows.length === 0) {
+      showToast('Please select a row first.');
+      return;
+    }
+
+    const allAlreadyApproved = selectedRows.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
+    const newStatus = allAlreadyApproved ? 'Not Approved' : 'Approved';
+
+    // Call API to persist approved status in telecom_indus_po
+    const idsToApprove = selectedRows.map(r => r.id).filter(id => typeof id === 'number');
+    if (idsToApprove.length > 0 && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.approveRows) {
+      try {
+        await NexusApi.commercial.jms.approveRows(idsToApprove, newStatus);
+      } catch (err) {
+        console.error('Failed to update approval status via API:', err);
+        showToast('Error updating row approval status in database.');
+        return;
+      }
+    }
+
+    selectedRows.forEach(r => {
+      r.highlighted = (newStatus === 'Approved');
+      r.jmsStatus = newStatus;
+    });
+
+    applyFiltersAndRender();
+    updateJmsDetailActionIcons();
+    renderWorklistFooter();
+    showToast(newStatus === 'Approved' ? `Approved ${selectedRows.length} row${selectedRows.length > 1 ? 's' : ''}!` : `Unapproved ${selectedRows.length} row${selectedRows.length > 1 ? 's' : ''}.`);
+    return;
+  }
+
+  // Preserve existing flow for other tasks
   let count = 0;
   currentDataset.forEach(r => {
     if (r.selected || r.highlighted) {
@@ -4403,7 +4444,7 @@ window.editSelectedJmsDetailRow = function() {
   }
 };
 
-window.updateJmsDetailRowQty = function(rowId, val) {
+window.updateJmsDetailRowQty = async function(rowId, val) {
   const row = currentDataset.find(r => String(r.id) === String(rowId));
   if (row) {
     const num = Math.max(0, parseFloat(val) || 0);
@@ -4414,12 +4455,31 @@ window.updateJmsDetailRowQty = function(rowId, val) {
       : (parseFloat(String(row.rate || 0).replace(/[^0-9.-]+/g, '')) || 0);
     const amt = num * rateVal;
     row.rawAmount = amt;
-    row.amount = amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    row.amount = formatJmsSum(amt);
+
+    const poQ = Number(row.poQty) || 0;
+    const matQ = Number(row.netMaterialQty !== undefined ? row.netMaterialQty : poQ);
+    row.poDifference = poQ - num;
+    row.materialDifference = num - matQ;
+
+    const isValidateTask = (String(window.selectedJmsParentTask || '').trim().toLowerCase() === 'jms to be validate');
+    if (isValidateTask && typeof row.id === 'number' && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.updateQty) {
+      try {
+        await NexusApi.commercial.jms.updateQty(row.id, num);
+      } catch (err) {
+        console.error('Failed to update JMS Qty in backend:', err);
+      }
+      row.highlighted = false;
+      row.jmsStatus = 'Not Approved';
+    }
     
     // Update dynamic summation in toolbar
     const totalAmountEl = document.getElementById('lblJmsDetailTotalAmount');
     if (totalAmountEl) {
       totalAmountEl.textContent = formatJmsSum(calculateJmsTotalSum(currentDataset));
+    }
+    if (typeof updateJmsDetailActionIcons === 'function') {
+      updateJmsDetailActionIcons();
     }
     applyFiltersAndRender();
   }
@@ -4460,55 +4520,71 @@ window.updateJmsDetailActionIcons = function() {
   if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
 };
 
-window.handleJmsDetailSubmitClick = function() {
+window.handleJmsDetailSubmitClick = async function() {
   const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId));
   const rawTaskStr = window.selectedJmsParentTask || (parentRow && parentRow.task ? parentRow.task : '');
   const taskStr = String(rawTaskStr).trim().toLowerCase();
-  
-  if (taskStr === 'jms to be process' || taskStr.includes('process')) {
-    // When user highlighted all rows and click submit, the respective row should disappear from table where task 'jms to be process'
-    if (selectedJmsRowId) {
-      const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId));
-      if (idx !== -1) {
-        commercialJmsData.splice(idx, 1);
-      }
-      if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
-        const cIdx = currentDataset.findIndex(r => String(r.id) === String(selectedJmsRowId));
-        if (cIdx !== -1) {
-          currentDataset.splice(cIdx, 1);
-        }
-      }
-    }
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('JMS processed successfully and submitted!', 'Task Completed');
-    } else {
-      showToast('Task completed successfully!');
-    }
-    setTimeout(() => {
-      backToJmsList();
-    }, 1200);
-    return;
-  }
 
   if (taskStr.includes('pending') || taskStr.includes('approval')) {
     openJmsPdfUploadModal();
-  } else if (taskStr.includes('validate')) {
-    // Where task is jms to be validate, task completion popup appears instead of select worktype modal
-    if (selectedJmsRowId) {
-      const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId));
-      if (parentRow) {
-        parentRow.task = "JMS to be process";
+  } else if (taskStr === 'jms to be validate' || taskStr.includes('validate')) {
+    // Where task is jms to be validate, verify all rows are approved
+    const allApproved = currentDataset.length > 0 && currentDataset.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
+    if (!allApproved) {
+      showToast('Every line item must be approved before submission.');
+      return;
+    }
+
+    const poNo = window.selectedJmsPoNo || (parentRow && parentRow.poNo);
+    const siteId = window.selectedJmsSiteId || (parentRow && parentRow.siteId);
+
+    if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.submitJms) {
+      try {
+        await NexusApi.commercial.jms.submitJms(poNo, siteId);
+      } catch (err) {
+        console.error('Failed to submit JMS to Project Manager:', err);
+        showToast(err.message || 'Error submitting JMS.');
+        return;
       }
     }
+
+    // Transition task to 'JMS approval pending'
+    if (parentRow) {
+      parentRow.task = "JMS approval pending";
+    }
+    window.selectedJmsParentTask = "JMS approval pending";
+    if (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) {
+      const npRow = commercialWorklistData.find(np => np.poNo === poNo || String(np.id) === String(selectedJmsRowId));
+      if (npRow) {
+        npRow.task = "JMS approval pending";
+        npRow.current_task = "JMS approval pending";
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
+      }
+    }
+    if (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData)) {
+      const jRow = commercialJmsData.find(j => j.poNo === poNo || String(j.id) === String(selectedJmsRowId));
+      if (jRow) {
+        jRow.task = "JMS approval pending";
+      }
+    }
+
     if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Task Completed');
+      showSvgSuccessPopup('JMS validation completed and submitted to Project Manager successfully!', 'Task Completed');
     } else {
       showToast('Task completed successfully!');
     }
     setTimeout(() => {
       backToJmsList();
     }, 1200);
-  } else if (taskStr.includes('commercial')) {
+  } else if (taskStr === 'jms to be process' || taskStr.includes('process') || taskStr.includes('commercial')) {
+    // For PO of 'JMS to be process', when user approves all lines and clicks submit icon, Select Work Type modal appears
+    const allApproved = currentDataset.length > 0 && currentDataset.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
+    if (!allApproved) {
+      showToast('Every line item must be approved before submission.');
+      return;
+    }
     openJmsSelectWorkTypeModal();
   } else {
     submitJmsDetail();
@@ -4712,11 +4788,20 @@ function syncCommercialPoAmendDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
   commercialPoAmendData = commercialWorklistData.map((np, idx) => {
     const existing = commercialPoAmendData.find(p => String(p.id) === String(np.id) || p.poNo === np.poNo) || defaultPoAmendItems[idx % defaultPoAmendItems.length];
-    const taskOptions = ["To be submit", "Pending with Indus"];
-    const assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
-    const statusOptions = ["Amend Requested", "Under Review", "Revision Pending"];
-    const assignedStatus = (existing && existing.poStatus) ? existing.poStatus : statusOptions[idx % statusOptions.length];
-    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    const npTask = np.task || np.current_task;
+    const npStatus = np.poStatus || np.po_status;
+    let assignedTask;
+    let assignedStatus;
+    if (npTask && (npTask.toLowerCase().includes('amend') || npStatus === 'Amend Requested' || npTask.toLowerCase().includes('submit'))) {
+      assignedTask = npTask.toLowerCase().includes('amend') ? npTask : (existing?.task || "To be submit");
+      assignedStatus = npStatus || "Amend Requested";
+    } else {
+      const taskOptions = ["To be submit", "Pending with Indus"];
+      assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
+      const statusOptions = ["Amend Requested", "Under Review", "Revision Pending"];
+      assignedStatus = (existing && existing.poStatus) ? existing.poStatus : statusOptions[idx % statusOptions.length];
+    }
+    const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
     return {
       id: np.id || `poamend-${idx + 1}`,
       date: np.date || existing.date || "12/08/2026",
@@ -4873,10 +4958,20 @@ window.calculatePoAmendDetailTotalSum = calculatePoAmendDetailTotalSum;
 window.openPoAmendDetailPage = function(rowId, poNo, task) {
   selectedPoAmendRowId = rowId;
   let parentTask = task;
-  if (!parentTask && typeof commercialPoAmendData !== 'undefined') {
-    const pRow = commercialPoAmendData.find(r => String(r.id) === String(rowId));
-    if (pRow) parentTask = pRow.task;
+  let parentPo = poNo;
+  let parentSiteId = null;
+
+  if (typeof commercialPoAmendData !== 'undefined') {
+    const pRow = commercialPoAmendData.find(r => String(r.id) === String(rowId) || (poNo && r.poNo === poNo));
+    if (pRow) {
+      if (!parentTask) parentTask = pRow.task;
+      if (!parentPo) parentPo = pRow.poNo;
+      parentSiteId = pRow.siteId;
+    }
   }
+
+  window.selectedPoAmendPoNo = parentPo;
+  window.selectedPoAmendSiteId = parentSiteId;
   window.currentPoAmendParentTask = parentTask;
   const taskStr = String(parentTask || '').trim().toLowerCase();
   currentPoAmendSubpageType = taskStr.includes('pending') ? 'pending_with_indus' : 'to_be_submit';
@@ -4885,8 +4980,63 @@ window.openPoAmendDetailPage = function(rowId, poNo, task) {
   loadWorklistDataset();
   updateURL();
   renderApp();
-  showToast(`Opened PO Amendment Detail for ${poNo || 'PO'}`);
+  showToast(`Opened PO Amendment Detail for ${parentPo || 'PO'}`);
+
+  if (parentPo) {
+    loadPoAmendDetailFromApi(parentPo, parentSiteId);
+  }
 };
+
+async function loadPoAmendDetailFromApi(poNo, siteId) {
+  if (!poNo) return;
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.getPoDetails) {
+    try {
+      const res = await NexusApi.commercial.poAmend.getPoDetails(poNo, siteId);
+      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+        currentDataset = res.lineItems.map(item => {
+          const rateVal = parseFloat(item.rate) || 0;
+          const qtyVal = parseFloat(item.qty) || 0;
+          const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
+          return {
+            id: item.id,
+            amendmentType: item.amendmentType || "Change QTY",
+            lineNo: String(item.lineNo || ''),
+            itemCode: item.itemCode || '',
+            itemName: item.itemName || '',
+            uom: item.uom || 'Nos',
+            rate: formatJmsSum(rateVal),
+            rawRate: rateVal,
+            qty: qtyVal.toFixed(2),
+            rawQty: qtyVal,
+            poQty: item.poQty,
+            jmsQty: item.jmsQty,
+            poDifference: item.poDifference,
+            amount: formatJmsSum(amtVal),
+            rawAmount: amtVal,
+            selected: false,
+            highlighted: false
+          };
+        });
+        filteredDataset = [...currentDataset];
+        if (selectedPoAmendRowId) {
+          poAmendDetailItemsMap[selectedPoAmendRowId] = currentDataset;
+        }
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+        if (typeof renderWorklistToolbar === 'function') {
+          renderWorklistToolbar();
+        }
+        if (typeof renderWorklistFooter === 'function') {
+          renderWorklistFooter();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load PO Amend details from API:', err);
+    }
+  }
+}
+window.loadPoAmendDetailFromApi = loadPoAmendDetailFromApi;
 
 window.backToPoAmendList = function() {
   currentWorklistView = 'po_amend';
@@ -5178,9 +5328,15 @@ function syncCommercialWccDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
   commercialWccData = commercialWorklistData.map((np, idx) => {
     const existing = commercialWccData.find(w => String(w.id) === String(np.id) || w.poNo === np.poNo) || defaultWccItems[idx % defaultWccItems.length];
-    const taskOptions = ["To be submit", "Pending with Indus", "Rejected"];
-    const assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
-    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    const npTask = np.task || np.current_task;
+    let assignedTask;
+    if (npTask && (npTask.toLowerCase().includes('wcc') || npTask.toLowerCase().includes('raise'))) {
+      assignedTask = npTask;
+    } else {
+      const taskOptions = ["To be submit", "Pending with Indus", "Rejected"];
+      assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
+    }
+    const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
     return {
       id: np.id || `wcc-${idx + 1}`,
       date: np.date || existing.date || "12/08/2026",
@@ -5386,6 +5542,19 @@ window.handleWccPoNoClick = function(rowId, poNo, task) {
 
 window.openWccDetailPage = function(rowId, poNo, subpageType) {
   selectedWccRowId = rowId;
+  let parentPo = poNo;
+  let parentSiteId = null;
+
+  if (typeof commercialWccData !== 'undefined') {
+    const pRow = commercialWccData.find(r => String(r.id) === String(rowId) || (poNo && r.poNo === poNo));
+    if (pRow) {
+      if (!parentPo) parentPo = pRow.poNo;
+      parentSiteId = pRow.siteId;
+    }
+  }
+
+  window.selectedWccPoNo = parentPo;
+  window.selectedWccSiteId = parentSiteId;
   currentWccSubpageType = subpageType || 'to_be_submit';
   currentWorklistView = 'wcc_detail';
   activeColumnFilters = {};
@@ -5393,7 +5562,62 @@ window.openWccDetailPage = function(rowId, poNo, subpageType) {
   updateURL();
   renderApp();
   showToast(`Opened WCC Detail (${currentWccSubpageType === 'rejected' ? 'Rejected' : 'To Be Submitted'})`);
+
+  if (parentPo) {
+    loadWccDetailFromApi(parentPo, parentSiteId);
+  }
 };
+
+async function loadWccDetailFromApi(poNo, siteId) {
+  if (!poNo) return;
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.getPoDetails) {
+    try {
+      const res = await NexusApi.commercial.wcc.getPoDetails(poNo, siteId);
+      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+        currentDataset = res.lineItems.map(item => {
+          const rateVal = parseFloat(item.rate) || 0;
+          const qtyVal = parseFloat(item.qty) || 0;
+          const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
+          return {
+            id: item.id,
+            lineNo: String(item.lineNo || ''),
+            itemCode: item.itemCode || '',
+            itemName: item.itemName || '',
+            uom: item.uom || 'Nos',
+            rate: formatJmsSum(rateVal),
+            rawRate: rateVal,
+            qty: qtyVal.toFixed(2),
+            rawQty: qtyVal,
+            poQty: item.poQty,
+            jmsQty: item.jmsQty,
+            poDifference: item.poDifference,
+            amount: formatJmsSum(amtVal),
+            rawAmount: amtVal,
+            task: item.task || 'WCC to be raise',
+            selected: false,
+            highlighted: false
+          };
+        });
+        filteredDataset = [...currentDataset];
+        if (selectedWccRowId) {
+          wccDetailItemsMap[selectedWccRowId] = currentDataset;
+        }
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+        if (typeof renderWorklistToolbar === 'function') {
+          renderWorklistToolbar();
+        }
+        if (typeof renderWorklistFooter === 'function') {
+          renderWorklistFooter();
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load WCC details from API:', err);
+    }
+  }
+}
+window.loadWccDetailFromApi = loadWccDetailFromApi;
 
 window.backToWccList = function() {
   currentWorklistView = 'wcc';
@@ -7198,6 +7422,16 @@ function parseUrlAndApplyState() {
     } else if (role === 'Commercial Manager') {
       const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
+      if (viewParam === 'jms_detail') {
+        const poParam = params.get('po_no');
+        const siteParam = params.get('site_id');
+        const rowIdParam = params.get('row_id');
+        const taskParam = params.get('task');
+        if (poParam) window.selectedJmsPoNo = poParam;
+        if (siteParam) window.selectedJmsSiteId = siteParam;
+        if (rowIdParam) selectedJmsRowId = rowIdParam;
+        if (taskParam) window.selectedJmsParentTask = taskParam;
+      }
     } else if (role === 'Warehouse Manager') {
       const warehouseViews = ['pr', 'grn', 'min', 'min_detail', 'mrn', 'mrn_detail', 'mtn', 'stn', 'srn', 'payment', 'supply'];
       currentWorklistView = warehouseViews.includes(viewParam) ? viewParam : 'pr';
@@ -7832,7 +8066,12 @@ function updateURL() {
     url.searchParams.delete('customer');
   }
 
-  if (currentModule === 'worklist' && currentWorklistView === 'min_detail' && activeWmMinRowId) {
+  if (currentModule === 'worklist' && currentWorklistView === 'jms_detail') {
+    if (window.selectedJmsPoNo) url.searchParams.set('po_no', window.selectedJmsPoNo);
+    if (window.selectedJmsSiteId) url.searchParams.set('site_id', window.selectedJmsSiteId);
+    if (selectedJmsRowId) url.searchParams.set('row_id', selectedJmsRowId);
+    if (window.selectedJmsParentTask) url.searchParams.set('task', window.selectedJmsParentTask);
+  } else if (currentModule === 'worklist' && currentWorklistView === 'min_detail' && activeWmMinRowId) {
     url.searchParams.set('site_id', activeWmMinRowId);
   } else if (currentModule === 'worklist' && currentWorklistView === 'mrn_detail' && activeWmMrnRowId) {
     url.searchParams.set('site_id', activeWmMrnRowId);
@@ -7840,6 +8079,9 @@ function updateURL() {
     url.searchParams.delete('context');
     url.searchParams.delete('origin');
     url.searchParams.delete('site_id');
+    url.searchParams.delete('po_no');
+    url.searchParams.delete('row_id');
+    url.searchParams.delete('task');
   }
 
   const newUrlStr = url.toString();
@@ -8241,14 +8483,15 @@ function renderApp() {
           </div>
         `;
       } else if (currentWorklistView === 'jms_detail') {
-        const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId)) || (typeof defaultJmsItems !== 'undefined' && defaultJmsItems[0]);
+        const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId) || (r.poNo && r.poNo === window.selectedJmsPoNo)) || (typeof defaultJmsItems !== 'undefined' && defaultJmsItems[0]);
         const pId = parentRow ? (parentRow.projectId || 'PRJ-2026-001') : 'PRJ-2026-001';
         const pType = parentRow ? (parentRow.projectType || 'Run project') : 'Run project';
         const subType = parentRow ? (parentRow.subProjectType || 'Civil') : 'Civil';
-        const pPo = parentRow ? (parentRow.poNo || '4500128934') : '4500128934';
-        const sId = parentRow ? (parentRow.siteId || 'IN-123456') : 'IN-123456';
+        const pPo = window.selectedJmsPoNo || (parentRow ? (parentRow.poNo || '4500128934') : '4500128934');
+        const sId = window.selectedJmsSiteId || (parentRow ? (parentRow.siteId || 'IN-123456') : 'IN-123456');
         const sName = parentRow ? (parentRow.siteName || 'Guindy Hub') : 'Guindy Hub';
         const rId = parentRow && parentRow.id ? parentRow.id : '';
+        const poType = (parentRow && parentRow.poType) ? parentRow.poType : 'Capex';
 
         bannerTitle.innerHTML = `
           <div class="project-details-banner-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 4px;">
@@ -8259,8 +8502,8 @@ function renderApp() {
               </button>
             </div>
             <div class="banner-item-with-copy" style="display: flex; align-items: center; gap: 8px;">
-              <a href="#" onclick="openPoCapexModal('${pPo} (0-Opex)'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open PO Details">${pPo} (0-Opex)</a>
-              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pPo} (0-Opex)', event)" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
+              <a href="#" onclick="openPoCapexModal('${pPo} (${poType})'); return false;" class="banner-clickable-link" style="text-decoration: none !important; font-weight: 700; color: #ffffff; font-size: 1.05rem; cursor: pointer;" title="Open PO Details">${pPo} (${poType})</a>
+              <button type="button" class="btn-banner-copy" onclick="copyBannerText('${pPo} (${poType})', event)" title="Copy PO Info" style="background: transparent; border: none; cursor: pointer; padding: 0; display: inline-flex; align-items: center;">
                 <img src="icons/Copy (1).svg" alt="Copy" style="filter: brightness(0) invert(1); width: 18px; height: 18px; display: block;">
               </button>
             </div>
@@ -10292,6 +10535,10 @@ window.openProjectInfoModal = function(rowId) {
           (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(rowId)) ||
           (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(rowId));
   }
+  if (!row && window.selectedJmsPoNo) {
+    row = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => r.poNo === window.selectedJmsPoNo) ||
+          (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => r.poNo === window.selectedJmsPoNo);
+  }
   if (!row && window.activePmProjectRow) {
     row = window.activePmProjectRow;
   }
@@ -12118,7 +12365,7 @@ window.renderPoCapexTable = function() {
   updatePoCapexTotalAmount();
 };
 
-window.openPoCapexModal = function(titleText) {
+window.openPoCapexModal = async function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -12127,19 +12374,57 @@ window.openPoCapexModal = function(titleText) {
     if (card.id !== 'poCapexModal') card.style.display = 'none';
   });
 
-  const titleBadge = document.getElementById('lblPoCapexTitle');
-  if (titleBadge) {
-    const defaultTitle = activePmModalRow && activePmModalRow.poNo ? `${activePmModalRow.poNo} / (${activePmModalRow.poType === 'Capex' ? '0-Capex' : '0-Opex'})` : (titleText || '230510678 / ( 0 - Capex )');
-    titleBadge.textContent = defaultTitle;
+  let poNo = window.selectedJmsPoNo || (activePmModalRow && activePmModalRow.poNo) || '';
+  let siteId = window.selectedJmsSiteId || (activePmModalRow && activePmModalRow.siteId) || '';
+  let poType = (activePmModalRow && activePmModalRow.poType) || 'Capex';
+
+  if (titleText && typeof titleText === 'string') {
+    const cleanPo = titleText.replace(/\(.*?\)/g, '').trim();
+    if (cleanPo) poNo = cleanPo;
+    if (titleText.toLowerCase().includes('opex')) poType = 'Opex';
+    if (titleText.toLowerCase().includes('capex')) poType = 'Capex';
   }
 
-  renderPoCapexTable();
+  const titleBadge = document.getElementById('lblPoCapexTitle');
+  if (titleBadge) {
+    const catLabel = poType === 'Capex' ? '0-Capex' : '0-Opex';
+    titleBadge.textContent = `${poNo} / ( ${catLabel} )`;
+  }
 
   const modal = document.getElementById('poCapexModal');
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
+
+  // Fetch real line items from telecom_indus_po in Project DB
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.getPoDetails) {
+    try {
+      const res = await NexusApi.commercial.jms.getPoDetails(poNo, siteId);
+      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+        poCapexItemsData = res.lineItems.map(item => {
+          const rVal = parseFloat(item.rate) || 0;
+          const qVal = (item.poQty !== undefined && item.poQty !== null) ? parseFloat(item.poQty) : (parseFloat(item.qty) || 1);
+          const amtVal = rVal * qVal;
+          return {
+            lineNo: String(item.lineNo || '10'),
+            itemCode: item.itemCode || '',
+            description: item.itemName || item.itemDescription || '',
+            uom: item.uom || 'Nos',
+            qty: qVal,
+            rate: rVal,
+            amount: amtVal,
+            gst: 0,
+            total: amtVal
+          };
+        });
+      }
+    } catch (err) {
+      console.warn('Could not load PO details from DB for modal, retaining fallback:', err);
+    }
+  }
+
+  renderPoCapexTable();
 };
 
 window.closePoCapexModal = function() {
@@ -12530,7 +12815,7 @@ window.closeAddSiteModal = function() {
   if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
 };
 
-window.saveNewSiteDetails = function() {
+window.saveNewSiteDetails = async function() {
   const selFsm = document.getElementById('selAddSiteFsm');
   const selAom = document.getElementById('selAddSiteAom');
   const fsmVal = selFsm ? selFsm.value : '';
@@ -12541,16 +12826,24 @@ window.saveNewSiteDetails = function() {
     return;
   }
 
+  let newFseName = null;
+  let newFseContact = null;
+  let newFseEmail = null;
+  let newAomName = null;
+  let newAomContact = null;
+  let newAomEmail = null;
+
   if (fsmVal) {
     const parts = fsmVal.split(' - ');
-    const name = parts[0] || 'FSE Contact';
-    const contact = (fsmVal.match(/\+91\s?\d{10}/) || ['+91 9845112233'])[0];
+    newFseName = parts[0] || 'FSE Contact';
+    newFseContact = (fsmVal.match(/\+91\s?\d{10}/) || ['+91 9845112233'])[0];
+    newFseEmail = newFseName.toLowerCase().replace(/\s+/g, '.') + '@telecom.in';
     siteInfoDataStore.unshift({
       id: 'site-fse-' + Date.now(),
-      name: name,
-      designation: 'FSE',
-      contact: contact,
-      email: name.toLowerCase().replace(/\s+/g, '.') + '@telecom.in',
+      name: newFseName,
+      designation: 'Site Engineer',
+      contact: newFseContact,
+      email: newFseEmail,
       status: 'Active',
       selected: false
     });
@@ -12558,25 +12851,50 @@ window.saveNewSiteDetails = function() {
 
   if (aomVal) {
     const parts = aomVal.split(' - ');
-    const name = parts[0] || 'AOM Contact';
-    const contact = (aomVal.match(/\+91\s?\d{10}/) || ['+91 9845012345'])[0];
+    newAomName = parts[0] || 'AOM Contact';
+    newAomContact = (aomVal.match(/\+91\s?\d{10}/) || ['+91 9845012345'])[0];
+    newAomEmail = newAomName.toLowerCase().replace(/\s+/g, '.') + '@telecom.in';
     siteInfoDataStore.unshift({
       id: 'site-aom-' + Date.now(),
-      name: name,
-      designation: 'AOM',
-      contact: contact,
-      email: name.toLowerCase().replace(/\s+/g, '.') + '@telecom.in',
+      name: newAomName,
+      designation: 'Operations Officer',
+      contact: newAomContact,
+      email: newAomEmail,
       status: 'Active',
       selected: false
     });
   }
 
+  // Persist to Master DB indus_site_details if active site id is known
+  if (window.currentActiveMasterSiteId && typeof NexusApi !== 'undefined' && NexusApi.indusSites?.saveContact) {
+    try {
+      if (newFseName) {
+        await NexusApi.indusSites.saveContact(window.currentActiveMasterSiteId, {
+          contact_type: 'FSE',
+          name: newFseName,
+          contact_number: newFseContact,
+          email: newFseEmail
+        });
+      }
+      if (newAomName) {
+        await NexusApi.indusSites.saveContact(window.currentActiveMasterSiteId, {
+          contact_type: 'AOM',
+          name: newAomName,
+          contact_number: newAomContact,
+          email: newAomEmail
+        });
+      }
+    } catch (err) {
+      console.warn('Could not persist contact to Master DB:', err);
+    }
+  }
+
   renderSiteInfoTable();
   closeAddSiteModal();
-  showToast('Site contact details updated successfully.');
+  showToast('Site contact details updated and saved successfully.');
 };
 
-window.openSiteInfoModal = function(titleText) {
+window.openSiteInfoModal = async function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -12585,18 +12903,87 @@ window.openSiteInfoModal = function(titleText) {
     if (card.id !== 'siteInfoModal') card.style.display = 'none';
   });
 
+  let siteCode = window.selectedJmsSiteId || (activePmModalRow && activePmModalRow.siteId) || '';
+  let siteName = (activePmModalRow && activePmModalRow.siteName) || '';
+
+  if (titleText && typeof titleText === 'string') {
+    const parts = titleText.split('/').map(p => p.trim());
+    if (parts[0] && parts[0].includes('IN-')) {
+      siteCode = parts[0];
+      if (parts[1]) siteName = parts[1];
+    } else if (parts[0] && !siteCode) {
+      siteCode = parts[0];
+      if (parts[1]) siteName = parts[1];
+    }
+  }
+
   const titleBadge = document.getElementById('lblSiteInfoTitle');
   if (titleBadge) {
-    const defaultTitle = activePmModalRow && activePmModalRow.siteId ? `${activePmModalRow.siteId} / ${activePmModalRow.siteName || 'Guindy'}` : (titleText || 'IN-123456 / Guindy');
-    titleBadge.textContent = defaultTitle;
+    titleBadge.textContent = siteName ? `${siteCode} / ${siteName}` : (siteCode || 'Site Details');
   }
 
   const modal = document.getElementById('siteInfoModal');
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
-    renderSiteInfoTable();
   }
+
+  window.currentActiveSiteCode = siteCode;
+  window.currentActiveSiteName = siteName;
+  window.currentActiveMasterSiteId = null;
+
+  // Link to Master DB: load site details & contacts from indus_site_details
+  if (siteCode && typeof NexusApi !== 'undefined' && NexusApi.indusSites?.getAll) {
+    try {
+      const res = await NexusApi.indusSites.getAll({ search: siteCode, limit: 10 });
+      const sites = (res && Array.isArray(res.items)) ? res.items : (Array.isArray(res) ? res : []);
+      const matchedSite = sites.find(s => (s.site_code && s.site_code.toLowerCase() === siteCode.toLowerCase()) || (s.site_name && s.site_name.toLowerCase() === siteName.toLowerCase())) || sites[0];
+
+      if (matchedSite) {
+        window.currentActiveMasterSiteId = matchedSite.id || matchedSite.site_id;
+        const contacts = Array.isArray(matchedSite.contacts) && matchedSite.contacts.length > 0 ? matchedSite.contacts : [];
+        if (contacts.length > 0) {
+          siteInfoDataStore = contacts.map((c, idx) => ({
+            id: c.id || `site-contact-${idx + 1}`,
+            name: c.name || '-',
+            designation: c.designation || 'Site Engineer',
+            contact: c.contact || c.contact_number || '-',
+            email: c.email || '-',
+            status: c.status || 'Active',
+            selected: false
+          }));
+        } else {
+          siteInfoDataStore = [];
+          if (matchedSite.fse_name || matchedSite.fse_contact_number) {
+            siteInfoDataStore.push({
+              id: 'site-contact-fse',
+              name: matchedSite.fse_name || 'Site Engineer',
+              designation: 'Site Engineer',
+              contact: matchedSite.fse_contact_number || '-',
+              email: matchedSite.fse_email || '-',
+              status: matchedSite.status || 'Active',
+              selected: false
+            });
+          }
+          if (matchedSite.aom_name || matchedSite.aom_contact_number) {
+            siteInfoDataStore.push({
+              id: 'site-contact-aom',
+              name: matchedSite.aom_name || 'Operations Officer',
+              designation: 'Operations Officer',
+              contact: matchedSite.aom_contact_number || '-',
+              email: matchedSite.aom_email || '-',
+              status: matchedSite.status || 'Active',
+              selected: false
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load site details from Master DB, using fallback:', err);
+    }
+  }
+
+  renderSiteInfoTable();
 };
 
 window.closeSiteInfoModal = function() {
@@ -27251,6 +27638,9 @@ function loadWorklistDataset() {
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms') {
       syncCommercialJmsDataWithNewProject();
+      if (typeof loadCommercialProjectsFromApi === 'function' && (!commercialWorklistData || commercialWorklistData.length === 0)) {
+        loadCommercialProjectsFromApi();
+      }
       const pmJmsTasks = ["JMS to be validate", "JMS approval pending"];
       currentDataset = commercialJmsData.map((item, idx) => {
         let pmTask = pmJmsTasks[idx % pmJmsTasks.length];
@@ -27270,6 +27660,9 @@ function loadWorklistDataset() {
       const parentId = selectedJmsRowId || 'cw-1';
       currentDataset = getJmsDetailItems(parentId);
       filteredDataset = [...currentDataset];
+      if (window.selectedJmsPoNo && typeof loadJmsDetailFromApi === 'function') {
+        loadJmsDetailFromApi(window.selectedJmsPoNo, window.selectedJmsSiteId);
+      }
     } else if (currentWorklistView === 'email') {
       syncCommercialEmailDataWithNewProject();
       currentDataset = commercialEmailData.map(item => ({ ...item }));
@@ -27296,9 +27689,19 @@ function loadWorklistDataset() {
     if (currentWorklistView === 'new_project') {
       currentDataset = commercialWorklistData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
+      if (typeof loadCommercialProjectsFromApi === 'function') {
+        loadCommercialProjectsFromApi();
+      }
     } else if (currentWorklistView === 'jms') {
+      if (typeof loadCommercialProjectsFromApi === 'function') {
+        loadCommercialProjectsFromApi();
+      }
       syncCommercialJmsDataWithNewProject();
-      currentDataset = commercialJmsData.map(item => ({ ...item }));
+      const visibleData = (commercialJmsData || []).filter(item => {
+        const tLower = (item.task || '').trim().toLowerCase();
+        return !tLower.includes('pending') && !tLower.includes('wcc') && !tLower.includes('amend') && tLower !== 'jms approval pending';
+      });
+      currentDataset = visibleData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'po_amend') {
       syncCommercialPoAmendDataWithNewProject();
@@ -27312,14 +27715,23 @@ function loadWorklistDataset() {
       const parentId = selectedJmsRowId || 'jms-1';
       currentDataset = getJmsDetailItems(parentId);
       filteredDataset = [...currentDataset];
+      if (window.selectedJmsPoNo && typeof loadJmsDetailFromApi === 'function') {
+        loadJmsDetailFromApi(window.selectedJmsPoNo, window.selectedJmsSiteId);
+      }
     } else if (currentWorklistView === 'po_amend_detail') {
       const parentId = selectedPoAmendRowId || 'poamend-1';
       currentDataset = getPoAmendDetailItems(parentId);
       filteredDataset = [...currentDataset];
+      if (window.selectedPoAmendPoNo && typeof loadPoAmendDetailFromApi === 'function') {
+        loadPoAmendDetailFromApi(window.selectedPoAmendPoNo, window.selectedPoAmendSiteId);
+      }
     } else if (currentWorklistView === 'wcc_detail') {
       const parentId = selectedWccRowId || 'wcc-1';
       currentDataset = getWccDetailItems(parentId);
       filteredDataset = [...currentDataset];
+      if (window.selectedWccPoNo && typeof loadWccDetailFromApi === 'function') {
+        loadWccDetailFromApi(window.selectedWccPoNo, window.selectedWccSiteId);
+      }
     } else if (currentWorklistView === 'invoice') {
       syncCommercialInvoiceDataWithNewProject();
       currentDataset = commercialInvoiceData.map(item => ({ ...item }));
@@ -27377,7 +27789,9 @@ window.toggleCommercialWorklistRowSelect = function(rowId) {
   if (rowInCur) rowInCur.selected = newSelected;
   if (rowInComm) rowInComm.selected = newSelected;
   applyFiltersAndRender();
-  updateCommercialWorklistDeleteBtnVisibility();
+  if (typeof updateCommercialWorklistDeleteBtnVisibility === 'function') {
+    updateCommercialWorklistDeleteBtnVisibility();
+  }
 };
 
 window.togglePmStatusRowSelect = function(rowId) {
@@ -28733,9 +29147,9 @@ function renderWorklistToolbar() {
             <img src="icons/summation.svg" alt="Summation" width="28" height="28" style="vertical-align: middle;">
             <span id="lblJmsDetailTotalAmount" style="font-size: 16px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${initialTotalFormatted}</span>
           </div>
-            <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px; cursor: pointer;" title="Payable Amount (Open Project Expenses)" onclick="openProjectExpensesPage()">
+            <div class="metric-item" style="display: flex; align-items: center; gap: 8px; margin-left: 12px; cursor: pointer;" title="Payable Amount (Open Project Expenses)" onclick="openJmsPayableExpensesModal()">
               <img src="icons/red payment.svg" alt="Payable" width="28" height="28" style="vertical-align: middle; cursor: pointer;">
-              <span id="lblJmsDetailPayableAmount" style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px; cursor: pointer; text-decoration: underline;">1,85,000.00</span>
+              <span id="lblJmsDetailPayableAmount" style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px; cursor: pointer; text-decoration: underline;">0.00</span>
             </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
@@ -29415,7 +29829,7 @@ function renderWorklistFooter() {
     footer.style.marginTop = 'auto';
     footer.style.padding = '24px';
 
-    const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 7;
+    const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 0;
     const ytsCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'YTS').length : 2;
     const wipCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'WIP').length : 3;
     const holdCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'HOLD').length : 1;
@@ -29482,8 +29896,14 @@ function renderWorklistFooter() {
       return;
     }
 
-    const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 7;
-    const jmsCount = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData)) ? commercialJmsData.length : 7;
+    const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 0;
+    const jmsVisibleItems = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData))
+      ? commercialJmsData.filter(item => {
+          const tLower = (item.task || '').trim().toLowerCase();
+          return !tLower.includes('pending') && tLower !== 'jms approval pending';
+        })
+      : [];
+    const jmsCount = jmsVisibleItems.length;
     const poAmendCount = (typeof commercialPoAmendData !== 'undefined' && Array.isArray(commercialPoAmendData)) ? commercialPoAmendData.length : 7;
     const wccCount = (typeof commercialWccData !== 'undefined' && Array.isArray(commercialWccData)) ? commercialWccData.length : 7;
     const invoiceCount = (typeof commercialInvoiceData !== 'undefined' && Array.isArray(commercialInvoiceData)) ? commercialInvoiceData.length : newProjectCount;
@@ -34461,7 +34881,12 @@ function applyFiltersAndRender() {
             };
           });
         } else {
-          currentDataset = commercialJmsData.map(item => ({ ...item }));
+          currentDataset = (commercialJmsData || [])
+            .filter(item => {
+              const tLower = (item.task || '').trim().toLowerCase();
+              return !tLower.includes('pending') && tLower !== 'jms approval pending';
+            })
+            .map(item => ({ ...item }));
         }
       }
 
@@ -34758,12 +35183,27 @@ function applyFiltersAndRender() {
         return;
       }
 
-      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
+      const isValidateTask = (String(window.selectedJmsParentTask || '').trim().toLowerCase() === 'jms to be validate');
+      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
 
       let rowsHtml = filteredDataset.map(row => {
-        const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
-        const isChecked = Boolean(row.selected || row.highlighted);
-        const isRowEditable = Boolean(typeof isJmsDetailEditMode !== 'undefined' && isJmsDetailEditMode && (row.selected || row.highlighted));
+        const isAppr = Boolean(row.highlighted || row.jmsStatus === 'Approved');
+        const qVal = row.rawQty !== undefined ? parseFloat(row.rawQty) : (parseFloat(row.qty) || 0);
+        const poQVal = Number(row.poQty) || 0;
+        const matQVal = Number(row.netMaterialQty !== undefined ? row.netMaterialQty : poQVal);
+        const poDiff = (row.poDifference !== undefined) ? Number(row.poDifference) : (poQVal - qVal);
+        const matDiff = (row.materialDifference !== undefined) ? Number(row.materialDifference) : (qVal - matQVal);
+        const hasNegativeDifference = (poDiff < 0) || (matDiff < 0);
+
+        let rowBgStyle = '';
+        if (isAppr) {
+          rowBgStyle = 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;';
+        } else if (isValidateTask && hasNegativeDifference) {
+          rowBgStyle = 'background-color: #fee2e2 !important; border-bottom: 1px solid #fca5a5;';
+        }
+
+        const isChecked = Boolean(row.selected);
+        const isRowEditable = Boolean(typeof isJmsDetailEditMode !== 'undefined' && isJmsDetailEditMode && (row.selected || isAppr));
         
         const rawNum = row.rawQty !== undefined ? parseFloat(row.rawQty) : (parseFloat(row.qty) || 20);
         const formattedQty = isNaN(rawNum) ? '20.00' : rawNum.toFixed(2);
@@ -41361,6 +41801,18 @@ function closeSideForm() {
   if (daysCard) daysCard.style.display = 'none';
   const payCard = document.getElementById('addPaymentRequestCard');
   if (payCard) payCard.style.display = 'none';
+  const jmsAddPanel = document.getElementById('addJmsLineItemsPanel');
+  if (jmsAddPanel) jmsAddPanel.style.display = 'none';
+  const jmsDocsPanel = document.getElementById('jmsDocumentsPanel');
+  if (jmsDocsPanel) jmsDocsPanel.style.display = 'none';
+  const jmsAddDocCard = document.getElementById('addJmsDocumentCard');
+  if (jmsAddDocCard) jmsAddDocCard.style.display = 'none';
+  const poReconPanel = document.getElementById('poReconciliationPanel');
+  if (poReconPanel) poReconPanel.style.display = 'none';
+  const matReconPanel = document.getElementById('materialReconciliationPanel');
+  if (matReconPanel) matReconPanel.style.display = 'none';
+  const jmsExpPanel = document.getElementById('jmsPayableExpensesPanel');
+  if (jmsExpPanel) jmsExpPanel.style.display = 'none';
   currentViewedVendorId = null;
   // Remove blur from any dimmed cards and has-dimmed-card from row
   document.querySelectorAll('.card-dimmed-blurred').forEach(c => c.classList.remove('card-dimmed-blurred'));
@@ -50698,6 +51150,7 @@ window.openAddBulkUploadModal = function() {
   if (titleBadge) {
     titleBadge.textContent = `Bulk Upload - ${displayName}`;
   }
+  currentBulkUploadPageName = displayName;
 
   if (siteTypeRow) {
     if (['YTS', 'WIP', 'HOLD', 'NR'].includes(displayName)) {
@@ -50731,12 +51184,13 @@ window.openAddBulkUploadModal = function() {
         `;
       }
     } else if (displayName === 'New project') {
-      siteTypeRow.style.display = 'block';
+      siteTypeRow.style.display = 'flex';
       if (selUploadType) {
         selUploadType.innerHTML = `
           <option value="projects" selected>Projects</option>
           <option value="po">PO</option>
         `;
+        selUploadType.value = 'projects';
       }
     } else if (pageNorm === 'site') {
       siteTypeRow.style.display = 'block';
@@ -50779,12 +51233,42 @@ window.closeBulkUploadModal = function() {
 };
 
 window.downloadBulkCsvTemplate = function() {
-  const page = (currentBulkUploadPageName || 'Employee').trim();
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeView = (typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : (urlParams.get('view') || '');
+  const activeModule = (typeof currentModule !== 'undefined' && currentModule) ? currentModule : (urlParams.get('module') || '');
+  const page = (currentBulkUploadPageName || '').trim();
   const pageLower = page.toLowerCase();
-  let templateFileName = '';
+  const selSiteType = document.getElementById('selBulkUploadSiteType');
+  const typeVal = (selSiteType ? selSiteType.value : '').toLowerCase();
 
-  if (pageLower === 'worklist' || pageLower === 'new project') {
-    showToast('Template download for New project is not available yet.');
+  // 1. Check if New Project / PO template download
+  const isNewProject = pageLower === 'new project' ||
+    pageLower.includes('new project') ||
+    activeView === 'new_project' ||
+    (activeModule === 'worklist' && activeView === 'new_project') ||
+    typeVal === 'projects' ||
+    typeVal === 'po';
+
+  if (isNewProject) {
+    let templateFileName = '';
+    if (typeVal === 'po') {
+      templateFileName = 'New Project - PO Template.xlsx';
+    } else {
+      templateFileName = 'New Project - Project Template.xlsx';
+    }
+    const fileUrl = `bulk upload template/${encodeURIComponent(templateFileName)}`;
+    const link = document.createElement('a');
+    link.setAttribute('href', fileUrl);
+    link.setAttribute('download', templateFileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Template downloaded: ${templateFileName}`);
+    return;
+  }
+
+  if (pageLower === 'worklist') {
+    showToast('Template download for Worklist is not available yet.');
     return;
   }
   if (pageLower === 'po amend' || pageLower === 'po amendment') {
@@ -50792,12 +51276,12 @@ window.downloadBulkCsvTemplate = function() {
     return;
   }
   if (pageLower === 'wcc') {
-    const selSiteType = document.getElementById('selBulkUploadSiteType');
-    const typeVal = selSiteType ? selSiteType.value : 'wcc_status';
-    showToast(`Template download for WCC (${typeVal === 'wcc_status' ? 'WCC status' : 'support required'}) is not available yet.`);
+    const wccVal = selSiteType ? selSiteType.value : 'wcc_status';
+    showToast(`Template download for WCC (${wccVal === 'wcc_status' ? 'WCC status' : 'support required'}) is not available yet.`);
     return;
   }
 
+  let templateFileName = '';
   if (pageLower === 'employee') {
     templateFileName = 'Company_Employee-Template.xlsx';
   } else if (pageLower === 'products') {
@@ -50805,7 +51289,6 @@ window.downloadBulkCsvTemplate = function() {
   } else if (pageLower === 'expense') {
     templateFileName = 'Company_Expenses-Template.xlsx';
   } else if (pageLower === 'site') {
-    const selSiteType = document.getElementById('selBulkUploadSiteType');
     const siteVal = (selSiteType ? selSiteType.value : 'new_site').toLowerCase();
     if (siteVal === 'site_contact' || siteVal.includes('contact')) {
       templateFileName = 'Site_contacts-Template.xlsx';
@@ -50956,6 +51439,19 @@ window.handleBulkCsvFileSelected = async function(input) {
         result = await NexusApi.indusGbpaMaterials.bulkUpload(file);
         if (typeof loadIndusGbpaMaterialsFromApi === 'function') {
           await loadIndusGbpaMaterialsFromApi();
+        }
+      } else if (pageKey.includes('new project') || pageKey === 'new project' || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'new_project') || (new URLSearchParams(window.location.search).get('view') === 'new_project') || ((document.getElementById('selBulkUploadSiteType')?.value || '').toLowerCase() === 'projects') || ((document.getElementById('selBulkUploadSiteType')?.value || '').toLowerCase() === 'po')) {
+        if (typeof NexusApi !== 'undefined' && NexusApi.commercial) {
+          const selSiteType = document.getElementById('selBulkUploadSiteType');
+          const uploadTypeVal = (selSiteType ? selSiteType.value : 'projects').toLowerCase();
+          if (uploadTypeVal === 'po') {
+            result = await NexusApi.commercial.uploadPo(file);
+          } else {
+            result = await NexusApi.commercial.uploadProjects(file);
+          }
+          if (typeof loadCommercialProjectsFromApi === 'function') {
+            await loadCommercialProjectsFromApi();
+          }
         }
       }
 
@@ -51855,7 +52351,7 @@ function getJmsDocuments(rowId) {
   return jmsDocumentsMap[key];
 }
 
-window.openJmsDocumentsModal = function() {
+window.openJmsDocumentsModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   const panel = document.getElementById('jmsDocumentsPanel');
   const addCard = document.getElementById('addJmsDocumentCard');
@@ -51863,6 +52359,27 @@ window.openJmsDocumentsModal = function() {
 
   // Hide all other side cards in overlay
   document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const poNo = window.selectedJmsPoNo;
+  const siteId = window.selectedJmsSiteId;
+
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.getDocuments) {
+    try {
+      const docsFromApi = await NexusApi.commercial.jms.getDocuments(poNo, siteId);
+      if (Array.isArray(docsFromApi)) {
+        jmsDocumentsMap[key] = docsFromApi.map(d => ({
+          id: d.id,
+          docType: d.docType,
+          docDetails: d.docDetails,
+          docName: d.docName,
+          selected: false
+        }));
+      }
+    } catch (err) {
+      console.warn('Could not load documents from API:', err);
+    }
+  }
 
   renderJmsDocumentsTable();
   if (addCard) addCard.style.display = 'none';
@@ -51918,11 +52435,19 @@ window.renderJmsDocumentsTable = function() {
         </td>
         <!-- 4. Document Name: 20ch & left -->
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500;" title="${(doc.docName || '').replace(/"/g, '&quot;')}">
-          <span style="color: #0454e4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;" onclick="showToast('Viewing ${doc.docName}')">${doc.docName || ''}</span>
+          <span style="color: #0454e4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;" onclick="downloadJmsDocument('${doc.id}', '${(doc.docName || '').replace(/'/g, "\\'")}')">${doc.docName || ''}</span>
         </td>
       </tr>
     `;
   }).join('');
+};
+
+window.downloadJmsDocument = function(docId, docName) {
+  if (typeof docId === 'number' || !isNaN(Number(docId))) {
+    window.open(`/api/v1/commercial/jms/documents/${docId}/download`, '_blank');
+  } else {
+    showToast(`Viewing ${docName}`);
+  }
 };
 
 window.toggleJmsDocumentSelect = function(docId) {
@@ -51935,18 +52460,29 @@ window.toggleJmsDocumentSelect = function(docId) {
   }
 };
 
-window.deleteSelectedJmsDocuments = function() {
+window.deleteSelectedJmsDocuments = async function() {
   const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
   const docs = getJmsDocuments(key);
-  const countBefore = docs.length;
-  jmsDocumentsMap[key] = docs.filter(d => !d.selected);
-  const deletedCount = countBefore - jmsDocumentsMap[key].length;
-  renderJmsDocumentsTable();
-  if (deletedCount > 0) {
-    showToast(`Deleted ${deletedCount} document${deletedCount > 1 ? 's' : ''}`);
-  } else {
+  const selectedDocs = docs.filter(d => d.selected);
+
+  if (selectedDocs.length === 0) {
     showToast('Please select at least one document to delete.');
+    return;
   }
+
+  for (const doc of selectedDocs) {
+    if (typeof doc.id === 'number' && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.deleteDocument) {
+      try {
+        await NexusApi.commercial.jms.deleteDocument(doc.id);
+      } catch (err) {
+        console.error('Failed to delete doc:', err);
+      }
+    }
+  }
+
+  jmsDocumentsMap[key] = docs.filter(d => !d.selected);
+  renderJmsDocumentsTable();
+  showToast(`Deleted ${selectedDocs.length} document${selectedDocs.length > 1 ? 's' : ''}`);
 };
 
 window.openAddJmsDocumentModal = function() {
@@ -51991,12 +52527,13 @@ window.handleJmsDocPdfFileSelected = function(input) {
   }
 };
 
-window.saveJmsDocument = function() {
+window.saveJmsDocument = async function() {
   const selType = document.getElementById('inpJmsDocType');
   const inpDetails = document.getElementById('inpJmsDocDetails');
   const inpName = document.getElementById('inpJmsDocName');
+  const filePicker = document.getElementById('inpJmsDocPdfFilePicker');
 
-  const docType = selType ? selType.value : 'STN Document';
+  const docType = selType ? (selType.value || 'Survey report') : 'Survey report';
   const docDetails = inpDetails ? (inpDetails.value.trim() || `${docType} Details`) : `${docType} Details`;
   let docName = inpName ? inpName.value.trim() : '';
   if (!docName) {
@@ -52006,16 +52543,51 @@ window.saveJmsDocument = function() {
   }
 
   const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
-  const docs = getJmsDocuments(key);
-  const newDoc = {
-    id: `jmsdoc-${Date.now()}`,
-    docType: docType,
-    docDetails: docDetails,
-    docName: docName,
-    selected: false
-  };
-  docs.push(newDoc);
-  jmsDocumentsMap[key] = docs;
+  const poNo = window.selectedJmsPoNo;
+  const siteId = window.selectedJmsSiteId;
+
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.uploadDocument) {
+    try {
+      const formData = new FormData();
+      formData.append('po_no', poNo);
+      if (siteId) formData.append('site_id', siteId);
+      formData.append('doc_type', docType);
+      formData.append('doc_details', docDetails);
+
+      if (filePicker && filePicker.files && filePicker.files[0]) {
+        formData.append('file', filePicker.files[0]);
+      } else {
+        const dummyPdf = new Blob(['%PDF-1.4 Default JMS Document content'], { type: 'application/pdf' });
+        formData.append('file', dummyPdf, docName);
+      }
+
+      const uploadedDoc = await NexusApi.commercial.jms.uploadDocument(formData);
+      if (uploadedDoc) {
+        if (!jmsDocumentsMap[key]) jmsDocumentsMap[key] = [];
+        jmsDocumentsMap[key].push({
+          id: uploadedDoc.id,
+          docType: uploadedDoc.docType,
+          docDetails: uploadedDoc.docDetails,
+          docName: uploadedDoc.docName,
+          selected: false
+        });
+      }
+    } catch (err) {
+      console.error('Failed to upload document:', err);
+      showToast('Error uploading document to server.');
+      return;
+    }
+  } else {
+    const docs = getJmsDocuments(key);
+    docs.push({
+      id: `jmsdoc-${Date.now()}`,
+      docType: docType,
+      docDetails: docDetails,
+      docName: docName,
+      selected: false
+    });
+    jmsDocumentsMap[key] = docs;
+  }
 
   closeAddJmsDocumentModal();
   renderJmsDocumentsTable();
@@ -52060,12 +52632,35 @@ function getDefaultPoReconData(key) {
 }
 
 function getPoReconData(rowId) {
+  if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentDataset.length > 0) {
+    return currentDataset.filter(r => {
+      const q = Number(r.rawQty !== undefined ? r.rawQty : r.qty) || 0;
+      const pq = Number(r.poQty) || 0;
+      return (r.poDifference !== undefined ? r.poDifference > 0 : q > pq);
+    }).map(r => {
+      const q = Number(r.rawQty !== undefined ? r.rawQty : r.qty) || 0;
+      const pq = Number(r.poQty) || 0;
+      const rate = (r.rawRate !== undefined && !isNaN(Number(r.rawRate))) ? Number(r.rawRate) : (parseFloat(String(r.rate).replace(/[^0-9.-]+/g, '')) || 0);
+      return {
+        id: r.id,
+        selected: Boolean(r.selected),
+        lineNo: r.lineNo,
+        itemCode: r.itemCode,
+        itemName: r.itemName,
+        uom: r.uom,
+        rate: rate,
+        jmsQty: q,
+        poQty: pq,
+        poDifferenceQty: pq - q,
+        amount: r.rawAmount !== undefined ? r.rawAmount : (q * rate)
+      };
+    });
+  }
   const key = rowId || (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) || 'default';
   if (!jmsPoReconMap[key]) {
     jmsPoReconMap[key] = getDefaultPoReconData(key);
   }
-  // Filter rows where poDifferenceQty <= 0
-  return jmsPoReconMap[key].filter(r => (Number(r.poDifferenceQty) <= 0));
+  return jmsPoReconMap[key].filter(r => (Number(r.poDifferenceQty) > 0));
 }
 
 window.openJmsPoReconciliationModal = function() {
@@ -52105,16 +52700,45 @@ window.togglePoReconEditMode = function() {
   }
 };
 
-window.updatePoReconJmsQty = function(rowId, val) {
-  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
-  const data = getPoReconData(key);
-  const row = data.find(r => String(r.id) === String(rowId));
+window.updatePoReconJmsQty = async function(rowId, val) {
+  const num = Math.max(0, parseFloat(val) || 0);
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId));
   if (row) {
-    const num = Math.max(0, parseFloat(val) || 0);
-    row.jmsQty = num;
-    row.poDifferenceQty = Number(row.poQty || 0) - num;
-    row.amount = num * Number(row.rate || 0);
-    renderPoReconciliationTable();
+    row.rawQty = num;
+    row.qty = num.toFixed(2);
+    const rateVal = (row.rawRate !== undefined && !isNaN(Number(row.rawRate)))
+      ? Number(row.rawRate)
+      : (parseFloat(String(row.rate || 0).replace(/[^0-9.-]+/g, '')) || 0);
+    const amt = num * rateVal;
+    row.rawAmount = amt;
+    row.amount = formatJmsSum(amt);
+
+    const poQ = Number(row.poQty) || 0;
+    const matQ = Number(row.netMaterialQty !== undefined ? row.netMaterialQty : poQ);
+    row.poDifference = poQ - num;
+    row.materialDifference = num - matQ;
+
+    const isValidateTask = (String(window.selectedJmsParentTask || '').trim().toLowerCase() === 'jms to be validate');
+    if (isValidateTask && typeof row.id === 'number' && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.updateQty) {
+      try {
+        await NexusApi.commercial.jms.updateQty(row.id, num);
+      } catch (err) {
+        console.error('Failed to update JMS Qty in backend:', err);
+      }
+      row.highlighted = false;
+      row.jmsStatus = 'Not Approved';
+    }
+  }
+  renderPoReconciliationTable();
+  const totalAmountEl = document.getElementById('lblJmsDetailTotalAmount');
+  if (totalAmountEl) {
+    totalAmountEl.textContent = formatJmsSum(calculateJmsTotalSum(currentDataset));
+  }
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+  if (typeof updateJmsDetailActionIcons === 'function') {
+    updateJmsDetailActionIcons();
   }
 };
 
@@ -52237,11 +52861,35 @@ function getDefaultMaterialReconData(key) {
 }
 
 function getMaterialReconData(rowId) {
+  if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentDataset.length > 0) {
+    return currentDataset.filter(r => {
+      const q = Number(r.rawQty !== undefined ? r.rawQty : r.qty) || 0;
+      const mq = Number(r.netMaterialQty !== undefined ? r.netMaterialQty : (r.poQty || 0));
+      return (r.materialDifference !== undefined ? r.materialDifference > 0 : q > mq);
+    }).map(r => {
+      const q = Number(r.rawQty !== undefined ? r.rawQty : r.qty) || 0;
+      const mq = Number(r.netMaterialQty !== undefined ? r.netMaterialQty : (r.poQty || 0));
+      const rate = (r.rawRate !== undefined && !isNaN(Number(r.rawRate))) ? Number(r.rawRate) : (parseFloat(String(r.rate).replace(/[^0-9.-]+/g, '')) || 0);
+      return {
+        id: r.id,
+        selected: Boolean(r.selected),
+        lineNo: r.lineNo,
+        itemCode: r.itemCode,
+        itemName: r.itemName,
+        uom: r.uom,
+        rate: rate,
+        jmsQty: q,
+        materialShortageQty: Math.max(0, q - mq),
+        materialDifferenceQty: q - mq,
+        poQty: Number(r.poQty) || 0,
+        amount: r.rawAmount !== undefined ? r.rawAmount : (q * rate)
+      };
+    });
+  }
   const key = rowId || (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) || 'default';
   if (!jmsMaterialReconMap[key]) {
     jmsMaterialReconMap[key] = getDefaultMaterialReconData(key);
   }
-  // Filter rows where materialDifferenceQty > 0
   return jmsMaterialReconMap[key].filter(r => (Number(r.materialDifferenceQty) > 0));
 }
 
@@ -52282,15 +52930,45 @@ window.toggleMaterialReconEditMode = function() {
   }
 };
 
-window.updateMaterialReconJmsQty = function(rowId, val) {
-  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
-  const data = getMaterialReconData(key);
-  const row = data.find(r => String(r.id) === String(rowId));
+window.updateMaterialReconJmsQty = async function(rowId, val) {
+  const num = Math.max(0, parseFloat(val) || 0);
+  const row = (currentDataset || []).find(r => String(r.id) === String(rowId));
   if (row) {
-    const num = Math.max(0, parseFloat(val) || 0);
-    row.jmsQty = num;
-    row.amount = num * Number(row.rate || 0);
-    renderMaterialReconciliationTable();
+    row.rawQty = num;
+    row.qty = num.toFixed(2);
+    const rateVal = (row.rawRate !== undefined && !isNaN(Number(row.rawRate)))
+      ? Number(row.rawRate)
+      : (parseFloat(String(row.rate || 0).replace(/[^0-9.-]+/g, '')) || 0);
+    const amt = num * rateVal;
+    row.rawAmount = amt;
+    row.amount = formatJmsSum(amt);
+
+    const poQ = Number(row.poQty) || 0;
+    const matQ = Number(row.netMaterialQty !== undefined ? row.netMaterialQty : poQ);
+    row.poDifference = num - poQ;
+    row.materialDifference = num - matQ;
+
+    const isValidateTask = (String(window.selectedJmsParentTask || '').trim().toLowerCase() === 'jms to be validate');
+    if (isValidateTask && typeof row.id === 'number' && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.updateQty) {
+      try {
+        await NexusApi.commercial.jms.updateQty(row.id, num);
+      } catch (err) {
+        console.error('Failed to update JMS Qty in backend:', err);
+      }
+      row.highlighted = false;
+      row.jmsStatus = 'Not Approved';
+    }
+  }
+  renderMaterialReconciliationTable();
+  const totalAmountEl = document.getElementById('lblJmsDetailTotalAmount');
+  if (totalAmountEl) {
+    totalAmountEl.textContent = formatJmsSum(calculateJmsTotalSum(currentDataset));
+  }
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+  if (typeof updateJmsDetailActionIcons === 'function') {
+    updateJmsDetailActionIcons();
   }
 };
 
@@ -52376,6 +53054,8 @@ window.renderMaterialReconciliationTable = function() {
 // ==========================================
 // ADD LINE ITEMS MODAL (JMS Detail Subpage)
 // ==========================================
+window.checkedJmsGbpaItem = null;
+
 window.openJmsAddLineItemsModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
   const panel = document.getElementById('addJmsLineItemsPanel');
@@ -52385,8 +53065,131 @@ window.openJmsAddLineItemsModal = function() {
   const inpSearch = document.getElementById('inpJmsAddLineItemsSearch');
   if (inpSearch) inpSearch.value = '';
 
+  const dropdown = document.getElementById('dropdownJmsGbpaItems');
+  if (dropdown) {
+    dropdown.style.display = 'none';
+    dropdown.innerHTML = '';
+  }
+
+  const qtyWrap = document.getElementById('wrapJmsAddLineItemQty');
+  if (qtyWrap) qtyWrap.style.display = 'none';
+  const inpQty = document.getElementById('inpJmsAddLineItemQty');
+  if (inpQty) inpQty.value = '1.00';
+
+  const resultContainer = document.getElementById('containerJmsLineItemCheckResult');
+  if (resultContainer) {
+    resultContainer.style.display = 'none';
+    resultContainer.innerHTML = '';
+  }
+
+  window.checkedJmsGbpaItem = null;
   panel.style.display = 'block';
   overlay.style.display = 'flex';
+  if (inpSearch) inpSearch.focus();
+
+  // Load GBPA items immediately so user can pick from dropdown
+  handleJmsAddLineItemSearch('', true);
+};
+
+window.handleJmsAddLineItemSearch = async function(query, forceOpen = false) {
+  const dropdown = document.getElementById('dropdownJmsGbpaItems');
+  if (!dropdown) return;
+
+  const poNo = window.selectedJmsPoNo;
+  const siteId = window.selectedJmsSiteId;
+  const q = (query || '').trim();
+
+  dropdown.style.display = 'block';
+  dropdown.innerHTML = '<div style="padding: 10px 14px; color: #64748b; font-size: 0.88rem; font-style: italic;">Loading GBPA items...</div>';
+
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.getGbpaItems) {
+    try {
+      const items = await NexusApi.commercial.jms.getGbpaItems(poNo, siteId, q);
+      if (Array.isArray(items) && items.length > 0) {
+        dropdown.innerHTML = items.map(item => {
+          const itemJson = JSON.stringify(item).replace(/'/g, "&#39;");
+          return `
+            <div onclick='selectJmsGbpaItem(${itemJson})' style="padding: 10px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='#ffffff'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                <span style="font-weight: 700; color: #1e293b; font-size: 0.92rem;">${item.itemCode}</span>
+                <span style="display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; background: ${item.itemType === 'Capex' ? '#e0f2fe' : '#fef3c7'}; color: ${item.itemType === 'Capex' ? '#0369a1' : '#b45309'}; text-transform: uppercase;">${item.itemType}</span>
+              </div>
+              <div style="font-size: 0.85rem; color: #475569; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.itemName || '-'}</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b;">
+                <span>Rate: <strong>${formatIndianCurrency(item.rate || 0)}</strong></span>
+                <span>UOM: <strong>${item.uom || 'Nos'}</strong></span>
+              </div>
+            </div>
+          `;
+        }).join('');
+        dropdown.style.display = 'block';
+      } else {
+        dropdown.innerHTML = `<div style="padding: 10px 14px; color: #94a3b8; font-size: 0.88rem; font-style: italic;">No matching GBPA items found for PO ${poNo}</div>`;
+      }
+    } catch (err) {
+      console.error('Error fetching GBPA items:', err);
+      dropdown.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.88rem;">Error loading GBPA items.</div>';
+    }
+  } else {
+    dropdown.innerHTML = '<div style="padding: 10px 14px; color: #94a3b8; font-size: 0.88rem;">PO not selected.</div>';
+  }
+};
+
+window.selectJmsGbpaItem = function(item) {
+  if (!item) return;
+  window.checkedJmsGbpaItem = item;
+
+  const inp = document.getElementById('inpJmsAddLineItemsSearch');
+  if (inp) inp.value = item.itemCode;
+
+  const dropdown = document.getElementById('dropdownJmsGbpaItems');
+  if (dropdown) dropdown.style.display = 'none';
+
+  const qtyWrap = document.getElementById('wrapJmsAddLineItemQty');
+  if (qtyWrap) qtyWrap.style.display = 'block';
+
+  const inpQty = document.getElementById('inpJmsAddLineItemQty');
+  const qty = inpQty ? (parseFloat(inpQty.value) || 1.0) : 1.0;
+
+  renderJmsAddLineItemVerificationCard(item, qty);
+};
+
+function renderJmsAddLineItemVerificationCard(item, qty) {
+  const resultContainer = document.getElementById('containerJmsLineItemCheckResult');
+  if (!resultContainer) return;
+
+  const rate = parseFloat(item.rate) || 0;
+  const totalAmt = rate * qty;
+
+  resultContainer.style.display = 'block';
+  resultContainer.style.borderColor = '#86efac';
+  resultContainer.style.background = '#f0fdf4';
+  resultContainer.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+      <span style="display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; background: #dcfce7; color: #15803d;">✓ Valid & Eligible</span>
+      <span style="font-size: 0.8rem; font-weight: 700; color: #0454e4; text-transform: uppercase;">${item.itemType || ''}</span>
+    </div>
+    <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 4px;">${item.itemCode}</div>
+    <div style="font-size: 0.88rem; color: #475569; margin-bottom: 10px;">${item.itemName || '-'}</div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #334155; border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-bottom: 6px;">
+      <span><strong>Rate:</strong> ${formatIndianCurrency(rate)}</span>
+      <span><strong>UOM:</strong> ${item.uom || 'Nos'}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.88rem; color: #15803d; font-weight: 600;">
+      <span>Estimated Total:</span>
+      <span id="lblJmsAddLineItemEstimatedAmt">${formatIndianCurrency(totalAmt)}</span>
+    </div>
+    <div style="margin-top: 10px; font-size: 0.8rem; color: #166534; font-weight: 500;">
+      Click the Save icon above to add this line item to the PO.
+    </div>
+  `;
+}
+
+window.updateJmsAddLineItemCalculations = function() {
+  if (!window.checkedJmsGbpaItem) return;
+  const inpQty = document.getElementById('inpJmsAddLineItemQty');
+  const qty = inpQty ? (parseFloat(inpQty.value) || 1.0) : 1.0;
+  renderJmsAddLineItemVerificationCard(window.checkedJmsGbpaItem, qty);
 };
 
 window.closeJmsAddLineItemsModal = function() {
@@ -52394,12 +53197,51 @@ window.closeJmsAddLineItemsModal = function() {
   const panel = document.getElementById('addJmsLineItemsPanel');
   if (panel) panel.style.display = 'none';
   if (overlay) overlay.style.display = 'none';
+  window.checkedJmsGbpaItem = null;
 };
 
-window.saveJmsAddLineItems = function() {
-  showToast('Line items saved successfully.');
+window.saveJmsAddLineItems = async function() {
+  if (!window.checkedJmsGbpaItem || !window.checkedJmsGbpaItem.itemCode) {
+    showToast('Please search and select a valid GBPA item first.');
+    const inp = document.getElementById('inpJmsAddLineItemsSearch');
+    if (inp) inp.focus();
+    return;
+  }
+
+  const poNo = window.selectedJmsPoNo;
+  const siteId = window.selectedJmsSiteId;
+  const itemCode = window.checkedJmsGbpaItem.itemCode;
+  const inpQty = document.getElementById('inpJmsAddLineItemQty');
+  const qty = inpQty ? (parseFloat(inpQty.value) || 1.0) : 1.0;
+
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.addLineItem) {
+    try {
+      await NexusApi.commercial.jms.addLineItem(poNo, siteId, itemCode, qty);
+      showToast(`Line item '${itemCode}' added successfully!`);
+      closeJmsAddLineItemsModal();
+      await loadJmsDetailFromApi(poNo, siteId);
+      return;
+    } catch (err) {
+      console.error('Failed to add line item:', err);
+      showToast(err.message || 'Error adding line item. Check item category and PO type.');
+      return;
+    }
+  }
+
+  showToast('Line item saved successfully.');
   closeJmsAddLineItemsModal();
 };
+
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('dropdownJmsGbpaItems');
+  const inp = document.getElementById('inpJmsAddLineItemsSearch');
+  const btn = document.getElementById('btnSearchJmsLineItem');
+  if (dropdown && dropdown.style.display === 'block') {
+    if (!dropdown.contains(e.target) && e.target !== inp && (!btn || !btn.contains(e.target))) {
+      dropdown.style.display = 'none';
+    }
+  }
+});
 
 // ==========================================
 // SELECT WORK TYPE MODAL (JMS Detail Subpage)
@@ -52446,38 +53288,60 @@ window.toggleWorkTypeSwitch = function(type) {
   }
 };
 
-window.submitWorkTypeSelection = function() {
+window.submitWorkTypeSelection = async function() {
   closeJmsSelectWorkTypeModal();
 
-  if (selectedJmsRowId) {
-    const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
-    if (parentRow) {
-      const taskStr = (parentRow.task || '').toLowerCase();
-      if (taskStr === 'jms to be process' || taskStr.includes('process')) {
-        const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId));
-        if (idx !== -1) {
-          commercialJmsData.splice(idx, 1);
-        }
-        if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
-          const cIdx = currentDataset.findIndex(r => String(r.id) === String(selectedJmsRowId));
-          if (cIdx !== -1) {
-            currentDataset.splice(cIdx, 1);
+  const poNo = window.selectedJmsPoNo || (selectedJmsRowId ? (commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId))?.poNo) : null);
+  const siteId = window.selectedJmsSiteId || (selectedJmsRowId ? (commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId))?.siteId) : null);
+
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.processJms) {
+    try {
+      const res = await NexusApi.commercial.jms.processJms(poNo, siteId);
+      if (res && res.success) {
+        if (selectedJmsRowId || poNo) {
+          const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId) || r.poNo === poNo);
+          if (idx !== -1) {
+            commercialJmsData.splice(idx, 1);
+          }
+          if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
+            const cIdx = currentDataset.findIndex(r => String(r.id) === String(selectedJmsRowId) || r.poNo === poNo);
+            if (cIdx !== -1) {
+              currentDataset.splice(cIdx, 1);
+            }
           }
         }
-      } else if (taskStr.includes('commercial') || taskStr.includes('pending')) {
-        parentRow.task = "Commercial approved";
-      } else {
-        parentRow.task = "JMS to be process";
+        if (typeof loadCommercialProjectsFromApi === 'function') {
+          await loadCommercialProjectsFromApi();
+        }
+
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup(res.message || 'JMS processing completed and routed successfully!', 'Task Completed');
+        } else {
+          showToast(res.message || 'JMS processing completed and routed successfully!');
+        }
+
+        setTimeout(() => {
+          backToJmsList();
+        }, 1200);
+        return;
       }
+    } catch (err) {
+      console.error('Failed to process JMS routing:', err);
+      const errMsg = (err && (err.message || err.detail)) || 'Error routing JMS line items.';
+      showToast(errMsg);
+      return;
     }
   }
 
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
+  // Fallback if API not available
+  if (selectedJmsRowId || poNo) {
+    const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId) || r.poNo === poNo);
+    if (parentRow) {
+      const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId) || r.poNo === poNo);
+      if (idx !== -1) commercialJmsData.splice(idx, 1);
+    }
   }
-
+  showToast('Task completed successfully!');
   setTimeout(() => {
     backToJmsList();
   }, 1200);
@@ -52702,6 +53566,52 @@ window.submitRemarksModal = function() {
     showSvgSuccessPopup('Remarks submitted successfully!', 'Task Completed');
   } else if (typeof showToast === 'function') {
     showToast('Remarks submitted successfully!');
+  }
+};
+
+window.openJmsPayableExpensesModal = async function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('jmsPayableExpensesPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+
+  const tbody = document.getElementById('tbodyJmsPayableExpenses');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #64748b;">Loading project expenses...</td></tr>';
+
+  const poNo = window.selectedJmsPoNo;
+  const siteId = window.selectedJmsSiteId;
+
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.getExpenses) {
+    try {
+      const data = await NexusApi.commercial.jms.getExpenses(poNo, siteId);
+      const expenses = (data && Array.isArray(data.expenses)) ? data.expenses : [];
+      if (expenses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #64748b;">No expenses found for this PO.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = expenses.map(exp => `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px 8px; text-align: left; color: #1e293b; font-weight: 500;">${exp.expenseHead || 'Project Expense'}</td>
+          <td style="padding: 10px 8px; text-align: left; color: #334155;" title="${(exp.expenseName || '').replace(/"/g, '&quot;')}">${exp.expenseName || exp.requestNumber || '-'}</td>
+          <td style="padding: 10px 6px; text-align: center; color: #1e293b;">${exp.uom || 'Nos'}</td>
+          <td style="padding: 10px 6px; text-align: right; color: #1e293b;">${(exp.qty !== null && exp.qty !== undefined) ? Number(exp.qty).toFixed(2) : '1.00'}</td>
+          <td style="padding: 10px 6px; text-align: right; color: #1e293b; font-weight: 500;">${formatIndianCurrency(exp.amount || 0)}</td>
+          <td style="padding: 10px 6px; text-align: right; color: #1e293b;">${formatIndianCurrency(exp.amount || 0)}</td>
+          <td style="padding: 10px 6px; text-align: right; color: #dc2626; font-weight: 600;">${formatIndianCurrency(exp.amount || 0)}</td>
+          <td style="padding: 10px 6px; text-align: right; color: #10b981; font-weight: 600;">${formatIndianCurrency(0)}</td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      console.error('Failed to load payable expenses:', err);
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #ef4444;">Error loading expenses.</td></tr>';
+    }
+  } else {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 24px; color: #64748b;">No expenses available.</td></tr>';
   }
 };
 

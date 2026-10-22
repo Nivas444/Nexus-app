@@ -72,7 +72,8 @@
       } catch (err) {
         console.error('Error fetching master customers from API:', err);
         if (typeof showToast === 'function') {
-          showToast('Could not load customers from database: ' + (err.message || err));
+          const errorCode = (err && (err.status || err.statusCode || err.code)) || 503;
+          showToast(`Couldnt load DataBase: ${errorCode}`);
         }
       }
     }

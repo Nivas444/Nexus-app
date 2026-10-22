@@ -21,6 +21,11 @@
       'Accept': 'application/json'
     };
 
+    const token = (typeof window !== 'undefined' && window.localStorage) ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token'))) : null;
+    if (token) {
+      defaultHeaders['Authorization'] = `Bearer ${token}`;
+    }
+
     if (!(options.body instanceof FormData)) {
       defaultHeaders['Content-Type'] = 'application/json';
     }
@@ -70,7 +75,11 @@
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         const friendlyMsg = `Cannot connect to FastAPI backend at ${API_BASE_URL}. Please ensure backend is running via: python -m uvicorn app.main:app --port 8000`;
         console.error(friendlyMsg, error);
-        throw new Error(friendlyMsg);
+        const err = new Error(friendlyMsg);
+        err.status = 503;
+        err.statusCode = 503;
+        err.code = 503;
+        throw err;
       }
       console.error(`API Request failed for ${url}:`, error);
       throw error;
@@ -1775,6 +1784,134 @@
       },
       async deleteApproval(approvalId) {
         return await request(`/customer/indus/projects-approvals/${approvalId}`, { method: 'DELETE' });
+      }
+    },
+
+    commercial: {
+      async getProjects() {
+        return await request('/commercial/projects', { method: 'GET' });
+      },
+      async uploadProjects(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/commercial/projects/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
+      },
+      async uploadPo(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await request('/commercial/po/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
+      },
+      async bulkUpload(file, uploadType = 'projects') {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_type', uploadType);
+        return await request('/commercial/bulk-upload', {
+          method: 'POST',
+          body: formData
+        });
+      },
+      jms: {
+        async getPoDetails(poNo, siteId) {
+          const url = `/commercial/jms/po-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        },
+        async updateQty(lineItemId, jmsQty) {
+          return await request(`/commercial/jms/line-items/${lineItemId}/qty`, {
+            method: 'PATCH',
+            body: JSON.stringify({ jmsQty: parseFloat(jmsQty) })
+          });
+        },
+        async approveRows(lineItemIds, status = 'Approved') {
+          return await request('/commercial/jms/line-items/approve', {
+            method: 'POST',
+            body: JSON.stringify({ lineItemIds, status })
+          });
+        },
+        async getGbpaItems(poNo, siteId, search = '') {
+          const url = `/commercial/jms/gbpa-items?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}${search ? '&search=' + encodeURIComponent(search) : ''}`;
+          return await request(url, { method: 'GET' });
+        },
+        async getEligibleGbpa(poNo, siteId, search = '') {
+          return await this.getGbpaItems(poNo, siteId, search);
+        },
+        async checkItem(poNo, siteId, itemCode) {
+          const url = `/commercial/jms/check-item?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}&item_code=${encodeURIComponent(itemCode || '')}`;
+          return await request(url, { method: 'GET' });
+        },
+        async addLineItem(poNo, siteId, itemCode, qty = 1.0) {
+          return await request('/commercial/jms/line-items', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, itemCode, qty })
+          });
+        },
+        async submitJms(poNo, siteId) {
+          return await request('/commercial/jms/submit', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId })
+          });
+        },
+        async getDocuments(poNo, siteId) {
+          const url = `/commercial/jms/documents?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        },
+        async uploadDocument(poNoOrFormData, siteId, docType, docDetails, file) {
+          let formData;
+          if (poNoOrFormData instanceof FormData) {
+            formData = poNoOrFormData;
+          } else {
+            formData = new FormData();
+            formData.append('po_no', poNoOrFormData);
+            if (siteId) formData.append('site_id', siteId);
+            formData.append('doc_type', docType);
+            formData.append('doc_details', docDetails || `${docType} Upload`);
+            if (file) formData.append('file', file);
+          }
+          return await request('/commercial/jms/documents', {
+            method: 'POST',
+            body: formData
+          });
+        },
+        async deleteDocument(documentId) {
+          return await request(`/commercial/jms/documents/${documentId}`, {
+            method: 'DELETE'
+          });
+        },
+        async getExpenses(poNo, siteId) {
+          const url = `/commercial/jms/expenses?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        },
+        async processJms(poNo, siteId, lineItemIds = null) {
+          return await request('/commercial/jms/process', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, lineItemIds })
+          });
+        },
+        async getWccDetails(poNo, siteId) {
+          const url = `/commercial/jms/wcc-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        },
+        async getPoAmendDetails(poNo, siteId) {
+          const url = `/commercial/jms/po-amend-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        }
+      },
+      wcc: {
+        async getPoDetails(poNo, siteId) {
+          const url = `/commercial/jms/wcc-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        }
+      },
+      poAmend: {
+        async getPoDetails(poNo, siteId) {
+          const url = `/commercial/jms/po-amend-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        }
       }
     }
   };

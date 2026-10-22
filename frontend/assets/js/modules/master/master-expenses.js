@@ -27,7 +27,8 @@
       } catch (err) {
         console.error('Error fetching master expenses from API:', err);
         if (typeof window.showToast === 'function') {
-          window.showToast('Could not load expenses from database: ' + (err.message || err));
+          const errorCode = (err && (err.status || err.statusCode || err.code)) || 503;
+          window.showToast(`Couldnt load DataBase: ${errorCode}`);
         }
       }
     }

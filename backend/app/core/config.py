@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     DB_HOST: str = Field(default="localhost")
     DB_PORT: int = Field(default=5432)
     DB_NAME: str = Field(default="Nexus_Master DB")
+    DB_PROJECT_NAME: str = Field(default="Nexus_Project DB")
     DB_USER: str = Field(default="postgres")
     DB_PASSWORD: str = Field(default="")
     
@@ -47,6 +48,17 @@ class Settings(BaseSettings):
             host=self.DB_HOST,
             port=self.DB_PORT,
             database=self.DB_NAME
+        )
+
+    @property
+    def sqlalchemy_project_database_uri(self) -> URL:
+        return URL.create(
+            drivername="postgresql+psycopg2",
+            username=self.DB_USER,
+            password=self.DB_PASSWORD,
+            host=self.DB_HOST,
+            port=self.DB_PORT,
+            database=self.DB_PROJECT_NAME
         )
 
     model_config = SettingsConfigDict(

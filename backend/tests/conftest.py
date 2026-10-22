@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
-from app.db.session import get_db, SessionLocal
+from app.db.session import get_db, SessionLocal, get_project_db, ProjectSessionLocal
 
 @pytest.fixture(scope="module")
 def client():
@@ -15,3 +15,12 @@ def db_session():
         yield db
     finally:
         db.close()
+
+@pytest.fixture(scope="function")
+def project_db_session():
+    db = ProjectSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+

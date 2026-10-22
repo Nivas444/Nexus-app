@@ -29,6 +29,7 @@ from app.models.indus_project import (
     IndusCustomerProjectsTypeAdditionalTransport,
     IndusCustomerProjectTypeSupply
 )
+from app.models.commercial_project import TelecomProject, TelecomIndusPo, ProjectExpense, ProjectDocument
 
 __all__ = [
     "CompanyExpense",
@@ -59,7 +60,11 @@ __all__ = [
     "IndusCustomerProjectType",
     "IndusCustomerProjectTypeActivity",
     "IndusCustomerProjectsTypeAdditionalTransport",
-    "IndusCustomerProjectTypeSupply"
+    "IndusCustomerProjectTypeSupply",
+    "TelecomProject",
+    "TelecomIndusPo",
+    "ProjectExpense",
+    "ProjectDocument"
 ]
 
 

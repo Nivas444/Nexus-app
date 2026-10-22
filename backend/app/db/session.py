@@ -23,3 +23,25 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+project_engine = create_engine(
+    settings.sqlalchemy_project_database_uri,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+    pool_recycle=1800
+)
+
+ProjectSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=project_engine)
+
+def get_project_db() -> Generator[Session, None, None]:
+    """
+    FastAPI dependency providing a database session to Nexus_Project DB.
+    """
+    db = ProjectSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+

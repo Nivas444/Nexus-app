@@ -13,6 +13,8 @@ from app.api.v1.indus_gbpa_subpages import router as indus_gbpa_subpages_router
 from app.api.v1.indus_infra import router as indus_infra_router
 from app.api.v1.indus_esh import router as indus_esh_router
 from app.api.v1.indus_project import router as indus_project_router
+from app.api.v1.commercial_project import router as commercial_project_router
+from app.api.v1.commercial_jms import router as commercial_jms_router
 from app.api.v1.auth import router as auth_router
 
 api_router = APIRouter()
@@ -31,6 +33,9 @@ api_router.include_router(indus_gbpa_router)
 api_router.include_router(indus_infra_router)
 api_router.include_router(indus_esh_router)
 api_router.include_router(indus_project_router)
+api_router.include_router(commercial_project_router)
+api_router.include_router(commercial_jms_router)
+
 
 
 

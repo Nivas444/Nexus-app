@@ -8869,10 +8869,10 @@
         </div>
 
         <!-- Commercial Manager: PO Detail Modal Card (Extended Tab Width, Rounded Corners & Clean Header Icons) -->
-        <div class="side-form-card" id="commercialPoDetailCard" style="display: none; width: 1100px; max-width: 96vw; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);">
+        <div class="side-form-card" id="commercialPoDetailCard" style="display: none; width: 1380px; max-width: 96vw; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);">
           <!-- Header Ribbon Badge with 3 Badges + Copy Buttons & Top Right Save, Close Icons -->
           <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0; margin-bottom: 24px; box-sizing: border-box;">
-            <div class="side-form-title-badge" id="lblPoHeaderSlantedBadge" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 42px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 20px; margin: 0; white-space: nowrap; flex-shrink: 0;">
+            <div class="side-form-title-badge" id="lblPoHeaderSlantedBadge" style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 0.88rem; padding: 0 42px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 28px) 100%, 0 100%); height: 52px; display: flex; align-items: center; gap: 20px; margin: 0; white-space: nowrap; flex-shrink: 0; max-width: calc(100% - 110px);">
               <!-- Badge 1: Project ID / Project Type / Sub-Project Type -->
               <div style="display: inline-flex; align-items: center; gap: 6px;">
                 <span id="lblPoHeaderProjectInfo" onclick="openProjectInfoModal(activeCommercialPoRowId)" style="cursor: pointer; text-decoration: none !important; font-weight: 700; color: #ffffff;" title="Open Project Details">Project ID / Project Type / Sub-Project Type</span>
@@ -8897,7 +8897,7 @@
             </div>
 
             <!-- Top Right Icons: Save & Close placed cleanly with margin in corner -->
-            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 16px; margin-left: auto; padding-right: 20px; flex-shrink: 0; z-index: 20;">
+            <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 16px; margin-left: auto; padding-right: 20px; flex-shrink: 0; min-width: 90px; z-index: 20;">
               <button type="button" class="side-top-icon-btn" id="btnSaveCommercialPo" title="Save PO Details" style="background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;">
                 <img src="icons/Save.svg" alt="Save" width="24" height="24">
               </button>
@@ -8988,7 +8988,7 @@
           <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
             <div class="side-form-title-badge" id="lblAddBulkUploadTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Bulk Upload - Employee
+              Bulk Upload
             </div>
             <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
               <button type="button" class="side-top-icon-btn" id="btnAddBulkCsvDownload" title="CSV Download" onclick="downloadBulkCsvTemplate()" style="background: none; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
@@ -9531,6 +9531,10 @@
                   <option value="Additional Activity Approval">Additional Activity Approval</option>
                   <option value="Drawing">Drawing</option>
                   <option value="CAM Document">CAM Document</option>
+                  <option value="Survey report">Survey report</option>
+                  <option value="Mail Approval">Mail Approval</option>
+                  <option value="Audit Checklist">Audit Checklist</option>
+                  <option value="Audit Certificate">Audit Certificate</option>
                 </select>
                 <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #2563eb; display: flex; align-items: center;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -9764,7 +9768,7 @@
         </div>
 
         <!-- Add Line Items Side Panel (Opened when clicking + Toolbar Icon in JMS Detail) -->
-        <div class="side-form-card" id="addJmsLineItemsPanel" style="display: none; width: 440px;">
+        <div class="side-form-card" id="addJmsLineItemsPanel" style="display: none; width: 520px; max-width: 95vw;">
           <!-- Header Ribbon Badge: Add Line Items + Save, Close -->
           <div class="side-form-header"
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
@@ -9784,12 +9788,32 @@
           </div>
 
           <!-- Form Body -->
-          <div class="side-form-body" style="padding: 12px 20px 24px 20px;">
-            <div style="position: relative; width: 100%;">
-              <input type="text" id="inpJmsAddLineItemsSearch" placeholder=""
-                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 40px 6px 14px; font-size: 0.95rem; outline: none; transition: border-color 0.2s ease;">
-              <img src="icons/Search.svg" alt="Search" width="22" height="22"
-                style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+          <div class="side-form-body" style="padding: 18px 20px 24px 20px;">
+            <label for="inpJmsAddLineItemsSearch" style="display: block; font-size: 0.88rem; font-weight: 600; color: #1e293b; margin-bottom: 8px;">Item Code / Description:</label>
+            <div style="position: relative; margin-bottom: 14px;">
+              <input type="text" id="inpJmsAddLineItemsSearch" placeholder="Search Item Code or Description from GBPA..." autocomplete="off"
+                style="width: 100%; height: 42px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 42px 0 14px; font-size: 0.92rem; outline: none; transition: border-color 0.2s ease; box-sizing: border-box;"
+                oninput="handleJmsAddLineItemSearch(this.value)"
+                onfocus="handleJmsAddLineItemSearch(this.value, true)"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();handleJmsAddLineItemSearch(this.value, true);}">
+              <button type="button" id="btnSearchJmsLineItem" onclick="handleJmsAddLineItemSearch(document.getElementById('inpJmsAddLineItemsSearch').value, true)" title="Search GBPA Items"
+                style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                <img src="icons/Search.svg" alt="Search" style="width: 20px; height: 20px; display: block;">
+              </button>
+              <!-- Live suggestions dropdown from GBPA -->
+              <div id="dropdownJmsGbpaItems" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; max-height: 220px; overflow-y: auto; z-index: 1100; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
+              </div>
+            </div>
+            <!-- Quantity Field (Editable) -->
+            <div id="wrapJmsAddLineItemQty" style="display: none; margin-bottom: 14px;">
+              <label for="inpJmsAddLineItemQty" style="display: block; font-size: 0.88rem; font-weight: 600; color: #1e293b; margin-bottom: 6px;">Quantity:</label>
+              <input type="number" step="0.01" min="0.01" id="inpJmsAddLineItemQty" value="1.00"
+                style="width: 100%; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 14px; font-size: 0.92rem; outline: none; box-sizing: border-box;"
+                oninput="updateJmsAddLineItemCalculations()">
+            </div>
+            <!-- Verification result container -->
+            <div id="containerJmsLineItemCheckResult" style="display: none; border-radius: 8px; padding: 14px 16px; border: 1px solid #e2e8f0; background: #f8fafc;">
+              <!-- Populated dynamically via selectJmsGbpaItem() -->
             </div>
           </div>
         </div>

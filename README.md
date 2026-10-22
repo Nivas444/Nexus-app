@@ -4,41 +4,6 @@ Full-stack Enterprise Resource Planning (ERP) platform with a modern responsive 
 
 ---
 
-## 📁 Project Architecture
-
-```text
-Nexus-App/
-├── backend/                       # Python FastAPI + PostgreSQL Backend
-│   ├── app/
-│   │   ├── api/v1/                # Versioned REST endpoints (Expenses, etc.)
-│   │   ├── core/                  # Configuration & Environment settings
-│   │   ├── db/                    # SQLAlchemy engine & session management
-│   │   ├── models/                # Database models (company_expenses, etc.)
-│   │   ├── repositories/          # Data Access Layer & queries
-│   │   ├── schemas/               # Pydantic validation schemas
-│   │   ├── services/              # Business logic layer
-│   │   └── main.py                # FastAPI Application entry point
-│   ├── tests/                     # Pytest automated test suite
-│   ├── requirements.txt           # Python dependencies
-│   ├── view_db.py                 # CLI database table viewer
-│   └── README.md                  # Backend documentation
-│
-├── frontend/                      # Web Client Application
-│   ├── assets/
-│   │   ├── css/                   # Stylesheets (home.css, style.css)
-│   │   ├── js/                    # JavaScript (api.js, home.js, app.js)
-│   │   └── images/                # UI images
-│   ├── icons/                     # SVG icon library
-│   ├── bulk upload template/      # Excel/CSV upload templates
-│   ├── home.html                  # Main ERP Application Dashboard
-│   └── index.html                 # Landing / Login page
-│
-├── .env                           # Local environment variables
-└── README.md                      # Project root documentation
-```
-
----
-
 ## 🚀 Getting Started
 
 ### 1. Start the Backend API (FastAPI + PostgreSQL)

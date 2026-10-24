@@ -20,6 +20,12 @@ class CommercialProjectItem(BaseModel):
     task: Optional[str] = None
     raBill: bool = False
     selected: bool = False
+    poRevNo: Optional[str] = None
+    poAmendmentCompletionDate: Optional[str] = None
+    poAmendmentCompletionStatus: Optional[str] = None
+    poStatus: Optional[str] = None
+    completionDate: Optional[str] = None
+    amount: Optional[str] = None
 
 
 class CommercialProjectListResponse(BaseModel):
@@ -239,4 +245,31 @@ class PoAmendPoDetailResponse(BaseModel):
     poStatus: str
     totalAmount: float
     lineItems: List[PoAmendLineItem]
+
+
+class SelectWorksSubmitRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+    civil: bool = True
+    electrical: bool = False
+    service: bool = False
+    eb: bool = False
+
+
+class SelectWorksSubmitResponse(BaseModel):
+    success: bool
+    message: str
+    poNo: str
+    siteId: Optional[str] = None
+    projectId: Optional[str] = None
+    task: str
+    status: str
+    destination: Optional[str] = None
+    mergedDocumentId: Optional[int] = None
+    certificateDocumentId: Optional[int] = None
+    totalPages: int
+    fileName: str
+    pdfDataUri: Optional[str] = None
+
+
 

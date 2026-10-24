@@ -751,7 +751,7 @@ class JmsService:
 
             # Strict scope check: Apply new logic only to rows whose task is exactly 'JMS to be process'
             current_task_norm = (proj.current_task or "").strip()
-            routed_tasks = ["WCC to be raise", "To be submit", "PO to be amend", "WCC to be raise / PO to be amend"]
+            routed_tasks = ["WCC to be raise", "WCC to be submit", "To be submit", "PO Amend to be submit", "PO to be amend", "WCC to be raise / PO to be amend"]
             is_already_routed = current_task_norm in routed_tasks
 
             if current_task_norm != "JMS to be process" and not is_already_routed:
@@ -799,24 +799,31 @@ class JmsService:
                 # Calculate PO Difference = PO Qty - JMS Qty with accurate Decimal arithmetic
                 po_diff = po_qty - jms_qty
 
-                if po_diff >= Decimal("0"):
-                    # Rule A: PO Difference >= 0 -> WCC with 'WCC to be raise'
+                if po_diff < Decimal("0"):
+                    # Priority 1: PO Difference < 0 -> PO Amend with 'PO Amend to be submit'
+                    destination = "po_amend"
+                    task_status = "PO Amend to be submit"
+                    item.po_amendment_type = "PO Amend to be submit"
+                    item.po_amendment_qty = abs(po_diff)
+                    amend_type = "Change QTY"
+                    amend_qty = float(abs(po_diff))
+                    po_amend_count += 1
+                elif jms_qty != Decimal("0"):
+                    # Priority 2: Non-zero JMS Qty -> WCC with 'WCC to be submit'
                     destination = "wcc"
-                    task_status = "WCC to be raise"
-                    item.po_amendment_type = "WCC to be raise"
+                    task_status = "WCC to be submit"
+                    item.po_amendment_type = "WCC to be submit"
                     item.po_amendment_qty = Decimal("0.00")
                     amend_type = None
                     amend_qty = None
                     wcc_count += 1
                 else:
-                    # Rule B: PO Difference < 0 -> PO to be amend with established task/status
-                    destination = "po_amend"
-                    task_status = "To be submit"
-                    item.po_amendment_type = "Change QTY"
-                    item.po_amendment_qty = abs(po_diff)
-                    amend_type = "Change QTY"
-                    amend_qty = float(abs(po_diff))
-                    po_amend_count += 1
+                    destination = "none"
+                    task_status = "JMS to be process"
+                    item.po_amendment_type = None
+                    item.po_amendment_qty = Decimal("0.00")
+                    amend_type = None
+                    amend_qty = None
 
                 routed_items.append(JmsRoutedItem(
                     lineItemId=item.project_po_line_item_id,
@@ -844,21 +851,21 @@ class JmsService:
             # "Do not change the overall project status when only an individual line item's task should change."
             is_full_po_routed = not line_item_ids or (len(line_item_ids) >= len(all_lines_list))
 
-            if is_full_po_routed or all(it.po_amendment_type in ["WCC to be raise", "Change QTY"] for it in all_lines_list):
-                all_wcc = all(it.po_amendment_type == "WCC to be raise" for it in all_lines_list)
-                all_amend = all(it.po_amendment_type == "Change QTY" for it in all_lines_list)
+            if is_full_po_routed or all(it.po_amendment_type in ["WCC to be raise", "WCC to be submit", "Change QTY", "PO Amend to be submit"] for it in all_lines_list):
+                all_wcc = all(it.po_amendment_type in ["WCC to be raise", "WCC to be submit"] for it in all_lines_list)
+                all_amend = all(it.po_amendment_type in ["Change QTY", "PO Amend to be submit"] for it in all_lines_list)
 
                 if all_wcc:
-                    proj.current_task = "WCC to be raise"
-                    proj.project_status = "WCC to be raise"
+                    proj.current_task = "WCC to be submit"
+                    proj.project_status = "WCC to be submit"
                 elif all_amend:
-                    proj.current_task = "To be submit"
-                    proj.po_status = "Amend Requested"
-                    proj.project_status = "PO to be amend"
+                    proj.current_task = "PO Amend to be submit"
+                    proj.po_status = "PO Amend to be submit"
+                    proj.project_status = "PO Amend to be submit"
                 else:
-                    proj.current_task = "WCC to be raise / PO to be amend"
-                    proj.po_status = "Amend Requested"
-                    proj.project_status = "WCC to be raise"
+                    proj.current_task = "WCC to be submit / PO Amend to be submit"
+                    proj.po_status = "PO Amend to be submit"
+                    proj.project_status = "WCC to be submit / PO Amend to be submit"
 
             self.project_db.commit()
             self.project_db.refresh(proj)
@@ -886,7 +893,7 @@ class JmsService:
 
     def get_wcc_po_details(self, po_no: str, site_id: Optional[str] = None) -> WccPoDetailResponse:
         """
-        Retrieve routed WCC PO details and line items (PO Difference >= 0).
+        Retrieve routed WCC PO details and line items (PO Difference >= 0 and JMS Qty != 0).
         """
         proj = self._get_project_context(po_no, site_id)
 
@@ -905,12 +912,16 @@ class JmsService:
             po_rate = Decimal(str(r.po_rate or 0))
             amt = Decimal(str(r.jms_amount if r.jms_amount is not None else (po_rate * jms_qty)))
 
-            # Include items with PO Difference >= 0 specifically routed to WCC
-            is_wcc = (r.po_amendment_type == "WCC to be raise") or (
-                r.po_amendment_type is None and proj and proj.current_task in ["WCC to be raise", "WCC to be raise / PO to be amend"] and po_diff >= Decimal("0")
+            # Include items with PO Difference >= 0 and non-zero JMS Qty specifically routed to WCC
+            # Priority: A row with negative PO Difference must route to PO Amend rather than both pages
+            is_wcc = (po_diff >= Decimal("0") and jms_qty != Decimal("0")) and (
+                (r.po_amendment_type in ["WCC to be raise", "WCC to be submit"]) or (
+                    r.po_amendment_type is None and proj and proj.current_task in ["WCC to be raise", "WCC to be submit", "WCC to be raise / PO to be amend", "WCC to be submit / PO Amend to be submit"]
+                )
             )
             if is_wcc:
                 total_wcc_amount += amt
+                line_task = "WCC to be submit" if (r.po_amendment_type == "WCC to be submit" or (proj and "WCC to be submit" in (proj.current_task or ""))) else "WCC to be raise"
                 wcc_items.append(WccLineItem(
                     id=r.project_po_line_item_id,
                     lineNo=str(r.line_number or ""),
@@ -923,7 +934,7 @@ class JmsService:
                     jmsQty=float(jms_qty),
                     poDifference=float(po_diff),
                     amount=float(amt),
-                    task="WCC to be raise",
+                    task=line_task,
                     selected=False,
                     highlighted=False
                 ))
@@ -933,7 +944,7 @@ class JmsService:
         project_id = proj.project_code if proj else f"PRJ-{po_no}"
         project_type = proj.project_type if proj else "New Build"
         sub_project_type = proj.sub_project_type if proj else "Civil"
-        task = proj.current_task if proj and proj.current_task else "WCC to be raise"
+        task = "WCC to be submit" if (proj and "WCC to be submit" in (proj.current_task or "")) else (proj.current_task if proj and proj.current_task else "WCC to be raise")
 
         return WccPoDetailResponse(
             poNo=po_no,
@@ -970,8 +981,11 @@ class JmsService:
             amt = Decimal(str(r.jms_amount if r.jms_amount is not None else (po_rate * jms_qty)))
 
             # Include items with PO Difference < 0 specifically routed for amendment
-            is_amend = (r.po_amendment_type == "Change QTY") or (
-                r.po_amendment_type is None and proj and proj.current_task in ["To be submit", "PO to be amend", "WCC to be raise / PO to be amend"] and po_diff < Decimal("0")
+            # Priority: A row with negative PO Difference must route to PO Amend
+            is_amend = (po_diff < Decimal("0")) and (
+                (r.po_amendment_type in ["Change QTY", "PO Amend to be submit"]) or (
+                    r.po_amendment_type is None and proj and proj.current_task in ["To be submit", "PO Amend to be submit", "PO to be amend", "WCC to be raise / PO to be amend", "WCC to be submit / PO Amend to be submit"]
+                )
             )
             if is_amend:
                 amend_qty = float(r.po_amendment_qty) if r.po_amendment_qty is not None else float(abs(po_diff))
@@ -998,8 +1012,8 @@ class JmsService:
         project_id = proj.project_code if proj else f"PRJ-{po_no}"
         project_type = proj.project_type if proj else "New Build"
         sub_project_type = proj.sub_project_type if proj else "Civil"
-        task = proj.current_task if proj and proj.current_task else "To be submit"
-        po_status = proj.po_status if proj and proj.po_status else "Amend Requested"
+        task = "PO Amend to be submit" if (proj and "PO Amend" in (proj.current_task or "")) else (proj.current_task if proj and proj.current_task else "To be submit")
+        po_status = "PO Amend to be submit" if (proj and "PO Amend" in (proj.po_status or "")) else (proj.po_status if proj and proj.po_status else "Amend Requested")
 
         return PoAmendPoDetailResponse(
             poNo=po_no,

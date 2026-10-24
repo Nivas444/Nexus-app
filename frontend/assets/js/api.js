@@ -1892,6 +1892,23 @@
             body: JSON.stringify({ poNo, siteId, lineItemIds })
           });
         },
+        async submitSelectWorks(poNo, siteId, selectedWorks = {}) {
+          return await request('/commercial/jms/select-works/submit', {
+            method: 'POST',
+            body: JSON.stringify({
+              poNo,
+              siteId,
+              civil: selectedWorks.civil ?? true,
+              electrical: selectedWorks.electrical ?? false,
+              service: selectedWorks.service ?? false,
+              eb: selectedWorks.eb ?? false
+            })
+          });
+        },
+        async downloadGeneratedPdf(poNo, siteId) {
+          const url = `/commercial/jms/pdf/download?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
+          return await request(url, { method: 'GET' });
+        },
         async getWccDetails(poNo, siteId) {
           const url = `/commercial/jms/wcc-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
@@ -1908,6 +1925,17 @@
         }
       },
       poAmend: {
+        async getProjects() {
+          return await request('/commercial/po-amend/projects', { method: 'GET' });
+        },
+        async uploadPoAmend(file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          return await request('/commercial/po-amend/bulk-upload', {
+            method: 'POST',
+            body: formData
+          });
+        },
         async getPoDetails(poNo, siteId) {
           const url = `/commercial/jms/po-amend-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });

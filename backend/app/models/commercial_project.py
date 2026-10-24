@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, Numeric, Text, Date, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, BigInteger, String, Numeric, Text, Date, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.sql import func
 from app.db.base import Base
 
@@ -21,6 +21,7 @@ class TelecomProject(Base):
     po_amendment_ref_id = Column(String(100), nullable=True)
     po_amendment_submission_date = Column(Date, nullable=True)
     po_amendment_completion_date = Column(Date, nullable=True)
+    po_amendment_completion_status = Column(String(50), nullable=True)
     po_amendment_ageing = Column(BigInteger, nullable=True)
     po_status = Column(String(50), nullable=True)
     po_ageing = Column(BigInteger, nullable=True)
@@ -196,4 +197,109 @@ class ProjectDocument(Base):
 
     def __repr__(self) -> str:
         return f"<ProjectDocument(id={self.project_document_id}, po_no='{self.po_no}', name='{self.document_name}')>"
+
+
+class IndusProjectInfra(Base):
+    """
+    SQLAlchemy ORM Model mapping PostgreSQL `indus_project_infra` table
+    in `Nexus_Project DB`.
+    """
+    __tablename__ = "indus_project_infra"
+
+    infrastructure_management_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    company_name = Column(String(255), nullable=True, default="Nexus")
+    customer_name = Column(String(255), nullable=True)
+    po_no = Column(String(100), nullable=True, index=True)
+    site_id = Column(String(100), nullable=True, index=True)
+    document_type = Column(String(100), nullable=True)
+    document_number = Column(String(100), nullable=True)
+    document_date = Column(Date, nullable=True)
+    documents = Column(Text, nullable=True)
+    boq_number = Column(String(100), nullable=True)
+    boq_date = Column(Date, nullable=True)
+    boq_ageing = Column(Integer, nullable=True)
+    infra_category = Column(String(150), nullable=True)
+    infra_description = Column(Text, nullable=True)
+    infra_type = Column(String(150), nullable=True)
+    installation_type = Column(String(100), nullable=True)
+    uom = Column(String(50), nullable=True)
+    qty = Column(Numeric(12, 2), nullable=True)
+    srn_ge_number = Column(String(100), nullable=True)
+    srn_ge_date = Column(Date, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<IndusProjectInfra(id={self.infrastructure_management_id}, type='{self.document_type}', no='{self.document_number}')>"
+
+
+class DprRecord(Base):
+    """
+    SQLAlchemy ORM Model mapping PostgreSQL `dpr` table
+    in `Nexus_Project DB`.
+    """
+    __tablename__ = "dpr"
+
+    activity_tracking_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    company_name = Column(String(255), nullable=True, default="Nexus")
+    customer_name = Column(String(255), nullable=True)
+    project_code = Column(String(100), nullable=True)
+    po_no = Column(String(100), nullable=True, index=True)
+    site_id = Column(String(100), nullable=True, index=True)
+    site_name = Column(String(255), nullable=True)
+    date = Column(Date, nullable=True)
+    stage = Column(String(150), nullable=True)
+    activity = Column(String(255), nullable=True)
+    start_photo = Column(Text, nullable=True)
+    end_photo = Column(Text, nullable=True)
+    status = Column(String(50), nullable=True)
+    h_ptw_number = Column(String(100), nullable=True)
+    h_ptw_documents = Column(Text, nullable=True)
+    h_ptw_status = Column(String(50), nullable=True)
+    e_ptw_number = Column(String(100), nullable=True)
+    e_ptw_documents = Column(Text, nullable=True)
+    e_ptw_status = Column(String(50), nullable=True)
+    c_ptw_number = Column(String(100), nullable=True)
+    c_ptw_documents = Column(Text, nullable=True)
+    c_ptw_status = Column(String(50), nullable=True)
+    m_ptw_number = Column(String(100), nullable=True)
+    m_ptw_documents = Column(Text, nullable=True)
+    m_ptw_status = Column(String(50), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<DprRecord(id={self.activity_tracking_id}, po_no='{self.po_no}', site='{self.site_id}')>"
+
+
+class EmailApproval(Base):
+    """
+    SQLAlchemy ORM Model mapping PostgreSQL `email_approval` table
+    in `Nexus_Project DB`.
+    """
+    __tablename__ = "email_approval"
+
+    approval_tracking_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    company_name = Column(String(255), nullable=True, default="Nexus")
+    customer_name = Column(String(255), nullable=True)
+    po_no = Column(String(100), nullable=True, index=True)
+    site_id = Column(String(100), nullable=True, index=True)
+    request_date = Column(Date, nullable=True)
+    subject = Column(String(255), nullable=True)
+    fse = Column(String(255), nullable=True)
+    aom = Column(String(255), nullable=True)
+    zpm = Column(String(255), nullable=True)
+    pm = Column(String(255), nullable=True)
+    scm = Column(String(255), nullable=True)
+    qm = Column(String(255), nullable=True)
+    whm = Column(String(255), nullable=True)
+    planning_manager = Column(String(255), nullable=True)
+    final_approved_date = Column(Date, nullable=True)
+    final_approved_status = Column(String(50), nullable=True)
+    approved_document_name = Column(String(255), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<EmailApproval(id={self.approval_tracking_id}, po_no='{self.po_no}', subject='{self.subject}')>"
 

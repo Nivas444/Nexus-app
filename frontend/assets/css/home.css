@@ -5840,3 +5840,16 @@ th.wm-supply-sub-header {
 #vehicleBankSidePanel .contact-table-wrap {
   overflow-x: hidden !important;
 }
+
+/* JMS Detail Submit Button Row - Remove underline and bottom border completely */
+#rowJmsDetailSubmitAction,
+#rowJmsDetailSubmitAction td,
+.worklist-table-full tbody tr#rowJmsDetailSubmitAction td,
+#btnJmsDetailSubmit,
+#btnJmsDetailSubmit * {
+  border: none !important;
+  border-bottom: none !important;
+  border-top: none !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+}

@@ -86,5 +86,35 @@ async def bulk_upload_commercial_unified(
 
     if norm_type in ["po", "purchase_order", "po_lines"]:
         return service.process_po_bulk_upload(content, file.filename or "")
+    elif norm_type in ["po_amend", "po_amendment", "amend", "amendment"]:
+        return service.process_po_amend_bulk_upload(content, file.filename or "")
     else:
         return service.process_project_bulk_upload(content, file.filename or "")
+
+
+@router.get("/po-amend/projects", response_model=CommercialProjectListResponse, summary="List PO Amend Projects from telecom_project")
+def list_po_amend_projects(
+    db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Retrieves real Project records from PostgreSQL table `telecom_project` in `Nexus_Project DB` for PO Amend workflow.
+    """
+    service = CommercialProjectService(db)
+    return service.get_po_amend_projects_list()
+
+
+@router.post("/po-amend/bulk-upload", response_model=CommercialBulkUploadResponse, summary="Bulk Upload PO Amendment via CSV/Excel")
+async def bulk_upload_commercial_po_amend(
+    file: UploadFile = File(..., description="CSV or Excel (.xlsx) file matching the PO Amendment template"),
+    db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Upload and parse CSV or Excel file to update PO Revision Number, Amendment Completion Date,
+    and Amendment Completion Status into PostgreSQL `telecom_project` table in `Nexus_Project DB`.
+    """
+    content = await file.read()
+    service = CommercialProjectService(db)
+    return service.process_po_amend_bulk_upload(content, file.filename or "")
+

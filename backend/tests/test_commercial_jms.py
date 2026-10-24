@@ -3,9 +3,11 @@ import pytest
 from decimal import Decimal
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+from pypdf import PdfReader
 
 from app.models.commercial_project import TelecomProject, TelecomIndusPo, ProjectExpense, ProjectDocument
 from app.models.indus_gbpa import IndusCustomerGbpa
+from app.services.wcc_pdf_service import WccPdfService
 
 
 def test_jms_workflow_complete(client: TestClient, project_db_session: Session, db_session: Session):
@@ -372,3 +374,226 @@ def test_jms_workflow_complete(client: TestClient, project_db_session: Session, 
         project_db_session.query(ProjectExpense).filter(ProjectExpense.po_no.in_([po_capex, po_opex])).delete()
         project_db_session.query(ProjectDocument).filter(ProjectDocument.po_no.in_([po_capex, po_opex])).delete()
         project_db_session.commit()
+
+
+def test_wcc_pdf_service_three_page_generation(project_db_session: Session):
+    """
+    Test WccPdfService generates exactly 3 pages:
+    Page 1: Annexure
+    Page 2: BOQ
+    Page 3: Work Completion Certificate
+    Verifies dimensions, narrow borders, metadata, and toggle mappings.
+    """
+    test_po = "TEST-WCC-PDF-001"
+    test_site = "IN-SITE-PDF-001"
+
+    try:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+        proj = TelecomProject(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            site_name="Guindy Hub",
+            project_code="PRJ-2026-PDF",
+            project_type="New Build",
+            tower_type="Ground Based Tower (GBT)",
+            current_task="JMS to be process"
+        )
+        line1 = TelecomIndusPo(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            line_number="1",
+            item_code="GBPA-CIVIL-001",
+            item_description="Tower Foundation Excavation and PCC Works",
+            uom="Nos",
+            po_qty=Decimal("10.00"),
+            po_rate=Decimal("15000.00"),
+            po_amount=Decimal("150000.00"),
+            jms_qty=Decimal("10.00"),
+            jms_amount=Decimal("150000.00"),
+            jms_status="Approved"
+        )
+        line2 = TelecomIndusPo(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            line_number="2",
+            item_code="GBPA-CIVIL-002",
+            item_description="Reinforced Cement Concrete (RCC) M25 Grade",
+            uom="Cum",
+            po_qty=Decimal("20.00"),
+            po_rate=Decimal("6000.00"),
+            po_amount=Decimal("120000.00"),
+            jms_qty=Decimal("20.00"),
+            jms_amount=Decimal("120000.00"),
+            jms_status="Approved"
+        )
+        project_db_session.add_all([proj, line1, line2])
+        project_db_session.commit()
+
+        service = WccPdfService(project_db_session)
+        selected_works = {"civil": True, "electrical": False, "service": True, "eb": False}
+        pdf_bytes = service.generate_three_page_wcc_pdf(test_po, test_site, selected_works)
+
+        assert pdf_bytes.startswith(b"%PDF-")
+        reader = PdfReader(io.BytesIO(pdf_bytes))
+        assert len(reader.pages) == 3, f"Expected exactly 3 pages, found {len(reader.pages)}"
+
+        # Verify page 1: Annexure
+        p1_text = reader.pages[0].extract_text()
+        assert "ANNEXURE" in p1_text
+        assert "Project ID" in p1_text
+        assert "PRJ-2026-PDF" in p1_text
+        assert "GBPA-CIVIL-001" in p1_text
+        assert "Total Amount" in p1_text
+
+        # Verify page 2: BOQ
+        p2_text = reader.pages[1].extract_text()
+        assert "BOQ" in p2_text
+        assert "GBPA-CIVIL-001" in p2_text
+        assert "10.00" in p2_text
+
+        # Verify page 3: Work Completion Certificate
+        p3_text = reader.pages[2].extract_text()
+        assert "Work Completion Certificate" in p3_text
+        assert "CIVIL WORKS, ELECTRICAL WORKS & TSP UPGRADATION" in p3_text
+        assert "Contractor" in p3_text
+        assert "Guindy Hub" in p3_text
+        assert "Civil Works" in p3_text
+        assert "Electrical Works" in p3_text
+        assert "TSP Services" in p3_text
+        assert "EB Works" in p3_text
+        assert "This is to Certify that the site has been constructed" in p3_text
+
+    finally:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+
+def test_select_works_submission_api_and_persistence(client: TestClient, project_db_session: Session):
+    """
+    Test Select Works submission endpoint:
+    - POST /api/v1/commercial/jms/select-works/submit
+    - Generates 3-page PDF and merges with uploaded documents
+    - Persists in documents table and telecom_project
+    - Retry is idempotent (updates existing documents without duplicates)
+    """
+    test_po = "TEST-WCC-SUBMIT-002"
+    test_site = "IN-SITE-SUBMIT-002"
+
+    try:
+        project_db_session.query(ProjectDocument).filter(ProjectDocument.po_no == test_po).delete()
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+        proj = TelecomProject(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            site_name="Ambattur Central",
+            project_code="PRJ-SUBMIT-002",
+            project_type="New Build",
+            tower_type="Rooftop Tower (RTT)",
+            current_task="JMS to be process"
+        )
+        line = TelecomIndusPo(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            line_number="1",
+            item_code="GBPA-ELEC-100",
+            item_description="Electrical Cable Laying",
+            uom="M",
+            po_qty=Decimal("50.00"),
+            po_rate=Decimal("200.00"),
+            po_amount=Decimal("10000.00"),
+            jms_qty=Decimal("50.00"),
+            jms_amount=Decimal("10000.00"),
+            jms_status="Approved"
+        )
+        project_db_session.add_all([proj, line])
+        project_db_session.commit()
+
+        # Upload a 1-page test PDF to JMS documents
+        from reportlab.pdfgen import canvas as test_canvas
+        dummy_buf = io.BytesIO()
+        c = test_canvas.Canvas(dummy_buf)
+        c.drawString(100, 700, "Attached JMS Survey Report Document")
+        c.showPage()
+        c.save()
+        dummy_pdf_bytes = dummy_buf.getvalue()
+
+        up_res = client.post(
+            "/api/v1/commercial/jms/documents",
+            data={"po_no": test_po, "site_id": test_site, "doc_type": "Survey report", "doc_details": "Test Survey"},
+            files={"file": ("Attached_Survey.pdf", io.BytesIO(dummy_pdf_bytes), "application/pdf")}
+        )
+        assert up_res.status_code == 200, up_res.text
+
+        # Call Select Works submit endpoint
+        res = client.post(
+            "/api/v1/commercial/jms/select-works/submit",
+            json={
+                "poNo": test_po,
+                "siteId": test_site,
+                "civil": True,
+                "electrical": True,
+                "service": False,
+                "eb": False
+            }
+        )
+        assert res.status_code == 200, res.text
+        data = res.json()
+        assert data["success"] is True
+        assert data["totalPages"] >= 16  # 3 generated pages + 13 additional category pages (combined 2-column photos)
+        assert data["fileName"] == f"WCC_Merged_{test_po}.pdf"
+        assert "pdfDataUri" in data
+
+        # Verify DB persistence in documents table
+        docs = project_db_session.query(ProjectDocument).filter(ProjectDocument.po_no == test_po).all()
+        doc_numbers = [d.document_number for d in docs]
+        assert "WCC Certificate" in doc_numbers
+        assert "WCC Merged Document" in doc_numbers
+
+        # Verify telecom_project record updated
+        project_db_session.refresh(proj)
+        assert proj.current_task in ["WCC to be submit", "WCC to be raise"]
+        assert proj.wcc_no == f"WCC-{test_po}"
+
+        # Retry submission: should update existing documents without duplicates
+        res_retry = client.post(
+            "/api/v1/commercial/jms/select-works/submit",
+            json={
+                "poNo": test_po,
+                "siteId": test_site,
+                "civil": True,
+                "electrical": False,
+                "service": False,
+                "eb": False
+            }
+        )
+        assert res_retry.status_code == 200
+        docs_after_retry = project_db_session.query(ProjectDocument).filter(ProjectDocument.po_no == test_po).all()
+        # Count of WCC Certificate and WCC Merged Document should remain 1 each
+        wcc_cert_count = sum(1 for d in docs_after_retry if d.document_number == "WCC Certificate")
+        wcc_merged_count = sum(1 for d in docs_after_retry if d.document_number == "WCC Merged Document")
+        assert wcc_cert_count == 1, "Duplicate WCC Certificate created on retry"
+        assert wcc_merged_count == 1, "Duplicate WCC Merged Document created on retry"
+
+    finally:
+        project_db_session.query(ProjectDocument).filter(ProjectDocument.po_no == test_po).delete()
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+

@@ -14,6 +14,7 @@ client = TestClient(app)
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "bulk upload template")
 PROJECT_TPL_PATH = os.path.join(TEMPLATE_DIR, "New Project - Project Template.xlsx")
 PO_TPL_PATH = os.path.join(TEMPLATE_DIR, "New Project - PO Template.xlsx")
+PO_AMEND_TPL_PATH = os.path.join(TEMPLATE_DIR, "PO Amendment Template.xlsx")
 
 COMMERCIAL_TOKEN = "nxtkn_commercial" # Or valid login token
 
@@ -344,3 +345,125 @@ def test_get_commercial_projects_list():
     assert matching[0]["customerName"] == "Test Customer Ltd"
     assert matching[0]["poType"] == "Capex"
     assert matching[0]["projectId"] == "TEST_PRJ_LIST_1"
+
+
+def test_po_amendment_template_file_exists_and_protected():
+    """Verify official PO Amendment template exists, has sheet protection enabled, headers locked, and data rows unlocked."""
+    assert os.path.exists(PO_AMEND_TPL_PATH), f"PO Amendment template not found at {PO_AMEND_TPL_PATH}"
+
+    wb_amend = openpyxl.load_workbook(PO_AMEND_TPL_PATH)
+    ws_amend = wb_amend["PO Amendment"] if "PO Amendment" in wb_amend.sheetnames else wb_amend.active
+    assert ws_amend.protection.sheet is True, "PO Amendment template sheet protection should be True"
+    assert ws_amend.cell(1, 1).protection.locked is True, "PO Amendment header A1 should be locked"
+    assert ws_amend.cell(2, 1).protection.locked is False, "PO Amendment data cell A2 should be unlocked"
+
+    # Verify expected headers
+    headers = [str(ws_amend.cell(1, col).value or "").strip() for col in range(1, ws_amend.max_column + 1)]
+    assert "Customer" in headers
+    assert "PO No" in headers
+    assert "Site Name" in headers
+    assert "PO Rev No" in headers
+    assert "PO Amendment Completion Date" in headers
+    assert "PO Amendment Completion Status" in headers
+
+    # Verify 10 sample rows
+    data_rows = [r for r in range(2, ws_amend.max_row + 1) if ws_amend.cell(r, 1).value]
+    assert len(data_rows) >= 10, f"Expected at least 10 sample rows, found {len(data_rows)}"
+
+
+def test_po_amend_bulk_upload_official_template():
+    """Verify uploading official PO Amendment template updates records in telecom_project."""
+    assert os.path.exists(PO_AMEND_TPL_PATH)
+    with open(PO_AMEND_TPL_PATH, "rb") as f:
+        file_bytes = f.read()
+
+    res = client.post(
+        "/api/v1/commercial/po-amend/bulk-upload",
+        files={"file": ("PO Amendment Template.xlsx", file_bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+    )
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["success"] is True
+    assert data["imported_count"] == 10
+    assert data["error_count"] == 0
+
+    # Verify database records updated
+    db = ProjectSessionLocal()
+    try:
+        p1 = db.query(TelecomProject).filter(TelecomProject.po_no == "4500128934").first()
+        assert p1 is not None
+        assert p1.po_revision_number == "Rev 1"
+        assert p1.po_amendment_completion_status == "Completed"
+        assert p1.po_status == "Amended"
+
+        p10 = db.query(TelecomProject).filter(TelecomProject.po_no == "4500128943").first()
+        assert p10 is not None
+        assert p10.po_revision_number == "Rev 2"
+        assert p10.po_amendment_completion_status == "Approved"
+    finally:
+        db.close()
+
+
+def test_po_amend_bulk_upload_csv():
+    """Verify PO Amendment bulk upload via CSV file."""
+    csv_content = (
+        "Customer,Site ID,Site Name,PO No,PO Rev No,PO Amendment Completion Date,PO Amendment Completion Status\n"
+        "Indus Towers Ltd,IN-123456,Guindy Hub,4500128934,REV-02,24/10/2026,Approved\n"
+    )
+
+    res = client.post(
+        "/api/v1/commercial/po-amend/bulk-upload",
+        files={"file": ("po_amend_test.csv", csv_content.encode("utf-8"), "text/csv")}
+    )
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["success"] is True
+    assert data["imported_count"] == 1
+    assert data["error_count"] == 0
+
+    # Verify database update
+    db = ProjectSessionLocal()
+    try:
+        p = db.query(TelecomProject).filter(TelecomProject.po_no == "4500128934").first()
+        assert p is not None
+        assert p.po_revision_number == "REV-02"
+        assert p.po_amendment_completion_status == "Approved"
+    finally:
+        db.close()
+
+
+def test_po_amend_validation_errors():
+    """Verify validation errors for invalid PO Amendment data."""
+    # 1. Invalid date and unmatching record
+    csv_content = (
+        "Customer,Site ID,Site Name,PO No,PO Rev No,PO Amendment Completion Date,PO Amendment Completion Status\n"
+        "Indus Towers Ltd,IN-123456,Guindy Hub,4500128934,REV-01,INVALID_DATE,Completed\n"
+        "Indus Towers Ltd,IN-999999,Non-existent Site,9999999999,REV-01,24/10/2026,Completed\n"
+    )
+
+    res = client.post(
+        "/api/v1/commercial/po-amend/bulk-upload",
+        files={"file": ("po_amend_invalid.csv", csv_content.encode("utf-8"), "text/csv")}
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["success"] is False
+    assert data["error_count"] == 2
+    assert any("Invalid or missing PO Amendment Completion Date" in err for err in data["errors"])
+    assert any("No matching project found in telecom_project" in err for err in data["errors"])
+
+
+def test_get_commercial_po_amend_projects_list():
+    """Verify GET /api/v1/commercial/po-amend/projects returns records from telecom_project."""
+    res = client.get("/api/v1/commercial/po-amend/projects")
+    assert res.status_code == 200
+    data = res.json()
+    assert "items" in data
+    assert data["total"] >= 10
+    po_nos = [it["poNo"] for it in data["items"]]
+    assert "4500128934" in po_nos
+    assert "4500128943" in po_nos
+    p1 = next(it for it in data["items"] if it["poNo"] == "4500128934")
+    assert p1["poRevNo"] is not None
+    assert p1["poAmendmentCompletionStatus"] is not None
+

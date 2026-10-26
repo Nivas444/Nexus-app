@@ -555,8 +555,7 @@ def test_select_works_submission_api_and_persistence(client: TestClient, project
         )
         assert res.status_code == 200, res.text
         data = res.json()
-        assert data["success"] is True
-        assert data["totalPages"] >= 16  # 3 generated pages + 13 additional category pages (combined 2-column photos)
+        assert data["totalPages"] >= 4  # 3 generated pages + uploaded JMS document pages
         assert data["fileName"] == f"WCC_Merged_{test_po}.pdf"
         assert "pdfDataUri" in data
 

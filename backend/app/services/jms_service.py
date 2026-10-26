@@ -1,4 +1,5 @@
 import base64
+import re
 from datetime import date, datetime
 from decimal import Decimal
 from typing import List, Optional, Dict, Any
@@ -511,8 +512,9 @@ class JmsService:
     def submit_jms_to_pm(self, po_no: str, site_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Validate and submit JMS records to Project Manager JMS workflow.
-        Updates receiving Project Manager status / task to exactly 'JMS approval pending'.
-        Idempotent: safe against repeated submissions.
+        Updates receiving Project Manager status / task to exactly 'JMS Approval Pending'.
+        Merges uploaded JMS documents into one PDF and persists in jms_merged_document.
+        Idempotent: safe against repeated submissions and retries.
         """
         proj = self._get_project_context(po_no, site_id)
         if not proj:
@@ -544,11 +546,32 @@ class JmsService:
                 detail=f"Cannot submit: {len(unapproved)} line item(s) are not yet Approved. Every line item must be approved before submission."
             )
 
-        # Idempotently update status
-        proj.current_task = "JMS approval pending"
-        proj.project_status = "JMS Approval Pending"
-        self.project_db.commit()
-        self.project_db.refresh(proj)
+        try:
+            # Merge uploaded JMS documents in parallel with submission
+            from app.services.wcc_pdf_service import WccPdfService
+            pdf_service = WccPdfService(self.project_db)
+            merged_pdf_bytes = pdf_service.merge_uploaded_jms_documents(po_no, site_id or proj.site_id, proj)
+            if not merged_pdf_bytes or not merged_pdf_bytes.startswith(b"%PDF-"):
+                raise ValueError("Generated merged document is not a valid PDF.")
+
+            # Persist merged PDF in jms_merged_document in project database
+            proj.jms_merged_document = merged_pdf_bytes
+            proj.jms_merged_documents = merged_pdf_bytes
+
+            # Idempotently update status
+            proj.current_task = "JMS approval pending"
+            proj.project_status = "JMS Approval Pending"
+            self.project_db.commit()
+            self.project_db.refresh(proj)
+        except HTTPException:
+            self.project_db.rollback()
+            raise
+        except Exception as e:
+            self.project_db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"JMS submission failed during document merging/persistence: {str(e)}"
+            )
 
         return {
             "success": True,
@@ -751,7 +774,7 @@ class JmsService:
 
             # Strict scope check: Apply new logic only to rows whose task is exactly 'JMS to be process'
             current_task_norm = (proj.current_task or "").strip()
-            routed_tasks = ["WCC to be raise", "WCC to be submit", "To be submit", "PO Amend to be submit", "PO to be amend", "WCC to be raise / PO to be amend"]
+            routed_tasks = ["WCC to be raise", "WCC to be submit", "To be submit", "PO Amend to be submit", "PO to be amend", "WCC to be raise / PO to be amend", "WCC to be submit / PO Amend to be submit"]
             is_already_routed = current_task_norm in routed_tasks
 
             if current_task_norm != "JMS to be process" and not is_already_routed:
@@ -808,8 +831,8 @@ class JmsService:
                     amend_type = "Change QTY"
                     amend_qty = float(abs(po_diff))
                     po_amend_count += 1
-                elif jms_qty != Decimal("0"):
-                    # Priority 2: Non-zero JMS Qty -> WCC with 'WCC to be submit'
+                else:
+                    # Priority 2: PO Difference >= 0 -> WCC with 'WCC to be submit'
                     destination = "wcc"
                     task_status = "WCC to be submit"
                     item.po_amendment_type = "WCC to be submit"
@@ -817,13 +840,6 @@ class JmsService:
                     amend_type = None
                     amend_qty = None
                     wcc_count += 1
-                else:
-                    destination = "none"
-                    task_status = "JMS to be process"
-                    item.po_amendment_type = None
-                    item.po_amendment_qty = Decimal("0.00")
-                    amend_type = None
-                    amend_qty = None
 
                 routed_items.append(JmsRoutedItem(
                     lineItemId=item.project_po_line_item_id,
@@ -912,16 +928,16 @@ class JmsService:
             po_rate = Decimal(str(r.po_rate or 0))
             amt = Decimal(str(r.jms_amount if r.jms_amount is not None else (po_rate * jms_qty)))
 
-            # Include items with PO Difference >= 0 and non-zero JMS Qty specifically routed to WCC
+            # Include items with PO Difference >= 0 specifically routed to WCC
             # Priority: A row with negative PO Difference must route to PO Amend rather than both pages
-            is_wcc = (po_diff >= Decimal("0") and jms_qty != Decimal("0")) and (
-                (r.po_amendment_type in ["WCC to be raise", "WCC to be submit"]) or (
-                    r.po_amendment_type is None and proj and proj.current_task in ["WCC to be raise", "WCC to be submit", "WCC to be raise / PO to be amend", "WCC to be submit / PO Amend to be submit"]
+            is_wcc = (po_diff >= Decimal("0")) and (
+                (r.po_amendment_type in ["WCC to be raise", "WCC to be submit", "Rejected"]) or (
+                    r.po_amendment_type is None and proj and proj.current_task in ["WCC to be raise", "WCC to be submit", "WCC to be raise / PO to be amend", "WCC to be submit / PO Amend to be submit", "Approval Pending", "Rejected", "Amend Approved", "Amendment Approved"]
                 )
             )
             if is_wcc:
                 total_wcc_amount += amt
-                line_task = "WCC to be submit" if (r.po_amendment_type == "WCC to be submit" or (proj and "WCC to be submit" in (proj.current_task or ""))) else "WCC to be raise"
+                line_task = "WCC to be submit" if (r.po_amendment_type == "WCC to be submit" or (proj and ("WCC to be submit" in (proj.current_task or "") or (proj.current_task or "") in ["Amend Approved", "Amendment Approved"]))) else ("Rejected" if (r.po_amendment_type == "Rejected" or (proj and proj.current_task == "Rejected")) else "WCC to be raise")
                 wcc_items.append(WccLineItem(
                     id=r.project_po_line_item_id,
                     lineNo=str(r.line_number or ""),
@@ -944,7 +960,23 @@ class JmsService:
         project_id = proj.project_code if proj else f"PRJ-{po_no}"
         project_type = proj.project_type if proj else "New Build"
         sub_project_type = proj.sub_project_type if proj else "Civil"
-        task = "WCC to be submit" if (proj and "WCC to be submit" in (proj.current_task or "")) else (proj.current_task if proj and proj.current_task else "WCC to be raise")
+        curr_task = (proj.current_task or "").strip() if proj else ""
+        t_low = curr_task.lower()
+        if t_low in ["pending with indus", "approval pending"]:
+            task = "Approval Pending"
+        elif t_low == "rejected":
+            task = "Rejected"
+        elif t_low in ["amend approved", "amendment approved"]:
+            task = "WCC to be submit"
+        elif "approved" in t_low or "completed" in t_low:
+            task = curr_task
+        else:
+            task = "WCC to be submit"
+
+        has_merged = bool(proj and (proj.jms_merged_document or proj.jms_merged_documents or proj.po_amendment_merged_document or proj.po_amendment_merged_documents))
+        wcc_date_str = proj.wcc_submission_date.strftime("%d/%m/%Y") if (proj and proj.wcc_submission_date) else None
+        wcc_appr_str = proj.wcc_approved_date.strftime("%d/%m/%Y") if (proj and proj.wcc_approved_date) else (proj.po_amendment_completion_date.strftime("%d/%m/%Y") if (proj and proj.po_amendment_completion_date) else None)
+        wcc_amt_val = float(proj.wcc_amount) if (proj and proj.wcc_amount is not None) else (float(total_wcc_amount) if total_wcc_amount > 0 else (float(proj.po_amount) if (proj and proj.po_amount is not None) else 0.0))
 
         return WccPoDetailResponse(
             poNo=po_no,
@@ -956,6 +988,15 @@ class JmsService:
             subProjectType=sub_project_type,
             task=task,
             totalAmount=float(total_wcc_amount),
+            wccNo=proj.wcc_no if proj else None,
+            wccDate=wcc_date_str,
+            wccAmount=wcc_amt_val,
+            poRevisionNumber=proj.po_revision_number if proj else None,
+            wccApprovedDate=wcc_appr_str,
+            receiptNo=proj.receipt_no if proj else None,
+            receiptDate=proj.receipt_date.strftime("%d/%m/%Y") if (proj and proj.receipt_date) else None,
+            ersNo=proj.ers_no if proj else None,
+            hasMergedDocument=has_merged,
             lineItems=wcc_items
         )
 
@@ -980,11 +1021,9 @@ class JmsService:
             po_rate = Decimal(str(r.po_rate or 0))
             amt = Decimal(str(r.jms_amount if r.jms_amount is not None else (po_rate * jms_qty)))
 
-            # Include items with PO Difference < 0 specifically routed for amendment
-            # Priority: A row with negative PO Difference must route to PO Amend
             is_amend = (po_diff < Decimal("0")) and (
-                (r.po_amendment_type in ["Change QTY", "PO Amend to be submit"]) or (
-                    r.po_amendment_type is None and proj and proj.current_task in ["To be submit", "PO Amend to be submit", "PO to be amend", "WCC to be raise / PO to be amend", "WCC to be submit / PO Amend to be submit"]
+                (r.po_amendment_type in ["Change QTY", "PO Amend to be submit", "Approval Pending", "Pending with Indus", "Rejected"]) or (
+                    r.po_amendment_type is None and proj and proj.current_task in ["To be submit", "PO Amend to be submit", "PO to be amend", "WCC to be raise / PO to be amend", "WCC to be submit / PO Amend to be submit", "Approval Pending", "Rejected"]
                 )
             )
             if is_amend:
@@ -1011,9 +1050,28 @@ class JmsService:
         site_name = proj.site_name if proj else (site_id or "")
         project_id = proj.project_code if proj else f"PRJ-{po_no}"
         project_type = proj.project_type if proj else "New Build"
-        sub_project_type = proj.sub_project_type if proj else "Civil"
-        task = "PO Amend to be submit" if (proj and "PO Amend" in (proj.current_task or "")) else (proj.current_task if proj and proj.current_task else "To be submit")
-        po_status = "PO Amend to be submit" if (proj and "PO Amend" in (proj.po_status or "")) else (proj.po_status if proj and proj.po_status else "Amend Requested")
+        sub_project_type = proj.sub_project_type if proj else "Anchor"
+        curr_task = (proj.current_task or "").strip() if proj else ""
+        t_low = curr_task.lower()
+        if t_low in ["pending with indus", "approval pending"]:
+            task = "Approval Pending"
+            po_status = "Under Review"
+        elif t_low == "rejected":
+            task = "Rejected"
+            po_status = "Rejected"
+        elif proj and proj.po_amendment_completion_status:
+            task = f"Amendment {proj.po_amendment_completion_status}"
+            po_status = "Amended"
+        elif "approved" in t_low or "completed" in t_low:
+            task = curr_task
+            po_status = "Approved"
+        else:
+            task = "PO Amend to be submit"
+            po_status = "PO Amend to be submit" if (proj and "PO Amend" in (proj.po_status or "")) else (proj.po_status if proj and proj.po_status else "Amend Requested")
+
+        has_merged = bool(proj and (proj.jms_merged_document or proj.jms_merged_documents or proj.po_amendment_merged_document or proj.po_amendment_merged_documents))
+        comp_date_str = proj.po_amendment_completion_date.strftime("%d/%m/%Y") if (proj and proj.po_amendment_completion_date) else None
+        ref_id_val = (proj.po_reference_number or proj.po_amendment_ref_id) if proj else None
 
         return PoAmendPoDetailResponse(
             poNo=po_no,
@@ -1026,5 +1084,374 @@ class JmsService:
             task=task,
             poStatus=po_status,
             totalAmount=float(total_amend_amount),
+            poAmendmentRefId=ref_id_val,
+            poRevisionNumber=proj.po_revision_number if proj else None,
+            poAmendmentCompletionDate=comp_date_str,
+            hasMergedDocument=has_merged,
             lineItems=amend_items
         )
+
+    def submit_po_amend_reference(self, po_no: str, site_id: Optional[str] = None, ref_id: str = "") -> Dict[str, Any]:
+        """
+        Save PO Reference Number to telecom_project and transition task to 'Approval Pending'.
+        """
+        ref_clean = (ref_id or "").strip()
+        if not ref_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="PO Reference Number / Ref. ID is required."
+            )
+
+        proj = self._get_project_context(po_no, site_id)
+        if not proj:
+            proj = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
+            if not proj:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Project record for PO #{po_no} not found."
+                )
+
+        proj.po_amendment_ref_id = ref_clean
+        proj.po_reference_number = ref_clean
+        proj.current_task = "Approval Pending"
+        proj.project_status = "Approval Pending"
+        proj.po_status = "Under Review"
+
+        # Update line items scoped to this PO
+        lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+        if site_id:
+            lines = lines.filter(TelecomIndusPo.site_id == site_id)
+        for item in lines.all():
+            if item.po_amendment_type in ["PO Amend to be submit", "Rejected"]:
+                item.po_amendment_type = "Approval Pending"
+
+        self.project_db.commit()
+        self.project_db.refresh(proj)
+
+        return {
+            "success": True,
+            "message": f"PO Reference Number '{ref_clean}' saved successfully and task changed to 'Approval Pending'.",
+            "poNo": po_no,
+            "siteId": proj.site_id,
+            "refId": ref_clean,
+            "poAmendmentRefId": ref_clean,
+            "task": proj.current_task,
+            "status": proj.project_status
+        }
+
+    def submit_wcc_details(
+        self,
+        po_no: str,
+        site_id: Optional[str] = None,
+        wcc_no: str = "",
+        wcc_date: str = "",
+        wcc_amount: float = 0.0
+    ) -> Dict[str, Any]:
+        """
+        Save WCC Number, WCC Date, and WCC Amount to telecom_project and transition task to 'Approval Pending'.
+        """
+        wcc_no_clean = (wcc_no or "").strip()
+        if not wcc_no_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="WCC Number is required."
+            )
+
+        wcc_date_clean = (wcc_date or "").strip()
+        if not wcc_date_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="WCC Date is required."
+            )
+
+        norm_date = re.sub(r"\s*([/\-.])\s*", r"\1", wcc_date_clean)
+        parsed_date = None
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%d.%m.%Y"):
+            try:
+                parsed_date = datetime.strptime(norm_date, fmt).date()
+                break
+            except ValueError:
+                continue
+
+        if not parsed_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid WCC Date format '{wcc_date_clean}'. Expected DD/MM/YYYY or YYYY-MM-DD."
+            )
+
+        try:
+            dec_amount = Decimal(str(wcc_amount))
+            if dec_amount <= 0:
+                raise ValueError()
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="WCC Amount must be a valid positive number."
+            )
+
+        proj = self._get_project_context(po_no, site_id)
+        if not proj:
+            proj = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
+            if not proj:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Project record for PO #{po_no} not found."
+                )
+
+        proj.wcc_no = wcc_no_clean
+        proj.wcc_submission_date = parsed_date
+        proj.wcc_amount = dec_amount
+        proj.current_task = "Approval Pending"
+        proj.project_status = "Approval Pending"
+
+        # Update line items scoped to this PO
+        lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+        if site_id:
+            lines = lines.filter(TelecomIndusPo.site_id == site_id)
+        for item in lines.all():
+            if item.po_amendment_type in ["WCC to be submit", "Rejected"]:
+                item.po_amendment_type = "Approval Pending"
+
+        self.project_db.commit()
+        self.project_db.refresh(proj)
+
+        return {
+            "success": True,
+            "message": f"WCC details saved successfully and task changed to 'Approval Pending'.",
+            "poNo": po_no,
+            "siteId": proj.site_id,
+            "wccNo": wcc_no_clean,
+            "wccDate": str(parsed_date),
+            "wccAmount": float(dec_amount),
+            "task": proj.current_task,
+            "status": proj.project_status
+        }
+
+    def submit_wcc_receipt(
+        self,
+        po_no: str,
+        site_id: Optional[str] = None,
+        receipt_no: str = "",
+        receipt_date: str = "",
+        ers_no: Optional[str] = ""
+    ) -> Dict[str, Any]:
+        """
+        Save Receipt No, Receipt Date, and ERS No to telecom_project and transition task to 'WCC Approved'.
+        """
+        rec_clean = (receipt_no or "").strip()
+        if not rec_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Receipt No is required."
+            )
+
+        date_clean = (receipt_date or "").strip()
+        if not date_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Receipt Date is required."
+            )
+
+        norm_date = re.sub(r"\s*([/\-.])\s*", r"\1", date_clean)
+        parsed_date = None
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%d.%m.%Y"):
+            try:
+                parsed_date = datetime.strptime(norm_date, fmt).date()
+                break
+            except ValueError:
+                continue
+
+        if not parsed_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid Receipt Date format '{date_clean}'. Expected DD/MM/YYYY or YYYY-MM-DD."
+            )
+
+        proj = self._get_project_context(po_no, site_id)
+        if not proj:
+            proj = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
+            if not proj:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Project record for PO #{po_no} not found."
+                )
+
+        proj.receipt_no = rec_clean
+        proj.receipt_date = parsed_date
+        proj.ers_no = (ers_no or "").strip()
+        proj.wcc_approved_date = parsed_date
+        proj.current_task = "WCC Approved"
+        proj.project_status = "WCC Approved"
+
+        lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+        if site_id:
+            lines = lines.filter(TelecomIndusPo.site_id == site_id)
+        for item in lines.all():
+            po_qty = Decimal(str(item.po_qty or 0))
+            jms_qty = Decimal(str(item.jms_qty if item.jms_qty is not None else po_qty))
+            po_diff = po_qty - jms_qty
+            if po_diff >= Decimal("0"):
+                item.po_amendment_type = "WCC Approved"
+
+        self.project_db.commit()
+        self.project_db.refresh(proj)
+
+        return {
+            "success": True,
+            "message": f"Receipt details saved successfully for PO #{po_no}.",
+            "poNo": po_no,
+            "siteId": proj.site_id,
+            "receiptNo": rec_clean,
+            "receiptDate": str(parsed_date),
+            "ersNo": proj.ers_no,
+            "task": proj.current_task,
+            "status": proj.project_status
+        }
+
+    def reject_po_workflow_row(
+        self,
+        po_no: str,
+        site_id: Optional[str] = None,
+        workflow: str = "po_amend"
+    ) -> Dict[str, Any]:
+        """
+        Rejects only the selected PO row, transitions task to 'Rejected',
+        and removes previously generated merged PDF from jms_merged_document.
+        Ensures unrelated PO rows and projects remain intact.
+        """
+        proj = self._get_project_context(po_no, site_id)
+        if not proj:
+            proj = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
+            if not proj:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Project record for PO #{po_no} not found."
+                )
+
+        # 1. Reject task & status
+        proj.current_task = "Rejected"
+        proj.project_status = "Rejected"
+        proj.po_status = "Rejected"
+
+        # 2. Clear jms_merged_document and po_amendment_merged_document scoped to this PO
+        proj.jms_merged_document = None
+        proj.jms_merged_documents = None
+        proj.po_amendment_merged_document = None
+        proj.po_amendment_merged_documents = None
+
+        # 3. Reset line items approval status scoped to this workflow
+        norm_wf = (workflow or "").strip().lower()
+        lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+        if site_id:
+            lines = lines.filter(TelecomIndusPo.site_id == site_id)
+        for item in lines.all():
+            po_qty = Decimal(str(item.po_qty or 0))
+            jms_qty = Decimal(str(item.jms_qty if item.jms_qty is not None else po_qty))
+            po_diff = po_qty - jms_qty
+            if norm_wf == "wcc":
+                if po_diff >= Decimal("0"):
+                    item.jms_status = "Not Approved"
+                    item.po_amendment_type = "Rejected"
+            elif norm_wf in ["po_amend", "po amend"]:
+                if po_diff < Decimal("0"):
+                    item.jms_status = "Not Approved"
+                    item.po_amendment_type = "Rejected"
+            else:
+                item.jms_status = "Not Approved"
+                item.po_amendment_type = "Rejected"
+
+        self.project_db.commit()
+        self.project_db.refresh(proj)
+
+        return {
+            "success": True,
+            "message": f"PO #{po_no} rejected successfully. Merged document removed.",
+            "poNo": po_no,
+            "siteId": proj.site_id,
+            "task": "Rejected",
+            "status": "Rejected"
+        }
+
+    def submit_amendment_status(
+        self,
+        po_no: str,
+        site_id: Optional[str] = None,
+        workflow: str = "po_amend",
+        revision_no: str = "",
+        approved_date: str = ""
+    ) -> Dict[str, Any]:
+        """
+        Capture Revision Number and Approved Date, save both values,
+        and transition task according to existing approval workflow.
+        """
+        rev_clean = (revision_no or "").strip()
+        if not rev_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Revision Number is required."
+            )
+        if len(rev_clean) > 50:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Revision Number cannot exceed 50 characters."
+            )
+
+        appr_date_clean = (approved_date or "").strip()
+        if not appr_date_clean:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Approved Date is required."
+            )
+
+        norm_appr_date = re.sub(r"\s*([/\-.])\s*", r"\1", appr_date_clean)
+        parsed_date = None
+        for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%d.%m.%Y"):
+            try:
+                parsed_date = datetime.strptime(norm_appr_date, fmt).date()
+                break
+            except ValueError:
+                continue
+
+        if not parsed_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid Approved Date format '{appr_date_clean}'. Expected DD/MM/YYYY or YYYY-MM-DD."
+            )
+
+        proj = self._get_project_context(po_no, site_id)
+        if not proj:
+            proj = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
+            if not proj:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Project record for PO #{po_no} not found."
+                )
+
+        proj.po_revision_number = rev_clean
+        proj.po_amendment_completion_date = parsed_date
+        proj.po_amendment_completion_status = "Approved"
+
+        norm_wf = (workflow or "").strip().lower()
+        if norm_wf == "wcc":
+            proj.wcc_approved_date = parsed_date
+            proj.current_task = "WCC Approved"
+            proj.project_status = "WCC Approved"
+        else:
+            proj.current_task = "Amend Approved"
+            proj.project_status = "Amend Approved"
+            proj.po_status = "Approved"
+
+        self.project_db.commit()
+        self.project_db.refresh(proj)
+
+        return {
+            "success": True,
+            "message": f"PO #{po_no} amendment status saved (Rev: {rev_clean}, Date: {parsed_date}). Task: '{proj.current_task}'.",
+            "poNo": po_no,
+            "siteId": proj.site_id,
+            "revisionNo": rev_clean,
+            "approvedDate": str(parsed_date),
+            "task": proj.current_task,
+            "status": proj.project_status
+        }
+

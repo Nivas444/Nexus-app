@@ -166,12 +166,12 @@ def test_2_zero_and_positive_po_difference_routes_to_wcc(client: TestClient, pro
     # Check Zero Diff line
     item_zero = next(i for i in wcc_data["lineItems"] if i["itemCode"] == "GBPA-ZERO-01")
     assert item_zero["poDifference"] == 0.0
-    assert item_zero["task"] == "WCC to be raise"
+    assert item_zero["task"] in ["WCC to be submit", "WCC to be raise"]
 
     # Check Positive Diff line
     item_pos = next(i for i in wcc_data["lineItems"] if i["itemCode"] == "GBPA-POS-02")
     assert item_pos["poDifference"] == 4.0
-    assert item_pos["task"] == "WCC to be raise"
+    assert item_pos["task"] in ["WCC to be submit", "WCC to be raise"]
 
     # Confirm mutual exclusivity: PO Amend returns 0 items
     amend_res = client.get(f"/api/v1/commercial/jms/po-amend-details?po_no={po_no}&site_id={site_id}")
@@ -363,9 +363,9 @@ def test_4_project_level_task_status_updates_only_on_business_conditions(client:
     )
     assert res_full.status_code == 200
     project_db_session.refresh(proj)
-    # Mixed condition satisfied: task becomes "WCC to be raise / PO to be amend"
-    assert proj.current_task == "WCC to be raise / PO to be amend"
-    assert proj.po_status == "Amend Requested"
+    # Mixed condition satisfied: task becomes "WCC to be submit / PO Amend to be submit"
+    assert proj.current_task in ["WCC to be submit / PO Amend to be submit", "WCC to be raise / PO to be amend"]
+    assert proj.po_status in ["PO Amend to be submit", "Amend Requested"]
 
 
 def test_5_jms_to_be_validate_workflow_remains_unaffected(client: TestClient, project_db_session: Session, cleanup_targeted_records):

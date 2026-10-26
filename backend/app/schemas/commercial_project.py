@@ -213,6 +213,15 @@ class WccPoDetailResponse(BaseModel):
     subProjectType: Optional[str] = None
     task: str
     totalAmount: float
+    wccNo: Optional[str] = None
+    wccDate: Optional[str] = None
+    wccAmount: Optional[float] = None
+    poRevisionNumber: Optional[str] = None
+    wccApprovedDate: Optional[str] = None
+    receiptNo: Optional[str] = None
+    receiptDate: Optional[str] = None
+    ersNo: Optional[str] = None
+    hasMergedDocument: bool = False
     lineItems: List[WccLineItem]
 
 
@@ -244,7 +253,67 @@ class PoAmendPoDetailResponse(BaseModel):
     task: str
     poStatus: str
     totalAmount: float
+    poAmendmentRefId: Optional[str] = None
+    poRevisionNumber: Optional[str] = None
+    poAmendmentCompletionDate: Optional[str] = None
+    hasMergedDocument: bool = False
     lineItems: List[PoAmendLineItem]
+
+
+class PoAmendSubmitReferenceRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+    refId: Optional[str] = None
+    poAmendmentRefId: Optional[str] = None
+
+    def get_ref_id(self) -> str:
+        ref = self.refId or self.poAmendmentRefId or ""
+        return ref.strip()
+
+
+class WccSubmitDetailsRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+    wccNo: str
+    wccDate: str
+    wccAmount: float
+
+
+class WccSubmitReceiptRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+    receiptNo: str
+    receiptDate: str
+    ersNo: Optional[str] = None
+
+
+class SubmitAmendmentStatusRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+    workflow: Optional[str] = "po_amend"
+    revisionNo: str
+    approvedDate: str
+
+
+class PoRowRejectRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+    workflow: Optional[str] = "po_amend"
+
+
+class PdfProcessRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+
+
+class PdfProcessResponse(BaseModel):
+    success: bool
+    message: str
+    poNo: str
+    siteId: Optional[str] = None
+    fileName: str
+    totalPages: int
+
 
 
 class SelectWorksSubmitRequest(BaseModel):

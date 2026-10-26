@@ -22,7 +22,14 @@ from app.schemas.commercial_project import (
     WccPoDetailResponse,
     PoAmendPoDetailResponse,
     SelectWorksSubmitRequest,
-    SelectWorksSubmitResponse
+    SelectWorksSubmitResponse,
+    PoAmendSubmitReferenceRequest,
+    WccSubmitDetailsRequest,
+    WccSubmitReceiptRequest,
+    SubmitAmendmentStatusRequest,
+    PoRowRejectRequest,
+    PdfProcessRequest,
+    PdfProcessResponse
 )
 
 router = APIRouter(prefix="/commercial/jms", tags=["Commercial Manager - JMS Workflow"])
@@ -257,114 +264,204 @@ def submit_select_works(
         )
 
 
+@router.post("/po-amend/submit-reference", summary="Submit PO Reference Number and transition task to Approval Pending")
+def submit_po_amend_reference(
+    payload: PoAmendSubmitReferenceRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    ref_val = payload.get_ref_id()
+    if not ref_val:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="PO Reference Number cannot be empty."
+        )
+    service = JmsService(project_db)
+    return service.submit_po_amend_reference(payload.poNo, payload.siteId, ref_val)
+
+
+@router.post("/wcc/submit-details", summary="Submit WCC Details and transition task to Approval Pending")
+def submit_wcc_details(
+    payload: WccSubmitDetailsRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    service = JmsService(project_db)
+    return service.submit_wcc_details(
+        payload.poNo,
+        payload.siteId,
+        payload.wccNo,
+        payload.wccDate,
+        payload.wccAmount
+    )
+
+
+@router.post("/wcc/submit-receipt", summary="Submit Receipt No, Receipt Date, and ERS No for WCC")
+def submit_wcc_receipt(
+    payload: WccSubmitReceiptRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    service = JmsService(project_db)
+    return service.submit_wcc_receipt(
+        payload.poNo,
+        payload.siteId,
+        payload.receiptNo,
+        payload.receiptDate,
+        payload.ersNo
+    )
+
+
+@router.post("/reject", summary="Reject PO row and remove merged PDF from database")
+def reject_po_workflow_row(
+    payload: PoRowRejectRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    service = JmsService(project_db)
+    return service.reject_po_workflow_row(payload.poNo, payload.siteId, payload.workflow or "po_amend")
+
+
+@router.post("/submit-amendment-status", summary="Submit Revision Number and Approved Date")
+def submit_amendment_status(
+    payload: SubmitAmendmentStatusRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    service = JmsService(project_db)
+    return service.submit_amendment_status(
+        payload.poNo,
+        payload.siteId,
+        payload.workflow or "po_amend",
+        payload.revisionNo,
+        payload.approvedDate
+    )
+
+
+@router.post("/pdf/process", response_model=PdfProcessResponse, summary="Process/regenerate 3-page certificate and merge with additional documents")
+def process_pdf_regeneration(
+    payload: PdfProcessRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    pdf_service = WccPdfService(project_db)
+    try:
+        res = pdf_service.process_pdf_regeneration(payload.poNo, payload.siteId)
+        return PdfProcessResponse(
+            success=True,
+            message=res.get("message", "PDF regenerated and persisted successfully."),
+            poNo=payload.poNo,
+            siteId=payload.siteId,
+            fileName=res.get("fileName", f"WCC_Merged_{payload.poNo}.pdf"),
+            totalPages=res.get("totalPages", 3)
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"PDF processing failed: {str(e)}"
+        )
+
+
 @router.get("/pdf/download", summary="Download generated WCC / PO Amend PDF")
 def download_generated_pdf(
     po_no: str = Query(..., description="PO Number"),
     site_id: Optional[str] = Query(None, description="Site ID"),
+    doc_type: Optional[str] = Query(None, description="Document type: 'jms' or 'wcc' / 'po_amend'"),
     project_db: Session = Depends(get_project_db),
     _auth: bool = Depends(verify_jms_access)
 ):
     """
-    Downloads the generated WCC / PO Amend PDF for the given PO and site.
-    Ensures the PDF contains the 3 generated pages (Annexure, BOQ, Work Completion Certificate)
-    merged with all uploaded documents in the Documents tab of JMS.
+    Downloads the persisted binary PDF from PostgreSQL database:
+    - If doc_type == 'jms': serves jms_merged_document.
+    - Otherwise (default): serves po_amendment_merged_document (Annexure, BOQ, WCC + JMS documents).
+    Ensures application/pdf content type and valid PDF bytes.
+    If the document was rejected and not yet processed, returns 404 without serving stale document.
     """
-    import os
-    import base64
-    from datetime import date
-    from app.models.commercial_project import ProjectDocument, TelecomProject
+    from app.models.commercial_project import TelecomProject
     from app.services.wcc_pdf_service import WccPdfService
 
     pdf_service = WccPdfService(project_db)
+
+    proj_q = project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no)
+    if site_id:
+        proj_q = proj_q.filter(TelecomProject.site_id == site_id)
+    proj = proj_q.first()
+    if not proj:
+        proj = project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
+
+    # Prevent exposing stale document if PO is in Rejected state
+    if proj and proj.current_task == "Rejected":
+        raw_po = proj.po_amendment_merged_document or proj.po_amendment_merged_documents
+        raw_jms = proj.jms_merged_document or proj.jms_merged_documents
+        if not raw_po and not raw_jms:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"PO #{po_no} is currently Rejected. Please click 'PDF Process' to generate the updated document before download."
+            )
+
     pdf_bytes: Optional[bytes] = None
-    file_name = "fresh_verified_merged_wcc.pdf"
+    file_name = f"WCC_Merged_{po_no}.pdf"
 
-    # Priority 1: Serve fresh_verified_merged_wcc.pdf directly from disk
-    fresh_wcc_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../fresh_verified_merged_wcc.pdf"))
-    if not os.path.exists(fresh_wcc_path):
-        fresh_wcc_path = "E:/Nexus_WebUI/backend/fresh_verified_merged_wcc.pdf"
+    if (doc_type or "").lower() == "jms":
+        file_name = f"JMS_Merged_{po_no}.pdf"
+        if proj:
+            raw_jms = proj.jms_merged_document or proj.jms_merged_documents
+            if raw_jms:
+                pdf_bytes, _ = pdf_service._decode_document_content(raw_jms)
 
-    if os.path.exists(fresh_wcc_path):
-        try:
-            with open(fresh_wcc_path, "rb") as f:
-                pdf_bytes = f.read()
-            file_name = "fresh_verified_merged_wcc.pdf"
-        except Exception:
-            pdf_bytes = None
+        if not pdf_bytes:
+            # Fall back to merging uploaded JMS documents live
+            pdf_bytes = pdf_service.merge_uploaded_jms_documents(
+                po_no=po_no,
+                site_id=site_id or (proj.site_id if proj else None),
+                proj=proj
+            )
+            if proj and pdf_bytes:
+                try:
+                    proj.jms_merged_document = pdf_bytes
+                    proj.jms_merged_documents = pdf_bytes
+                    project_db.commit()
+                except Exception:
+                    project_db.rollback()
+    else:
+        # Default: WCC / PO Amendment merged document
+        if proj:
+            raw_po = proj.po_amendment_merged_document or proj.po_amendment_merged_documents
+            if raw_po:
+                pdf_bytes, _ = pdf_service._decode_document_content(raw_po)
+            elif proj.jms_merged_document or proj.jms_merged_documents:
+                pdf_bytes, _ = pdf_service._decode_document_content(
+                    proj.jms_merged_document or proj.jms_merged_documents
+                )
 
-    if not pdf_bytes:
-        # Fall back to live generation if fresh verified file not on disk
-        file_name = f"WCC_Merged_{po_no}.pdf"
-        try:
-            three_page = pdf_service.generate_three_page_wcc_pdf(po_no, site_id)
-            pdf_bytes = pdf_service.merge_with_additional_documents(three_page, po_no, site_id)
-        except Exception as e:
-            # Fallback to existing persisted document if live generation encounters an error
-            doc_query = project_db.query(ProjectDocument).filter(ProjectDocument.po_no == po_no)
-            if site_id:
-                doc_query = doc_query.filter(ProjectDocument.site_id == site_id)
-            doc = doc_query.filter(
-                ProjectDocument.document_number.in_(["WCC Merged Document", "WCC Certificate"])
-            ).order_by(ProjectDocument.project_document_id.desc()).first()
-
-            if doc and doc.documents:
-                content = doc.documents
-                if "base64," in content:
-                    b64_str = content.split("base64,", 1)[1]
-                    pdf_bytes = base64.b64decode(b64_str)
-                else:
-                    try:
-                        pdf_bytes = base64.b64decode(content)
-                    except Exception:
-                        pdf_bytes = content.encode("utf-8")
-                file_name = doc.document_name or file_name
-
-            if not pdf_bytes:
+        if not pdf_bytes and proj and proj.current_task != "Rejected":
+            # Live generate and merge if not yet generated and not rejected
+            try:
+                res = pdf_service.process_select_works_submission(
+                    po_no=po_no,
+                    site_id=site_id or (proj.site_id if proj else None)
+                )
+                if proj:
+                    project_db.refresh(proj)
+                    raw_po = proj.po_amendment_merged_document or proj.po_amendment_merged_documents
+                    if raw_po:
+                        pdf_bytes, _ = pdf_service._decode_document_content(raw_po)
+            except Exception as e:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"Could not generate or retrieve PDF for PO #{po_no}: {str(e)}"
                 )
 
-    # Persist the merged document into database idempotently
-    try:
-        merged_b64 = base64.b64encode(pdf_bytes).decode("utf-8")
-        merged_data_uri = f"data:application/pdf;base64,{merged_b64}"
-
-        proj_q = project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no)
-        if site_id:
-            proj_q = proj_q.filter(TelecomProject.site_id == site_id)
-        proj = proj_q.first()
-
-        actual_site = site_id or (proj.site_id if proj else "")
-        doc_merged = project_db.query(ProjectDocument).filter(
-            ProjectDocument.po_no == po_no,
-            ProjectDocument.site_id == actual_site,
-            ProjectDocument.document_number == "WCC Merged Document"
-        ).first()
-
-        if not doc_merged:
-            doc_merged = ProjectDocument(
-                company_name=proj.company_name if proj else "Nexus",
-                customer_name=proj.customer_name if proj else "Indus Towers Ltd",
-                po_no=po_no,
-                site_id=actual_site,
-                date=date.today(),
-                document_name=file_name,
-                document_number="WCC Merged Document",
-                document_details="Final Merged WCC PDF (3-Page Certificate + Uploaded JMS Documents)",
-                documents=merged_data_uri
-            )
-            project_db.add(doc_merged)
-        else:
-            doc_merged.documents = merged_data_uri
-            doc_merged.date = date.today()
-
-        if proj:
-            proj.jms_merged_documents = merged_data_uri
-
-        project_db.commit()
-    except Exception:
-        project_db.rollback()
+    if not pdf_bytes or not pdf_bytes.startswith(b"%PDF-"):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No valid PDF document found or generated for PO #{po_no}."
+        )
 
     return Response(
         content=pdf_bytes,
@@ -373,6 +470,22 @@ def download_generated_pdf(
             "Content-Disposition": f'attachment; filename="{file_name}"',
             "Access-Control-Expose-Headers": "Content-Disposition"
         }
+    )
+
+
+@router.get("/jms/download", summary="Download merged JMS PDF")
+def download_jms_pdf(
+    po_no: str = Query(..., description="PO Number"),
+    site_id: Optional[str] = Query(None, description="Site ID"),
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    return download_generated_pdf(
+        po_no=po_no,
+        site_id=site_id,
+        doc_type="jms",
+        project_db=project_db,
+        _auth=_auth
     )
 
 

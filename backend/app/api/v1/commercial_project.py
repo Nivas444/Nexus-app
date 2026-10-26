@@ -118,3 +118,15 @@ async def bulk_upload_commercial_po_amend(
     service = CommercialProjectService(db)
     return service.process_po_amend_bulk_upload(content, file.filename or "")
 
+
+@router.get("/wcc/projects", response_model=CommercialProjectListResponse, summary="List WCC Projects from telecom_project")
+def list_wcc_projects(
+    db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Retrieves real Project records from PostgreSQL table `telecom_project` in `Nexus_Project DB` for WCC workflow.
+    """
+    service = CommercialProjectService(db)
+    return service.get_wcc_projects_list()
+

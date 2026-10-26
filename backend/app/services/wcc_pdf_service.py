@@ -1451,22 +1451,28 @@ class WccPdfService:
         return pdf_buffer.getvalue()
 
     @staticmethod
-    def _decode_document_content(content: Optional[str]) -> Tuple[Optional[bytes], Optional[str]]:
-        """Decodes stored document content (data URI or raw base64). Returns (bytes, mime-type-if-known)."""
+    def _decode_document_content(content: Any) -> Tuple[Optional[bytes], Optional[str]]:
+        """Decodes stored document content (bytes, memoryview, data URI or raw base64). Returns (bytes, mime-type-if-known)."""
         if not content:
             return None, None
+        if isinstance(content, memoryview):
+            return bytes(content), "application/pdf"
+        if isinstance(content, bytes):
+            return content, "application/pdf"
         mime = None
-        if content.startswith("data:"):
-            mime = content[5:].split(";", 1)[0].split(",", 1)[0] or None
-        if "base64," in content:
+        if isinstance(content, str):
+            if content.startswith("data:"):
+                mime = content[5:].split(";", 1)[0].split(",", 1)[0] or None
+            if "base64," in content:
+                try:
+                    return base64.b64decode(content.split("base64,", 1)[1]), mime
+                except Exception:
+                    return None, mime
             try:
-                return base64.b64decode(content.split("base64,", 1)[1]), mime
+                return base64.b64decode(content), mime
             except Exception:
-                return None, mime
-        try:
-            return base64.b64decode(content), mime
-        except Exception:
-            return content.encode("utf-8"), mime
+                return content.encode("utf-8"), mime
+        return None, None
 
     @staticmethod
     def _is_supported_image(raw_bytes: bytes) -> bool:
@@ -2310,7 +2316,8 @@ class WccPdfService:
         other_jms_tasks = [
             "jms approval pending", "jms approved", "po to be amend", "po amend to be submit",
             "wcc to be raise", "wcc to be submit", "to be submit", "invoice to be raise",
-            "wcc to be raise / po to be amend"
+            "wcc to be raise / po to be amend", "wcc to be submit / po amend to be submit",
+            "approval pending"
         ]
         if current_task_val and current_task_val.lower() in other_jms_tasks and current_task_val.lower() != "jms to be process":
             all_lines = []
@@ -3712,6 +3719,7 @@ class WccPdfService:
             token = norm.split()[0]
             uploaded_rec = self.project_db.query(ProjectDocument).filter(
                 ProjectDocument.po_no == po_no,
+                ~ProjectDocument.document_number.in_(["WCC Certificate", "WCC Merged Document"]),
                 or_(
                     ProjectDocument.document_number.ilike(f"%{token}%"),
                     ProjectDocument.document_name.ilike(f"%{token}%")
@@ -3721,6 +3729,26 @@ class WccPdfService:
                 raw_bytes, _ = self._decode_document_content(uploaded_rec.documents)
                 if raw_bytes:
                     return self.fit_pdf_into_nexus_template(raw_bytes, title=cat_title, master_assets=master_assets)
+
+            if norm == "JMS" and proj and (proj.jms_merged_document or proj.jms_merged_documents):
+                raw_bytes = proj.jms_merged_document or proj.jms_merged_documents
+                raw_bytes = bytes(raw_bytes) if isinstance(raw_bytes, memoryview) else raw_bytes
+                if raw_bytes:
+                    try:
+                        r = PdfReader(io.BytesIO(raw_bytes))
+                        first_text = (r.pages[0].extract_text() or "").upper() if r.pages else ""
+                        if "ANNEXURE" not in first_text and "WORK COMPLETION CERTIFICATE" not in first_text and len(r.pages) <= 5:
+                            return self.fit_pdf_into_nexus_template(raw_bytes, title=cat_title, master_assets=master_assets)
+                        for page in r.pages:
+                            txt = (page.extract_text() or "").upper()
+                            if "JMS" in txt and "ANNEXURE" not in txt and "WORK COMPLETION" not in txt:
+                                wr = PdfWriter()
+                                wr.add_page(page)
+                                buf = io.BytesIO()
+                                wr.write(buf)
+                                return buf.getvalue()
+                    except Exception:
+                        pass
 
             if os.path.exists(DEFAULT_ADDITIONAL_DOC_PATH):
                 return self.fit_pdf_file_into_nexus_template(DEFAULT_ADDITIONAL_DOC_PATH, title=cat_title, master_assets=master_assets)
@@ -4544,6 +4572,91 @@ class WccPdfService:
         out_buffer.seek(0)
         return out_buffer.getvalue()
 
+    def merge_uploaded_jms_documents(
+        self,
+        po_no: str,
+        site_id: Optional[str] = None,
+        proj: Optional[TelecomProject] = None
+    ) -> bytes:
+        """
+        Merges documents uploaded in the JMS Documents tab into one single PDF.
+        If no uploaded documents exist, generates standard JMS document pages.
+        Idempotent: always produces a clean, non-duplicated merged PDF.
+        """
+        writer = PdfWriter()
+
+        doc_query = self.project_db.query(ProjectDocument).filter(ProjectDocument.po_no == po_no)
+        docs = []
+        if site_id:
+            site_docs = doc_query.filter(ProjectDocument.site_id == site_id).filter(
+                ~ProjectDocument.document_number.in_(["WCC Certificate", "WCC Merged Document"])
+            ).order_by(ProjectDocument.project_document_id.asc()).all()
+            if site_docs:
+                docs = site_docs
+        
+        if not docs:
+            docs = doc_query.filter(
+                ~ProjectDocument.document_number.in_(["WCC Certificate", "WCC Merged Document"])
+            ).order_by(ProjectDocument.project_document_id.asc()).all()
+
+        added_pages_count = 0
+        for d in docs:
+            doc_name = d.document_name or f"Document_{d.project_document_id}"
+            doc_type = d.document_number or "JMS Uploaded Document"
+            raw_bytes, mime = self._decode_document_content(d.documents)
+            pages_to_add = []
+            reason: Optional[str] = None
+
+            if not raw_bytes:
+                reason = "No file content is stored for this document."
+            elif raw_bytes.startswith(b"%PDF-"):
+                try:
+                    doc_reader = PdfReader(io.BytesIO(raw_bytes))
+                    pages_to_add = list(doc_reader.pages)
+                    if not pages_to_add:
+                        reason = "PDF contains no pages."
+                except Exception as exc:
+                    pages_to_add = []
+                    reason = f"PDF could not be read ({type(exc).__name__})."
+            elif self._is_supported_image(raw_bytes):
+                try:
+                    img_reader = PdfReader(io.BytesIO(self._render_image_as_plain_page(raw_bytes)))
+                    pages_to_add = list(img_reader.pages)
+                except Exception as exc:
+                    pages_to_add = []
+                    reason = f"Image could not be embedded ({type(exc).__name__})."
+            else:
+                reason = f"Unsupported file format: {self._describe_format(doc_name, mime, raw_bytes)}. Supported: PDF and images."
+
+            if reason:
+                logger.warning(
+                    "JMS merge (PO %s, site %s): document %s '%s' not embedded - %s",
+                    po_no, site_id, d.project_document_id, doc_name, reason
+                )
+                notice_reader = PdfReader(io.BytesIO(self._render_unsupported_notice_page(doc_name, doc_type, reason)))
+                pages_to_add = list(notice_reader.pages)
+
+            for page in pages_to_add:
+                writer.add_page(page)
+                added_pages_count += 1
+
+        if added_pages_count == 0:
+            if not proj:
+                proj_q = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no)
+                if site_id:
+                    proj_q = proj_q.filter(TelecomProject.site_id == site_id)
+                proj = proj_q.first()
+            master_assets = self._get_master_company_assets()
+            jms_std_bytes = self._generate_jms_document_pages(po_no, site_id, proj, master_assets)
+            jms_reader = PdfReader(io.BytesIO(jms_std_bytes))
+            for page in jms_reader.pages:
+                writer.add_page(page)
+
+        out_buffer = io.BytesIO()
+        writer.write(out_buffer)
+        out_buffer.seek(0)
+        return out_buffer.getvalue()
+
     def process_select_works_submission(
         self,
         po_no: str,
@@ -4565,10 +4678,12 @@ class WccPdfService:
         if not proj:
             raise ValueError(f"Project for PO #{po_no} not found.")
 
-        # 1. Generate 3-page PDF
+        actual_site_id = site_id or proj.site_id or ""
+
+        # 1. Generate 3-page PDF (Annexure, BOQ, Work Completion Certificate)
         three_page_pdf = self.generate_three_page_wcc_pdf(po_no, site_id, selected_works)
 
-        # 2. Merge with all 16 additional document categories
+        # 2. Merge with all 16 additional document categories in exact specified order
         final_merged_pdf = self.merge_with_additional_documents(three_page_pdf, po_no, site_id)
 
         merged_b64 = base64.b64encode(final_merged_pdf).decode("utf-8")
@@ -4576,8 +4691,6 @@ class WccPdfService:
 
         cert_b64 = base64.b64encode(three_page_pdf).decode("utf-8")
         cert_data_uri = f"data:application/pdf;base64,{cert_b64}"
-
-        actual_site_id = site_id or proj.site_id or ""
 
         # 3. Persist into documents table idempotently
         wcc_cert_doc = self.project_db.query(ProjectDocument).filter(
@@ -4628,8 +4741,12 @@ class WccPdfService:
             wcc_merged_doc.documents = merged_data_uri
             wcc_merged_doc.document_details = "Final Merged WCC PDF (3-Page Certificate + Uploaded JMS Documents)"
 
-        # 4. Update telecom_project
-        proj.jms_merged_documents = merged_data_uri
+        # 4. Persist actual PDF bytes in telecom_project database columns
+        proj.po_amendment_merged_document = final_merged_pdf
+        proj.po_amendment_merged_documents = final_merged_pdf
+        proj.jms_merged_document = final_merged_pdf
+        proj.jms_merged_documents = final_merged_pdf
+
         if not proj.wcc_no:
             proj.wcc_no = f"WCC-{po_no}"
         proj.wcc_submission_date = date.today()
@@ -4702,5 +4819,107 @@ class WccPdfService:
             "certificateDocumentId": wcc_cert_doc.project_document_id,
             "totalPages": total_pages,
             "fileName": f"WCC_Merged_{po_no}.pdf",
+            "pdfDataUri": merged_data_uri
+        }
+
+    def process_pdf_regeneration(
+        self,
+        po_no: str,
+        site_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Regenerates updated versions of Annexure, BOQ, and Work Completion Certificate
+        using the latest database values.
+        Merges these three generated documents with the applicable existing additional documents.
+        Saves the final merged PDF to jms_merged_document and po_amendment_merged_document in telecom_project,
+        and updates the ProjectDocument records.
+        """
+        proj_query = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no)
+        if site_id:
+            proj_query = proj_query.filter(TelecomProject.site_id == site_id)
+        proj = proj_query.first()
+        if not proj:
+            raise ValueError(f"Project for PO #{po_no} not found.")
+
+        actual_site_id = site_id or proj.site_id or ""
+
+        # 1. Generate updated 3-page PDF (Annexure, BOQ, Work Completion Certificate) using latest DB values
+        three_page_pdf = self.generate_three_page_wcc_pdf(po_no, site_id)
+
+        # 2. Merge with applicable existing additional documents
+        final_merged_pdf = self.merge_with_additional_documents(three_page_pdf, po_no, site_id)
+
+        # 3. Save to project database columns
+        proj.jms_merged_document = final_merged_pdf
+        proj.jms_merged_documents = final_merged_pdf
+        proj.po_amendment_merged_document = final_merged_pdf
+        proj.po_amendment_merged_documents = final_merged_pdf
+
+        # Update ProjectDocument table idempotently
+        merged_b64 = base64.b64encode(final_merged_pdf).decode("utf-8")
+        merged_data_uri = f"data:application/pdf;base64,{merged_b64}"
+
+        cert_b64 = base64.b64encode(three_page_pdf).decode("utf-8")
+        cert_data_uri = f"data:application/pdf;base64,{cert_b64}"
+
+        wcc_cert_doc = self.project_db.query(ProjectDocument).filter(
+            ProjectDocument.po_no == po_no,
+            ProjectDocument.site_id == actual_site_id,
+            ProjectDocument.document_number == "WCC Certificate"
+        ).first()
+
+        if not wcc_cert_doc:
+            wcc_cert_doc = ProjectDocument(
+                company_name=proj.company_name or "Nexus",
+                customer_name=proj.customer_name or "Indus Towers Ltd",
+                po_no=po_no,
+                site_id=actual_site_id,
+                date=date.today(),
+                document_name=f"WCC_Certificate_{po_no}.pdf",
+                document_number="WCC Certificate",
+                document_details="3-Page WCC Certificate (Annexure, BOQ, Work Completion Certificate)",
+                documents=cert_data_uri
+            )
+            self.project_db.add(wcc_cert_doc)
+        else:
+            wcc_cert_doc.date = date.today()
+            wcc_cert_doc.documents = cert_data_uri
+
+        wcc_merged_doc = self.project_db.query(ProjectDocument).filter(
+            ProjectDocument.po_no == po_no,
+            ProjectDocument.site_id == actual_site_id,
+            ProjectDocument.document_number == "WCC Merged Document"
+        ).first()
+
+        if not wcc_merged_doc:
+            wcc_merged_doc = ProjectDocument(
+                company_name=proj.company_name or "Nexus",
+                customer_name=proj.customer_name or "Indus Towers Ltd",
+                po_no=po_no,
+                site_id=actual_site_id,
+                date=date.today(),
+                document_name=f"WCC_Merged_{po_no}.pdf",
+                document_number="WCC Merged Document",
+                document_details="Final Merged WCC PDF (3-Page Certificate + Uploaded Documents)",
+                documents=merged_data_uri
+            )
+            self.project_db.add(wcc_merged_doc)
+        else:
+            wcc_merged_doc.date = date.today()
+            wcc_merged_doc.documents = merged_data_uri
+
+        self.project_db.commit()
+        self.project_db.refresh(proj)
+
+        reader = PdfReader(io.BytesIO(final_merged_pdf))
+        total_pages = len(reader.pages)
+
+        return {
+            "success": True,
+            "message": f"PDF regenerated and persisted successfully ({total_pages} pages).",
+            "poNo": po_no,
+            "siteId": actual_site_id,
+            "fileName": f"WCC_Merged_{po_no}.pdf",
+            "totalPages": total_pages,
             "pdfDataUri": merged_data_uri
         }

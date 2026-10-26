@@ -192,12 +192,13 @@ def test_select_works_routing_priority_and_mutual_exclusivity(client: TestClient
         assert wcc_res.status_code == 200
         wcc_data = wcc_res.json()
         wcc_items = wcc_data["lineItems"]
-        # Only Line 2 (positive diff with nonzero JMS Qty) should be in WCC!
-        # Line 1 (negative diff) must NEVER be in WCC!
-        # Line 3 (zero JMS Qty) must NEVER be in WCC!
-        assert len(wcc_items) == 1
-        assert wcc_items[0]["itemCode"] == "ITEM-POS-DIFF"
-        assert wcc_items[0]["jmsQty"] == 18.0
+        # Line 2 (diff = +2 >= 0) and Line 3 (diff = +5 >= 0) route to WCC
+        # Line 1 (negative diff = -5 < 0) routes to PO Amend and must NEVER be in WCC!
+        assert len(wcc_items) == 2
+        wcc_item_codes = [it["itemCode"] for it in wcc_items]
+        assert "ITEM-POS-DIFF" in wcc_item_codes
+        assert "ITEM-ZERO-QTY" in wcc_item_codes
+        assert "ITEM-NEG-DIFF" not in wcc_item_codes
 
     finally:
         project_db_session.query(ProjectDocument).filter(ProjectDocument.po_no == po_no).delete()

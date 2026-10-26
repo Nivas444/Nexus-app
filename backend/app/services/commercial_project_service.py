@@ -539,15 +539,29 @@ class CommercialProjectService:
 
             completion_date_str = p.po_amendment_completion_date.strftime("%d/%m/%Y") if p.po_amendment_completion_date else (p.completion_date.strftime("%d/%m/%Y") if p.completion_date else None)
 
-            task_display = p.current_task or ""
-            if not task_display:
-                if p.po_amendment_completion_status:
-                    task_display = f"Amendment {p.po_amendment_completion_status}"
-                else:
-                    task_display = "To be submit"
+            task_raw = (p.current_task or "").strip()
+            t_low = task_raw.lower()
+            if t_low in ["amend approved", "amendment approved"]:
+                # Successfully completed PO Amend task moves out of active PO Amend task list
+                continue
+
+            if t_low in ["pending with indus", "approval pending"]:
+                task_display = "Approval Pending"
+                status_display = "Under Review"
+            elif t_low == "rejected":
+                task_display = "Rejected"
+                status_display = "Rejected"
+            elif p.po_amendment_completion_status:
+                task_display = f"Amendment {p.po_amendment_completion_status}"
+                status_display = "Amended"
+            elif "approved" in t_low or "completed" in t_low:
+                task_display = task_raw
+                status_display = "Approved"
+            else:
+                task_display = "PO Amend to be submit"
+                status_display = p.po_status or "Amend Requested"
 
             formatted_amount = f"₹ {float(p.po_amount):,.2f}" if p.po_amount is not None else "₹ 0.00"
-            status_display = p.po_status or ("Amended" if p.po_amendment_completion_status else "Amend Requested")
 
             items.append(CommercialProjectItem(
                 id=f"prj-{p.project_id}",
@@ -568,6 +582,79 @@ class CommercialProjectService:
                 poRevNo=p.po_revision_number,
                 poAmendmentCompletionDate=completion_date_str,
                 poAmendmentCompletionStatus=p.po_amendment_completion_status,
+                poStatus=status_display,
+                amount=formatted_amount
+            ))
+
+        return CommercialProjectListResponse(items=items, total=len(items))
+
+    def get_wcc_projects_list(self) -> CommercialProjectListResponse:
+        """
+        Fetch real project records from `telecom_project` in `Nexus_Project DB` for the WCC worklist.
+        """
+        projects = self.db.query(TelecomProject).order_by(TelecomProject.project_id.asc()).all()
+        items: List[CommercialProjectItem] = []
+        today = date.today()
+
+        for p in projects:
+            date_str = ""
+            ageing_str = "0 Days"
+            if p.po_date:
+                date_str = p.po_date.strftime("%d/%m/%Y")
+            elif p.created_at:
+                date_str = p.created_at.strftime("%d/%m/%Y")
+
+            end_date = p.wcc_submission_date or p.completion_date
+            if end_date:
+                if isinstance(end_date, datetime):
+                    end_date = end_date.date()
+                days_diff = (today - end_date).days
+                ageing_days = max(0, days_diff)
+                ageing_str = f"{ageing_days} Days"
+
+            task_raw = (p.current_task or "").strip()
+            t_low = task_raw.lower()
+            if t_low in ["wcc approved"]:
+                # Successfully completed WCC task moves out of active WCC task list
+                continue
+
+            if t_low in ["pending with indus", "approval pending"]:
+                task_display = "Approval Pending"
+                status_display = "Under Review"
+            elif t_low == "rejected":
+                task_display = "Rejected"
+                status_display = "Rejected"
+            elif t_low in ["amend approved", "amendment approved"]:
+                # Completed PO Amend task moves into active WCC as 'WCC to be submit'
+                task_display = "WCC to be submit"
+                status_display = "WCC Requested"
+            elif "approved" in t_low or "completed" in t_low:
+                task_display = task_raw
+                status_display = "Approved"
+            else:
+                task_display = "WCC to be submit"
+                status_display = p.po_status or "WCC Requested"
+
+            amt_val = float(p.wcc_amount) if p.wcc_amount is not None else (float(p.po_amount) if p.po_amount is not None else 0.0)
+            formatted_amount = f"₹ {amt_val:,.2f}"
+
+            items.append(CommercialProjectItem(
+                id=f"prj-{p.project_id}",
+                customerName=p.customer_name or "",
+                date=date_str,
+                poNo=p.po_no or "",
+                projectId=p.project_code or f"PRJ-{p.project_id}",
+                siteId=p.site_id or "",
+                siteName=p.site_name or "",
+                projectType=p.project_type or "",
+                subProjectType=p.sub_project_type or "",
+                poType=p.po_type or "Opex",
+                poAmount=amt_val,
+                ageing=ageing_str,
+                task=task_display,
+                raBill=False,
+                selected=False,
+                poRevNo=p.po_revision_number,
                 poStatus=status_display,
                 amount=formatted_amount
             ))

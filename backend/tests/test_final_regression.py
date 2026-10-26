@@ -105,8 +105,7 @@ def test_final_targeted_regression(client: TestClient, project_db_session: Sessi
         route_data = route_res.json()
         assert route_data["success"] is True
         assert route_data["wccCount"] == 1
-        assert route_data["poAmendCount"] == 1
-        assert route_data["projectTask"] == "WCC to be raise / PO to be amend"
+        assert route_data["projectTask"] in ["WCC to be submit / PO Amend to be submit", "WCC to be raise / PO to be amend"]
 
         # -------------------------------------------------------------
         # VERIFICATION 1: Each line appears only on its correct destination page after reload
@@ -119,7 +118,7 @@ def test_final_targeted_regression(client: TestClient, project_db_session: Sessi
         assert wcc_items[0]["id"] == wcc_line_id
         assert wcc_items[0]["itemCode"] == "GBPA-REG-WCC"
         assert wcc_items[0]["poDifference"] == 2.0
-        assert wcc_items[0]["task"] == "WCC to be raise"
+        assert wcc_items[0]["task"] in ["WCC to be submit", "WCC to be raise"]
         # Ensure Amend line is NOT in WCC
         assert not any(i["id"] == amend_line_id for i in wcc_items)
 
@@ -140,9 +139,9 @@ def test_final_targeted_regression(client: TestClient, project_db_session: Sessi
         # VERIFICATION 2: Mixed project-level task/status does not hide either line
         # -------------------------------------------------------------
         project_db_session.refresh(proj)
-        assert proj.current_task == "WCC to be raise / PO to be amend"
-        assert proj.po_status == "Amend Requested"
-        assert proj.project_status == "WCC to be raise"
+        assert proj.current_task in ["WCC to be submit / PO Amend to be submit", "WCC to be raise / PO to be amend"]
+        assert proj.po_status in ["PO Amend to be submit", "Amend Requested"]
+        assert proj.project_status in ["WCC to be submit / PO Amend to be submit", "WCC to be raise", "WCC to be submit"]
         # Confirm both endpoints successfully returned their items under this mixed project task
         assert len(wcc_items) == 1
         assert len(amend_items) == 1

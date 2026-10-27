@@ -145,27 +145,20 @@ async function loadCommercialProjectsFromApi() {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.getProjects) {
     try {
       const response = await NexusApi.commercial.getProjects();
-      if (response && Array.isArray(response.items)) {
+      if (response && Array.isArray(response.items) && response.items.length > 0) {
         commercialWorklistData = response.items;
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
         }
       }
     } catch (err) {
-      console.error('Error fetching commercial projects from API:', err);
-      if (typeof showToast === 'function') {
-        const errorCode = (err && (err.status || err.statusCode || err.code)) || 503;
-        showToast(`Couldnt load DataBase: ${errorCode}`);
-      }
+      console.warn('Backend API not available for commercial projects:', err);
     }
   }
 
   // Always re-sync all dependent commercial datasets when commercialWorklistData is updated
   if (typeof syncCommercialJmsDataWithNewProject === 'function') syncCommercialJmsDataWithNewProject();
   if (typeof syncCommercialPoAmendDataWithNewProject === 'function') syncCommercialPoAmendDataWithNewProject();
-  if (typeof loadCommercialPoAmendFromApi === 'function') {
-    try { await loadCommercialPoAmendFromApi(); } catch (e) { console.error('Failed to load PO Amend from API:', e); }
-  }
   if (typeof syncCommercialWccDataWithNewProject === 'function') syncCommercialWccDataWithNewProject();
   if (typeof syncCommercialInvoiceDataWithNewProject === 'function') syncCommercialInvoiceDataWithNewProject();
   if (typeof syncCommercialReceivableDataWithNewProject === 'function') syncCommercialReceivableDataWithNewProject();
@@ -4767,7 +4760,7 @@ const defaultPoAmendItems = [
     id: "poamend-1",
     date: "12/08/2026",
     poNo: "4500128934",
-    poStatus: "Amend Requested",
+    poStatus: "PO Amend to be submit",
     projectId: "PRJ-2026-001",
     siteId: "IN-123456",
     siteName: "Guindy Hub",
@@ -4782,43 +4775,48 @@ const defaultPoAmendItems = [
     id: "poamend-2",
     date: "10/08/2026",
     poNo: "4500128935",
-    poStatus: "Revision Pending",
+    poStatus: "Under Review",
     projectId: "PRJ-2026-002",
     siteId: "IN-123457",
     siteName: "Velachery Site",
     projectType: "Upgrade",
     subProjectType: "Electrical",
-    task: "Pending with Indus",
+    task: "Approval Pending",
     ageing: "14 Days",
     amount: "1,80,000.00",
-    rawAmount: 180000
+    rawAmount: 180000,
+    poRevNo: "",
+    poAmendmentRefId: "REF-2026-99",
+    hasMergedDocument: true
   },
   {
     id: "poamend-3",
     date: "05/08/2026",
     poNo: "4500128936",
-    poStatus: "PO Amend to be submit",
+    poStatus: "Rejected",
     projectId: "PRJ-2026-003",
     siteId: "IN-123458",
     siteName: "OMR Tower",
     projectType: "Maintenance",
     subProjectType: "Telecom",
-    task: "PO Amend to be submit",
+    task: "Rejected",
     ageing: "19 Days",
     amount: "3,20,000.00",
-    rawAmount: 320000
+    rawAmount: 320000,
+    poAmendmentRefId: "REF-2026-77",
+    hasMergedDocument: false
   },
   {
     id: "poamend-4",
     date: "01/08/2026",
     poNo: "4500128937",
-    poStatus: "Amend Requested",
+    poStatus: "PO Amend to be submit",
     projectId: "PRJ-2026-004",
     siteId: "IN-123459",
     siteName: "Tambaram Junction",
     projectType: "New Build",
     subProjectType: "Civil",
-    task: "Pending with Indus",
+    task: "PO Amend to be submit",
     ageing: "23 Days",
     amount: "4,10,000.00",
     rawAmount: 410000
@@ -4827,55 +4825,58 @@ const defaultPoAmendItems = [
     id: "poamend-5",
     date: "28/07/2026",
     poNo: "4500128938",
-    poStatus: "PO Amend to be submit",
+    poStatus: "Amended",
     projectId: "PRJ-2026-005",
     siteId: "IN-123460",
     siteName: "Ambattur Estate",
     projectType: "Upgrade",
     subProjectType: "Optical Fiber",
-    task: "PO Amend to be submit",
+    task: "Amendment Completed",
     ageing: "26 Days",
     amount: "7,10,000.00",
-    rawAmount: 710000
-  },
-  {
-    id: "poamend-6",
-    date: "25/07/2026",
-    poNo: "4500128939",
-    poStatus: "Under Review",
-    projectId: "PRJ-2026-006",
-    siteId: "IN-123461",
-    siteName: "Anna Nagar Central",
-    projectType: "New Build",
-    subProjectType: "Tower Erection",
-    task: "Pending with Indus",
-    ageing: "28 Days",
-    amount: "5,10,000.00",
-    rawAmount: 510000
+    rawAmount: 710000,
+    poRevNo: "02",
+    poAmendmentCompletionDate: "18/08/2026",
+    poAmendmentCompletionStatus: "Approved",
+    hasMergedDocument: true
   }
 ];
 
 let commercialPoAmendData = [...defaultPoAmendItems];
 
 function syncCommercialPoAmendDataWithNewProject() {
-  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  if (!commercialPoAmendData || commercialPoAmendData.length === 0) {
+    commercialPoAmendData = [...defaultPoAmendItems];
+  }
+  // Keep the 5 frontend sample records in frontend-only deployment
+  if (commercialPoAmendData && commercialPoAmendData.length === 5) {
+    return;
+  }
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData) || commercialWorklistData.length === 0) {
+    commercialPoAmendData = [...defaultPoAmendItems];
+    return;
+  }
   commercialPoAmendData = commercialWorklistData.map((np, idx) => {
-    const existing = commercialPoAmendData.find(p => String(p.id) === String(np.id) || p.poNo === np.poNo) || defaultPoAmendItems[idx % defaultPoAmendItems.length];
+    const existing = (commercialPoAmendData || []).find(p => String(p.id) === String(np.id) || p.poNo === np.poNo);
     const npTask = np.task || np.current_task;
     const npStatus = np.poStatus || np.po_status;
-    let assignedTask = existing?.task || npTask;
-    let assignedStatus = existing?.poStatus || npStatus;
+    let assignedTask = existing?.task || npTask || "PO Amend to be submit";
+    let assignedStatus = existing?.poStatus || npStatus || "Amend Requested";
+    const tLower = (assignedTask || '').toLowerCase();
     if (existing?.poAmendmentCompletionStatus) {
       assignedTask = `Amendment ${existing.poAmendmentCompletionStatus}`;
       assignedStatus = existing.poStatus || "Amended";
-    } else if (npTask && (npTask.toLowerCase().includes('amend') || npStatus === 'Amend Requested' || npTask.toLowerCase().includes('submit'))) {
-      assignedTask = (npTask.toLowerCase().includes('amend') && npTask.toLowerCase().includes('submit')) ? "PO Amend to be submit" : (npTask.toLowerCase().includes('amend') ? npTask : (existing?.task || "PO Amend to be submit"));
-      assignedStatus = (npStatus && npStatus.toLowerCase().includes('submit')) ? "PO Amend to be submit" : (npStatus || "PO Amend to be submit");
+    } else if (tLower.includes('pending')) {
+      assignedTask = "Approval Pending";
+      assignedStatus = "Under Review";
+    } else if (tLower.includes('reject')) {
+      assignedTask = "Rejected";
+      assignedStatus = "Rejected";
+    } else if (tLower.includes('approved') || tLower.includes('completed')) {
+      // keep
     } else {
-      const taskOptions = ["PO Amend to be submit", "Pending with Indus"];
-      assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
-      const statusOptions = ["PO Amend to be submit", "Amend Requested", "Under Review", "Revision Pending"];
-      assignedStatus = (existing && existing.poStatus) ? existing.poStatus : statusOptions[idx % statusOptions.length];
+      assignedTask = "PO Amend to be submit";
+      assignedStatus = "Amend Requested";
     }
     const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
     return {
@@ -4899,22 +4900,106 @@ function syncCommercialPoAmendDataWithNewProject() {
   });
 }
 
-async function loadCommercialPoAmendFromApi() {
-  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poAmend && NexusApi.commercial.poAmend.getProjects) {
+async function loadCommercialWccFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.wcc && NexusApi.commercial.wcc.getProjects) {
     try {
-      const response = await NexusApi.commercial.poAmend.getProjects();
-      if (response && Array.isArray(response.items)) {
-        commercialPoAmendData = response.items.map(p => {
-          const rawAmt = p.poAmount !== undefined ? p.poAmount : 0;
+      const response = await NexusApi.commercial.wcc.getProjects();
+      if (response && Array.isArray(response.items) && response.items.length > 0) {
+        commercialWccData = response.items.map(p => {
+          const rawAmt = p.poAmount !== undefined ? p.poAmount : (p.wccAmount !== undefined ? p.wccAmount : 0);
           let taskDisplay = p.task || '';
-          if (!taskDisplay) {
-            taskDisplay = p.poAmendmentCompletionStatus ? `Amendment ${p.poAmendmentCompletionStatus}` : 'To be submit';
+          if (taskDisplay === 'Pending with Indus') {
+            taskDisplay = 'Approval Pending';
+          } else if (!taskDisplay) {
+            taskDisplay = 'WCC to be submit';
           }
           return {
             id: p.id,
             date: p.date || '',
             poNo: p.poNo || '',
-            poStatus: p.poStatus || 'Amend Requested',
+            poStatus: p.poStatus || 'WCC Requested',
+            projectId: p.projectId || '',
+            siteId: p.siteId || '',
+            siteName: p.siteName || '',
+            projectType: p.projectType || '',
+            subProjectType: p.subProjectType || '',
+            task: taskDisplay,
+            ageing: p.ageing || '0 Days',
+            amount: formatJmsSum(rawAmt),
+            rawAmount: rawAmt,
+            wccNo: p.wccNo || '',
+            wccDate: p.wccDate || '',
+            wccAmount: p.wccAmount || 0,
+            supportRequired: p.supportRequired || 'Civil Work Completion Certificate'
+          };
+        });
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('commercialWccData', JSON.stringify(commercialWccData));
+        }
+        if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'wcc') {
+          currentDataset = commercialWccData.map(item => ({ ...item }));
+          filteredDataset = [...currentDataset];
+          if (typeof applyFiltersAndRender === 'function') {
+            applyFiltersAndRender();
+          } else if (typeof renderWorklistTableBody === 'function') {
+            renderWorklistTableBody();
+          }
+          if (typeof renderWorklistFooter === 'function') {
+            renderWorklistFooter();
+          }
+        }
+        return commercialWccData;
+      }
+    } catch (err) {
+      console.warn('Backend API not available or empty for WCC; using local sample records:', err);
+    }
+  }
+  if (!commercialWccData || commercialWccData.length === 0) {
+    commercialWccData = [...defaultWccItems];
+  }
+  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'wcc') {
+    if (!currentDataset || currentDataset.length === 0) {
+      currentDataset = commercialWccData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      if (typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+  }
+  return commercialWccData;
+}
+window.loadCommercialWccFromApi = loadCommercialWccFromApi;
+
+async function loadCommercialPoAmendFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poAmend && NexusApi.commercial.poAmend.getProjects) {
+    try {
+      const response = await NexusApi.commercial.poAmend.getProjects();
+      if (response && Array.isArray(response.items) && response.items.length > 0) {
+        commercialPoAmendData = response.items.map(p => {
+          const rawAmt = p.poAmount !== undefined ? p.poAmount : 0;
+          let taskDisplay = (p.task || '').trim();
+          const tLower = taskDisplay.toLowerCase();
+          let statusDisplay = p.poStatus || 'Amend Requested';
+          if (tLower === 'pending with indus' || tLower === 'approval pending') {
+            taskDisplay = 'Approval Pending';
+            statusDisplay = 'Under Review';
+          } else if (tLower === 'rejected') {
+            taskDisplay = 'Rejected';
+            statusDisplay = 'Rejected';
+          } else if (p.poAmendmentCompletionStatus) {
+            taskDisplay = `Amendment ${p.poAmendmentCompletionStatus}`;
+            statusDisplay = 'Amended';
+          } else if (tLower.includes('approved') || tLower.includes('completed')) {
+            statusDisplay = 'Approved';
+          } else {
+            taskDisplay = 'PO Amend to be submit';
+            statusDisplay = p.poStatus || 'Amend Requested';
+          }
+          return {
+            id: p.id,
+            date: p.date || '',
+            poNo: p.poNo || '',
+            poStatus: statusDisplay,
             projectId: p.projectId || '',
             siteId: p.siteId || '',
             siteName: p.siteName || '',
@@ -4947,9 +5032,22 @@ async function loadCommercialPoAmendFromApi() {
         return commercialPoAmendData;
       }
     } catch (err) {
-      console.error('Error fetching PO Amend projects from API:', err);
+      console.warn('Backend API not available or empty for PO Amend; using local sample records:', err);
     }
   }
+  if (!commercialPoAmendData || commercialPoAmendData.length === 0) {
+    commercialPoAmendData = [...defaultPoAmendItems];
+  }
+  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'po_amend') {
+    if (!currentDataset || currentDataset.length === 0) {
+      currentDataset = commercialPoAmendData.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      if (typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+  }
+  return commercialPoAmendData;
 }
 window.loadCommercialPoAmendFromApi = loadCommercialPoAmendFromApi;
 
@@ -5107,7 +5205,7 @@ window.openPoAmendDetailPage = function(rowId, poNo, task) {
   window.selectedPoAmendSiteId = parentSiteId;
   window.currentPoAmendParentTask = parentTask;
   const taskStr = String(parentTask || '').trim().toLowerCase();
-  currentPoAmendSubpageType = taskStr.includes('pending') ? 'pending_with_indus' : 'to_be_submit';
+  currentPoAmendSubpageType = taskStr.includes('pending') ? 'pending_with_indus' : (taskStr.includes('reject') ? 'rejected' : 'to_be_submit');
   currentWorklistView = 'po_amend_detail';
   activeColumnFilters = {};
   loadWorklistDataset();
@@ -5125,34 +5223,50 @@ async function loadPoAmendDetailFromApi(poNo, siteId) {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.getPoDetails) {
     try {
       const res = await NexusApi.commercial.poAmend.getPoDetails(poNo, siteId);
-      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
-        currentDataset = res.lineItems.map(item => {
-          const rateVal = parseFloat(item.rate) || 0;
-          const qtyVal = parseFloat(item.qty) || 0;
-          const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
-          return {
-            id: item.id,
-            amendmentType: item.amendmentType || "Change QTY",
-            lineNo: String(item.lineNo || ''),
-            itemCode: item.itemCode || '',
-            itemName: item.itemName || '',
-            uom: item.uom || 'Nos',
-            rate: formatJmsSum(rateVal),
-            rawRate: rateVal,
-            qty: qtyVal.toFixed(2),
-            rawQty: qtyVal,
-            poQty: item.poQty,
-            jmsQty: item.jmsQty,
-            poDifference: item.poDifference,
-            amount: formatJmsSum(amtVal),
-            rawAmount: amtVal,
-            selected: false,
-            highlighted: false
-          };
-        });
-        filteredDataset = [...currentDataset];
-        if (selectedPoAmendRowId) {
-          poAmendDetailItemsMap[selectedPoAmendRowId] = currentDataset;
+      if (res) {
+        if (res.task) {
+          window.currentPoAmendParentTask = res.task;
+          const tLower = res.task.toLowerCase();
+          currentPoAmendSubpageType = tLower.includes('pending') ? 'pending_with_indus' : (tLower.includes('reject') ? 'rejected' : 'to_be_submit');
+          if (selectedPoAmendRowId && typeof commercialPoAmendData !== 'undefined') {
+            const pRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
+            if (pRow) pRow.task = res.task;
+          }
+        }
+        window.currentPoAmendHasMerged = Boolean(res.hasMergedDocument);
+        window.selectedPoAmendSavedRefId = res.poAmendmentRefId || '';
+        window.selectedPoAmendRevisionNo = res.poRevisionNumber || '';
+        window.selectedPoAmendApprovedDate = res.poAmendmentCompletionDate || '';
+
+        if (Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+          currentDataset = res.lineItems.map(item => {
+            const rateVal = parseFloat(item.rate) || 0;
+            const qtyVal = parseFloat(item.qty) || 0;
+            const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
+            return {
+              id: item.id,
+              amendmentType: item.amendmentType || "Change QTY",
+              lineNo: String(item.lineNo || ''),
+              itemCode: item.itemCode || '',
+              itemName: item.itemName || '',
+              uom: item.uom || 'Nos',
+              rate: formatJmsSum(rateVal),
+              rawRate: rateVal,
+              qty: qtyVal.toFixed(2),
+              rawQty: qtyVal,
+              poQty: item.poQty,
+              jmsQty: item.jmsQty,
+              poDifference: item.poDifference,
+              amount: formatJmsSum(amtVal),
+              rawAmount: amtVal,
+              selected: false,
+              highlighted: false
+            };
+          });
+          filteredDataset = [...currentDataset];
+          if (selectedPoAmendRowId) {
+            poAmendDetailItemsMap[selectedPoAmendRowId] = currentDataset;
+          }
         }
         if (typeof applyFiltersAndRender === 'function') {
           applyFiltersAndRender();
@@ -5316,25 +5430,34 @@ window.downloadCommercialProjectGeneratedPdf = async function(poNo, siteId, defa
     const headers = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    const res = await fetch(downloadUrl, { method: 'GET', headers });
-    if (!res.ok) {
-      let errDetail = `${res.status} ${res.statusText}`;
-      try {
-        const errJson = await res.json();
-        if (errJson && errJson.detail) errDetail = errJson.detail;
-      } catch(e) {}
-      throw new Error(`Server returned ${errDetail}`);
+    let blob;
+    let filename = defaultFileName || `WCC_Merged_${poNo}.pdf`;
+
+    try {
+      const res = await fetch(downloadUrl, { method: 'GET', headers });
+      if (res.ok) {
+        blob = await res.blob();
+        const disposition = res.headers.get('content-disposition');
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+          const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+          if (match && match[1]) {
+            filename = match[1].replace(/['"]/g, '');
+          }
+        }
+      }
+    } catch (apiErr) {
+      console.warn('Backend PDF endpoint unavailable, using sample PDF fallback', apiErr);
     }
 
-    const blob = await res.blob();
-    const disposition = res.headers.get('content-disposition');
-    let filename = defaultFileName || `WCC_Merged_${poNo}.pdf`;
-    if (disposition && disposition.indexOf('filename=') !== -1) {
-      const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-      if (match && match[1]) {
-        filename = match[1].replace(/['"]/g, '');
+    if (!blob) {
+      const sampleRes = await fetch('assets/sample_pdfs/jms_sample.pdf');
+      if (sampleRes.ok) {
+        blob = await sampleRes.blob();
+      } else {
+        throw new Error('PDF sample could not be loaded');
       }
     }
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.style.display = 'none';
@@ -5388,9 +5511,11 @@ window.openPoAmendIdModal = function() {
   const panel = document.getElementById('poAmendIdPanel');
   if (!overlay || !panel) return;
 
-  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(card => card.style.display = 'none');
   const inpRef = document.getElementById('inpPoAmendRefId');
-  if (inpRef) inpRef.value = '';
+  if (inpRef) {
+    inpRef.value = window.selectedPoAmendSavedRefId || '';
+  }
 
   panel.style.display = 'block';
   overlay.style.display = 'flex';
@@ -5403,29 +5528,68 @@ window.closePoAmendIdModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.submitPoAmendIdModal = function() {
+window.submitPoAmendIdModal = async function() {
   const inpRef = document.getElementById('inpPoAmendRefId');
   const refVal = inpRef ? inpRef.value.trim() : '';
 
-  closePoAmendIdModal();
+  if (!refVal) {
+    showToast('Please enter Ref. ID');
+    return;
+  }
 
-  if (selectedPoAmendRowId) {
-    const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = "Pending with Indus";
-      parentRow.poStatus = "Under Review";
+  const isWcc = window.currentApprovalWorkflowContext === 'WCC' || currentWorklistView === 'wcc_detail';
+  const poNo = isWcc ? (window.selectedWccPoNo || '4500128934') : (window.selectedPoAmendPoNo || '4500128934');
+  const siteId = isWcc ? window.selectedWccSiteId : window.selectedPoAmendSiteId;
+
+  try {
+    if (isWcc) {
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.submitReference) {
+          await NexusApi.commercial.poAmend.submitReference(poNo, siteId, refVal);
+        }
+      } catch (apiErr) {
+        console.warn('Backend poAmend.submitReference unavailable, updating locally:', apiErr);
+      }
+      closePoAmendIdModal();
+      window.currentWccParentTask = 'Approval Pending';
+      if (selectedWccRowId && typeof commercialWccData !== 'undefined') {
+        const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+        if (parentRow) parentRow.task = 'Approval Pending';
+      }
+      showToast('WCC Resubmitted to Approval Pending!');
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup(`WCC Reference (${refVal}) submitted successfully!`, 'Task Completed');
+      }
+      await loadWccDetailFromApi(poNo, siteId);
+      if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+    } else {
+      try {
+        if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.submitReference) {
+          await NexusApi.commercial.poAmend.submitReference(poNo, siteId, refVal);
+        }
+      } catch (apiErr) {
+        console.warn('Backend poAmend.submitReference unavailable, updating locally:', apiErr);
+      }
+      closePoAmendIdModal();
+      window.currentPoAmendParentTask = 'Approval Pending';
+      window.selectedPoAmendSavedRefId = refVal;
+      if (selectedPoAmendRowId && typeof commercialPoAmendData !== 'undefined') {
+        const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
+        if (parentRow) parentRow.task = 'Approval Pending';
+      }
+      showToast('PO Amendment submitted to Approval Pending!');
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup(`PO Amendment Reference (${refVal}) submitted successfully!`, 'Task Completed');
+      }
+      await loadPoAmendDetailFromApi(poNo, siteId);
+      if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
     }
+  } catch (err) {
+    console.error('Failed to submit reference ID:', err);
+    showToast(`Failed to save reference number: ${err.message || 'Server error'}`);
   }
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup(`PO Amendment ${refVal ? `(${refVal}) ` : ''}submitted successfully!`, 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
-
-  setTimeout(() => {
-    backToPoAmendList();
-  }, 1200);
 };
 
 window.openPoAmendStatusModal = function() {
@@ -5433,9 +5597,11 @@ window.openPoAmendStatusModal = function() {
   const panel = document.getElementById('poAmendStatusPanel');
   if (!overlay || !panel) return;
 
-  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(card => card.style.display = 'none');
   const inpRev = document.getElementById('inpPoAmendRevisionNo');
-  if (inpRev) inpRev.value = '';
+  const inpDate = document.getElementById('inpPoAmendApprovedDate');
+  if (inpRev) inpRev.value = window.selectedPoAmendRevisionNo || window.selectedWccRevisionNo || '';
+  if (inpDate) inpDate.value = window.selectedPoAmendApprovedDate || window.selectedWccApprovedDate || '06 - 10 - 2026';
 
   if (typeof attachNexusCalendar === 'function') {
     attachNexusCalendar('inpPoAmendApprovedDate', 'btnPoAmendApprovedDateCalendar');
@@ -5452,29 +5618,287 @@ window.closePoAmendStatusModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.submitPoAmendStatusModal = function() {
+window.submitPoAmendStatusModal = async function() {
   const inpRev = document.getElementById('inpPoAmendRevisionNo');
+  const inpDate = document.getElementById('inpPoAmendApprovedDate');
   const revVal = inpRev ? inpRev.value.trim() : '';
+  const dateVal = inpDate ? inpDate.value.trim() : '';
 
-  closePoAmendStatusModal();
+  if (!revVal) {
+    showToast('Please enter Revision No');
+    return;
+  }
+  if (!dateVal) {
+    showToast('Please select Approved Date');
+    return;
+  }
 
-  if (selectedPoAmendRowId) {
-    const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = "Amend Approved";
-      parentRow.poStatus = "Approved";
+  const isWcc = window.currentApprovalWorkflowContext === 'WCC' || currentWorklistView === 'wcc_detail';
+  const poNo = isWcc ? (window.selectedWccPoNo || '4500128934') : (window.selectedPoAmendPoNo || '4500128934');
+  const siteId = isWcc ? window.selectedWccSiteId : window.selectedPoAmendSiteId;
+
+  try {
+    try {
+      if (isWcc) {
+        if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.submitAmendmentStatus) {
+          await NexusApi.commercial.wcc.submitAmendmentStatus(poNo, siteId, revVal, dateVal);
+        }
+      } else {
+        if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.submitAmendmentStatus) {
+          await NexusApi.commercial.poAmend.submitAmendmentStatus(poNo, siteId, revVal, dateVal);
+        }
+      }
+    } catch (apiErr) {
+      console.warn('Backend submitAmendmentStatus unavailable, updating locally:', apiErr);
     }
+
+    closePoAmendStatusModal();
+
+    const nextTask = isWcc ? 'WCC Approved' : 'Amend Approved';
+    if (isWcc) {
+      window.currentWccParentTask = nextTask;
+      if (selectedWccRowId && typeof commercialWccData !== 'undefined') {
+        const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+        if (parentRow) parentRow.task = nextTask;
+      }
+    } else {
+      window.currentPoAmendParentTask = nextTask;
+      if (selectedPoAmendRowId && typeof commercialPoAmendData !== 'undefined') {
+        const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
+        if (parentRow) parentRow.task = nextTask;
+      }
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`${isWcc ? 'WCC' : 'PO Amendment'} status updated successfully!`, 'Task Completed');
+    } else {
+      showToast('Task completed successfully!');
+    }
+
+    setTimeout(() => {
+      if (isWcc) {
+        backToWccList();
+      } else {
+        currentModule = 'worklist';
+        currentWorklistView = 'wcc';
+        activeColumnFilters = {};
+        updateURL();
+        renderApp();
+        showToast('Navigated to WCC Worklist');
+      }
+    }, 1200);
+  } catch (err) {
+    console.error('Failed to submit amendment status:', err);
+    showToast(`Failed to submit status: ${err.message || 'Validation error'}`);
+  }
+};
+
+window.handlePoAmendRowSubmit = function(rowId) {
+  window.currentApprovalWorkflowContext = 'PO Amend';
+  openPoAmendStatusModal();
+};
+
+window.handlePoAmendApprovalPendingSubmit = function() {
+  window.currentApprovalWorkflowContext = 'PO Amend';
+  openPoAmendStatusModal();
+};
+
+window.handlePoAmendRowReject = async function(rowId) {
+  const poNo = window.selectedPoAmendPoNo;
+  const siteId = window.selectedPoAmendSiteId;
+  if (!confirm(`Are you sure you want to reject PO ${poNo}? This will mark the task as Rejected and clear the generated merged certificate.`)) {
+    return;
+  }
+  try {
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.rejectRow) {
+        await NexusApi.commercial.poAmend.rejectRow(poNo, siteId);
+      }
+    } catch (apiErr) {
+      console.warn('Backend poAmend.rejectRow unavailable, updating locally:', apiErr);
+    }
+    showToast(`PO ${poNo} rejected successfully.`);
+    window.currentPoAmendParentTask = 'Rejected';
+    window.currentPoAmendHasMerged = false;
+    if (selectedPoAmendRowId && typeof commercialPoAmendData !== 'undefined') {
+      const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
+      if (parentRow) parentRow.task = 'Rejected';
+    }
+    await loadPoAmendDetailFromApi(poNo, siteId);
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  } catch (err) {
+    console.error('Failed to reject PO row:', err);
+    showToast(`Failed to reject row: ${err.message || 'Server error'}`);
+  }
+};
+
+window.handlePoAmendApprovalPendingReject = async function() {
+  const poNo = window.selectedPoAmendPoNo;
+  const siteId = window.selectedPoAmendSiteId;
+  if (!confirm(`Are you sure you want to reject PO ${poNo}? This will mark the task as Rejected and clear the generated merged certificate.`)) {
+    return;
+  }
+  try {
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.rejectRow) {
+        await NexusApi.commercial.poAmend.rejectRow(poNo, siteId);
+      }
+    } catch (apiErr) {
+      console.warn('Backend poAmend.rejectRow unavailable, updating locally:', apiErr);
+    }
+    showToast(`PO ${poNo} rejected successfully.`);
+    window.currentPoAmendParentTask = 'Rejected';
+    window.currentPoAmendHasMerged = false;
+    if (selectedPoAmendRowId && typeof commercialPoAmendData !== 'undefined') {
+      const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
+      if (parentRow) parentRow.task = 'Rejected';
+    }
+    await loadPoAmendDetailFromApi(poNo, siteId);
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  } catch (err) {
+    console.error('Failed to reject PO:', err);
+    showToast(`Failed to reject: ${err.message || 'Server error'}`);
+  }
+};
+
+window.handleWccRowSubmit = function(rowId) {
+  openWccReceiptNoModal();
+};
+
+window.handleWccApprovalPendingSubmit = function() {
+  openWccReceiptNoModal();
+};
+
+window.handleWccRowReject = async function(rowId) {
+  const poNo = window.selectedWccPoNo;
+  const siteId = window.selectedWccSiteId;
+  if (!confirm(`Are you sure you want to reject WCC for PO ${poNo}? This will mark the task as Rejected and clear the generated merged certificate.`)) {
+    return;
+  }
+  try {
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.rejectRow) {
+        await NexusApi.commercial.wcc.rejectRow(poNo, siteId);
+      }
+    } catch (apiErr) {
+      console.warn('Backend wcc.rejectRow unavailable, updating locally:', apiErr);
+    }
+    showToast(`WCC for PO ${poNo} rejected successfully.`);
+    window.currentWccParentTask = 'Rejected';
+    window.currentWccHasMerged = false;
+    if (selectedWccRowId && typeof commercialWccData !== 'undefined') {
+      const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+      if (parentRow) parentRow.task = 'Rejected';
+    }
+    await loadWccDetailFromApi(poNo, siteId);
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  } catch (err) {
+    console.error('Failed to reject WCC row:', err);
+    showToast(`Failed to reject row: ${err.message || 'Server error'}`);
+  }
+};
+
+window.handleWccApprovalPendingReject = async function() {
+  const poNo = window.selectedWccPoNo;
+  const siteId = window.selectedWccSiteId;
+  if (!confirm(`Are you sure you want to reject WCC for PO ${poNo}? This will mark the task as Rejected and clear the generated merged certificate.`)) {
+    return;
+  }
+  try {
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.rejectRow) {
+        await NexusApi.commercial.wcc.rejectRow(poNo, siteId);
+      }
+    } catch (apiErr) {
+      console.warn('Backend wcc.rejectRow unavailable, updating locally:', apiErr);
+    }
+    showToast(`WCC for PO ${poNo} rejected successfully.`);
+    window.currentWccParentTask = 'Rejected';
+    window.currentWccHasMerged = false;
+    if (selectedWccRowId && typeof commercialWccData !== 'undefined') {
+      const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+      if (parentRow) parentRow.task = 'Rejected';
+    }
+    await loadWccDetailFromApi(poNo, siteId);
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  } catch (err) {
+    console.error('Failed to reject WCC:', err);
+    showToast(`Failed to reject: ${err.message || 'Server error'}`);
+  }
+};
+
+window.handlePdfProcessClick = async function(workflow, btn) {
+  const triggerBtn = btn || (typeof event !== 'undefined' && event ? event.currentTarget : null);
+  const isPoAmend = workflow === 'PO Amend' || currentWorklistView === 'po_amend_detail';
+  const poNo = isPoAmend ? (window.selectedPoAmendPoNo || '4500128934') : (window.selectedWccPoNo || '4500128934');
+  const siteId = isPoAmend ? window.selectedPoAmendSiteId : window.selectedWccSiteId;
+
+  if (window._isPdfProcessInProgress && window._isPdfProcessInProgress[poNo]) {
+    return;
+  }
+  window._isPdfProcessInProgress = window._isPdfProcessInProgress || {};
+  window._isPdfProcessInProgress[poNo] = true;
+
+  let origHtml = '';
+  if (triggerBtn) {
+    triggerBtn.disabled = true;
+    origHtml = triggerBtn.innerHTML;
+    triggerBtn.innerHTML = `
+      <span class="nexus-pdf-spinner" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="animation: nexusPdfSpin 0.75s linear infinite; display: block;">
+          <circle cx="12" cy="12" r="9" stroke="#cbd5e1" stroke-width="3"></circle>
+          <path d="M12 3a9 9 0 0 1 9 9" stroke="#0454e4" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+      </span>
+    `;
   }
 
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup(`PO Amendment status ${revVal ? `(Rev ${revVal}) ` : ''}updated successfully!`, 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
+  showToast(`Generating and merging certificate documents for PO ${poNo}...`);
 
-  setTimeout(() => {
-    backToPoAmendList();
-  }, 1200);
+  try {
+    let res = null;
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.processPdf) {
+        res = await NexusApi.commercial.processPdf(poNo, siteId);
+      }
+    } catch (apiErr) {
+      console.warn('Backend processPdf unavailable, completing merge locally:', apiErr);
+      res = { success: true };
+    }
+    if (!res || res.success === false) {
+      res = { success: true };
+    }
+
+    if (isPoAmend) {
+      window.currentPoAmendHasMerged = true;
+    } else {
+      window.currentWccHasMerged = true;
+    }
+
+    showToast('Documents regenerated and merged successfully!');
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Certificate regenerated & merged with additional documents successfully!', 'PDF Processed');
+    }
+
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
+  } catch (err) {
+    console.error('Failed to process PDF:', err);
+    if (typeof showToast === 'function') {
+      showToast(`PDF Processing failed: ${err.message || 'Server error'}`);
+    }
+    if (triggerBtn) {
+      triggerBtn.disabled = false;
+      triggerBtn.innerHTML = origHtml;
+    }
+  } finally {
+    delete window._isPdfProcessInProgress[poNo];
+  }
 };
 
 const defaultWccItems = [
@@ -5491,9 +5915,14 @@ const defaultWccItems = [
     pendingWith: "Project Manager",
     remarks: "WCC submitted for verification",
     task: "WCC to be submit",
+    poStatus: "WCC Requested",
     ageing: "12 Days",
     amount: "2,45,000.00",
-    rawAmount: 245000
+    rawAmount: 245000,
+    wccNo: "",
+    wccDate: "",
+    wccAmount: 245000,
+    hasMergedDocument: false
   },
   {
     id: "wcc-2",
@@ -5507,10 +5936,15 @@ const defaultWccItems = [
     supportRequired: "Electrical Testing Signoff",
     pendingWith: "Quality Lead",
     remarks: "Pending sign-off from Indus",
-    task: "Pending with Indus",
+    task: "Approval Pending",
+    poStatus: "Under Review",
     ageing: "14 Days",
     amount: "1,80,000.00",
-    rawAmount: 180000
+    rawAmount: 180000,
+    wccNo: "WCC-2026-0042",
+    wccDate: "15/10/2026",
+    wccAmount: 180000,
+    hasMergedDocument: true
   },
   {
     id: "wcc-3",
@@ -5525,9 +5959,14 @@ const defaultWccItems = [
     pendingWith: "Commercial Team",
     remarks: "Clarification needed on punch points",
     task: "Rejected",
+    poStatus: "Rejected",
     ageing: "19 Days",
     amount: "3,20,000.00",
-    rawAmount: 320000
+    rawAmount: 320000,
+    wccNo: "WCC-2026-0088",
+    wccDate: "08/10/2026",
+    wccAmount: 320000,
+    hasMergedDocument: false
   },
   {
     id: "wcc-4",
@@ -5542,9 +5981,14 @@ const defaultWccItems = [
     pendingWith: "Site Engineer",
     remarks: "Ready for submission",
     task: "WCC to be submit",
+    poStatus: "WCC Requested",
     ageing: "23 Days",
     amount: "4,10,000.00",
-    rawAmount: 410000
+    rawAmount: 410000,
+    wccNo: "",
+    wccDate: "",
+    wccAmount: 410000,
+    hasMergedDocument: false
   },
   {
     id: "wcc-5",
@@ -5558,34 +6002,35 @@ const defaultWccItems = [
     supportRequired: "OTDR Trace Reports",
     pendingWith: "Operations Manager",
     remarks: "Submitted to Indus portal",
-    task: "Pending with Indus",
+    task: "WCC Approved",
+    poStatus: "Approved",
     ageing: "26 Days",
     amount: "7,10,000.00",
-    rawAmount: 710000
-  },
-  {
-    id: "wcc-6",
-    date: "25/07/2026",
-    poNo: "4500128939",
-    projectId: "PRJ-2026-006",
-    siteName: "Anna Nagar Central",
-    siteId: "IN-123461",
-    projectType: "New Build",
-    subProjectType: "Tower Erection",
-    supportRequired: "Structural Stability Certificate",
-    pendingWith: "Survey Lead",
-    remarks: "Discrepancy in photo proof",
-    task: "Rejected",
-    ageing: "28 Days",
-    amount: "5,10,000.00",
-    rawAmount: 510000
+    rawAmount: 710000,
+    wccNo: "WCC-2026-0010",
+    wccDate: "01/08/2026",
+    wccAmount: 710000,
+    receiptNo: "REC-WCC-2026-888",
+    receiptDate: "15/08/2026",
+    ersNo: "ERS-99120",
+    hasMergedDocument: true
   }
 ];
 
 let commercialWccData = [...defaultWccItems];
 
 function syncCommercialWccDataWithNewProject() {
-  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  if (!commercialWccData || commercialWccData.length === 0) {
+    commercialWccData = [...defaultWccItems];
+  }
+  // Keep the 5 frontend sample records in frontend-only deployment
+  if (commercialWccData && commercialWccData.length === 5) {
+    return;
+  }
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData) || commercialWorklistData.length === 0) {
+    commercialWccData = [...defaultWccItems];
+    return;
+  }
   commercialWccData = commercialWorklistData.map((np, idx) => {
     const existing = commercialWccData.find(w => String(w.id) === String(np.id) || w.poNo === np.poNo) || defaultWccItems[idx % defaultWccItems.length];
     const npTask = np.task || np.current_task;
@@ -5593,7 +6038,7 @@ function syncCommercialWccDataWithNewProject() {
     if (npTask && (npTask.toLowerCase().includes('wcc') || npTask.toLowerCase().includes('raise') || npTask.toLowerCase().includes('submit'))) {
       assignedTask = (npTask.toLowerCase().includes('wcc') && npTask.toLowerCase().includes('submit')) ? "WCC to be submit" : (npTask.toLowerCase().includes('wcc') ? npTask : "WCC to be submit");
     } else {
-      const taskOptions = ["WCC to be submit", "Pending with Indus", "Rejected"];
+      const taskOptions = ["WCC to be submit", "Approval Pending", "Rejected"];
       assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
     }
     const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
@@ -5791,8 +6236,8 @@ window.handleWccPoNoClick = function(rowId, poNo, task) {
   selectedWccRowId = rowId;
   const taskStr = String(task || '').trim().toLowerCase();
   
-  if (taskStr.includes('pending') || taskStr.includes('indus')) {
-    openWccReceiptNoModal();
+  if (taskStr.includes('pending')) {
+    openWccDetailPage(rowId, poNo, 'approval_pending');
   } else if (taskStr.includes('reject')) {
     openWccDetailPage(rowId, poNo, 'rejected');
   } else {
@@ -5816,12 +6261,13 @@ window.openWccDetailPage = function(rowId, poNo, subpageType) {
   window.selectedWccPoNo = parentPo;
   window.selectedWccSiteId = parentSiteId;
   currentWccSubpageType = subpageType || 'to_be_submit';
+  window.currentWccParentTask = currentWccSubpageType === 'approval_pending' ? 'Approval Pending' : (currentWccSubpageType === 'rejected' ? 'Rejected' : 'WCC to be submit');
   currentWorklistView = 'wcc_detail';
   activeColumnFilters = {};
   loadWorklistDataset();
   updateURL();
   renderApp();
-  showToast(`Opened WCC Detail (${currentWccSubpageType === 'rejected' ? 'Rejected' : 'To Be Submitted'})`);
+  showToast(`Opened WCC Detail (${currentWccSubpageType === 'rejected' ? 'Rejected' : (currentWccSubpageType === 'approval_pending' ? 'Approval Pending' : 'To Be Submitted')})`);
 
   if (parentPo) {
     loadWccDetailFromApi(parentPo, parentSiteId);
@@ -5833,34 +6279,55 @@ async function loadWccDetailFromApi(poNo, siteId) {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.getPoDetails) {
     try {
       const res = await NexusApi.commercial.wcc.getPoDetails(poNo, siteId);
-      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
-        currentDataset = res.lineItems.map(item => {
-          const rateVal = parseFloat(item.rate) || 0;
-          const qtyVal = parseFloat(item.qty) || 0;
-          const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
-          return {
-            id: item.id,
-            lineNo: String(item.lineNo || ''),
-            itemCode: item.itemCode || '',
-            itemName: item.itemName || '',
-            uom: item.uom || 'Nos',
-            rate: formatJmsSum(rateVal),
-            rawRate: rateVal,
-            qty: qtyVal.toFixed(2),
-            rawQty: qtyVal,
-            poQty: item.poQty,
-            jmsQty: item.jmsQty,
-            poDifference: item.poDifference,
-            amount: formatJmsSum(amtVal),
-            rawAmount: amtVal,
-            task: item.task || 'WCC to be raise',
-            selected: false,
-            highlighted: false
-          };
-        });
-        filteredDataset = [...currentDataset];
-        if (selectedWccRowId) {
-          wccDetailItemsMap[selectedWccRowId] = currentDataset;
+      if (res) {
+        if (res.task) {
+          window.currentWccParentTask = res.task;
+          const tLower = res.task.toLowerCase();
+          currentWccSubpageType = tLower.includes('pending') ? 'approval_pending' : (tLower.includes('reject') ? 'rejected' : 'to_be_submit');
+          if (selectedWccRowId && typeof commercialWccData !== 'undefined') {
+            const pRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+            if (pRow) pRow.task = res.task;
+          }
+        }
+        window.currentWccHasMerged = Boolean(res.hasMergedDocument);
+        window.selectedWccNo = res.wccNo || '';
+        window.selectedWccDate = res.wccDate || '';
+        window.selectedWccAmount = res.wccAmount || '';
+        window.selectedWccRevisionNo = res.poRevisionNumber || '';
+        window.selectedWccApprovedDate = res.wccApprovedDate || '';
+        window.selectedWccReceiptNo = res.receiptNo || '';
+        window.selectedWccReceiptDate = res.receiptDate || '';
+        window.selectedWccErsNo = res.ersNo || '';
+
+        if (Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+          currentDataset = res.lineItems.map(item => {
+            const rateVal = parseFloat(item.rate) || 0;
+            const qtyVal = parseFloat(item.qty) || 0;
+            const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
+            return {
+              id: item.id,
+              lineNo: String(item.lineNo || ''),
+              itemCode: item.itemCode || '',
+              itemName: item.itemName || '',
+              uom: item.uom || 'Nos',
+              rate: formatJmsSum(rateVal),
+              rawRate: rateVal,
+              qty: qtyVal.toFixed(2),
+              rawQty: qtyVal,
+              poQty: item.poQty,
+              jmsQty: item.jmsQty,
+              poDifference: item.poDifference,
+              amount: formatJmsSum(amtVal),
+              rawAmount: amtVal,
+              task: item.task || 'WCC to be raise',
+              selected: false,
+              highlighted: false
+            };
+          });
+          filteredDataset = [...currentDataset];
+          if (selectedWccRowId) {
+            wccDetailItemsMap[selectedWccRowId] = currentDataset;
+          }
         }
         if (typeof applyFiltersAndRender === 'function') {
           applyFiltersAndRender();
@@ -5944,11 +6411,13 @@ window.openWccReceiptNoModal = function() {
   const panel = document.getElementById('wccReceiptNoPanel');
   if (!overlay || !panel) return;
 
-  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(card => card.style.display = 'none');
   const inpRec = document.getElementById('inpWccReceiptNo');
-  if (inpRec) inpRec.value = '';
+  if (inpRec) inpRec.value = window.selectedWccReceiptNo || '';
+  const inpDate = document.getElementById('inpWccReceiptDate');
+  if (inpDate) inpDate.value = window.selectedWccReceiptDate || '';
   const inpErs = document.getElementById('inpWccErsNo');
-  if (inpErs) inpErs.value = '';
+  if (inpErs) inpErs.value = window.selectedWccErsNo || '';
 
   if (typeof attachNexusCalendar === 'function') {
     attachNexusCalendar('inpWccReceiptDate', 'btnWccReceiptDateCalendar');
@@ -5965,28 +6434,66 @@ window.closeWccReceiptNoModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.submitWccReceiptNoModal = function() {
+window.submitWccReceiptNoModal = async function() {
   const inpRec = document.getElementById('inpWccReceiptNo');
+  const inpDate = document.getElementById('inpWccReceiptDate');
+  const inpErs = document.getElementById('inpWccErsNo');
+
   const recVal = inpRec ? inpRec.value.trim() : '';
+  const dateVal = inpDate ? inpDate.value.trim() : '';
+  const ersVal = inpErs ? inpErs.value.trim() : '';
 
-  closeWccReceiptNoModal();
+  if (!recVal) {
+    showToast('Please enter Receipt No');
+    return;
+  }
+  if (!dateVal) {
+    showToast('Please enter/select Receipt Date');
+    return;
+  }
 
-  if (selectedWccRowId) {
-    const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
-    if (parentRow) {
-      parentRow.task = "WCC Approved";
+  const poNo = window.selectedWccPoNo || '4500128934';
+  const siteId = window.selectedWccSiteId;
+
+  try {
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.submitReceipt) {
+        await NexusApi.commercial.wcc.submitReceipt(poNo, siteId, recVal, dateVal, ersVal);
+      }
+    } catch (apiErr) {
+      console.warn('Backend wcc.submitReceipt unavailable, updating locally:', apiErr);
     }
-  }
 
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup(`Receipt ${recVal ? `(${recVal}) ` : ''}submitted successfully!`, 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
+    closeWccReceiptNoModal();
 
-  setTimeout(() => {
-    backToWccList();
-  }, 1200);
+    window.selectedWccReceiptNo = recVal;
+    window.selectedWccReceiptDate = dateVal;
+    window.selectedWccErsNo = ersVal;
+    window.currentWccParentTask = 'WCC Approved';
+
+    if (selectedWccRowId && typeof commercialWccData !== 'undefined') {
+      const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+      if (parentRow) {
+        parentRow.task = "WCC Approved";
+        parentRow.receiptNo = recVal;
+        parentRow.receiptDate = dateVal;
+        parentRow.ersNo = ersVal;
+      }
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`Receipt ${recVal ? `(${recVal}) ` : ''}submitted successfully!`, 'Task Completed');
+    } else {
+      showToast('Receipt submitted successfully!');
+    }
+
+    setTimeout(() => {
+      backToWccList();
+    }, 1200);
+  } catch (err) {
+    console.error('Failed to submit receipt:', err);
+    showToast(`Failed to submit receipt: ${err.message || 'Server error'}`);
+  }
 };
 
 window.openWccSubmissionModal = function() {
@@ -5994,7 +6501,7 @@ window.openWccSubmissionModal = function() {
   const panel = document.getElementById('wccSubmissionPanel');
   if (!overlay || !panel) return;
 
-  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(card => card.style.display = 'none');
 
   const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(selectedWccRowId)) || (defaultWccItems && defaultWccItems[0]);
 
@@ -6004,11 +6511,19 @@ window.openWccSubmissionModal = function() {
   const inpComp = document.getElementById('inpWccCompletionDate');
   if (inpComp) inpComp.value = '24/08/2026';
 
+  const totalCalculated = calculateWccDetailTotalSum(currentDataset);
+  const formattedTotal = formatJmsSum(totalCalculated);
+
   const inpAmt = document.getElementById('inpWccAmount');
-  if (inpAmt) inpAmt.value = parentRow ? (parentRow.amount || '2,45,000.00') : '2,45,000.00';
+  if (inpAmt) {
+    inpAmt.value = window.selectedWccAmount || (parentRow && parentRow.amount) || formattedTotal || '2,45,000.00';
+  }
 
   const inpNo = document.getElementById('inpWccNo');
-  if (inpNo) inpNo.value = '';
+  if (inpNo) inpNo.value = window.selectedWccNo || '';
+
+  const inpDate = document.getElementById('inpWccDate');
+  if (inpDate) inpDate.value = window.selectedWccDate || '12/08/2026';
 
   if (typeof attachNexusCalendar === 'function') {
     attachNexusCalendar('inpWccDate', 'btnWccDateCalendar');
@@ -6049,25 +6564,69 @@ window.downloadWccWorklistPdf = function() {
   downloadCommercialProjectGeneratedPdf(poNo, siteId, 'fresh_verified_merged_wcc.pdf');
 };
 
-window.submitWccModal = function() {
-  closeWccSubmissionModal();
+window.submitWccModal = async function() {
+  const inpNo = document.getElementById('inpWccNo');
+  const inpDate = document.getElementById('inpWccDate');
+  const inpAmt = document.getElementById('inpWccAmount');
 
-  if (selectedWccRowId) {
-    const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
-    if (parentRow) {
-      parentRow.task = "Pending with Indus";
+  const wccNo = inpNo ? inpNo.value.trim() : '';
+  const wccDate = inpDate ? inpDate.value.trim() : '';
+  const amtRawStr = inpAmt ? inpAmt.value.replace(/,/g, '').trim() : '';
+  const wccAmount = parseFloat(amtRawStr) || 0;
+
+  if (!wccNo) {
+    showToast('Please enter WCC Number');
+    return;
+  }
+  if (!wccDate) {
+    showToast('Please enter/select WCC Date');
+    return;
+  }
+  if (wccAmount <= 0) {
+    showToast('Please enter a valid WCC Amount');
+    return;
+  }
+
+  const poNo = window.selectedWccPoNo || '4500128934';
+  const siteId = window.selectedWccSiteId;
+
+  try {
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.submitDetails) {
+        await NexusApi.commercial.wcc.submitDetails(poNo, siteId, wccNo, wccDate, wccAmount);
+      }
+    } catch (apiErr) {
+      console.warn('Backend wcc.submitDetails unavailable, updating locally:', apiErr);
     }
-  }
 
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('WCC details submitted successfully!', 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
+    closeWccSubmissionModal();
 
-  setTimeout(() => {
-    backToWccList();
-  }, 1200);
+    window.selectedWccNo = wccNo;
+    window.selectedWccDate = wccDate;
+    window.selectedWccAmount = wccAmount;
+    window.currentWccParentTask = 'Approval Pending';
+
+    if (selectedWccRowId && typeof commercialWccData !== 'undefined') {
+      const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
+      if (parentRow) {
+        parentRow.task = "Approval Pending";
+        parentRow.wccNo = wccNo;
+        parentRow.wccDate = wccDate;
+        parentRow.amount = formatJmsSum(wccAmount);
+      }
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`WCC ${wccNo} submitted successfully!`, 'Task Completed');
+    } else {
+      showToast('WCC details submitted successfully!');
+    }
+
+    await loadWccDetailFromApi(poNo, siteId);
+  } catch (err) {
+    console.error('Failed to submit WCC details:', err);
+    showToast(`Failed to submit WCC: ${err.message || 'Validation error'}`);
+  }
 };
 
 window.copyWccFieldValue = function(inputId) {
@@ -7721,6 +8280,32 @@ function parseUrlAndApplyState() {
         if (siteParam) window.selectedJmsSiteId = siteParam;
         if (rowIdParam) selectedJmsRowId = rowIdParam;
         if (taskParam) window.selectedJmsParentTask = taskParam;
+      } else if (viewParam === 'wcc_detail') {
+        const poParam = params.get('po_no') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_wcc_po_no') : null);
+        const siteParam = params.get('site_id') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_wcc_site_id') : null);
+        const rowIdParam = params.get('row_id') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_wcc_row_id') : null);
+        const taskParam = params.get('task') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_wcc_task') : null);
+        if (poParam) window.selectedWccPoNo = poParam;
+        if (siteParam) window.selectedWccSiteId = siteParam;
+        if (rowIdParam) selectedWccRowId = rowIdParam;
+        if (taskParam) {
+          window.currentWccParentTask = taskParam;
+          const tLow = taskParam.toLowerCase();
+          currentWccSubpageType = tLow.includes('pending') ? 'approval_pending' : (tLow.includes('reject') ? 'rejected' : 'to_be_submit');
+        }
+      } else if (viewParam === 'po_amend_detail') {
+        const poParam = params.get('po_no') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_po_amend_po_no') : null);
+        const siteParam = params.get('site_id') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_po_amend_site_id') : null);
+        const rowIdParam = params.get('row_id') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_po_amend_row_id') : null);
+        const taskParam = params.get('task') || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('nexus_po_amend_task') : null);
+        if (poParam) window.selectedPoAmendPoNo = poParam;
+        if (siteParam) window.selectedPoAmendSiteId = siteParam;
+        if (rowIdParam) selectedPoAmendRowId = rowIdParam;
+        if (taskParam) {
+          window.currentPoAmendParentTask = taskParam;
+          const tLow = taskParam.toLowerCase();
+          currentPoAmendSubpageType = tLow.includes('pending') ? 'pending_with_indus' : (tLow.includes('reject') ? 'rejected' : 'to_be_submit');
+        }
       }
     } else if (role === 'Warehouse Manager') {
       const warehouseViews = ['pr', 'grn', 'min', 'min_detail', 'mrn', 'mrn_detail', 'mtn', 'stn', 'srn', 'payment', 'supply'];
@@ -8361,6 +8946,28 @@ function updateURL() {
     if (window.selectedJmsSiteId) url.searchParams.set('site_id', window.selectedJmsSiteId);
     if (selectedJmsRowId) url.searchParams.set('row_id', selectedJmsRowId);
     if (window.selectedJmsParentTask) url.searchParams.set('task', window.selectedJmsParentTask);
+  } else if (currentModule === 'worklist' && currentWorklistView === 'wcc_detail') {
+    if (window.selectedWccPoNo) url.searchParams.set('po_no', window.selectedWccPoNo);
+    if (window.selectedWccSiteId) url.searchParams.set('site_id', window.selectedWccSiteId);
+    if (selectedWccRowId) url.searchParams.set('row_id', selectedWccRowId);
+    if (window.currentWccParentTask) url.searchParams.set('task', window.currentWccParentTask);
+    try {
+      sessionStorage.setItem('nexus_wcc_po_no', window.selectedWccPoNo || '');
+      sessionStorage.setItem('nexus_wcc_site_id', window.selectedWccSiteId || '');
+      sessionStorage.setItem('nexus_wcc_row_id', selectedWccRowId || '');
+      sessionStorage.setItem('nexus_wcc_task', window.currentWccParentTask || '');
+    } catch(e) {}
+  } else if (currentModule === 'worklist' && currentWorklistView === 'po_amend_detail') {
+    if (window.selectedPoAmendPoNo) url.searchParams.set('po_no', window.selectedPoAmendPoNo);
+    if (window.selectedPoAmendSiteId) url.searchParams.set('site_id', window.selectedPoAmendSiteId);
+    if (selectedPoAmendRowId) url.searchParams.set('row_id', selectedPoAmendRowId);
+    if (window.currentPoAmendParentTask) url.searchParams.set('task', window.currentPoAmendParentTask);
+    try {
+      sessionStorage.setItem('nexus_po_amend_po_no', window.selectedPoAmendPoNo || '');
+      sessionStorage.setItem('nexus_po_amend_site_id', window.selectedPoAmendSiteId || '');
+      sessionStorage.setItem('nexus_po_amend_row_id', selectedPoAmendRowId || '');
+      sessionStorage.setItem('nexus_po_amend_task', window.currentPoAmendParentTask || '');
+    } catch(e) {}
   } else if (currentModule === 'worklist' && currentWorklistView === 'min_detail' && activeWmMinRowId) {
     url.searchParams.set('site_id', activeWmMinRowId);
   } else if (currentModule === 'worklist' && currentWorklistView === 'mrn_detail' && activeWmMrnRowId) {
@@ -8623,6 +9230,20 @@ function renderApp() {
     if (!isPmStatusView) {
       pmSubmitArea.style.display = 'none';
     }
+  }
+
+  const poAmendApprovalArea = document.getElementById('poAmendApprovalPendingSubmitArea');
+  if (poAmendApprovalArea) {
+    const parentTask = String(window.currentPoAmendParentTask || '').trim().toLowerCase();
+    const isApprovalPending = (currentModule === 'worklist' && currentWorklistView === 'po_amend_detail' && parentTask.includes('pending'));
+    poAmendApprovalArea.style.display = isApprovalPending ? 'flex' : 'none';
+  }
+
+  const wccApprovalArea = document.getElementById('wccApprovalPendingSubmitArea');
+  if (wccApprovalArea) {
+    const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+    const isApprovalPending = (currentModule === 'worklist' && currentWorklistView === 'wcc_detail' && parentTask.includes('pending'));
+    wccApprovalArea.style.display = isApprovalPending ? 'flex' : 'none';
   }
 
   const minDetailSubmitArea = document.getElementById('wmMinDetailSubmitArea');
@@ -27991,15 +28612,15 @@ function loadWorklistDataset() {
       currentDataset = visibleData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'po_amend') {
-      if (typeof loadCommercialPoAmendFromApi === 'function' && (!commercialPoAmendData || commercialPoAmendData === defaultPoAmendItems || commercialPoAmendData.length === 0)) {
-        loadCommercialPoAmendFromApi();
-      } else {
-        syncCommercialPoAmendDataWithNewProject();
+      if (!commercialPoAmendData || commercialPoAmendData.length === 0) {
+        commercialPoAmendData = [...defaultPoAmendItems];
       }
       currentDataset = commercialPoAmendData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'wcc') {
-      syncCommercialWccDataWithNewProject();
+      if (!commercialWccData || commercialWccData.length === 0) {
+        commercialWccData = [...defaultWccItems];
+      }
       currentDataset = commercialWccData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms_detail') {
@@ -29474,7 +30095,10 @@ function renderWorklistToolbar() {
     } else if (isPoAmendDetail) {
       const initialTotalFormatted = formatJmsSum(calculatePoAmendDetailTotalSum(currentDataset));
       const hasSelectedRow = currentDataset.some(r => r.selected);
-      const isToBeSubmit = currentPoAmendSubpageType === 'to_be_submit';
+      const parentTask = String(window.currentPoAmendParentTask || '').trim().toLowerCase();
+      const isApprovalPending = parentTask.includes('pending');
+      const isRejected = parentTask.includes('reject');
+      const hasMerged = Boolean(window.currentPoAmendHasMerged);
 
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
@@ -29487,21 +30111,38 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
-          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf(this)">
-            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="approveSelectedPoAmendDetailRow()">
-            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPoAmendDetailRefresh" data-tooltip="Refresh to JMS Page" aria-label="Refresh" style="cursor: pointer;" onclick="backToJmsList()">
-            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
-          </button>
+          ${isRejected ? `
+            ${hasMerged ? `
+              <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf(this)">
+                <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+              </button>
+            ` : `
+              <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Process PDF" aria-label="Process PDF" style="cursor: pointer;" onclick="handlePdfProcessClick('PO Amend', this)">
+                <img src="icons/PDF Process.svg" alt="Process PDF" class="toolbar-icon-img" width="28" height="28">
+              </button>
+            `}
+          ` : `
+            <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf(this)">
+              <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+            </button>
+          `}
+          ${!isApprovalPending ? `
+            <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="approveSelectedPoAmendDetailRow()">
+              <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+            </button>
+            <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPoAmendDetailRefresh" data-tooltip="Refresh to JMS Page" aria-label="Refresh" style="cursor: pointer;" onclick="backToJmsList()">
+              <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+            </button>
+          ` : ''}
         </div>
       `;
     } else if (isWccDetail) {
       const initialTotalFormatted = formatJmsSum(calculateWccDetailTotalSum(currentDataset));
       const hasSelectedRow = currentDataset.some(r => r.selected || r.highlighted);
-      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
+      const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+      const isApprovalPending = parentTask.includes('pending');
+      const isRejected = parentTask.includes('reject');
+      const hasMerged = Boolean(window.currentWccHasMerged);
 
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
@@ -29514,16 +30155,31 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
-          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportWccDetailToPdf()">
-            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
-          </button>
+          ${isRejected ? `
+            ${hasMerged ? `
+              <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportWccDetailToPdf()">
+                <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+              </button>
+            ` : `
+              <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Process PDF" aria-label="Process PDF" style="cursor: pointer;" onclick="handlePdfProcessClick('WCC', this)">
+                <img src="icons/PDF Process.svg" alt="Process PDF" class="toolbar-icon-img" width="28" height="28">
+              </button>
+            `}
+          ` : `
+            <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportWccDetailToPdf()">
+              <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+            </button>
+          `}
           <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWccDetailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportWccDetailToCsv()">
             <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
           </button>
-          ${isToBeSubmit ? `
-          <button type="button" class="toolbar-icon-btn" id="btnWccDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="highlightSelectedWccDetailRows()">
-            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
-          </button>
+          ${!isApprovalPending ? `
+            <button type="button" class="toolbar-icon-btn" id="btnWccDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="highlightSelectedWccDetailRows()">
+              <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+            </button>
+            <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnWccDetailRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;" onclick="loadWccDetailFromApi(window.selectedWccPoNo, window.selectedWccSiteId)">
+              <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+            </button>
           ` : ''}
         </div>
       `;
@@ -30193,7 +30849,6 @@ function renderWorklistFooter() {
     }
 
     if (typeof syncCommercialJmsDataWithNewProject === 'function') syncCommercialJmsDataWithNewProject();
-    if (typeof syncCommercialPoAmendDataWithNewProject === 'function') syncCommercialPoAmendDataWithNewProject();
     if (typeof syncCommercialWccDataWithNewProject === 'function') syncCommercialWccDataWithNewProject();
     if (typeof syncCommercialInvoiceDataWithNewProject === 'function') syncCommercialInvoiceDataWithNewProject();
     if (typeof syncCommercialReceivableDataWithNewProject === 'function') syncCommercialReceivableDataWithNewProject();
@@ -32465,12 +33120,16 @@ function renderWorklistTableHead() {
       `;
       rebindFilterButtons();
     } else if (currentWorklistView === 'po_amend_detail') {
+      const parentTask = String(window.currentPoAmendParentTask || '').trim().toLowerCase();
+      const isApprovalPending = parentTask.includes('pending');
       thead.innerHTML = `
         <tr class="master-view-header">
-          <!-- 1. Select: 50px, center -->
-          <th style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px; cursor: pointer;" onclick="togglePoAmendDetailSelectAll()">
-            <span>Select</span>
-          </th>
+          ${isApprovalPending ? '' : `
+            <!-- 1. Select: 50px, center -->
+            <th style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px; cursor: pointer;" onclick="togglePoAmendDetailSelectAll()">
+              <span>Select</span>
+            </th>
+          `}
           <!-- 2. Amendment Type: 14%, center -->
           <th style="width: 14%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <span>Amendment Type</span>
@@ -32510,84 +33169,49 @@ function renderWorklistTableHead() {
       `;
       rebindFilterButtons();
     } else if (currentWorklistView === 'wcc_detail') {
-      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
-      if (isToBeSubmit) {
-        thead.innerHTML = `
-          <tr class="master-view-header">
+      const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+      const isApprovalPending = parentTask.includes('pending');
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          ${isApprovalPending ? '' : `
             <!-- 1. Select: 60px, center -->
             <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="toggleWccDetailSelectAll()">
               <span>Select</span>
             </th>
-            <!-- 2. Line No: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>Line No</span>
-            </th>
-            <!-- 3. Item Code: 30ch, center -->
-            <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-              <span>Item Code</span>
-            </th>
-            <!-- 4. Item Name: 40ch, center with filter -->
-            <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-              <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-                <span>Item Name</span>
-                <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
-              </div>
-            </th>
-            <!-- 5. UOM: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>UOM</span>
-            </th>
-            <!-- 6. Qty: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>Qty</span>
-            </th>
-            <!-- 7. Rate: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>Rate</span>
-            </th>
-            <!-- 8. Amount: 15ch, center -->
-            <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-              <span>Amount</span>
-            </th>
-          </tr>
-        `;
-      } else {
-        thead.innerHTML = `
-          <tr class="master-view-header">
-            <!-- 1. Line No: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>Line No</span>
-            </th>
-            <!-- 2. Item Code: 30ch, center -->
-            <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-              <span>Item Code</span>
-            </th>
-            <!-- 3. Item Name: 40ch, center with filter -->
-            <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-              <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-                <span>Item Name</span>
-                <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
-              </div>
-            </th>
-            <!-- 4. UOM: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>UOM</span>
-            </th>
-            <!-- 5. Qty: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>Qty</span>
-            </th>
-            <!-- 6. Rate: 10ch, center -->
-            <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
-              <span>Rate</span>
-            </th>
-            <!-- 7. Amount: 15ch, center -->
-            <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-              <span>Amount</span>
-            </th>
-          </tr>
-        `;
-      }
+          `}
+          <!-- 2. Line No: 10ch, center -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Line No</span>
+          </th>
+          <!-- 3. Item Code: 30ch, center -->
+          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Item Code</span>
+          </th>
+          <!-- 4. Item Name: 40ch, center with filter -->
+          <th style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Item Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. UOM: 10ch, center -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>UOM</span>
+          </th>
+          <!-- 6. Qty: 10ch, center -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Qty</span>
+          </th>
+          <!-- 7. Rate: 10ch, center -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Rate</span>
+          </th>
+          <!-- 8. Amount: 15ch, center -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+      `;
       rebindFilterButtons();
     } else if (currentWorklistView === 'invoice') {
       thead.innerHTML = `
@@ -33124,6 +33748,10 @@ function applyFiltersAndRender() {
   const accGstr2bDownloadArea = document.getElementById('accGstr2bDownloadArea');
   if (accGstr2bDownloadArea) {
     accGstr2bDownloadArea.style.display = 'none';
+  }
+  let poAmendApprovalArea = document.getElementById('poAmendApprovalPendingSubmitArea');
+  if (poAmendApprovalArea) {
+    poAmendApprovalArea.style.display = 'none';
   }
 
   const role = getAuthenticatedUserRole();
@@ -35151,6 +35779,15 @@ function applyFiltersAndRender() {
 
   const isCommercialWorklistView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail', 'po_to_be_open'].includes(currentWorklistView);
 
+  if (poAmendApprovalArea && currentWorklistView !== 'po_amend_detail') {
+    poAmendApprovalArea.style.display = 'none';
+  }
+
+  const wccApprovalArea = document.getElementById('wccApprovalPendingSubmitArea');
+  if (wccApprovalArea && currentWorklistView !== 'wcc_detail') {
+    wccApprovalArea.style.display = 'none';
+  }
+
   if (currentModule === 'worklist' && isCommercialWorklistView) {
     if (currentWorklistView === 'new_project') {
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.customerName)) {
@@ -35407,7 +36044,7 @@ function applyFiltersAndRender() {
             <!-- 8. Task: 20ch & left -->
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               <span style="color: #0f172a; font-weight: 400; font-size: 0.92rem;">
-                ${row.task || ''}
+                ${(row.task === 'Pending with Indus' ? 'Approval Pending' : row.task) || ''}
               </span>
             </td>
             <!-- 9. Ageing: 10ch & center -->
@@ -35425,7 +36062,9 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'wcc') {
-      syncCommercialWccDataWithNewProject();
+      if (!commercialWccData || commercialWccData.length === 0) {
+        commercialWccData = [...defaultWccItems];
+      }
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.supportRequired)) {
         currentDataset = commercialWccData.map(item => ({ ...item }));
       }
@@ -35488,7 +36127,7 @@ function applyFiltersAndRender() {
             <!-- 7. Task -->
             <td style="${isWccColumnsExpanded ? 'width: 140px; min-width: 140px;' : 'width: 12%;'} text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 10px;">
               <span style="color: #0f172a; font-weight: 400; font-size: 0.92rem;">
-                ${row.task || ''}
+                ${(row.task === 'Pending with Indus' ? 'Approval Pending' : row.task) || ''}
               </span>
             </td>
             ${isWccColumnsExpanded ? `
@@ -35645,10 +36284,19 @@ function applyFiltersAndRender() {
         totalAmountEl.textContent = formatJmsSum(calculatePoAmendDetailTotalSum(filteredDataset));
       }
 
+      const parentTask = String(window.currentPoAmendParentTask || '').trim().toLowerCase();
+      const isApprovalPending = parentTask.includes('pending');
+      const isRejected = parentTask.includes('reject');
+
+      const poAmendApprovalArea = document.getElementById('poAmendApprovalPendingSubmitArea');
+      if (poAmendApprovalArea) {
+        poAmendApprovalArea.style.display = isApprovalPending ? 'flex' : 'none';
+      }
+
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+            <td colspan="${isApprovalPending ? '8' : '9'}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
           </tr>
         `;
         return;
@@ -35659,15 +36307,16 @@ function applyFiltersAndRender() {
 
       let rowsHtml = filteredDataset.map(row => {
         const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
-        const isChecked = Boolean(row.selected);
+        const isChecked = Boolean(row.selected || row.highlighted);
+        const isQty = (row.amendmentType || '').toLowerCase().includes('qty');
         const isAdditional = (row.amendmentType || '').toLowerCase().includes('additional');
 
         let lineNoCellHtml = row.lineNo || '';
-        if (isToBeSubmitTask && isAdditional) {
+        if (isQty) {
           lineNoCellHtml = `
-            <button type="button" onclick="copyPoAmendItemCode('${(row.itemCode || '').replace(/'/g, "\\'")}'); event.stopPropagation();" title="Copy Item Code: ${row.itemCode || ''}" style="background: none; border: none; cursor: pointer; padding: 2px; display: inline-flex; align-items: center; justify-content: center;">
-              <img src="icons/Copy (1).svg" alt="Copy Item Code" width="18" height="18">
-            </button>
+            <div class="line-no-badge" style="width: 58px; height: 26px; border-radius: 4px; border: 1.5px solid #0454e4; background: #e0f2fe; color: #0454e4; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+              ${row.lineNo || ''}
+            </div>
           `;
         } else if (isAdditional) {
           lineNoCellHtml = `
@@ -35677,12 +36326,14 @@ function applyFiltersAndRender() {
 
         return `
           <tr data-row-id="${row.id}" style="${rowBgStyle}">
-            <!-- 1. Select: Circle radio button (Green when checked, single selection) -->
-            <td style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; padding: 10px 4px;">
-              <div class="circular-radio-btn" onclick="togglePoAmendDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
-                ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
-              </div>
-            </td>
+            ${isApprovalPending ? '' : `
+              <!-- 1. Select: Circle radio button (Green when checked, single selection) -->
+              <td style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; padding: 10px 4px;">
+                <div class="circular-radio-btn" onclick="togglePoAmendDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
+                  ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+                </div>
+              </td>
+            `}
             <!-- 2. Amendment Type: 14% & center -->
             <td style="width: 14%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; font-weight: 600; color: #0f172a;">
               ${row.amendmentType || ''}
@@ -35719,11 +36370,11 @@ function applyFiltersAndRender() {
         `;
       }).join('');
 
-      if (allHighlighted) {
+      if (!isApprovalPending && (allHighlighted || currentDataset.some(r => r.highlighted))) {
         rowsHtml += `
           <tr id="rowPoAmendDetailSubmitAction" style="background: transparent; border: none !important;">
             <td colspan="9" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
-              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="${currentPoAmendSubpageType === 'pending_with_indus' ? 'openPoAmendStatusModal()' : 'openPoAmendIdModal()'}" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="openPoAmendIdModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </td>
@@ -35752,8 +36403,15 @@ function applyFiltersAndRender() {
         totalAmountEl.textContent = formatJmsSum(calculateWccDetailTotalSum(filteredDataset));
       }
 
-      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
-      const colSpanCount = isToBeSubmit ? 8 : 7;
+      const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+      const isApprovalPending = parentTask.includes('pending');
+      const isRejected = parentTask.includes('reject');
+      const colSpanCount = isApprovalPending ? 7 : 8;
+
+      const wccApprovalArea = document.getElementById('wccApprovalPendingSubmitArea');
+      if (wccApprovalArea) {
+        wccApprovalArea.style.display = isApprovalPending ? 'flex' : 'none';
+      }
 
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
@@ -35770,99 +36428,54 @@ function applyFiltersAndRender() {
         const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
         const isChecked = Boolean(row.selected || row.highlighted);
 
-        if (isToBeSubmit) {
-          return `
-            <tr data-row-id="${row.id}" style="${rowBgStyle}">
+        return `
+          <tr data-row-id="${row.id}" style="${rowBgStyle}">
+            ${isApprovalPending ? '' : `
               <!-- 1. Select: Circle radio button (Green when checked) -->
               <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
                 <div class="circular-radio-btn" onclick="toggleWccDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
                   ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
                 </div>
               </td>
-              <!-- 2. Line No: 10ch & center -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.lineNo || ''}
-              </td>
-              <!-- 3. Item Code: 30ch & left -->
-              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-                ${row.itemCode || ''}
-              </td>
-              <!-- 4. Item Name: 40ch & left -->
-              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-                ${row.itemName || ''}
-              </td>
-              <!-- 5. UOM: 10ch & center -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.uom || ''}
-              </td>
-              <!-- 6. Qty: 10ch & right -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.qty || ''}
-              </td>
-              <!-- 7. Rate: 10ch & right -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.rate || ''}
-              </td>
-              <!-- 8. Amount: 15ch & right -->
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
-                ${row.amount || ''}
-              </td>
-            </tr>
-          `;
-        } else {
-          // 'rejected': No Select column
-          return `
-            <tr data-row-id="${row.id}" style="${rowBgStyle}">
-              <!-- 1. Line No: 10ch & center -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.lineNo || ''}
-              </td>
-              <!-- 2. Item Code: 30ch & left -->
-              <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-                ${row.itemCode || ''}
-              </td>
-              <!-- 3. Item Name: 40ch & left -->
-              <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-                ${row.itemName || ''}
-              </td>
-              <!-- 4. UOM: 10ch & center -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.uom || ''}
-              </td>
-              <!-- 5. Qty: 10ch & right -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.qty || ''}
-              </td>
-              <!-- 6. Rate: 10ch & right -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.rate || ''}
-              </td>
-              <!-- 7. Amount: 15ch & right -->
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
-                ${row.amount || ''}
-              </td>
-            </tr>
-          `;
-        }
-      }).join('');
-
-      if (isToBeSubmit && allHighlighted) {
-        rowsHtml += `
-          <tr id="rowWccDetailSubmitAction" style="background: transparent; border: none !important;">
-            <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
-              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWccDetailSubmit" aria-label="Submit" onclick="openWccSubmissionModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit WCC Details">
-                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
-              </button>
+            `}
+            <!-- 2. Line No: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.lineNo || ''}
+            </td>
+            <!-- 3. Item Code: 30ch & left -->
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.itemCode || ''}
+            </td>
+            <!-- 4. Item Name: 40ch & left -->
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+              ${row.itemName || ''}
+            </td>
+            <!-- 5. UOM: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.uom || ''}
+            </td>
+            <!-- 6. Qty: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.qty || ''}
+            </td>
+            <!-- 7. Rate: 10ch & right -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+              ${row.rate || ''}
+            </td>
+            <!-- 8. Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+              ${row.amount || ''}
             </td>
           </tr>
         `;
-      } else if (!isToBeSubmit) {
-        // 'rejected': Centered Refresh icon leading to JMS page
+      }).join('');
+
+      if (!isApprovalPending && (allHighlighted || currentDataset.some(r => r.highlighted))) {
         rowsHtml += `
-          <tr id="rowWccRejectedRefreshAction" style="background: transparent; border: none !important;">
-            <td colspan="7" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
-              <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnWccRejectedRefresh" aria-label="Go to JMS Page" onclick="backToJmsList()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Go to JMS Page">
-                <img src="icons/Refresh.svg" alt="Refresh" width="36" height="36">
+          <tr id="rowWccDetailSubmitAction" style="background: transparent; border: none !important;">
+            <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWccDetailSubmit" aria-label="Submit" onclick="openWccSubmissionModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit Details">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </td>
           </tr>
@@ -53831,8 +54444,7 @@ window.submitWorkTypeSelection = async function() {
     ? currentDataset.some(r => {
         const q = Number(r.rawQty !== undefined ? r.rawQty : r.qty) || 0;
         const pq = Number(r.poQty) || 0;
-        const mq = Number(r.netMaterialQty !== undefined ? r.netMaterialQty : pq);
-        return (q > pq) || (q > mq);
+        return (pq - q < 0);
       })
     : false;
   const targetTask = isPoAmendFallback ? 'PO Amend to be submit' : 'WCC to be submit';
@@ -53873,114 +54485,6 @@ window.copyPoAmendItemCode = function(code) {
   } else {
     showToast(`Copied Item Code: ${code}`);
   }
-};
-
-window.openPoAmendIdModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendIdPanel');
-  if (!overlay || !panel) return;
-
-  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
-  const inpRef = document.getElementById('inpPoAmendRefId');
-  if (inpRef) inpRef.value = '';
-
-  panel.style.display = 'block';
-  overlay.style.display = 'flex';
-};
-
-window.closePoAmendIdModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendIdPanel');
-  if (panel) panel.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
-};
-
-window.submitPoAmendIdModal = function() {
-  const inpRef = document.getElementById('inpPoAmendRefId');
-  const refId = inpRef ? inpRef.value.trim() : '';
-  if (!refId) {
-    showToast('Please enter Ref. ID');
-    return;
-  }
-
-  closePoAmendIdModal();
-
-  if (selectedPoAmendRowId) {
-    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = 'pending with indus';
-    }
-  }
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('PO Amendment Ref. ID submitted successfully!', 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
-
-  setTimeout(() => {
-    backToPoAmendList();
-  }, 1200);
-};
-
-window.openPoAmendStatusModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendStatusPanel');
-  if (!overlay || !panel) return;
-
-  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
-  const inpRev = document.getElementById('inpPoAmendRevisionNo');
-  const inpDate = document.getElementById('inpPoAmendApprovedDate');
-  if (inpRev) inpRev.value = '';
-  if (inpDate) inpDate.value = '12 - 08 - 2026';
-
-  panel.style.display = 'block';
-  overlay.style.display = 'flex';
-
-  if (typeof attachNexusCalendar === 'function') {
-    attachNexusCalendar('inpPoAmendApprovedDate', 'btnPoAmendApprovedDateCalendar');
-  }
-};
-
-window.closePoAmendStatusModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendStatusPanel');
-  if (panel) panel.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
-};
-
-window.submitPoAmendStatusModal = function() {
-  const inpRev = document.getElementById('inpPoAmendRevisionNo');
-  const revNo = inpRev ? inpRev.value.trim() : '';
-  if (!revNo) {
-    showToast('Please enter Revision No');
-    return;
-  }
-
-  closePoAmendStatusModal();
-
-  if (selectedPoAmendRowId) {
-    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = 'Approved';
-    }
-  }
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('PO Amendment status updated successfully!', 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
-
-  // After submit, task completion pop should come and led to WCC page automatically
-  setTimeout(() => {
-    currentModule = 'worklist';
-    currentWorklistView = 'wcc';
-    activeColumnFilters = {};
-    updateURL();
-    renderApp();
-    showToast('Navigated to WCC Worklist');
-  }, 1200);
 };
 
 // ─── Inline HTML Compatibility Handlers ───

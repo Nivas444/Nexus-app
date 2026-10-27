@@ -1916,12 +1916,63 @@
         async getPoAmendDetails(poNo, siteId) {
           const url = `/commercial/jms/po-amend-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
+        },
+        async rejectRow(poNo, siteId, workflow = 'PO Amend') {
+          return await request('/commercial/jms/reject', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow })
+          });
+        },
+        async submitAmendmentStatus(poNo, siteId, workflow = 'PO Amend', revisionNo = null, approvedDate = null) {
+          return await request('/commercial/jms/submit-amendment-status', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow, revisionNo, approvedDate })
+          });
+        },
+        async processPdf(poNo, siteId) {
+          return await request('/commercial/jms/pdf/process', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId })
+          });
         }
       },
       wcc: {
+        async getProjects() {
+          return await request('/commercial/wcc/projects', { method: 'GET' });
+        },
         async getPoDetails(poNo, siteId) {
           const url = `/commercial/jms/wcc-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
+        },
+        async submitDetails(poNo, siteId, wccNo, wccDate, wccAmount) {
+          return await request('/commercial/jms/wcc/submit-details', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, wccNo, wccDate, wccAmount })
+          });
+        },
+        async submitReceipt(poNo, siteId, receiptNo, receiptDate, ersNo) {
+          return await request('/commercial/jms/wcc/submit-receipt', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, receiptNo, receiptDate, ersNo })
+          });
+        },
+        async rejectRow(poNo, siteId) {
+          return await request('/commercial/jms/reject', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow: 'WCC' })
+          });
+        },
+        async submitAmendmentStatus(poNo, siteId, revisionNo, approvedDate) {
+          return await request('/commercial/jms/submit-amendment-status', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow: 'WCC', revisionNo, approvedDate })
+          });
+        },
+        async processPdf(poNo, siteId) {
+          return await request('/commercial/jms/pdf/process', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId })
+          });
         }
       },
       poAmend: {
@@ -1939,7 +1990,49 @@
         async getPoDetails(poNo, siteId) {
           const url = `/commercial/jms/po-amend-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
+        },
+        async submitReference(poNo, siteId, poAmendmentRefId) {
+          return await request('/commercial/jms/po-amend/submit-reference', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, poAmendmentRefId })
+          });
+        },
+        async rejectRow(poNo, siteId) {
+          return await request('/commercial/jms/reject', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow: 'PO Amend' })
+          });
+        },
+        async submitAmendmentStatus(poNo, siteId, revisionNo, approvedDate) {
+          return await request('/commercial/jms/submit-amendment-status', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow: 'PO Amend', revisionNo, approvedDate })
+          });
+        },
+        async processPdf(poNo, siteId) {
+          return await request('/commercial/jms/pdf/process', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId })
+          });
         }
+      },
+      async rejectRow(poNo, siteId, workflow = 'PO Amend') {
+        return await request('/commercial/jms/reject', {
+          method: 'POST',
+          body: JSON.stringify({ poNo, siteId, workflow })
+        });
+      },
+      async submitAmendmentStatus(poNo, siteId, workflow = 'PO Amend', revisionNo = null, approvedDate = null) {
+        return await request('/commercial/jms/submit-amendment-status', {
+          method: 'POST',
+          body: JSON.stringify({ poNo, siteId, workflow, revisionNo, approvedDate })
+        });
+      },
+      async processPdf(poNo, siteId) {
+        return await request('/commercial/jms/pdf/process', {
+          method: 'POST',
+          body: JSON.stringify({ poNo, siteId })
+        });
       }
     }
   };

@@ -20,6 +20,23 @@ def pdf_service(project_db_session):
     return WccPdfService(project_db=project_db_session)
 
 
+@pytest.fixture(autouse=True)
+def cleanup_dummy_projects(project_db_session):
+    dummy_pos = [
+        "PO-SMP-15-VERIFY", "PO-VERIFY-15-ROWS", "PO-MERGE-BLANK-TEST",
+        "PO-VERIFY-30-AND-WCC-BORDER", "PO-VERIFY-40-AND-WCC-BORDER",
+        "PO-FITTED-DOC-TEST", "PO-INFO-LINES-TEST"
+    ]
+    for po in dummy_pos:
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == po).delete()
+    project_db_session.commit()
+    yield
+    for po in dummy_pos:
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == po).delete()
+    project_db_session.commit()
+
+
+
 def test_annexure_and_boq_15_sample_rows_and_square_corners(project_db_session, pdf_service):
     """
     Requirement 3:

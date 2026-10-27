@@ -217,13 +217,14 @@ def test_3_po_amend_approval_pending_submit_action(
     assert sub_res.status_code == 200
     data = sub_res.json()
     assert data["success"] is True
-    assert data["task"] == "Amend Approved"
+    assert data["task"] == "WCC to be submit"
 
     # Verify DB values
     project_db_session.expire_all()
     db_proj = project_db_session.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
-    assert db_proj.current_task == "Amend Approved"
+    assert db_proj.current_task == "WCC to be submit"
     assert db_proj.po_revision_number == "REV-02"
+    assert str(db_proj.po_date) == "2026-10-15"
     assert str(db_proj.po_amendment_completion_date) == "2026-10-15"
     assert db_proj.po_amendment_completion_status == "Approved"
 

@@ -1791,6 +1791,17 @@
       async getProjects() {
         return await request('/commercial/projects', { method: 'GET' });
       },
+      async deleteProject(projectId) {
+        return await request(`/commercial/projects/${encodeURIComponent(projectId)}`, {
+          method: 'DELETE'
+        });
+      },
+      async deleteProjects(projectIds) {
+        return await request('/commercial/projects/delete', {
+          method: 'POST',
+          body: JSON.stringify({ project_ids: projectIds })
+        });
+      },
       async uploadProjects(file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -1909,6 +1920,12 @@
           const url = `/commercial/jms/pdf/download?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
         },
+        async processPdf(poNo, siteId) {
+          return await request('/commercial/jms/pdf/process', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId })
+          });
+        },
         async getWccDetails(poNo, siteId) {
           const url = `/commercial/jms/wcc-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
@@ -1939,6 +1956,36 @@
         async getPoDetails(poNo, siteId) {
           const url = `/commercial/jms/po-amend-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
+        },
+        async updateLineItemQty(lineItemId, qty, poNo, siteId) {
+          return await request(`/commercial/jms/po-amend/line-items/${encodeURIComponent(lineItemId)}/qty`, {
+            method: 'PATCH',
+            body: JSON.stringify({ qty: parseFloat(qty), poNo, siteId })
+          });
+        },
+        async processPdf(poNo, siteId) {
+          return await request('/commercial/jms/pdf/process', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId })
+          });
+        },
+        async submitReference(poNo, siteId, poAmendmentRefId) {
+          return await request('/commercial/jms/po-amend/submit-reference', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, poAmendmentRefId })
+          });
+        },
+        async submitAmendmentStatus(poNo, siteId, revisionNo, approvedDate) {
+          return await request('/commercial/jms/submit-amendment-status', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow: 'po_amend', revisionNo, approvedDate })
+          });
+        },
+        async rejectPo(poNo, siteId) {
+          return await request('/commercial/jms/reject', {
+            method: 'POST',
+            body: JSON.stringify({ poNo, siteId, workflow: 'po_amend' })
+          });
         }
       }
     }

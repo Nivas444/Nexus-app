@@ -7,7 +7,9 @@ from app.services.commercial_project_service import CommercialProjectService
 from app.services.auth_service import auth_service
 from app.schemas.commercial_project import (
     CommercialProjectListResponse,
-    CommercialBulkUploadResponse
+    CommercialBulkUploadResponse,
+    CommercialProjectDeleteRequest,
+    CommercialProjectDeleteResponse
 )
 
 router = APIRouter(prefix="/commercial", tags=["Commercial Manager - New Project & PO"])
@@ -39,6 +41,43 @@ def list_commercial_projects(
     """
     service = CommercialProjectService(db)
     return service.get_projects_list()
+
+
+@router.delete("/projects/{project_id}", summary="Delete Commercial Project")
+def delete_commercial_project(
+    project_id: str,
+    db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Deletes a project record from PostgreSQL `telecom_project` table in `Nexus_Project DB`.
+    """
+    service = CommercialProjectService(db)
+    success = service.delete_project(project_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Project '{project_id}' not found."
+        )
+    return {"success": True, "message": f"Project '{project_id}' deleted successfully."}
+
+
+@router.post("/projects/delete", response_model=CommercialProjectDeleteResponse, summary="Bulk Delete Commercial Projects")
+def bulk_delete_commercial_projects(
+    payload: CommercialProjectDeleteRequest,
+    db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Bulk deletes projects from PostgreSQL `telecom_project` table in `Nexus_Project DB`.
+    """
+    service = CommercialProjectService(db)
+    count = service.delete_projects_bulk(payload.project_ids)
+    return CommercialProjectDeleteResponse(
+        success=True,
+        deleted_count=count,
+        message=f"Successfully deleted {count} project(s)."
+    )
 
 
 @router.post("/projects/bulk-upload", response_model=CommercialBulkUploadResponse, summary="Bulk Upload New Projects via Excel")

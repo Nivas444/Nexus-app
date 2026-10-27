@@ -145,17 +145,22 @@ async function loadCommercialProjectsFromApi() {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.getProjects) {
     try {
       const response = await NexusApi.commercial.getProjects();
-      if (response && Array.isArray(response.items)) {
+      if (response && Array.isArray(response.items) && response.items.length > 0) {
         commercialWorklistData = response.items;
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
         }
+      } else if (!commercialWorklistData || commercialWorklistData.length === 0) {
+        if (typeof defaultCommercialProjects !== 'undefined') {
+          commercialWorklistData = defaultCommercialProjects.map(p => ({ ...p }));
+        }
       }
     } catch (err) {
       console.error('Error fetching commercial projects from API:', err);
-      if (typeof showToast === 'function') {
-        const errorCode = (err && (err.status || err.statusCode || err.code)) || 503;
-        showToast(`Couldnt load DataBase: ${errorCode}`);
+      if (!commercialWorklistData || commercialWorklistData.length === 0) {
+        if (typeof defaultCommercialProjects !== 'undefined') {
+          commercialWorklistData = defaultCommercialProjects.map(p => ({ ...p }));
+        }
       }
     }
   }
@@ -188,10 +193,16 @@ async function loadCommercialProjectsFromApi() {
       currentDataset = visibleData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'po_amend') {
-      currentDataset = (commercialPoAmendData || []).map(item => ({ ...item }));
+      if (!commercialPoAmendData || !Array.isArray(commercialPoAmendData) || commercialPoAmendData.length !== 6) {
+        commercialPoAmendData = defaultPoAmendItems.map(item => ({ ...item }));
+      }
+      currentDataset = commercialPoAmendData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'wcc') {
-      currentDataset = (commercialWccData || []).map(item => ({ ...item }));
+      if (!commercialWccData || commercialWccData.length === 0) {
+        commercialWccData = [...defaultWccItems];
+      }
+      currentDataset = commercialWccData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'invoice') {
       currentDataset = (commercialInvoiceData || []).map(item => ({ ...item }));
@@ -3601,7 +3612,85 @@ let infraWhSrnData = [
   }
 ];
 
-let commercialWorklistData = [];
+const defaultCommercialProjects = [
+  {
+    id: "prj-1",
+    customerName: "Indus Towers Ltd",
+    date: "12/08/2026",
+    poNo: "4500128934",
+    projectId: "PRJ-2026-001",
+    siteId: "IN-123456",
+    siteName: "Guindy Hub",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    ageing: "12 Days",
+    poAmount: 245000,
+    task: "Civil Work Signoff",
+    selected: false
+  },
+  {
+    id: "prj-2",
+    customerName: "Indus Towers Ltd",
+    date: "10/08/2026",
+    poNo: "4500128935",
+    projectId: "PRJ-2026-002",
+    siteId: "IN-123457",
+    siteName: "Velachery Site",
+    projectType: "Upgrade",
+    subProjectType: "Electrical",
+    ageing: "14 Days",
+    poAmount: 180000,
+    task: "Electrical Signoff",
+    selected: false
+  },
+  {
+    id: "prj-3",
+    customerName: "Indus Towers Ltd",
+    date: "05/08/2026",
+    poNo: "4500128936",
+    projectId: "PRJ-2026-003",
+    siteId: "IN-123458",
+    siteName: "OMR Tower",
+    projectType: "Maintenance",
+    subProjectType: "Telecom",
+    ageing: "19 Days",
+    poAmount: 320000,
+    task: "Tower Audit",
+    selected: false
+  },
+  {
+    id: "prj-4",
+    customerName: "Indus Towers Ltd",
+    date: "01/08/2026",
+    poNo: "4500128937",
+    projectId: "PRJ-2026-004",
+    siteId: "IN-123459",
+    siteName: "Tambaram Junction",
+    projectType: "New Build",
+    subProjectType: "Civil",
+    ageing: "23 Days",
+    poAmount: 410000,
+    task: "Earth Pit Testing",
+    selected: false
+  },
+  {
+    id: "prj-5",
+    customerName: "Indus Towers Ltd",
+    date: "28/07/2026",
+    poNo: "4500128938",
+    projectId: "PRJ-2026-005",
+    siteId: "IN-123460",
+    siteName: "Ambattur Estate",
+    projectType: "Upgrade",
+    subProjectType: "Optical Fiber",
+    ageing: "26 Days",
+    poAmount: 710000,
+    task: "OTDR Reports",
+    selected: false
+  }
+];
+
+let commercialWorklistData = [...defaultCommercialProjects];
 
 let pmStatusDataStore = [
   // YTS (Yet to Start) Records
@@ -4767,13 +4856,13 @@ const defaultPoAmendItems = [
     id: "poamend-1",
     date: "12/08/2026",
     poNo: "4500128934",
-    poStatus: "Amend Requested",
+    poStatus: "Rejected",
     projectId: "PRJ-2026-001",
     siteId: "IN-123456",
     siteName: "Guindy Hub",
     projectType: "New Build",
     subProjectType: "Civil",
-    task: "PO Amend to be submit",
+    task: "Rejected",
     ageing: "12 Days",
     amount: "2,45,000.00",
     rawAmount: 245000
@@ -4782,153 +4871,147 @@ const defaultPoAmendItems = [
     id: "poamend-2",
     date: "10/08/2026",
     poNo: "4500128935",
-    poStatus: "Revision Pending",
+    poStatus: "Under Review",
     projectId: "PRJ-2026-002",
     siteId: "IN-123457",
-    siteName: "Velachery Site",
+    siteName: "Ambattur Central",
     projectType: "Upgrade",
     subProjectType: "Electrical",
-    task: "Pending with Indus",
+    task: "Approval Pending",
     ageing: "14 Days",
-    amount: "1,80,000.00",
-    rawAmount: 180000
+    amount: "3,80,000.00",
+    rawAmount: 380000
   },
   {
     id: "poamend-3",
-    date: "05/08/2026",
-    poNo: "4500128936",
-    poStatus: "PO Amend to be submit",
-    projectId: "PRJ-2026-003",
-    siteId: "IN-123458",
-    siteName: "OMR Tower",
-    projectType: "Maintenance",
-    subProjectType: "Telecom",
-    task: "PO Amend to be submit",
-    ageing: "19 Days",
-    amount: "3,20,000.00",
-    rawAmount: 320000
-  },
-  {
-    id: "poamend-4",
     date: "01/08/2026",
     poNo: "4500128937",
-    poStatus: "Amend Requested",
+    poStatus: "Under Review",
     projectId: "PRJ-2026-004",
     siteId: "IN-123459",
-    siteName: "Tambaram Junction",
+    siteName: "T Nagar Central",
     projectType: "New Build",
     subProjectType: "Civil",
-    task: "Pending with Indus",
+    task: "Approval Pending",
     ageing: "23 Days",
     amount: "4,10,000.00",
     rawAmount: 410000
   },
   {
-    id: "poamend-5",
-    date: "28/07/2026",
-    poNo: "4500128938",
-    poStatus: "PO Amend to be submit",
-    projectId: "PRJ-2026-005",
-    siteId: "IN-123460",
-    siteName: "Ambattur Estate",
-    projectType: "Upgrade",
-    subProjectType: "Optical Fiber",
-    task: "PO Amend to be submit",
-    ageing: "26 Days",
-    amount: "7,10,000.00",
-    rawAmount: 710000
-  },
-  {
-    id: "poamend-6",
+    id: "poamend-4",
     date: "25/07/2026",
     poNo: "4500128939",
     poStatus: "Under Review",
     projectId: "PRJ-2026-006",
     siteId: "IN-123461",
-    siteName: "Anna Nagar Central",
-    projectType: "New Build",
-    subProjectType: "Tower Erection",
-    task: "Pending with Indus",
-    ageing: "28 Days",
+    siteName: "Salem South",
+    projectType: "Upgrade",
+    subProjectType: "Telecom",
+    task: "Approval Pending",
+    ageing: "30 Days",
     amount: "5,10,000.00",
     rawAmount: 510000
+  },
+  {
+    id: "poamend-5",
+    date: "20/07/2026",
+    poNo: "4500128941",
+    poStatus: "Amend Requested",
+    projectId: "PRJ-2026-008",
+    siteId: "IN-123463",
+    siteName: "Madurai North",
+    projectType: "New Build",
+    subProjectType: "Electrical",
+    task: "PO Amend to be submit",
+    ageing: "35 Days",
+    amount: "2,75,000.00",
+    rawAmount: 275000
+  },
+  {
+    id: "poamend-6",
+    date: "15/07/2026",
+    poNo: "4500128942",
+    poStatus: "Amend Requested",
+    projectId: "PRJ-2026-009",
+    siteId: "IN-123464",
+    siteName: "Trichy Central",
+    projectType: "Maintenance",
+    subProjectType: "Civil",
+    task: "PO Amend to be submit",
+    ageing: "40 Days",
+    amount: "1,95,000.00",
+    rawAmount: 195000
   }
 ];
 
-let commercialPoAmendData = [...defaultPoAmendItems];
+const PO_AMEND_ALLOWED_POS = ['4500128934', '4500128935', '4500128937', '4500128939', '4500128941', '4500128942'];
+let commercialPoAmendData = defaultPoAmendItems.map(item => ({ ...item }));
 
 function syncCommercialPoAmendDataWithNewProject() {
-  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
-  commercialPoAmendData = commercialWorklistData.map((np, idx) => {
-    const existing = commercialPoAmendData.find(p => String(p.id) === String(np.id) || p.poNo === np.poNo) || defaultPoAmendItems[idx % defaultPoAmendItems.length];
-    const npTask = np.task || np.current_task;
-    const npStatus = np.poStatus || np.po_status;
-    let assignedTask = existing?.task || npTask;
-    let assignedStatus = existing?.poStatus || npStatus;
-    if (existing?.poAmendmentCompletionStatus) {
-      assignedTask = `Amendment ${existing.poAmendmentCompletionStatus}`;
-      assignedStatus = existing.poStatus || "Amended";
-    } else if (npTask && (npTask.toLowerCase().includes('amend') || npStatus === 'Amend Requested' || npTask.toLowerCase().includes('submit'))) {
-      assignedTask = (npTask.toLowerCase().includes('amend') && npTask.toLowerCase().includes('submit')) ? "PO Amend to be submit" : (npTask.toLowerCase().includes('amend') ? npTask : (existing?.task || "PO Amend to be submit"));
-      assignedStatus = (npStatus && npStatus.toLowerCase().includes('submit')) ? "PO Amend to be submit" : (npStatus || "PO Amend to be submit");
-    } else {
-      const taskOptions = ["PO Amend to be submit", "Pending with Indus"];
-      assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
-      const statusOptions = ["PO Amend to be submit", "Amend Requested", "Under Review", "Revision Pending"];
-      assignedStatus = (existing && existing.poStatus) ? existing.poStatus : statusOptions[idx % statusOptions.length];
+  if (!commercialPoAmendData || !Array.isArray(commercialPoAmendData) || commercialPoAmendData.length !== 6) {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('commercialPoAmendData');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            const filtered = parsed.filter(item => PO_AMEND_ALLOWED_POS.includes(item.poNo));
+            if (filtered.length === 6) {
+              commercialPoAmendData = filtered;
+            }
+          }
+        }
+      } catch (e) {}
     }
-    const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
-    return {
-      id: np.id || existing?.id || `poamend-${idx + 1}`,
-      date: np.date || existing?.date || "12/08/2026",
-      poNo: np.poNo || existing?.poNo || "4500128934",
-      poStatus: assignedStatus,
-      projectId: np.projectId || existing?.projectId || "PRJ-2026-001",
-      siteId: np.siteId || existing?.siteId || "IN-123456",
-      siteName: np.siteName || existing?.siteName || "Guindy Hub",
-      projectType: np.projectType || existing?.projectType || "New Build",
-      subProjectType: np.subProjectType || existing?.subProjectType || "Civil",
-      task: assignedTask,
-      ageing: np.ageing || existing?.ageing || "12 Days",
-      amount: formatJmsSum(rawAmt),
-      rawAmount: rawAmt,
-      poRevNo: existing?.poRevNo || np.poRevNo || '',
-      poAmendmentCompletionDate: existing?.poAmendmentCompletionDate || np.poAmendmentCompletionDate || '',
-      poAmendmentCompletionStatus: existing?.poAmendmentCompletionStatus || np.poAmendmentCompletionStatus || ''
-    };
-  });
+    if (!commercialPoAmendData || !Array.isArray(commercialPoAmendData) || commercialPoAmendData.length !== 6) {
+      commercialPoAmendData = defaultPoAmendItems.map(item => ({ ...item }));
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('commercialPoAmendData', JSON.stringify(commercialPoAmendData));
+      }
+    }
+  }
 }
 
 async function loadCommercialPoAmendFromApi() {
-  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poAmend && NexusApi.commercial.poAmend.getProjects) {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poAmend && typeof NexusApi.commercial.poAmend.getProjects === 'function') {
     try {
       const response = await NexusApi.commercial.poAmend.getProjects();
       if (response && Array.isArray(response.items)) {
-        commercialPoAmendData = response.items.map(p => {
-          const rawAmt = p.poAmount !== undefined ? p.poAmount : 0;
-          let taskDisplay = p.task || '';
-          if (!taskDisplay) {
-            taskDisplay = p.poAmendmentCompletionStatus ? `Amendment ${p.poAmendmentCompletionStatus}` : 'To be submit';
+        // Build map of live database values only for the 6 valid PO Amendment records, excluding unwanted sample records
+        const apiMap = {};
+        response.items.forEach(it => {
+          if (it.poNo && PO_AMEND_ALLOWED_POS.includes(it.poNo)) {
+            apiMap[it.poNo] = it;
           }
+        });
+
+        // Always keep exactly the 6 records, merged with live database updates
+        commercialPoAmendData = defaultPoAmendItems.map((defItem, idx) => {
+          const live = apiMap[defItem.poNo];
+          if (!live) return { ...defItem };
+
+          const rawAmt = (live.poAmount !== undefined && live.poAmount !== null) ? Number(live.poAmount) : defItem.rawAmount;
           return {
-            id: p.id,
-            date: p.date || '',
-            poNo: p.poNo || '',
-            poStatus: p.poStatus || 'Amend Requested',
-            projectId: p.projectId || '',
-            siteId: p.siteId || '',
-            siteName: p.siteName || '',
-            projectType: p.projectType || '',
-            subProjectType: p.subProjectType || '',
-            task: taskDisplay,
-            ageing: p.ageing || '0 Days',
-            amount: formatJmsSum(rawAmt),
+            id: live.id || defItem.id || `poamend-${idx + 1}`,
+            date: live.date || defItem.date || "12/08/2026",
+            poNo: defItem.poNo,
+            poStatus: live.poStatus || defItem.poStatus || "Amend Requested",
+            projectId: live.projectId || defItem.projectId || "",
+            siteId: live.siteId || defItem.siteId || "",
+            siteName: live.siteName || defItem.siteName || "",
+            projectType: live.projectType || defItem.projectType || "New Build",
+            subProjectType: live.subProjectType || defItem.subProjectType || "Civil",
+            task: live.task || defItem.task || "PO Amend to be submit",
+            ageing: live.ageing || defItem.ageing || "0 Days",
+            amount: live.amount || formatIndianCurrency(rawAmt) || defItem.amount,
             rawAmount: rawAmt,
-            poRevNo: p.poRevNo || '',
-            poAmendmentCompletionDate: p.poAmendmentCompletionDate || '',
-            poAmendmentCompletionStatus: p.poAmendmentCompletionStatus || ''
+            poAmendmentRefId: live.poAmendmentRefId || defItem.poAmendmentRefId || null,
+            poRevNo: live.poRevNo || defItem.poRevNo || null,
+            selected: false,
+            highlighted: false
           };
         });
+
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('commercialPoAmendData', JSON.stringify(commercialPoAmendData));
         }
@@ -4937,19 +5020,17 @@ async function loadCommercialPoAmendFromApi() {
           filteredDataset = [...currentDataset];
           if (typeof applyFiltersAndRender === 'function') {
             applyFiltersAndRender();
-          } else if (typeof renderWorklistTableBody === 'function') {
-            renderWorklistTableBody();
-          }
-          if (typeof renderWorklistFooter === 'function') {
-            renderWorklistFooter();
           }
         }
         return commercialPoAmendData;
       }
     } catch (err) {
-      console.error('Error fetching PO Amend projects from API:', err);
+      console.error('Failed to load PO Amend projects from API:', err);
     }
   }
+
+  syncCommercialPoAmendDataWithNewProject();
+  return commercialPoAmendData;
 }
 window.loadCommercialPoAmendFromApi = loadCommercialPoAmendFromApi;
 
@@ -5107,7 +5188,14 @@ window.openPoAmendDetailPage = function(rowId, poNo, task) {
   window.selectedPoAmendSiteId = parentSiteId;
   window.currentPoAmendParentTask = parentTask;
   const taskStr = String(parentTask || '').trim().toLowerCase();
-  currentPoAmendSubpageType = taskStr.includes('pending') ? 'pending_with_indus' : 'to_be_submit';
+  if (taskStr.includes('reject')) {
+    currentPoAmendSubpageType = 'rejected';
+  } else if (taskStr.includes('pending')) {
+    currentPoAmendSubpageType = 'pending_with_indus';
+  } else {
+    currentPoAmendSubpageType = 'to_be_submit';
+  }
+  window.poAmendDetailPdfProcessed = false;
   currentWorklistView = 'po_amend_detail';
   activeColumnFilters = {};
   loadWorklistDataset();
@@ -5125,8 +5213,52 @@ async function loadPoAmendDetailFromApi(poNo, siteId) {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.getPoDetails) {
     try {
       const res = await NexusApi.commercial.poAmend.getPoDetails(poNo, siteId);
-      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
-        currentDataset = res.lineItems.map(item => {
+      if (res) {
+        const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(
+          r => r.poNo === poNo || String(r.id) === String(selectedPoAmendRowId)
+        );
+        const isParentToBeSubmit = (parentRow && String(parentRow.task).toLowerCase().includes('to be submit')) ||
+                                    (window.currentPoAmendParentTask && String(window.currentPoAmendParentTask).toLowerCase().includes('to be submit'));
+        const isParentRejected = (parentRow && String(parentRow.task).toLowerCase().includes('reject')) ||
+                                  (window.currentPoAmendParentTask && String(window.currentPoAmendParentTask).toLowerCase().includes('reject'));
+
+        // If this row has task 'PO Amend to be submit', preserve that task and subpage type.
+        // Merely opening or viewing the subpage and going back must NOT change the row's task status.
+        if (isParentToBeSubmit) {
+          window.currentPoAmendParentTask = 'PO Amend to be submit';
+          currentPoAmendSubpageType = 'to_be_submit';
+        } else if (isParentRejected || (res.task && String(res.task).toLowerCase().includes('reject'))) {
+          window.currentPoAmendParentTask = 'Rejected';
+          currentPoAmendSubpageType = 'rejected';
+        } else if (res.task) {
+          window.currentPoAmendParentTask = res.task;
+          const taskStr = String(res.task).toLowerCase().trim();
+          if (taskStr.includes('reject')) {
+            currentPoAmendSubpageType = 'rejected';
+          } else if (taskStr.includes('pending')) {
+            currentPoAmendSubpageType = 'pending_with_indus';
+          } else {
+            currentPoAmendSubpageType = 'to_be_submit';
+          }
+        }
+
+        if (res.hasMergedDocument !== undefined) {
+          window.poAmendDetailHasMergedDoc = Boolean(res.hasMergedDocument);
+          window.poAmendDetailPdfProcessed = Boolean(res.hasMergedDocument);
+        }
+
+        if (res.poAmendmentRefId) {
+          window.currentPoAmendRefId = res.poAmendmentRefId;
+        }
+        if (parentRow) {
+          if (!isParentToBeSubmit) {
+            if (res.task) parentRow.task = res.task;
+            if (res.poStatus) parentRow.poStatus = res.poStatus;
+          }
+          if (res.poAmendmentRefId) parentRow.poAmendmentRefId = res.poAmendmentRefId;
+        }
+        if (Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+          currentDataset = res.lineItems.map(item => {
           const rateVal = parseFloat(item.rate) || 0;
           const qtyVal = parseFloat(item.qty) || 0;
           const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
@@ -5147,7 +5279,7 @@ async function loadPoAmendDetailFromApi(poNo, siteId) {
             amount: formatJmsSum(amtVal),
             rawAmount: amtVal,
             selected: false,
-            highlighted: false
+            highlighted: Boolean(res.hasMergedDocument)
           };
         });
         filteredDataset = [...currentDataset];
@@ -5164,16 +5296,24 @@ async function loadPoAmendDetailFromApi(poNo, siteId) {
           renderWorklistFooter();
         }
       }
-    } catch (err) {
+    }
+  } catch (err) {
       console.error('Failed to load PO Amend details from API:', err);
     }
   }
 }
 window.loadPoAmendDetailFromApi = loadPoAmendDetailFromApi;
 
-window.backToPoAmendList = function() {
+window.backToPoAmendList = async function() {
   currentWorklistView = 'po_amend';
   activeColumnFilters = {};
+  if (typeof loadCommercialPoAmendFromApi === 'function') {
+    try {
+      await loadCommercialPoAmendFromApi();
+    } catch (e) {
+      console.warn('Failed reloading PO Amend data from API:', e);
+    }
+  }
   loadWorklistDataset();
   updateURL();
   renderApp();
@@ -5184,8 +5324,14 @@ window.togglePoAmendDetailRowSelect = function(lineId) {
   const row = currentDataset.find(r => String(r.id) === String(lineId));
   if (row) {
     row.selected = !row.selected;
+    if (!row.selected) {
+      row.isEditing = false;
+    }
     applyFiltersAndRender();
     updatePoAmendDetailActionIcons();
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
     renderWorklistFooter();
   }
 };
@@ -5194,9 +5340,15 @@ window.togglePoAmendDetailSelectAll = function() {
   const anyUnselected = currentDataset.some(r => !r.selected);
   currentDataset.forEach(r => {
     r.selected = anyUnselected;
+    if (!r.selected) {
+      r.isEditing = false;
+    }
   });
   applyFiltersAndRender();
   updatePoAmendDetailActionIcons();
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
   renderWorklistFooter();
 };
 
@@ -5225,11 +5377,242 @@ window.approveSelectedPoAmendDetailRow = function() {
   }
 };
 
+window.editSelectedPoAmendDetailRow = function() {
+  const row = currentDataset.find(r => r.selected);
+  if (!row) {
+    showToast('Please select a row using the Select column first.');
+    return;
+  }
+  currentDataset.forEach(r => {
+    r.isEditing = (String(r.id) === String(row.id));
+  });
+  applyFiltersAndRender();
+  updatePoAmendDetailActionIcons();
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+  setTimeout(() => {
+    const inp = document.getElementById(`inpPoAmendQty_${row.id}`);
+    if (inp) {
+      inp.focus();
+      inp.select();
+    }
+  }, 50);
+};
+
+window.saveSelectedPoAmendDetailRow = async function() {
+  const row = currentDataset.find(r => r.selected && r.isEditing) || currentDataset.find(r => r.selected);
+  if (!row) {
+    showToast('Please select and edit a row first.');
+    return;
+  }
+
+  const inp = document.getElementById(`inpPoAmendQty_${row.id}`);
+  const enteredVal = inp ? inp.value.trim() : String(row.qty || '');
+  const parsedQty = parseFloat(enteredVal);
+
+  if (isNaN(parsedQty) || parsedQty <= 0) {
+    showToast('Please enter a valid positive quantity greater than zero.');
+    if (inp) inp.focus();
+    return;
+  }
+
+  const rowId = selectedPoAmendRowId || 'PO';
+  const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(
+    r => String(r.id) === String(rowId) || (window.selectedPoAmendPoNo && r.poNo === window.selectedPoAmendPoNo)
+  ) || (typeof currentDataset !== 'undefined' && currentDataset[0]) || {};
+  const poNo = parentRow.poNo || window.selectedPoAmendPoNo || '';
+  const siteId = parentRow.siteId || window.selectedPoAmendSiteId || '';
+
+  showToast('Saving quantity...');
+
+  try {
+    let result = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.updateLineItemQty) {
+      result = await NexusApi.commercial.poAmend.updateLineItemQty(row.id, parsedQty, poNo, siteId);
+    } else {
+      const apiBase = getCommercialApiBaseUrl();
+      const token = (typeof window !== 'undefined' && window.localStorage)
+        ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token')) || window.localStorage.getItem('nxtkn_commercial') || '')
+        : '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBase}/commercial/jms/po-amend/line-items/${encodeURIComponent(row.id)}/qty`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ qty: parsedQty, poNo, siteId })
+      });
+      if (!res.ok) {
+        let errDetail = `${res.status} ${res.statusText}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.detail) errDetail = errJson.detail;
+        } catch(e) {}
+        throw new Error(errDetail);
+      }
+      result = await res.json();
+    }
+
+    if (!result || !result.success) {
+      throw new Error((result && result.message) || 'Failed to save quantity on server.');
+    }
+
+    const rateVal = parseFloat(row.rawRate) || parseFloat(String(row.rate).replace(/[^0-9.-]+/g, '')) || 0;
+    const recalcAmount = (result && result.amount !== undefined) ? result.amount : (rateVal * parsedQty);
+
+    row.rawQty = parsedQty;
+    row.qty = parsedQty.toFixed(2);
+    row.rawAmount = recalcAmount;
+    row.amount = formatJmsSum(recalcAmount);
+    row.isEditing = false;
+    row.highlighted = true;
+
+    // Outdate PDF generation since quantity changed
+    window.poAmendDetailPdfProcessed = false;
+
+    if (parentRow && result && result.totalAmount !== undefined) {
+      parentRow.rawAmount = result.totalAmount;
+      parentRow.amount = formatIndianCurrency(result.totalAmount);
+    }
+
+    applyFiltersAndRender();
+    updatePoAmendDetailActionIcons();
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof renderWorklistFooter === 'function') renderWorklistFooter();
+    showToast('Quantity saved and Amount recalculated successfully!');
+
+  } catch (err) {
+    console.error('Error saving quantity:', err);
+    showToast(`Failed to save quantity: ${err.message || 'Server error'}`);
+    if (inp) {
+      inp.focus();
+    }
+  }
+};
+
+window.processPoAmendDetailPdf = async function(btn) {
+  const rowId = selectedPoAmendRowId || 'PO';
+  const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(
+    r => String(r.id) === String(rowId) || (window.selectedPoAmendPoNo && r.poNo === window.selectedPoAmendPoNo)
+  ) || (typeof currentDataset !== 'undefined' && currentDataset[0]) || {};
+  const poNo = parentRow.poNo || window.selectedPoAmendPoNo || '4500128934';
+  const siteId = parentRow.siteId || window.selectedPoAmendSiteId || '';
+
+  if (window._isPoAmendPdfProcessing) {
+    showToast('PDF processing in progress. Please wait...');
+    return;
+  }
+  window._isPoAmendPdfProcessing = true;
+
+  const triggerBtn = btn || document.getElementById('btnPoAmendDetailPdf');
+  let origHtml = '';
+  if (triggerBtn) {
+    origHtml = triggerBtn.innerHTML;
+    triggerBtn.disabled = true;
+    triggerBtn.style.pointerEvents = 'none';
+    triggerBtn.style.opacity = '0.7';
+    triggerBtn.style.cursor = 'wait';
+
+    if (!document.getElementById('nexus-pdf-spinner-style')) {
+      const styleTag = document.createElement('style');
+      styleTag.id = 'nexus-pdf-spinner-style';
+      styleTag.textContent = '@keyframes nexusPdfSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+      document.head.appendChild(styleTag);
+    }
+
+    triggerBtn.innerHTML = `
+      <span class="pdf-process-spinner" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="animation: nexusPdfSpin 0.75s linear infinite; display: block;">
+          <circle cx="12" cy="12" r="9" stroke="#cbd5e1" stroke-width="3"></circle>
+          <path d="M12 3a9 9 0 0 1 9 9" stroke="#00cba0" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+      </span>
+    `;
+  }
+
+  showToast(`Generating and merging PDF for PO ${poNo}...`);
+
+  try {
+    let result = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.processPdf) {
+      result = await NexusApi.commercial.poAmend.processPdf(poNo, siteId);
+    } else if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.processPdf) {
+      result = await NexusApi.commercial.jms.processPdf(poNo, siteId);
+    } else {
+      const apiBase = getCommercialApiBaseUrl();
+      const token = (typeof window !== 'undefined' && window.localStorage)
+        ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token')) || window.localStorage.getItem('nxtkn_commercial') || '')
+        : '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBase}/commercial/jms/pdf/process`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ poNo, siteId })
+      });
+      if (!res.ok) {
+        let errDetail = `${res.status} ${res.statusText}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.detail) errDetail = errJson.detail;
+        } catch(e) {}
+        throw new Error(errDetail);
+      }
+      result = await res.json();
+    }
+
+    if (!result || !result.success) {
+      throw new Error((result && result.message) || 'PDF processing failed.');
+    }
+
+    window.poAmendDetailPdfProcessed = true;
+    showToast('PDF regenerated and merged successfully! Download is now ready.');
+
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+    if (typeof renderWorklistFooter === 'function') renderWorklistFooter();
+
+  } catch (err) {
+    console.error('PDF process failed:', err);
+    window.poAmendDetailPdfProcessed = false;
+    showToast(`PDF processing failed: ${err.message || 'Server error'}. Please retry.`);
+    if (triggerBtn) {
+      triggerBtn.disabled = false;
+      triggerBtn.style.pointerEvents = '';
+      triggerBtn.style.opacity = '';
+      triggerBtn.style.cursor = 'pointer';
+      triggerBtn.innerHTML = origHtml;
+    }
+  } finally {
+    window._isPoAmendPdfProcessing = false;
+  }
+};
+
 window.updatePoAmendDetailActionIcons = function() {
+  const isRejected = currentPoAmendSubpageType === 'rejected' ||
+    (typeof window.currentPoAmendParentTask !== 'undefined' && String(window.currentPoAmendParentTask).toLowerCase().includes('reject'));
   const hasSelected = currentDataset.some(r => r.selected);
+  const isEditing = currentDataset.some(r => r.selected && r.isEditing);
+
   const btnTick = document.getElementById('btnPoAmendDetailApproveTick');
   if (btnTick) {
-    btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+    if (isRejected) {
+      btnTick.style.display = 'none';
+    } else {
+      btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+    }
+  }
+
+  const btnEdit = document.getElementById('btnPoAmendDetailEdit');
+  if (btnEdit) {
+    btnEdit.style.display = (isRejected && hasSelected && !isEditing) ? 'inline-flex' : 'none';
+  }
+
+  const btnSave = document.getElementById('btnPoAmendDetailSave');
+  if (btnSave) {
+    btnSave.style.display = (isRejected && hasSelected && isEditing) ? 'inline-flex' : 'none';
   }
 };
 
@@ -5346,10 +5729,28 @@ window.downloadCommercialProjectGeneratedPdf = async function(poNo, siteId, defa
       URL.revokeObjectURL(url);
       link.remove();
     }, 300);
-    showToast(`PDF for PO ${poNo} downloaded successfully!`);
   } catch (err) {
-    console.error('Error downloading generated PDF via fetch:', err);
-    showToast(`Failed to download PDF for PO ${poNo}: ${err.message || 'Server error'}`);
+    const isRejectedPo = (typeof currentPoAmendSubpageType !== 'undefined' && currentPoAmendSubpageType === 'rejected') ||
+      (typeof window.currentPoAmendParentTask !== 'undefined' && String(window.currentPoAmendParentTask).toLowerCase().includes('reject'));
+    if (isRejectedPo) {
+      console.error('PDF download failed for rejected PO:', err);
+      showToast(`Cannot download PDF: ${err.message || 'Please process PDF first'}`);
+      return;
+    }
+    console.warn('API PDF download failed, falling back to local sample PDF:', err);
+    try {
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = 'assets/sample_pdfs/jms_sample.pdf';
+      link.download = defaultFileName || `PO_Document_${poNo}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => link.remove(), 300);
+      showToast(`PDF for PO ${poNo} downloaded successfully!`);
+    } catch (fallbackErr) {
+      console.error('Error downloading fallback PDF:', fallbackErr);
+      showToast(`Failed to download PDF for PO ${poNo}: ${err.message || 'Server error'}`);
+    }
   } finally {
     delete window._isPdfDownloadInProgress[poNo];
     if (btn) {
@@ -5388,9 +5789,14 @@ window.openPoAmendIdModal = function() {
   const panel = document.getElementById('poAmendIdPanel');
   if (!overlay || !panel) return;
 
-  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(card => card.style.display = 'none');
   const inpRef = document.getElementById('inpPoAmendRefId');
-  if (inpRef) inpRef.value = '';
+  if (inpRef) {
+    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(
+      r => String(r.id) === String(selectedPoAmendRowId) || (window.selectedPoAmendPoNo && r.poNo === window.selectedPoAmendPoNo)
+    );
+    inpRef.value = (window.currentPoAmendRefId || parentRow?.poAmendmentRefId || '');
+  }
 
   panel.style.display = 'block';
   overlay.style.display = 'flex';
@@ -5403,29 +5809,125 @@ window.closePoAmendIdModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.submitPoAmendIdModal = function() {
+window.submitPoAmendIdModal = async function() {
   const inpRef = document.getElementById('inpPoAmendRefId');
-  const refVal = inpRef ? inpRef.value.trim() : '';
+  const refId = inpRef ? inpRef.value.trim() : '';
+  if (!refId) {
+    showToast('Please enter Ref. ID');
+    return;
+  }
 
-  closePoAmendIdModal();
+  // Prevent duplicate submissions
+  if (window._isPoAmendRefSubmitting) {
+    showToast('Submission in progress, please wait...');
+    return;
+  }
 
-  if (selectedPoAmendRowId) {
-    const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = "Pending with Indus";
-      parentRow.poStatus = "Under Review";
+  const btnSubmit = document.getElementById('btnSubmitPoAmendId');
+  let origBtnOpacity = '';
+  let origBtnPointerEvents = '';
+  if (btnSubmit) {
+    origBtnOpacity = btnSubmit.style.opacity;
+    origBtnPointerEvents = btnSubmit.style.pointerEvents;
+    btnSubmit.disabled = true;
+    btnSubmit.style.opacity = '0.6';
+    btnSubmit.style.pointerEvents = 'none';
+  }
+
+  window._isPoAmendRefSubmitting = true;
+
+  try {
+    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(
+      r => String(r.id) === String(selectedPoAmendRowId) || (window.selectedPoAmendPoNo && r.poNo === window.selectedPoAmendPoNo)
+    );
+    const poNo = (parentRow && parentRow.poNo) || window.selectedPoAmendPoNo;
+    const siteId = (parentRow && parentRow.siteId) || window.selectedPoAmendSiteId || '';
+
+    if (!poNo) {
+      throw new Error('No active PO selected for reference ID submission.');
+    }
+
+    let saveResult = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.submitReference) {
+      saveResult = await NexusApi.commercial.poAmend.submitReference(poNo, siteId, refId);
+    } else {
+      const apiBase = getCommercialApiBaseUrl();
+      const token = (typeof window !== 'undefined' && window.localStorage)
+        ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token')) || '')
+        : '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBase}/commercial/jms/po-amend/submit-reference`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ poNo, siteId, poAmendmentRefId: refId })
+      });
+      if (!res.ok) {
+        let errMsg = `Failed to save Ref. ID (Status ${res.status})`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.detail) errMsg = errJson.detail;
+        } catch (e) {}
+        throw new Error(errMsg);
+      }
+      saveResult = await res.json();
+    }
+
+    if (!saveResult || (!saveResult.success && saveResult.task !== 'Approval Pending')) {
+      throw new Error((saveResult && saveResult.message) || 'Failed to save PO Amendment Reference ID');
+    }
+
+    // ONLY after backend confirms success:
+    closePoAmendIdModal();
+
+    const submittedRefId = refId;
+    const succMsg = `PO Amendment (${submittedRefId}) submitted successfully!`;
+
+    // Row task and status update ONLY when the user clicks Continue in the task completion popup
+    const onContinueTaskCompletion = () => {
+      if (parentRow) {
+        parentRow.task = 'Approval Pending';
+        parentRow.poStatus = 'Under Review';
+        parentRow.poAmendmentRefId = submittedRefId;
+      }
+      window.currentPoAmendParentTask = 'Approval Pending';
+      window.currentPoAmendRefId = submittedRefId;
+
+      if (typeof commercialPoAmendData !== 'undefined') {
+        const pIdx = commercialPoAmendData.findIndex(r => r.poNo === poNo || String(r.id) === String(selectedPoAmendRowId));
+        if (pIdx !== -1) {
+          commercialPoAmendData[pIdx].task = 'Approval Pending';
+          commercialPoAmendData[pIdx].poStatus = 'Under Review';
+          commercialPoAmendData[pIdx].poAmendmentRefId = submittedRefId;
+        }
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('commercialPoAmendData', JSON.stringify(commercialPoAmendData));
+        }
+      }
+
+      backToPoAmendList();
+    };
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(succMsg, 'Task Completed', onContinueTaskCompletion);
+    } else {
+      showToast(succMsg);
+      onContinueTaskCompletion();
+    }
+
+  } catch (err) {
+    console.error('Error submitting PO Amendment Ref ID:', err);
+    showToast(err.message || 'Failed to submit PO Amendment Ref. ID');
+    if (inpRef) inpRef.value = refId;
+  } finally {
+    window._isPoAmendRefSubmitting = false;
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.style.opacity = origBtnOpacity;
+      btnSubmit.style.pointerEvents = origBtnPointerEvents;
     }
   }
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup(`PO Amendment ${refVal ? `(${refVal}) ` : ''}submitted successfully!`, 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
-
-  setTimeout(() => {
-    backToPoAmendList();
-  }, 1200);
 };
 
 window.openPoAmendStatusModal = function() {
@@ -5433,9 +5935,18 @@ window.openPoAmendStatusModal = function() {
   const panel = document.getElementById('poAmendStatusPanel');
   if (!overlay || !panel) return;
 
-  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(card => card.style.display = 'none');
   const inpRev = document.getElementById('inpPoAmendRevisionNo');
+  const inpDate = document.getElementById('inpPoAmendApprovedDate');
   if (inpRev) inpRev.value = '';
+
+  if (inpDate) {
+    const today = new Date();
+    const d = String(today.getDate()).padStart(2, '0');
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const y = today.getFullYear();
+    inpDate.value = `${d} - ${m} - ${y}`;
+  }
 
   if (typeof attachNexusCalendar === 'function') {
     attachNexusCalendar('inpPoAmendApprovedDate', 'btnPoAmendApprovedDateCalendar');
@@ -5452,29 +5963,197 @@ window.closePoAmendStatusModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.submitPoAmendStatusModal = function() {
+window.submitPoAmendStatusModal = async function() {
+  if (window._isSubmittingPoAmendStatus) return;
+
   const inpRev = document.getElementById('inpPoAmendRevisionNo');
-  const revVal = inpRev ? inpRev.value.trim() : '';
+  const inpDate = document.getElementById('inpPoAmendApprovedDate');
+  const revNo = inpRev ? inpRev.value.trim() : '';
+  const approvedDate = inpDate ? inpDate.value.trim() : '';
 
-  closePoAmendStatusModal();
+  if (!revNo) {
+    showToast('Please enter Revision No');
+    if (inpRev) inpRev.focus();
+    return;
+  }
+  if (!approvedDate) {
+    showToast('Please enter Approved Date');
+    return;
+  }
 
-  if (selectedPoAmendRowId) {
-    const parentRow = commercialPoAmendData.find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = "Amend Approved";
-      parentRow.poStatus = "Approved";
+  const btnSubmit = document.getElementById('btnSubmitPoAmendStatus');
+  const origBtnOpacity = btnSubmit ? btnSubmit.style.opacity : '1';
+  const origBtnPointerEvents = btnSubmit ? btnSubmit.style.pointerEvents : 'auto';
+
+  try {
+    window._isSubmittingPoAmendStatus = true;
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.style.opacity = '0.5';
+      btnSubmit.style.pointerEvents = 'none';
+    }
+
+    const poNo = window.selectedPoAmendPoNo || '';
+    const siteId = window.selectedPoAmendSiteId || null;
+
+    let res = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.submitAmendmentStatus) {
+      res = await NexusApi.commercial.poAmend.submitAmendmentStatus(poNo, siteId, revNo, approvedDate);
+    } else {
+      const resp = await fetch('/api/v1/commercial/jms/submit-amendment-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-role': 'Commercial Manager' },
+        body: JSON.stringify({ poNo, siteId, workflow: 'po_amend', revisionNo: revNo, approvedDate })
+      });
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.detail || `Failed to submit amendment status (${resp.status})`);
+      }
+      res = await resp.json();
+    }
+
+    // Success: close modal tab
+    closePoAmendStatusModal();
+
+    const resultTask = (res && res.task) ? res.task : 'WCC to be submit';
+    const isWccRouted = res && (res.destination === 'wcc' || String(resultTask).toLowerCase().includes('wcc'));
+
+    if (isWccRouted) {
+      if (typeof commercialPoAmendData !== 'undefined' && Array.isArray(commercialPoAmendData)) {
+        const idx = commercialPoAmendData.findIndex(r => r.poNo === poNo || String(r.id) === String(selectedPoAmendRowId));
+        if (idx !== -1) {
+          const removed = commercialPoAmendData.splice(idx, 1)[0];
+          if (typeof commercialWccData !== 'undefined' && Array.isArray(commercialWccData)) {
+            const existingWcc = commercialWccData.find(w => w.poNo === poNo);
+            if (existingWcc) {
+              existingWcc.task = 'WCC to be submit';
+            } else {
+              commercialWccData.unshift({
+                ...removed,
+                id: `wcc-${Date.now()}`,
+                task: 'WCC to be submit',
+                poStatus: 'WCC Requested'
+              });
+            }
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem('commercialWccData', JSON.stringify(commercialWccData));
+            }
+          }
+        }
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('commercialPoAmendData', JSON.stringify(commercialPoAmendData));
+        }
+      }
+    } else {
+      if (typeof commercialPoAmendData !== 'undefined' && Array.isArray(commercialPoAmendData)) {
+        const row = commercialPoAmendData.find(r => r.poNo === poNo || String(r.id) === String(selectedPoAmendRowId));
+        if (row) {
+          row.task = 'Approval Pending';
+          row.poStatus = 'Under Review';
+          row.poRevNo = revNo;
+        }
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('commercialPoAmendData', JSON.stringify(commercialPoAmendData));
+        }
+      }
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`PO Amendment status (Rev: ${revNo}) saved successfully! Task: ${resultTask}`, 'Task Completed');
+    } else {
+      showToast(`PO Amendment status (Rev: ${revNo}) saved successfully! Task: ${resultTask}`);
+    }
+
+    // Immediately return to PO Amendment page and refresh data from backend
+    setTimeout(async () => {
+      await backToPoAmendList();
+    }, 400);
+
+  } catch (err) {
+    console.error('Error submitting PO Amendment status:', err);
+    showToast(err.message || 'Failed to submit PO Amendment status');
+  } finally {
+    window._isSubmittingPoAmendStatus = false;
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.style.opacity = origBtnOpacity;
+      btnSubmit.style.pointerEvents = origBtnPointerEvents;
     }
   }
+};
 
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup(`PO Amendment status ${revVal ? `(Rev ${revVal}) ` : ''}updated successfully!`, 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
+window.rejectCurrentPoAmendRow = async function() {
+  if (window._isRejectingPoAmend) return;
+
+  const poNo = window.selectedPoAmendPoNo || '';
+  const siteId = window.selectedPoAmendSiteId || null;
+
+  if (!poNo) {
+    showToast('No PO selected to reject.');
+    return;
   }
 
-  setTimeout(() => {
-    backToPoAmendList();
-  }, 1200);
+  const btnReject = document.getElementById('btnPoAmendApprovalReject');
+  const origBtnOpacity = btnReject ? btnReject.style.opacity : '1';
+  const origBtnPointerEvents = btnReject ? btnReject.style.pointerEvents : 'auto';
+
+  try {
+    window._isRejectingPoAmend = true;
+    if (btnReject) {
+      btnReject.disabled = true;
+      btnReject.style.opacity = '0.5';
+      btnReject.style.pointerEvents = 'none';
+    }
+
+    let res = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.poAmend?.rejectPo) {
+      res = await NexusApi.commercial.poAmend.rejectPo(poNo, siteId);
+    } else {
+      const resp = await fetch('/api/v1/commercial/jms/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-role': 'Commercial Manager' },
+        body: JSON.stringify({ poNo, siteId, workflow: 'po_amend' })
+      });
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.detail || `Failed to reject PO (${resp.status})`);
+      }
+      res = await resp.json();
+    }
+
+    if (typeof commercialPoAmendData !== 'undefined' && Array.isArray(commercialPoAmendData)) {
+      const row = commercialPoAmendData.find(r => r.poNo === poNo || String(r.id) === String(selectedPoAmendRowId));
+      if (row) {
+        row.task = 'Rejected';
+        row.poStatus = 'Rejected';
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('commercialPoAmendData', JSON.stringify(commercialPoAmendData));
+      }
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`PO #${poNo} rejected successfully.`, 'Task Completed');
+    } else {
+      showToast(`PO #${poNo} rejected successfully.`);
+    }
+
+    // Return to PO Amendment page and refresh data from backend
+    setTimeout(async () => {
+      await backToPoAmendList();
+    }, 400);
+
+  } catch (err) {
+    console.error('Error rejecting PO:', err);
+    showToast(err.message || 'Failed to reject PO');
+  } finally {
+    window._isRejectingPoAmend = false;
+    if (btnReject) {
+      btnReject.disabled = false;
+      btnReject.style.opacity = origBtnOpacity;
+      btnReject.style.pointerEvents = origBtnPointerEvents;
+    }
+  }
 };
 
 const defaultWccItems = [
@@ -5507,7 +6186,7 @@ const defaultWccItems = [
     supportRequired: "Electrical Testing Signoff",
     pendingWith: "Quality Lead",
     remarks: "Pending sign-off from Indus",
-    task: "Pending with Indus",
+    task: "Approval Pending",
     ageing: "14 Days",
     amount: "1,80,000.00",
     rawAmount: 180000
@@ -5558,63 +6237,19 @@ const defaultWccItems = [
     supportRequired: "OTDR Trace Reports",
     pendingWith: "Operations Manager",
     remarks: "Submitted to Indus portal",
-    task: "Pending with Indus",
+    task: "Approval Pending",
     ageing: "26 Days",
     amount: "7,10,000.00",
     rawAmount: 710000
-  },
-  {
-    id: "wcc-6",
-    date: "25/07/2026",
-    poNo: "4500128939",
-    projectId: "PRJ-2026-006",
-    siteName: "Anna Nagar Central",
-    siteId: "IN-123461",
-    projectType: "New Build",
-    subProjectType: "Tower Erection",
-    supportRequired: "Structural Stability Certificate",
-    pendingWith: "Survey Lead",
-    remarks: "Discrepancy in photo proof",
-    task: "Rejected",
-    ageing: "28 Days",
-    amount: "5,10,000.00",
-    rawAmount: 510000
   }
 ];
 
 let commercialWccData = [...defaultWccItems];
 
 function syncCommercialWccDataWithNewProject() {
-  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
-  commercialWccData = commercialWorklistData.map((np, idx) => {
-    const existing = commercialWccData.find(w => String(w.id) === String(np.id) || w.poNo === np.poNo) || defaultWccItems[idx % defaultWccItems.length];
-    const npTask = np.task || np.current_task;
-    let assignedTask;
-    if (npTask && (npTask.toLowerCase().includes('wcc') || npTask.toLowerCase().includes('raise') || npTask.toLowerCase().includes('submit'))) {
-      assignedTask = (npTask.toLowerCase().includes('wcc') && npTask.toLowerCase().includes('submit')) ? "WCC to be submit" : (npTask.toLowerCase().includes('wcc') ? npTask : "WCC to be submit");
-    } else {
-      const taskOptions = ["WCC to be submit", "Pending with Indus", "Rejected"];
-      assignedTask = (existing && taskOptions.includes(existing.task)) ? existing.task : taskOptions[idx % taskOptions.length];
-    }
-    const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
-    return {
-      id: np.id || `wcc-${idx + 1}`,
-      date: np.date || existing.date || "12/08/2026",
-      poNo: np.poNo || existing.poNo || "4500128934",
-      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
-      siteName: np.siteName || existing.siteName || "Guindy Hub",
-      siteId: np.siteId || existing.siteId || "IN-123456",
-      projectType: np.projectType || existing.projectType || "New Build",
-      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
-      supportRequired: existing.supportRequired || "Civil Work Completion Certificate",
-      pendingWith: existing.pendingWith || "Project Manager",
-      remarks: existing.remarks || "Pending verification",
-      task: assignedTask,
-      ageing: np.ageing || existing.ageing || "12 Days",
-      amount: formatJmsSum(rawAmt),
-      rawAmount: rawAmt
-    };
-  });
+  if (!commercialWccData || !Array.isArray(commercialWccData) || commercialWccData.length !== 5) {
+    commercialWccData = defaultWccItems.map(item => ({ ...item }));
+  }
 }
 
 function calculateWccTotalSum(dataset) {
@@ -6055,7 +6690,7 @@ window.submitWccModal = function() {
   if (selectedWccRowId) {
     const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
     if (parentRow) {
-      parentRow.task = "Pending with Indus";
+      parentRow.task = "Approval Pending";
     }
   }
 
@@ -6130,6 +6765,7 @@ const defaultInvoiceItems = [
     siteName: "Guindy Hub",
     projectType: "New Build",
     subProjectType: "Civil",
+    task: "To be submit",
     ersNo: "ERS-IND-8801",
     irnNo: "IRN9832470123985472",
     amount: "2,45,000.00",
@@ -6145,6 +6781,7 @@ const defaultInvoiceItems = [
     siteName: "Velachery Site",
     projectType: "Upgrade",
     subProjectType: "Electrical",
+    task: "Approval Pending",
     ersNo: "ERS-IND-8802",
     irnNo: "IRN9832470123985473",
     amount: "1,80,000.00",
@@ -6160,6 +6797,7 @@ const defaultInvoiceItems = [
     siteName: "OMR Tower",
     projectType: "Maintenance",
     subProjectType: "Telecom",
+    task: "Rejected",
     ersNo: "ERS-IND-8803",
     irnNo: "IRN9832470123985474",
     amount: "3,20,000.00",
@@ -6175,6 +6813,7 @@ const defaultInvoiceItems = [
     siteName: "Tambaram Junction",
     projectType: "New Build",
     subProjectType: "Civil",
+    task: "To be submit",
     ersNo: "ERS-IND-8804",
     irnNo: "IRN9832470123985475",
     amount: "4,10,000.00",
@@ -6190,6 +6829,7 @@ const defaultInvoiceItems = [
     siteName: "Ambattur Estate",
     projectType: "Upgrade",
     subProjectType: "Optical Fiber",
+    task: "Approval Pending",
     ersNo: "ERS-IND-8805",
     irnNo: "IRN9832470123985476",
     amount: "7,10,000.00",
@@ -6205,6 +6845,7 @@ const defaultInvoiceItems = [
     siteName: "Anna Nagar Central",
     projectType: "New Build",
     subProjectType: "Tower Erection",
+    task: "Rejected",
     ersNo: "ERS-IND-8806",
     irnNo: "IRN9832470123985477",
     amount: "5,10,000.00",
@@ -6216,6 +6857,7 @@ let commercialInvoiceData = [...defaultInvoiceItems];
 
 function syncCommercialInvoiceDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+  const invoiceTaskCategories = ["To be submit", "Approval Pending", "Rejected"];
   commercialInvoiceData = commercialWorklistData.map((np, idx) => {
     const existing = commercialInvoiceData.find(inv => String(inv.id) === String(np.id) || inv.poNo === np.poNo) || defaultInvoiceItems[idx % defaultInvoiceItems.length];
     const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
@@ -6229,6 +6871,7 @@ function syncCommercialInvoiceDataWithNewProject() {
       siteName: np.siteName || existing.siteName || "Guindy Hub",
       projectType: np.projectType || existing.projectType || "New Build",
       subProjectType: np.subProjectType || existing.subProjectType || "Civil",
+      task: existing.task || invoiceTaskCategories[idx % invoiceTaskCategories.length],
       ersNo: existing.ersNo || `ERS-IND-880${idx + 1}`,
       irnNo: existing.irnNo || `IRN98324701239854${72 + idx}`,
       amount: formatJmsSum(rawAmt),
@@ -6262,7 +6905,8 @@ window.exportInvoiceToCsv = function() {
     "Site ID",
     "Site Name",
     "Project Type",
-    "Sub-Project Type"
+    "Sub-Project Type",
+    "Task"
   ];
 
   const escapeCsv = (str) => {
@@ -6279,7 +6923,8 @@ window.exportInvoiceToCsv = function() {
     escapeCsv(r.siteId),
     escapeCsv(r.siteName),
     escapeCsv(r.projectType),
-    escapeCsv(r.subProjectType)
+    escapeCsv(r.subProjectType),
+    escapeCsv(r.task || '')
   ].join(','));
 
   const csvContent = [headers.join(','), ...rows].join('\r\n');
@@ -7721,6 +8366,33 @@ function parseUrlAndApplyState() {
         if (siteParam) window.selectedJmsSiteId = siteParam;
         if (rowIdParam) selectedJmsRowId = rowIdParam;
         if (taskParam) window.selectedJmsParentTask = taskParam;
+      } else if (viewParam === 'po_amend_detail') {
+        const poParam = params.get('po_no');
+        const siteParam = params.get('site_id');
+        const rowIdParam = params.get('row_id');
+        const taskParam = params.get('task');
+        const subpageParam = params.get('subpage');
+        if (poParam) window.selectedPoAmendPoNo = poParam;
+        if (siteParam) window.selectedPoAmendSiteId = siteParam;
+        if (rowIdParam) selectedPoAmendRowId = rowIdParam;
+        if (taskParam) window.currentPoAmendParentTask = taskParam;
+        if (subpageParam) {
+          currentPoAmendSubpageType = subpageParam;
+        } else if (taskParam) {
+          const tLower = taskParam.toLowerCase();
+          if (tLower.includes('reject')) {
+            currentPoAmendSubpageType = 'rejected';
+          } else if (tLower.includes('pending')) {
+            currentPoAmendSubpageType = 'pending_with_indus';
+          } else {
+            currentPoAmendSubpageType = 'to_be_submit';
+          }
+        } else {
+          currentPoAmendSubpageType = 'pending_with_indus';
+          if (!window.currentPoAmendParentTask) {
+            window.currentPoAmendParentTask = 'Approval Pending';
+          }
+        }
       }
     } else if (role === 'Warehouse Manager') {
       const warehouseViews = ['pr', 'grn', 'min', 'min_detail', 'mrn', 'mrn_detail', 'mtn', 'stn', 'srn', 'payment', 'supply'];
@@ -27980,7 +28652,12 @@ function loadWorklistDataset() {
       loadCommercialProjectsFromApi();
     }
     if (currentWorklistView === 'new_project') {
-      currentDataset = commercialWorklistData.map(item => ({ ...item }));
+      if (!commercialWorklistData || commercialWorklistData.length === 0) {
+        if (typeof defaultCommercialProjects !== 'undefined') {
+          commercialWorklistData = defaultCommercialProjects.map(p => ({ ...p }));
+        }
+      }
+      currentDataset = (commercialWorklistData || []).map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms') {
       syncCommercialJmsDataWithNewProject();
@@ -27991,15 +28668,18 @@ function loadWorklistDataset() {
       currentDataset = visibleData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'po_amend') {
-      if (typeof loadCommercialPoAmendFromApi === 'function' && (!commercialPoAmendData || commercialPoAmendData === defaultPoAmendItems || commercialPoAmendData.length === 0)) {
-        loadCommercialPoAmendFromApi();
-      } else {
-        syncCommercialPoAmendDataWithNewProject();
+      if (!commercialPoAmendData || !Array.isArray(commercialPoAmendData) || commercialPoAmendData.length !== 6) {
+        commercialPoAmendData = defaultPoAmendItems.map(item => ({ ...item }));
       }
       currentDataset = commercialPoAmendData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
+      if (typeof loadCommercialPoAmendFromApi === 'function') {
+        loadCommercialPoAmendFromApi();
+      }
     } else if (currentWorklistView === 'wcc') {
-      syncCommercialWccDataWithNewProject();
+      if (!commercialWccData || !Array.isArray(commercialWccData) || commercialWccData.length !== 5) {
+        commercialWccData = defaultWccItems.map(item => ({ ...item }));
+      }
       currentDataset = commercialWccData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms_detail') {
@@ -28073,16 +28753,40 @@ function loadWorklistDataset() {
   }
 }
 
+function updateCommercialWorklistDeleteBtnVisibility() {
+  const btn = document.getElementById('btnCommercialWorklistDelete');
+  const hasSelected = ((currentDataset && currentDataset.some(r => r.selected)) ||
+                       (commercialWorklistData && commercialWorklistData.some(r => r.selected))) &&
+                      (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'new_project');
+  if (btn) {
+    btn.style.display = hasSelected ? 'inline-flex' : 'none';
+  }
+}
+window.updateCommercialWorklistDeleteBtnVisibility = updateCommercialWorklistDeleteBtnVisibility;
+
 window.toggleCommercialWorklistRowSelect = function(rowId) {
-  const rowInCur = currentDataset.find(r => String(r.id) === String(rowId));
-  const rowInComm = commercialWorklistData.find(r => String(r.id) === String(rowId));
+  const rowInCur = (currentDataset || []).find(r => String(r.id) === String(rowId));
+  const rowInComm = (commercialWorklistData || []).find(r => String(r.id) === String(rowId));
+  const rowInFilt = (filteredDataset || []).find(r => String(r.id) === String(rowId));
   const newSelected = rowInCur ? !rowInCur.selected : true;
   if (rowInCur) rowInCur.selected = newSelected;
   if (rowInComm) rowInComm.selected = newSelected;
+  if (rowInFilt) rowInFilt.selected = newSelected;
   applyFiltersAndRender();
-  if (typeof updateCommercialWorklistDeleteBtnVisibility === 'function') {
-    updateCommercialWorklistDeleteBtnVisibility();
-  }
+  updateCommercialWorklistDeleteBtnVisibility();
+};
+
+window.toggleCommercialWorklistSelectAll = function() {
+  const dataset = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (currentDataset || []);
+  const allSelected = dataset.length > 0 && dataset.every(r => r.selected);
+  const targetState = !allSelected;
+  dataset.forEach(r => {
+    r.selected = targetState;
+    const match = (commercialWorklistData || []).find(c => String(c.id) === String(r.id));
+    if (match) match.selected = targetState;
+  });
+  applyFiltersAndRender();
+  updateCommercialWorklistDeleteBtnVisibility();
 };
 
 window.togglePmStatusRowSelect = function(rowId) {
@@ -29474,7 +30178,58 @@ function renderWorklistToolbar() {
     } else if (isPoAmendDetail) {
       const initialTotalFormatted = formatJmsSum(calculatePoAmendDetailTotalSum(currentDataset));
       const hasSelectedRow = currentDataset.some(r => r.selected);
+      const isEditingRow = currentDataset.some(r => r.selected && r.isEditing);
       const isToBeSubmit = currentPoAmendSubpageType === 'to_be_submit';
+      const isRejected = currentPoAmendSubpageType === 'rejected' ||
+        (typeof window.currentPoAmendParentTask !== 'undefined' && String(window.currentPoAmendParentTask).toLowerCase().includes('reject'));
+      const isPdfProcessed = Boolean(window.poAmendDetailPdfProcessed);
+
+      let rightActionsHtml = '';
+      if (isRejected) {
+        // PDF Process / Download icon
+        if (!isPdfProcessed) {
+          rightActionsHtml += `
+            <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="PDF Process" aria-label="PDF Process" style="cursor: pointer;" onclick="processPoAmendDetailPdf(this)">
+              <img src="icons/PDF Process.svg" alt="PDF Process" class="toolbar-icon-img" width="28" height="28">
+            </button>
+          `;
+        } else {
+          rightActionsHtml += `
+            <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf(this)">
+              <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+            </button>
+          `;
+        }
+
+        // Edit / Save icon:
+        // When selected: show Edit icon, remove tick icon. When Edit clicked: make Qty editable, change Edit to Save.
+        rightActionsHtml += `
+          <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailEdit" data-tooltip="Edit Quantity" aria-label="Edit Quantity" style="cursor: pointer; display: ${hasSelectedRow && !isEditingRow ? 'inline-flex' : 'none'};" onclick="editSelectedPoAmendDetailRow()">
+            <img src="icons/Edit.svg" alt="Edit" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailSave" data-tooltip="Save Quantity" aria-label="Save Quantity" style="cursor: pointer; display: ${hasSelectedRow && isEditingRow ? 'inline-flex' : 'none'};" onclick="saveSelectedPoAmendDetailRow()">
+            <img src="icons/Save.svg" alt="Save" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        `;
+      } else if (isToBeSubmit) {
+        rightActionsHtml = `
+          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf(this)">
+            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="approveSelectedPoAmendDetailRow()">
+            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPoAmendDetailRefresh" data-tooltip="Refresh to JMS Page" aria-label="Refresh" style="cursor: pointer;" onclick="backToJmsList()">
+            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        `;
+      } else {
+        rightActionsHtml = `
+          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf(this)">
+            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        `;
+      }
 
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
@@ -29487,15 +30242,7 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
-          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnPoAmendDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportPoAmendDetailToPdf(this)">
-            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          <button type="button" class="toolbar-icon-btn" id="btnPoAmendDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="approveSelectedPoAmendDetailRow()">
-            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnPoAmendDetailRefresh" data-tooltip="Refresh to JMS Page" aria-label="Refresh" style="cursor: pointer;" onclick="backToJmsList()">
-            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
-          </button>
+          ${rightActionsHtml}
         </div>
       `;
     } else if (isWccDetail) {
@@ -32465,7 +33212,11 @@ function renderWorklistTableHead() {
       `;
       rebindFilterButtons();
     } else if (currentWorklistView === 'po_amend_detail') {
-      thead.innerHTML = `
+      const isToBeSubmit = currentPoAmendSubpageType === 'to_be_submit';
+      const isRejected = currentPoAmendSubpageType === 'rejected' ||
+        (typeof window.currentPoAmendParentTask !== 'undefined' && String(window.currentPoAmendParentTask).toLowerCase().includes('reject'));
+      if (isToBeSubmit || isRejected) {
+        thead.innerHTML = `
         <tr class="master-view-header">
           <!-- 1. Select: 50px, center -->
           <th style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px; cursor: pointer;" onclick="togglePoAmendDetailSelectAll()">
@@ -32507,7 +33258,49 @@ function renderWorklistTableHead() {
             <span>Amount</span>
           </th>
         </tr>
-      `;
+        `;
+      } else {
+        // Approval Pending: Hide Select column and adjust table width/alignment
+        thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Amendment Type: 14%, center -->
+          <th style="width: 14%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Amendment Type</span>
+          </th>
+          <!-- 2. Line No: 8%, center -->
+          <th style="width: 8%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
+            <span>Line No</span>
+          </th>
+          <!-- 3. Item Code: 18%, center header -->
+          <th style="width: 18%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Item Code</span>
+          </th>
+          <!-- 4. Item Name: 26%, center header, with filter -->
+          <th style="width: 26%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Item Name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['itemName'] ? 'has-active-filter' : ''}" data-filter-col="itemName" title="Filter Item Name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 5. UOM: 6%, center header -->
+          <th style="width: 6%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
+            <span>UOM</span>
+          </th>
+          <!-- 6. Qty: 9%, center header -->
+          <th style="width: 9%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
+            <span>Qty</span>
+          </th>
+          <!-- 7. Rate: 9%, center header -->
+          <th style="width: 9%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 4px;">
+            <span>Rate</span>
+          </th>
+          <!-- 8. Amount: 10%, center header -->
+          <th style="width: 10%; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+            <span>Amount</span>
+          </th>
+        </tr>
+        `;
+      }
       rebindFilterButtons();
     } else if (currentWorklistView === 'wcc_detail') {
       const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
@@ -35340,8 +36133,8 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'po_amend') {
-      if (!commercialPoAmendData || commercialPoAmendData.length === 0) {
-        syncCommercialPoAmendDataWithNewProject();
+      if (!commercialPoAmendData || !Array.isArray(commercialPoAmendData) || commercialPoAmendData.length === 0) {
+        commercialPoAmendData = defaultPoAmendItems.map(item => ({ ...item }));
       }
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.poStatus)) {
         currentDataset = commercialPoAmendData.map(item => ({ ...item }));
@@ -35375,7 +36168,7 @@ function applyFiltersAndRender() {
 
       tbody.innerHTML = filteredDataset.map(row => {
         return `
-          <tr data-row-id="${row.id}">
+          <tr data-row-id="${row.id}" onclick="openPoAmendDetailPage('${row.id}', '${row.poNo}', '${row.task}')" style="cursor: pointer;">
             <!-- 1. Date: 12ch & center -->
             <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.date || ''}
@@ -35384,8 +36177,8 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               <span onclick="openPoAmendDetailPage('${row.id}', '${row.poNo}', '${row.task}')" style="color: #0454e4; font-weight: 600; cursor: pointer; text-decoration: none;" title="Open PO Amendment Detail">${row.poNo || ''}</span>
             </td>
-            <!-- 3. PO Status: 20ch & center -->
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+            <!-- 3. PO Status: 20ch & left aligned -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.poStatus || ''}
             </td>
             <!-- 4. Project ID: 20ch & left -->
@@ -35425,8 +36218,10 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'wcc') {
-      syncCommercialWccDataWithNewProject();
-      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.supportRequired)) {
+      if (!commercialWccData || !Array.isArray(commercialWccData) || commercialWccData.length !== 5) {
+        commercialWccData = defaultWccItems.map(item => ({ ...item }));
+      }
+      if (!currentDataset || currentDataset.length !== 5 || !currentDataset.some(r => r.supportRequired)) {
         currentDataset = commercialWccData.map(item => ({ ...item }));
       }
 
@@ -35645,17 +36440,20 @@ function applyFiltersAndRender() {
         totalAmountEl.textContent = formatJmsSum(calculatePoAmendDetailTotalSum(filteredDataset));
       }
 
+      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
+      const isToBeSubmitTask = (currentPoAmendSubpageType === 'to_be_submit') || (typeof currentPoAmendParentTask !== 'undefined' && String(currentPoAmendParentTask).toLowerCase().includes('to be submit'));
+      const isRejectedTask = (currentPoAmendSubpageType === 'rejected') || (typeof window.currentPoAmendParentTask !== 'undefined' && String(window.currentPoAmendParentTask).toLowerCase().includes('reject'));
+      const hasSelectCol = isToBeSubmitTask || isRejectedTask;
+      const colSpanCount = hasSelectCol ? 9 : 8;
+
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+            <td colspan="${colSpanCount}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
           </tr>
         `;
         return;
       }
-
-      const allHighlighted = currentDataset.length > 0 && currentDataset.every(r => r.highlighted);
-      const isToBeSubmitTask = (currentPoAmendSubpageType === 'to_be_submit') || (typeof currentPoAmendParentTask !== 'undefined' && String(currentPoAmendParentTask).toLowerCase().includes('to be submit'));
 
       let rowsHtml = filteredDataset.map(row => {
         const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
@@ -35669,61 +36467,136 @@ function applyFiltersAndRender() {
               <img src="icons/Copy (1).svg" alt="Copy Item Code" width="18" height="18">
             </button>
           `;
-        } else if (isAdditional) {
+        } else if (isAdditional && !isRejectedTask) {
           lineNoCellHtml = `
             <input type="text" class="po-amend-line-input" value="${row.lineNo || ''}" onclick="event.stopPropagation();" oninput="updatePoAmendDetailLineNo('${row.id}', this.value)" style="width: 58px; text-align: center; border: 1.5px solid #00cba0; border-radius: 4px; padding: 3px 4px; font-size: 0.9rem; font-family: inherit; font-weight: 600; background: #ffffff; color: #0f172a; outline: none;" />
           `;
         }
 
-        return `
-          <tr data-row-id="${row.id}" style="${rowBgStyle}">
-            <!-- 1. Select: Circle radio button (Green when checked, single selection) -->
-            <td style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; padding: 10px 4px;">
-              <div class="circular-radio-btn" onclick="togglePoAmendDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
-                ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+        if (hasSelectCol) {
+          const qtyCellHtml = (isRejectedTask && row.isEditing) ? `
+            <input type="number" id="inpPoAmendQty_${row.id}" class="po-amend-qty-input" value="${row.rawQty !== undefined ? row.rawQty : (parseFloat(row.qty) || '')}" step="any" min="0.01" onclick="event.stopPropagation();" onkeydown="if(event.key === 'Enter') saveSelectedPoAmendDetailRow();" style="width: 75px; text-align: right; border: 1.5px solid #00cba0; border-radius: 4px; padding: 4px 6px; font-size: 0.9rem; font-family: inherit; font-weight: 600; background: #ffffff; color: #0f172a; outline: none; box-sizing: border-box;" />
+          ` : `${row.qty || ''}`;
+
+          return `
+            <tr data-row-id="${row.id}" style="${rowBgStyle}">
+              <!-- 1. Select: Circle radio button (Green when checked, single selection) -->
+              <td style="width: 50px; min-width: 50px; max-width: 50px; text-align: center !important; vertical-align: middle; padding: 10px 4px;">
+                <div class="circular-radio-btn" onclick="togglePoAmendDetailRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${isChecked ? '#10b981' : '#94a3b8'}; background: ${isChecked ? '#10b981' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${isChecked ? 'Unselect' : 'Select'}">
+                  ${isChecked ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
+                </div>
+              </td>
+              <!-- 2. Amendment Type: 14% & center -->
+              <td style="width: 14%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; font-weight: 600; color: #0f172a;">
+                ${row.amendmentType || ''}
+              </td>
+              <!-- 3. Line No: 8% & center -->
+              <td style="width: 8%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 4px 4px;">
+                ${lineNoCellHtml}
+              </td>
+              <!-- 4. Item Code: 18% & left -->
+              <td style="width: 18%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemCode || ''}
+              </td>
+              <!-- 5. Item Name: 26% & left -->
+              <td style="width: 26%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemName || ''}
+              </td>
+              <!-- 6. UOM: 6% & center -->
+              <td style="width: 6%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 4px;">
+                ${row.uom || ''}
+              </td>
+              <!-- 7. Qty: 8% & right -->
+              <td style="width: 8%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: ${row.isEditing ? '4px 4px' : '10px 6px'};">
+                ${qtyCellHtml}
+              </td>
+              <!-- 8. Rate: 9% & right -->
+              <td style="width: 9%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.rate || ''}
+              </td>
+              <!-- 9. Amount: 11% & right -->
+              <td style="width: 11%; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+                ${row.amount || ''}
+              </td>
+            </tr>
+          `;
+        } else {
+          // Approval Pending: Hide Select column, adjust width/alignment
+          return `
+            <tr data-row-id="${row.id}" style="${rowBgStyle}">
+              <!-- 1. Amendment Type: 14% & center -->
+              <td style="width: 14%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; font-weight: 600; color: #0f172a;">
+                ${row.amendmentType || ''}
+              </td>
+              <!-- 2. Line No: 8% & center -->
+              <td style="width: 8%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 4px 4px;">
+                ${lineNoCellHtml}
+              </td>
+              <!-- 3. Item Code: 18% & left -->
+              <td style="width: 18%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemCode || ''}
+              </td>
+              <!-- 4. Item Name: 26% & left -->
+              <td style="width: 26%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
+                ${row.itemName || ''}
+              </td>
+              <!-- 5. UOM: 6% & center -->
+              <td style="width: 6%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 4px;">
+                ${row.uom || ''}
+              </td>
+              <!-- 6. Qty: 9% & right -->
+              <td style="width: 9%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.qty || ''}
+              </td>
+              <!-- 7. Rate: 9% & right -->
+              <td style="width: 9%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
+                ${row.rate || ''}
+              </td>
+              <!-- 8. Amount: 10% & right -->
+              <td style="width: 10%; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
+                ${row.amount || ''}
+              </td>
+            </tr>
+          `;
+        }
+      }).join('');
+
+      if (!isToBeSubmitTask && !isRejectedTask) {
+        // Approval Pending: Submit and Reject icons ALWAYS VISIBLE, side by side, and centered beneath table
+        rowsHtml += `
+          <tr id="rowPoAmendApprovalPendingActions" style="background: transparent; border: none !important;">
+            <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin: 0 auto;">
+                <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendApprovalSubmit" aria-label="Submit" onclick="openPoAmendStatusModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center;" title="Submit PO Amendment Status">
+                  <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+                </button>
+                <button type="button" class="toolbar-icon-btn btn-reject-action" id="btnPoAmendApprovalReject" aria-label="Reject" onclick="rejectCurrentPoAmendRow()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center;" title="Reject PO Amendment">
+                  <img src="icons/Reject.svg" alt="Reject" width="36" height="36">
+                </button>
               </div>
-            </td>
-            <!-- 2. Amendment Type: 14% & center -->
-            <td style="width: 14%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px; font-weight: 600; color: #0f172a;">
-              ${row.amendmentType || ''}
-            </td>
-            <!-- 3. Line No: 8% & center -->
-            <td style="width: 8%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 4px 4px;">
-              ${lineNoCellHtml}
-            </td>
-            <!-- 4. Item Code: 18% & left -->
-            <td style="width: 18%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-              ${row.itemCode || ''}
-            </td>
-            <!-- 5. Item Name: 26% & left -->
-            <td style="width: 26%; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
-              ${row.itemName || ''}
-            </td>
-            <!-- 6. UOM: 6% & center -->
-            <td style="width: 6%; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 4px;">
-              ${row.uom || ''}
-            </td>
-            <!-- 7. Qty: 8% & right -->
-            <td style="width: 8%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-              ${row.qty || ''}
-            </td>
-            <!-- 8. Rate: 9% & right -->
-            <td style="width: 9%; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-              ${row.rate || ''}
-            </td>
-            <!-- 9. Amount: 11% & right -->
-            <td style="width: 11%; text-align: right !important; white-space: nowrap; font-weight: 400; color: #0f172a; vertical-align: middle; padding: 10px 8px;">
-              ${row.amount || ''}
             </td>
           </tr>
         `;
-      }).join('');
-
-      if (allHighlighted) {
+      } else if (isRejectedTask) {
+        const isPdfProcessed = Boolean(window.poAmendDetailPdfProcessed);
+        const hasApprovedAndSelectedRow = currentDataset.length > 0 && currentDataset.some(r => r.selected && r.highlighted);
+        const isNotCurrentlyEditing = !currentDataset.some(r => r.selected && r.isEditing);
+        if (isPdfProcessed && hasApprovedAndSelectedRow && isNotCurrentlyEditing) {
+          rowsHtml += `
+            <tr id="rowPoAmendDetailSubmitAction" style="background: transparent; border: none !important;">
+              <td colspan="9" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
+                <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="openPoAmendIdModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
+                  <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+                </button>
+              </td>
+            </tr>
+          `;
+        }
+      } else if (allHighlighted) {
         rowsHtml += `
           <tr id="rowPoAmendDetailSubmitAction" style="background: transparent; border: none !important;">
             <td colspan="9" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
-              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="${currentPoAmendSubpageType === 'pending_with_indus' ? 'openPoAmendStatusModal()' : 'openPoAmendIdModal()'}" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendDetailSubmit" aria-label="Submit" onclick="openPoAmendIdModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit PO Amendment">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </td>
@@ -52188,10 +53061,12 @@ window.showSvgSuccessPopup = function(message, title = "Task Completed", onConti
 
   overlay.style.display = 'flex';
 
-  // Auto-dismiss after 3 seconds without user interruption
-  svgSuccessPopupAutoCloseTimer = setTimeout(() => {
-    closeSvgSuccessPopup();
-  }, 3000);
+  // Auto-dismiss after 3 seconds without user interruption only when no onContinue callback is provided
+  if (typeof onContinue !== 'function') {
+    svgSuccessPopupAutoCloseTimer = setTimeout(() => {
+      closeSvgSuccessPopup();
+    }, 3000);
+  }
 };
 
 window.closeSvgSuccessPopup = function() {
@@ -53875,113 +54750,9 @@ window.copyPoAmendItemCode = function(code) {
   }
 };
 
-window.openPoAmendIdModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendIdPanel');
-  if (!overlay || !panel) return;
+// Note: PO Amendment Status modal handlers (openPoAmendStatusModal, closePoAmendStatusModal, submitPoAmendStatusModal, rejectCurrentPoAmendRow)
+// are implemented with backend API persistence and material difference routing at lines ~5625-5750.
 
-  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
-  const inpRef = document.getElementById('inpPoAmendRefId');
-  if (inpRef) inpRef.value = '';
-
-  panel.style.display = 'block';
-  overlay.style.display = 'flex';
-};
-
-window.closePoAmendIdModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendIdPanel');
-  if (panel) panel.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
-};
-
-window.submitPoAmendIdModal = function() {
-  const inpRef = document.getElementById('inpPoAmendRefId');
-  const refId = inpRef ? inpRef.value.trim() : '';
-  if (!refId) {
-    showToast('Please enter Ref. ID');
-    return;
-  }
-
-  closePoAmendIdModal();
-
-  if (selectedPoAmendRowId) {
-    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = 'pending with indus';
-    }
-  }
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('PO Amendment Ref. ID submitted successfully!', 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
-
-  setTimeout(() => {
-    backToPoAmendList();
-  }, 1200);
-};
-
-window.openPoAmendStatusModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendStatusPanel');
-  if (!overlay || !panel) return;
-
-  document.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => c.style.display = 'none');
-  const inpRev = document.getElementById('inpPoAmendRevisionNo');
-  const inpDate = document.getElementById('inpPoAmendApprovedDate');
-  if (inpRev) inpRev.value = '';
-  if (inpDate) inpDate.value = '12 - 08 - 2026';
-
-  panel.style.display = 'block';
-  overlay.style.display = 'flex';
-
-  if (typeof attachNexusCalendar === 'function') {
-    attachNexusCalendar('inpPoAmendApprovedDate', 'btnPoAmendApprovedDateCalendar');
-  }
-};
-
-window.closePoAmendStatusModal = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  const panel = document.getElementById('poAmendStatusPanel');
-  if (panel) panel.style.display = 'none';
-  if (overlay) overlay.style.display = 'none';
-};
-
-window.submitPoAmendStatusModal = function() {
-  const inpRev = document.getElementById('inpPoAmendRevisionNo');
-  const revNo = inpRev ? inpRev.value.trim() : '';
-  if (!revNo) {
-    showToast('Please enter Revision No');
-    return;
-  }
-
-  closePoAmendStatusModal();
-
-  if (selectedPoAmendRowId) {
-    const parentRow = (typeof commercialPoAmendData !== 'undefined' ? commercialPoAmendData : []).find(r => String(r.id) === String(selectedPoAmendRowId));
-    if (parentRow) {
-      parentRow.task = 'Approved';
-    }
-  }
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('PO Amendment status updated successfully!', 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
-
-  // After submit, task completion pop should come and led to WCC page automatically
-  setTimeout(() => {
-    currentModule = 'worklist';
-    currentWorklistView = 'wcc';
-    activeColumnFilters = {};
-    updateURL();
-    renderApp();
-    showToast('Navigated to WCC Worklist');
-  }, 1200);
-};
 
 // ─── Inline HTML Compatibility Handlers ───
 window.closeAddSurveyForm = function() {

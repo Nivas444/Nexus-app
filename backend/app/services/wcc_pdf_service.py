@@ -1198,8 +1198,8 @@ class WccPdfService:
         if approved_lines and not use_sample_rows:
             for item in approved_lines:
                 rate_val = Decimal(str(item.po_rate or 0))
-                qty_val = Decimal(str(item.jms_qty if item.jms_qty is not None else (item.po_qty or 0)))
-                amt_val = Decimal(str(item.jms_amount if item.jms_amount is not None else (rate_val * qty_val)))
+                qty_val = Decimal(str(item.po_amendment_qty if item.po_amendment_qty is not None else (item.jms_qty if item.jms_qty is not None else (item.po_qty or 0))))
+                amt_val = Decimal(str(item.po_amount if item.po_amount is not None else (item.jms_amount if item.jms_amount is not None else (rate_val * qty_val))))
                 total_amount += amt_val
 
                 annex_rows.append([
@@ -1277,7 +1277,7 @@ class WccPdfService:
 
         if approved_lines and not use_sample_rows:
             for item in approved_lines:
-                qty_val = Decimal(str(item.jms_qty if item.jms_qty is not None else (item.po_qty or 0)))
+                qty_val = Decimal(str(item.po_amendment_qty if item.po_amendment_qty is not None else (item.jms_qty if item.jms_qty is not None else (item.po_qty or 0))))
                 boq_rows.append([
                     str(sl_no),
                     _para(item.item_code or "", cell_style),

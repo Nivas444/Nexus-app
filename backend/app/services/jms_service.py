@@ -1028,6 +1028,7 @@ class JmsService:
             )
             if is_amend:
                 amend_qty = float(r.po_amendment_qty) if r.po_amendment_qty is not None else float(abs(po_diff))
+                amt = Decimal(str(r.po_amount if r.po_amount is not None else (po_rate * Decimal(str(amend_qty)))))
                 total_amend_amount += amt
                 amend_items.append(PoAmendLineItem(
                     id=r.project_po_line_item_id,
@@ -1137,6 +1138,132 @@ class JmsService:
             "poAmendmentRefId": ref_clean,
             "task": proj.current_task,
             "status": proj.project_status
+        }
+
+    def update_po_amend_line_item_qty(
+        self,
+        line_item_id: Any,
+        new_qty: float,
+        po_no: Optional[str] = None,
+        site_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Update PO Amendment Qty for a specific line item in telecom_indus_po.
+        Recalculates Amount = PO Rate * Qty.
+        Persists recalculated amount in telecom_indus_po and updates po_amount in telecom_project.
+        Invalidates existing merged PDF so document regeneration is required.
+        """
+        if new_qty is None or new_qty <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="PO Amendment Quantity must be a positive number greater than zero."
+            )
+
+        line_item = None
+        # Try finding by primary key ID if numeric
+        try:
+            numeric_id = int(line_item_id)
+            line_item = self.project_db.query(TelecomIndusPo).filter(
+                TelecomIndusPo.project_po_line_item_id == numeric_id
+            ).first()
+        except (ValueError, TypeError):
+            pass
+
+        # Fallback to search by po_no and site_id
+        if not line_item and po_no:
+            query = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+            if site_id:
+                query = query.filter(TelecomIndusPo.site_id == site_id)
+            line_item = query.first()
+
+        if not line_item:
+            # If still not found, check if project exists to at least update project po_amount
+            proj_fallback = None
+            if po_no:
+                proj_q = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no)
+                if site_id:
+                    proj_q = proj_q.filter(TelecomProject.site_id == site_id)
+                proj_fallback = proj_q.first()
+            if not proj_fallback:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Line item or project with ID #{line_item_id} not found."
+                )
+            dec_qty = Decimal(str(new_qty))
+            recalc_amount = (proj_fallback.po_amount or Decimal("0"))
+            proj_fallback.po_amount = recalc_amount
+            proj_fallback.jms_merged_document = None
+            proj_fallback.jms_merged_documents = None
+            proj_fallback.po_amendment_merged_document = None
+            proj_fallback.po_amendment_merged_documents = None
+            self.project_db.commit()
+            return {
+                "success": True,
+                "id": line_item_id,
+                "poNo": proj_fallback.po_no,
+                "siteId": proj_fallback.site_id,
+                "qty": float(dec_qty),
+                "rate": 0.0,
+                "amount": float(recalc_amount),
+                "totalAmount": float(recalc_amount)
+            }
+
+        po_rate = Decimal(str(line_item.po_rate or 0))
+        dec_qty = Decimal(str(new_qty))
+        recalculated_amount = po_rate * dec_qty
+
+        po_qty = Decimal(str(line_item.po_qty or 0))
+        line_item.po_amendment_qty = dec_qty
+        line_item.jms_amount = recalculated_amount
+        line_item.po_amount = recalculated_amount
+        line_item.jms_qty = po_qty + dec_qty
+        line_item.material_difference_qty = dec_qty
+        line_item.jms_status = "Approved"
+
+        # Update parent project in telecom_project table
+        proj_q = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == line_item.po_no)
+        if line_item.site_id:
+            proj_q = proj_q.filter(TelecomProject.site_id == line_item.site_id)
+        proj = proj_q.first()
+        if not proj:
+            proj = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == line_item.po_no).first()
+
+        # Recalculate total amount across all amendment lines for this PO
+        all_po_lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == line_item.po_no)
+        if line_item.site_id:
+            all_po_lines = all_po_lines.filter(TelecomIndusPo.site_id == line_item.site_id)
+
+        total_po_amount = Decimal("0.00")
+        for l in all_po_lines.all():
+            if l.project_po_line_item_id == line_item.project_po_line_item_id:
+                total_po_amount += recalculated_amount
+            else:
+                l_rate = Decimal(str(l.po_rate or 0))
+                l_qty = Decimal(str(l.po_amendment_qty if l.po_amendment_qty is not None else (abs(Decimal(str(l.po_qty or 0)) - Decimal(str(l.jms_qty or 0))) if (l.po_qty and l.jms_qty and Decimal(str(l.po_qty or 0)) < Decimal(str(l.jms_qty or 0))) else Decimal(str(l.jms_qty or l.po_qty or 0)))))
+                total_po_amount += (l_rate * l_qty)
+
+        if proj:
+            proj.po_amount = total_po_amount
+            # Outdate existing merged documents so fresh generation is required
+            proj.jms_merged_document = None
+            proj.jms_merged_documents = None
+            proj.po_amendment_merged_document = None
+            proj.po_amendment_merged_documents = None
+
+        self.project_db.commit()
+        self.project_db.refresh(line_item)
+        if proj:
+            self.project_db.refresh(proj)
+
+        return {
+            "success": True,
+            "id": line_item.project_po_line_item_id,
+            "poNo": line_item.po_no,
+            "siteId": line_item.site_id,
+            "qty": float(dec_qty),
+            "rate": float(po_rate),
+            "amount": float(recalculated_amount),
+            "totalAmount": float(proj.po_amount if proj else total_po_amount)
         }
 
     def submit_wcc_details(
@@ -1428,18 +1555,68 @@ class JmsService:
                 )
 
         proj.po_revision_number = rev_clean
+        proj.po_date = parsed_date
         proj.po_amendment_completion_date = parsed_date
-        proj.po_amendment_completion_status = "Approved"
 
         norm_wf = (workflow or "").strip().lower()
         if norm_wf == "wcc":
             proj.wcc_approved_date = parsed_date
             proj.current_task = "WCC Approved"
             proj.project_status = "WCC Approved"
+            destination = "wcc"
+            mat_diff_val = 0.0
         else:
-            proj.current_task = "Amend Approved"
-            proj.project_status = "Amend Approved"
-            proj.po_status = "Approved"
+            # Evaluate that PO row's current po_material_difference value from the database
+            mat_diff_val = None
+            if hasattr(proj, 'po_material_difference') and proj.po_material_difference is not None:
+                mat_diff_val = float(proj.po_material_difference)
+
+            if mat_diff_val is None:
+                lines_q = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+                if site_id:
+                    lines_q = lines_q.filter(TelecomIndusPo.site_id == site_id)
+                lines = lines_q.all()
+                if lines:
+                    diffs = []
+                    for li in lines:
+                        if li.material_difference_qty is not None:
+                            diffs.append(float(li.material_difference_qty))
+                        elif li.net_material_qty is not None and li.jms_qty is not None:
+                            diffs.append(float(Decimal(str(li.jms_qty)) - Decimal(str(li.net_material_qty))))
+                    if diffs:
+                        pos_diffs = [d for d in diffs if d > 0]
+                        mat_diff_val = max(pos_diffs) if pos_diffs else max(diffs)
+                    else:
+                        mat_diff_val = 0.0
+                else:
+                    mat_diff_val = 0.0
+
+            # If po_material_difference <= 0, remove row from active PO Amendment and route to WCC with 'WCC to be submit'
+            # If po_material_difference > 0, keep row on PO Amendment with 'Approval Pending'
+            if mat_diff_val <= 0:
+                proj.current_task = "WCC to be submit"
+                proj.project_status = "WCC to be submit"
+                proj.po_status = "Approved"
+                proj.po_amendment_completion_status = "Approved"
+                destination = "wcc"
+
+                lines_q = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+                if site_id:
+                    lines_q = lines_q.filter(TelecomIndusPo.site_id == site_id)
+                for li in lines_q.all():
+                    li.po_amendment_type = "WCC to be submit"
+            else:
+                proj.current_task = "Approval Pending"
+                proj.project_status = "Approval Pending"
+                proj.po_status = "Under Review"
+                proj.po_amendment_completion_status = None
+                destination = "po_amend"
+
+                lines_q = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+                if site_id:
+                    lines_q = lines_q.filter(TelecomIndusPo.site_id == site_id)
+                for li in lines_q.all():
+                    li.po_amendment_type = "Approval Pending"
 
         self.project_db.commit()
         self.project_db.refresh(proj)
@@ -1451,7 +1628,9 @@ class JmsService:
             "siteId": proj.site_id,
             "revisionNo": rev_clean,
             "approvedDate": str(parsed_date),
+            "poMaterialDifference": mat_diff_val,
             "task": proj.current_task,
-            "status": proj.project_status
+            "status": proj.project_status,
+            "destination": destination
         }
 

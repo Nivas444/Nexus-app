@@ -112,6 +112,41 @@ class CommercialProjectService:
 
         return CommercialProjectListResponse(items=items, total=len(items))
 
+    def delete_project(self, project_id: Any) -> bool:
+        """
+        Delete a project record from `telecom_project` by project_id, project_code, or po_no.
+        """
+        str_id = str(project_id).strip()
+        cleaned_id = str_id.replace("prj-", "").replace("PRJ-", "")
+        pid = int(cleaned_id) if cleaned_id.isdigit() else None
+
+        query = self.db.query(TelecomProject)
+        proj = None
+        if pid is not None:
+            proj = query.filter(TelecomProject.project_id == pid).first()
+        if not proj:
+            proj = query.filter(
+                (TelecomProject.project_code == str_id) |
+                (TelecomProject.po_no == str_id)
+            ).first()
+
+        if not proj:
+            return False
+
+        self.db.delete(proj)
+        self.db.commit()
+        return True
+
+    def delete_projects_bulk(self, project_ids: List[Any]) -> int:
+        """
+        Bulk delete project records from `telecom_project`.
+        """
+        deleted_count = 0
+        for pid in project_ids:
+            if self.delete_project(pid):
+                deleted_count += 1
+        return deleted_count
+
     def process_project_bulk_upload(self, file_content: bytes, filename: str = "") -> CommercialBulkUploadResponse:
         """
         Validate and bulk upload Project records into `telecom_project`.
@@ -541,10 +576,9 @@ class CommercialProjectService:
 
             task_raw = (p.current_task or "").strip()
             t_low = task_raw.lower()
-            if t_low in ["amend approved", "amendment approved"]:
-                # Successfully completed PO Amend task moves out of active PO Amend task list
+            if t_low in ["wcc to be submit", "wcc to be raise", "wcc approved"]:
+                # Routed to WCC: remove from active PO Amendment page
                 continue
-
             if t_low in ["pending with indus", "approval pending"]:
                 task_display = "Approval Pending"
                 status_display = "Under Review"
@@ -580,6 +614,7 @@ class CommercialProjectService:
                 raBill=False,
                 selected=False,
                 poRevNo=p.po_revision_number,
+                poAmendmentRefId=p.po_amendment_ref_id or p.po_reference_number,
                 poAmendmentCompletionDate=completion_date_str,
                 poAmendmentCompletionStatus=p.po_amendment_completion_status,
                 poStatus=status_display,
@@ -618,7 +653,12 @@ class CommercialProjectService:
                 # Successfully completed WCC task moves out of active WCC task list
                 continue
 
+            if t_low in ["po amend to be submit", "amend requested"]:
+                continue
+
             if t_low in ["pending with indus", "approval pending"]:
+                if (not p.wcc_submission_date and not p.wcc_no) or (p.po_material_difference is not None and float(p.po_material_difference) > 0):
+                    continue
                 task_display = "Approval Pending"
                 status_display = "Under Review"
             elif t_low == "rejected":

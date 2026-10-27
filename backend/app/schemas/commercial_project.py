@@ -21,6 +21,7 @@ class CommercialProjectItem(BaseModel):
     raBill: bool = False
     selected: bool = False
     poRevNo: Optional[str] = None
+    poAmendmentRefId: Optional[str] = None
     poAmendmentCompletionDate: Optional[str] = None
     poAmendmentCompletionStatus: Optional[str] = None
     poStatus: Optional[str] = None
@@ -40,6 +41,16 @@ class CommercialBulkUploadResponse(BaseModel):
     total_count: int
     error_count: int
     errors: List[str]
+
+
+class CommercialProjectDeleteRequest(BaseModel):
+    project_ids: List[Any]
+
+
+class CommercialProjectDeleteResponse(BaseModel):
+    success: bool
+    deleted_count: int
+    message: str
 
 
 # ==========================================
@@ -269,6 +280,12 @@ class PoAmendSubmitReferenceRequest(BaseModel):
     def get_ref_id(self) -> str:
         ref = self.refId or self.poAmendmentRefId or ""
         return ref.strip()
+
+
+class PoAmendQtyUpdateRequest(BaseModel):
+    qty: float
+    poNo: Optional[str] = None
+    siteId: Optional[str] = None
 
 
 class WccSubmitDetailsRequest(BaseModel):

@@ -24,6 +24,7 @@ from app.schemas.commercial_project import (
     SelectWorksSubmitRequest,
     SelectWorksSubmitResponse,
     PoAmendSubmitReferenceRequest,
+    PoAmendQtyUpdateRequest,
     WccSubmitDetailsRequest,
     WccSubmitReceiptRequest,
     SubmitAmendmentStatusRequest,
@@ -262,6 +263,23 @@ def submit_select_works(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"PDF generation failed: {str(e)}"
         )
+
+
+@router.patch("/po-amend/line-items/{line_item_id}/qty", summary="Update PO Amendment line item quantity and persist recalculated amount")
+@router.post("/po-amend/line-items/{line_item_id}/qty", summary="Alias: Update PO Amendment line item quantity")
+def update_po_amend_line_item_qty(
+    line_item_id: str,
+    payload: PoAmendQtyUpdateRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    service = JmsService(project_db)
+    return service.update_po_amend_line_item_qty(
+        line_item_id=line_item_id,
+        new_qty=payload.qty,
+        po_no=payload.poNo,
+        site_id=payload.siteId
+    )
 
 
 @router.post("/po-amend/submit-reference", summary="Submit PO Reference Number and transition task to Approval Pending")

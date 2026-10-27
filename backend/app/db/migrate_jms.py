@@ -46,6 +46,11 @@ def run_migration():
             conn.execute(text("ALTER TABLE telecom_project ADD COLUMN receipt_date DATE;"))
             conn.commit()
 
+        if 'po_material_difference' not in proj_cols:
+            print("Adding po_material_difference NUMERIC to telecom_project...")
+            conn.execute(text("ALTER TABLE telecom_project ADD COLUMN po_material_difference NUMERIC;"))
+            conn.commit()
+
         # Check and migrate text columns if needed
         proj_cols = {c['name']: str(c['type']).upper() for c in inspector.get_columns('telecom_project')}
         for col_name in ['jms_merged_documents', 'po_amendment_merged_documents', 'jms_merged_document', 'po_amendment_merged_document']:

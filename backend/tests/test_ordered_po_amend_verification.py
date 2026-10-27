@@ -306,17 +306,18 @@ def test_C_approval_pending_status_modal_submission():
         headers={"x-user-role": "Commercial Manager"}
     )
     assert resp_ok.status_code == 200, resp_ok.text
-    assert resp_ok.json().get("task") == "Amend Approved"
+    # Since po_material_difference <= 0, it routes to WCC with task 'WCC to be submit'
+    assert resp_ok.json().get("task") == "WCC to be submit"
     assert resp_ok.json().get("revisionNo") == "REV-01"
 
     # Verify DB persistence
     db = ProjectSessionLocal()
     try:
         proj = db.query(TelecomProject).filter(TelecomProject.po_no == TEST_PO_A).first()
-        assert proj.current_task == "Amend Approved"
+        assert proj.current_task == "WCC to be submit"
         assert proj.po_revision_number == "REV-01"
+        assert str(proj.po_date) == "2026-10-26"
         assert str(proj.po_amendment_completion_date) == "2026-10-26"
-        assert proj.po_amendment_completion_status == "Approved"
     finally:
         db.close()
 

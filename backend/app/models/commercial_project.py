@@ -82,6 +82,7 @@ class TelecomProject(Base):
     jms_merged_documents = Column(LargeBinary, nullable=True)
     po_amendment_merged_documents = Column(LargeBinary, nullable=True)
     invoice_supporting_documents = Column(Text, nullable=True)
+    po_material_difference = Column(Numeric, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
 

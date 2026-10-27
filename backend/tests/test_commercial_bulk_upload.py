@@ -467,3 +467,55 @@ def test_get_commercial_po_amend_projects_list():
     assert p1["poRevNo"] is not None
     assert p1["poAmendmentCompletionStatus"] is not None
 
+
+def test_delete_commercial_project():
+    """Verify DELETE /api/v1/commercial/projects/{project_id} removes record."""
+    db = ProjectSessionLocal()
+    try:
+        proj = TelecomProject(
+            company_name="Nexus",
+            customer_name="Delete Customer Ltd",
+            po_no="TEST_PO_DEL_1",
+            project_code="TEST_PRJ_DEL_1",
+            site_id="TEST_SITE_DEL_1"
+        )
+        db.add(proj)
+        db.commit()
+        db.refresh(proj)
+        proj_id = proj.project_id
+    finally:
+        db.close()
+
+    res = client.delete(f"/api/v1/commercial/projects/prj-{proj_id}")
+    assert res.status_code == 200
+    assert res.json()["success"] is True
+
+    # Confirm deleted
+    db2 = ProjectSessionLocal()
+    try:
+        found = db2.query(TelecomProject).filter(TelecomProject.project_id == proj_id).first()
+        assert found is None
+    finally:
+        db2.close()
+
+
+def test_bulk_delete_commercial_projects():
+    """Verify POST /api/v1/commercial/projects/delete removes multiple records."""
+    db = ProjectSessionLocal()
+    try:
+        p1 = TelecomProject(company_name="Nexus", customer_name="Cust 1", po_no="TEST_BULK_DEL_1")
+        p2 = TelecomProject(company_name="Nexus", customer_name="Cust 2", po_no="TEST_BULK_DEL_2")
+        db.add_all([p1, p2])
+        db.commit()
+        db.refresh(p1)
+        db.refresh(p2)
+        p1_id, p2_id = p1.project_id, p2.project_id
+    finally:
+        db.close()
+
+    res = client.post("/api/v1/commercial/projects/delete", json={"project_ids": [f"prj-{p1_id}", f"prj-{p2_id}"]})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["success"] is True
+    assert data["deleted_count"] == 2
+

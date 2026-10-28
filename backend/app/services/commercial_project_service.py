@@ -649,15 +649,15 @@ class CommercialProjectService:
 
             task_raw = (p.current_task or "").strip()
             t_low = task_raw.lower()
-            if t_low in ["wcc approved"]:
-                # Successfully completed WCC task moves out of active WCC task list
+            if t_low in ["wcc approved", "to be submit", "invoice to be submit", "invoice to be raise"] or (p.receipt_no and t_low in ["to be submit", "wcc approved"]):
+                # Successfully completed WCC task moves out of active WCC task list into Invoice workflow
                 continue
 
             if t_low in ["po amend to be submit", "amend requested"]:
                 continue
 
             if t_low in ["pending with indus", "approval pending"]:
-                if (not p.wcc_submission_date and not p.wcc_no) or (p.po_material_difference is not None and float(p.po_material_difference) > 0):
+                if (p.po_material_difference is not None and float(p.po_material_difference) > 0) or (p.po_amendment_ref_id and not (p.wcc_no or p.wcc_submission_date)):
                     continue
                 task_display = "Approval Pending"
                 status_display = "Under Review"
@@ -696,7 +696,17 @@ class CommercialProjectService:
                 selected=False,
                 poRevNo=p.po_revision_number,
                 poStatus=status_display,
-                amount=formatted_amount
+                amount=formatted_amount,
+                wccNo=p.wcc_no,
+                wccDate=p.wcc_date.strftime("%d/%m/%Y") if p.wcc_date else None,
+                submissionDate=p.wcc_submission_date.strftime("%d/%m/%Y") if p.wcc_submission_date else None,
+                wccSubmissionDate=p.wcc_submission_date.strftime("%d/%m/%Y") if p.wcc_submission_date else None,
+                approvedDate=p.wcc_approved_date.strftime("%d/%m/%Y") if p.wcc_approved_date else None,
+                wccApprovedDate=p.wcc_approved_date.strftime("%d/%m/%Y") if p.wcc_approved_date else None,
+                wccAmount=float(p.wcc_amount) if p.wcc_amount is not None else None,
+                receiptNo=p.receipt_no,
+                receiptDate=p.receipt_date.strftime("%d/%m/%Y") if p.receipt_date else None,
+                ersNo=p.ers_no
             ))
 
         return CommercialProjectListResponse(items=items, total=len(items))

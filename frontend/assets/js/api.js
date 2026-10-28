@@ -1961,10 +1961,16 @@
           const url = `/commercial/jms/wcc-details?po_no=${encodeURIComponent(poNo || '')}${siteId ? '&site_id=' + encodeURIComponent(siteId) : ''}`;
           return await request(url, { method: 'GET' });
         },
-        async submitDetails(poNo, siteId, wccNo, wccDate, wccAmount) {
+        async updateLineItemQty(lineItemId, qty, poNo, siteId) {
+          return await request(`/commercial/jms/wcc/line-items/${encodeURIComponent(lineItemId)}/qty`, {
+            method: 'PATCH',
+            body: JSON.stringify({ qty: parseFloat(qty), poNo, siteId })
+          });
+        },
+        async submitDetails(poNo, siteId, wccNo, wccDate, wccAmount, submissionDate = null, approvedDate = null) {
           return await request('/commercial/jms/wcc/submit-details', {
             method: 'POST',
-            body: JSON.stringify({ poNo, siteId, wccNo, wccDate, wccAmount })
+            body: JSON.stringify({ poNo, siteId, wccNo, wccDate, wccAmount, submissionDate, approvedDate })
           });
         },
         async submitReceipt(poNo, siteId, receiptNo, receiptDate, ersNo) {

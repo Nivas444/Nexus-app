@@ -41,6 +41,11 @@ def run_migration():
             conn.execute(text("ALTER TABLE telecom_project ADD COLUMN wcc_amount NUMERIC;"))
             conn.commit()
 
+        if 'wcc_date' not in proj_cols:
+            print("Adding wcc_date DATE to telecom_project...")
+            conn.execute(text("ALTER TABLE telecom_project ADD COLUMN wcc_date DATE;"))
+            conn.commit()
+
         if 'receipt_date' not in proj_cols:
             print("Adding receipt_date DATE to telecom_project...")
             conn.execute(text("ALTER TABLE telecom_project ADD COLUMN receipt_date DATE;"))

@@ -172,6 +172,9 @@ async function loadCommercialProjectsFromApi() {
     try { await loadCommercialPoAmendFromApi(); } catch (e) { console.error('Failed to load PO Amend from API:', e); }
   }
   if (typeof syncCommercialWccDataWithNewProject === 'function') syncCommercialWccDataWithNewProject();
+  if (typeof loadCommercialWccFromApi === 'function') {
+    try { await loadCommercialWccFromApi(); } catch (e) { console.error('Failed to load WCC from API:', e); }
+  }
   if (typeof syncCommercialInvoiceDataWithNewProject === 'function') syncCommercialInvoiceDataWithNewProject();
   if (typeof syncCommercialReceivableDataWithNewProject === 'function') syncCommercialReceivableDataWithNewProject();
   if (typeof syncCommercialPoToBeOpenDataWithNewProject === 'function') syncCommercialPoToBeOpenDataWithNewProject();
@@ -5155,6 +5158,28 @@ function getPoAmendDetailItems(rowId) {
 }
 
 function calculatePoAmendDetailTotalSum(dataset) {
+  if (window.currentPoAmendTotalJmsAmount !== undefined && window.currentPoAmendTotalJmsAmount !== null && !isNaN(window.currentPoAmendTotalJmsAmount)) {
+    return window.currentPoAmendTotalJmsAmount;
+  }
+  const poNo = window.selectedPoAmendPoNo;
+  if (poNo && typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData)) {
+    const jmsRow = commercialJmsData.find(r => r.poNo === poNo);
+    if (jmsRow) {
+      const amt = (jmsRow.rawAmount !== undefined && !isNaN(Number(jmsRow.rawAmount)))
+        ? Number(jmsRow.rawAmount)
+        : parseFloat(String(jmsRow.amount || '').replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(amt)) return amt;
+    }
+  }
+  if (poNo && typeof defaultJmsItems !== 'undefined') {
+    const defJms = defaultJmsItems.find(r => r.poNo === poNo);
+    if (defJms) {
+      const amt = (defJms.rawAmount !== undefined && !isNaN(Number(defJms.rawAmount)))
+        ? defJms.rawAmount
+        : parseFloat(String(defJms.amount || '').replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(amt)) return amt;
+    }
+  }
   const list = dataset || filteredDataset || currentDataset || [];
   let sum = 0;
   list.forEach(r => {
@@ -5168,6 +5193,10 @@ function calculatePoAmendDetailTotalSum(dataset) {
   return sum;
 }
 window.calculatePoAmendDetailTotalSum = calculatePoAmendDetailTotalSum;
+
+window.openCommercialDashboard = function(pageName) {
+  showToast(`${pageName || 'Commercial'} Dashboard`);
+};
 
 window.openPoAmendDetailPage = function(rowId, poNo, task) {
   selectedPoAmendRowId = rowId;
@@ -5187,6 +5216,27 @@ window.openPoAmendDetailPage = function(rowId, poNo, task) {
   window.selectedPoAmendPoNo = parentPo;
   window.selectedPoAmendSiteId = parentSiteId;
   window.currentPoAmendParentTask = parentTask;
+
+  // Initialize sum of jms amount with respect to this PO No
+  window.currentPoAmendTotalJmsAmount = null;
+  if (parentPo) {
+    if (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData)) {
+      const jmsRow = commercialJmsData.find(r => r.poNo === parentPo);
+      if (jmsRow) {
+        window.currentPoAmendTotalJmsAmount = (jmsRow.rawAmount !== undefined && !isNaN(Number(jmsRow.rawAmount)))
+          ? Number(jmsRow.rawAmount)
+          : parseFloat(String(jmsRow.amount || '').replace(/[^0-9.-]+/g, ''));
+      }
+    }
+    if ((window.currentPoAmendTotalJmsAmount === null || isNaN(window.currentPoAmendTotalJmsAmount)) && typeof defaultJmsItems !== 'undefined') {
+      const defJms = defaultJmsItems.find(r => r.poNo === parentPo);
+      if (defJms) {
+        window.currentPoAmendTotalJmsAmount = (defJms.rawAmount !== undefined && !isNaN(Number(defJms.rawAmount)))
+          ? defJms.rawAmount
+          : parseFloat(String(defJms.amount || '').replace(/[^0-9.-]+/g, ''));
+      }
+    }
+  }
   const taskStr = String(parentTask || '').trim().toLowerCase();
   if (taskStr.includes('reject')) {
     currentPoAmendSubpageType = 'rejected';
@@ -5247,6 +5297,15 @@ async function loadPoAmendDetailFromApi(poNo, siteId) {
           window.poAmendDetailPdfProcessed = Boolean(res.hasMergedDocument);
         }
 
+        if (res.totalJmsAmount !== undefined && res.totalJmsAmount !== null) {
+          window.currentPoAmendTotalJmsAmount = Number(res.totalJmsAmount);
+        } else if (res.totalAmount !== undefined && res.totalAmount !== null) {
+          window.currentPoAmendTotalJmsAmount = Number(res.totalAmount);
+        }
+        const poAmendDetailSumEl = document.getElementById('lblPoAmendDetailTotalAmount');
+        if (poAmendDetailSumEl && window.currentPoAmendTotalJmsAmount !== undefined && window.currentPoAmendTotalJmsAmount !== null) {
+          poAmendDetailSumEl.textContent = formatJmsSum(window.currentPoAmendTotalJmsAmount);
+        }
         if (res.poAmendmentRefId) {
           window.currentPoAmendRefId = res.poAmendmentRefId;
         }
@@ -6244,13 +6303,109 @@ const defaultWccItems = [
   }
 ];
 
-let commercialWccData = [...defaultWccItems];
+let commercialWccData = defaultWccItems.map(item => ({ ...item }));
 
 function syncCommercialWccDataWithNewProject() {
-  if (!commercialWccData || !Array.isArray(commercialWccData) || commercialWccData.length !== 5) {
+  if (!commercialWccData || !Array.isArray(commercialWccData)) {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('commercialWccData');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            commercialWccData = parsed;
+            return;
+          }
+        }
+      } catch (e) {}
+    }
     commercialWccData = defaultWccItems.map(item => ({ ...item }));
   }
 }
+
+async function loadCommercialWccFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.wcc && typeof NexusApi.commercial.wcc.getProjects === 'function') {
+    try {
+      const response = await NexusApi.commercial.wcc.getProjects();
+      if (response && Array.isArray(response.items)) {
+        const apiMap = {};
+        response.items.forEach(it => {
+          if (it.poNo) {
+            apiMap[it.poNo] = it;
+          }
+        });
+
+        // Use live active records returned by the backend database
+        const liveItems = [];
+        const seenPo = new Set();
+
+        response.items.forEach((live, idx) => {
+          if (live.poNo && !seenPo.has(live.poNo)) {
+            seenPo.add(live.poNo);
+            const defItem = defaultWccItems.find(d => d.poNo === live.poNo) || {};
+            const rawAmt = (live.poAmount !== undefined && live.poAmount !== null) ? Number(live.poAmount) : (defItem.rawAmount || 0);
+            liveItems.push({
+              id: live.id || defItem.id || `wcc-live-${idx + 1}`,
+              date: live.date || defItem.date || "12/08/2026",
+              poNo: live.poNo,
+              poStatus: live.poStatus || defItem.poStatus || "WCC Requested",
+              projectId: live.projectId || defItem.projectId || "",
+              siteId: live.siteId || defItem.siteId || "",
+              siteName: live.siteName || defItem.siteName || "",
+              projectType: live.projectType || defItem.projectType || "New Build",
+              subProjectType: live.subProjectType || defItem.subProjectType || "Civil",
+              supportRequired: defItem.supportRequired || "",
+              pendingWith: defItem.pendingWith || "",
+              remarks: defItem.remarks || "",
+              task: live.task || defItem.task || "WCC to be submit",
+              ageing: live.ageing || defItem.ageing || "0 Days",
+              amount: live.amount || (typeof formatIndianCurrency === 'function' ? formatIndianCurrency(rawAmt) : "0.00"),
+              rawAmount: rawAmt,
+              wccNo: live.wccNo || defItem.wccNo || null,
+              wccDate: live.wccDate || defItem.wccDate || null,
+              wccSubmissionDate: live.wccSubmissionDate || live.submissionDate || defItem.wccSubmissionDate || null,
+              submissionDate: live.submissionDate || live.wccSubmissionDate || defItem.submissionDate || null,
+              wccApprovedDate: live.wccApprovedDate || live.approvedDate || defItem.wccApprovedDate || null,
+              approvedDate: live.approvedDate || live.wccApprovedDate || defItem.approvedDate || null,
+              wccAmount: (live.wccAmount !== undefined && live.wccAmount !== null) ? Number(live.wccAmount) : rawAmt,
+              receiptNo: live.receiptNo || defItem.receiptNo || null,
+              receiptDate: live.receiptDate || defItem.receiptDate || null,
+              ersNo: live.ersNo || defItem.ersNo || null,
+              selected: false,
+              highlighted: false
+            });
+          }
+        });
+
+        // Filter out completed rows whose task is 'to be submit' or has receiptNo
+        commercialWccData = liveItems.filter(item => {
+          const t = (item.task || '').trim().toLowerCase();
+          return t !== 'to be submit' && t !== 'wcc approved' && !item.receiptNo;
+        });
+
+        if (typeof localStorage !== 'undefined') {
+          try {
+            localStorage.setItem('commercialWccData', JSON.stringify(commercialWccData));
+          } catch (e) {}
+        }
+        if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'wcc') {
+          currentDataset = commercialWccData.map(item => ({ ...item }));
+          filteredDataset = [...currentDataset];
+          if (typeof applyFiltersAndRender === 'function') {
+            applyFiltersAndRender();
+          }
+        }
+        return commercialWccData;
+      }
+    } catch (err) {
+      console.error('Failed to load WCC projects from API:', err);
+    }
+  }
+
+  syncCommercialWccDataWithNewProject();
+  return commercialWccData;
+}
+window.loadCommercialWccFromApi = loadCommercialWccFromApi;
 
 function calculateWccTotalSum(dataset) {
   const list = dataset || filteredDataset || currentDataset || [];
@@ -6427,13 +6582,92 @@ window.handleWccPoNoClick = function(rowId, poNo, task) {
   const taskStr = String(task || '').trim().toLowerCase();
   
   if (taskStr.includes('pending') || taskStr.includes('indus')) {
-    openWccReceiptNoModal();
+    openWccDetailPage(rowId, poNo, 'approval_pending');
   } else if (taskStr.includes('reject')) {
     openWccDetailPage(rowId, poNo, 'rejected');
   } else {
     openWccDetailPage(rowId, poNo, 'to_be_submit');
   }
 };
+
+window.handleWccRowSubmit = function(rowId) {
+  openWccReceiptNoModal();
+};
+window.handleWccApprovalPendingSubmit = window.handleWccRowSubmit;
+
+let isRejectingWccRow = false;
+window.handleWccRowReject = async function(rowId) {
+  if (isRejectingWccRow) return;
+
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => 
+    String(r.id) === String(selectedWccRowId) || (window.selectedWccPoNo && r.poNo === window.selectedWccPoNo)
+  ) || {};
+  const poNo = parentRow.poNo || window.selectedWccPoNo;
+  const siteId = parentRow.siteId || window.selectedWccSiteId;
+
+  if (!poNo) {
+    if (typeof showToast === 'function') showToast('No PO selected to reject.');
+    return;
+  }
+
+  isRejectingWccRow = true;
+  try {
+    let rejResult = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.rejectRow) {
+      rejResult = await NexusApi.commercial.wcc.rejectRow(poNo, siteId);
+    } else {
+      const resp = await fetch('/api/v1/commercial/jms/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ poNo, siteId, workflow: 'WCC' })
+      });
+      if (!resp.ok) {
+        let errDetail = 'Failed to reject WCC row';
+        try {
+          const errJson = await resp.json();
+          if (errJson && errJson.detail) errDetail = errJson.detail;
+        } catch (e) {}
+        throw new Error(errDetail);
+      }
+      rejResult = await resp.json();
+    }
+
+    if (!rejResult || (!rejResult.success && rejResult.task !== 'Rejected')) {
+      throw new Error(rejResult?.message || 'Rejection failed');
+    }
+
+    window.currentWccParentTask = 'Rejected';
+    currentWccSubpageType = 'rejected';
+    if (typeof commercialWccData !== 'undefined') {
+      const pRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId) || (poNo && r.poNo === poNo));
+      if (pRow) {
+        pRow.task = 'Rejected';
+        pRow.poStatus = 'Rejected';
+      }
+      try {
+        localStorage.setItem('commercialWccData', JSON.stringify(commercialWccData));
+      } catch (e) {}
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('WCC Rejected successfully!', 'Task Completed');
+    } else {
+      showToast('WCC Rejected');
+    }
+
+    // Return to the WCC page and refresh data from backend
+    await backToWccList();
+
+  } catch (apiErr) {
+    console.error('Backend wcc rejectRow failed:', apiErr);
+    if (typeof showToast === 'function') {
+      showToast(apiErr.message || 'Failed to reject WCC. Task status remains unchanged.');
+    }
+  } finally {
+    isRejectingWccRow = false;
+  }
+};
+window.handleWccApprovalPendingReject = window.handleWccRowReject;
 
 window.openWccDetailPage = function(rowId, poNo, subpageType) {
   selectedWccRowId = rowId;
@@ -6451,12 +6685,14 @@ window.openWccDetailPage = function(rowId, poNo, subpageType) {
   window.selectedWccPoNo = parentPo;
   window.selectedWccSiteId = parentSiteId;
   currentWccSubpageType = subpageType || 'to_be_submit';
+  window.currentWccParentTask = currentWccSubpageType === 'approval_pending' ? 'Approval Pending' : (currentWccSubpageType === 'rejected' ? 'Rejected' : 'WCC to be submit');
+  window.wccDetailPdfProcessed = false;
   currentWorklistView = 'wcc_detail';
   activeColumnFilters = {};
   loadWorklistDataset();
   updateURL();
   renderApp();
-  showToast(`Opened WCC Detail (${currentWccSubpageType === 'rejected' ? 'Rejected' : 'To Be Submitted'})`);
+  showToast(`Opened WCC Detail (${currentWccSubpageType === 'rejected' ? 'Rejected' : (currentWccSubpageType === 'approval_pending' ? 'Approval Pending' : 'To Be Submitted')})`);
 
   if (parentPo) {
     loadWccDetailFromApi(parentPo, parentSiteId);
@@ -6468,43 +6704,92 @@ async function loadWccDetailFromApi(poNo, siteId) {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.getPoDetails) {
     try {
       const res = await NexusApi.commercial.wcc.getPoDetails(poNo, siteId);
-      if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
-        currentDataset = res.lineItems.map(item => {
-          const rateVal = parseFloat(item.rate) || 0;
-          const qtyVal = parseFloat(item.qty) || 0;
-          const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
-          return {
-            id: item.id,
-            lineNo: String(item.lineNo || ''),
-            itemCode: item.itemCode || '',
-            itemName: item.itemName || '',
-            uom: item.uom || 'Nos',
-            rate: formatJmsSum(rateVal),
-            rawRate: rateVal,
-            qty: qtyVal.toFixed(2),
-            rawQty: qtyVal,
-            poQty: item.poQty,
-            jmsQty: item.jmsQty,
-            poDifference: item.poDifference,
-            amount: formatJmsSum(amtVal),
-            rawAmount: amtVal,
-            task: item.task || 'WCC to be raise',
-            selected: false,
-            highlighted: false
-          };
-        });
-        filteredDataset = [...currentDataset];
-        if (selectedWccRowId) {
-          wccDetailItemsMap[selectedWccRowId] = currentDataset;
+      if (res) {
+        window.currentWccDetails = res;
+        const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(
+          r => r.poNo === poNo || String(r.id) === String(selectedWccRowId)
+        );
+        const isParentToBeSubmit = (parentRow && String(parentRow.task).toLowerCase().includes('to be submit')) ||
+                                    (window.currentWccParentTask && String(window.currentWccParentTask).toLowerCase().includes('to be submit'));
+        const isParentRejected = (parentRow && String(parentRow.task).toLowerCase().includes('reject')) ||
+                                  (window.currentWccParentTask && String(window.currentWccParentTask).toLowerCase().includes('reject'));
+
+        if (isParentToBeSubmit) {
+          window.currentWccParentTask = 'WCC to be submit';
+          currentWccSubpageType = 'to_be_submit';
+        } else if (isParentRejected || (res.task && String(res.task).toLowerCase().includes('reject'))) {
+          window.currentWccParentTask = 'Rejected';
+          currentWccSubpageType = 'rejected';
+        } else if (res.task) {
+          window.currentWccParentTask = res.task;
+          const taskStr = String(res.task).toLowerCase().trim();
+          if (taskStr.includes('reject')) {
+            currentWccSubpageType = 'rejected';
+          } else if (taskStr.includes('pending')) {
+            currentWccSubpageType = 'approval_pending';
+          } else {
+            currentWccSubpageType = 'to_be_submit';
+          }
         }
-        if (typeof applyFiltersAndRender === 'function') {
-          applyFiltersAndRender();
+
+        if (res.hasMergedDocument !== undefined) {
+          window.wccDetailHasMergedDoc = Boolean(res.hasMergedDocument);
+          window.wccDetailPdfProcessed = Boolean(res.hasMergedDocument);
         }
-        if (typeof renderWorklistToolbar === 'function') {
-          renderWorklistToolbar();
+
+        if (parentRow) {
+          if (!isParentToBeSubmit) {
+            if (res.task) parentRow.task = res.task;
+            if (res.poStatus) parentRow.poStatus = res.poStatus;
+          }
+          if (res.wccNo) parentRow.wccNo = res.wccNo;
+          if (res.wccDate) parentRow.wccDate = res.wccDate;
+          if (res.wccAmount !== undefined && res.wccAmount !== null) {
+            parentRow.wccAmount = res.wccAmount;
+            parentRow.rawAmount = res.wccAmount;
+            parentRow.amount = typeof formatIndianCurrency === 'function' ? formatIndianCurrency(res.wccAmount) : String(res.wccAmount);
+          }
         }
-        if (typeof renderWorklistFooter === 'function') {
-          renderWorklistFooter();
+
+        if (Array.isArray(res.lineItems) && res.lineItems.length > 0) {
+          currentDataset = res.lineItems.map(item => {
+            const rateVal = parseFloat(item.rate) || 0;
+            const qtyVal = parseFloat(item.qty) || 0;
+            const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
+            return {
+              id: item.id,
+              lineNo: String(item.lineNo || ''),
+              itemCode: item.itemCode || '',
+              itemName: item.itemName || '',
+              uom: item.uom || 'Nos',
+              rate: formatJmsSum(rateVal),
+              rawRate: rateVal,
+              qty: qtyVal.toFixed(2),
+              rawQty: qtyVal,
+              poQty: item.poQty,
+              jmsQty: item.jmsQty,
+              poDifference: item.poDifference,
+              amount: formatJmsSum(amtVal),
+              rawAmount: amtVal,
+              task: item.task || 'WCC to be raise',
+              selected: false,
+              highlighted: Boolean(res.hasMergedDocument),
+              isEditing: false
+            };
+          });
+          filteredDataset = [...currentDataset];
+          if (selectedWccRowId) {
+            wccDetailItemsMap[selectedWccRowId] = currentDataset;
+          }
+          if (typeof applyFiltersAndRender === 'function') {
+            applyFiltersAndRender();
+          }
+          if (typeof renderWorklistToolbar === 'function') {
+            renderWorklistToolbar();
+          }
+          if (typeof renderWorklistFooter === 'function') {
+            renderWorklistFooter();
+          }
         }
       }
     } catch (err) {
@@ -6514,9 +6799,18 @@ async function loadWccDetailFromApi(poNo, siteId) {
 }
 window.loadWccDetailFromApi = loadWccDetailFromApi;
 
-window.backToWccList = function() {
+window.backToWccList = async function() {
+  const wccApprovalArea = document.getElementById('wccApprovalPendingSubmitArea');
+  if (wccApprovalArea) wccApprovalArea.style.display = 'none';
   currentWorklistView = 'wcc';
   activeColumnFilters = {};
+  if (typeof loadCommercialWccFromApi === 'function') {
+    try {
+      await loadCommercialWccFromApi();
+    } catch (e) {
+      console.warn('Failed reloading WCC data from API:', e);
+    }
+  }
   loadWorklistDataset();
   updateURL();
   renderApp();
@@ -6527,11 +6821,14 @@ window.toggleWccDetailRowSelect = function(lineId) {
   const row = currentDataset.find(r => String(r.id) === String(lineId));
   if (row) {
     row.selected = !row.selected;
-    if (!row.selected && row.highlighted) {
-      row.highlighted = false;
+    if (!row.selected) {
+      row.isEditing = false;
     }
     applyFiltersAndRender();
     updateWccDetailActionIcons();
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
     renderWorklistFooter();
   }
 };
@@ -6541,11 +6838,14 @@ window.toggleWccDetailSelectAll = function() {
   currentDataset.forEach(r => {
     r.selected = anyUnselected;
     if (!anyUnselected) {
-      r.highlighted = false;
+      r.isEditing = false;
     }
   });
   applyFiltersAndRender();
   updateWccDetailActionIcons();
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
   renderWorklistFooter();
 };
 
@@ -6561,6 +6861,9 @@ window.highlightSelectedWccDetailRows = function() {
   if (count > 0) {
     applyFiltersAndRender();
     updateWccDetailActionIcons();
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
     renderWorklistFooter();
     showToast(`Validated and highlighted ${count} row${count > 1 ? 's' : ''}!`);
   } else {
@@ -6568,10 +6871,245 @@ window.highlightSelectedWccDetailRows = function() {
   }
 };
 
+window.editSelectedWccDetailRow = function() {
+  const row = currentDataset.find(r => r.selected);
+  if (!row) {
+    showToast('Please select a row using the Select column first.');
+    return;
+  }
+  currentDataset.forEach(r => {
+    r.isEditing = (String(r.id) === String(row.id));
+  });
+  applyFiltersAndRender();
+  updateWccDetailActionIcons();
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+  setTimeout(() => {
+    const inp = document.getElementById(`inpWccQty_${row.id}`);
+    if (inp) {
+      inp.focus();
+      inp.select();
+    }
+  }, 50);
+};
+
+window.saveSelectedWccDetailRow = async function() {
+  const row = currentDataset.find(r => r.selected && r.isEditing) || currentDataset.find(r => r.selected);
+  if (!row) {
+    showToast('Please select and edit a row first.');
+    return;
+  }
+
+  const inp = document.getElementById(`inpWccQty_${row.id}`);
+  const enteredVal = inp ? inp.value.trim() : String(row.qty || '');
+  const parsedQty = parseFloat(enteredVal);
+
+  if (isNaN(parsedQty) || parsedQty <= 0) {
+    showToast('Please enter a valid positive quantity greater than zero.');
+    if (inp) inp.focus();
+    return;
+  }
+
+  const rowId = selectedWccRowId || 'PO';
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(
+    r => String(r.id) === String(rowId) || (window.selectedWccPoNo && r.poNo === window.selectedWccPoNo)
+  ) || (typeof currentDataset !== 'undefined' && currentDataset[0]) || {};
+  const poNo = parentRow.poNo || window.selectedWccPoNo || '';
+  const siteId = parentRow.siteId || window.selectedWccSiteId || '';
+
+  showToast('Saving quantity...');
+
+  try {
+    let result = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.updateLineItemQty) {
+      result = await NexusApi.commercial.wcc.updateLineItemQty(row.id, parsedQty, poNo, siteId);
+    } else {
+      const apiBase = getCommercialApiBaseUrl();
+      const token = (typeof window !== 'undefined' && window.localStorage)
+        ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token')) || window.localStorage.getItem('nxtkn_commercial') || '')
+        : '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBase}/commercial/jms/wcc/line-items/${encodeURIComponent(row.id)}/qty`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ qty: parsedQty, poNo, siteId })
+      });
+      if (!res.ok) {
+        let errDetail = `${res.status} ${res.statusText}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.detail) errDetail = errJson.detail;
+        } catch(e) {}
+        throw new Error(errDetail);
+      }
+      result = await res.json();
+    }
+
+    if (!result || !result.success) {
+      throw new Error((result && result.message) || 'Failed to save quantity on server.');
+    }
+
+    const rateVal = parseFloat(row.rawRate) || parseFloat(String(row.rate).replace(/[^0-9.-]+/g, '')) || 0;
+    const recalcAmount = (result && result.amount !== undefined) ? result.amount : (rateVal * parsedQty);
+
+    row.rawQty = parsedQty;
+    row.qty = parsedQty.toFixed(2);
+    row.rawAmount = recalcAmount;
+    row.amount = formatJmsSum(recalcAmount);
+    row.isEditing = false;
+    row.highlighted = true;
+    row.selected = true;
+
+    // Outdate PDF generation since quantity changed
+    window.wccDetailPdfProcessed = false;
+
+    if (parentRow && result && result.totalAmount !== undefined) {
+      parentRow.rawAmount = result.totalAmount;
+      parentRow.amount = typeof formatIndianCurrency === 'function' ? formatIndianCurrency(result.totalAmount) : formatJmsSum(result.totalAmount);
+      parentRow.wccAmount = result.totalAmount;
+    }
+
+    applyFiltersAndRender();
+    updateWccDetailActionIcons();
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof renderWorklistFooter === 'function') renderWorklistFooter();
+    showToast('Quantity saved and Amount recalculated successfully!');
+
+  } catch (err) {
+    console.error('Error saving quantity:', err);
+    showToast(`Failed to save quantity: ${err.message || 'Server error'}`);
+    if (inp) {
+      inp.focus();
+    }
+  }
+};
+
+window.processWccDetailPdf = async function(btn) {
+  const rowId = selectedWccRowId || 'PO';
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(
+    r => String(r.id) === String(rowId) || (window.selectedWccPoNo && r.poNo === window.selectedWccPoNo)
+  ) || (typeof currentDataset !== 'undefined' && currentDataset[0]) || {};
+  const poNo = parentRow.poNo || window.selectedWccPoNo || '4500128934';
+  const siteId = parentRow.siteId || window.selectedWccSiteId || '';
+
+  if (window._isWccPdfProcessing) {
+    showToast('PDF processing in progress. Please wait...');
+    return;
+  }
+  window._isWccPdfProcessing = true;
+
+  const triggerBtn = btn || document.getElementById('btnWccDetailPdf');
+  let origHtml = '';
+  if (triggerBtn) {
+    origHtml = triggerBtn.innerHTML;
+    triggerBtn.disabled = true;
+    triggerBtn.style.pointerEvents = 'none';
+    triggerBtn.style.opacity = '0.7';
+    triggerBtn.style.cursor = 'wait';
+
+    if (!document.getElementById('nexus-pdf-spinner-style')) {
+      const styleTag = document.createElement('style');
+      styleTag.id = 'nexus-pdf-spinner-style';
+      styleTag.textContent = '@keyframes nexusPdfSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+      document.head.appendChild(styleTag);
+    }
+
+    triggerBtn.innerHTML = `
+      <span class="pdf-process-spinner" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="animation: nexusPdfSpin 0.75s linear infinite; display: block;">
+          <circle cx="12" cy="12" r="9" stroke="#cbd5e1" stroke-width="3"></circle>
+          <path d="M12 3a9 9 0 0 1 9 9" stroke="#00cba0" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+      </span>
+    `;
+  }
+
+  showToast(`Generating and merging PDF for PO ${poNo}...`);
+
+  try {
+    let result = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.processPdf) {
+      result = await NexusApi.commercial.wcc.processPdf(poNo, siteId);
+    } else if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.processPdf) {
+      result = await NexusApi.commercial.jms.processPdf(poNo, siteId);
+    } else {
+      const apiBase = getCommercialApiBaseUrl();
+      const token = (typeof window !== 'undefined' && window.localStorage)
+        ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token')) || window.localStorage.getItem('nxtkn_commercial') || '')
+        : '';
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiBase}/commercial/jms/pdf/process`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ poNo, siteId })
+      });
+      if (!res.ok) {
+        let errDetail = `${res.status} ${res.statusText}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.detail) errDetail = errJson.detail;
+        } catch(e) {}
+        throw new Error(errDetail);
+      }
+      result = await res.json();
+    }
+
+    if (!result || !result.success) {
+      throw new Error((result && result.message) || 'PDF processing failed.');
+    }
+
+    window.wccDetailPdfProcessed = true;
+    showToast('PDF regenerated and merged successfully! Download is now ready.');
+
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+    if (typeof renderWorklistFooter === 'function') renderWorklistFooter();
+
+  } catch (err) {
+    console.error('PDF process failed:', err);
+    window.wccDetailPdfProcessed = false;
+    showToast(`PDF processing failed: ${err.message || 'Server error'}. Please retry.`);
+    if (triggerBtn) {
+      triggerBtn.disabled = false;
+      triggerBtn.style.pointerEvents = '';
+      triggerBtn.style.opacity = '';
+      triggerBtn.style.cursor = 'pointer';
+      triggerBtn.innerHTML = origHtml;
+    }
+  } finally {
+    window._isWccPdfProcessing = false;
+  }
+};
+
 window.updateWccDetailActionIcons = function() {
-  const hasSelected = currentDataset.some(r => r.selected || r.highlighted);
+  const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+  const isRejected = currentWccSubpageType === 'rejected' || parentTask.includes('reject');
+  const hasSelected = currentDataset.some(r => r.selected);
+  const isEditing = currentDataset.some(r => r.selected && r.isEditing);
+
   const btnTick = document.getElementById('btnWccDetailApproveTick');
-  if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
+  if (btnTick) {
+    if (isRejected) {
+      btnTick.style.display = (hasSelected && !isEditing) ? 'inline-flex' : 'none';
+    } else {
+      btnTick.style.display = currentDataset.some(r => r.selected || r.highlighted) ? 'inline-flex' : 'none';
+    }
+  }
+
+  const btnEdit = document.getElementById('btnWccDetailEdit');
+  if (btnEdit) {
+    btnEdit.style.display = (isRejected && hasSelected && !isEditing) ? 'inline-flex' : 'none';
+  }
+
+  const btnSave = document.getElementById('btnWccDetailSave');
+  if (btnSave) {
+    btnSave.style.display = (isRejected && hasSelected && isEditing) ? 'inline-flex' : 'none';
+  }
 };
 
 window.openWccReceiptNoModal = function() {
@@ -6580,10 +7118,30 @@ window.openWccReceiptNoModal = function() {
   if (!overlay || !panel) return;
 
   document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => 
+    String(r.id) === String(selectedWccRowId) || (window.selectedWccPoNo && r.poNo === window.selectedWccPoNo)
+  );
+
   const inpRec = document.getElementById('inpWccReceiptNo');
-  if (inpRec) inpRec.value = '';
+  if (inpRec) {
+    if (!inpRec.value || !window._hasEnteredWccReceiptValues) {
+      inpRec.value = parentRow ? (parentRow.receiptNo || '') : '';
+    }
+  }
+
+  const inpDate = document.getElementById('inpWccReceiptDate');
+  if (inpDate) {
+    if (!inpDate.value || inpDate.value === '06 - 10 - 2026' || !window._hasEnteredWccReceiptValues) {
+      inpDate.value = parentRow ? (parentRow.receiptDate || parentRow.date || '06 - 10 - 2026') : '06 - 10 - 2026';
+    }
+  }
+
   const inpErs = document.getElementById('inpWccErsNo');
-  if (inpErs) inpErs.value = '';
+  if (inpErs) {
+    if (!inpErs.value || !window._hasEnteredWccReceiptValues) {
+      inpErs.value = parentRow ? (parentRow.ersNo || '') : '';
+    }
+  }
 
   if (typeof attachNexusCalendar === 'function') {
     attachNexusCalendar('inpWccReceiptDate', 'btnWccReceiptDateCalendar');
@@ -6600,50 +7158,211 @@ window.closeWccReceiptNoModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.submitWccReceiptNoModal = function() {
+let isSubmittingWccReceipt = false;
+window.submitWccReceiptNoModal = async function() {
+  if (isSubmittingWccReceipt) return;
+
   const inpRec = document.getElementById('inpWccReceiptNo');
-  const recVal = inpRec ? inpRec.value.trim() : '';
+  const inpDate = document.getElementById('inpWccReceiptDate');
+  const inpErs = document.getElementById('inpWccErsNo');
 
-  closeWccReceiptNoModal();
+  const receiptNo = inpRec ? inpRec.value.trim() : '';
+  const receiptDate = inpDate ? inpDate.value.trim() : '';
+  const ersNo = inpErs ? inpErs.value.trim() : '';
 
-  if (selectedWccRowId) {
-    const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
-    if (parentRow) {
-      parentRow.task = "WCC Approved";
+  if (!receiptNo) {
+    if (typeof showToast === 'function') showToast('Receipt No is required');
+    if (inpRec) inpRec.focus();
+    return;
+  }
+
+  if (!receiptDate) {
+    if (typeof showToast === 'function') showToast('Receipt Date is required');
+    if (inpDate) inpDate.focus();
+    return;
+  }
+
+  window._hasEnteredWccReceiptValues = true;
+
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => 
+    String(r.id) === String(selectedWccRowId) || (window.selectedWccPoNo && r.poNo === window.selectedWccPoNo)
+  ) || {};
+  const poNo = parentRow.poNo || window.selectedWccPoNo;
+  const siteId = parentRow.siteId || window.selectedWccSiteId;
+
+  if (!poNo) {
+    if (typeof showToast === 'function') showToast('No PO selected for submission');
+    return;
+  }
+
+  isSubmittingWccReceipt = true;
+  try {
+    let result = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.submitReceipt) {
+      result = await NexusApi.commercial.wcc.submitReceipt(poNo, siteId, receiptNo, receiptDate, ersNo);
+    } else {
+      const resp = await fetch('/api/v1/commercial/jms/wcc/submit-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ poNo, siteId, receiptNo, receiptDate, ersNo })
+      });
+      if (!resp.ok) {
+        let errDetail = 'Failed to submit receipt details';
+        try {
+          const errJson = await resp.json();
+          if (errJson && errJson.detail) errDetail = errJson.detail;
+        } catch (e) {}
+        throw new Error(errDetail);
+      }
+      result = await resp.json();
     }
-  }
 
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup(`Receipt ${recVal ? `(${recVal}) ` : ''}submitted successfully!`, 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
-  }
+    if (!result || !result.success) {
+      throw new Error(result?.message || 'Submission failed');
+    }
 
-  setTimeout(() => {
-    backToWccList();
-  }, 1200);
+    window._hasEnteredWccReceiptValues = false;
+    closeWccReceiptNoModal();
+
+    // 5. Change that specific PO row's task to 'to be submit' for the Invoice workflow.
+    // 6. Remove the completed row from the active WCC page and make it available on the Invoice page with task status 'to be submit'.
+    if (parentRow) {
+      parentRow.receiptNo = receiptNo;
+      parentRow.receiptDate = receiptDate;
+      parentRow.ersNo = ersNo;
+      parentRow.task = 'to be submit';
+    }
+
+    // Add or update in commercialInvoiceData
+    if (typeof commercialInvoiceData !== 'undefined') {
+      let invRow = commercialInvoiceData.find(inv => String(inv.id) === String(parentRow?.id) || inv.poNo === poNo);
+      if (invRow) {
+        invRow.task = 'to be submit';
+        invRow.receiptNo = receiptNo;
+        invRow.receiptDate = receiptDate;
+        invRow.ersNo = ersNo || invRow.ersNo;
+      } else {
+        commercialInvoiceData.push({
+          id: parentRow.id || `inv-${Date.now()}`,
+          invoiceNo: `INV-${poNo}`,
+          date: receiptDate || parentRow.date || '12/08/2026',
+          poNo: parentRow.poNo || poNo,
+          projectId: parentRow.projectId || '',
+          siteId: parentRow.siteId || siteId || '',
+          siteName: parentRow.siteName || '',
+          projectType: parentRow.projectType || 'New Build',
+          subProjectType: parentRow.subProjectType || 'Civil',
+          task: 'to be submit',
+          ersNo: ersNo || `ERS-${poNo}`,
+          irnNo: `IRN-${poNo}`,
+          amount: parentRow.amount || (typeof formatJmsSum === 'function' ? formatJmsSum(parentRow.rawAmount || 245000) : '2,45,000.00'),
+          rawAmount: parentRow.rawAmount || 245000,
+          receiptNo: receiptNo,
+          receiptDate: receiptDate
+        });
+      }
+      try {
+        localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
+      } catch (e) {}
+    }
+
+    // Remove the completed row from commercialWccData
+    if (typeof commercialWccData !== 'undefined' && Array.isArray(commercialWccData)) {
+      commercialWccData = commercialWccData.filter(r => String(r.id) !== String(selectedWccRowId) && r.poNo !== poNo);
+      try {
+        localStorage.setItem('commercialWccData', JSON.stringify(commercialWccData));
+      } catch (e) {}
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`Receipt ${receiptNo ? `(${receiptNo}) ` : ''}submitted successfully! Routed to Invoice.`, 'Task Completed');
+    } else {
+      showToast('Receipt submitted successfully! Routed to Invoice.');
+    }
+
+    // 7. Return the user to the WCC page after successful submission and refresh the displayed data from the backend.
+    await backToWccList();
+
+  } catch (err) {
+    console.error('Submit WCC receipt failed:', err);
+    if (typeof showToast === 'function') {
+      showToast(err.message || 'Submission failed. Please try again.');
+    }
+  } finally {
+    isSubmittingWccReceipt = false;
+  }
 };
 
-window.openWccSubmissionModal = function() {
+window.openWccSubmissionModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   const panel = document.getElementById('wccSubmissionPanel');
   if (!overlay || !panel) return;
 
   document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
 
-  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(selectedWccRowId)) || (defaultWccItems && defaultWccItems[0]);
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => 
+    String(r.id) === String(selectedWccRowId) || (window.selectedWccPoNo && r.poNo === window.selectedWccPoNo)
+  ) || (typeof currentDataset !== 'undefined' && currentDataset[0]) || (defaultWccItems && defaultWccItems[0]) || {};
+
+  const poNo = parentRow.poNo || window.selectedWccPoNo;
+  const siteId = parentRow.siteId || window.selectedWccSiteId;
+
+  // Retrieve saved WCC values from database
+  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.wcc?.getPoDetails) {
+    try {
+      const fetched = await NexusApi.commercial.wcc.getPoDetails(poNo, siteId);
+      if (fetched) {
+        window.currentWccDetails = fetched;
+        if (fetched.wccNo) parentRow.wccNo = fetched.wccNo;
+        if (fetched.wccDate) parentRow.wccDate = fetched.wccDate;
+        if (fetched.wccAmount !== undefined && fetched.wccAmount !== null) {
+          parentRow.wccAmount = fetched.wccAmount;
+          parentRow.rawAmount = fetched.wccAmount;
+          parentRow.amount = typeof formatIndianCurrency === 'function' ? formatIndianCurrency(fetched.wccAmount) : String(fetched.wccAmount);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch latest WCC details for modal prepopulation:', e);
+    }
+  }
+
+  const details = window.currentWccDetails || {};
+  const savedWccNo = details.wccNo || parentRow.wccNo || '';
+  const savedWccDate = details.wccDate || details.wccSubmissionDate || parentRow.wccDate || '';
+  const savedWccAmt = (details.wccAmount !== undefined && details.wccAmount !== null && details.wccAmount > 0)
+    ? details.wccAmount
+    : ((details.totalAmount !== undefined && details.totalAmount !== null && details.totalAmount > 0)
+      ? details.totalAmount
+      : (parentRow.rawAmount || parentRow.wccAmount || 0));
 
   const inpStart = document.getElementById('inpWccStartDate');
-  if (inpStart) inpStart.value = parentRow ? (parentRow.date || '12/08/2026') : '12/08/2026';
+  if (inpStart) {
+    inpStart.value = details.poDate || details.startDate || (parentRow ? (parentRow.date || '12/08/2026') : '12/08/2026');
+  }
 
   const inpComp = document.getElementById('inpWccCompletionDate');
-  if (inpComp) inpComp.value = '24/08/2026';
+  if (inpComp) {
+    inpComp.value = details.completionDate || details.wccSubmissionDate || details.wccDate || '24/08/2026';
+  }
 
   const inpAmt = document.getElementById('inpWccAmount');
-  if (inpAmt) inpAmt.value = parentRow ? (parentRow.amount || '2,45,000.00') : '2,45,000.00';
+  if (inpAmt) {
+    if (savedWccAmt) {
+      inpAmt.value = typeof formatIndianCurrency === 'function' ? formatIndianCurrency(savedWccAmt) : String(savedWccAmt);
+    } else {
+      inpAmt.value = parentRow.amount || '0.00';
+    }
+  }
 
   const inpNo = document.getElementById('inpWccNo');
-  if (inpNo) inpNo.value = '';
+  if (inpNo) {
+    inpNo.value = savedWccNo || '';
+  }
+
+  const inpDate = document.getElementById('inpWccDate');
+  if (inpDate) {
+    inpDate.value = savedWccDate || '06 - 10 - 2026';
+  }
 
   if (typeof attachNexusCalendar === 'function') {
     attachNexusCalendar('inpWccDate', 'btnWccDateCalendar');
@@ -6660,18 +7379,18 @@ window.closeWccSubmissionModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.triggerWccPdfUpload = function() {
+window.triggerWccPdfUpload = function(btn) {
   const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(selectedWccRowId)) || (typeof currentDataset !== 'undefined' && currentDataset[0]) || {};
   const poNo = parentRow.poNo || window.selectedWccPoNo || '4500128934';
   const siteId = parentRow.siteId || window.selectedWccSiteId || '';
-  downloadCommercialProjectGeneratedPdf(poNo, siteId, 'fresh_verified_merged_wcc.pdf');
+  downloadCommercialProjectGeneratedPdf(poNo, siteId, 'fresh_verified_merged_wcc.pdf', btn);
 };
 
-window.exportWccDetailToPdf = function() {
+window.exportWccDetailToPdf = function(btn) {
   const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(selectedWccRowId)) || (typeof currentDataset !== 'undefined' && currentDataset[0]) || {};
   const poNo = parentRow.poNo || window.selectedWccPoNo || '4500128934';
   const siteId = parentRow.siteId || window.selectedWccSiteId || '';
-  downloadCommercialProjectGeneratedPdf(poNo, siteId, 'fresh_verified_merged_wcc.pdf');
+  downloadCommercialProjectGeneratedPdf(poNo, siteId, 'fresh_verified_merged_wcc.pdf', btn);
 };
 
 window.downloadWccWorklistPdf = function() {
@@ -6684,25 +7403,159 @@ window.downloadWccWorklistPdf = function() {
   downloadCommercialProjectGeneratedPdf(poNo, siteId, 'fresh_verified_merged_wcc.pdf');
 };
 
-window.submitWccModal = function() {
-  closeWccSubmissionModal();
+window.submitWccModal = async function() {
+  if (window._isSubmittingWcc) {
+    return;
+  }
 
-  if (selectedWccRowId) {
-    const parentRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId));
-    if (parentRow) {
-      parentRow.task = "Approval Pending";
+  const inpNo = document.getElementById('inpWccNo');
+  const inpDate = document.getElementById('inpWccDate');
+  const inpAmt = document.getElementById('inpWccAmount');
+
+  const parentRow = (typeof commercialWccData !== 'undefined' ? commercialWccData : []).find(r => String(r.id) === String(selectedWccRowId)) ||
+    (typeof currentDataset !== 'undefined' && currentDataset.find(r => String(r.id) === String(selectedWccRowId))) ||
+    (typeof currentDataset !== 'undefined' && currentDataset[0]) || {};
+
+  const wccNo = inpNo ? (inpNo.value || '').trim() : '';
+  const wccDate = inpDate ? (inpDate.value || '').trim() : '';
+  const submissionDate = null;
+  const approvedDate = null;
+
+  const rawAmtStr = inpAmt ? String(inpAmt.value || '').trim() : '';
+  // Strip currency symbols (₹, Rs, etc.), commas, and whitespace, keeping only digits, decimal point, and negative sign
+  const cleanAmtStr = rawAmtStr.replace(/[^0-9.-]/g, '');
+  const parsedAmt = cleanAmtStr !== '' ? parseFloat(cleanAmtStr) : NaN;
+  const parentRowAmt = (parentRow && parentRow.rawAmount !== undefined && parentRow.rawAmount !== null && !isNaN(Number(parentRow.rawAmount)))
+    ? Number(parentRow.rawAmount)
+    : ((parentRow && parentRow.wccAmount !== undefined && parentRow.wccAmount !== null && !isNaN(Number(parentRow.wccAmount))) ? Number(parentRow.wccAmount) : 0);
+
+  const wccAmount = !isNaN(parsedAmt) ? parsedAmt : (parentRowAmt || 0);
+
+  window._hasEnteredWccValues = true;
+
+  if (!wccNo) {
+    if (typeof showToast === 'function') {
+      showToast('WCC Number is required.', 'error');
+    } else {
+      alert('WCC Number is required.');
     }
+    return;
   }
 
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('WCC details submitted successfully!', 'Task Completed');
-  } else {
-    showToast('Task completed successfully!');
+  if (!wccDate) {
+    if (typeof showToast === 'function') {
+      showToast('WCC Date is required.', 'error');
+    } else {
+      alert('WCC Date is required.');
+    }
+    return;
   }
 
-  setTimeout(() => {
-    backToWccList();
-  }, 1200);
+  if (wccAmount <= 0) {
+    if (typeof showToast === 'function') {
+      showToast('WCC Amount must be a positive number.', 'error');
+    } else {
+      alert('WCC Amount must be a positive number.');
+    }
+    return;
+  }
+
+  const poNo = parentRow.poNo || window.selectedWccPoNo || '4500128934';
+  const siteId = parentRow.siteId || window.selectedWccSiteId || '';
+
+  window._isSubmittingWcc = true;
+  const btnSubmit = document.getElementById('btnSubmitWccModal');
+  if (btnSubmit) btnSubmit.disabled = true;
+
+  try {
+    let resp = null;
+    if (window.NexusApi && window.NexusApi.commercial && window.NexusApi.commercial.wcc && window.NexusApi.commercial.wcc.submitDetails) {
+      resp = await window.NexusApi.commercial.wcc.submitDetails(
+        poNo,
+        siteId,
+        wccNo,
+        wccDate,
+        wccAmount,
+        submissionDate,
+        approvedDate
+      );
+    } else {
+      const res = await fetch('/api/v1/commercial/wcc/submit-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          poNo: poNo,
+          siteId: siteId,
+          wccNo: wccNo,
+          wccDate: wccDate,
+          wccAmount: wccAmount,
+          submissionDate: submissionDate,
+          wccSubmissionDate: submissionDate,
+          approvedDate: approvedDate,
+          wccApprovedDate: approvedDate
+        })
+      });
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({ detail: 'Failed to submit WCC details.' }));
+        throw new Error(errJson.detail || 'Failed to submit WCC details.');
+      }
+      resp = await res.json();
+    }
+
+    // Backend confirmed all required values saved successfully!
+    window._hasEnteredWccValues = false;
+    closeWccSubmissionModal();
+
+    // Transition row task to 'Approval Pending' and update saved values
+    if (typeof commercialWccData !== 'undefined' && commercialWccData.length > 0) {
+      const foundRow = commercialWccData.find(r => String(r.id) === String(selectedWccRowId) || (r.poNo === poNo && (!siteId || r.siteId === siteId)));
+      if (foundRow) {
+        foundRow.task = "Approval Pending";
+        foundRow.wccNo = wccNo;
+        foundRow.wccDate = wccDate;
+        foundRow.wccSubmissionDate = submissionDate;
+        foundRow.submissionDate = submissionDate;
+        foundRow.wccApprovedDate = approvedDate;
+        foundRow.approvedDate = approvedDate;
+        foundRow.amount = typeof formatIndianCurrency === 'function' ? formatIndianCurrency(wccAmount) : (foundRow.amount || String(wccAmount));
+        foundRow.rawAmount = wccAmount;
+        foundRow.wccAmount = wccAmount;
+      }
+    }
+    if (typeof currentDataset !== 'undefined' && currentDataset.length > 0) {
+      currentDataset.forEach(r => {
+        if (String(r.id) === String(selectedWccRowId) || (r.poNo === poNo && (!siteId || r.siteId === siteId))) {
+          r.task = "Approval Pending";
+        }
+      });
+    }
+
+    const onAfterSubmissionComplete = async () => {
+      await backToWccList();
+      if (typeof renderWorklistTableBody === 'function') {
+        renderWorklistTableBody();
+      }
+    };
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('WCC details submitted successfully!', 'Task Completed', onAfterSubmissionComplete);
+    } else if (typeof showToast === 'function') {
+      showToast('WCC details submitted successfully!');
+      setTimeout(onAfterSubmissionComplete, 1200);
+    }
+
+  } catch (err) {
+    console.error('Error submitting WCC details:', err);
+    const msg = (err && (err.message || err.detail)) || 'Error submitting WCC details.';
+    if (typeof showToast === 'function') {
+      showToast(msg, 'error');
+    } else {
+      alert(msg);
+    }
+  } finally {
+    window._isSubmittingWcc = false;
+    if (btnSubmit) btnSubmit.disabled = false;
+  }
 };
 
 window.copyWccFieldValue = function(inputId) {
@@ -6854,13 +7707,27 @@ const defaultInvoiceItems = [
 ];
 
 let commercialInvoiceData = [...defaultInvoiceItems];
+if (typeof localStorage !== 'undefined') {
+  try {
+    const cachedInv = localStorage.getItem('commercialInvoiceData');
+    if (cachedInv) {
+      const parsedInv = JSON.parse(cachedInv);
+      if (Array.isArray(parsedInv) && parsedInv.length > 0) {
+        commercialInvoiceData = parsedInv;
+      }
+    }
+  } catch (e) {}
+}
 
 function syncCommercialInvoiceDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
-  const invoiceTaskCategories = ["To be submit", "Approval Pending", "Rejected"];
-  commercialInvoiceData = commercialWorklistData.map((np, idx) => {
-    const existing = commercialInvoiceData.find(inv => String(inv.id) === String(np.id) || inv.poNo === np.poNo) || defaultInvoiceItems[idx % defaultInvoiceItems.length];
+  const invoiceTaskCategories = ["To be submit", "to be submit", "Approval Pending", "Rejected"];
+  const seenPo = new Set();
+  const synced = commercialWorklistData.map((np, idx) => {
+    seenPo.add(np.poNo);
+    const existing = (commercialInvoiceData || []).find(inv => String(inv.id) === String(np.id) || inv.poNo === np.poNo) || defaultInvoiceItems[idx % defaultInvoiceItems.length];
     const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
+    const isCat = existing && existing.task && invoiceTaskCategories.some(c => c.toLowerCase() === (existing.task || '').toLowerCase());
     return {
       id: np.id || `inv-${idx + 1}`,
       invoiceNo: existing.invoiceNo || `INV-2026-00${101 + idx}`,
@@ -6871,13 +7738,24 @@ function syncCommercialInvoiceDataWithNewProject() {
       siteName: np.siteName || existing.siteName || "Guindy Hub",
       projectType: np.projectType || existing.projectType || "New Build",
       subProjectType: np.subProjectType || existing.subProjectType || "Civil",
-      task: existing.task || invoiceTaskCategories[idx % invoiceTaskCategories.length],
+      task: isCat ? existing.task : invoiceTaskCategories[idx % invoiceTaskCategories.length],
       ersNo: existing.ersNo || `ERS-IND-880${idx + 1}`,
       irnNo: existing.irnNo || `IRN98324701239854${72 + idx}`,
       amount: formatJmsSum(rawAmt),
-      rawAmount: rawAmt
+      rawAmount: rawAmt,
+      receiptNo: existing.receiptNo,
+      receiptDate: existing.receiptDate
     };
   });
+
+  (commercialInvoiceData || []).forEach(inv => {
+    if (inv.poNo && !seenPo.has(inv.poNo)) {
+      seenPo.add(inv.poNo);
+      synced.push({ ...inv });
+    }
+  });
+
+  commercialInvoiceData = synced;
 }
 
 function calculateInvoiceTotalSum(dataset) {
@@ -6951,9 +7829,17 @@ window.openInvoiceDetailModal = function(rowId) {
   document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
 
   const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) || (commercialInvoiceData || []).find(r => String(r.id) === String(rowId)) || defaultInvoiceItems[0];
+  const taskStr = String(row.task || '').toLowerCase().trim();
+  const isApprovalPending = taskStr === 'approval pending' || taskStr.includes('pending');
+  const isToBeSubmit = taskStr.includes('to be submit') || taskStr === 'to be submit';
+  const isRejected = taskStr.includes('reject');
 
   const inpErs = document.getElementById('inpInvoiceModalErsNo');
-  if (inpErs) inpErs.value = row.ersNo || '';
+  if (inpErs) {
+    inpErs.value = row.ersNo || '';
+    inpErs.placeholder = "Enter ERS No";
+    inpErs.readOnly = isApprovalPending;
+  }
 
   const inpInvNo = document.getElementById('inpInvoiceModalInvoiceNo');
   if (inpInvNo) inpInvNo.value = row.invoiceNo || '';
@@ -6962,7 +7848,11 @@ window.openInvoiceDetailModal = function(rowId) {
   if (inpDate) inpDate.value = row.date || '12/08/2026';
 
   const inpIrn = document.getElementById('inpInvoiceModalIrnNo');
-  if (inpIrn) inpIrn.value = row.irnNo || '';
+  if (inpIrn) {
+    inpIrn.value = row.irnNo || '';
+    inpIrn.placeholder = "Enter IRN No";
+    inpIrn.readOnly = isApprovalPending;
+  }
 
   const inpDesc = document.getElementById('inpInvoiceModalDescription');
   if (inpDesc) {
@@ -6972,8 +7862,82 @@ window.openInvoiceDetailModal = function(rowId) {
   const lblAmt = document.getElementById('lblInvoiceModalTotalAmount');
   if (lblAmt) lblAmt.textContent = row.amount || '2,45,000.00';
 
+  const btnReject = document.getElementById('btnRejectInvoiceModal');
+  const btnSubmit = document.getElementById('btnSubmitInvoiceModal');
+
+  if (isApprovalPending) {
+    if (btnReject) btnReject.style.display = 'inline-flex';
+    if (btnSubmit) btnSubmit.style.display = 'inline-flex';
+  } else if (isToBeSubmit || isRejected) {
+    // For Rejected and To Be Submit: keep submit icon as centered below the last field
+    if (btnReject) btnReject.style.display = 'none';
+    if (btnSubmit) btnSubmit.style.display = 'inline-flex';
+  } else {
+    if (btnReject) btnReject.style.display = 'none';
+    if (btnSubmit) btnSubmit.style.display = 'none';
+  }
+
+  // Handle PDF icon: in rejected task, replace PDF Download with PDF Process icon until clicked
+  const btnPdf = document.getElementById('btnInvoiceModalPdf');
+  if (btnPdf) {
+    const imgPdf = btnPdf.querySelector('img');
+    if (isRejected) {
+      if (!row._pdfProcessed) {
+        if (imgPdf) {
+          imgPdf.src = 'icons/PDF Process.svg';
+          imgPdf.alt = 'PDF Process';
+        }
+        btnPdf.title = 'Process PDF';
+        btnPdf.onclick = function() {
+          processInvoiceModalPdf();
+        };
+      } else {
+        if (imgPdf) {
+          imgPdf.src = 'icons/PDF Download.svg';
+          imgPdf.alt = 'Download PDF';
+        }
+        btnPdf.title = 'Download PDF';
+        btnPdf.onclick = function() {
+          downloadInvoiceModalPdf();
+        };
+      }
+    } else {
+      if (imgPdf) {
+        imgPdf.src = 'icons/PDF Download.svg';
+        imgPdf.alt = 'Download PDF';
+      }
+      btnPdf.title = 'Download PDF';
+      btnPdf.onclick = function() {
+        downloadInvoiceModalPdf();
+      };
+    }
+  }
+
   panel.style.display = 'block';
   overlay.style.display = 'flex';
+};
+
+window.processInvoiceModalPdf = function() {
+  const btnPdf = document.getElementById('btnInvoiceModalPdf');
+  if (btnPdf) {
+    const imgPdf = btnPdf.querySelector('img');
+    if (imgPdf) {
+      imgPdf.src = 'icons/PDF Download.svg';
+      imgPdf.alt = 'Download PDF';
+    }
+    btnPdf.title = 'Download PDF';
+    btnPdf.onclick = function() {
+      downloadInvoiceModalPdf();
+    };
+  }
+  const row = (currentDataset || []).find(r => String(r.id) === String(selectedInvoiceRowId)) ||
+              (commercialInvoiceData || []).find(r => String(r.id) === String(selectedInvoiceRowId));
+  if (row) {
+    row._pdfProcessed = true;
+  }
+  if (typeof showToast === 'function') {
+    showToast('PDF Processed successfully! Ready to download.');
+  }
 };
 
 window.closeInvoiceDetailModal = function() {
@@ -6981,6 +7945,46 @@ window.closeInvoiceDetailModal = function() {
   const panel = document.getElementById('invoiceDetailPanel');
   if (panel) panel.style.display = 'none';
   if (overlay) overlay.style.display = 'none';
+};
+
+window.rejectInvoiceModal = function() {
+  const targetRowId = selectedInvoiceRowId;
+  const rowInCurrent = (currentDataset || []).find(r => String(r.id) === String(targetRowId));
+  if (rowInCurrent) {
+    rowInCurrent.task = 'Rejected';
+  }
+  const rowInCommercial = (commercialInvoiceData || []).find(r => String(r.id) === String(targetRowId));
+  if (rowInCommercial) {
+    rowInCommercial.task = 'Rejected';
+  }
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
+    } catch (e) {}
+  }
+
+  closeInvoiceDetailModal();
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  currentWorklistView = 'invoice';
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Invoice rejected successfully! Status changed to Rejected.', 'Task Completed', () => {
+      closeInvoiceDetailModal();
+      if (overlay) overlay.style.display = 'none';
+      currentWorklistView = 'invoice';
+      applyFiltersAndRender();
+    });
+  } else {
+    showToast('Invoice rejected successfully!');
+  }
 };
 
 window.refreshInvoiceModalDetails = function() {
@@ -7009,12 +8013,96 @@ window.copyInvoiceFieldValue = function(inputId) {
 
 window.submitInvoiceModal = function() {
   const row = (currentDataset || []).find(r => String(r.id) === String(selectedInvoiceRowId)) || (commercialInvoiceData || []).find(r => String(r.id) === String(selectedInvoiceRowId));
+  if (!row) return;
+
+  const taskStr = String(row.task || '').toLowerCase().trim();
+  const isApprovalPending = taskStr === 'approval pending' || taskStr.includes('pending');
+  const isRejected = taskStr.includes('reject');
+
+  if (isApprovalPending) {
+    // When task is Approval Pending, clicking submit opens the tab named 'Invoice#'
+    closeInvoiceDetailModal();
+    openInvoiceHashModal(selectedInvoiceRowId);
+    return;
+  }
+
+  if (isRejected) {
+    // When task is Rejected, clicking submit changes task to Approval Pending in invoice page
+    const inpErs = document.getElementById('inpInvoiceModalErsNo');
+    const inpIrn = document.getElementById('inpInvoiceModalIrnNo');
+    if (inpErs && inpErs.value.trim()) {
+      row.ersNo = inpErs.value.trim();
+    }
+    if (inpIrn && inpIrn.value.trim()) {
+      row.irnNo = inpIrn.value.trim();
+    }
+    row.task = 'Approval Pending';
+
+    const rowInCommercial = (commercialInvoiceData || []).find(r => String(r.id) === String(selectedInvoiceRowId));
+    if (rowInCommercial) {
+      if (row.ersNo) rowInCommercial.ersNo = row.ersNo;
+      if (row.irnNo) rowInCommercial.irnNo = row.irnNo;
+      rowInCommercial.task = 'Approval Pending';
+    }
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
+      } catch (e) {}
+    }
+
+    closeInvoiceDetailModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    currentWorklistView = 'invoice';
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Invoice resubmitted successfully! Status changed to Approval Pending.', 'Task Completed', () => {
+        closeInvoiceDetailModal();
+        if (overlay) overlay.style.display = 'none';
+        currentWorklistView = 'invoice';
+        applyFiltersAndRender();
+      });
+    } else {
+      showToast('Invoice status changed to Approval Pending');
+    }
+    return;
+  }
+
+  // When task is To Be Submit:
   const inpErs = document.getElementById('inpInvoiceModalErsNo');
   const inpIrn = document.getElementById('inpInvoiceModalIrnNo');
-  if (row) {
-    if (inpErs) row.ersNo = inpErs.value.trim();
-    if (inpIrn) row.irnNo = inpIrn.value.trim();
+  const ersVal = inpErs ? inpErs.value.trim() : '';
+  const irnVal = inpIrn ? inpIrn.value.trim() : '';
+
+  if (!ersVal) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter ERS No.', 'Validation Error');
+    } else {
+      showToast('Please enter ERS No.');
+    }
+    if (inpErs) inpErs.focus();
+    return;
   }
+
+  if (!irnVal) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter IRN No.', 'Validation Error');
+    } else {
+      showToast('Please enter IRN No.');
+    }
+    if (inpIrn) inpIrn.focus();
+    return;
+  }
+
+  row.ersNo = ersVal;
+  row.irnNo = irnVal;
 
   const rowIdToOpen = selectedInvoiceRowId;
   closeInvoiceDetailModal();
@@ -7024,6 +8112,165 @@ window.submitInvoiceModal = function() {
   }
 };
 window.submitInvoiceDetailModal = window.submitInvoiceModal;
+
+let selectedInvoiceHashRowId = null;
+
+window.openInvoiceHashModal = function(rowId) {
+  selectedInvoiceHashRowId = rowId || selectedInvoiceRowId;
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('invoiceHashPanel');
+  if (!overlay || !panel) return;
+
+  document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
+
+  const row = (currentDataset || []).find(r => String(r.id) === String(selectedInvoiceHashRowId)) ||
+              (commercialInvoiceData || []).find(r => String(r.id) === String(selectedInvoiceHashRowId)) ||
+              defaultInvoiceItems[0];
+
+  const baseAmt = row.rawAmount || (row.amount ? parseFloat(String(row.amount).replace(/[^0-9.-]+/g, '')) : 245000) || 245000;
+  const defTds = 5000;
+  const defRecv = Math.max(0, baseAmt - defTds);
+
+  const lblAmt = document.getElementById('lblInvoiceHashTotalAmount');
+  if (lblAmt) lblAmt.textContent = formatJmsSum(baseAmt);
+
+  const inpInvAmt = document.getElementById('inpInvoiceHashAmount');
+  const inpTds = document.getElementById('inpInvoiceHashTdsDeduction');
+  const inpRecv = document.getElementById('inpInvoiceHashReceivableAmount');
+
+  if (inpInvAmt) inpInvAmt.value = formatJmsSum(baseAmt);
+  if (inpTds) inpTds.value = formatJmsSum(defTds);
+  if (inpRecv) inpRecv.value = formatJmsSum(defRecv);
+
+  // Setup input auto-recalculation when user edits amount or TDS
+  const recompute = () => {
+    const curInv = parseFloat(inpInvAmt.value.replace(/[^0-9.-]+/g, '')) || 0;
+    const curTds = parseFloat(inpTds.value.replace(/[^0-9.-]+/g, '')) || 0;
+    inpRecv.value = formatJmsSum(Math.max(0, curInv - curTds));
+  };
+  if (inpInvAmt) inpInvAmt.oninput = recompute;
+  if (inpTds) inpTds.oninput = recompute;
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeInvoiceHashModal = function() {
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('invoiceHashPanel');
+  if (panel) panel.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.submitInvoiceHashModal = function() {
+  const inpInvAmt = document.getElementById('inpInvoiceHashAmount');
+  const inpTds = document.getElementById('inpInvoiceHashTdsDeduction');
+  const inpRecv = document.getElementById('inpInvoiceHashReceivableAmount');
+
+  const invAmtStr = inpInvAmt ? inpInvAmt.value.trim() : '';
+  const tdsStr = inpTds ? inpTds.value.trim() : '';
+  const recvStr = inpRecv ? inpRecv.value.trim() : '';
+
+  if (!invAmtStr) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter Invoice Amount.', 'Validation Error');
+    } else {
+      showToast('Please enter Invoice Amount.');
+    }
+    if (inpInvAmt) inpInvAmt.focus();
+    return;
+  }
+
+  const rawInv = parseFloat(invAmtStr.replace(/[^0-9.-]+/g, '')) || 0;
+  const rawTds = parseFloat(tdsStr.replace(/[^0-9.-]+/g, '')) || 0;
+  const rawRecv = recvStr ? (parseFloat(recvStr.replace(/[^0-9.-]+/g, '')) || 0) : Math.max(0, rawInv - rawTds);
+
+  const targetRowId = selectedInvoiceHashRowId || selectedInvoiceRowId;
+  const invoiceRow = (currentDataset || []).find(r => String(r.id) === String(targetRowId)) ||
+                     (commercialInvoiceData || []).find(r => String(r.id) === String(targetRowId)) || {};
+
+  // Retrieve customerName and context from DB/worklist
+  let customerName = "Indus Towers Limited";
+  if (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) {
+    const proj = commercialWorklistData.find(p => (invoiceRow.poNo && p.poNo === invoiceRow.poNo) || String(p.id) === String(targetRowId));
+    if (proj && proj.customerName) {
+      customerName = proj.customerName;
+    }
+  }
+  if (invoiceRow.customerName) {
+    customerName = invoiceRow.customerName;
+  }
+
+  const receivableItem = {
+    id: invoiceRow.id ? `rec-${invoiceRow.id}` : `rec-${Date.now()}`,
+    poNo: invoiceRow.poNo || '',
+    customerName: customerName,
+    invoiceNo: invoiceRow.invoiceNo || 'INV-2026-00101',
+    invoiceDate: invoiceRow.date || '12/08/2026',
+    dueDate: invoiceRow.dueDate || '27/08/2026',
+    invoiceAmount: formatJmsSum(rawInv),
+    rawInvoiceAmount: rawInv,
+    deduction: formatJmsSum(rawTds),
+    rawDeduction: rawTds,
+    receivedAmount: formatJmsSum(0),
+    rawReceivedAmount: 0,
+    receivable: formatJmsSum(rawRecv),
+    rawReceivable: rawRecv,
+    ageing: invoiceRow.ageing || '0 Days'
+  };
+
+  // Add/update row in commercialReceivableData
+  if (typeof commercialReceivableData === 'undefined' || !Array.isArray(commercialReceivableData)) {
+    window.commercialReceivableData = [...defaultReceivableItems];
+  }
+
+  const existingRecIdx = commercialReceivableData.findIndex(r => r.invoiceNo === receivableItem.invoiceNo || (receivableItem.poNo && r.poNo === receivableItem.poNo));
+  if (existingRecIdx !== -1) {
+    commercialReceivableData[existingRecIdx] = { ...commercialReceivableData[existingRecIdx], ...receivableItem };
+  } else {
+    commercialReceivableData.unshift(receivableItem);
+  }
+
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('commercialReceivableData', JSON.stringify(commercialReceivableData));
+    } catch (e) {}
+  }
+
+  // Remove the row from commercialInvoiceData since it has moved to Receivable
+  if (typeof commercialInvoiceData !== 'undefined' && Array.isArray(commercialInvoiceData)) {
+    commercialInvoiceData = commercialInvoiceData.filter(r => String(r.id) !== String(targetRowId) && r.invoiceNo !== invoiceRow.invoiceNo);
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
+      } catch (e) {}
+    }
+  }
+
+  // Close Invoice# modal and side overlay
+  closeInvoiceHashModal();
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // Move to Receivable page and render
+  currentWorklistView = 'receivable';
+  activeColumnFilters = {};
+  loadWorklistDataset();
+  updateURL();
+  renderApp();
+
+  // Show Task Completion popup
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Invoice details submitted successfully! Moved to Receivable.', 'Task Completed', () => {
+      closeInvoiceHashModal();
+      if (overlay) overlay.style.display = 'none';
+      currentWorklistView = 'receivable';
+      renderApp();
+    });
+  } else {
+    showToast('Invoice details submitted successfully! Moved to Receivable.');
+  }
+};
 
 let selectedInvoiceDueDateRowId = null;
 
@@ -7040,8 +8287,10 @@ window.openInvoiceDueDateModal = function(rowId) {
   const inpDue = document.getElementById('inpInvoiceDueDate');
   const btnCal = document.getElementById('btnInvoiceDueDateCalendar');
   if (inpDue) {
-    const rawDate = row.date || '12/08/2026';
-    inpDue.value = rawDate.includes('/') ? rawDate.split('/').join(' - ') : rawDate;
+    const rawDate = row.dueDate || '';
+    inpDue.value = rawDate ? (rawDate.includes('/') ? rawDate.split('/').join(' - ') : rawDate) : '';
+    inpDue.readOnly = false;
+    inpDue.placeholder = "DD - MM - YYYY";
 
     inpDue.onclick = (e) => {
       e.stopPropagation();
@@ -7078,25 +8327,68 @@ window.closeInvoiceDueDateModal = function() {
 window.submitInvoiceDueDateModal = function() {
   const inpDue = document.getElementById('inpInvoiceDueDate');
   let selectedVal = inpDue ? inpDue.value.trim() : '';
+
+  if (!selectedVal) {
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please enter or select a Due Date.', 'Validation Error');
+    } else {
+      showToast('Please enter or select a Due Date.');
+    }
+    if (inpDue) inpDue.focus();
+    return;
+  }
+
   if (selectedVal.includes(' - ')) {
     selectedVal = selectedVal.split(' - ').join('/');
   }
 
-  if (selectedInvoiceDueDateRowId && selectedVal) {
-    const rowInCurrent = (currentDataset || []).find(r => String(r.id) === String(selectedInvoiceDueDateRowId));
-    if (rowInCurrent) rowInCurrent.date = selectedVal;
+  const targetRowId = selectedInvoiceDueDateRowId || selectedInvoiceRowId;
 
-    const rowInCommercial = (commercialInvoiceData || []).find(r => String(r.id) === String(selectedInvoiceDueDateRowId));
-    if (rowInCommercial) rowInCommercial.date = selectedVal;
+  // 1. Update the row in currentDataset
+  const rowInCurrent = (currentDataset || []).find(r => String(r.id) === String(targetRowId));
+  if (rowInCurrent) {
+    rowInCurrent.dueDate = selectedVal;
+    rowInCurrent.task = 'Approval Pending';
   }
 
-  closeInvoiceDueDateModal();
-  applyFiltersAndRender();
+  // 2. Update the row in commercialInvoiceData
+  const rowInCommercial = (commercialInvoiceData || []).find(r => String(r.id) === String(targetRowId));
+  if (rowInCommercial) {
+    rowInCommercial.dueDate = selectedVal;
+    rowInCommercial.task = 'Approval Pending';
+  }
 
+  // 3. Persist commercialInvoiceData in localStorage
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
+    } catch (e) {}
+  }
+
+  // 4. Close side modal & overlay immediately
+  closeInvoiceDueDateModal();
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // 5. Ensure we are in Invoice page and re-render so row status changes to 'Approval Pending' simultaneously
+  currentWorklistView = 'invoice';
+  if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+
+  // 6. Arise task completion popup
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup(`Due Date updated to ${selectedVal || 'new date'}!`, 'Task Completed');
+    showSvgSuccessPopup('Invoice submitted successfully! Status changed to Approval Pending.', 'Task Completed', () => {
+      closeInvoiceDueDateModal();
+      if (overlay) overlay.style.display = 'none';
+      currentWorklistView = 'invoice';
+      applyFiltersAndRender();
+    });
   } else {
-    showToast(`Due Date updated to ${selectedVal}!`);
+    showToast('Invoice submitted successfully! Status changed to Approval Pending.');
   }
 };
 
@@ -9295,6 +10587,13 @@ function renderApp() {
     if (!isPmStatusView) {
       pmSubmitArea.style.display = 'none';
     }
+  }
+
+  const wccApprovalArea = document.getElementById('wccApprovalPendingSubmitArea');
+  if (wccApprovalArea) {
+    const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+    const isApprovalPending = (currentModule === 'worklist' && currentWorklistView === 'wcc_detail' && (parentTask.includes('pending') || currentWccSubpageType === 'approval_pending'));
+    wccApprovalArea.style.display = isApprovalPending ? 'flex' : 'none';
   }
 
   const minDetailSubmitArea = document.getElementById('wmMinDetailSubmitArea');
@@ -28677,11 +29976,14 @@ function loadWorklistDataset() {
         loadCommercialPoAmendFromApi();
       }
     } else if (currentWorklistView === 'wcc') {
-      if (!commercialWccData || !Array.isArray(commercialWccData) || commercialWccData.length !== 5) {
+      if (!commercialWccData || !Array.isArray(commercialWccData)) {
         commercialWccData = defaultWccItems.map(item => ({ ...item }));
       }
       currentDataset = commercialWccData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
+      if (typeof loadCommercialWccFromApi === 'function') {
+        loadCommercialWccFromApi();
+      }
     } else if (currentWorklistView === 'jms_detail') {
       const parentId = selectedJmsRowId || 'jms-1';
       currentDataset = getJmsDetailItems(parentId);
@@ -30007,6 +31309,9 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnJmsDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard" style="cursor: pointer;" onclick="openCommercialDashboard('JMS')">
+            <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
+          </button>
           <button type="button" class="toolbar-icon-btn btn-collapse-action" id="btnJmsToggleColumns" data-tooltip="${isJmsColumnsExpanded ? 'Hide Extra Columns' : 'Show Extra Columns'}" aria-label="Toggle Columns" style="cursor: pointer;" onclick="toggleJmsExtraColumns()">
             <img src="icons/Collapse.svg" alt="Toggle Columns" class="toolbar-icon-img" id="imgJmsCollapseIcon" width="28" height="28" style="transform: ${isJmsColumnsExpanded ? 'rotate(-90deg)' : 'rotate(90deg)'}; transition: transform 0.2s ease;">
           </button>
@@ -30025,6 +31330,9 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnPoAmendDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard" style="cursor: pointer;" onclick="openCommercialDashboard('PO Amend')">
+            <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
+          </button>
           <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnPoAmendCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportPoAmendToCsv()">
             <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
           </button>
@@ -30046,6 +31354,9 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnWccDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard" style="cursor: pointer;" onclick="openCommercialDashboard('WCC')">
+            <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
+          </button>
           <button type="button" class="toolbar-icon-btn btn-collapse-action" id="btnWccToggleColumns" data-tooltip="${isWccColumnsExpanded ? 'Hide Extra Columns' : 'Show Extra Columns'}" aria-label="Toggle Columns" style="cursor: pointer;" onclick="toggleWccExtraColumns()">
             <img src="icons/Collapse.svg" alt="Toggle Columns" class="toolbar-icon-img" id="imgWccCollapseIcon" width="28" height="28" style="transform: ${isWccColumnsExpanded ? 'rotate(-90deg)' : 'rotate(90deg)'}; transition: transform 0.2s ease;">
           </button>
@@ -30070,11 +31381,11 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
-          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnInvoiceCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportInvoiceToCsv()">
-            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnInvoiceDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard" style="cursor: pointer;" onclick="openCommercialDashboard('Invoice')">
+            <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
           </button>
-          <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnCommercialWorklistRefresh" data-tooltip="Refresh" aria-label="Refresh" style="cursor: pointer;">
-            <img src="icons/Refresh.svg" alt="Refresh" class="toolbar-icon-img" width="28" height="28">
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnInvoiceBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Invoice')">
+            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
           </button>
         </div>
       `;
@@ -30247,8 +31558,67 @@ function renderWorklistToolbar() {
       `;
     } else if (isWccDetail) {
       const initialTotalFormatted = formatJmsSum(calculateWccDetailTotalSum(currentDataset));
-      const hasSelectedRow = currentDataset.some(r => r.selected || r.highlighted);
-      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
+      const hasSelectedRow = currentDataset.some(r => r.selected);
+      const isEditingRow = currentDataset.some(r => r.selected && r.isEditing);
+      const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+      const isApprovalPending = currentWccSubpageType === 'approval_pending' || parentTask.includes('pending');
+      const isRejected = currentWccSubpageType === 'rejected' || parentTask.includes('reject');
+      const isToBeSubmit = !isApprovalPending && !isRejected;
+      const isPdfProcessed = Boolean(window.wccDetailPdfProcessed);
+
+      let rightActionsHtml = '';
+      if (isRejected) {
+        // PDF Process / Download icon
+        if (!isPdfProcessed) {
+          rightActionsHtml += `
+            <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="PDF Process" aria-label="PDF Process" style="cursor: pointer;" onclick="processWccDetailPdf(this)">
+              <img src="icons/PDF Process.svg" alt="PDF Process" class="toolbar-icon-img" width="28" height="28">
+            </button>
+          `;
+        } else {
+          rightActionsHtml += `
+            <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportWccDetailToPdf(this)">
+              <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+            </button>
+          `;
+        }
+
+        rightActionsHtml += `
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWccDetailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportWccDetailToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnWccDetailEdit" data-tooltip="Edit Quantity" aria-label="Edit Quantity" style="cursor: pointer; display: ${hasSelectedRow && !isEditingRow ? 'inline-flex' : 'none'};" onclick="editSelectedWccDetailRow()">
+            <img src="icons/Edit.svg" alt="Edit" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnWccDetailSave" data-tooltip="Save Quantity" aria-label="Save Quantity" style="cursor: pointer; display: ${hasSelectedRow && isEditingRow ? 'inline-flex' : 'none'};" onclick="saveSelectedWccDetailRow()">
+            <img src="icons/Save.svg" alt="Save" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnWccDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow && !isEditingRow ? 'inline-flex' : 'none'};" onclick="highlightSelectedWccDetailRows()">
+            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        `;
+      } else if (isToBeSubmit) {
+        rightActionsHtml = `
+          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportWccDetailToPdf(this)">
+            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWccDetailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportWccDetailToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn" id="btnWccDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow || currentDataset.some(r => r.highlighted) ? 'inline-flex' : 'none'};" onclick="highlightSelectedWccDetailRows()">
+            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        `;
+      } else {
+        rightActionsHtml = `
+          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportWccDetailToPdf(this)">
+            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWccDetailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportWccDetailToCsv()">
+            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+          </button>
+        `;
+      }
 
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
@@ -30261,17 +31631,7 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
-          <button type="button" class="toolbar-icon-btn btn-pdf-action" id="btnWccDetailPdf" data-tooltip="Download PDF" aria-label="Download PDF" style="cursor: pointer;" onclick="exportWccDetailToPdf()">
-            <img src="icons/PDF Download.svg" alt="Download PDF" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWccDetailCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportWccDetailToCsv()">
-            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          ${isToBeSubmit ? `
-          <button type="button" class="toolbar-icon-btn" id="btnWccDetailApproveTick" data-tooltip="Save & Highlight Line" aria-label="Approve Line" style="cursor: pointer; display: ${hasSelectedRow ? 'inline-flex' : 'none'};" onclick="highlightSelectedWccDetailRows()">
-            <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          ` : ''}
+          ${rightActionsHtml}
         </div>
       `;
     } else {
@@ -31653,6 +33013,11 @@ function renderWorklistTableHead() {
       if (containerEl) containerEl.style.overflowX = 'auto';
     } else if (currentWorklistView === 'jms') {
       tableEl.style.minWidth = isJmsColumnsExpanded ? '1600px' : '100%';
+      tableEl.style.width = '100%';
+      tableEl.style.tableLayout = '';
+      if (containerEl) containerEl.style.overflowX = 'auto';
+    } else if (currentWorklistView === 'invoice') {
+      tableEl.style.minWidth = '1450px';
       tableEl.style.width = '100%';
       tableEl.style.tableLayout = '';
       if (containerEl) containerEl.style.overflowX = 'auto';
@@ -33303,8 +34668,12 @@ function renderWorklistTableHead() {
       }
       rebindFilterButtons();
     } else if (currentWorklistView === 'wcc_detail') {
-      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
-      if (isToBeSubmit) {
+      const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+      const isApprovalPending = currentWccSubpageType === 'approval_pending' || parentTask.includes('pending');
+      const isRejected = currentWccSubpageType === 'rejected' || parentTask.includes('reject');
+      const isToBeSubmit = !isApprovalPending && !isRejected;
+      const hasSelectCol = isToBeSubmit || isRejected;
+      if (hasSelectCol) {
         thead.innerHTML = `
           <tr class="master-view-header">
             <!-- 1. Select: 60px, center -->
@@ -33436,6 +34805,13 @@ function renderWorklistTableHead() {
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Sub-Project Type</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['subProjectType'] ? 'has-active-filter' : ''}" data-filter-col="subProjectType" title="Filter Sub-Project Type">&#9660;</button>
+            </div>
+          </th>
+          <!-- 9. Task: 35ch, center header, filter enabled -->
+          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Task</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['task'] ? 'has-active-filter' : ''}" data-filter-col="task" title="Filter Task">&#9660;</button>
             </div>
           </th>
         </tr>
@@ -33885,6 +35261,10 @@ function applyFiltersAndRender() {
   const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
   if (pmSubmitArea) {
     pmSubmitArea.style.display = 'none';
+  }
+  const wccApprovalArea = document.getElementById('wccApprovalPendingSubmitArea');
+  if (wccApprovalArea && currentWorklistView !== 'wcc_detail') {
+    wccApprovalArea.style.display = 'none';
   }
   const wmSubmitArea = document.getElementById('wmPrSubmitArea');
   if (wmSubmitArea) {
@@ -36069,7 +37449,7 @@ function applyFiltersAndRender() {
 
       tbody.innerHTML = filteredDataset.map(row => {
         return `
-          <tr data-row-id="${row.id}">
+          <tr data-row-id="${row.id}" onclick="handleWccPoNoClick('${row.id}', '${row.poNo}', '${row.task}')" style="cursor: pointer;">
             <!-- 1. PO No -->
             <td style="${isJmsColumnsExpanded ? 'width: 120px; min-width: 120px;' : 'width: 11%;'} text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.poNo ? `
@@ -36218,10 +37598,10 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'wcc') {
-      if (!commercialWccData || !Array.isArray(commercialWccData) || commercialWccData.length !== 5) {
+      if (!commercialWccData || !Array.isArray(commercialWccData)) {
         commercialWccData = defaultWccItems.map(item => ({ ...item }));
       }
-      if (!currentDataset || currentDataset.length !== 5 || !currentDataset.some(r => r.supportRequired)) {
+      if (!currentDataset || !Array.isArray(currentDataset)) {
         currentDataset = commercialWccData.map(item => ({ ...item }));
       }
 
@@ -36625,8 +38005,17 @@ function applyFiltersAndRender() {
         totalAmountEl.textContent = formatJmsSum(calculateWccDetailTotalSum(filteredDataset));
       }
 
-      const isToBeSubmit = currentWccSubpageType === 'to_be_submit';
-      const colSpanCount = isToBeSubmit ? 8 : 7;
+      const parentTask = String(window.currentWccParentTask || '').trim().toLowerCase();
+      const isApprovalPending = currentWccSubpageType === 'approval_pending' || parentTask.includes('pending');
+      const isRejected = currentWccSubpageType === 'rejected' || parentTask.includes('reject');
+      const isToBeSubmit = !isApprovalPending && !isRejected;
+      const hasSelectCol = isToBeSubmit || isRejected;
+      const colSpanCount = hasSelectCol ? 8 : 7;
+
+      const wccApprovalArea = document.getElementById('wccApprovalPendingSubmitArea');
+      if (wccApprovalArea) {
+        wccApprovalArea.style.display = isApprovalPending ? 'flex' : 'none';
+      }
 
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
@@ -36641,9 +38030,13 @@ function applyFiltersAndRender() {
 
       let rowsHtml = filteredDataset.map(row => {
         const rowBgStyle = row.highlighted ? 'background-color: #dcfce7 !important; border-bottom: 1px solid #86efac;' : '';
-        const isChecked = Boolean(row.selected || row.highlighted);
+        const isChecked = Boolean(row.selected);
 
-        if (isToBeSubmit) {
+        if (hasSelectCol) {
+          const qtyCellHtml = (isRejected && row.isEditing) ? `
+            <input type="number" id="inpWccQty_${row.id}" class="wcc-qty-input" value="${row.rawQty !== undefined ? row.rawQty : (parseFloat(row.qty) || '')}" step="any" min="0.01" onclick="event.stopPropagation();" onkeydown="if(event.key === 'Enter') saveSelectedWccDetailRow();" style="width: 75px; text-align: right; border: 1.5px solid #00cba0; border-radius: 4px; padding: 4px 6px; font-size: 0.9rem; font-family: inherit; font-weight: 600; background: #ffffff; color: #0f172a; outline: none; box-sizing: border-box;" />
+          ` : `${row.qty || ''}`;
+
           return `
             <tr data-row-id="${row.id}" style="${rowBgStyle}">
               <!-- 1. Select: Circle radio button (Green when checked) -->
@@ -36669,8 +38062,8 @@ function applyFiltersAndRender() {
                 ${row.uom || ''}
               </td>
               <!-- 6. Qty: 10ch & right -->
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
-                ${row.qty || ''}
+              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: ${row.isEditing ? '4px 4px' : '10px 6px'};">
+                ${qtyCellHtml}
               </td>
               <!-- 7. Rate: 10ch & right -->
               <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
@@ -36683,7 +38076,7 @@ function applyFiltersAndRender() {
             </tr>
           `;
         } else {
-          // 'rejected': No Select column
+          // 'approval_pending': No Select column
           return `
             <tr data-row-id="${row.id}" style="${rowBgStyle}">
               <!-- 1. Line No: 10ch & center -->
@@ -36719,23 +38112,14 @@ function applyFiltersAndRender() {
         }
       }).join('');
 
-      if (isToBeSubmit && allHighlighted) {
+      const hasApprovedRow = currentDataset.length > 0 && currentDataset.some(r => r.highlighted);
+      const isNotCurrentlyEditing = !currentDataset.some(r => r.selected && r.isEditing);
+      if ((isToBeSubmit || isRejected) && (hasApprovedRow || allHighlighted) && isNotCurrentlyEditing) {
         rowsHtml += `
           <tr id="rowWccDetailSubmitAction" style="background: transparent; border: none !important;">
             <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
               <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWccDetailSubmit" aria-label="Submit" onclick="openWccSubmissionModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Submit WCC Details">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
-              </button>
-            </td>
-          </tr>
-        `;
-      } else if (!isToBeSubmit) {
-        // 'rejected': Centered Refresh icon leading to JMS page
-        rowsHtml += `
-          <tr id="rowWccRejectedRefreshAction" style="background: transparent; border: none !important;">
-            <td colspan="7" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important;">
-              <button type="button" class="toolbar-icon-btn btn-refresh-action" id="btnWccRejectedRefresh" aria-label="Go to JMS Page" onclick="backToJmsList()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;" title="Go to JMS Page">
-                <img src="icons/Refresh.svg" alt="Refresh" width="36" height="36">
               </button>
             </td>
           </tr>
@@ -36772,7 +38156,7 @@ function applyFiltersAndRender() {
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+            <td colspan="9" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
           </tr>
         `;
         return;
@@ -36812,6 +38196,10 @@ function applyFiltersAndRender() {
             <!-- 8. Sub-Project Type: 25ch & left -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px;">
               ${row.subProjectType || ''}
+            </td>
+            <!-- 9. Task: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0f172a; font-weight: 400; font-size: 0.92rem;">
+              ${row.task || ''}
             </td>
           </tr>
         `;
@@ -52382,6 +53770,8 @@ window.openAddBulkUploadModal = function() {
     displayName = 'Receivable';
   } else if (activeView === 'po_to_be_open' || pageNorm === 'po to be open' || pageNorm === 'po_to_be_open') {
     displayName = 'PO to be Open';
+  } else if (activeView === 'invoice' || pageNorm === 'invoice') {
+    displayName = 'Invoice';
   }
 
   if (titleBadge) {
@@ -52413,7 +53803,7 @@ window.openAddBulkUploadModal = function() {
         `;
       }
     } else if (displayName === 'WCC') {
-      siteTypeRow.style.display = 'block';
+      siteTypeRow.style.display = 'flex';
       if (selUploadType) {
         selUploadType.innerHTML = `
           <option value="wcc_status" selected>WCC status</option>
@@ -52520,9 +53910,45 @@ window.downloadBulkCsvTemplate = function() {
     showToast(`Template downloaded: ${templateFileName}`);
     return;
   }
-  if (pageLower === 'wcc') {
-    const wccVal = selSiteType ? selSiteType.value : 'wcc_status';
-    showToast(`Template download for WCC (${wccVal === 'wcc_status' ? 'WCC status' : 'support required'}) is not available yet.`);
+  const isWcc = pageLower === 'wcc' ||
+    activeView === 'wcc' ||
+    activeView === 'wcc_detail' ||
+    typeVal === 'wcc_status' ||
+    typeVal === 'support_required';
+
+  if (isWcc) {
+    let templateFileName = '';
+    if (typeVal === 'support_required' || typeVal.includes('support')) {
+      templateFileName = 'Support Required - Template.xlsx';
+    } else {
+      templateFileName = 'WCC_Status_Template.xlsx';
+    }
+    const fileUrl = `bulk upload template/${encodeURIComponent(templateFileName)}`;
+    const link = document.createElement('a');
+    link.setAttribute('href', fileUrl);
+    link.setAttribute('download', templateFileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Template downloaded: ${templateFileName}`);
+    return;
+  }
+
+  const isInvoice = pageLower === 'invoice' ||
+    pageLower.includes('invoice') ||
+    activeView === 'invoice' ||
+    typeVal === 'invoice_status';
+
+  if (isInvoice) {
+    const templateFileName = 'Invoice_Status_Template.xlsx';
+    const fileUrl = `bulk upload template/${encodeURIComponent(templateFileName)}`;
+    const link = document.createElement('a');
+    link.setAttribute('href', fileUrl);
+    link.setAttribute('download', templateFileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Template downloaded: ${templateFileName}`);
     return;
   }
 

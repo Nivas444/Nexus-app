@@ -973,8 +973,18 @@ class JmsService:
         else:
             task = "WCC to be submit"
 
-        has_merged = bool(proj and (proj.jms_merged_document or proj.jms_merged_documents or proj.po_amendment_merged_document or proj.po_amendment_merged_documents))
-        wcc_date_str = proj.wcc_submission_date.strftime("%d/%m/%Y") if (proj and proj.wcc_submission_date) else None
+        has_merged = bool(
+            proj and (
+                proj.po_amendment_merged_document or proj.po_amendment_merged_documents or
+                proj.jms_merged_document or proj.jms_merged_documents
+            )
+        )
+        if proj and proj.current_task == "Rejected":
+            has_merged = bool(proj.jms_merged_document or proj.jms_merged_documents)
+        wcc_date_str = proj.wcc_date.strftime("%d/%m/%Y") if (proj and getattr(proj, 'wcc_date', None)) else (proj.wcc_submission_date.strftime("%d/%m/%Y") if (proj and proj.wcc_submission_date) else None)
+        po_date_str = proj.po_date.strftime("%d/%m/%Y") if (proj and proj.po_date) else None
+        comp_date_str = proj.completion_date.strftime("%d/%m/%Y") if (proj and proj.completion_date) else (proj.po_amendment_completion_date.strftime("%d/%m/%Y") if (proj and proj.po_amendment_completion_date) else None)
+        wcc_subm_str = proj.wcc_submission_date.strftime("%d/%m/%Y") if (proj and proj.wcc_submission_date) else None
         wcc_appr_str = proj.wcc_approved_date.strftime("%d/%m/%Y") if (proj and proj.wcc_approved_date) else (proj.po_amendment_completion_date.strftime("%d/%m/%Y") if (proj and proj.po_amendment_completion_date) else None)
         wcc_amt_val = float(proj.wcc_amount) if (proj and proj.wcc_amount is not None) else (float(total_wcc_amount) if total_wcc_amount > 0 else (float(proj.po_amount) if (proj and proj.po_amount is not None) else 0.0))
 
@@ -990,9 +1000,14 @@ class JmsService:
             totalAmount=float(total_wcc_amount),
             wccNo=proj.wcc_no if proj else None,
             wccDate=wcc_date_str,
+            poDate=po_date_str,
+            completionDate=comp_date_str,
+            wccSubmissionDate=wcc_subm_str,
+            submissionDate=wcc_subm_str,
             wccAmount=wcc_amt_val,
             poRevisionNumber=proj.po_revision_number if proj else None,
             wccApprovedDate=wcc_appr_str,
+            approvedDate=wcc_appr_str,
             receiptNo=proj.receipt_no if proj else None,
             receiptDate=proj.receipt_date.strftime("%d/%m/%Y") if (proj and proj.receipt_date) else None,
             ersNo=proj.ers_no if proj else None,
@@ -1013,6 +1028,7 @@ class JmsService:
 
         amend_items: List[PoAmendLineItem] = []
         total_amend_amount = Decimal("0.00")
+        total_jms_amount = Decimal("0.00")
 
         for r in po_lines:
             po_qty = Decimal(str(r.po_qty or 0))
@@ -1020,6 +1036,7 @@ class JmsService:
             po_diff = po_qty - jms_qty
             po_rate = Decimal(str(r.po_rate or 0))
             amt = Decimal(str(r.jms_amount if r.jms_amount is not None else (po_rate * jms_qty)))
+            total_jms_amount += amt
 
             is_amend = (po_diff < Decimal("0")) and (
                 (r.po_amendment_type in ["Change QTY", "PO Amend to be submit", "Approval Pending", "Pending with Indus", "Rejected"]) or (
@@ -1070,7 +1087,14 @@ class JmsService:
             task = "PO Amend to be submit"
             po_status = "PO Amend to be submit" if (proj and "PO Amend" in (proj.po_status or "")) else (proj.po_status if proj and proj.po_status else "Amend Requested")
 
-        has_merged = bool(proj and (proj.jms_merged_document or proj.jms_merged_documents or proj.po_amendment_merged_document or proj.po_amendment_merged_documents))
+        has_merged = bool(
+            proj and (
+                proj.po_amendment_merged_document or proj.po_amendment_merged_documents or
+                proj.jms_merged_document or proj.jms_merged_documents
+            )
+        )
+        if proj and proj.current_task == "Rejected":
+            has_merged = bool(proj.jms_merged_document or proj.jms_merged_documents)
         comp_date_str = proj.po_amendment_completion_date.strftime("%d/%m/%Y") if (proj and proj.po_amendment_completion_date) else None
         ref_id_val = (proj.po_reference_number or proj.po_amendment_ref_id) if proj else None
 
@@ -1084,7 +1108,8 @@ class JmsService:
             subProjectType=sub_project_type,
             task=task,
             poStatus=po_status,
-            totalAmount=float(total_amend_amount),
+            totalAmount=float(total_jms_amount),
+            totalJmsAmount=float(total_jms_amount),
             poAmendmentRefId=ref_id_val,
             poRevisionNumber=proj.po_revision_number if proj else None,
             poAmendmentCompletionDate=comp_date_str,
@@ -1266,16 +1291,144 @@ class JmsService:
             "totalAmount": float(proj.po_amount if proj else total_po_amount)
         }
 
+    def update_wcc_line_item_qty(
+        self,
+        line_item_id: Any,
+        new_qty: float,
+        po_no: Optional[str] = None,
+        site_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Update WCC Qty for a specific line item in telecom_indus_po.
+        Recalculates Amount = PO Rate * Qty.
+        Persists recalculated amount in telecom_indus_po and updates wcc_amount / po_amount in telecom_project.
+        Invalidates existing merged PDF so document regeneration is required.
+        """
+        if new_qty is None or new_qty <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="WCC Quantity must be a positive number greater than zero."
+            )
+
+        line_item = None
+        try:
+            numeric_id = int(line_item_id)
+            line_item = self.project_db.query(TelecomIndusPo).filter(
+                TelecomIndusPo.project_po_line_item_id == numeric_id
+            ).first()
+        except (ValueError, TypeError):
+            pass
+
+        if not line_item and po_no:
+            query = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
+            if site_id:
+                query = query.filter(TelecomIndusPo.site_id == site_id)
+            line_item = query.first()
+
+        if not line_item:
+            proj_fallback = None
+            if po_no:
+                proj_q = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == po_no)
+                if site_id:
+                    proj_q = proj_q.filter(TelecomProject.site_id == site_id)
+                proj_fallback = proj_q.first()
+            if not proj_fallback:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Line item or project with ID #{line_item_id} not found."
+                )
+            dec_qty = Decimal(str(new_qty))
+            recalc_amount = (proj_fallback.wcc_amount or proj_fallback.po_amount or Decimal("0"))
+            proj_fallback.wcc_amount = recalc_amount
+            proj_fallback.po_amount = recalc_amount
+            proj_fallback.jms_merged_document = None
+            proj_fallback.jms_merged_documents = None
+            proj_fallback.po_amendment_merged_document = None
+            proj_fallback.po_amendment_merged_documents = None
+            self.project_db.commit()
+            return {
+                "success": True,
+                "id": line_item_id,
+                "poNo": proj_fallback.po_no,
+                "siteId": proj_fallback.site_id,
+                "qty": float(dec_qty),
+                "rate": 0.0,
+                "amount": float(recalc_amount),
+                "totalAmount": float(recalc_amount)
+            }
+
+        po_rate = Decimal(str(line_item.po_rate or 0))
+        dec_qty = Decimal(str(new_qty))
+        recalculated_amount = po_rate * dec_qty
+
+        line_item.jms_qty = dec_qty
+        line_item.jms_amount = recalculated_amount
+        line_item.po_amount = recalculated_amount
+        line_item.jms_status = "Approved"
+
+        # Update parent project in telecom_project table
+        proj_q = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == line_item.po_no)
+        if line_item.site_id:
+            proj_q = proj_q.filter(TelecomProject.site_id == line_item.site_id)
+        proj = proj_q.first()
+        if not proj:
+            proj = self.project_db.query(TelecomProject).filter(TelecomProject.po_no == line_item.po_no).first()
+
+        # Recalculate total amount across all WCC lines for this PO
+        all_po_lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == line_item.po_no)
+        if line_item.site_id:
+            all_po_lines = all_po_lines.filter(TelecomIndusPo.site_id == line_item.site_id)
+
+        total_wcc_amount = Decimal("0.00")
+        for l in all_po_lines.all():
+            po_q = Decimal(str(l.po_qty or 0))
+            j_q = Decimal(str(l.jms_qty if l.jms_qty is not None else po_q))
+            diff = po_q - j_q
+            if diff >= Decimal("0") or l.project_po_line_item_id == line_item.project_po_line_item_id:
+                if l.project_po_line_item_id == line_item.project_po_line_item_id:
+                    total_wcc_amount += recalculated_amount
+                else:
+                    l_rate = Decimal(str(l.po_rate or 0))
+                    l_qty = Decimal(str(l.jms_qty if l.jms_qty is not None else (l.po_qty or 0)))
+                    total_wcc_amount += (l_rate * l_qty)
+
+        if proj:
+            proj.wcc_amount = total_wcc_amount
+            proj.po_amount = total_wcc_amount
+            # Outdate existing merged documents so fresh generation is required
+            proj.jms_merged_document = None
+            proj.jms_merged_documents = None
+            proj.po_amendment_merged_document = None
+            proj.po_amendment_merged_documents = None
+
+        self.project_db.commit()
+        self.project_db.refresh(line_item)
+        if proj:
+            self.project_db.refresh(proj)
+
+        return {
+            "success": True,
+            "id": line_item.project_po_line_item_id,
+            "poNo": line_item.po_no,
+            "siteId": line_item.site_id,
+            "qty": float(dec_qty),
+            "rate": float(po_rate),
+            "amount": float(recalculated_amount),
+            "totalAmount": float(proj.wcc_amount if proj and proj.wcc_amount is not None else total_wcc_amount)
+        }
+
     def submit_wcc_details(
         self,
         po_no: str,
         site_id: Optional[str] = None,
         wcc_no: str = "",
         wcc_date: str = "",
-        wcc_amount: float = 0.0
+        wcc_amount: float = 0.0,
+        submission_date: Optional[str] = None,
+        approved_date: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Save WCC Number, WCC Date, and WCC Amount to telecom_project and transition task to 'Approval Pending'.
+        Save WCC Number, WCC Date, Submission Date, Approved Date, and WCC Amount to telecom_project and transition task to 'Approval Pending'.
         """
         wcc_no_clean = (wcc_no or "").strip()
         if not wcc_no_clean:
@@ -1306,8 +1459,41 @@ class JmsService:
                 detail=f"Invalid WCC Date format '{wcc_date_clean}'. Expected DD/MM/YYYY or YYYY-MM-DD."
             )
 
+        parsed_subm_date = None
+        if submission_date and str(submission_date).strip():
+            norm_subm = re.sub(r"\s*([/\-.])\s*", r"\1", str(submission_date).strip())
+            for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%d.%m.%Y"):
+                try:
+                    parsed_subm_date = datetime.strptime(norm_subm, fmt).date()
+                    break
+                except ValueError:
+                    continue
+            if not parsed_subm_date:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Submission Date format '{submission_date}'. Expected DD/MM/YYYY or YYYY-MM-DD."
+                )
+        else:
+            parsed_subm_date = parsed_date
+
+        parsed_appr_date = None
+        if approved_date and str(approved_date).strip():
+            norm_appr = re.sub(r"\s*([/\-.])\s*", r"\1", str(approved_date).strip())
+            for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%d.%m.%Y"):
+                try:
+                    parsed_appr_date = datetime.strptime(norm_appr, fmt).date()
+                    break
+                except ValueError:
+                    continue
+            if not parsed_appr_date:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid Approved Date format '{approved_date}'. Expected DD/MM/YYYY or YYYY-MM-DD."
+                )
+
         try:
-            dec_amount = Decimal(str(wcc_amount))
+            cleaned_str = re.sub(r"[^\d.-]", "", str(wcc_amount).strip()) if wcc_amount is not None else ""
+            dec_amount = Decimal(cleaned_str) if cleaned_str else Decimal("0")
             if dec_amount <= 0:
                 raise ValueError()
         except Exception:
@@ -1325,8 +1511,18 @@ class JmsService:
                     detail=f"Project record for PO #{po_no} not found."
                 )
 
+        # Prevent duplicate submissions
+        if proj.current_task == "Approval Pending" and proj.wcc_no:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="WCC details have already been submitted for this PO and are pending approval."
+            )
+
         proj.wcc_no = wcc_no_clean
-        proj.wcc_submission_date = parsed_date
+        proj.wcc_date = parsed_date
+        proj.wcc_submission_date = parsed_subm_date
+        if parsed_appr_date is not None:
+            proj.wcc_approved_date = parsed_appr_date
         proj.wcc_amount = dec_amount
         proj.current_task = "Approval Pending"
         proj.project_status = "Approval Pending"
@@ -1336,8 +1532,12 @@ class JmsService:
         if site_id:
             lines = lines.filter(TelecomIndusPo.site_id == site_id)
         for item in lines.all():
-            if item.po_amendment_type in ["WCC to be submit", "Rejected"]:
+            po_qty = Decimal(str(item.po_qty or 0))
+            jms_qty = Decimal(str(item.jms_qty if item.jms_qty is not None else po_qty))
+            po_diff = po_qty - jms_qty
+            if po_diff >= Decimal("0") or item.po_amendment_type in ["WCC to be submit", "Rejected", "WCC to be raise"]:
                 item.po_amendment_type = "Approval Pending"
+                item.jms_status = "Approved"
 
         self.project_db.commit()
         self.project_db.refresh(proj)
@@ -1349,6 +1549,10 @@ class JmsService:
             "siteId": proj.site_id,
             "wccNo": wcc_no_clean,
             "wccDate": str(parsed_date),
+            "wccSubmissionDate": str(proj.wcc_submission_date) if proj.wcc_submission_date else None,
+            "submissionDate": str(proj.wcc_submission_date) if proj.wcc_submission_date else None,
+            "wccApprovedDate": str(proj.wcc_approved_date) if proj.wcc_approved_date else None,
+            "approvedDate": str(proj.wcc_approved_date) if proj.wcc_approved_date else None,
             "wccAmount": float(dec_amount),
             "task": proj.current_task,
             "status": proj.project_status
@@ -1407,8 +1611,8 @@ class JmsService:
         proj.receipt_date = parsed_date
         proj.ers_no = (ers_no or "").strip()
         proj.wcc_approved_date = parsed_date
-        proj.current_task = "WCC Approved"
-        proj.project_status = "WCC Approved"
+        proj.current_task = "to be submit"
+        proj.project_status = "to be submit"
 
         lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
         if site_id:
@@ -1418,7 +1622,7 @@ class JmsService:
             jms_qty = Decimal(str(item.jms_qty if item.jms_qty is not None else po_qty))
             po_diff = po_qty - jms_qty
             if po_diff >= Decimal("0"):
-                item.po_amendment_type = "WCC Approved"
+                item.po_amendment_type = "to be submit"
 
         self.project_db.commit()
         self.project_db.refresh(proj)
@@ -1455,37 +1659,91 @@ class JmsService:
                     detail=f"Project record for PO #{po_no} not found."
                 )
 
-        # 1. Reject task & status
-        proj.current_task = "Rejected"
-        proj.project_status = "Rejected"
-        proj.po_status = "Rejected"
-
-        # 2. Clear jms_merged_document and po_amendment_merged_document scoped to this PO
-        proj.jms_merged_document = None
-        proj.jms_merged_documents = None
-        proj.po_amendment_merged_document = None
-        proj.po_amendment_merged_documents = None
-
-        # 3. Reset line items approval status scoped to this workflow
         norm_wf = (workflow or "").strip().lower()
         lines = self.project_db.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == po_no)
         if site_id:
             lines = lines.filter(TelecomIndusPo.site_id == site_id)
-        for item in lines.all():
+        all_lines = lines.all()
+
+        has_active_po_amend = False
+        has_active_wcc = False
+        for item in all_lines:
             po_qty = Decimal(str(item.po_qty or 0))
             jms_qty = Decimal(str(item.jms_qty if item.jms_qty is not None else po_qty))
             po_diff = po_qty - jms_qty
-            if norm_wf == "wcc":
+            if po_diff < Decimal("0"):
+                if item.po_amendment_type in ["PO Amend to be submit", "Approval Pending", "Amend Requested", "Change QTY"]:
+                    has_active_po_amend = True
+            elif po_diff >= Decimal("0"):
+                if item.po_amendment_type in ["WCC to be submit", "WCC to be raise", "Approval Pending"]:
+                    has_active_wcc = True
+
+        if norm_wf == "wcc":
+            # 1. Reset WCC line items approval status
+            for item in all_lines:
+                po_qty = Decimal(str(item.po_qty or 0))
+                jms_qty = Decimal(str(item.jms_qty if item.jms_qty is not None else po_qty))
+                po_diff = po_qty - jms_qty
                 if po_diff >= Decimal("0"):
                     item.jms_status = "Not Approved"
                     item.po_amendment_type = "Rejected"
-            elif norm_wf in ["po_amend", "po amend"]:
+
+            # 2. Reject task & status
+            if has_active_po_amend:
+                proj.current_task = "PO Amend to be submit"
+                proj.project_status = "PO Amend to be submit"
+            else:
+                proj.current_task = "Rejected"
+                proj.project_status = "Rejected"
+                proj.po_status = "Rejected"
+
+            # 3 & 4. Remove associated PDF only if it belongs exclusively to this workflow
+            # If jms_merged_document is shared with an active PO Amend workflow, do not delete it
+            is_shared_with_active_amend = has_active_po_amend and (
+                proj.po_amendment_merged_document is not None and
+                (proj.jms_merged_document == proj.po_amendment_merged_document)
+            )
+            if not is_shared_with_active_amend:
+                proj.jms_merged_document = None
+                proj.jms_merged_documents = None
+
+        elif norm_wf in ["po_amend", "po amend"]:
+            for item in all_lines:
+                po_qty = Decimal(str(item.po_qty or 0))
+                jms_qty = Decimal(str(item.jms_qty if item.jms_qty is not None else po_qty))
+                po_diff = po_qty - jms_qty
                 if po_diff < Decimal("0"):
                     item.jms_status = "Not Approved"
                     item.po_amendment_type = "Rejected"
+
+            if has_active_wcc:
+                proj.current_task = "WCC to be submit"
+                proj.project_status = "WCC to be submit"
             else:
+                proj.current_task = "Rejected"
+                proj.project_status = "Rejected"
+                proj.po_status = "Rejected"
+
+            is_shared_with_active_wcc = has_active_wcc and (
+                proj.jms_merged_document is not None and
+                (proj.po_amendment_merged_document == proj.jms_merged_document)
+            )
+            proj.po_amendment_merged_document = None
+            proj.po_amendment_merged_documents = None
+            if not is_shared_with_active_wcc:
+                proj.jms_merged_document = None
+                proj.jms_merged_documents = None
+        else:
+            for item in all_lines:
                 item.jms_status = "Not Approved"
                 item.po_amendment_type = "Rejected"
+            proj.current_task = "Rejected"
+            proj.project_status = "Rejected"
+            proj.po_status = "Rejected"
+            proj.jms_merged_document = None
+            proj.jms_merged_documents = None
+            proj.po_amendment_merged_document = None
+            proj.po_amendment_merged_documents = None
 
         self.project_db.commit()
         self.project_db.refresh(proj)

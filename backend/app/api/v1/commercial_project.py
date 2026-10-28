@@ -9,7 +9,8 @@ from app.schemas.commercial_project import (
     CommercialProjectListResponse,
     CommercialBulkUploadResponse,
     CommercialProjectDeleteRequest,
-    CommercialProjectDeleteResponse
+    CommercialProjectDeleteResponse,
+    WccSubmitDetailsRequest
 )
 
 router = APIRouter(prefix="/commercial", tags=["Commercial Manager - New Project & PO"])
@@ -169,3 +170,22 @@ def list_wcc_projects(
     service = CommercialProjectService(db)
     return service.get_wcc_projects_list()
 
+
+
+@router.post("/wcc/submit-details", summary="Submit WCC Details and transition task to Approval Pending")
+def submit_wcc_details_commercial(
+    payload: WccSubmitDetailsRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    from app.services.jms_service import JmsService
+    service = JmsService(project_db)
+    return service.submit_wcc_details(
+        payload.poNo,
+        payload.siteId,
+        payload.wccNo,
+        payload.wccDate,
+        payload.wccAmount,
+        payload.submissionDate or payload.wccSubmissionDate,
+        payload.approvedDate or payload.wccApprovedDate
+    )

@@ -282,6 +282,23 @@ def update_po_amend_line_item_qty(
     )
 
 
+@router.patch("/wcc/line-items/{line_item_id}/qty", summary="Update WCC line item quantity and persist recalculated amount")
+@router.post("/wcc/line-items/{line_item_id}/qty", summary="Alias: Update WCC line item quantity")
+def update_wcc_line_item_qty(
+    line_item_id: str,
+    payload: PoAmendQtyUpdateRequest,
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    service = JmsService(project_db)
+    return service.update_wcc_line_item_qty(
+        line_item_id=line_item_id,
+        new_qty=payload.qty,
+        po_no=payload.poNo,
+        site_id=payload.siteId
+    )
+
+
 @router.post("/po-amend/submit-reference", summary="Submit PO Reference Number and transition task to Approval Pending")
 def submit_po_amend_reference(
     payload: PoAmendSubmitReferenceRequest,
@@ -310,7 +327,9 @@ def submit_wcc_details(
         payload.siteId,
         payload.wccNo,
         payload.wccDate,
-        payload.wccAmount
+        payload.wccAmount,
+        payload.submissionDate or payload.wccSubmissionDate,
+        payload.approvedDate or payload.wccApprovedDate
     )
 
 

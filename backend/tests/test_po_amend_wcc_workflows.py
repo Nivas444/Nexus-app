@@ -20,7 +20,8 @@ def cleanup_workflow_records(project_db_session: Session):
         "TEST-WCC-WF-01",
         "TEST-WCC-WF-02",
         "TEST-ISOLATION-A",
-        "TEST-ISOLATION-B"
+        "TEST-ISOLATION-B",
+        "TEST-WCC-SHARED"
     ]
     for po in test_pos:
         project_db_session.query(ProjectDocument).filter(ProjectDocument.po_no == po).delete()
@@ -495,7 +496,7 @@ def test_6b_wcc_approval_pending_submit_receipt_action(
     assert rec_res.status_code == 200
     rec_data = rec_res.json()
     assert rec_data["success"] is True
-    assert rec_data["task"] == "WCC Approved"
+    assert rec_data["task"] == "to be submit"
     assert rec_data["receiptNo"] == "REC-INDUS-8899"
     assert "2026-10-25" in rec_data["receiptDate"]
     assert rec_data["ersNo"] == "ERS-2026-0012"
@@ -503,10 +504,16 @@ def test_6b_wcc_approval_pending_submit_receipt_action(
     # Verify DB persistence directly
     project_db_session.expire_all()
     db_proj = project_db_session.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
-    assert db_proj.current_task == "WCC Approved"
+    assert db_proj.current_task == "to be submit"
     assert db_proj.receipt_no == "REC-INDUS-8899"
     assert str(db_proj.receipt_date) == "2026-10-25"
     assert db_proj.ers_no == "ERS-2026-0012"
+
+    # Verify completed PO is removed from active WCC project worklist
+    wcc_list_res = client.get("/api/v1/commercial/wcc/projects")
+    assert wcc_list_res.status_code == 200
+    active_pos = [item["poNo"] for item in wcc_list_res.json()["items"]]
+    assert po_no not in active_pos
 
     # Detail API exposes saved receipt fields
     det_res = client.get(f"/api/v1/commercial/jms/wcc-details?po_no={po_no}&site_id={site_id}")
@@ -649,3 +656,75 @@ def test_8_isolation_unrelated_projects_remain_unaffected(
     assert b_fresh.po_reference_number == "REF-KEEP-B"
     assert b_fresh.jms_merged_document == pdf_b
     assert b_fresh.po_amount == Decimal("95000.00")
+
+
+def test_9_wcc_reject_preserves_shared_document_if_other_workflow_active(
+    client: TestClient, project_db_session: Session, cleanup_workflow_records
+):
+    """
+    Requirement 3.4:
+    - Before deleting the PDF, verify that it belongs exclusively to this PO/workflow.
+    - Do not delete a document shared with another active workflow (e.g. active PO Amend).
+    """
+    po_no = "TEST-WCC-SHARED"
+    site_id = "SITE-SHARED-01"
+    shared_pdf = _create_sample_pdf("Shared PDF Certificate")
+
+    proj = TelecomProject(
+        company_name="Nexus",
+        customer_name="Indus Towers Ltd",
+        project_code="PRJ-SHARED",
+        po_no=po_no,
+        site_id=site_id,
+        current_task="WCC to be submit / PO Amend to be submit",
+        po_status="Amend Requested",
+        jms_merged_document=shared_pdf,
+        po_amendment_merged_document=shared_pdf,
+        po_amount=Decimal("120000.00")
+    )
+    # Line 1: PO difference < 0 (PO Amend - still active)
+    item_amend = TelecomIndusPo(
+        company_name="Nexus",
+        customer_name="Indus Towers Ltd",
+        po_no=po_no,
+        site_id=site_id,
+        line_number="1",
+        po_qty=Decimal("1.00"),
+        jms_qty=Decimal("2.00"),  # po_diff = -1
+        po_rate=Decimal("60000.00"),
+        po_amount=Decimal("60000.00"),
+        po_amendment_type="PO Amend to be submit"
+    )
+    # Line 2: PO difference >= 0 (WCC - to be rejected)
+    item_wcc = TelecomIndusPo(
+        company_name="Nexus",
+        customer_name="Indus Towers Ltd",
+        po_no=po_no,
+        site_id=site_id,
+        line_number="2",
+        po_qty=Decimal("1.00"),
+        jms_qty=Decimal("1.00"),  # po_diff = 0
+        po_rate=Decimal("60000.00"),
+        po_amount=Decimal("60000.00"),
+        po_amendment_type="Approval Pending"
+    )
+    project_db_session.add(proj)
+    project_db_session.add(item_amend)
+    project_db_session.add(item_wcc)
+    project_db_session.commit()
+
+    # Reject WCC workflow
+    rej_res = client.post(
+        "/api/v1/commercial/jms/reject",
+        json={"poNo": po_no, "siteId": site_id, "workflow": "WCC"}
+    )
+    assert rej_res.status_code == 200
+
+    project_db_session.expire_all()
+    db_proj = project_db_session.query(TelecomProject).filter(TelecomProject.po_no == po_no).first()
+    # Shared document must NOT be deleted because PO Amend is still active!
+    assert db_proj.po_amendment_merged_document == shared_pdf
+    assert db_proj.jms_merged_document == shared_pdf
+    # Task retains active PO Amend workflow
+    assert db_proj.current_task == "PO Amend to be submit"
+

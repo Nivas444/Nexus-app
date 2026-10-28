@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, BigInteger, String, Numeric, Text, Date, DateTime, Boolean, UniqueConstraint, LargeBinary
+from sqlalchemy.orm import deferred
 from sqlalchemy.sql import func
 from app.db.base import Base
 
@@ -70,6 +71,7 @@ class TelecomProject(Base):
     cam_status = Column(String(100), nullable=True)
     tsp_status = Column(String(100), nullable=True)
     wcc_no = Column(String(100), nullable=True)
+    wcc_date = Column(Date, nullable=True)
     wcc_submission_date = Column(Date, nullable=True)
     wcc_approved_date = Column(Date, nullable=True)
     wcc_ageing = Column(BigInteger, nullable=True)
@@ -77,10 +79,10 @@ class TelecomProject(Base):
     receipt_no = Column(String(100), nullable=True)
     receipt_date = Column(Date, nullable=True)
     ers_no = Column(String(100), nullable=True)
-    jms_merged_document = Column(LargeBinary, nullable=True)
-    po_amendment_merged_document = Column(LargeBinary, nullable=True)
-    jms_merged_documents = Column(LargeBinary, nullable=True)
-    po_amendment_merged_documents = Column(LargeBinary, nullable=True)
+    jms_merged_document = deferred(Column(LargeBinary, nullable=True))
+    po_amendment_merged_document = deferred(Column(LargeBinary, nullable=True))
+    jms_merged_documents = deferred(Column(LargeBinary, nullable=True))
+    po_amendment_merged_documents = deferred(Column(LargeBinary, nullable=True))
     invoice_supporting_documents = Column(Text, nullable=True)
     po_material_difference = Column(Numeric, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)

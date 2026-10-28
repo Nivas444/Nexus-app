@@ -10158,9 +10158,6 @@
               <button type="button" class="side-top-icon-btn" id="btnInvoiceModalPdf" title="Download PDF" onclick="downloadInvoiceModalPdf()" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
                 <img src="icons/PDF Download.svg" alt="Download PDF" width="22" height="22">
               </button>
-              <button type="button" class="side-top-icon-btn" id="btnInvoiceModalRefresh" title="Refresh" onclick="event.preventDefault();" style="background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center;">
-                <img src="icons/Refresh.svg" alt="Refresh" width="22" height="22">
-              </button>
               <button type="button" class="side-form-close-btn" id="btnCloseInvoiceDetailPanel"
                 onclick="closeInvoiceDetailModal()" aria-label="Close"
                 style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
@@ -10230,10 +10227,13 @@
               </div>
             </div>
 
-            <!-- Submit Button Below Fields -->
-            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+            <!-- Actions Below Fields: Submit & Reject centered -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 14px; padding-top: 8px;">
               <button type="button" id="btnSubmitInvoiceModal" onclick="submitInvoiceModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Submit Invoice">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+              <button type="button" id="btnRejectInvoiceModal" onclick="rejectInvoiceModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: none; align-items: center; justify-content: center;" title="Reject Invoice">
+                <img src="icons/Reject.svg" alt="Reject" width="36" height="36">
               </button>
             </div>
           </div>
@@ -10258,7 +10258,7 @@
               <label for="inpInvoiceDueDate" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; width: 150px; min-width: 150px;">Due Date</label>
               <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
                 <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpInvoiceDueDate"
-                  placeholder="DD - MM - YYYY" value="12 - 08 - 2026" readonly
+                  placeholder="DD - MM - YYYY" value=""
                   style="cursor: pointer; background: #ffffff; width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 42px 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
                 <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnInvoiceDueDateCalendar"
                   title="Select Date" aria-label="Select Date"
@@ -10271,6 +10271,65 @@
             <!-- Centered Submit Icon Below Fields -->
             <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
               <button type="button" id="btnSubmitInvoiceDueDate" onclick="submitInvoiceDueDateModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Update Due Date">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice# Modal Tab (Opened when submitting Approval Pending task) -->
+        <div class="side-form-card" id="invoiceHashPanel" style="display: none; width: 620px; max-width: 95vw;">
+          <!-- Header Ribbon Badge: Invoice# + Inline Summation + Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblInvoiceHashTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Invoice#</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Invoice Summation">
+                <span id="lblInvoiceHashTotalAmount" style="color: #0454e4; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">2,45,000.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto;">
+              <button type="button" class="side-form-close-btn" id="btnCloseInvoiceHashPanel"
+                onclick="closeInvoiceHashModal()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Form Body with Field Name on Left and Input on Right -->
+          <div class="side-form-body" style="padding: 20px 24px 24px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <!-- 1. Invoice Amount (Typeable input box) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="inpInvoiceHashAmount" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; width: 180px; min-width: 180px;">Invoice Amount</label>
+              <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpInvoiceHashAmount" placeholder="Enter Invoice Amount"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+              </div>
+            </div>
+
+            <!-- 2. TDS Deduction Amount (Typeable input box) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="inpInvoiceHashTdsDeduction" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; width: 180px; min-width: 180px;">TDS Deduction Amount</label>
+              <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpInvoiceHashTdsDeduction" placeholder="Enter TDS Deduction Amount"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+              </div>
+            </div>
+
+            <!-- 3. Receivable Amount (Typeable input box) -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="inpInvoiceHashReceivableAmount" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; width: 180px; min-width: 180px;">Receivable Amount</label>
+              <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control" id="inpInvoiceHashReceivableAmount" placeholder="Enter Receivable Amount"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+              </div>
+            </div>
+
+            <!-- Submit Button Below Fields Centered -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+              <button type="button" id="btnSubmitInvoiceHashModal" onclick="submitInvoiceHashModal()" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Submit Invoice Details">
                 <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
               </button>
             </div>

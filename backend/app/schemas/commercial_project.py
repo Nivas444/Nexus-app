@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union
 from pydantic import BaseModel, ConfigDict
 
 
@@ -27,6 +27,16 @@ class CommercialProjectItem(BaseModel):
     poStatus: Optional[str] = None
     completionDate: Optional[str] = None
     amount: Optional[str] = None
+    wccNo: Optional[str] = None
+    wccDate: Optional[str] = None
+    submissionDate: Optional[str] = None
+    wccSubmissionDate: Optional[str] = None
+    approvedDate: Optional[str] = None
+    wccApprovedDate: Optional[str] = None
+    wccAmount: Optional[float] = None
+    receiptNo: Optional[str] = None
+    receiptDate: Optional[str] = None
+    ersNo: Optional[str] = None
 
 
 class CommercialProjectListResponse(BaseModel):
@@ -226,9 +236,14 @@ class WccPoDetailResponse(BaseModel):
     totalAmount: float
     wccNo: Optional[str] = None
     wccDate: Optional[str] = None
+    poDate: Optional[str] = None
+    completionDate: Optional[str] = None
+    wccSubmissionDate: Optional[str] = None
+    submissionDate: Optional[str] = None
     wccAmount: Optional[float] = None
     poRevisionNumber: Optional[str] = None
     wccApprovedDate: Optional[str] = None
+    approvedDate: Optional[str] = None
     receiptNo: Optional[str] = None
     receiptDate: Optional[str] = None
     ersNo: Optional[str] = None
@@ -264,6 +279,7 @@ class PoAmendPoDetailResponse(BaseModel):
     task: str
     poStatus: str
     totalAmount: float
+    totalJmsAmount: Optional[float] = None
     poAmendmentRefId: Optional[str] = None
     poRevisionNumber: Optional[str] = None
     poAmendmentCompletionDate: Optional[str] = None
@@ -293,7 +309,11 @@ class WccSubmitDetailsRequest(BaseModel):
     siteId: Optional[str] = None
     wccNo: str
     wccDate: str
-    wccAmount: float
+    wccAmount: Union[float, str]
+    submissionDate: Optional[str] = None
+    wccSubmissionDate: Optional[str] = None
+    approvedDate: Optional[str] = None
+    wccApprovedDate: Optional[str] = None
 
 
 class WccSubmitReceiptRequest(BaseModel):

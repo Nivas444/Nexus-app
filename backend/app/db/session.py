@@ -45,3 +45,25 @@ def get_project_db() -> Generator[Session, None, None]:
     finally:
         db.close()
 
+
+accounts_engine = create_engine(
+    settings.sqlalchemy_accounts_database_uri,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+    pool_recycle=1800
+)
+
+AccountsSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=accounts_engine)
+
+def get_accounts_db() -> Generator[Session, None, None]:
+    """
+    FastAPI dependency providing a database session to Nexus_Accounts DB.
+    """
+    db = AccountsSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+

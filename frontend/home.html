@@ -10502,6 +10502,35 @@
           </div>
         </div>
 
+        <!-- Commercial Dashboard Modal (Donut / Pie Chart for Task & Amount) -->
+        <div class="side-form-card" id="commercialDashboardModal" style="display: none; width: 740px; max-width: 96vw; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); overflow: hidden;">
+          <!-- Header Ribbon Badge: Page Name Dashboard + Inline Total + Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblCommercialDashboardTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Dashboard</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain;" title="Total Amount">
+                <span id="lblCommercialDashboardTotalAmount" style="color: #0454e4; font-weight: 700; font-size: 1.05rem; font-family: inherit; line-height: 1;">0.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseCommercialDashboardModal"
+                onclick="closeCommercialDashboard()" aria-label="Close"
+                style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Body: Chart Container with Donut and Legend -->
+          <div class="side-form-body" id="commercialDashboardBody" style="padding: 12px 20px 24px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+            <div id="commercialDashboardSvgWrap" style="width: 100%; display: flex; justify-content: center; align-items: center; min-height: 480px;">
+              <!-- Dynamic SVG Donut Chart rendered here -->
+            </div>
+          </div>
+        </div>
+
         <!-- 8. Add Salary Form Card (Matching Uploaded Mockup) -->
         <div class="side-form-card" id="addSalaryCard" style="display: none; width: 440px;">
           <!-- Header Ribbon Badge: Add Salary -->

@@ -526,3 +526,48 @@ def download_jms_pdf(
     )
 
 
+@router.get("/invoice/pdf/download", summary="Download Commercial Invoice PDF (Alias)")
+def download_commercial_invoice_pdf_alias(
+    invoice_no: Optional[str] = Query(None, description="Invoice Number"),
+    po_no: Optional[str] = Query(None, description="PO Number"),
+    site_id: Optional[str] = Query(None, description="Site ID"),
+    irn_no: Optional[str] = Query(None, description="IRN Number"),
+    ers_no: Optional[str] = Query(None, description="ERS Number"),
+    invoice_date: Optional[str] = Query(None, description="Invoice Date"),
+    gst_type: Optional[str] = Query(None, description="GST Type: SGST or IGST"),
+    project_db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_jms_access)
+):
+    from app.services.invoice_pdf_service import CommercialInvoicePdfService
+
+    pdf_service = CommercialInvoicePdfService(project_db)
+    try:
+        pdf_bytes = pdf_service.generate_invoice_pdf(
+            invoice_no=invoice_no,
+            po_no=po_no,
+            site_id=site_id,
+            irn_no=irn_no,
+            ers_no=ers_no,
+            invoice_date_str=invoice_date,
+            gst_type=gst_type
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Invoice PDF generation failed: {str(e)}"
+        )
+
+    file_label = (invoice_no or po_no or "Document").replace("/", "_").replace("\\", "_")
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="Tax_Invoice_{file_label}.pdf"',
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )

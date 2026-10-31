@@ -378,4 +378,142 @@ class SelectWorksSubmitResponse(BaseModel):
     pdfDataUri: Optional[str] = None
 
 
+# ==========================================
+# COMMERCIAL INVOICE SCHEMAS
+# ==========================================
+
+class CommercialInvoiceItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: Any
+    invoiceNo: Optional[str] = None
+    date: Optional[str] = None
+    poNo: Optional[str] = None
+    projectId: Optional[str] = None
+    siteId: Optional[str] = None
+    siteName: Optional[str] = None
+    projectType: Optional[str] = None
+    subProjectType: Optional[str] = None
+    task: Optional[str] = None
+    ersNo: Optional[str] = None
+    irnNo: Optional[str] = None
+    documentType: Optional[str] = None
+    amount: Optional[str] = None
+    rawAmount: Optional[float] = None
+    dueDate: Optional[str] = None
+    customerName: Optional[str] = None
+    companyName: Optional[str] = None
+    pdfStored: bool = False
+
+
+class CommercialInvoiceListResponse(BaseModel):
+    items: List[CommercialInvoiceItem]
+    total: int
+
+
+class CommercialInvoiceSubmitDetailsRequest(BaseModel):
+    poNo: str
+    siteId: Optional[str] = None
+    invoiceNo: Optional[str] = None
+    invoiceDate: Optional[str] = None
+    ersNo: Optional[str] = None
+    irnNo: Optional[str] = None
+    dueDate: Optional[str] = None
+    documentType: Optional[str] = None
+    amount: Optional[float] = None
+
+
+class CommercialInvoiceSubmitHashRequest(BaseModel):
+    poNo: Optional[str] = None
+    siteId: Optional[str] = None
+    invoiceNo: str
+    customerName: Optional[str] = None
+    companyName: Optional[str] = None
+    invoiceAmount: float
+    tds: float
+    receivable: float
+    dueDate: Optional[str] = None
+
+
+class CommercialInvoiceGenericResponse(BaseModel):
+    success: bool
+    message: str
+    data: Optional[Any] = None
+
+
+# ==========================================
+# COMMERCIAL RECEIVABLE SCHEMAS
+# ==========================================
+
+class CommercialReceivableItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: Any
+    poNo: Optional[str] = None
+    customerName: Optional[str] = None
+    invoiceNo: Optional[str] = None
+    invoiceDate: Optional[str] = None
+    dueDate: Optional[str] = None
+    invoiceAmount: Optional[str] = None
+    rawInvoiceAmount: Optional[float] = None
+    deduction: Optional[str] = None
+    rawDeduction: Optional[float] = None
+    receivedAmount: Optional[str] = None
+    rawReceivedAmount: Optional[float] = None
+    receivable: Optional[str] = None
+    rawReceivable: Optional[float] = None
+    ageing: Optional[str] = None
+    # Subtab details: Invoice amount breakdown from sales table
+    basicAmount: Optional[str] = None
+    rawBasicAmount: Optional[float] = None
+    cgst: Optional[str] = None
+    rawCgst: Optional[float] = None
+    sgst: Optional[str] = None
+    rawSgst: Optional[float] = None
+    igst: Optional[str] = None
+    rawIgst: Optional[float] = None
+    # Subtab details: Deduction breakdown from receipt_indus table
+    tds: Optional[str] = None
+    rawTds: Optional[float] = None
+    dnAmount: Optional[str] = None
+    rawDnAmount: Optional[float] = None
+    discount: Optional[str] = None
+    rawDiscount: Optional[float] = None
+    tredsFee: Optional[str] = None
+    rawTredsFee: Optional[float] = None
+    # Subtab details: Received amount date from receipt_indus table
+    receivedDate: Optional[str] = None
+
+
+class CommercialReceivableListResponse(BaseModel):
+    items: List[CommercialReceivableItem]
+    total: int
+
+
+class CommercialReceivableUpdateInvoiceAmountRequest(BaseModel):
+    invoiceNo: str
+    basicAmount: Optional[float] = None
+    cgst: Optional[float] = None
+    sgst: Optional[float] = None
+    igst: Optional[float] = None
+    totalAmount: Optional[float] = None
+
+
+class CommercialReceivableUpdateDeductionRequest(BaseModel):
+    invoiceNo: str
+    tds: Optional[float] = None
+    dnAmount: Optional[float] = None
+    discount: Optional[float] = None
+    tredsFee: Optional[float] = None
+
+
+class CommercialReceivableUpdateReceivedAmountRequest(BaseModel):
+    invoiceNo: str
+    receivedAmount: float
+    receivedDate: Optional[str] = None
+
+
+
+
+
 

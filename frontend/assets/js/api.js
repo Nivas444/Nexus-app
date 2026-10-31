@@ -2051,6 +2051,57 @@
           });
         }
       },
+      invoice: {
+        async getProjects() {
+          return await request('/commercial/invoice/projects', { method: 'GET' });
+        },
+        async submitDetails(data) {
+          return await request('/commercial/invoice/submit-details', {
+            method: 'POST',
+            body: JSON.stringify(data)
+          });
+        },
+        async submitHash(data) {
+          return await request('/commercial/invoice/submit-hash', {
+            method: 'POST',
+            body: JSON.stringify(data)
+          });
+        },
+        getDownloadUrl(params = {}) {
+          const q = new URLSearchParams();
+          if (params.invoiceNo) q.set('invoice_no', params.invoiceNo);
+          if (params.poNo) q.set('po_no', params.poNo);
+          if (params.siteId) q.set('site_id', params.siteId);
+          if (params.irnNo) q.set('irn_no', params.irnNo);
+          if (params.ersNo) q.set('ers_no', params.ersNo);
+          if (params.invoiceDate) q.set('invoice_date', params.invoiceDate);
+          if (params.gstType) q.set('gst_type', params.gstType);
+          return `/api/v1/commercial/invoice/pdf/download?${q.toString()}`;
+        }
+      },
+      receivable: {
+        async getProjects() {
+          return await request('/commercial/receivable/projects', { method: 'GET' });
+        },
+        async updateInvoiceAmount(data) {
+          return await request('/commercial/receivable/update-invoice-amount', {
+            method: 'POST',
+            body: JSON.stringify(data)
+          });
+        },
+        async updateDeduction(data) {
+          return await request('/commercial/receivable/update-deduction', {
+            method: 'POST',
+            body: JSON.stringify(data)
+          });
+        },
+        async updateReceivedAmount(data) {
+          return await request('/commercial/receivable/update-received-amount', {
+            method: 'POST',
+            body: JSON.stringify(data)
+          });
+        }
+      },
       async rejectRow(poNo, siteId, workflow = 'PO Amend') {
         return await request('/commercial/jms/reject', {
           method: 'POST',

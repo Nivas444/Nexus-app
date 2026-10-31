@@ -10,6 +10,7 @@
 // Top-level initialization of popup & sideform datasets to ensure availability on initial DOM load
 var companyBankData = [];
 var activeCompanyBankFilters = {};
+window.renderCommercialDashboardChart = renderCommercialDashboardChart;
 var currentCompanyBankFilterCol = null;
 var companyHolidaysData = [];
 var activeCompanyHolidaysFilters = {};
@@ -176,7 +177,15 @@ async function loadCommercialProjectsFromApi() {
     try { await loadCommercialWccFromApi(); } catch (e) { console.error('Failed to load WCC from API:', e); }
   }
   if (typeof syncCommercialInvoiceDataWithNewProject === 'function') syncCommercialInvoiceDataWithNewProject();
+
+  if (typeof loadCommercialInvoiceFromApi === 'function') {
+    try { await loadCommercialInvoiceFromApi(); } catch (e) { console.error('Failed to load Invoice from API:', e); }
+  }
   if (typeof syncCommercialReceivableDataWithNewProject === 'function') syncCommercialReceivableDataWithNewProject();
+
+  if (typeof loadCommercialReceivableFromApi === 'function') {
+    try { await loadCommercialReceivableFromApi(); } catch (e) { console.error('Failed to load Receivable from API:', e); }
+  }
   if (typeof syncCommercialPoToBeOpenDataWithNewProject === 'function') syncCommercialPoToBeOpenDataWithNewProject();
   if (typeof syncCommercialEmailDataWithNewProject === 'function') syncCommercialEmailDataWithNewProject();
 
@@ -5194,8 +5203,346 @@ function calculatePoAmendDetailTotalSum(dataset) {
 }
 window.calculatePoAmendDetailTotalSum = calculatePoAmendDetailTotalSum;
 
+// -------------------------------------------------------------
+// COMMERCIAL DASHBOARD (DONUT / PIE CHART FOR JMS, PO AMEND, WCC, INVOICE, RECEIVABLE)
+// -------------------------------------------------------------
+window._currentCommercialDashboardPage = null;
+
+function getCommercialDashboardData(pageName) {
+  const pName = String(pageName || '').trim().toLowerCase();
+  let categories = [];
+  let totalAmount = 0;
+
+  if (pName.includes('jms')) {
+    const list = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData) && commercialJmsData.length > 0)
+      ? commercialJmsData
+      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'jms')
+        ? currentDataset
+        : (typeof defaultJmsItems !== 'undefined' ? defaultJmsItems : []));
+
+    let validateAmt = 0, validateCount = 0;
+    let processAmt = 0, processCount = 0;
+
+    list.forEach(r => {
+      const amt = (r.rawAmount !== undefined && r.rawAmount !== null && !isNaN(Number(r.rawAmount)))
+        ? Number(r.rawAmount)
+        : (r.amount ? (parseFloat(String(r.amount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const t = String(r.task || '').toLowerCase();
+      if (t.includes('process')) {
+        processAmt += amt;
+        processCount++;
+      } else {
+        validateAmt += amt;
+        validateCount++;
+      }
+    });
+
+    categories = [
+      { label: 'JMS To be Validate', color: '#0284c7', amount: validateAmt, count: validateCount },
+      { label: 'JMS To be Process', color: '#f97316', amount: processAmt, count: processCount }
+    ];
+    totalAmount = validateAmt + processAmt;
+
+  } else if (pName.includes('po amend') || pName.includes('po_amend')) {
+    const list = (typeof commercialPoAmendData !== 'undefined' && Array.isArray(commercialPoAmendData) && commercialPoAmendData.length > 0)
+      ? commercialPoAmendData
+      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'po_amend')
+        ? currentDataset
+        : (typeof defaultPoAmendItems !== 'undefined' ? defaultPoAmendItems : []));
+
+    let submitAmt = 0, submitCount = 0;
+    let pendingAmt = 0, pendingCount = 0;
+    let rejectedAmt = 0, rejectedCount = 0;
+
+    list.forEach(r => {
+      const amt = (r.rawAmount !== undefined && r.rawAmount !== null && !isNaN(Number(r.rawAmount)))
+        ? Number(r.rawAmount)
+        : (r.amount ? (parseFloat(String(r.amount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const t = String(r.task || '').toLowerCase();
+      if (t.includes('reject')) {
+        rejectedAmt += amt;
+        rejectedCount++;
+      } else if (t.includes('approval') || t.includes('review') || t.includes('ending') || t.includes('pending')) {
+        pendingAmt += amt;
+        pendingCount++;
+      } else {
+        submitAmt += amt;
+        submitCount++;
+      }
+    });
+
+    categories = [
+      { label: 'To be Submit', color: '#0284c7', amount: submitAmt, count: submitCount },
+      { label: 'Pending Approval', color: '#f97316', amount: pendingAmt, count: pendingCount },
+      { label: 'Rejected', color: '#dc2626', amount: rejectedAmt, count: rejectedCount }
+    ];
+    totalAmount = submitAmt + pendingAmt + rejectedAmt;
+
+  } else if (pName.includes('wcc')) {
+    const list = (typeof commercialWccData !== 'undefined' && Array.isArray(commercialWccData) && commercialWccData.length > 0)
+      ? commercialWccData
+      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'wcc')
+        ? currentDataset
+        : (typeof defaultWccItems !== 'undefined' ? defaultWccItems : []));
+
+    let submitAmt = 0, submitCount = 0;
+    let pendingAmt = 0, pendingCount = 0;
+    let rejectedAmt = 0, rejectedCount = 0;
+
+    list.forEach(r => {
+      const amt = (r.rawAmount !== undefined && r.rawAmount !== null && !isNaN(Number(r.rawAmount)))
+        ? Number(r.rawAmount)
+        : (r.amount ? (parseFloat(String(r.amount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const t = String(r.task || '').toLowerCase();
+      if (t.includes('reject')) {
+        rejectedAmt += amt;
+        rejectedCount++;
+      } else if (t.includes('approval') || t.includes('review') || t.includes('ending') || t.includes('pending')) {
+        pendingAmt += amt;
+        pendingCount++;
+      } else {
+        submitAmt += amt;
+        submitCount++;
+      }
+    });
+
+    categories = [
+      { label: 'To be Submit', color: '#0284c7', amount: submitAmt, count: submitCount },
+      { label: 'Pending Approval', color: '#f97316', amount: pendingAmt, count: pendingCount },
+      { label: 'Rejected', color: '#dc2626', amount: rejectedAmt, count: rejectedCount }
+    ];
+    totalAmount = submitAmt + pendingAmt + rejectedAmt;
+
+  } else if (pName.includes('invoice')) {
+    const list = (typeof commercialInvoiceData !== 'undefined' && Array.isArray(commercialInvoiceData) && commercialInvoiceData.length > 0)
+      ? commercialInvoiceData
+      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'invoice')
+        ? currentDataset
+        : (typeof defaultInvoiceItems !== 'undefined' ? defaultInvoiceItems : []));
+
+    let submitAmt = 0, submitCount = 0;
+    let pendingAmt = 0, pendingCount = 0;
+    let rejectedAmt = 0, rejectedCount = 0;
+
+    list.forEach(r => {
+      const amt = (r.rawAmount !== undefined && r.rawAmount !== null && !isNaN(Number(r.rawAmount)))
+        ? Number(r.rawAmount)
+        : (r.amount ? (parseFloat(String(r.amount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const t = String(r.task || '').toLowerCase();
+      if (t.includes('reject')) {
+        rejectedAmt += amt;
+        rejectedCount++;
+      } else if (t.includes('approval') || t.includes('review') || t.includes('ending') || t.includes('pending')) {
+        pendingAmt += amt;
+        pendingCount++;
+      } else {
+        submitAmt += amt;
+        submitCount++;
+      }
+    });
+
+    categories = [
+      { label: 'To be Submit', color: '#0284c7', amount: submitAmt, count: submitCount },
+      { label: 'Pending Approval', color: '#f97316', amount: pendingAmt, count: pendingCount },
+      { label: 'Rejected', color: '#dc2626', amount: rejectedAmt, count: rejectedCount }
+    ];
+    totalAmount = submitAmt + pendingAmt + rejectedAmt;
+
+  } else if (pName.includes('receivable')) {
+    const list = (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData) && commercialReceivableData.length > 0)
+      ? commercialReceivableData
+      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'receivable')
+        ? currentDataset
+        : (typeof defaultReceivableItems !== 'undefined' ? defaultReceivableItems : []));
+
+    let invAmt = 0, recvAmt = 0, dedAmt = 0;
+
+    list.forEach(r => {
+      const i = (r.rawInvoiceAmount !== undefined && r.rawInvoiceAmount !== null && !isNaN(Number(r.rawInvoiceAmount)))
+        ? Number(r.rawInvoiceAmount)
+        : (r.invoiceAmount ? (parseFloat(String(r.invoiceAmount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const rc = (r.rawReceivedAmount !== undefined && r.rawReceivedAmount !== null && !isNaN(Number(r.rawReceivedAmount)))
+        ? Number(r.rawReceivedAmount)
+        : (r.receivedAmount ? (parseFloat(String(r.receivedAmount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const d = (r.rawDeduction !== undefined && r.rawDeduction !== null && !isNaN(Number(r.rawDeduction)))
+        ? Number(r.rawDeduction)
+        : (r.deduction ? (parseFloat(String(r.deduction).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+
+      invAmt += i;
+      recvAmt += rc;
+      dedAmt += d;
+    });
+
+    categories = [
+      { label: 'Invoice amount', color: '#0284c7', amount: invAmt, count: list.length },
+      { label: 'Received amount', color: '#16a34a', amount: recvAmt, count: list.length },
+      { label: 'Deduction', color: '#dc2626', amount: dedAmt, count: list.length }
+    ];
+    totalAmount = invAmt + recvAmt + dedAmt;
+  }
+
+  return { categories, totalAmount };
+}
+
+function generateCommercialDonutSvg(categories, totalAmount, pageName) {
+  const width = 720;
+  const height = 480;
+  const cx = 230;
+  const cy = 240;
+  const R = 175;
+  const r = 98;
+  const rMid = (R + r) / 2; // 136.5
+
+  let svgElements = [];
+
+  if (totalAmount <= 0) {
+    svgElements.push(`
+      <circle cx="${cx}" cy="${cy}" r="${rMid}" fill="none" stroke="#e2e8f0" stroke-width="${R - r}" />
+      <circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" />
+      <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="0.5">TOTAL AMOUNT</text>
+      <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#64748b">₹ 0.00</text>
+      <text x="${cx}" y="${cy + 38}" text-anchor="middle" font-size="12" font-weight="500" fill="#94a3b8">No Data Available</text>
+    `);
+  } else {
+    const nonZero = categories.filter(c => c.amount > 0);
+    if (nonZero.length === 1) {
+      const it = nonZero[0];
+      const pathD = `M ${cx} ${cy - R} A ${R} ${R} 0 1 0 ${cx} ${cy + R} A ${R} ${R} 0 1 0 ${cx} ${cy - R} M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
+      svgElements.push(`
+        <path d="${pathD}" fill="${it.color}" stroke="#ffffff" stroke-width="2.5" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+          <title>${it.label}: ₹ ${formatJmsSum(it.amount)} (100%)</title>
+        </path>
+        <text x="${cx}" y="${cy - rMid - 4}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">₹ ${formatJmsSum(it.amount)}</text>
+        <text x="${cx}" y="${cy - rMid + 12}" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">100%</text>
+      `);
+    } else {
+      let startAngle = -Math.PI / 2; // 12 o'clock
+      nonZero.forEach(it => {
+        const sliceAngle = (it.amount / totalAmount) * 2 * Math.PI;
+        const endAngle = startAngle + sliceAngle;
+        const pct = (it.amount / totalAmount) * 100;
+
+        const x1_out = cx + R * Math.cos(startAngle);
+        const y1_out = cy + R * Math.sin(startAngle);
+        const x2_out = cx + R * Math.cos(endAngle);
+        const y2_out = cy + R * Math.sin(endAngle);
+        const x1_in = cx + r * Math.cos(startAngle);
+        const y1_in = cy + r * Math.sin(startAngle);
+        const x2_in = cx + r * Math.cos(endAngle);
+        const y2_in = cy + r * Math.sin(endAngle);
+
+        const largeArc = sliceAngle > Math.PI ? 1 : 0;
+        const pathD = `M ${x1_out.toFixed(2)} ${y1_out.toFixed(2)} A ${R} ${R} 0 ${largeArc} 1 ${x2_out.toFixed(2)} ${y2_out.toFixed(2)} L ${x2_in.toFixed(2)} ${y2_in.toFixed(2)} A ${r} ${r} 0 ${largeArc} 0 ${x1_in.toFixed(2)} ${y1_in.toFixed(2)} Z`;
+
+        const midAngle = startAngle + sliceAngle / 2;
+        const tx = cx + rMid * Math.cos(midAngle);
+        const ty = cy + rMid * Math.sin(midAngle);
+
+        let sliceText = '';
+        if (pct >= 5.0) {
+          sliceText = `
+            <text x="${tx.toFixed(2)}" y="${(ty - 4).toFixed(2)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">₹ ${formatJmsSum(it.amount)}</text>
+            <text x="${tx.toFixed(2)}" y="${(ty + 12).toFixed(2)}" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">${pct.toFixed(1)}%</text>
+          `;
+        } else if (pct >= 2.0) {
+          sliceText = `
+            <text x="${tx.toFixed(2)}" y="${(ty + 4).toFixed(2)}" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">${pct.toFixed(1)}%</text>
+          `;
+        }
+
+        svgElements.push(`
+          <path d="${pathD}" fill="${it.color}" stroke="#ffffff" stroke-width="2.5" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+            <title>${it.label}: ₹ ${formatJmsSum(it.amount)} (${pct.toFixed(1)}%)</title>
+          </path>
+          ${sliceText}
+        `);
+
+        startAngle = endAngle;
+      });
+    }
+
+    // Donut center hole
+    svgElements.push(`
+      <circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" />
+      <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.5">TOTAL AMOUNT</text>
+      <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#0454e4">₹ ${formatJmsSum(totalAmount)}</text>
+    `);
+  }
+
+  // Legend on right side (top-right, exactly matching uploaded image layout)
+  let legY = 60;
+  categories.forEach(it => {
+    const pct = totalAmount > 0 ? (it.amount / totalAmount) * 100 : 0;
+    const countLabel = (it.count !== undefined && it.count !== null) ? `${it.count} ${it.count === 1 ? 'record' : 'records'}` : '';
+
+    svgElements.push(`
+      <g class="chart-legend-item" style="cursor: default;">
+        <rect x="445" y="${legY}" width="14" height="14" rx="3" fill="${it.color}" />
+        <text x="468" y="${legY + 12}" font-size="13" font-weight="700" fill="#1e293b">${it.label}</text>
+        <text x="468" y="${legY + 30}" font-size="13" font-weight="600" fill="#334155">₹ ${formatJmsSum(it.amount)} <tspan font-weight="500" fill="#64748b">(${pct.toFixed(1)}%)</tspan></text>
+        ${countLabel ? `<text x="468" y="${legY + 45}" font-size="11" font-weight="500" fill="#94a3b8">${countLabel}</text>` : ''}
+      </g>
+    `);
+    legY += 66;
+  });
+
+  return `
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" style="font-family: inherit; display: block; max-width: 100%;">
+      ${svgElements.join('\n')}
+    </svg>
+  `;
+}
+
+function renderCommercialDashboardChart(pageName) {
+  const pName = pageName || window._currentCommercialDashboardPage || 'Commercial';
+  const { categories, totalAmount } = getCommercialDashboardData(pName);
+
+  const totalEl = document.getElementById('lblCommercialDashboardTotalAmount');
+  if (totalEl) {
+    totalEl.textContent = formatJmsSum(totalAmount);
+  }
+
+  const wrapEl = document.getElementById('commercialDashboardSvgWrap');
+  if (wrapEl) {
+    wrapEl.innerHTML = generateCommercialDonutSvg(categories, totalAmount, pName);
+  }
+};
+
 window.openCommercialDashboard = function(pageName) {
-  showToast(`${pageName || 'Commercial'} Dashboard`);
+  const overlay = document.getElementById('sideFormOverlay');
+  const panel = document.getElementById('commercialDashboardModal');
+  if (!panel || !overlay) return;
+
+  // Hide any existing open modal panel inside overlay
+  const cards = overlay.querySelectorAll('.side-form-card');
+  cards.forEach(c => { c.style.display = 'none'; });
+
+  window._currentCommercialDashboardPage = pageName || 'Commercial';
+
+  const titleEl = document.getElementById('lblCommercialDashboardTitle');
+  if (titleEl) {
+    titleEl.textContent = `${pageName || 'Commercial'} Dashboard`;
+  }
+
+  renderCommercialDashboardChart(pageName);
+
+  panel.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeCommercialDashboard = function() {
+  const panel = document.getElementById('commercialDashboardModal');
+  if (panel) panel.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+  window._currentCommercialDashboardPage = null;
+};
+
+window.refreshCurrentCommercialDashboard = function() {
+  const panel = document.getElementById('commercialDashboardModal');
+  if (panel && panel.style.display !== 'none' && window._currentCommercialDashboardPage) {
+    renderCommercialDashboardChart(window._currentCommercialDashboardPage);
+  }
 };
 
 window.openPoAmendDetailPage = function(rowId, poNo, task) {
@@ -5770,13 +6117,14 @@ window.downloadCommercialProjectGeneratedPdf = async function(poNo, siteId, defa
 
     const blob = await res.blob();
     const disposition = res.headers.get('content-disposition');
-    let filename = defaultFileName || `WCC_Merged_${poNo}.pdf`;
+    let filename = defaultFileName || Tax_Invoice_.pdf;
     if (disposition && disposition.indexOf('filename=') !== -1) {
-      const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-      if (match && match[1]) {
-        filename = match[1].replace(/['"]/g, '');
+      const parts = disposition.split('filename=');
+      if (parts[1]) {
+        filename = parts[1].split(';')[0].trim().replace(/['"]/g, '');
       }
     }
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.style.display = 'none';
@@ -7719,36 +8067,156 @@ if (typeof localStorage !== 'undefined') {
   } catch (e) {}
 }
 
+async function loadCommercialInvoiceFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.invoice && typeof NexusApi.commercial.invoice.getProjects === 'function') {
+    try {
+      const response = await NexusApi.commercial.invoice.getProjects();
+      if (response && Array.isArray(response.items)) {
+        const liveItems = [];
+        const seenPo = new Set();
+        response.items.forEach((live, idx) => {
+          const taskLower = String(live.task || '').toLowerCase().trim();
+          if (taskLower === 'moved to receivable' || taskLower === 'receivable') {
+            return;
+          }
+          const inReceivable = (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData)) &&
+            commercialReceivableData.some(r => (live.poNo && r.poNo === live.poNo) || (live.invoiceNo && r.invoiceNo === live.invoiceNo));
+          if (inReceivable) {
+            return;
+          }
+
+          const poKey = live.poNo || live.invoiceNo || `inv-${idx + 1}`;
+          if (!seenPo.has(poKey)) {
+            seenPo.add(poKey);
+            const defItem = (typeof defaultInvoiceItems !== 'undefined') ? (defaultInvoiceItems.find(d => d.poNo === live.poNo) || defaultInvoiceItems[idx % defaultInvoiceItems.length]) : {};
+            const rawAmt = (live.rawAmount !== undefined && live.rawAmount !== null) ? Number(live.rawAmount) : (defItem.rawAmount || 245000);
+            liveItems.push({
+              id: live.id || defItem.id || `inv-live-${idx + 1}`,
+              invoiceNo: live.invoiceNo || defItem.invoiceNo || `INV-2026-00${101 + idx}`,
+              date: live.date || defItem.date || "12/08/2026",
+              poNo: live.poNo || defItem.poNo || "4500128934",
+              projectId: live.projectId || defItem.projectId || "",
+              siteId: live.siteId || defItem.siteId || "",
+              siteName: live.siteName || defItem.siteName || "",
+              projectType: live.projectType || defItem.projectType || "New Build",
+              subProjectType: live.subProjectType || defItem.subProjectType || "Civil",
+              task: live.task || defItem.task || "to be submit",
+              ersNo: live.ersNo || defItem.ersNo || "",
+              irnNo: live.irnNo || defItem.irnNo || "",
+              documentType: live.documentType || "CGST/SGST",
+              amount: live.amount || (typeof formatJmsSum === 'function' ? formatJmsSum(rawAmt) : "2,45,000.00"),
+              rawAmount: rawAmt,
+              dueDate: live.dueDate || "27/08/2026",
+              customerName: live.customerName || "Indus Towers Limited",
+              companyName: live.companyName || "Nexus Power Limited",
+              pdfStored: Boolean(live.pdfStored)
+            });
+          }
+        });
+
+        if (Array.isArray(commercialInvoiceData)) {
+          commercialInvoiceData.forEach(inv => {
+            const taskLower = String(inv.task || '').toLowerCase().trim();
+            if (taskLower === 'moved to receivable' || taskLower === 'receivable') {
+              return;
+            }
+            const inReceivable = (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData)) &&
+              commercialReceivableData.some(r => (inv.poNo && r.poNo === inv.poNo) || (inv.invoiceNo && r.invoiceNo === inv.invoiceNo));
+            if (inReceivable) {
+              return;
+            }
+
+            const poKey = inv.poNo || inv.invoiceNo;
+            if (poKey && !seenPo.has(poKey)) {
+              seenPo.add(poKey);
+              liveItems.push({ ...inv });
+            }
+          });
+        }
+
+        commercialInvoiceData = liveItems;
+        try {
+          localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
+        } catch(e) {}
+      }
+    } catch(err) {
+      console.error('Failed to load Commercial Invoice projects from API:', err);
+    }
+  }
+
+  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'invoice') {
+    currentDataset = (commercialInvoiceData || []).map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
+  }
+}
+window.loadCommercialInvoiceFromApi = loadCommercialInvoiceFromApi;
+
 function syncCommercialInvoiceDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
+
   const invoiceTaskCategories = ["To be submit", "to be submit", "Approval Pending", "Rejected"];
   const seenPo = new Set();
-  const synced = commercialWorklistData.map((np, idx) => {
+  const synced = [];
+
+  commercialWorklistData.forEach((np, idx) => {
+    const taskLower = String(np.currentTask || '').toLowerCase().trim();
+    if (taskLower === 'moved to receivable' || taskLower === 'receivable') {
+      return;
+    }
+
+    const existing = (commercialInvoiceData || []).find(inv => String(inv.id) === String(np.id) || (np.poNo && inv.poNo === np.poNo));
+    if (existing && (String(existing.task || '').toLowerCase().trim() === 'moved to receivable' || String(existing.task || '').toLowerCase().trim() === 'receivable')) {
+      return;
+    }
+
+    const inReceivable = (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData)) &&
+      commercialReceivableData.some(r => (np.poNo && r.poNo === np.poNo) || (existing && existing.invoiceNo && r.invoiceNo === existing.invoiceNo));
+    if (inReceivable) {
+      return;
+    }
+
     seenPo.add(np.poNo);
-    const existing = (commercialInvoiceData || []).find(inv => String(inv.id) === String(np.id) || inv.poNo === np.poNo) || defaultInvoiceItems[idx % defaultInvoiceItems.length];
-    const rawAmt = existing ? (existing.rawAmount || 245000) : 245000;
-    const isCat = existing && existing.task && invoiceTaskCategories.some(c => c.toLowerCase() === (existing.task || '').toLowerCase());
-    return {
+    const fallbackItem = (typeof defaultInvoiceItems !== 'undefined') ? defaultInvoiceItems[idx % defaultInvoiceItems.length] : {};
+    const sourceItem = existing || fallbackItem;
+    const rawAmt = sourceItem ? (sourceItem.rawAmount || 245000) : 245000;
+    const isCat = sourceItem && sourceItem.task && invoiceTaskCategories.some(c => c.toLowerCase() === (sourceItem.task || '').toLowerCase());
+
+    synced.push({
       id: np.id || `inv-${idx + 1}`,
-      invoiceNo: existing.invoiceNo || `INV-2026-00${101 + idx}`,
-      date: existing.date || np.date || "12/08/2026",
-      poNo: np.poNo || existing.poNo || "4500128934",
-      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
-      siteId: np.siteId || existing.siteId || "IN-123456",
-      siteName: np.siteName || existing.siteName || "Guindy Hub",
-      projectType: np.projectType || existing.projectType || "New Build",
-      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
-      task: isCat ? existing.task : invoiceTaskCategories[idx % invoiceTaskCategories.length],
-      ersNo: existing.ersNo || `ERS-IND-880${idx + 1}`,
-      irnNo: existing.irnNo || `IRN98324701239854${72 + idx}`,
-      amount: formatJmsSum(rawAmt),
+      invoiceNo: (existing && existing.invoiceNo) || `INV-2026-00${101 + idx}`,
+      date: (existing && existing.date) || np.date || "12/08/2026",
+      poNo: np.poNo || (existing && existing.poNo) || "4500128934",
+      projectId: np.projectId || (existing && existing.projectId) || "PRJ-2026-001",
+      siteId: np.siteId || (existing && existing.siteId) || "IN-123456",
+      siteName: np.siteName || (existing && existing.siteName) || "Guindy Hub",
+      projectType: np.projectType || (existing && existing.projectType) || "New Build",
+      subProjectType: np.subProjectType || (existing && existing.subProjectType) || "Civil",
+      task: isCat ? sourceItem.task : invoiceTaskCategories[idx % invoiceTaskCategories.length],
+      ersNo: (existing && existing.ersNo) || `ERS-IND-880${idx + 1}`,
+      irnNo: (existing && existing.irnNo) || `IRN98324701239854${72 + idx}`,
+      amount: typeof formatJmsSum === 'function' ? formatJmsSum(rawAmt) : "2,45,000.00",
       rawAmount: rawAmt,
-      receiptNo: existing.receiptNo,
-      receiptDate: existing.receiptDate
-    };
+      receiptNo: existing ? existing.receiptNo : undefined,
+      receiptDate: existing ? existing.receiptDate : undefined
+    });
   });
 
   (commercialInvoiceData || []).forEach(inv => {
+    const taskLower = String(inv.task || '').toLowerCase().trim();
+    if (taskLower === 'moved to receivable' || taskLower === 'receivable') {
+      return;
+    }
+    const inReceivable = (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData)) &&
+      commercialReceivableData.some(r => (inv.poNo && r.poNo === inv.poNo) || (inv.invoiceNo && r.invoiceNo === inv.invoiceNo));
+    if (inReceivable) {
+      return;
+    }
     if (inv.poNo && !seenPo.has(inv.poNo)) {
       seenPo.add(inv.poNo);
       synced.push({ ...inv });
@@ -7991,8 +8459,117 @@ window.refreshInvoiceModalDetails = function() {
   // when user click the refresh in that tab nothing should happen for now
 };
 
-window.downloadInvoiceModalPdf = function() {
-  showToast('Downloading Invoice PDF...');
+window.downloadInvoiceModalPdf = async function(rowId) {
+  const targetId = rowId || selectedInvoiceRowId;
+  const row = (currentDataset || []).find(r => String(r.id) === String(targetId)) ||
+              (commercialInvoiceData || []).find(r => String(r.id) === String(targetId)) ||
+              ((typeof defaultInvoiceItems !== 'undefined' && Array.isArray(defaultInvoiceItems)) ? defaultInvoiceItems[0] : {});
+
+  const inpInvNo = document.getElementById('inpInvoiceModalInvoiceNo');
+  const inpErs = document.getElementById('inpInvoiceModalErsNo');
+  const inpIrn = document.getElementById('inpInvoiceModalIrnNo');
+  const inpDate = document.getElementById('inpInvoiceModalDate');
+
+  const invNo = (inpInvNo && inpInvNo.value.trim()) ? inpInvNo.value.trim() : (row.invoiceNo || 'INV-2026-00101');
+  const poNo = row.poNo || '4500128934';
+  const siteId = row.siteId || '';
+  const ersNo = (inpErs && inpErs.value.trim()) ? inpErs.value.trim() : (row.ersNo || '');
+  const irnNo = (inpIrn && inpIrn.value.trim()) ? inpIrn.value.trim() : (row.irnNo || '');
+  const invoiceDate = (inpDate && inpDate.value.trim()) ? inpDate.value.trim() : (row.date || '12/08/2026');
+  const docType = String(row.documentType || '');
+  const gstType = docType.toUpperCase().includes('IGST') ? 'IGST' : 'SGST';
+
+  const btnPdf = document.getElementById('btnInvoiceModalPdf');
+  let origHtml = '';
+  if (btnPdf) {
+    origHtml = btnPdf.innerHTML;
+    btnPdf.disabled = true;
+    btnPdf.style.pointerEvents = 'none';
+    btnPdf.style.opacity = '0.7';
+    if (!document.getElementById('nexus-pdf-spinner-style')) {
+      const styleTag = document.createElement('style');
+      styleTag.id = 'nexus-pdf-spinner-style';
+      styleTag.textContent = '@keyframes nexusPdfSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+      document.head.appendChild(styleTag);
+    }
+    btnPdf.innerHTML = `
+      <span class="pdf-download-spinner" style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="animation: nexusPdfSpin 0.75s linear infinite; display: block;">
+          <circle cx="12" cy="12" r="9" stroke="#cbd5e1" stroke-width="3"></circle>
+          <path d="M12 3a9 9 0 0 1 9 9" stroke="#00cba0" stroke-width="3" stroke-linecap="round"></path>
+        </svg>
+      </span>
+    `;
+  }
+
+  showToast(`Preparing PDF download for Invoice ${invNo}...`);
+
+  try {
+    const params = new URLSearchParams();
+    if (invNo) params.set('invoice_no', invNo);
+    if (poNo) params.set('po_no', poNo);
+    if (siteId) params.set('site_id', siteId);
+    if (ersNo) params.set('ers_no', ersNo);
+    if (irnNo) params.set('irn_no', irnNo);
+    if (invoiceDate) params.set('invoice_date', invoiceDate);
+    if (gstType) params.set('gst_type', gstType);
+
+    const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+      ? getCommercialApiBaseUrl()
+      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1');
+    const downloadUrl = `${apiBase}/commercial/invoice/pdf/download?${params.toString()}`;
+
+    const token = (typeof window !== 'undefined' && window.localStorage)
+      ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token')) || window.localStorage.getItem('nxtkn_commercial') || '')
+      : '';
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(downloadUrl, { method: 'GET', headers });
+    if (!res.ok) {
+      let errDetail = `${res.status} ${res.statusText}`;
+      try {
+        const errJson = await res.json();
+        if (errJson && errJson.detail) errDetail = errJson.detail;
+      } catch (e) {}
+      throw new Error(errDetail);
+    }
+
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition');
+    let filename = `Tax_Invoice_${invNo.replace(/[\/\\]/g, '_')}.pdf`;
+    if (disposition && disposition.indexOf('filename=') !== -1) {
+      const parts = disposition.split('filename=');
+      if (parts[1]) {
+        filename = parts[1].split(';')[0].trim().replace(/['"]/g, '');
+      }
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.style.display = 'none';
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      link.remove();
+    }, 300);
+
+    if (row) row.pdfStored = true;
+    showToast(`Invoice PDF ${invNo} downloaded successfully!`);
+  } catch (err) {
+    console.error('Invoice PDF download failed:', err);
+    showToast(`Failed to download Invoice PDF: ${err.message || 'Server error'}`);
+  } finally {
+    if (btnPdf) {
+      btnPdf.disabled = false;
+      btnPdf.style.pointerEvents = 'auto';
+      btnPdf.style.opacity = '1';
+      btnPdf.innerHTML = origHtml || '<img src="icons/PDF Download.svg" alt="Download PDF" width="22" height="22">';
+    }
+  }
 };
 
 window.copyInvoiceFieldValue = function(inputId) {
@@ -8237,9 +8814,31 @@ window.submitInvoiceHashModal = function() {
     } catch (e) {}
   }
 
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.invoice && typeof NexusApi.commercial.invoice.submitHash === 'function') {
+    NexusApi.commercial.invoice.submitHash({
+      poNo: invoiceRow.poNo || '',
+      siteId: invoiceRow.siteId || '',
+      invoiceNo: invoiceRow.invoiceNo || 'INV-2026-00101',
+      customerName: customerName,
+      companyName: invoiceRow.companyName || 'Nexus Power Limited',
+      invoiceAmount: rawInv,
+      tds: rawTds,
+      receivable: rawRecv,
+      dueDate: invoiceRow.dueDate || ''
+    }).catch(err => console.error('Failed to submit invoice hash to API:', err));
+  }
+
+  // Update task status in commercialWorklistData
+  if (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) {
+    const proj = commercialWorklistData.find(p => (invoiceRow.poNo && p.poNo === invoiceRow.poNo) || String(p.id) === String(targetRowId));
+    if (proj) {
+      proj.currentTask = 'Moved to Receivable';
+    }
+  }
+
   // Remove the row from commercialInvoiceData since it has moved to Receivable
   if (typeof commercialInvoiceData !== 'undefined' && Array.isArray(commercialInvoiceData)) {
-    commercialInvoiceData = commercialInvoiceData.filter(r => String(r.id) !== String(targetRowId) && r.invoiceNo !== invoiceRow.invoiceNo);
+    commercialInvoiceData = commercialInvoiceData.filter(r => String(r.id) !== String(targetRowId) && r.invoiceNo !== invoiceRow.invoiceNo && (!invoiceRow.poNo || r.poNo !== invoiceRow.poNo));
     if (typeof localStorage !== 'undefined') {
       try {
         localStorage.setItem('commercialInvoiceData', JSON.stringify(commercialInvoiceData));
@@ -8496,32 +9095,166 @@ const defaultReceivableItems = [
 
 let commercialReceivableData = [...defaultReceivableItems];
 
+if (typeof localStorage !== 'undefined') {
+  try {
+    const cachedRec = localStorage.getItem('commercialReceivableData');
+    if (cachedRec) {
+      const parsedRec = JSON.parse(cachedRec);
+      if (Array.isArray(parsedRec) && parsedRec.length > 0) {
+        commercialReceivableData = parsedRec;
+      }
+    }
+  } catch (e) {}
+}
+
 function syncCommercialReceivableDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
-  commercialReceivableData = commercialWorklistData.map((np, idx) => {
-    const existing = commercialReceivableData.find(rec => String(rec.id) === String(np.id)) || defaultReceivableItems[idx % defaultReceivableItems.length];
-    const rawInvAmt = existing ? (existing.rawInvoiceAmount || 245000) : 245000;
-    const rawDed = existing ? (existing.rawDeduction || 5000) : 5000;
-    const rawRecv = existing ? (existing.rawReceivedAmount || 140000) : 140000;
-    const rawReceivable = Math.max(0, rawInvAmt - rawDed - rawRecv);
-    return {
-      id: np.id || `rec-${idx + 1}`,
-      customerName: np.customerName || existing.customerName || "Indus Towers Limited",
-      invoiceNo: existing.invoiceNo || `INV-2026-00${101 + idx}`,
-      invoiceDate: existing.invoiceDate || np.date || "12/08/2026",
-      dueDate: existing.dueDate || "27/08/2026",
-      invoiceAmount: formatJmsSum(rawInvAmt),
-      rawInvoiceAmount: rawInvAmt,
-      deduction: formatJmsSum(rawDed),
-      rawDeduction: rawDed,
-      receivedAmount: formatJmsSum(rawRecv),
-      rawReceivedAmount: rawRecv,
-      receivable: formatJmsSum(rawReceivable),
-      rawReceivable: rawReceivable,
-      ageing: np.ageing || existing.ageing || "15 Days"
-    };
+
+  const seenKeys = new Set();
+  const synced = [];
+
+  // 1. First keep existing items in commercialReceivableData (e.g. from approved invoices / receipt_indus)
+  (commercialReceivableData || []).forEach(rec => {
+    const key = rec.invoiceNo || rec.poNo || rec.id;
+    if (key && !seenKeys.has(key)) {
+      seenKeys.add(key);
+      if (rec.poNo) seenKeys.add(rec.poNo);
+      if (rec.invoiceNo) seenKeys.add(rec.invoiceNo);
+      synced.push({ ...rec });
+    }
   });
+
+  // 2. Add or sync projects from commercialWorklistData if not already present
+  commercialWorklistData.forEach((np, idx) => {
+    const key = np.poNo || np.id;
+    if (key && (seenKeys.has(key) || seenKeys.has(np.poNo) || seenKeys.has(np.id))) {
+      return;
+    }
+    const defItem = defaultReceivableItems[idx % defaultReceivableItems.length];
+    const rawInvAmt = defItem.rawInvoiceAmount || 245000;
+    const rawDed = defItem.rawDeduction || 5000;
+    const rawRecv = defItem.rawReceivedAmount || 140000;
+    const rawReceivable = Math.max(0, rawInvAmt - rawDed - rawRecv);
+
+    seenKeys.add(key);
+    if (np.poNo) seenKeys.add(np.poNo);
+
+    synced.push({
+      id: np.id || `rec-${idx + 1}`,
+      poNo: np.poNo || '',
+      customerName: np.customerName || defItem.customerName || "Indus Towers Limited",
+      invoiceNo: defItem.invoiceNo || `INV-2026-00${101 + idx}`,
+      invoiceDate: np.date || defItem.invoiceDate || "12/08/2026",
+      dueDate: defItem.dueDate || "27/08/2026",
+      invoiceAmount: typeof formatJmsSum === 'function' ? formatJmsSum(rawInvAmt) : "2,45,000.00",
+      rawInvoiceAmount: rawInvAmt,
+      deduction: typeof formatJmsSum === 'function' ? formatJmsSum(rawDed) : "5,000.00",
+      rawDeduction: rawDed,
+      receivedAmount: typeof formatJmsSum === 'function' ? formatJmsSum(rawRecv) : "1,40,000.00",
+      rawReceivedAmount: rawRecv,
+      receivable: typeof formatJmsSum === 'function' ? formatJmsSum(rawReceivable) : "1,00,000.00",
+      rawReceivable: rawReceivable,
+      ageing: np.ageing || defItem.ageing || "15 Days"
+    });
+  });
+
+  commercialReceivableData = synced;
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('commercialReceivableData', JSON.stringify(commercialReceivableData));
+    } catch (e) {}
+  }
 }
+
+async function loadCommercialReceivableFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.receivable && typeof NexusApi.commercial.receivable.getProjects === 'function') {
+    try {
+      const response = await NexusApi.commercial.receivable.getProjects();
+      if (response && Array.isArray(response.items) && response.items.length > 0) {
+        const liveItems = [];
+        const seenKeys = new Set();
+        response.items.forEach((live, idx) => {
+          const key = live.invoiceNo || live.poNo || live.id;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            if (live.poNo) seenKeys.add(live.poNo);
+            if (live.invoiceNo) seenKeys.add(live.invoiceNo);
+            liveItems.push({
+              id: live.id || `rec-live-${idx + 1}`,
+              poNo: live.poNo || '',
+              customerName: live.customerName || "Indus Towers Limited",
+              invoiceNo: live.invoiceNo || `INV-2026-00${101 + idx}`,
+              invoiceDate: live.invoiceDate || "12/08/2026",
+              dueDate: live.dueDate || "27/08/2026",
+              invoiceAmount: live.invoiceAmount || (typeof formatJmsSum === 'function' ? formatJmsSum(live.rawInvoiceAmount || 245000) : "2,45,000.00"),
+              rawInvoiceAmount: live.rawInvoiceAmount !== undefined ? Number(live.rawInvoiceAmount) : 245000,
+              deduction: live.deduction || (typeof formatJmsSum === 'function' ? formatJmsSum(live.rawDeduction || 5000) : "5,000.00"),
+              rawDeduction: live.rawDeduction !== undefined ? Number(live.rawDeduction) : 5000,
+              receivedAmount: live.receivedAmount || (typeof formatJmsSum === 'function' ? formatJmsSum(live.rawReceivedAmount || 0) : "0.00"),
+              rawReceivedAmount: live.rawReceivedAmount !== undefined ? Number(live.rawReceivedAmount) : 0,
+              receivable: live.receivable || (typeof formatJmsSum === 'function' ? formatJmsSum(live.rawReceivable || 240000) : "2,40,000.00"),
+              rawReceivable: live.rawReceivable !== undefined ? Number(live.rawReceivable) : 240000,
+              ageing: live.ageing || "0 Days",
+              // Subtab details: Invoice amount from sales table
+              basicAmount: live.basicAmount,
+              rawBasicAmount: live.rawBasicAmount,
+              cgst: live.cgst,
+              rawCgst: live.rawCgst,
+              sgst: live.sgst,
+              rawSgst: live.rawSgst,
+              igst: live.igst,
+              rawIgst: live.rawIgst,
+              // Subtab details: Deduction breakdown from receipt_indus table
+              tds: live.tds,
+              rawTds: live.rawTds,
+              dnAmount: live.dnAmount,
+              rawDnAmount: live.rawDnAmount,
+              discount: live.discount,
+              rawDiscount: live.rawDiscount,
+              tredsFee: live.tredsFee,
+              rawTredsFee: live.rawTredsFee,
+              // Subtab details: Received date from receipt_indus table
+              receivedDate: live.receivedDate
+            });
+          }
+        });
+
+        if (Array.isArray(commercialReceivableData)) {
+          commercialReceivableData.forEach(rec => {
+            const k = rec.invoiceNo || rec.poNo || rec.id;
+            if (k && !seenKeys.has(k)) {
+              seenKeys.add(k);
+              if (rec.poNo) seenKeys.add(rec.poNo);
+              if (rec.invoiceNo) seenKeys.add(rec.invoiceNo);
+              liveItems.push({ ...rec });
+            }
+          });
+        }
+
+        commercialReceivableData = liveItems;
+        if (typeof localStorage !== 'undefined') {
+          try {
+            localStorage.setItem('commercialReceivableData', JSON.stringify(commercialReceivableData));
+          } catch(e) {}
+        }
+      }
+    } catch(err) {
+      console.error('Error fetching commercial receivables from API:', err);
+    }
+  }
+
+  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'receivable') {
+    currentDataset = (commercialReceivableData || []).map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
+  }
+}
+window.loadCommercialReceivableFromApi = loadCommercialReceivableFromApi;
 
 function calculateReceivableTotalSum(dataset) {
   const list = dataset || filteredDataset || currentDataset || [];
@@ -8584,7 +9317,20 @@ window.exportReceivableToCsv = function() {
 };
 
 window.downloadReceivableInvoicePdf = function(id, invoiceNo) {
-  showToast(`Downloading Invoice ${invoiceNo || ''}...`);
+  const row = (currentDataset || []).find(r => String(r.id) === String(id) || r.invoiceNo === invoiceNo) || {};
+  const inv = invoiceNo || row.invoiceNo || '';
+  const po = row.poNo || '';
+  showToast(`Downloading Invoice ${inv}...`);
+  const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+    ? getCommercialApiBaseUrl()
+    : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1');
+  const url = `${apiBase}/commercial/invoice/pdf/download?invoice_no=${encodeURIComponent(inv)}&po_no=${encodeURIComponent(po)}`;
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Tax_Invoice_${inv.replace(/[\/\\]/g, '_')}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 };
 
 // ==========================================================================
@@ -8783,24 +9529,40 @@ window.openReceivableInvoiceAmountModal = function(rowId) {
 
   const lblTotal = document.getElementById('lblReceivableInvoiceAmountModalTotal');
   if (lblTotal) {
-    lblTotal.textContent = formatJmsSum(calculateReceivableTotalInvoiceAmountSum(filteredDataset && filteredDataset.length > 0 ? filteredDataset : commercialReceivableData));
+    lblTotal.textContent = row.invoiceAmount || (typeof formatJmsSum === 'function' ? formatJmsSum(row.rawInvoiceAmount || 245000) : "2,45,000.00");
   }
 
-  const rawAmt = row.rawInvoiceAmount || 245000;
-  const basicAmt = (rawAmt / 1.18).toFixed(2);
-  const gstEach = ((rawAmt - (rawAmt / 1.18)) / 2).toFixed(2);
+  // Invoice amount details sourced from sales table
+  const rawAmt = (row.rawInvoiceAmount !== undefined && row.rawInvoiceAmount !== null) ? Number(row.rawInvoiceAmount) : 245000;
+  const basicAmt = (row.rawBasicAmount !== undefined && row.rawBasicAmount !== null) ? Number(row.rawBasicAmount) : (rawAmt / 1.18);
+  const cgstAmt = (row.rawCgst !== undefined && row.rawCgst !== null) ? Number(row.rawCgst) : ((rawAmt - (rawAmt / 1.18)) / 2);
+  const sgstAmt = (row.rawSgst !== undefined && row.rawSgst !== null) ? Number(row.rawSgst) : ((rawAmt - (rawAmt / 1.18)) / 2);
+  const igstAmt = (row.rawIgst !== undefined && row.rawIgst !== null) ? Number(row.rawIgst) : 0.0;
 
   const inpBasic = document.getElementById('inpRecvInvBasicAmt');
   if (inpBasic) inpBasic.value = Number(basicAmt).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const inpCgst = document.getElementById('inpRecvInvCgst');
-  if (inpCgst) inpCgst.value = Number(gstEach).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (inpCgst) inpCgst.value = Number(cgstAmt).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const inpSgst = document.getElementById('inpRecvInvSgst');
-  if (inpSgst) inpSgst.value = Number(gstEach).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (inpSgst) inpSgst.value = Number(sgstAmt).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const inpIgst = document.getElementById('inpRecvInvIgst');
-  if (inpIgst) inpIgst.value = "0.00";
+  if (inpIgst) inpIgst.value = Number(igstAmt).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const recomputeInvTotal = () => {
+    const b = parseFloat((inpBasic?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const c = parseFloat((inpCgst?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const s = parseFloat((inpSgst?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const i = parseFloat((inpIgst?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const tot = b + c + s + i;
+    if (lblTotal) lblTotal.textContent = typeof formatJmsSum === 'function' ? formatJmsSum(tot) : tot.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  if (inpBasic) inpBasic.oninput = recomputeInvTotal;
+  if (inpCgst) inpCgst.oninput = recomputeInvTotal;
+  if (inpSgst) inpSgst.oninput = recomputeInvTotal;
+  if (inpIgst) inpIgst.oninput = recomputeInvTotal;
 
   panel.style.display = 'block';
   overlay.style.display = 'flex';
@@ -8814,9 +9576,63 @@ window.closeReceivableInvoiceAmountModal = function() {
 };
 
 window.submitReceivableInvoiceAmountModal = function() {
+  const row = (currentDataset || []).find(r => String(r.id) === String(selectedReceivableRowId)) || (commercialReceivableData || []).find(r => String(r.id) === String(selectedReceivableRowId));
+  if (row) {
+    const inpBasic = document.getElementById('inpRecvInvBasicAmt');
+    const inpCgst = document.getElementById('inpRecvInvCgst');
+    const inpSgst = document.getElementById('inpRecvInvSgst');
+    const inpIgst = document.getElementById('inpRecvInvIgst');
+
+    const b = parseFloat((inpBasic?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const c = parseFloat((inpCgst?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const s = parseFloat((inpSgst?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const i = parseFloat((inpIgst?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const tot = b + c + s + i;
+
+    row.rawBasicAmount = b;
+    row.basicAmount = typeof formatJmsSum === 'function' ? formatJmsSum(b) : String(b);
+    row.rawCgst = c;
+    row.cgst = typeof formatJmsSum === 'function' ? formatJmsSum(c) : String(c);
+    row.rawSgst = s;
+    row.sgst = typeof formatJmsSum === 'function' ? formatJmsSum(s) : String(s);
+    row.rawIgst = i;
+    row.igst = typeof formatJmsSum === 'function' ? formatJmsSum(i) : String(i);
+    row.rawInvoiceAmount = tot;
+    row.invoiceAmount = typeof formatJmsSum === 'function' ? formatJmsSum(tot) : String(tot);
+
+    const rawDed = (row.rawDeduction !== undefined) ? Number(row.rawDeduction) : 0;
+    const rawRecv = (row.rawReceivedAmount !== undefined) ? Number(row.rawReceivedAmount) : 0;
+    row.rawReceivable = Math.max(0, tot - rawDed - rawRecv);
+    row.receivable = typeof formatJmsSum === 'function' ? formatJmsSum(row.rawReceivable) : String(row.rawReceivable);
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('commercialReceivableData', JSON.stringify(commercialReceivableData));
+      } catch (e) {}
+    }
+
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.receivable && typeof NexusApi.commercial.receivable.updateInvoiceAmount === 'function') {
+      NexusApi.commercial.receivable.updateInvoiceAmount({
+        invoiceNo: row.invoiceNo,
+        basicAmount: b,
+        cgst: c,
+        sgst: s,
+        igst: i,
+        totalAmount: tot
+      }).catch(err => console.error('Failed to update invoice amount in DB:', err));
+    }
+
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
+  }
+
   closeReceivableInvoiceAmountModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Invoice Amount details updated successfully!', 'Task Completed');
+    showSvgSuccessPopup('Invoice Amount details updated successfully in sales table!', 'Task Completed');
   } else {
     showToast('Invoice Amount details updated successfully!');
   }
@@ -8834,14 +9650,15 @@ window.openReceivableDeductionModal = function(rowId) {
 
   const lblTotal = document.getElementById('lblReceivableDeductionModalTotal');
   if (lblTotal) {
-    lblTotal.textContent = formatJmsSum(calculateReceivableTotalDeductionSum(filteredDataset && filteredDataset.length > 0 ? filteredDataset : commercialReceivableData));
+    lblTotal.textContent = row.deduction || (typeof formatJmsSum === 'function' ? formatJmsSum(row.rawDeduction || 5000) : "5,000.00");
   }
 
-  const rawDed = row.rawDeduction || 5000;
-  const tds = (rawDed * 0.50).toFixed(2);
-  const dn = (rawDed * 0.25).toFixed(2);
-  const discount = (rawDed * 0.15).toFixed(2);
-  const tredsFee = (rawDed * 0.10).toFixed(2);
+  // Deduction subtab details sourced from receipt_indus table
+  const rawDed = (row.rawDeduction !== undefined && row.rawDeduction !== null) ? Number(row.rawDeduction) : 5000;
+  const tds = (row.rawTds !== undefined && row.rawTds !== null) ? Number(row.rawTds) : (rawDed * 0.50);
+  const dn = (row.rawDnAmount !== undefined && row.rawDnAmount !== null) ? Number(row.rawDnAmount) : (rawDed * 0.25);
+  const discount = (row.rawDiscount !== undefined && row.rawDiscount !== null) ? Number(row.rawDiscount) : (rawDed * 0.15);
+  const tredsFee = (row.rawTredsFee !== undefined && row.rawTredsFee !== null) ? Number(row.rawTredsFee) : (rawDed * 0.10);
 
   const inpTds = document.getElementById('inpRecvDedTds');
   if (inpTds) inpTds.value = Number(tds).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -8855,6 +9672,19 @@ window.openReceivableDeductionModal = function(rowId) {
   const inpTreds = document.getElementById('inpRecvDedTredsFee');
   if (inpTreds) inpTreds.value = Number(tredsFee).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const recomputeDedTotal = () => {
+    const t = parseFloat((inpTds?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const d = parseFloat((inpDn?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const disc = parseFloat((inpDiscount?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const fee = parseFloat((inpTreds?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const tot = t + d + disc + fee;
+    if (lblTotal) lblTotal.textContent = typeof formatJmsSum === 'function' ? formatJmsSum(tot) : tot.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  if (inpTds) inpTds.oninput = recomputeDedTotal;
+  if (inpDn) inpDn.oninput = recomputeDedTotal;
+  if (inpDiscount) inpDiscount.oninput = recomputeDedTotal;
+  if (inpTreds) inpTreds.oninput = recomputeDedTotal;
+
   panel.style.display = 'block';
   overlay.style.display = 'flex';
 };
@@ -8867,9 +9697,62 @@ window.closeReceivableDeductionModal = function() {
 };
 
 window.submitReceivableDeductionModal = function() {
+  const row = (currentDataset || []).find(r => String(r.id) === String(selectedReceivableRowId)) || (commercialReceivableData || []).find(r => String(r.id) === String(selectedReceivableRowId));
+  if (row) {
+    const inpTds = document.getElementById('inpRecvDedTds');
+    const inpDn = document.getElementById('inpRecvDedDn');
+    const inpDiscount = document.getElementById('inpRecvDedDiscount');
+    const inpTreds = document.getElementById('inpRecvDedTredsFee');
+
+    const t = parseFloat((inpTds?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const d = parseFloat((inpDn?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const disc = parseFloat((inpDiscount?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const fee = parseFloat((inpTreds?.value || '0').replace(/[^0-9.-]+/g, '')) || 0;
+    const tot = t + d + disc + fee;
+
+    row.rawTds = t;
+    row.tds = typeof formatJmsSum === 'function' ? formatJmsSum(t) : String(t);
+    row.rawDnAmount = d;
+    row.dnAmount = typeof formatJmsSum === 'function' ? formatJmsSum(d) : String(d);
+    row.rawDiscount = disc;
+    row.discount = typeof formatJmsSum === 'function' ? formatJmsSum(disc) : String(disc);
+    row.rawTredsFee = fee;
+    row.tredsFee = typeof formatJmsSum === 'function' ? formatJmsSum(fee) : String(fee);
+    row.rawDeduction = tot;
+    row.deduction = typeof formatJmsSum === 'function' ? formatJmsSum(tot) : String(tot);
+
+    const invAmt = (row.rawInvoiceAmount !== undefined) ? Number(row.rawInvoiceAmount) : 0;
+    const rawRecv = (row.rawReceivedAmount !== undefined) ? Number(row.rawReceivedAmount) : 0;
+    row.rawReceivable = Math.max(0, invAmt - tot - rawRecv);
+    row.receivable = typeof formatJmsSum === 'function' ? formatJmsSum(row.rawReceivable) : String(row.rawReceivable);
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('commercialReceivableData', JSON.stringify(commercialReceivableData));
+      } catch (e) {}
+    }
+
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.receivable && typeof NexusApi.commercial.receivable.updateDeduction === 'function') {
+      NexusApi.commercial.receivable.updateDeduction({
+        invoiceNo: row.invoiceNo,
+        tds: t,
+        dnAmount: d,
+        discount: disc,
+        tredsFee: fee
+      }).catch(err => console.error('Failed to update deduction in DB:', err));
+    }
+
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+    if (typeof renderWorklistToolbar === 'function') {
+      renderWorklistToolbar();
+    }
+  }
+
   closeReceivableDeductionModal();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Deduction details updated successfully!', 'Task Completed');
+    showSvgSuccessPopup('Deduction details updated successfully in receipt_indus and sales tables!', 'Task Completed');
   } else {
     showToast('Deduction details updated successfully!');
   }
@@ -8886,21 +9769,26 @@ window.openReceivableReceivedAmountModal = function(rowId) {
   const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) || (commercialReceivableData || []).find(r => String(r.id) === String(rowId)) || defaultReceivableItems[0];
   const tbody = document.getElementById('tbodyReceivableReceivedAmountBreakdown');
 
-  const rawRecv = row.rawReceivedAmount || 140000;
-  const part1 = rawRecv * 0.60;
-  const part2 = rawRecv * 0.40;
+  // Received amount sourced from receipt_indus table
+  const rawRecv = (row.rawReceivedAmount !== undefined && row.rawReceivedAmount !== null) ? Number(row.rawReceivedAmount) : 0;
+  const recvDate = row.receivedDate || row.dueDate || row.invoiceDate || '12/08/2026';
 
   if (tbody) {
-    tbody.innerHTML = `
-      <tr style="border-bottom: 1px solid #e2e8f0;">
-        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #1e293b;">${row.dueDate || '18/08/2026'}</td>
-        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 600; color: #1e293b;">₹ ${Number(part1).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-      </tr>
-      <tr>
-        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #1e293b;">${row.invoiceDate || '12/08/2026'}</td>
-        <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 600; color: #1e293b;">₹ ${Number(part2).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-      </tr>
-    `;
+    if (rawRecv > 0) {
+      tbody.innerHTML = `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #1e293b;">${recvDate}</td>
+          <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 600; color: #16a34a;">₹ ${Number(rawRecv).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; border-right: 1px solid #e2e8f0; font-weight: 500; color: #64748b;">${row.dueDate || '27/08/2026'}</td>
+          <td style="width: 50%; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 500; color: #64748b;">₹ 0.00</td>
+        </tr>
+      `;
+    }
   }
 
   panel.style.display = 'block';
@@ -30006,10 +30894,16 @@ function loadWorklistDataset() {
         loadWccDetailFromApi(window.selectedWccPoNo, window.selectedWccSiteId);
       }
     } else if (currentWorklistView === 'invoice') {
+      if (typeof loadCommercialInvoiceFromApi === 'function') {
+        loadCommercialInvoiceFromApi();
+      }
       syncCommercialInvoiceDataWithNewProject();
       currentDataset = commercialInvoiceData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'receivable') {
+      if (typeof loadCommercialReceivableFromApi === 'function') {
+        loadCommercialReceivableFromApi();
+      }
       syncCommercialReceivableDataWithNewProject();
       currentDataset = commercialReceivableData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
@@ -31399,6 +32293,9 @@ function renderWorklistToolbar() {
           </div>
         </div>
         <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnReceivableDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard" style="cursor: pointer;" onclick="openCommercialDashboard('Receivable')">
+            <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
+          </button>
           <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnReceivableBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Receivable')">
             <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
           </button>
@@ -35255,6 +36152,9 @@ function renderWorklistTableBody() {
 window.renderWorklistTableBody = renderWorklistTableBody;
 
 function applyFiltersAndRender() {
+  if (typeof refreshCurrentCommercialDashboard === 'function') {
+    refreshCurrentCommercialDashboard();
+  }
   const tbody = document.getElementById('worklistTableBody');
   if (!tbody) return;
 
@@ -38264,7 +39164,7 @@ function applyFiltersAndRender() {
             </td>
             <!-- 6. Deduction: 15ch & right, clickable to open Deduction Modal -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
-              <span onclick="openReceivableDeductionModal('${row.id}')" style="color: #0454e4; font-weight: 500; cursor: pointer;" title="View Deduction Breakdown">${row.deduction || ''}</span>
+              <span onclick="openReceivableDeductionModal('${row.id}')" style="color: #dc2626; font-weight: 500; cursor: pointer;" title="View Deduction Breakdown">${row.deduction || ''}</span>
             </td>
             <!-- 7. Received Amount: 15ch & right, clickable to open Received Amount Modal -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">

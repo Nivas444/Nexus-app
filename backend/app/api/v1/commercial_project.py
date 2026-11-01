@@ -9,6 +9,7 @@ from app.services.commercial_invoice_service import CommercialInvoiceService
 from app.services.auth_service import auth_service
 from app.schemas.commercial_project import (
     CommercialProjectListResponse,
+    CommercialPoToBeOpenListResponse,
     CommercialBulkUploadResponse,
     CommercialProjectDeleteRequest,
     CommercialProjectDeleteResponse,
@@ -178,6 +179,22 @@ def list_wcc_projects(
     """
     service = CommercialProjectService(db)
     return service.get_wcc_projects_list()
+
+
+@router.get("/po-to-be-open/projects", response_model=CommercialPoToBeOpenListResponse, summary="List PO To Be Open Projects from telecom_project")
+def list_po_to_be_open_projects(
+    db: Session = Depends(get_project_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Retrieves real Project records from PostgreSQL `telecom_project` and `project_expenses` in `Nexus_Project DB`
+    for PO To Be Open workflow satisfying ALL 3 conditions:
+    1. PO status is 'Closed' or 'Finally Closed'.
+    2. WCC not raised against that PO.
+    3. Expense records available and linked with spent amount > 0.
+    """
+    service = CommercialProjectService(db)
+    return service.get_po_to_be_open_projects_list()
 
 
 

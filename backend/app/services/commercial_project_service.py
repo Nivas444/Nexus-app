@@ -8,13 +8,16 @@ from typing import List, Dict, Any, Optional, Set, Tuple
 import openpyxl
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
-from app.models.commercial_project import TelecomProject, TelecomIndusPo
+from sqlalchemy import func, or_
+
+from app.models.commercial_project import TelecomProject, TelecomIndusPo, ProjectExpense
 from app.schemas.commercial_project import (
     CommercialProjectItem,
     CommercialProjectListResponse,
-    CommercialBulkUploadResponse
+    CommercialBulkUploadResponse,
+    CommercialPoToBeOpenItem,
+    CommercialPoToBeOpenListResponse
 )
 
 
@@ -710,6 +713,86 @@ class CommercialProjectService:
             ))
 
         return CommercialProjectListResponse(items=items, total=len(items))
+
+    def get_po_to_be_open_projects_list(self) -> CommercialPoToBeOpenListResponse:
+        """
+        Retrieve PO records eligible for 'PO To Be Open' satisfying ALL 3 conditions:
+        1. PO status must be 'Closed' or 'Finally Closed' (case-insensitive, trimmed).
+        2. WCC must not have been raised against that PO (wcc_no is null/empty,
+           wcc_submission_date is null, and wcc_approved_date is null).
+        3. Expense records must be available and linked to the corresponding PO in `project_expenses`,
+           with spent amount calculated from SUM(COALESCE(ProjectExpense.amount, 0)) > 0.
+        Grouped by PO to avoid duplicate PO rows when multiple expense records exist.
+        """
+        exp_subquery = (
+            self.db.query(
+                ProjectExpense.po_no.label("exp_po_no"),
+                func.sum(func.coalesce(ProjectExpense.amount, 0)).label("spent_amount"),
+                func.count(ProjectExpense.expense_management_id).label("exp_count")
+            )
+            .filter(
+                ProjectExpense.po_no.isnot(None),
+                func.trim(ProjectExpense.po_no) != ""
+            )
+            .group_by(ProjectExpense.po_no)
+            .having(func.sum(func.coalesce(ProjectExpense.amount, 0)) > 0)
+            .subquery()
+        )
+
+        query = (
+            self.db.query(
+                TelecomProject,
+                exp_subquery.c.spent_amount
+            )
+            .join(exp_subquery, exp_subquery.c.exp_po_no == TelecomProject.po_no)
+            .filter(
+                func.trim(func.lower(TelecomProject.po_status)).in_(["closed", "finally closed"]),
+                or_(TelecomProject.wcc_no.is_(None), func.trim(TelecomProject.wcc_no) == ""),
+                TelecomProject.wcc_submission_date.is_(None),
+                TelecomProject.wcc_approved_date.is_(None)
+            )
+            .order_by(TelecomProject.project_id.asc())
+        )
+
+        rows = query.all()
+        items: List[CommercialPoToBeOpenItem] = []
+
+        for proj, spent_amount in rows:
+            raw_amt = float(spent_amount) if spent_amount is not None else 0.0
+
+            # Format spent amount in Indian currency format (e.g. 85,000.00)
+            s_val = f"{raw_amt:.2f}"
+            parts = s_val.split(".")
+            int_p, dec_p = parts[0], parts[1]
+            if len(int_p) > 3:
+                last3 = int_p[-3:]
+                rem = int_p[:-3]
+                groups = []
+                while len(rem) > 2:
+                    groups.insert(0, rem[-2:])
+                    rem = rem[:-2]
+                if rem:
+                    groups.insert(0, rem)
+                groups.append(last3)
+                formatted_int = ",".join(groups)
+            else:
+                formatted_int = int_p
+            formatted_expense = f"{formatted_int}.{dec_p}"
+
+            items.append(CommercialPoToBeOpenItem(
+                id=f"ptbo-{proj.project_id}",
+                poNo=proj.po_no or "",
+                projectId=proj.project_code or f"PRJ-{proj.project_id}",
+                siteId=proj.site_id or "",
+                siteName=proj.site_name or "",
+                projectType=proj.project_type or "",
+                subProjectType=proj.sub_project_type or "",
+                expenseAmount=formatted_expense,
+                rawExpenseAmount=raw_amt,
+                poStatus=proj.po_status or ""
+            ))
+
+        return CommercialPoToBeOpenListResponse(items=items, total=len(items))
 
     def process_po_amend_bulk_upload(self, file_content: bytes, filename: str = "") -> CommercialBulkUploadResponse:
         """

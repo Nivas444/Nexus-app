@@ -186,6 +186,9 @@ async function loadCommercialProjectsFromApi() {
   if (typeof loadCommercialReceivableFromApi === 'function') {
     try { await loadCommercialReceivableFromApi(); } catch (e) { console.error('Failed to load Receivable from API:', e); }
   }
+  if (typeof loadCommercialPoToBeOpenFromApi === 'function') {
+    loadCommercialPoToBeOpenFromApi().catch(e => console.error('Failed to load PO To Be Open from API:', e));
+  }
   if (typeof syncCommercialPoToBeOpenDataWithNewProject === 'function') syncCommercialPoToBeOpenDataWithNewProject();
   if (typeof syncCommercialEmailDataWithNewProject === 'function') syncCommercialEmailDataWithNewProject();
 
@@ -5355,140 +5358,194 @@ function getCommercialDashboardData(pageName) {
         ? currentDataset
         : (typeof defaultReceivableItems !== 'undefined' ? defaultReceivableItems : []));
 
-    let invAmt = 0, recvAmt = 0, dedAmt = 0;
+    let receivableAmt = 0, receivableCount = 0;
+    let receivedAmt = 0, receivedCount = 0;
 
     list.forEach(r => {
-      const i = (r.rawInvoiceAmount !== undefined && r.rawInvoiceAmount !== null && !isNaN(Number(r.rawInvoiceAmount)))
+      const inv = (r.rawInvoiceAmount !== undefined && r.rawInvoiceAmount !== null && !isNaN(Number(r.rawInvoiceAmount)))
         ? Number(r.rawInvoiceAmount)
         : (r.invoiceAmount ? (parseFloat(String(r.invoiceAmount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const ded = (r.rawDeduction !== undefined && r.rawDeduction !== null && !isNaN(Number(r.rawDeduction)))
+        ? Number(r.rawDeduction)
+        : (r.deduction ? (parseFloat(String(r.deduction).replace(/[^0-9.-]+/g, '')) || 0) : 0);
       const rc = (r.rawReceivedAmount !== undefined && r.rawReceivedAmount !== null && !isNaN(Number(r.rawReceivedAmount)))
         ? Number(r.rawReceivedAmount)
         : (r.receivedAmount ? (parseFloat(String(r.receivedAmount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
-      const d = (r.rawDeduction !== undefined && r.rawDeduction !== null && !isNaN(Number(r.rawDeduction)))
-        ? Number(r.rawDeduction)
-        : (r.deduction ? (parseFloat(String(r.deduction).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      let recble = (r.rawReceivable !== undefined && r.rawReceivable !== null && !isNaN(Number(r.rawReceivable)))
+        ? Number(r.rawReceivable)
+        : (r.receivable ? (parseFloat(String(r.receivable).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      if (recble <= 0 && inv > 0) {
+        recble = Math.max(0, inv - ded - rc);
+      }
 
-      invAmt += i;
-      recvAmt += rc;
-      dedAmt += d;
+      receivableAmt += recble;
+      if (recble > 0) receivableCount++;
+      receivedAmt += rc;
+      if (rc > 0) receivedCount++;
     });
 
+    // In receivable page dashboard: Receivable as Orange (#f97316) and Received amount as Green (#16a34a)
     categories = [
-      { label: 'Invoice amount', color: '#0284c7', amount: invAmt, count: list.length },
-      { label: 'Received amount', color: '#16a34a', amount: recvAmt, count: list.length },
-      { label: 'Deduction', color: '#dc2626', amount: dedAmt, count: list.length }
+      { label: 'Receivable', color: '#f97316', amount: receivableAmt, count: receivableCount || list.length },
+      { label: 'Received amount', color: '#16a34a', amount: receivedAmt, count: receivedCount || list.length }
     ];
-    totalAmount = invAmt + recvAmt + dedAmt;
+    totalAmount = receivableAmt + receivedAmt;
   }
 
   return { categories, totalAmount };
 }
 
 function generateCommercialDonutSvg(categories, totalAmount, pageName) {
-  const width = 720;
-  const height = 480;
-  const cx = 230;
-  const cy = 240;
-  const R = 175;
-  const r = 98;
-  const rMid = (R + r) / 2; // 136.5
+  const width = 700;
+  const height = 420;
+  const cx = 210;
+  const cy = 210;
+  const R = 160;
+  const r = 85;
+  const rMid = (R + r) / 2; // 122.5
+  const rAmt = rMid + 12;   // 134.5
+  const rPct = rMid - 10;   // 112.5
 
-  let svgElements = [];
+  let defs = [];
+  let slicePaths = [];
+  let textElements = [];
+  let legendElements = [];
 
   if (totalAmount <= 0) {
-    svgElements.push(`
-      <circle cx="${cx}" cy="${cy}" r="${rMid}" fill="none" stroke="#e2e8f0" stroke-width="${R - r}" />
-      <circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" />
-      <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="0.5">TOTAL AMOUNT</text>
-      <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#64748b">₹ 0.00</text>
-      <text x="${cx}" y="${cy + 38}" text-anchor="middle" font-size="12" font-weight="500" fill="#94a3b8">No Data Available</text>
-    `);
-  } else {
-    const nonZero = categories.filter(c => c.amount > 0);
-    if (nonZero.length === 1) {
-      const it = nonZero[0];
-      const pathD = `M ${cx} ${cy - R} A ${R} ${R} 0 1 0 ${cx} ${cy + R} A ${R} ${R} 0 1 0 ${cx} ${cy - R} M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
-      svgElements.push(`
-        <path d="${pathD}" fill="${it.color}" stroke="#ffffff" stroke-width="2.5" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-          <title>${it.label}: ₹ ${formatJmsSum(it.amount)} (100%)</title>
-        </path>
-        <text x="${cx}" y="${cy - rMid - 4}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">₹ ${formatJmsSum(it.amount)}</text>
-        <text x="${cx}" y="${cy - rMid + 12}" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">100%</text>
-      `);
-    } else {
-      let startAngle = -Math.PI / 2; // 12 o'clock
-      nonZero.forEach(it => {
-        const sliceAngle = (it.amount / totalAmount) * 2 * Math.PI;
-        const endAngle = startAngle + sliceAngle;
-        const pct = (it.amount / totalAmount) * 100;
-
-        const x1_out = cx + R * Math.cos(startAngle);
-        const y1_out = cy + R * Math.sin(startAngle);
-        const x2_out = cx + R * Math.cos(endAngle);
-        const y2_out = cy + R * Math.sin(endAngle);
-        const x1_in = cx + r * Math.cos(startAngle);
-        const y1_in = cy + r * Math.sin(startAngle);
-        const x2_in = cx + r * Math.cos(endAngle);
-        const y2_in = cy + r * Math.sin(endAngle);
-
-        const largeArc = sliceAngle > Math.PI ? 1 : 0;
-        const pathD = `M ${x1_out.toFixed(2)} ${y1_out.toFixed(2)} A ${R} ${R} 0 ${largeArc} 1 ${x2_out.toFixed(2)} ${y2_out.toFixed(2)} L ${x2_in.toFixed(2)} ${y2_in.toFixed(2)} A ${r} ${r} 0 ${largeArc} 0 ${x1_in.toFixed(2)} ${y1_in.toFixed(2)} Z`;
-
-        const midAngle = startAngle + sliceAngle / 2;
-        const tx = cx + rMid * Math.cos(midAngle);
-        const ty = cy + rMid * Math.sin(midAngle);
-
-        let sliceText = '';
-        if (pct >= 5.0) {
-          sliceText = `
-            <text x="${tx.toFixed(2)}" y="${(ty - 4).toFixed(2)}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">₹ ${formatJmsSum(it.amount)}</text>
-            <text x="${tx.toFixed(2)}" y="${(ty + 12).toFixed(2)}" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">${pct.toFixed(1)}%</text>
-          `;
-        } else if (pct >= 2.0) {
-          sliceText = `
-            <text x="${tx.toFixed(2)}" y="${(ty + 4).toFixed(2)}" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5); pointer-events: none;">${pct.toFixed(1)}%</text>
-          `;
-        }
-
-        svgElements.push(`
-          <path d="${pathD}" fill="${it.color}" stroke="#ffffff" stroke-width="2.5" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-            <title>${it.label}: ₹ ${formatJmsSum(it.amount)} (${pct.toFixed(1)}%)</title>
-          </path>
-          ${sliceText}
-        `);
-
-        startAngle = endAngle;
-      });
-    }
-
-    // Donut center hole
-    svgElements.push(`
-      <circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" />
-      <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.5">TOTAL AMOUNT</text>
-      <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#0454e4">₹ ${formatJmsSum(totalAmount)}</text>
-    `);
+    return `
+      <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" style="font-family: inherit; display: block; max-width: 100%;">
+        <circle cx="${cx}" cy="${cy}" r="${rMid}" fill="none" stroke="#e2e8f0" stroke-width="${R - r}" />
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" />
+        <text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">NO DATA AVAILABLE</text>
+        <text x="${cx}" y="${cy + 18}" text-anchor="middle" font-size="14" font-weight="700" fill="#64748b">₹ 0.00</text>
+      </svg>
+    `;
   }
 
-  // Legend on right side (top-right, exactly matching uploaded image layout)
-  let legY = 60;
-  categories.forEach(it => {
-    const pct = totalAmount > 0 ? (it.amount / totalAmount) * 100 : 0;
-    const countLabel = (it.count !== undefined && it.count !== null) ? `${it.count} ${it.count === 1 ? 'record' : 'records'}` : '';
+  const nonZero = categories.filter(c => c.amount > 0);
+  if (nonZero.length === 1) {
+    const it = nonZero[0];
+    const pathD = `M ${cx} ${cy - R} A ${R} ${R} 0 1 0 ${cx} ${cy + R} A ${R} ${R} 0 1 0 ${cx} ${cy - R} M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
+    slicePaths.push(`
+      <path d="${pathD}" fill="${it.color}" stroke="none" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        <title>${it.label}: ₹ ${formatJmsSum(it.amount)} (100%)</title>
+      </path>
+    `);
+    defs.push(`<path id="curveSingleAmt" d="M ${cx - rAmt} ${cy} A ${rAmt} ${rAmt} 0 0 1 ${cx + rAmt} ${cy}" fill="none" stroke="none" />`);
+    defs.push(`<path id="curveSinglePct" d="M ${cx - rPct} ${cy} A ${rPct} ${rPct} 0 0 1 ${cx + rPct} ${cy}" fill="none" stroke="none" />`);
+    textElements.push(`
+      <text fill="#ffffff" font-size="11.5" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6); pointer-events: none;">
+        <textPath href="#curveSingleAmt" xlink:href="#curveSingleAmt" startOffset="50%" text-anchor="middle">₹ ${formatJmsSum(it.amount)}</textPath>
+      </text>
+      <text fill="#ffffff" font-size="11" font-weight="600" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6); pointer-events: none;">
+        <textPath href="#curveSinglePct" xlink:href="#curveSinglePct" startOffset="50%" text-anchor="middle">100%</textPath>
+      </text>
+    `);
+  } else {
+    let startAngle = -Math.PI / 2; // 12 o'clock
+    nonZero.forEach((it, idx) => {
+      const sliceAngle = (it.amount / totalAmount) * 2 * Math.PI;
+      const endAngle = startAngle + sliceAngle;
+      const pct = (it.amount / totalAmount) * 100;
 
-    svgElements.push(`
+      const x1_out = cx + R * Math.cos(startAngle);
+      const y1_out = cy + R * Math.sin(startAngle);
+      const x2_out = cx + R * Math.cos(endAngle);
+      const y2_out = cy + R * Math.sin(endAngle);
+      const x1_in = cx + r * Math.cos(startAngle);
+      const y1_in = cy + r * Math.sin(startAngle);
+      const x2_in = cx + r * Math.cos(endAngle);
+      const y2_in = cy + r * Math.sin(endAngle);
+
+      const largeArc = sliceAngle > Math.PI ? 1 : 0;
+      const pathD = `M ${x1_out.toFixed(2)} ${y1_out.toFixed(2)} A ${R} ${R} 0 ${largeArc} 1 ${x2_out.toFixed(2)} ${y2_out.toFixed(2)} L ${x2_in.toFixed(2)} ${y2_in.toFixed(2)} A ${r} ${r} 0 ${largeArc} 0 ${x1_in.toFixed(2)} ${y1_in.toFixed(2)} Z`;
+
+      // Slices rendered without white border
+      slicePaths.push(`
+        <path d="${pathD}" fill="${it.color}" stroke="none" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+          <title>${it.label}: ₹ ${formatJmsSum(it.amount)} (${pct.toFixed(1)}%)</title>
+        </path>
+      `);
+
+      const midAngle = startAngle + sliceAngle / 2;
+      const isBottom = Math.sin(midAngle) > 0;
+
+      function makeArcPath(radius) {
+        if (isBottom) {
+          const ax1 = cx + radius * Math.cos(endAngle);
+          const ay1 = cy + radius * Math.sin(endAngle);
+          const ax2 = cx + radius * Math.cos(startAngle);
+          const ay2 = cy + radius * Math.sin(startAngle);
+          return `M ${ax1.toFixed(2)} ${ay1.toFixed(2)} A ${radius} ${radius} 0 ${largeArc} 0 ${ax2.toFixed(2)} ${ay2.toFixed(2)}`;
+        } else {
+          const ax1 = cx + radius * Math.cos(startAngle);
+          const ay1 = cy + radius * Math.sin(startAngle);
+          const ax2 = cx + radius * Math.cos(endAngle);
+          const ay2 = cy + radius * Math.sin(endAngle);
+          return `M ${ax1.toFixed(2)} ${ay1.toFixed(2)} A ${radius} ${radius} 0 ${largeArc} 1 ${ax2.toFixed(2)} ${ay2.toFixed(2)}`;
+        }
+      }
+
+      if (pct >= 8.0) {
+        const idAmt = `curveAmt_${idx}`;
+        const idPct = `curvePct_${idx}`;
+        defs.push(`<path id="${idAmt}" d="${makeArcPath(isBottom ? rPct : rAmt)}" fill="none" stroke="none" />`);
+        defs.push(`<path id="${idPct}" d="${makeArcPath(isBottom ? rAmt : rPct)}" fill="none" stroke="none" />`);
+
+        textElements.push(`
+          <text fill="#ffffff" font-size="11.5" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6); pointer-events: none;">
+            <textPath href="#${idAmt}" xlink:href="#${idAmt}" startOffset="50%" text-anchor="middle">₹ ${formatJmsSum(it.amount)}</textPath>
+          </text>
+          <text fill="#ffffff" font-size="11" font-weight="600" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6); pointer-events: none;">
+            <textPath href="#${idPct}" xlink:href="#${idPct}" startOffset="50%" text-anchor="middle">${pct.toFixed(1)}%</textPath>
+          </text>
+        `);
+      } else if (pct >= 4.0) {
+        const idMid = `curveMid_${idx}`;
+        defs.push(`<path id="${idMid}" d="${makeArcPath(rMid)}" fill="none" stroke="none" />`);
+        textElements.push(`
+          <text fill="#ffffff" font-size="11" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6); pointer-events: none;">
+            <textPath href="#${idMid}" xlink:href="#${idMid}" startOffset="50%" text-anchor="middle">₹ ${formatJmsSum(it.amount)}</textPath>
+          </text>
+        `);
+      }
+
+      startAngle = endAngle;
+    });
+  }
+
+  // Clean white center circle without icons or header words
+  const centerCircle = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="none" />`;
+
+  // Vertically centered legend on the right side
+  const itemH = 56;
+  const totalLegH = categories.length * itemH;
+  let startLegY = (height - totalLegH) / 2 + 6;
+
+  categories.forEach((it, i) => {
+    const legY = startLegY + i * itemH;
+    const pct = totalAmount > 0 ? (it.amount / totalAmount) * 100 : 0;
+    const countLabel = (it.count !== undefined && it.count !== null && it.count > 0) ? `${it.count} ${it.count === 1 ? 'record' : 'records'}` : '';
+
+    legendElements.push(`
       <g class="chart-legend-item" style="cursor: default;">
-        <rect x="445" y="${legY}" width="14" height="14" rx="3" fill="${it.color}" />
-        <text x="468" y="${legY + 12}" font-size="13" font-weight="700" fill="#1e293b">${it.label}</text>
-        <text x="468" y="${legY + 30}" font-size="13" font-weight="600" fill="#334155">₹ ${formatJmsSum(it.amount)} <tspan font-weight="500" fill="#64748b">(${pct.toFixed(1)}%)</tspan></text>
-        ${countLabel ? `<text x="468" y="${legY + 45}" font-size="11" font-weight="500" fill="#94a3b8">${countLabel}</text>` : ''}
+        <rect x="435" y="${legY + 2}" width="14" height="14" rx="3" fill="${it.color}" />
+        <text x="458" y="${legY + 14}" font-size="13" font-weight="700" fill="#1e293b">${it.label}</text>
+        <text x="458" y="${legY + 32}" font-size="13" font-weight="600" fill="#334155">₹ ${formatJmsSum(it.amount)} <tspan font-weight="500" fill="#64748b">(${pct.toFixed(1)}%)</tspan></text>
+        ${countLabel ? `<text x="458" y="${legY + 47}" font-size="11" font-weight="500" fill="#94a3b8">${countLabel}</text>` : ''}
       </g>
     `);
-    legY += 66;
   });
 
   return `
-    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" style="font-family: inherit; display: block; max-width: 100%;">
-      ${svgElements.join('\n')}
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="font-family: inherit; display: block; max-width: 100%;">
+      <defs>
+        ${defs.join('')}
+      </defs>
+      ${slicePaths.join('')}
+      ${centerCircle}
+      ${textElements.join('')}
+      ${legendElements.join('')}
     </svg>
   `;
 }
@@ -5496,11 +5553,6 @@ function generateCommercialDonutSvg(categories, totalAmount, pageName) {
 function renderCommercialDashboardChart(pageName) {
   const pName = pageName || window._currentCommercialDashboardPage || 'Commercial';
   const { categories, totalAmount } = getCommercialDashboardData(pName);
-
-  const totalEl = document.getElementById('lblCommercialDashboardTotalAmount');
-  if (totalEl) {
-    totalEl.textContent = formatJmsSum(totalAmount);
-  }
 
   const wrapEl = document.getElementById('commercialDashboardSvgWrap');
   if (wrapEl) {
@@ -5513,16 +5565,17 @@ window.openCommercialDashboard = function(pageName) {
   const panel = document.getElementById('commercialDashboardModal');
   if (!panel || !overlay) return;
 
+  // If already open for this page, toggle it closed
+  if (panel.style.display === 'block' && window._currentCommercialDashboardPage === pageName) {
+    closeCommercialDashboard();
+    return;
+  }
+
   // Hide any existing open modal panel inside overlay
-  const cards = overlay.querySelectorAll('.side-form-card');
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(c => { c.style.display = 'none'; });
 
   window._currentCommercialDashboardPage = pageName || 'Commercial';
-
-  const titleEl = document.getElementById('lblCommercialDashboardTitle');
-  if (titleEl) {
-    titleEl.textContent = `${pageName || 'Commercial'} Dashboard`;
-  }
 
   renderCommercialDashboardChart(pageName);
 
@@ -5530,13 +5583,43 @@ window.openCommercialDashboard = function(pageName) {
   overlay.style.display = 'flex';
 };
 
-window.closeCommercialDashboard = function() {
+function closeCommercialDashboard() {
   const panel = document.getElementById('commercialDashboardModal');
   if (panel) panel.style.display = 'none';
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
   window._currentCommercialDashboardPage = null;
-};
+}
+window.closeCommercialDashboard = closeCommercialDashboard;
+
+// Close Commercial Dashboard when user clicks outside the modal
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('commercialDashboardModal');
+  if (!panel || panel.style.display === 'none') return;
+
+  const targetEl = (e.target && e.target.nodeType === 3) ? e.target.parentElement : e.target;
+  if (!targetEl) return;
+
+  // If clicked inside the dashboard modal panel, do not close
+  if (panel.contains(targetEl) || (targetEl.closest && targetEl.closest('#commercialDashboardModal'))) return;
+
+  // If clicked on any dashboard button/icon, do not close (it opens/toggles it)
+  if (targetEl.closest && (targetEl.closest('.btn-dashboard-action') || targetEl.closest('[onclick*="openCommercialDashboard"]'))) {
+    return;
+  }
+
+  // Clicked outside modal panel -> close it
+  closeCommercialDashboard();
+}, true);
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const panel = document.getElementById('commercialDashboardModal');
+    if (panel && panel.style.display !== 'none') {
+      closeCommercialDashboard();
+    }
+  }
+});
 
 window.refreshCurrentCommercialDashboard = function() {
   const panel = document.getElementById('commercialDashboardModal');
@@ -9405,25 +9488,50 @@ const defaultPoToBeOpenItems = [
   }
 ];
 
-let commercialPoToBeOpenData = [...defaultPoToBeOpenItems];
+let commercialPoToBeOpenData = [];
+
+async function loadCommercialPoToBeOpenFromApi() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poToBeOpen && typeof NexusApi.commercial.poToBeOpen.getProjects === 'function') {
+    try {
+      const response = await NexusApi.commercial.poToBeOpen.getProjects();
+      if (response && Array.isArray(response.items)) {
+        commercialPoToBeOpenData = response.items.map((live, idx) => {
+          const rawAmt = (live.rawExpenseAmount !== undefined && live.rawExpenseAmount !== null)
+            ? Number(live.rawExpenseAmount)
+            : (parseFloat(String(live.expenseAmount || '0').replace(/[^0-9.-]+/g, '')) || 0);
+          return {
+            id: live.id || `ptbo-live-${idx + 1}`,
+            poNo: live.poNo || '',
+            projectId: live.projectId || '',
+            siteId: live.siteId || '',
+            siteName: live.siteName || '',
+            projectType: live.projectType || '',
+            subProjectType: live.subProjectType || '',
+            expenseAmount: live.expenseAmount || (typeof formatIndianCurrency === 'function' ? formatIndianCurrency(rawAmt) : String(rawAmt)),
+            rawExpenseAmount: rawAmt,
+            poStatus: live.poStatus || ''
+          };
+        });
+
+        if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'po_to_be_open') {
+          currentDataset = commercialPoToBeOpenData.map(item => ({ ...item }));
+          filteredDataset = [...currentDataset];
+          if (typeof applyFiltersAndRender === 'function') {
+            applyFiltersAndRender();
+          }
+        }
+        return commercialPoToBeOpenData;
+      }
+    } catch (err) {
+      console.error('Failed to load PO To Be Open projects from API:', err);
+    }
+  }
+  return commercialPoToBeOpenData;
+}
+window.loadCommercialPoToBeOpenFromApi = loadCommercialPoToBeOpenFromApi;
 
 function syncCommercialPoToBeOpenDataWithNewProject() {
-  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
-  commercialPoToBeOpenData = commercialWorklistData.map((np, idx) => {
-    const existing = commercialPoToBeOpenData.find(pt => String(pt.id) === String(np.id) || pt.poNo === np.poNo) || defaultPoToBeOpenItems[idx % defaultPoToBeOpenItems.length];
-    const rawAmt = existing ? (existing.rawExpenseAmount || 145000) : 145000;
-    return {
-      id: np.id || `ptbo-${idx + 1}`,
-      poNo: np.poNo || existing.poNo || "4500128934",
-      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
-      siteId: np.siteId || existing.siteId || "IN-123456",
-      siteName: np.siteName || existing.siteName || "Guindy Hub",
-      projectType: np.projectType || existing.projectType || "New Build",
-      subProjectType: np.subProjectType || existing.subProjectType || "Civil",
-      expenseAmount: formatJmsSum(rawAmt),
-      rawExpenseAmount: rawAmt
-    };
-  });
+  // PO To Be Open strictly loads live eligible records via loadCommercialPoToBeOpenFromApi()
 }
 
 function calculatePoToBeOpenTotalSum(dataset) {
@@ -9927,6 +10035,9 @@ try {
   if (typeof syncCommercialWccDataWithNewProject === 'function') syncCommercialWccDataWithNewProject();
   if (typeof syncCommercialInvoiceDataWithNewProject === 'function') syncCommercialInvoiceDataWithNewProject();
   if (typeof syncCommercialReceivableDataWithNewProject === 'function') syncCommercialReceivableDataWithNewProject();
+  if (typeof loadCommercialPoToBeOpenFromApi === 'function') {
+    loadCommercialPoToBeOpenFromApi().catch(e => console.error('Failed to load PO To Be Open from API:', e));
+  }
   if (typeof syncCommercialPoToBeOpenDataWithNewProject === 'function') syncCommercialPoToBeOpenDataWithNewProject();
   if (typeof syncCommercialEmailDataWithNewProject === 'function') syncCommercialEmailDataWithNewProject();
 } catch (e) {}
@@ -30908,8 +31019,10 @@ function loadWorklistDataset() {
       currentDataset = commercialReceivableData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'po_to_be_open') {
-      syncCommercialPoToBeOpenDataWithNewProject();
-      currentDataset = commercialPoToBeOpenData.map(item => ({ ...item }));
+      if (typeof loadCommercialPoToBeOpenFromApi === 'function') {
+        loadCommercialPoToBeOpenFromApi();
+      }
+      currentDataset = (commercialPoToBeOpenData || []).map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
@@ -39185,9 +39298,8 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'po_to_be_open') {
-      syncCommercialPoToBeOpenDataWithNewProject();
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.expenseAmount !== undefined)) {
-        currentDataset = commercialPoToBeOpenData.map(item => ({ ...item }));
+        currentDataset = (commercialPoToBeOpenData || []).map(item => ({ ...item }));
       }
 
       filteredDataset = currentDataset.filter(row => {
@@ -45241,6 +45353,9 @@ function openSideForm() {
 function closeSideForm() {
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
+  const dashModal = document.getElementById('commercialDashboardModal');
+  if (dashModal) dashModal.style.display = 'none';
+  window._currentCommercialDashboardPage = null;
   const contactPanel = document.getElementById('contactDetailsSidePanel');
   if (contactPanel) contactPanel.style.display = 'none';
   const locationPanel = document.getElementById('locationDetailsSidePanel');

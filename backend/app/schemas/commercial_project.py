@@ -44,6 +44,26 @@ class CommercialProjectListResponse(BaseModel):
     total: int
 
 
+class CommercialPoToBeOpenItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: Any
+    poNo: str
+    projectId: str
+    siteId: str
+    siteName: str
+    projectType: str
+    subProjectType: str
+    expenseAmount: str
+    rawExpenseAmount: float
+    poStatus: Optional[str] = None
+
+
+class CommercialPoToBeOpenListResponse(BaseModel):
+    items: List[CommercialPoToBeOpenItem]
+    total: int
+
+
 class CommercialBulkUploadResponse(BaseModel):
     success: bool
     message: str

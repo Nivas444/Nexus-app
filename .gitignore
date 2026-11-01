@@ -1,4 +1,23 @@
 .vscode
 .env
 .pytest_cache
-Nexus-MCP/
+Nexus-MCP/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Backups & generated test outputs
+backend/backups/
+backend/fresh_verified_*.pdf
+*.log

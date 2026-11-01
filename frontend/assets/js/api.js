@@ -2102,6 +2102,11 @@
           });
         }
       },
+      poToBeOpen: {
+        async getProjects() {
+          return await request('/commercial/po-to-be-open/projects', { method: 'GET' });
+        }
+      },
       async rejectRow(poNo, siteId, workflow = 'PO Amend') {
         return await request('/commercial/jms/reject', {
           method: 'POST',

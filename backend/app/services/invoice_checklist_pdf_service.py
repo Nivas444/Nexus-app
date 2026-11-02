@@ -288,8 +288,8 @@ class InvoiceChecklistPdfService:
         t_details.setStyle(TableStyle([
             ('SPAN', (1, 3), (3, 3)),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 3),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('TOPPADDING', (0, 0), (-1, -1), 5.0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5.0),
             ('LEFTPADDING', (0, 0), (-1, -1), 6),
             ('RIGHTPADDING', (0, 0), (-1, -1), 6),
         ]))
@@ -332,7 +332,7 @@ class InvoiceChecklistPdfService:
             'ChecklistTDNo',
             fontName="Helvetica",
             fontSize=11.0,
-            leading=14.0,
+            leading=15.0,
             alignment=1,
             textColor=TEXT_DARK
         )
@@ -340,14 +340,14 @@ class InvoiceChecklistPdfService:
             'ChecklistTDDesc',
             fontName="Helvetica",
             fontSize=11.0,
-            leading=14.0,
+            leading=15.0,
             textColor=TEXT_DARK
         )
         s_phd_text = ParagraphStyle(
             'ChecklistPhdText',
             fontName="Helvetica-Bold",
             fontSize=11.0,
-            leading=14.0,
+            leading=15.0,
             textColor=TEXT_DARK
         )
 
@@ -380,18 +380,18 @@ class InvoiceChecklistPdfService:
             ('VALIGN', (0, 0), (-1, 1), 'MIDDLE'),
             ('INNERGRID', (0, 0), (-1, 1), 0.75, colors.white),
             ('BOX', (0, 0), (-1, 1), 0.75, GREY_HDR),
-            ('TOPPADDING', (0, 0), (-1, 1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, 1), 5),
+            ('TOPPADDING', (0, 0), (-1, 1), 7.0),
+            ('BOTTOMPADDING', (0, 0), (-1, 1), 7.0),
         ]
 
         target_col = self._resolve_service_column_index(work_type)
         status_map = status_overrides or {}
         curr_row_idx = 2
 
-        # Part 1 Items (1 to 17) - 11 pt content, S.No is regular (not bold)
+        # Part 1 Items (1 to 17) - 11 pt content, S.No is regular (not bold), expanded vertical padding
         for sno, desc, def_status in CHECKLIST_ITEMS_PART_1:
             status = status_map.get(sno, def_status)
-            indicator = _create_indicator_drawing(status, size=14.0)
+            indicator = _create_indicator_drawing(status, size=15.0)
 
             row_cells = [
                 Paragraph(str(sno), s_td_no),
@@ -405,8 +405,8 @@ class InvoiceChecklistPdfService:
             tstyle.append(('ALIGN', (2, curr_row_idx), (-1, curr_row_idx), 'CENTER'))
             tstyle.append(('VALIGN', (0, curr_row_idx), (-1, curr_row_idx), 'MIDDLE'))
             tstyle.append(('LINEBELOW', (0, curr_row_idx), (-1, curr_row_idx), 0.5, DIVIDER_LINE))
-            tstyle.append(('TOPPADDING', (0, curr_row_idx), (-1, curr_row_idx), 3.5))
-            tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (-1, curr_row_idx), 3.5))
+            tstyle.append(('TOPPADDING', (0, curr_row_idx), (-1, curr_row_idx), 10.0))
+            tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (-1, curr_row_idx), 10.0))
             curr_row_idx += 1
 
         # Section Divider: Mandatory Documents (lightgrey #d1d5db, black 10 pt font, centered)
@@ -418,14 +418,14 @@ class InvoiceChecklistPdfService:
         tstyle.append(('BACKGROUND', (0, curr_row_idx), (6, curr_row_idx), GREY_HDR))
         tstyle.append(('ALIGN', (0, curr_row_idx), (6, curr_row_idx), 'CENTER'))
         tstyle.append(('VALIGN', (0, curr_row_idx), (6, curr_row_idx), 'MIDDLE'))
-        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 4.0))
-        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 4.0))
+        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 8.5))
+        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 8.5))
         curr_row_idx += 1
 
-        # Part 2 Items (18 to 28) - 11 pt content, S.No is regular (not bold)
+        # Part 2 Items (18 to 28) - 11 pt content, S.No is regular (not bold), expanded vertical padding
         for sno, desc, def_status in CHECKLIST_ITEMS_PART_2:
             status = status_map.get(sno, def_status)
-            indicator = _create_indicator_drawing(status, size=14.0)
+            indicator = _create_indicator_drawing(status, size=15.0)
 
             row_cells = [
                 Paragraph(str(sno), s_td_no),
@@ -439,8 +439,8 @@ class InvoiceChecklistPdfService:
             tstyle.append(('ALIGN', (2, curr_row_idx), (-1, curr_row_idx), 'CENTER'))
             tstyle.append(('VALIGN', (0, curr_row_idx), (-1, curr_row_idx), 'MIDDLE'))
             tstyle.append(('LINEBELOW', (0, curr_row_idx), (-1, curr_row_idx), 0.5, DIVIDER_LINE))
-            tstyle.append(('TOPPADDING', (0, curr_row_idx), (-1, curr_row_idx), 3.5))
-            tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (-1, curr_row_idx), 3.5))
+            tstyle.append(('TOPPADDING', (0, curr_row_idx), (-1, curr_row_idx), 10.0))
+            tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (-1, curr_row_idx), 10.0))
             curr_row_idx += 1
 
         # PHD USE ONLY Section (lightgrey #d1d5db, black 10 pt font, centered)
@@ -452,8 +452,8 @@ class InvoiceChecklistPdfService:
         tstyle.append(('BACKGROUND', (0, curr_row_idx), (6, curr_row_idx), GREY_HDR))
         tstyle.append(('ALIGN', (0, curr_row_idx), (6, curr_row_idx), 'CENTER'))
         tstyle.append(('VALIGN', (0, curr_row_idx), (6, curr_row_idx), 'MIDDLE'))
-        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 4.0))
-        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 4.0))
+        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 8.5))
+        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 8.5))
         curr_row_idx += 1
 
         tbl_rows.append([
@@ -462,8 +462,8 @@ class InvoiceChecklistPdfService:
         ])
         tstyle.append(('SPAN', (0, curr_row_idx), (6, curr_row_idx)))
         tstyle.append(('VALIGN', (0, curr_row_idx), (6, curr_row_idx), 'MIDDLE'))
-        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 5.0))
-        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 5.0))
+        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 10.0))
+        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 10.0))
         curr_row_idx += 1
 
         # Remarks row with space left below for writing remarks
@@ -473,13 +473,13 @@ class InvoiceChecklistPdfService:
         ])
         tstyle.append(('SPAN', (0, curr_row_idx), (6, curr_row_idx)))
         tstyle.append(('VALIGN', (0, curr_row_idx), (6, curr_row_idx), 'TOP'))
-        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 5.0))
-        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 40.0))
+        tstyle.append(('TOPPADDING', (0, curr_row_idx), (6, curr_row_idx), 10.0))
+        tstyle.append(('BOTTOMPADDING', (0, curr_row_idx), (6, curr_row_idx), 55.0))
         curr_row_idx += 1
 
         t_check = Table(tbl_rows, colWidths=col_widths)
         t_check.setStyle(TableStyle(tstyle))
-        _, h_check = t_check.wrap(TABLE_W, 1500)
+        _, h_check = t_check.wrap(TABLE_W, 2000)
         y_check = y_details - 14.0 - h_check
         t_check.drawOn(canv, TABLE_X, y_check)
 

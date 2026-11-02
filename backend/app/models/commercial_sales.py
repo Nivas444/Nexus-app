@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, Date, Numeric, Text, TIMESTAMP, LargeBinary
+from sqlalchemy import Column, BigInteger, Integer, String, Date, Numeric, Text, TIMESTAMP, LargeBinary, Boolean
 from sqlalchemy.sql import func
 from app.db.base import Base
 
@@ -30,6 +30,14 @@ class Sales(Base):
     total_amount_in_words = Column(Text, nullable=True)
     tds_deduction = Column(Numeric, nullable=True)
     approved_amount = Column(Numeric, nullable=True)
+    dn_amount = Column(Numeric, nullable=True)
+    indus_processed_amount = Column(Numeric, nullable=True)
+    treds_discount_amount = Column(Numeric, nullable=True)
+    treds_processing_fee = Column(Numeric, nullable=True)
+    treds_processed_amount = Column(Numeric, nullable=True)
+    received_amount = Column(Numeric, nullable=True)
+    received_date = Column(Date, nullable=True)
+    ageing = Column(Integer, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -52,6 +60,10 @@ class ReceiptIndus(Base):
     tds = Column(Numeric, nullable=True)             # From Invoice# tab
     receivable = Column(Numeric, nullable=True)      # From Invoice# tab
     approved_amount = Column(Numeric, nullable=True)
+    treds = Column(Boolean, default=False, nullable=True)
+    dn = Column(Boolean, default=False, nullable=True)
+    indus_processed_amount = Column(Numeric, nullable=True)
+    treds_processed_amount = Column(Numeric, nullable=True)
     dn_amount = Column(Numeric, nullable=True)
     dn_number = Column(String(100), nullable=True)
     dn_remarks = Column(Text, nullable=True)

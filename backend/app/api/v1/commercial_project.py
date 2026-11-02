@@ -20,7 +20,9 @@ from app.schemas.commercial_project import (
     CommercialReceivableListResponse,
     CommercialReceivableUpdateInvoiceAmountRequest,
     CommercialReceivableUpdateDeductionRequest,
-    CommercialReceivableUpdateReceivedAmountRequest
+    CommercialReceivableUpdateReceivedAmountRequest,
+    CommercialIndusPaymentReceiptRequest,
+    CommercialM1PaymentReceiptRequest
 )
 
 router = APIRouter(prefix="/commercial", tags=["Commercial Manager - New Project & PO"])
@@ -397,6 +399,46 @@ def update_receivable_received_amount(
         received_date=payload.receivedDate
     )
 
+@router.post("/receivable/indus-payment-receipt", summary="Submit Indus Payment Receipt to receipt_indus table")
+def submit_indus_payment_receipt(
+    payload: CommercialIndusPaymentReceiptRequest,
+    project_db: Session = Depends(get_project_db),
+    accounts_db: Session = Depends(get_accounts_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Stores Indus Payment Receipt into PostgreSQL table `receipt_indus`.
+    Stores treds and dn booleans, and calculates/stores indus_processed_amount.
+    """
+    service = CommercialInvoiceService(project_db, accounts_db)
+    return service.submit_indus_payment_receipt(payload)
 
 
+@router.post("/receivable/m1-payment-receipt", summary="Submit M1 Payment Receipt to receipt_indus and sales tables")
+def submit_m1_payment_receipt(
+    payload: CommercialM1PaymentReceiptRequest,
+    project_db: Session = Depends(get_project_db),
+    accounts_db: Session = Depends(get_accounts_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Stores M1 Payment Receipt into PostgreSQL table `receipt_indus` and `sales`.
+    Stores treds_processed_amount in both tables.
+    """
+    service = CommercialInvoiceService(project_db, accounts_db)
+    return service.submit_m1_payment_receipt(payload)
 
+
+@router.post("/receivable/bulk-upload", summary="Bulk Upload for Receivable")
+async def bulk_upload_commercial_receivable(
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV file"),
+    project_db: Session = Depends(get_project_db),
+    accounts_db: Session = Depends(get_accounts_db),
+    _auth: bool = Depends(verify_commercial_access)
+):
+    """
+    Parses and processes bulk upload file for Receivable.
+    """
+    content = await file.read()
+    service = CommercialInvoiceService(project_db, accounts_db)
+    return service.process_receivable_bulk_upload(content, file.filename or "")

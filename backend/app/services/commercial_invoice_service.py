@@ -16,7 +16,9 @@ from app.schemas.commercial_project import (
     CommercialInvoiceSubmitHashRequest,
     CommercialInvoiceGenericResponse,
     CommercialReceivableItem,
-    CommercialReceivableListResponse
+    CommercialReceivableListResponse,
+    CommercialIndusPaymentReceiptRequest,
+    CommercialM1PaymentReceiptRequest
 )
 from app.services.invoice_pdf_service import (
     CommercialInvoicePdfService,
@@ -743,4 +745,279 @@ class CommercialInvoiceService:
             "invoiceAmount": float(raw_inv),
             "tds": float(raw_tds),
             "receivable": float(raw_recv)
+        }
+
+    def submit_indus_payment_receipt(self, payload: CommercialIndusPaymentReceiptRequest) -> Dict[str, Any]:
+        """
+        Stores Indus Payment Receipt into PostgreSQL table `receipt_indus`.
+        Sets `treds` and `dn` booleans, and calculates/stores `indus_processed_amount`.
+        Applies formula:
+            Invoice DN Amount = (DN Amount X Invoice Approved Amount) / (Total Invoice Approved Amount)
+            Invoice Processed Amount = Invoice Approved Amount - Invoice DN Amount
+        Stores received_date:
+            If user didn't enable treds toggle -> store payment date in received_date.
+            If user enabled treds toggle -> received_date will be stored from M1 tab.
+        """
+        adb = self.get_accounts_db()
+        receipt = adb.query(ReceiptIndus).filter(
+            ReceiptIndus.voucher_number == payload.receiptNo
+        ).first()
+        if not receipt:
+            receipt = adb.query(ReceiptIndus).filter(
+                ReceiptIndus.indus_payment_receipt_number == payload.receiptNo,
+                ReceiptIndus.invoice_no.is_(None)
+            ).first()
+
+        p_date = parse_flexible_date(payload.paymentDate)
+        app_amt = Decimal(str(payload.approvedAmount))
+        proc_amt = Decimal(str(payload.indusProcessedAmount))
+        h_amt = Decimal(str(payload.holdAmount or 0.0))
+        is_hold = payload.is_hold
+
+        # Date rule: if user didn't enable treds toggle -> store payment date in received_date
+        recv_date = p_date if not payload.treds else None
+
+        if receipt:
+            receipt.indus_payment_receipt_number = payload.receiptNo
+            receipt.indus_payment_receipt_date = p_date
+            receipt.approved_amount = app_amt
+            receipt.treds = payload.treds
+            receipt.dn = is_hold
+            receipt.dn_amount = h_amt if is_hold else Decimal("0.00")
+            receipt.dn_remarks = payload.holdReason if is_hold else None
+            receipt.indus_processed_amount = proc_amt
+            if not payload.treds and recv_date:
+                receipt.received_date = recv_date
+        else:
+            receipt = ReceiptIndus(
+                company_name="Nexus Power Limited",
+                customer_name="Indus Towers Limited",
+                voucher_number=payload.receiptNo,
+                indus_payment_receipt_number=payload.receiptNo,
+                indus_payment_receipt_date=p_date,
+                approved_amount=app_amt,
+                treds=payload.treds,
+                dn=is_hold,
+                dn_amount=h_amt if is_hold else Decimal("0.00"),
+                dn_remarks=payload.holdReason if is_hold else None,
+                indus_processed_amount=proc_amt,
+                received_date=recv_date if not payload.treds else None,
+            )
+            adb.add(receipt)
+
+        # Process per-invoice formulas and updates
+        # Invoice DN Amount = (DN Amount X Invoice Approved Amount) / (Total Invoice Approved Amount)
+        invoices = payload.invoices or []
+        for inv_data in invoices:
+            inv_no = inv_data.get("invoiceNo") or inv_data.get("voucher_number")
+            if not inv_no:
+                continue
+            inv_appr = Decimal(str(inv_data.get("approvedAmount") or 0.0))
+            if app_amt > 0 and is_hold:
+                inv_dn = (h_amt * inv_appr) / app_amt
+            else:
+                inv_dn = Decimal("0.00")
+            inv_proc = inv_appr - inv_dn if is_hold else inv_appr
+
+            # Update or create in receipt_indus for this invoice
+            inv_receipt = adb.query(ReceiptIndus).filter(
+                or_(
+                    ReceiptIndus.invoice_no == inv_no,
+                    ReceiptIndus.voucher_number == inv_no
+                )
+            ).first()
+            if inv_receipt and inv_receipt.receipt_id != receipt.receipt_id:
+                inv_receipt.indus_payment_receipt_number = payload.receiptNo
+                inv_receipt.indus_payment_receipt_date = p_date
+                inv_receipt.approved_amount = inv_appr
+                inv_receipt.dn_amount = inv_dn
+                inv_receipt.dn = is_hold
+                inv_receipt.treds = payload.treds
+                inv_receipt.dn_remarks = payload.holdReason if is_hold else None
+                inv_receipt.indus_processed_amount = inv_proc
+                if not payload.treds and recv_date:
+                    inv_receipt.received_date = recv_date
+
+            # Update in sales table
+            sales_rec = adb.query(Sales).filter(
+                or_(
+                    Sales.voucher_number == inv_no,
+                    Sales.document_no == inv_no
+                )
+            ).first()
+            if sales_rec:
+                sales_rec.dn_amount = inv_dn
+                sales_rec.indus_processed_amount = inv_proc
+                if not payload.treds and recv_date:
+                    sales_rec.received_date = recv_date
+
+        adb.commit()
+        adb.refresh(receipt)
+
+        return {
+            "success": True,
+            "message": "Indus Payment Receipt saved successfully",
+            "receiptId": receipt.receipt_id,
+            "receiptNo": payload.receiptNo,
+            "treds": payload.treds,
+            "dn": is_hold,
+            "indusProcessedAmount": float(proc_amt),
+            "receivedDate": recv_date.strftime("%Y-%m-%d") if recv_date else None
+        }
+
+    def submit_m1_payment_receipt(self, payload: CommercialM1PaymentReceiptRequest) -> Dict[str, Any]:
+        """
+        Stores M1 Payment Receipt into PostgreSQL table `receipt_indus` and `sales`.
+        Sets `treds_processed_amount` in both tables.
+        Applies formulas:
+            Invoice Discount Amount = (Discount Amount X Invoice Processed Amount) / (Total Invoice Processed Amount)
+            Invoice Processing fee = (Processing Fee X Invoice Processed Amount) / (Total Invoice Processed Amount)
+            Invoice TREDS Processed Amount = Invoice Processed Amount - (Invoice Discount Amount + Invoice Processing fee)
+        Stores received_date:
+            Takes date from M1 tab and stores in received_date in receipt_indus and sales tables.
+        """
+        adb = self.get_accounts_db()
+        receipt = adb.query(ReceiptIndus).filter(
+            ReceiptIndus.voucher_number == payload.indusReceiptNo
+        ).first()
+        if not receipt:
+            receipt = adb.query(ReceiptIndus).filter(
+                ReceiptIndus.indus_payment_receipt_number == payload.indusReceiptNo,
+                ReceiptIndus.invoice_no.is_(None)
+            ).first()
+
+        treds_proc_amt = Decimal(str(payload.tredsProcessedAmount))
+        disc_amt = Decimal(str(payload.discountAmount or 0.0))
+        fee_amt = Decimal(str(payload.processingFee or 0.0))
+        p_date = parse_flexible_date(payload.paymentDate)
+        receipt_no = payload.receipt_number
+
+        # Total Invoice Processed Amount (base amount from Indus receipt)
+        total_proc_amt = Decimal(str(receipt.indus_processed_amount)) if (receipt and receipt.indus_processed_amount is not None) else Decimal("0.00")
+        if total_proc_amt <= 0:
+            total_proc_amt = treds_proc_amt + disc_amt + fee_amt
+
+        if receipt:
+            receipt.treds_receipt_number = receipt_no
+            receipt.treds_receipt_date = p_date
+            receipt.treds_discount_amount = disc_amt
+            receipt.treds_processing_fee = fee_amt
+            receipt.treds_processed_amount = treds_proc_amt
+            # "if user enabled treds toggle then take date from m1 tab and store in received date in our table"
+            receipt.received_date = p_date
+
+        # Process per-invoice formulas and updates
+        invoices = payload.invoices or []
+        for inv_data in invoices:
+            inv_no = inv_data.get("invoiceNo") or inv_data.get("voucher_number")
+            if not inv_no:
+                continue
+            inv_proc = Decimal(str(inv_data.get("indusProcessedAmount") or 0.0))
+            if total_proc_amt > 0:
+                inv_disc = (disc_amt * inv_proc) / total_proc_amt
+                inv_fee = (fee_amt * inv_proc) / total_proc_amt
+            else:
+                inv_disc = Decimal("0.00")
+                inv_fee = Decimal("0.00")
+            inv_treds_proc = inv_proc - (inv_disc + inv_fee)
+
+            # Update in receipt_indus for this invoice
+            inv_receipt = adb.query(ReceiptIndus).filter(
+                or_(
+                    ReceiptIndus.invoice_no == inv_no,
+                    ReceiptIndus.voucher_number == inv_no
+                )
+            ).first()
+            if inv_receipt and inv_receipt.receipt_id != (receipt.receipt_id if receipt else None):
+                inv_receipt.treds_receipt_number = receipt_no
+                inv_receipt.treds_receipt_date = p_date
+                inv_receipt.treds_discount_amount = inv_disc
+                inv_receipt.treds_processing_fee = inv_fee
+                inv_receipt.treds_processed_amount = inv_treds_proc
+                inv_receipt.received_date = p_date
+
+            # Update in sales table
+            sales_rec = adb.query(Sales).filter(
+                or_(
+                    Sales.voucher_number == inv_no,
+                    Sales.document_no == inv_no
+                )
+            ).first()
+            if sales_rec:
+                sales_rec.treds_discount_amount = inv_disc
+                sales_rec.treds_processing_fee = inv_fee
+                sales_rec.treds_processed_amount = inv_treds_proc
+                sales_rec.received_date = p_date
+
+        # Also store in sales table matching indusReceiptNo directly if not in invoices
+        sales_record = adb.query(Sales).filter(
+            or_(
+                Sales.voucher_number == payload.indusReceiptNo,
+                Sales.document_no == payload.indusReceiptNo
+            )
+        ).first()
+        if sales_record:
+            sales_record.treds_discount_amount = disc_amt
+            sales_record.treds_processing_fee = fee_amt
+            sales_record.treds_processed_amount = treds_proc_amt
+            sales_record.received_date = p_date
+
+        adb.commit()
+        return {
+            "success": True,
+            "message": "M1 Payment Receipt saved successfully",
+            "indusReceiptNo": payload.indusReceiptNo,
+            "m1ReceiptNumber": receipt_no,
+            "tredsProcessedAmount": float(treds_proc_amt),
+            "receivedDate": p_date.strftime("%Y-%m-%d") if p_date else None
+        }
+
+    def process_receivable_bulk_upload(self, content: bytes, filename: str) -> Dict[str, Any]:
+        """
+        Parses uploaded Excel (.xlsx) or CSV file for Receivable bulk upload.
+        Returns list of parsed records with 'Invoice Receipt No', 'Invoice No', 'Payment Date'.
+        """
+        import io
+        import csv
+        import openpyxl
+
+        records = []
+        fn_lower = (filename or "").lower()
+        if fn_lower.endswith(('.xlsx', '.xlsm', '.xltx')):
+            try:
+                wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
+                sheet = wb.active
+                rows = list(sheet.iter_rows(values_only=True))
+                if rows and len(rows) > 1:
+                    headers = [str(h).strip() if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
+                    for r in rows[1:]:
+                        if any(v is not None and str(v).strip() for v in r):
+                            row_dict = {}
+                            for idx, h in enumerate(headers):
+                                val = r[idx] if idx < len(r) else None
+                                if hasattr(val, "strftime"):
+                                    row_dict[h] = val.strftime("%d/%m/%Y")
+                                elif val is not None:
+                                    row_dict[h] = str(val).strip()
+                                else:
+                                    row_dict[h] = ""
+                            records.append(row_dict)
+            except Exception as e:
+                logger.error(f"Error parsing Excel file for receivable: {e}")
+        else:
+            try:
+                text_data = content.decode('utf-8', errors='ignore')
+                reader = csv.DictReader(io.StringIO(text_data))
+                for row in reader:
+                    records.append({k.strip(): (v.strip() if v else "") for k, v in row.items() if k})
+            except Exception as e:
+                logger.error(f"Error parsing CSV file for receivable: {e}")
+
+        return {
+            "success": True,
+            "filename": filename,
+            "totalCount": len(records),
+            "validCount": len(records),
+            "invalidCount": 0,
+            "records": records
         }

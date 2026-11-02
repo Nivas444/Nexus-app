@@ -1,4 +1,4 @@
-from typing import List, Optional, Any, Union
+from typing import List, Optional, Any, Union, Dict
 from pydantic import BaseModel, ConfigDict
 
 
@@ -531,6 +531,44 @@ class CommercialReceivableUpdateReceivedAmountRequest(BaseModel):
     invoiceNo: str
     receivedAmount: float
     receivedDate: Optional[str] = None
+
+
+class CommercialIndusPaymentReceiptRequest(BaseModel):
+    receiptNo: str
+    paymentDate: Optional[str] = None
+    approvedAmount: float
+    treds: bool = False
+    dn: Optional[bool] = None  # Hold toggle
+    hold: Optional[bool] = None
+    holdAmount: Optional[float] = 0.0
+    holdReason: Optional[str] = None
+    indusProcessedAmount: float
+    remarks: Optional[str] = None
+    invoices: Optional[List[Dict[str, Any]]] = None
+
+    @property
+    def is_hold(self) -> bool:
+        if self.dn is not None:
+            return bool(self.dn)
+        if self.hold is not None:
+            return bool(self.hold)
+        return False
+
+
+class CommercialM1PaymentReceiptRequest(BaseModel):
+    indusReceiptNo: str
+    m1ReceiptNumber: Optional[str] = None
+    miReceiptNumber: Optional[str] = None
+    paymentDate: Optional[str] = None
+    discountAmount: Optional[float] = 0.0
+    processingFee: Optional[float] = 0.0
+    tredsProcessedAmount: float
+    invoices: Optional[List[Dict[str, Any]]] = None
+
+    @property
+    def receipt_number(self) -> str:
+        return self.m1ReceiptNumber or self.miReceiptNumber or ""
+
 
 
 

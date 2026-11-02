@@ -975,25 +975,29 @@ class CommercialInvoiceService:
     def process_receivable_bulk_upload(self, content: bytes, filename: str) -> Dict[str, Any]:
         """
         Parses uploaded Excel (.xlsx) or CSV file for Receivable bulk upload.
-        Returns list of parsed records with 'Invoice Receipt No', 'Invoice No', 'Payment Date'.
+        Validates whether uploaded file matches the template headers:
+        'Invoice Receipt No', 'Invoice No', 'Payment Date', 'Approved Amount'.
+        Returns list of parsed records and summation of Approved Amount.
         """
         import io
         import csv
+        import re
         import openpyxl
 
         records = []
+        raw_headers = []
         fn_lower = (filename or "").lower()
         if fn_lower.endswith(('.xlsx', '.xlsm', '.xltx')):
             try:
                 wb = openpyxl.load_workbook(io.BytesIO(content), data_only=True)
                 sheet = wb.active
                 rows = list(sheet.iter_rows(values_only=True))
-                if rows and len(rows) > 1:
-                    headers = [str(h).strip() if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
+                if rows and len(rows) > 0:
+                    raw_headers = [str(h).strip() if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
                     for r in rows[1:]:
                         if any(v is not None and str(v).strip() for v in r):
                             row_dict = {}
-                            for idx, h in enumerate(headers):
+                            for idx, h in enumerate(raw_headers):
                                 val = r[idx] if idx < len(r) else None
                                 if hasattr(val, "strftime"):
                                     row_dict[h] = val.strftime("%d/%m/%Y")
@@ -1004,14 +1008,66 @@ class CommercialInvoiceService:
                             records.append(row_dict)
             except Exception as e:
                 logger.error(f"Error parsing Excel file for receivable: {e}")
+                return {
+                    "success": False,
+                    "message": f"Failed to parse uploaded Excel file: {str(e)}",
+                    "error": "PARSE_ERROR"
+                }
         else:
             try:
                 text_data = content.decode('utf-8', errors='ignore')
                 reader = csv.DictReader(io.StringIO(text_data))
+                if reader.fieldnames:
+                    raw_headers = [k.strip() for k in reader.fieldnames if k]
                 for row in reader:
                     records.append({k.strip(): (v.strip() if v else "") for k, v in row.items() if k})
             except Exception as e:
                 logger.error(f"Error parsing CSV file for receivable: {e}")
+                return {
+                    "success": False,
+                    "message": f"Failed to parse uploaded CSV file: {str(e)}",
+                    "error": "PARSE_ERROR"
+                }
+
+        # Template Header Validation
+        # Required columns: 'Invoice Receipt No', 'Invoice No', 'Payment Date', 'Approved Amount'
+        def normalize_key(k: str) -> str:
+            return re.sub(r'[^a-z0-9]', '', str(k).lower())
+
+        norm_headers = [normalize_key(h) for h in raw_headers]
+        required_cols = {
+            'invoicereceiptno': 'Invoice Receipt No',
+            'invoiceno': 'Invoice No',
+            'paymentdate': 'Payment Date',
+            'approvedamount': 'Approved Amount'
+        }
+
+        missing = []
+        for req_norm, display_name in required_cols.items():
+            if not any(req_norm in nh or nh in req_norm for nh in norm_headers):
+                missing.append(display_name)
+
+        if missing:
+            return {
+                "success": False,
+                "message": f"Missing column: {', '.join(missing)}",
+                "error": "TEMPLATE_MISMATCH",
+                "missingColumns": missing
+            }
+
+        # Calculate summation of Approved Amount
+        total_approved = 0.0
+        for r in records:
+            amt_val = 0.0
+            for k, v in r.items():
+                if 'approved' in k.lower() and 'amount' in k.lower():
+                    clean_str = re.sub(r'[^0-9.-]', '', str(v or '0'))
+                    try:
+                        amt_val = float(clean_str) if clean_str else 0.0
+                    except (ValueError, TypeError):
+                        amt_val = 0.0
+                    break
+            total_approved += amt_val
 
         return {
             "success": True,
@@ -1019,5 +1075,6 @@ class CommercialInvoiceService:
             "totalCount": len(records),
             "validCount": len(records),
             "invalidCount": 0,
+            "totalApprovedAmount": round(total_approved, 2),
             "records": records
         }

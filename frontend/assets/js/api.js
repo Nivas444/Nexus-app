@@ -2100,6 +2100,24 @@
             method: 'POST',
             body: JSON.stringify(data)
           });
+        },
+        async submitIndusPaymentReceipt(data) {
+          return await request('/commercial/receivable/indus-payment-receipt', {
+            method: 'POST',
+            body: JSON.stringify(data)
+          });
+        },
+        async submitM1PaymentReceipt(data) {
+          return await request('/commercial/receivable/m1-payment-receipt', {
+            method: 'POST',
+            body: JSON.stringify(data)
+          });
+        },
+        async bulkUpload(formData) {
+          return await request('/commercial/receivable/bulk-upload', {
+            method: 'POST',
+            body: formData
+          });
         }
       },
       poToBeOpen: {

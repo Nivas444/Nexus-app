@@ -9037,10 +9037,203 @@
               <input type="file" id="inpBulkCsvFilePicker" accept=".csv, .xlsx, .xls, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;" onchange="handleBulkCsvFileSelected(this)">
               <button type="button" class="bulk-upload-dropzone-btn" id="btnTriggerBulkCsvUpload" onclick="document.getElementById('inpBulkCsvFilePicker').click();" title="Upload CSV / Excel" style="background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 18px 30px; transition: transform 0.2s ease;">
                 <img src="icons/CSV upload.svg" alt="CSV Upload" width="60" height="60" style="width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0, 203, 160, 0.25)); transition: transform 0.2s ease;">
-                <span style="font-size: 0.95rem; font-weight: 600; color: #475569;">Click to Upload CSV / Excel</span>
+                <span id="lblBulkCsvFileName" style="font-size: 0.95rem; font-weight: 600; color: #475569;">Click to Upload CSV / Excel</span>
               </button>
+
+              <!-- Submit button below CSV upload icon as centered (for Receivable bulk upload) -->
+              <div id="wrapBulkUploadReceivableSubmit" style="display: none; justify-content: center; align-items: center; width: 100%; margin-top: 14px;">
+                <button type="button" id="btnSubmitBulkUploadReceivable" onclick="submitBulkUploadReceivable()" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                  <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+
+        <!-- Indus Payment Receipt Modal Card -->
+        <div class="side-form-card" id="indusPaymentReceiptCard" style="display: none; width: 560px; max-width: 95vw; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); overflow: hidden; margin: auto; padding: 0 0 16px 0;">
+          <!-- Header Ribbon: Slanted Green Title Badge & Rupee Icon with Value Next To Header Design + Close -->
+          <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblIndusPaymentReceiptTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Indus Payment Receipt
+              </div>
+              <div id="wrapIndusPaymentReceiptTotal" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px;">
+                <img src="icons/Ruppee.svg" alt="Rupee" width="18" height="22" style="height: 20px; width: auto; object-fit: contain;">
+                <span id="lblIndusPaymentReceiptValue" style="font-size: 1.05rem; font-weight: 700; color: #004aad;">0.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto;">
+              <button type="button" class="side-form-close-btn" id="btnCloseIndusPaymentReceiptCard" onclick="closeIndusPaymentReceiptModal()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <form class="side-form-body" id="frmIndusPaymentReceipt" onsubmit="event.preventDefault(); submitIndusPaymentReceipt();" style="padding: 16px 24px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Receipt No (Typeable Input) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpIndusReceiptNo" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Receipt No</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <select class="form-input-control" id="inpIndusReceiptNo" onchange="handleIndusReceiptNoSelected(this.value)" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="" disabled selected>Select Receipt No</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. Payment Date (Field with Calendar Icon) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpIndusPaymentDate" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Payment Date</label>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative;">
+                <input type="date" class="form-input-control date-picker-control" id="inpIndusPaymentDate" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+                <span class="input-pdf-badge btn-calendar-trigger" title="Select Payment Date" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center;" onclick="const el = document.getElementById('inpIndusPaymentDate'); if (el) { el.showPicker ? el.showPicker() : el.focus(); }">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
+                </span>
+              </div>
+            </div>
+
+            <!-- 3. Approved Amount (Fixed Rupee Symbol on Left, Typeable Rest) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpIndusApprovedAmount" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Approved Amount</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 12px; color: #64748b; font-size: 0.95rem; font-weight: 600; pointer-events: none;">₹</span>
+                <input type="text" class="form-input-control" id="inpIndusApprovedAmount" placeholder="0.00" oninput="handleIndusApprovedAmountInput(this.value); updateIndusProcessedAmount();" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px 0 28px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 4. TREDS (Toggle Switch as Centered, Not Field Name) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">TREDS</label>
+              <div class="form-input-wrap" style="flex: 1; display: flex; justify-content: center; align-items: center;">
+                <label class="toggle-slide-switch" title="Toggle TREDS">
+                  <input type="checkbox" id="tglIndusPaymentTreds">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 5. Hold (Toggle Switch as Centered, Not Field Name) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Hold</label>
+              <div class="form-input-wrap" style="flex: 1; display: flex; justify-content: center; align-items: center;">
+                <label class="toggle-slide-switch" title="Toggle Hold">
+                  <input type="checkbox" id="tglIndusPaymentHold" onchange="toggleIndusPaymentHoldFields(this.checked); updateIndusProcessedAmount();">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 6. Hold Amount (Visible when Hold toggle is active; Fixed Rupee on Left) -->
+            <div class="form-row-group" id="rowIndusHoldAmount" style="display: none; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpIndusHoldAmount" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Hold Amount</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 12px; color: #64748b; font-size: 0.95rem; font-weight: 600; pointer-events: none;">₹</span>
+                <input type="text" class="form-input-control" id="inpIndusHoldAmount" placeholder="0.00" oninput="updateIndusProcessedAmount()" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px 0 28px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 7. Hold Reason (Visible when Hold toggle is active; Dropdown GST/Debit Note) -->
+            <div class="form-row-group" id="rowIndusHoldReason" style="display: none; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="selIndusHoldReason" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Hold Reason</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <select class="form-input-control" id="selIndusHoldReason" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="" disabled selected>Select Hold Reason</option>
+                  <option value="GST">GST</option>
+                  <option value="Debit Note">Debit Note</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 8. Remarks (Typeable Input Field, Present as Last Field) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpIndusRemarks" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Remarks</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpIndusRemarks" placeholder="Enter Remarks" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- Submit Button Below Last Field (Centered) -->
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 14px;">
+              <button type="submit" id="btnSubmitIndusPaymentReceipt" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- MI Payment Receipt Modal Card -->
+        <div class="side-form-card" id="miPaymentReceiptCard" style="display: none; width: 560px; max-width: 95vw; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); overflow: hidden; margin: auto; padding: 0 0 16px 0;">
+          <!-- Header Ribbon: Slanted Green Title Badge & Rupee Icon with Value Next To Header Design + Close -->
+          <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 14px; height: 100%;">
+              <div class="side-form-title-badge" id="lblMiPaymentReceiptTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                M1 Payment Receipt
+              </div>
+              <div id="wrapMiPaymentReceiptTotal" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px;">
+                <img src="icons/Ruppee.svg" alt="Rupee" width="18" height="22" style="height: 20px; width: auto; object-fit: contain;">
+                <span id="lblMiPaymentReceiptValue" style="font-size: 1.05rem; font-weight: 700; color: #004aad;">0.00</span>
+              </div>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto;">
+              <button type="button" class="side-form-close-btn" id="btnCloseMiPaymentReceiptCard" onclick="closeMiPaymentReceiptModal()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <form class="side-form-body" id="frmMiPaymentReceipt" onsubmit="event.preventDefault(); submitMiPaymentReceipt();" style="padding: 16px 24px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Indus Receipt No (Dropdown from TREDS enabled receipts) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="selMiIndusReceiptNo" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Indus Receipt No</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <select class="form-input-control" id="selMiIndusReceiptNo" onchange="handleMiIndusReceiptSelected(this.value); updateM1TredsProcessedAmount();" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                  <option value="" disabled selected>Select Indus Receipt No</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 2. MI Receipt Number (Typeable Input Field) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpMiReceiptNumber" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">MI Receipt Number</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpMiReceiptNumber" placeholder="Enter MI Receipt Number" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 3. Payment Date (Field with Calendar Icon) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpMiPaymentDate" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Payment Date</label>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative;">
+                <input type="date" class="form-input-control date-picker-control" id="inpMiPaymentDate" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+                <span class="input-pdf-badge btn-calendar-trigger" title="Select Payment Date" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center;" onclick="const el = document.getElementById('inpMiPaymentDate'); if (el) { el.showPicker ? el.showPicker() : el.focus(); }">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
+                </span>
+              </div>
+            </div>
+
+            <!-- 4. Discount Amount (Fixed Rupee on Left, Typeable Rest) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpMiDiscountAmount" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Discount Amount</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 12px; color: #64748b; font-size: 0.95rem; font-weight: 600; pointer-events: none;">₹</span>
+                <input type="text" class="form-input-control" id="inpMiDiscountAmount" placeholder="0.00" oninput="updateM1TredsProcessedAmount()" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px 0 28px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 5. Processing Fee (Fixed Rupee on Left, Typeable Rest) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpMiProcessingFee" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Processing Fee</label>
+              <div class="form-input-wrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 12px; color: #64748b; font-size: 0.95rem; font-weight: 600; pointer-events: none;">₹</span>
+                <input type="text" class="form-input-control" id="inpMiProcessingFee" placeholder="0.00" oninput="updateM1TredsProcessedAmount()" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px 0 28px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- Submit Button Below Last Field (Centered) -->
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 14px;">
+              <button type="submit" id="btnSubmitMiPaymentReceipt" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
         </div>
 
         <!-- Accounts Manager -> Add Payment Request Card -->
@@ -10502,10 +10695,33 @@
           </div>
         </div>
 
-        <!-- Commercial Dashboard Modal (Clean Donut / Pie Chart for Task & Amount) -->
-        <div class="side-form-card" id="commercialDashboardModal" style="display: none; width: 720px; max-width: 96vw; background: #ffffff; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; padding: 20px 16px; border: 1px solid #e2e8f0; margin: auto;">
-          <div id="commercialDashboardSvgWrap" style="width: 100%; display: flex; justify-content: center; align-items: center; min-height: 440px;">
-            <!-- Dynamic SVG Donut Chart rendered here -->
+        <!-- Commercial Dashboard Modal (Donut / Pie Chart for Task & Amount) -->
+        <div class="side-form-card" id="commercialDashboardModal" style="display: none; width: 740px; max-width: 96vw; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); overflow: hidden; margin: auto; padding: 0 0 12px 0;">
+          <!-- Header Ribbon Badge: Respective Page Name + Copy Icon Next To Header Design + Close -->
+          <div class="side-form-header"
+            style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px; height: 100%;">
+              <div class="side-form-title-badge" id="lblCommercialDashboardTitle"
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                Dashboard
+              </div>
+              <button type="button" class="side-top-icon-btn" id="btnCopyCommercialDashboardChart" onclick="copyCommercialDashboardChart()" title="Copy Chart with Legend as PNG"
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; transition: transform 0.15s ease;">
+                <img src="icons/Copy (1).svg" alt="Copy Chart" width="22" height="22" style="width: 22px; height: 22px; display: block; object-fit: contain;">
+              </button>
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseCommercialDashboardModal"
+                onclick="closeCommercialDashboard()" aria-label="Close"
+                style="color: #ef4444; font-size: 30px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+          </div>
+
+          <!-- Body: Chart Container with Donut and Legend -->
+          <div class="side-form-body" id="commercialDashboardBody" style="padding: 10px 20px 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+            <div id="commercialDashboardSvgWrap" style="width: 100%; display: flex; justify-content: center; align-items: center; min-height: 420px;">
+              <!-- Dynamic SVG Donut Chart rendered here -->
+            </div>
           </div>
         </div>
 

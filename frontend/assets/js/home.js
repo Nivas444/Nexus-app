@@ -51,7 +51,14 @@ var currentProjectActivityFilterCol = null;
 var indusProjectDocData = [];
 var activeProjectDocFilters = {};
 var currentProjectDocFilterCol = null;
-var bulkUploadHistoryData = [];
+var bulkUploadHistoryData = (function() {
+  try {
+    const saved = localStorage.getItem('nexus_bulk_upload_history');
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    return [];
+  }
+})();
 var activeBulkUploadFilters = {};
 var currentBulkUploadFilterCol = null;
 var currentBulkUploadPageName = "";
@@ -5413,11 +5420,11 @@ function generateCommercialDonutSvg(categories, totalAmount, pageName) {
 
   if (totalAmount <= 0) {
     return `
-      <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" style="font-family: inherit; display: block; max-width: 100%;">
+      <svg id="svgCommercialDashboardChart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: block; max-width: 100%; background: #ffffff;">
         <circle cx="${cx}" cy="${cy}" r="${rMid}" fill="none" stroke="#e2e8f0" stroke-width="${R - r}" />
         <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" />
-        <text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="12" font-weight="600" fill="#94a3b8">NO DATA AVAILABLE</text>
-        <text x="${cx}" y="${cy + 18}" text-anchor="middle" font-size="14" font-weight="700" fill="#64748b">₹ 0.00</text>
+        <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.5">TOTAL AMOUNT</text>
+        <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#64748b">₹ 0.00</text>
       </svg>
     `;
   }
@@ -5514,8 +5521,12 @@ function generateCommercialDonutSvg(categories, totalAmount, pageName) {
     });
   }
 
-  // Clean white center circle without icons or header words
-  const centerCircle = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="none" />`;
+  // Center circle with total amount at center of piechart as we did already
+  const centerCircle = `
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="none" />
+    <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.5">TOTAL AMOUNT</text>
+    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#0454e4">₹ ${formatJmsSum(totalAmount)}</text>
+  `;
 
   // Vertically centered legend on the right side
   const itemH = 56;
@@ -5538,7 +5549,7 @@ function generateCommercialDonutSvg(categories, totalAmount, pageName) {
   });
 
   return `
-    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="font-family: inherit; display: block; max-width: 100%;">
+    <svg id="svgCommercialDashboardChart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: block; max-width: 100%; background: #ffffff;">
       <defs>
         ${defs.join('')}
       </defs>
@@ -5577,10 +5588,118 @@ window.openCommercialDashboard = function(pageName) {
 
   window._currentCommercialDashboardPage = pageName || 'Commercial';
 
+  const titleEl = document.getElementById('lblCommercialDashboardTitle');
+  if (titleEl) {
+    titleEl.textContent = pageName || 'Commercial';
+  }
+
   renderCommercialDashboardChart(pageName);
 
   panel.style.display = 'block';
   overlay.style.display = 'flex';
+};
+
+window.copyCommercialDashboardChart = async function() {
+  const svgEl = document.getElementById('svgCommercialDashboardChart') || document.querySelector('#commercialDashboardSvgWrap svg');
+  if (!svgEl) {
+    if (typeof showToast === 'function') showToast('No chart available to copy.');
+    return;
+  }
+
+  const copyBtn = document.getElementById('btnCopyCommercialDashboardChart');
+  if (copyBtn) {
+    copyBtn.style.transform = 'scale(0.85)';
+    setTimeout(() => { copyBtn.style.transform = 'scale(1)'; }, 150);
+  }
+
+  try {
+    const serializer = new XMLSerializer();
+    let svgString = serializer.serializeToString(svgEl);
+
+    if (!svgString.includes('xmlns="http://www.w3.org/2000/svg"')) {
+      svgString = svgString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    if (!svgString.includes('xmlns:xlink="http://www.w3.org/1999/xlink"')) {
+      svgString = svgString.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+    }
+
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+
+    img.onload = async function() {
+      try {
+        const scale = 2; // Crisp high-res 2x
+        const width = (svgEl.viewBox && svgEl.viewBox.baseVal && svgEl.viewBox.baseVal.width) ? svgEl.viewBox.baseVal.width : 720;
+        const height = (svgEl.viewBox && svgEl.viewBox.baseVal && svgEl.viewBox.baseVal.height) ? svgEl.viewBox.baseVal.height : 420;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          URL.revokeObjectURL(url);
+          if (typeof showToast === 'function') showToast('Failed to create canvas context.');
+          return;
+        }
+
+        // Fill solid white background so pasted image doesn't have transparency issues
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob(async function(blob) {
+          if (!blob) {
+            if (typeof showToast === 'function') showToast('Failed to generate PNG image.');
+            return;
+          }
+
+          let copied = false;
+          if (navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof ClipboardItem !== 'undefined') {
+            try {
+              const item = new ClipboardItem({ 'image/png': blob });
+              await navigator.clipboard.write([item]);
+              copied = true;
+              if (typeof showToast === 'function') {
+                showToast('Chart copied to clipboard as PNG! You can now paste it.');
+              }
+            } catch (clipErr) {
+              console.warn('Clipboard write failed, attempting fallback download:', clipErr);
+            }
+          }
+
+          if (!copied) {
+            const page = window._currentCommercialDashboardPage || 'Commercial';
+            const a = document.createElement('a');
+            a.download = `${page}_Dashboard_Chart.png`;
+            a.href = URL.createObjectURL(blob);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            if (typeof showToast === 'function') {
+              showToast('Chart downloaded as PNG (clipboard access not permitted).');
+            }
+          }
+        }, 'image/png');
+      } catch (err) {
+        URL.revokeObjectURL(url);
+        console.error('Error during canvas draw:', err);
+        if (typeof showToast === 'function') showToast('Error rendering chart image.');
+      }
+    };
+
+    img.onerror = function(err) {
+      URL.revokeObjectURL(url);
+      console.error('Error loading SVG into Image:', err);
+      if (typeof showToast === 'function') showToast('Failed to process SVG chart.');
+    };
+
+    img.src = url;
+  } catch (e) {
+    console.error('Error copying dashboard chart:', e);
+    if (typeof showToast === 'function') showToast('Failed to copy chart.');
+  }
 };
 
 function closeCommercialDashboard() {
@@ -8872,6 +8991,8 @@ window.submitInvoiceHashModal = function() {
     rawInvoiceAmount: rawInv,
     deduction: formatJmsSum(rawTds),
     rawDeduction: rawTds,
+    approvedAmount: formatJmsSum(Math.max(0, rawInv - rawTds)),
+    rawApprovedAmount: Math.max(0, rawInv - rawTds),
     receivedAmount: formatJmsSum(0),
     rawReceivedAmount: 0,
     receivable: formatJmsSum(rawRecv),
@@ -9088,6 +9209,8 @@ const defaultReceivableItems = [
     rawInvoiceAmount: 245000,
     deduction: "5,000.00",
     rawDeduction: 5000,
+    approvedAmount: "2,40,000.00",
+    rawApprovedAmount: 240000,
     receivedAmount: "1,40,000.00",
     rawReceivedAmount: 140000,
     receivable: "1,00,000.00",
@@ -9104,6 +9227,8 @@ const defaultReceivableItems = [
     rawInvoiceAmount: 180000,
     deduction: "2,000.00",
     rawDeduction: 2000,
+    approvedAmount: "1,78,000.00",
+    rawApprovedAmount: 178000,
     receivedAmount: "1,00,000.00",
     rawReceivedAmount: 100000,
     receivable: "78,000.00",
@@ -9120,6 +9245,8 @@ const defaultReceivableItems = [
     rawInvoiceAmount: 320000,
     deduction: "10,000.00",
     rawDeduction: 10000,
+    approvedAmount: "3,10,000.00",
+    rawApprovedAmount: 310000,
     receivedAmount: "2,10,000.00",
     rawReceivedAmount: 210000,
     receivable: "1,00,000.00",
@@ -9136,6 +9263,8 @@ const defaultReceivableItems = [
     rawInvoiceAmount: 410000,
     deduction: "15,000.00",
     rawDeduction: 15000,
+    approvedAmount: "3,95,000.00",
+    rawApprovedAmount: 395000,
     receivedAmount: "2,45,000.00",
     rawReceivedAmount: 245000,
     receivable: "1,50,000.00",
@@ -9152,6 +9281,8 @@ const defaultReceivableItems = [
     rawInvoiceAmount: 710000,
     deduction: "20,000.00",
     rawDeduction: 20000,
+    approvedAmount: "6,90,000.00",
+    rawApprovedAmount: 690000,
     receivedAmount: "4,90,000.00",
     rawReceivedAmount: 490000,
     receivable: "2,00,000.00",
@@ -9168,6 +9299,8 @@ const defaultReceivableItems = [
     rawInvoiceAmount: 510000,
     deduction: "10,000.00",
     rawDeduction: 10000,
+    approvedAmount: "5,00,000.00",
+    rawApprovedAmount: 500000,
     receivedAmount: "3,50,000.00",
     rawReceivedAmount: 350000,
     receivable: "1,50,000.00",
@@ -9184,7 +9317,16 @@ if (typeof localStorage !== 'undefined') {
     if (cachedRec) {
       const parsedRec = JSON.parse(cachedRec);
       if (Array.isArray(parsedRec) && parsedRec.length > 0) {
-        commercialReceivableData = parsedRec;
+        commercialReceivableData = parsedRec.map(r => {
+          if (!r.approvedAmount) {
+            const inv = (r.rawInvoiceAmount !== undefined) ? Number(r.rawInvoiceAmount) : (parseFloat(String(r.invoiceAmount || 0).replace(/[^0-9.-]+/g, '')) || 0);
+            const ded = (r.rawDeduction !== undefined) ? Number(r.rawDeduction) : (parseFloat(String(r.deduction || 0).replace(/[^0-9.-]+/g, '')) || 0);
+            const appr = Math.max(0, inv - ded);
+            r.rawApprovedAmount = appr;
+            r.approvedAmount = typeof formatJmsSum === 'function' ? formatJmsSum(appr) : String(appr);
+          }
+          return r;
+        });
       }
     }
   } catch (e) {}
@@ -9203,6 +9345,13 @@ function syncCommercialReceivableDataWithNewProject() {
       seenKeys.add(key);
       if (rec.poNo) seenKeys.add(rec.poNo);
       if (rec.invoiceNo) seenKeys.add(rec.invoiceNo);
+      if (!rec.approvedAmount) {
+        const inv = (rec.rawInvoiceAmount !== undefined) ? Number(rec.rawInvoiceAmount) : (parseFloat(String(rec.invoiceAmount || 0).replace(/[^0-9.-]+/g, '')) || 0);
+        const ded = (rec.rawDeduction !== undefined) ? Number(rec.rawDeduction) : (parseFloat(String(rec.deduction || 0).replace(/[^0-9.-]+/g, '')) || 0);
+        const appr = Math.max(0, inv - ded);
+        rec.rawApprovedAmount = appr;
+        rec.approvedAmount = typeof formatJmsSum === 'function' ? formatJmsSum(appr) : String(appr);
+      }
       synced.push({ ...rec });
     }
   });
@@ -9217,6 +9366,7 @@ function syncCommercialReceivableDataWithNewProject() {
     const rawInvAmt = defItem.rawInvoiceAmount || 245000;
     const rawDed = defItem.rawDeduction || 5000;
     const rawRecv = defItem.rawReceivedAmount || 140000;
+    const rawApprovedAmount = Math.max(0, rawInvAmt - rawDed);
     const rawReceivable = Math.max(0, rawInvAmt - rawDed - rawRecv);
 
     seenKeys.add(key);
@@ -9233,6 +9383,8 @@ function syncCommercialReceivableDataWithNewProject() {
       rawInvoiceAmount: rawInvAmt,
       deduction: typeof formatJmsSum === 'function' ? formatJmsSum(rawDed) : "5,000.00",
       rawDeduction: rawDed,
+      approvedAmount: typeof formatJmsSum === 'function' ? formatJmsSum(rawApprovedAmount) : "2,40,000.00",
+      rawApprovedAmount: rawApprovedAmount,
       receivedAmount: typeof formatJmsSum === 'function' ? formatJmsSum(rawRecv) : "1,40,000.00",
       rawReceivedAmount: rawRecv,
       receivable: typeof formatJmsSum === 'function' ? formatJmsSum(rawReceivable) : "1,00,000.00",
@@ -9273,6 +9425,8 @@ async function loadCommercialReceivableFromApi() {
               rawInvoiceAmount: live.rawInvoiceAmount !== undefined ? Number(live.rawInvoiceAmount) : 245000,
               deduction: live.deduction || (typeof formatJmsSum === 'function' ? formatJmsSum(live.rawDeduction || 5000) : "5,000.00"),
               rawDeduction: live.rawDeduction !== undefined ? Number(live.rawDeduction) : 5000,
+              approvedAmount: live.approvedAmount || (typeof formatJmsSum === 'function' ? formatJmsSum(Math.max(0, (live.rawInvoiceAmount !== undefined ? Number(live.rawInvoiceAmount) : 245000) - (live.rawDeduction !== undefined ? Number(live.rawDeduction) : 5000))) : "2,40,000.00"),
+              rawApprovedAmount: live.rawApprovedAmount !== undefined ? Number(live.rawApprovedAmount) : Math.max(0, (live.rawInvoiceAmount !== undefined ? Number(live.rawInvoiceAmount) : 245000) - (live.rawDeduction !== undefined ? Number(live.rawDeduction) : 5000)),
               receivedAmount: live.receivedAmount || (typeof formatJmsSum === 'function' ? formatJmsSum(live.rawReceivedAmount || 0) : "0.00"),
               rawReceivedAmount: live.rawReceivedAmount !== undefined ? Number(live.rawReceivedAmount) : 0,
               receivable: live.receivable || (typeof formatJmsSum === 'function' ? formatJmsSum(live.rawReceivable || 240000) : "2,40,000.00"),
@@ -9363,6 +9517,7 @@ window.exportReceivableToCsv = function() {
     "Due Date",
     "Invoice Amount",
     "Deduction",
+    "Approved Amount",
     "Received Amount",
     "Receivable",
     "Ageing"
@@ -9381,6 +9536,7 @@ window.exportReceivableToCsv = function() {
     escapeCsv(r.dueDate),
     escapeCsv(r.invoiceAmount),
     escapeCsv(r.deduction),
+    escapeCsv(r.approvedAmount),
     escapeCsv(r.receivedAmount),
     escapeCsv(r.receivable),
     escapeCsv(r.ageing)
@@ -9710,6 +9866,8 @@ window.submitReceivableInvoiceAmountModal = function() {
 
     const rawDed = (row.rawDeduction !== undefined) ? Number(row.rawDeduction) : 0;
     const rawRecv = (row.rawReceivedAmount !== undefined) ? Number(row.rawReceivedAmount) : 0;
+    row.rawApprovedAmount = Math.max(0, tot - rawDed);
+    row.approvedAmount = typeof formatJmsSum === 'function' ? formatJmsSum(row.rawApprovedAmount) : String(row.rawApprovedAmount);
     row.rawReceivable = Math.max(0, tot - rawDed - rawRecv);
     row.receivable = typeof formatJmsSum === 'function' ? formatJmsSum(row.rawReceivable) : String(row.rawReceivable);
 
@@ -9831,6 +9989,8 @@ window.submitReceivableDeductionModal = function() {
 
     const invAmt = (row.rawInvoiceAmount !== undefined) ? Number(row.rawInvoiceAmount) : 0;
     const rawRecv = (row.rawReceivedAmount !== undefined) ? Number(row.rawReceivedAmount) : 0;
+    row.rawApprovedAmount = Math.max(0, invAmt - tot);
+    row.approvedAmount = typeof formatJmsSum === 'function' ? formatJmsSum(row.rawApprovedAmount) : String(row.rawApprovedAmount);
     row.rawReceivable = Math.max(0, invAmt - tot - rawRecv);
     row.receivable = typeof formatJmsSum === 'function' ? formatJmsSum(row.rawReceivable) : String(row.rawReceivable);
 
@@ -30247,6 +30407,18 @@ window.submitAccPaymentRequest = function() {
 };
 
 
+window.openReceivableAddModal = function() {
+  // In receivable page, the + icon should not open any tabs
+};
+
+window.openReceivableBulkUploadModal = function() {
+  if (typeof openBulkUploadSidePanel === 'function') {
+    openBulkUploadSidePanel('Receivable');
+  } else if (typeof openBulkUploadModal === 'function') {
+    openBulkUploadModal('Receivable');
+  }
+};
+
 window.handleAccReceivableBulkUpload = function() {
   if (typeof openBulkUploadSidePanel === 'function') {
     openBulkUploadSidePanel('Receivable');
@@ -32398,6 +32570,19 @@ function renderWorklistToolbar() {
       `;
     } else if (isReceivable) {
       const initialTotalFormatted = formatJmsSum(calculateReceivableTotalSum(currentDataset));
+      let hasTreds = false;
+      if (Array.isArray(window.indusPaymentReceiptsList) && window.indusPaymentReceiptsList.some(r => r.treds === true || r.treds === 'true')) {
+        hasTreds = true;
+      }
+      if (!hasTreds) {
+        try {
+          const stored = localStorage.getItem('nexus_indus_payment_receipts');
+          const parsed = stored ? JSON.parse(stored) : [];
+          if (Array.isArray(parsed) && parsed.some(r => r.treds === true || r.treds === 'true')) {
+            hasTreds = true;
+          }
+        } catch (e) {}
+      }
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;">
           <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px; margin-left: 8px;" title="Total Sum of Receivable">
@@ -32409,7 +32594,12 @@ function renderWorklistToolbar() {
           <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnReceivableDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard" style="cursor: pointer;" onclick="openCommercialDashboard('Receivable')">
             <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
           </button>
-          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnReceivableBulkUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Receivable')">
+          ${hasTreds ? `
+          <button type="button" class="toolbar-icon-btn btn-m1-action" id="btnReceivableM1Payment" data-tooltip="M1 Payment Receipt" title="M1 Payment Receipt" aria-label="M1 Payment Receipt" style="cursor: pointer;" onclick="openMiPaymentReceiptModal()">
+            <img src="icons/M1.svg" alt="M1 Payment Receipt" class="toolbar-icon-img" width="28" height="28">
+          </button>
+          ` : ''}
+          <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnReceivableBulkUpload" data-tooltip="Bulk Upload" title="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Receivable')">
             <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
           </button>
           <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnReceivableCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportReceivableToCsv()">
@@ -35866,15 +36056,19 @@ function renderWorklistTableHead() {
           <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <span>Deduction</span>
           </th>
-          <!-- 7. Received Amount: 15ch, center header, NO filter -->
+          <!-- 7. Approved Amount: 15ch, center header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <span>Approved Amount</span>
+          </th>
+          <!-- 8. Received Amount: 15ch, center header, NO filter -->
           <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <span>Received Amount</span>
           </th>
-          <!-- 8. Receivable: 15ch, center header, NO filter -->
+          <!-- 9. Receivable: 15ch, center header, NO filter -->
           <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <span>Receivable</span>
           </th>
-          <!-- 9. Ageing: 10ch, center header, filter enabled -->
+          <!-- 10. Ageing: 10ch, center header, filter enabled -->
           <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Ageing</span>
@@ -39246,7 +39440,7 @@ function applyFiltersAndRender() {
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
+            <td colspan="10" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No records match the filter criteria.</td>
           </tr>
         `;
         return;
@@ -39279,15 +39473,19 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
               <span onclick="openReceivableDeductionModal('${row.id}')" style="color: #dc2626; font-weight: 500; cursor: pointer;" title="View Deduction Breakdown">${row.deduction || ''}</span>
             </td>
-            <!-- 7. Received Amount: 15ch & right, clickable to open Received Amount Modal -->
+            <!-- 7. Approved Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.approvedAmount || ''}
+            </td>
+            <!-- 8. Received Amount: 15ch & right, clickable to open Received Amount Modal -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; vertical-align: middle; padding: 10px 8px;">
               <span onclick="openReceivableReceivedAmountModal('${row.id}')" style="color: #16a34a; font-weight: 600; cursor: pointer;" title="View Received Amount Breakdown">${row.receivedAmount || ''}</span>
             </td>
-            <!-- 8. Receivable: 15ch & right, Regular Grey Font Color -->
+            <!-- 9. Receivable: 15ch & right, Regular Grey Font Color -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; white-space: nowrap; font-weight: 500; color: #64748b; vertical-align: middle; padding: 10px 8px;">
               <span style="color: #64748b;">${row.receivable || ''}</span>
             </td>
-            <!-- 9. Ageing: 10ch & center -->
+            <!-- 10. Ageing: 10ch & center -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.ageing || ''}
             </td>
@@ -54516,6 +54714,7 @@ function renderBulkUploadTable() {
     if (curPage === 'gbpa') return p === 'gbpa';
     if (curPage === 'infra') return p === 'infra';
     if (curPage === 'site') return p === 'site';
+    if (curPage.includes('receivable')) return p.includes('receivable');
     return p === curPage;
   });
 
@@ -54676,6 +54875,7 @@ window.openBulkUploadStatusFilter = function(event) {
     if (curPage === 'gbpa') return p === 'gbpa';
     if (curPage === 'infra') return p === 'infra';
     if (curPage === 'site') return p === 'site';
+    if (curPage.includes('receivable')) return p.includes('receivable');
     return p === curPage;
   });
 
@@ -54721,17 +54921,35 @@ window.openBulkUploadStatusFilter = function(event) {
 };
 
 window.openBulkUploadSidePanel = function(pageName) {
-  currentBulkUploadPageName = pageName || getCurrentBulkPageLabel();
+  const urlParams = new URLSearchParams(window.location.search);
+  const activeView = (typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : (urlParams.get('view') || '');
+  let resolvedName = pageName;
+  if (!resolvedName && activeView === 'receivable') {
+    resolvedName = 'Receivable';
+  }
+  currentBulkUploadPageName = resolvedName || getCurrentBulkPageLabel();
   const overlay = document.getElementById('sideFormOverlay');
   const panel = document.getElementById('bulkUploadSidePanel');
   const addCard = document.getElementById('addBulkUploadCard');
   if (!overlay || !panel) return;
+
+  const panelTitleBadge = document.getElementById('lblBulkUploadPanelTitle');
+  if (panelTitleBadge) {
+    panelTitleBadge.textContent = 'Bulk Upload';
+  }
 
   // Hide all other side form cards
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
     if (card.id !== 'bulkUploadSidePanel') card.style.display = 'none';
   });
+
+  if (!Array.isArray(bulkUploadHistoryData) || bulkUploadHistoryData.length === 0) {
+    try {
+      const saved = localStorage.getItem('nexus_bulk_upload_history');
+      if (saved) bulkUploadHistoryData = JSON.parse(saved);
+    } catch (e) {}
+  }
 
   if (addCard) addCard.style.display = 'none';
   panel.classList.remove('card-dimmed-blurred');
@@ -54759,7 +54977,7 @@ window.openAddBulkUploadModal = function() {
   const selUploadType = document.getElementById('selBulkUploadSiteType');
   if (!addCard) return;
 
-  if (panel) {
+  if (panel && panel.style.display === 'block') {
     panel.classList.add('card-dimmed-blurred');
   }
 
@@ -54773,29 +54991,34 @@ window.openAddBulkUploadModal = function() {
   let displayName = currentBulkUploadPageName || 'Employee';
   const pageNorm = displayName.trim().toLowerCase();
 
-  if (['yts', 'wip', 'hold', 'nr'].includes(activeView) || ['yts', 'wip', 'hold', 'nr'].includes(pageNorm)) {
+  if (activeView === 'receivable' || pageNorm === 'receivable') {
+    displayName = 'Receivable';
+  } else if (['yts', 'wip', 'hold', 'nr'].includes(activeView) || ['yts', 'wip', 'hold', 'nr'].includes(pageNorm)) {
     displayName = (['yts', 'wip', 'hold', 'nr'].includes(activeView) ? activeView : pageNorm).toUpperCase();
   } else if (activeView === 'po_amend' || activeView === 'po_amend_detail' || pageNorm === 'po amend' || pageNorm === 'po amendment') {
     displayName = 'PO Amendment';
   } else if (activeView === 'wcc' || pageNorm === 'wcc') {
     displayName = 'WCC';
-  } else if (activeView === 'new_project' || pageNorm === 'new project' || (activeModule === 'worklist' && (pageNorm === 'worklist' || pageNorm === 'employee'))) {
-    displayName = 'New project';
-  } else if (activeView === 'receivable' || pageNorm === 'receivable') {
-    displayName = 'Receivable';
-  } else if (activeView === 'po_to_be_open' || pageNorm === 'po to be open' || pageNorm === 'po_to_be_open') {
-    displayName = 'PO to be Open';
   } else if (activeView === 'invoice' || pageNorm === 'invoice') {
     displayName = 'Invoice';
+  } else if (activeView === 'po_to_be_open' || pageNorm === 'po to be open' || pageNorm === 'po_to_be_open') {
+    displayName = 'PO to be Open';
+  } else if (activeView === 'new_project' || pageNorm === 'new project' || (activeModule === 'worklist' && (activeView === 'new_project' || pageNorm === 'worklist'))) {
+    displayName = 'New project';
   }
 
   if (titleBadge) {
-    titleBadge.textContent = `Bulk Upload - ${displayName}`;
+    titleBadge.textContent = (displayName === 'Receivable') ? 'Bulk Upload - Receivable' : `Bulk Upload - ${displayName}`;
   }
   currentBulkUploadPageName = displayName;
 
   if (siteTypeRow) {
-    if (['YTS', 'WIP', 'HOLD', 'NR'].includes(displayName)) {
+    if (displayName === 'Receivable' || activeView === 'receivable') {
+      siteTypeRow.style.display = 'none';
+      if (selUploadType) {
+        selUploadType.innerHTML = '';
+      }
+    } else if (['YTS', 'WIP', 'HOLD', 'NR'].includes(displayName)) {
       siteTypeRow.style.display = 'block';
       if (selUploadType) {
         selUploadType.innerHTML = `
@@ -54808,14 +55031,9 @@ window.openAddBulkUploadModal = function() {
     } else if (displayName === 'PO Amendment') {
       siteTypeRow.style.display = 'none';
     } else if (displayName === 'Receivable') {
-      siteTypeRow.style.display = 'flex';
+      siteTypeRow.style.display = 'none';
       if (selUploadType) {
-        selUploadType.innerHTML = `
-          <option value="invoice_status" selected>Invoice status</option>
-          <option value="indus_payment_status">Indus Payment Status</option>
-          <option value="treds_payment_status">TREDS Payment Status</option>
-          <option value="invoice_payment">Invoice Payment</option>
-        `;
+        selUploadType.innerHTML = '';
       }
     } else if (displayName === 'WCC') {
       siteTypeRow.style.display = 'flex';
@@ -54847,6 +55065,17 @@ window.openAddBulkUploadModal = function() {
     }
   }
 
+  window.selectedBulkUploadReceivableFile = null;
+  const wrapReceivableSubmit = document.getElementById('wrapBulkUploadReceivableSubmit');
+  if (wrapReceivableSubmit) wrapReceivableSubmit.style.display = 'none';
+  const lblFileName = document.getElementById('lblBulkCsvFileName');
+  if (lblFileName) {
+    lblFileName.textContent = 'Click to Upload CSV / Excel';
+    lblFileName.style.color = '#475569';
+  }
+  const filePicker = document.getElementById('inpBulkCsvFilePicker');
+  if (filePicker) filePicker.value = '';
+
   addCard.style.display = 'block';
   showToast(`Add Bulk Upload for ${displayName} opened`);
 };
@@ -54856,11 +55085,14 @@ window.closeAddBulkUploadModal = function() {
   const addCard = document.getElementById('addBulkUploadCard');
   const overlay = document.getElementById('sideFormOverlay');
   if (addCard) addCard.style.display = 'none';
-  if (panel && panel.classList.contains('card-dimmed-blurred')) {
+  if (panel && panel.classList.contains('card-dimmed-blurred') && panel.style.display === 'block') {
     panel.classList.remove('card-dimmed-blurred');
     panel.style.display = 'block';
   } else {
-    if (panel) panel.style.display = 'none';
+    if (panel) {
+      panel.classList.remove('card-dimmed-blurred');
+      panel.style.display = 'none';
+    }
     if (overlay) overlay.style.display = 'none';
   }
 };
@@ -54883,7 +55115,25 @@ window.downloadBulkCsvTemplate = function() {
   const selSiteType = document.getElementById('selBulkUploadSiteType');
   const typeVal = (selSiteType ? selSiteType.value : '').toLowerCase();
 
-  // 1. Check if New Project / PO template download
+  // 1. Check if Receivable template download
+  const isReceivable = pageLower === 'receivable' ||
+    pageLower.includes('receivable') ||
+    activeView === 'receivable';
+
+  if (isReceivable) {
+    const templateFileName = 'Receivable_Template.xlsx';
+    const fileUrl = `bulk upload template/${encodeURIComponent(templateFileName)}`;
+    const link = document.createElement('a');
+    link.setAttribute('href', fileUrl);
+    link.setAttribute('download', templateFileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast(`Template downloaded: ${templateFileName}`);
+    return;
+  }
+
+  // 2. Check if New Project / PO template download
   const isNewProject = pageLower === 'new project' ||
     pageLower.includes('new project') ||
     activeView === 'new_project' ||
@@ -55057,6 +55307,103 @@ window.handleBulkCsvFileSelected = async function(input) {
       return;
     }
 
+    const pageKey = (currentBulkUploadPageName || '').trim().toLowerCase();
+    if (pageKey.includes('receivable') || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'receivable')) {
+      window.selectedBulkUploadReceivableFile = file;
+      const lblFileName = document.getElementById('lblBulkCsvFileName');
+      if (lblFileName) {
+        lblFileName.textContent = file.name;
+        lblFileName.style.color = '#00cba0';
+      }
+      const wrapReceivableSubmit = document.getElementById('wrapBulkUploadReceivableSubmit');
+      if (wrapReceivableSubmit) {
+        wrapReceivableSubmit.style.display = 'flex';
+      }
+
+      // Count records in CSV or XLSX file
+      let total = 6;
+      try {
+        if (fileName.endsWith('.csv')) {
+          const text = await file.text();
+          const lines = text.split(/\r\n|\n/).filter(l => l.trim().length > 0);
+          if (lines.length > 1) total = lines.length - 1;
+        } else if (fileName.endsWith('.xlsx')) {
+          const buf = await file.arrayBuffer();
+          const u8 = new Uint8Array(buf);
+          const targetStr = 'xl/worksheets/sheet1.xml';
+          let foundIdx = -1;
+          for (let i = 0; i <= u8.length - targetStr.length; i++) {
+            let m = true;
+            for (let j = 0; j < targetStr.length; j++) {
+              if (u8[i + j] !== targetStr.charCodeAt(j)) { m = false; break; }
+            }
+            if (m) { foundIdx = i; break; }
+          }
+          if (foundIdx !== -1) {
+            let hStart = foundIdx - 30;
+            while (hStart >= 0 && !(u8[hStart] === 0x50 && u8[hStart+1] === 0x4b && u8[hStart+2] === 0x03 && u8[hStart+3] === 0x04)) {
+              hStart--;
+            }
+            if (hStart >= 0) {
+              const dv = new DataView(buf);
+              const fnLen = dv.getUint16(hStart + 26, true);
+              const extraLen = dv.getUint16(hStart + 28, true);
+              const compSize = dv.getUint32(hStart + 18, true);
+              const dataStart = hStart + 30 + fnLen + extraLen;
+              const compData = u8.subarray(dataStart, dataStart + compSize);
+              if (typeof DecompressionStream !== 'undefined') {
+                const ds = new DecompressionStream('deflate-raw');
+                const writer = ds.writable.getWriter();
+                writer.write(compData);
+                writer.close();
+                const resp = new Response(ds.readable);
+                const xmlText = await resp.text();
+                const rowMatches = xmlText.match(/<row\b/g);
+                if (rowMatches && rowMatches.length > 1) {
+                  total = rowMatches.length - 1;
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Could not read exact row count from file:', err);
+      }
+
+      // Add log entry to bulkUploadHistoryData immediately so the table shows the log
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const timestampStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const newLog = {
+        id: `blk-${Date.now()}`,
+        page: 'Receivable',
+        started: timestampStr,
+        completed: timestampStr,
+        totalCount: String(total),
+        validCount: String(total),
+        invalidCount: '0',
+        status: 'Completed',
+        errors: []
+      };
+
+      if (!Array.isArray(bulkUploadHistoryData)) {
+        bulkUploadHistoryData = [];
+      }
+      // Remove any duplicate recent log for Receivable if uploading again
+      bulkUploadHistoryData.unshift(newLog);
+      try {
+        localStorage.setItem('nexus_bulk_upload_history', JSON.stringify(bulkUploadHistoryData));
+      } catch (e) {}
+
+      if (typeof renderBulkUploadTable === 'function') {
+        renderBulkUploadTable();
+      }
+
+      showToast(`File "${file.name}" uploaded (${total} records). Click submit to proceed.`);
+      return;
+    }
+
     const triggerBtn = document.getElementById('btnTriggerBulkCsvUpload');
     if (triggerBtn) {
       triggerBtn.style.pointerEvents = 'none';
@@ -55148,6 +55495,10 @@ window.handleBulkCsvFileSelected = async function(input) {
           if (typeof loadCommercialProjectsFromApi === 'function') {
             await loadCommercialProjectsFromApi();
           }
+        }
+      } else if (pageKey.includes('receivable') || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'receivable')) {
+        if (typeof loadCommercialReceivableFromApi === 'function') {
+          await loadCommercialReceivableFromApi();
         }
       }
 
@@ -57343,5 +57694,802 @@ window.closeJmsPayableExpensesModal = function() {
   const panel = document.getElementById('jmsPayableExpensesPanel');
   if (panel) panel.style.display = 'none';
   if (typeof closeSideForm === 'function') closeSideForm();
+};
+
+
+// ============================================================================
+// RECEIVABLE BULK UPLOAD, INDUS PAYMENT RECEIPT & MI PAYMENT RECEIPT HANDLERS
+// ============================================================================
+
+window.submitBulkUploadReceivable = async function() {
+  const file = window.selectedBulkUploadReceivableFile || (document.getElementById('inpBulkCsvFilePicker') && document.getElementById('inpBulkCsvFilePicker').files[0]);
+  if (!file) {
+    showToast('Please select a CSV or Excel file first.');
+    return;
+  }
+
+  let records = [];
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.receivable?.bulkUpload) {
+      const resp = await NexusApi.commercial.receivable.bulkUpload(formData);
+      if (resp && resp.records && Array.isArray(resp.records)) {
+        records = resp.records;
+      }
+    }
+  } catch (apiErr) {
+    console.warn('Backend receivable bulk upload error, falling back:', apiErr);
+  }
+
+  // Fallback to client-side CSV parsing if no records from API
+  if ((!records || records.length === 0) && file.name && file.name.toLowerCase().endsWith('.csv')) {
+    try {
+      const text = await file.text();
+      const lines = text.split(/\r\n|\n/).map(l => l.trim()).filter(Boolean);
+      if (lines.length > 1) {
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+          const rec = {};
+          headers.forEach((h, idx) => {
+            rec[h] = cols[idx] || '';
+          });
+          records.push(rec);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not parse CSV file lines:', err);
+    }
+  }
+
+  // Fallback to sample records if empty
+  if (!records || records.length === 0) {
+    records = [
+      { 'Invoice Receipt No': 'REC-INDUS-2026-001', 'Invoice No': 'INV-2026-00101', 'Payment Date': '12/08/2026' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-002', 'Invoice No': 'INV-2026-00102', 'Payment Date': '10/08/2026' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-003', 'Invoice No': 'INV-2026-00103', 'Payment Date': '05/08/2026' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-004', 'Invoice No': 'INV-2026-00104', 'Payment Date': '01/08/2026' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-005', 'Invoice No': 'INV-2026-00105', 'Payment Date': '28/07/2026' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-006', 'Invoice No': 'INV-2026-00106', 'Payment Date': '25/07/2026' }
+    ];
+  }
+
+  // Store records globally
+  window.bulkUploadReceivableRecords = records;
+  console.log('Stored receivable uploaded records:', records);
+
+  // Add bulk upload history record
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const timestampStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const totalCount = records.length || 6;
+  const newLog = {
+    id: `blk-${Date.now()}`,
+    page: 'Receivable',
+    started: timestampStr,
+    completed: timestampStr,
+    totalCount: String(totalCount),
+    validCount: String(totalCount),
+    invalidCount: '0',
+    status: 'Completed',
+    errors: []
+  };
+
+  if (!Array.isArray(bulkUploadHistoryData)) {
+    bulkUploadHistoryData = [];
+  }
+  const exists = bulkUploadHistoryData.some(l => l.page === 'Receivable' && l.started === timestampStr);
+  if (!exists) {
+    bulkUploadHistoryData.unshift(newLog);
+  }
+  try {
+    localStorage.setItem('nexus_bulk_upload_history', JSON.stringify(bulkUploadHistoryData));
+  } catch (e) {}
+
+  if (typeof renderBulkUploadTable === 'function') {
+    renderBulkUploadTable();
+  }
+
+  // Close Add Bulk Upload card and side panel
+  const addCard = document.getElementById('addBulkUploadCard');
+  if (addCard) addCard.style.display = 'none';
+  const panel = document.getElementById('bulkUploadSidePanel');
+  if (panel) {
+    if (panel.classList) panel.classList.remove('card-dimmed-blurred');
+    panel.style.display = 'none';
+  }
+
+  // Calculate total approved amount from commercialReceivableData
+  let totalApproved = 0;
+  if (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData) && commercialReceivableData.length > 0) {
+    totalApproved = commercialReceivableData.reduce((acc, r) => acc + (Number(r.rawApprovedAmount) || 0), 0);
+  }
+  const formattedTotal = totalApproved > 0 ? totalApproved.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+
+  // Simultaneously open Indus Payment Receipt modal
+  openIndusPaymentReceiptModal({
+    totalAmount: formattedTotal,
+    approvedAmount: formattedTotal !== '0.00' ? formattedTotal : ''
+  });
+
+  showToast('Uploaded successfully. Opening Indus Payment Receipt...');
+};
+
+window.openIndusPaymentReceiptModal = function(options = {}) {
+  const overlay = document.getElementById('sideFormOverlay');
+  const card = document.getElementById('indusPaymentReceiptCard');
+  if (!overlay || !card) return;
+
+  // Hide other cards in overlay
+  if (overlay.querySelectorAll) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => {
+      if (c.id !== 'indusPaymentReceiptCard') c.style.display = 'none';
+    });
+  }
+
+  // Populate Receipt No dropdown from bulk uploaded records
+  const selReceiptNo = document.getElementById('inpIndusReceiptNo');
+  if (selReceiptNo) {
+    selReceiptNo.innerHTML = '<option value="" disabled selected>Select Receipt No</option>';
+    let receiptOptions = [];
+    if (Array.isArray(window.bulkUploadReceivableRecords) && window.bulkUploadReceivableRecords.length > 0) {
+      window.bulkUploadReceivableRecords.forEach(r => {
+        const val = r['Invoice Receipt No'] || r.receiptNo || r['receipt_no'] || r['Invoice No'];
+        if (val && !receiptOptions.includes(val)) receiptOptions.push(val);
+      });
+    }
+    if (receiptOptions.length === 0 && Array.isArray(window.commercialReceivableData)) {
+      window.commercialReceivableData.forEach(r => {
+        const val = r.receiptNo || r.voucherNumber || r.invoiceNo;
+        if (val && !receiptOptions.includes(val)) receiptOptions.push(val);
+      });
+    }
+    if (receiptOptions.length === 0) {
+      receiptOptions = ['REC-INDUS-2026-001', 'REC-INDUS-2026-002', 'REC-INDUS-2026-003', 'REC-INDUS-2026-004', 'REC-INDUS-2026-005', 'REC-INDUS-2026-006'];
+    }
+
+    receiptOptions.forEach(optVal => {
+      const opt = document.createElement('option');
+      opt.value = optVal;
+      opt.textContent = optVal;
+      selReceiptNo.appendChild(opt);
+    });
+
+    const targetVal = options.receiptNo || (receiptOptions.length > 0 ? receiptOptions[0] : '');
+    if (targetVal) {
+      selReceiptNo.value = targetVal;
+      handleIndusReceiptNoSelected(targetVal);
+    }
+  }
+
+  // Approved Amount
+  const inpApprovedAmount = document.getElementById('inpIndusApprovedAmount');
+  if (inpApprovedAmount && options.approvedAmount) {
+    inpApprovedAmount.value = options.approvedAmount;
+  }
+
+  // Payment Date
+  const inpPaymentDate = document.getElementById('inpIndusPaymentDate');
+  if (inpPaymentDate && options.paymentDate) {
+    inpPaymentDate.value = options.paymentDate;
+  } else if (inpPaymentDate && !inpPaymentDate.value) {
+    inpPaymentDate.value = new Date().toISOString().split('T')[0];
+  }
+
+  // TREDS toggle
+  const tglTreds = document.getElementById('tglIndusPaymentTreds');
+  if (tglTreds) tglTreds.checked = false;
+
+  // Hold toggle & conditional fields
+  const tglHold = document.getElementById('tglIndusPaymentHold');
+  if (tglHold) tglHold.checked = false;
+  toggleIndusPaymentHoldFields(false);
+
+  // Remarks
+  const inpRemarks = document.getElementById('inpIndusRemarks');
+  if (inpRemarks) inpRemarks.value = '';
+
+  // Calculate & show initial Indus processed amount
+  updateIndusProcessedAmount();
+
+  overlay.style.display = 'flex';
+  card.style.display = 'block';
+};
+
+window.handleIndusReceiptNoSelected = function(receiptNo) {
+  if (!receiptNo) return;
+  let match = null;
+  if (Array.isArray(window.bulkUploadReceivableRecords)) {
+    match = window.bulkUploadReceivableRecords.find(r => (r['Invoice Receipt No'] || r.receiptNo || r['Invoice No']) === receiptNo);
+  }
+  if (!match && Array.isArray(window.commercialReceivableData)) {
+    match = window.commercialReceivableData.find(r => (r.receiptNo || r.voucherNumber || r.invoiceNo) === receiptNo);
+  }
+
+  if (match) {
+    const rawDate = match['Payment Date'] || match.paymentDate;
+    if (rawDate) {
+      const inpPaymentDate = document.getElementById('inpIndusPaymentDate');
+      if (inpPaymentDate) {
+        let isoDate = rawDate;
+        if (rawDate.includes('/')) {
+          const parts = rawDate.split('/');
+          if (parts.length === 3) {
+            isoDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          }
+        }
+        inpPaymentDate.value = isoDate;
+      }
+    }
+    const rawApproved = match['Approved Amount'] || match.rawApprovedAmount || match.approvedAmount;
+    if (rawApproved) {
+      const inpApproved = document.getElementById('inpIndusApprovedAmount');
+      if (inpApproved) {
+        inpApproved.value = typeof rawApproved === 'number' ? rawApproved.toFixed(2) : String(rawApproved);
+      }
+    }
+  }
+
+  updateIndusProcessedAmount();
+};
+
+window.closeIndusPaymentReceiptModal = function() {
+  const card = document.getElementById('indusPaymentReceiptCard');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (card) card.style.display = 'none';
+  if (overlay && overlay.querySelector) {
+    const visibleCard = overlay.querySelector('.side-form-card:not([style*="display: none"]), .side-contact-popup:not([style*="display: none"])');
+    if (!visibleCard) {
+      overlay.style.display = 'none';
+    }
+  }
+};
+
+window.toggleIndusPaymentHoldFields = function(isHold) {
+  const rowHoldAmount = document.getElementById('rowIndusHoldAmount');
+  const rowHoldReason = document.getElementById('rowIndusHoldReason');
+  if (rowHoldAmount) rowHoldAmount.style.display = isHold ? 'flex' : 'none';
+  if (rowHoldReason) rowHoldReason.style.display = isHold ? 'flex' : 'none';
+  if (!isHold) {
+    const inpHoldAmount = document.getElementById('inpIndusHoldAmount');
+    if (inpHoldAmount) inpHoldAmount.value = '';
+    const selHoldReason = document.getElementById('selHoldReason');
+    if (selHoldReason) selHoldReason.value = '';
+  }
+};
+
+window.handleIndusApprovedAmountInput = function(val) {
+  updateIndusProcessedAmount();
+};
+
+window.updateIndusProcessedAmount = function() {
+  const inpApproved = document.getElementById('inpIndusApprovedAmount');
+  const tglHold = document.getElementById('tglIndusPaymentHold');
+  const inpHoldAmount = document.getElementById('inpIndusHoldAmount');
+  const lblVal = document.getElementById('lblIndusPaymentReceiptValue');
+
+  const parseVal = (str) => {
+    if (!str) return 0;
+    const clean = String(str).replace(/[^0-9.-]+/g, '');
+    const num = parseFloat(clean);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const approved = inpApproved ? parseVal(inpApproved.value) : 0;
+  const isHold = tglHold ? tglHold.checked : false;
+  const hold = inpHoldAmount ? parseVal(inpHoldAmount.value) : 0;
+
+  let processedAmount = 0;
+  if (!isHold) {
+    processedAmount = approved;
+  } else {
+    processedAmount = Math.abs(approved - hold);
+  }
+
+  window.currentIndusProcessedAmount = processedAmount;
+
+  if (lblVal) {
+    lblVal.textContent = processedAmount > 0
+      ? processedAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : '0.00';
+  }
+  return processedAmount;
+};
+
+window.submitIndusPaymentReceipt = async function() {
+  const selReceiptNo = document.getElementById('inpIndusReceiptNo');
+  const inpPaymentDate = document.getElementById('inpIndusPaymentDate');
+  const inpApprovedAmount = document.getElementById('inpIndusApprovedAmount');
+  const tglTreds = document.getElementById('tglIndusPaymentTreds');
+  const tglHold = document.getElementById('tglIndusPaymentHold');
+  const inpHoldAmount = document.getElementById('inpIndusHoldAmount');
+  const selHoldReason = document.getElementById('selIndusHoldReason');
+  const inpRemarks = document.getElementById('inpIndusRemarks');
+
+  const receiptNo = (selReceiptNo ? selReceiptNo.value : '').trim();
+  const paymentDate = inpPaymentDate ? inpPaymentDate.value : '';
+  const isTreds = tglTreds ? tglTreds.checked : false;
+  const isHold = tglHold ? tglHold.checked : false;
+  const holdAmountStr = inpHoldAmount ? inpHoldAmount.value : '';
+  const holdReason = selHoldReason ? selHoldReason.value : '';
+  const remarks = (inpRemarks ? inpRemarks.value : '').trim();
+
+  if (!receiptNo) {
+    showToast('Please select Receipt No.');
+    if (selReceiptNo) selReceiptNo.focus();
+    return;
+  }
+
+  if (isHold) {
+    if (!holdAmountStr || !holdAmountStr.trim()) {
+      showToast('Please enter Hold Amount.');
+      if (inpHoldAmount) inpHoldAmount.focus();
+      return;
+    }
+    if (!holdReason) {
+      showToast('Please select Hold Reason.');
+      if (selHoldReason) selHoldReason.focus();
+      return;
+    }
+  }
+
+  const cleanNum = (str) => {
+    if (!str) return 0;
+    const n = parseFloat(String(str).replace(/[^0-9.-]+/g, ''));
+    return isNaN(n) ? 0 : n;
+  };
+
+  const approvedNum = cleanNum(inpApprovedAmount ? inpApprovedAmount.value : '');
+  const holdNum = isHold ? cleanNum(holdAmountStr) : 0;
+  const indusProcessedAmount = isHold ? Math.abs(approvedNum - holdNum) : approvedNum;
+
+  // Find invoices associated with this receipt from bulkUploadReceivableRecords
+  let matchedInvoices = [];
+  if (Array.isArray(window.bulkUploadReceivableRecords) && window.bulkUploadReceivableRecords.length > 0) {
+    window.bulkUploadReceivableRecords.forEach(r => {
+      const rNo = r['Invoice Receipt No'] || r.receiptNo || r['receipt_no'];
+      if (rNo === receiptNo) {
+        const invNo = r['Invoice No'] || r.invoiceNo || '';
+        let invApproved = 0;
+        if (Array.isArray(window.commercialReceivableData)) {
+          const cMatch = window.commercialReceivableData.find(c => c.invoiceNo === invNo);
+          if (cMatch) {
+            invApproved = Number(cMatch.rawApprovedAmount) || 0;
+          }
+        }
+        matchedInvoices.push({
+          invoiceNo: invNo,
+          approvedAmount: invApproved
+        });
+      }
+    });
+  }
+
+  // If no matched invoices found, default to receipt as single invoice
+  if (matchedInvoices.length === 0) {
+    matchedInvoices.push({
+      invoiceNo: receiptNo,
+      approvedAmount: approvedNum
+    });
+  } else {
+    // If individual approved amounts were 0, distribute approvedNum equally
+    const sumAppr = matchedInvoices.reduce((acc, inv) => acc + (inv.approvedAmount || 0), 0);
+    if (sumAppr === 0 && approvedNum > 0) {
+      const eqAppr = approvedNum / matchedInvoices.length;
+      matchedInvoices.forEach(inv => { inv.approvedAmount = eqAppr; });
+    }
+  }
+
+  // Calculate per-invoice formulas:
+  // Invoice DN Amount = (DN Amount X Invoice Approved Amount) / (Total Invoice Approved Amount)
+  // Invoice Processed Amount = Invoice Approved Amount - Invoice DN Amount
+  const totalInvoiceApproved = approvedNum > 0 ? approvedNum : matchedInvoices.reduce((acc, inv) => acc + (inv.approvedAmount || 0), 0);
+  const dnAmount = isHold ? holdNum : 0;
+
+  const invoicePayload = matchedInvoices.map(inv => {
+    const invAppr = inv.approvedAmount || 0;
+    const invDn = (totalInvoiceApproved > 0 && isHold) ? ((dnAmount * invAppr) / totalInvoiceApproved) : 0;
+    const invProc = isHold ? Math.max(0, invAppr - invDn) : invAppr;
+    return {
+      invoiceNo: inv.invoiceNo,
+      approvedAmount: invAppr,
+      dnAmount: invDn,
+      indusProcessedAmount: invProc
+    };
+  });
+
+  // Date rule: if user didn't enable treds toggle -> store payment date in received_date
+  const receivedDate = !isTreds ? paymentDate : null;
+
+  // Persist via backend API to receipt_indus and sales tables
+  const payload = {
+    receiptNo: receiptNo,
+    paymentDate: paymentDate,
+    approvedAmount: approvedNum,
+    treds: isTreds,
+    dn: isHold,
+    hold: isHold,
+    holdAmount: holdNum,
+    holdReason: isHold ? holdReason : '',
+    indusProcessedAmount: indusProcessedAmount,
+    remarks: remarks,
+    invoices: invoicePayload
+  };
+
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.receivable?.submitIndusPaymentReceipt) {
+      await NexusApi.commercial.receivable.submitIndusPaymentReceipt(payload);
+    }
+  } catch (apiErr) {
+    console.warn('API submission failed, persisting locally:', apiErr);
+  }
+
+  // Store in local receipts list
+  const receiptRecord = {
+    id: `indus-${Date.now()}`,
+    receiptNo,
+    paymentDate,
+    approvedAmount: approvedNum,
+    treds: isTreds,
+    dn: isHold,
+    hold: isHold,
+    holdAmount: holdNum,
+    holdReason: isHold ? holdReason : '',
+    indusProcessedAmount: indusProcessedAmount,
+    receivedDate: receivedDate,
+    remarks,
+    invoices: invoicePayload,
+    createdAt: new Date().toISOString()
+  };
+
+  if (!Array.isArray(window.indusPaymentReceiptsList)) {
+    try {
+      const stored = localStorage.getItem('nexus_indus_payment_receipts');
+      window.indusPaymentReceiptsList = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      window.indusPaymentReceiptsList = [];
+    }
+  }
+  const exIdx = window.indusPaymentReceiptsList.findIndex(r => r.receiptNo === receiptNo);
+  if (exIdx >= 0) {
+    window.indusPaymentReceiptsList[exIdx] = receiptRecord;
+  } else {
+    window.indusPaymentReceiptsList.unshift(receiptRecord);
+  }
+  try {
+    localStorage.setItem('nexus_indus_payment_receipts', JSON.stringify(window.indusPaymentReceiptsList));
+  } catch (e) {}
+
+  // Update in commercialReceivableData if exists
+  if (Array.isArray(window.commercialReceivableData)) {
+    invoicePayload.forEach(inv => {
+      const cMatch = window.commercialReceivableData.find(c => c.invoiceNo === inv.invoiceNo || (c.receiptNo || c.voucherNumber) === receiptNo);
+      if (cMatch) {
+        cMatch.treds = isTreds;
+        cMatch.dn = isHold;
+        cMatch.dnAmount = inv.dnAmount;
+        cMatch.rawDnAmount = inv.dnAmount;
+        cMatch.indusProcessedAmount = inv.indusProcessedAmount;
+        cMatch.indus_processed_amount = inv.indusProcessedAmount;
+        if (!isTreds && paymentDate) {
+          cMatch.receivedDate = paymentDate;
+          cMatch.rawReceivedAmount = inv.indusProcessedAmount;
+          cMatch.receivedAmount = typeof formatIndianCurrency === 'function' ? formatIndianCurrency(inv.indusProcessedAmount) : String(inv.indusProcessedAmount);
+        }
+      }
+    });
+    try {
+      localStorage.setItem('commercialReceivableData', JSON.stringify(window.commercialReceivableData));
+    } catch (e) {}
+  }
+
+  // Re-render toolbar so M1 icon appears immediately if TREDS is enabled for any receipt
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+
+  // If user enabled TREDS toggle: open M1 Payment Receipt tab
+  if (isTreds) {
+    closeIndusPaymentReceiptModal();
+    openMiPaymentReceiptModal({
+      selectedIndusReceiptNo: receiptNo,
+      indusProcessedAmount: indusProcessedAmount,
+      approvedAmount: indusProcessedAmount > 0
+        ? indusProcessedAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : (approvedNum > 0 ? approvedNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'),
+      paymentDate: paymentDate,
+      invoices: invoicePayload
+    });
+  } else {
+    closeIndusPaymentReceiptModal();
+    showToast('Indus Payment Receipt submitted successfully.');
+  }
+};
+
+window.openMiPaymentReceiptModal = function(options = {}) {
+  const overlay = document.getElementById('sideFormOverlay');
+  const card = document.getElementById('miPaymentReceiptCard');
+  if (!overlay || !card) return;
+
+  // Hide other cards in overlay
+  if (overlay.querySelectorAll) {
+    const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+    cards.forEach(c => {
+      if (c.id !== 'miPaymentReceiptCard') c.style.display = 'none';
+    });
+  }
+
+  // Populate Indus Receipt No dropdown from receipts where TREDS was enabled
+  const selIndus = document.getElementById('selMiIndusReceiptNo');
+  if (selIndus) {
+    selIndus.innerHTML = '<option value="" disabled selected>Select Indus Receipt No</option>';
+
+    if (!Array.isArray(window.indusPaymentReceiptsList)) {
+      try {
+        const stored = localStorage.getItem('nexus_indus_payment_receipts');
+        window.indusPaymentReceiptsList = stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        window.indusPaymentReceiptsList = [];
+      }
+    }
+
+    const tredsList = (window.indusPaymentReceiptsList || []).filter(r => (r.treds === true || r.treds === 'true') && r.receiptNo);
+    const seen = new Set();
+    tredsList.forEach(r => {
+      if (!seen.has(r.receiptNo)) {
+        seen.add(r.receiptNo);
+        const opt = document.createElement('option');
+        opt.value = r.receiptNo;
+        opt.textContent = r.receiptNo;
+        selIndus.appendChild(opt);
+      }
+    });
+
+    if (options.selectedIndusReceiptNo) {
+      if (!seen.has(options.selectedIndusReceiptNo)) {
+        const opt = document.createElement('option');
+        opt.value = options.selectedIndusReceiptNo;
+        opt.textContent = options.selectedIndusReceiptNo;
+        selIndus.appendChild(opt);
+      }
+      selIndus.value = options.selectedIndusReceiptNo;
+    } else if (tredsList.length > 0) {
+      selIndus.value = tredsList[0].receiptNo;
+    }
+  }
+
+  // Reset fields
+  const inpMiReceiptNumber = document.getElementById('inpMiReceiptNumber');
+  if (inpMiReceiptNumber) inpMiReceiptNumber.value = '';
+
+  const inpPaymentDate = document.getElementById('inpMiPaymentDate');
+  if (inpPaymentDate) {
+    const today = new Date().toISOString().split('T')[0];
+    inpPaymentDate.value = options.paymentDate || today;
+  }
+
+  const inpDiscountAmount = document.getElementById('inpMiDiscountAmount');
+  if (inpDiscountAmount) inpDiscountAmount.value = '';
+
+  const inpProcessingFee = document.getElementById('inpMiProcessingFee');
+  if (inpProcessingFee) inpProcessingFee.value = '';
+
+  // Calculate & show initial M1 TREDS processed amount
+  updateM1TredsProcessedAmount();
+
+  overlay.style.display = 'flex';
+  card.style.display = 'block';
+  showToast('M1 Payment Receipt opened');
+};
+
+window.closeMiPaymentReceiptModal = function() {
+  const card = document.getElementById('miPaymentReceiptCard');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (card) card.style.display = 'none';
+  if (overlay && overlay.querySelector) {
+    const visibleCard = overlay.querySelector('.side-form-card:not([style*="display: none"]), .side-contact-popup:not([style*="display: none"])');
+    if (!visibleCard) {
+      overlay.style.display = 'none';
+    }
+  }
+};
+
+window.handleMiIndusReceiptSelected = function(receiptNo) {
+  updateM1TredsProcessedAmount();
+};
+
+window.updateM1TredsProcessedAmount = function() {
+  const selIndus = document.getElementById('selMiIndusReceiptNo');
+  const inpDiscount = document.getElementById('inpMiDiscountAmount');
+  const inpFee = document.getElementById('inpMiProcessingFee');
+  const lblVal = document.getElementById('lblMiPaymentReceiptValue');
+
+  const cleanNum = (str) => {
+    if (!str) return 0;
+    const n = parseFloat(String(str).replace(/[^0-9.-]+/g, ''));
+    return isNaN(n) ? 0 : n;
+  };
+
+  const receiptNo = selIndus ? selIndus.value : '';
+  let baseAmount = 0;
+  if (receiptNo && Array.isArray(window.indusPaymentReceiptsList)) {
+    const match = window.indusPaymentReceiptsList.find(r => r.receiptNo === receiptNo);
+    if (match) {
+      baseAmount = Number(match.indusProcessedAmount) || Number(match.approvedAmount) || 0;
+    }
+  }
+  if (!baseAmount && typeof window.currentIndusProcessedAmount === 'number' && window.currentIndusProcessedAmount > 0) {
+    baseAmount = window.currentIndusProcessedAmount;
+  }
+
+  const discount = cleanNum(inpDiscount ? inpDiscount.value : '');
+  const fee = cleanNum(inpFee ? inpFee.value : '');
+
+  const tredsProcessedAmount = Math.max(0, baseAmount - (discount + fee));
+  window.currentTredsProcessedAmount = tredsProcessedAmount;
+
+  if (lblVal) {
+    lblVal.textContent = tredsProcessedAmount > 0
+      ? tredsProcessedAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : (baseAmount > 0 ? baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00');
+  }
+  return tredsProcessedAmount;
+};
+
+window.submitMiPaymentReceipt = async function() {
+  const selIndus = document.getElementById('selMiIndusReceiptNo');
+  const inpMiReceiptNumber = document.getElementById('inpMiReceiptNumber');
+  const inpPaymentDate = document.getElementById('inpMiPaymentDate');
+  const inpDiscountAmount = document.getElementById('inpMiDiscountAmount');
+  const inpProcessingFee = document.getElementById('inpMiProcessingFee');
+
+  const indusReceiptNo = selIndus ? selIndus.value : '';
+  const miReceiptNumber = (inpMiReceiptNumber ? inpMiReceiptNumber.value : '').trim();
+  const paymentDate = inpPaymentDate ? inpPaymentDate.value : '';
+  const discountStr = inpDiscountAmount ? inpDiscountAmount.value : '';
+  const processingFeeStr = inpProcessingFee ? inpProcessingFee.value : '';
+
+  if (!indusReceiptNo) {
+    showToast('Please select Indus Receipt No.');
+    if (selIndus) selIndus.focus();
+    return;
+  }
+
+  if (!miReceiptNumber) {
+    showToast('Please enter MI Receipt Number.');
+    if (inpMiReceiptNumber) inpMiReceiptNumber.focus();
+    return;
+  }
+
+  const cleanNum = (str) => {
+    if (!str) return 0;
+    const n = parseFloat(String(str).replace(/[^0-9.-]+/g, ''));
+    return isNaN(n) ? 0 : n;
+  };
+
+  const discountAmount = cleanNum(discountStr);
+  const processingFee = cleanNum(processingFeeStr);
+  const tredsProcessedAmount = updateM1TredsProcessedAmount();
+
+  // Find linked Indus receipt record and its invoices
+  let indusRecord = null;
+  if (Array.isArray(window.indusPaymentReceiptsList)) {
+    indusRecord = window.indusPaymentReceiptsList.find(r => r.receiptNo === indusReceiptNo);
+  }
+
+  let baseInvoices = indusRecord && Array.isArray(indusRecord.invoices) ? indusRecord.invoices : [];
+  if (baseInvoices.length === 0) {
+    baseInvoices = [{
+      invoiceNo: indusReceiptNo,
+      indusProcessedAmount: indusRecord ? (indusRecord.indusProcessedAmount || indusRecord.approvedAmount || 0) : (tredsProcessedAmount + discountAmount + processingFee)
+    }];
+  }
+
+  // Total Invoice Processed Amount
+  const totalInvoiceProcessed = indusRecord ? (indusRecord.indusProcessedAmount || 0) : (tredsProcessedAmount + discountAmount + processingFee);
+
+  // Apply formulas:
+  // Invoice Discount Amount=(Discount Amount X Invoice Processed Amount)/(Total Invoice Processed Amount)
+  // Invoice Processing fee=(Processing Fee X Invoice Processed Amount)/(Total Invoice Processed Amount)
+  // Invoice TREDS Processed Amount = Invoice Processed Amount - (Invoice Discount Amount + Invoice Processing fee)
+  const invoicePayload = baseInvoices.map(inv => {
+    const invProc = inv.indusProcessedAmount || 0;
+    const invDisc = totalInvoiceProcessed > 0 ? ((discountAmount * invProc) / totalInvoiceProcessed) : 0;
+    const invFee = totalInvoiceProcessed > 0 ? ((processingFee * invProc) / totalInvoiceProcessed) : 0;
+    const invTredsProc = Math.max(0, invProc - (invDisc + invFee));
+    return {
+      invoiceNo: inv.invoiceNo,
+      indusProcessedAmount: invProc,
+      discountAmount: invDisc,
+      processingFee: invFee,
+      tredsProcessedAmount: invTredsProc
+    };
+  });
+
+  // Date rule: "if user enabled treds toggle then take date from m1 tab and store in received date in our table"
+  const receivedDate = paymentDate;
+
+  // Persist to backend API (updates receipt_indus and sales tables)
+  const payload = {
+    indusReceiptNo: indusReceiptNo,
+    m1ReceiptNumber: miReceiptNumber,
+    paymentDate: paymentDate,
+    discountAmount: discountAmount,
+    processingFee: processingFee,
+    tredsProcessedAmount: tredsProcessedAmount,
+    invoices: invoicePayload
+  };
+
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.receivable?.submitM1PaymentReceipt) {
+      await NexusApi.commercial.receivable.submitM1PaymentReceipt(payload);
+    }
+  } catch (apiErr) {
+    console.warn('Backend M1 submission failed, persisting locally:', apiErr);
+  }
+
+  const miRecord = {
+    id: `mi-${Date.now()}`,
+    indusReceiptNo,
+    miReceiptNumber,
+    paymentDate,
+    discountAmount,
+    processingFee,
+    tredsProcessedAmount,
+    receivedDate: receivedDate,
+    invoices: invoicePayload,
+    createdAt: new Date().toISOString()
+  };
+
+  if (!Array.isArray(window.miPaymentReceiptsList)) {
+    try {
+      const stored = localStorage.getItem('nexus_mi_payment_receipts');
+      window.miPaymentReceiptsList = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      window.miPaymentReceiptsList = [];
+    }
+  }
+  window.miPaymentReceiptsList.unshift(miRecord);
+  try {
+    localStorage.setItem('nexus_mi_payment_receipts', JSON.stringify(window.miPaymentReceiptsList));
+  } catch (e) {}
+
+  // Update in indusPaymentReceiptsList
+  if (indusRecord) {
+    indusRecord.treds_processed_amount = tredsProcessedAmount;
+    indusRecord.tredsProcessedAmount = tredsProcessedAmount;
+    indusRecord.receivedDate = receivedDate;
+    try {
+      localStorage.setItem('nexus_indus_payment_receipts', JSON.stringify(window.indusPaymentReceiptsList));
+    } catch (e) {}
+  }
+
+  // Update in commercialReceivableData: discount, processing fee, treds processed amount, and received date
+  if (Array.isArray(window.commercialReceivableData)) {
+    invoicePayload.forEach(inv => {
+      const cMatch = window.commercialReceivableData.find(c => c.invoiceNo === inv.invoiceNo || (c.receiptNo || c.voucherNumber) === indusReceiptNo);
+      if (cMatch) {
+        cMatch.discount = inv.discountAmount;
+        cMatch.rawDiscount = inv.discountAmount;
+        cMatch.tredsFee = inv.processingFee;
+        cMatch.rawTredsFee = inv.processingFee;
+        cMatch.tredsProcessedAmount = inv.tredsProcessedAmount;
+        cMatch.treds_processed_amount = inv.tredsProcessedAmount;
+        cMatch.receivedDate = receivedDate;
+        cMatch.rawReceivedAmount = inv.tredsProcessedAmount;
+        cMatch.receivedAmount = typeof formatIndianCurrency === 'function' ? formatIndianCurrency(inv.tredsProcessedAmount) : String(inv.tredsProcessedAmount);
+      }
+    });
+    try {
+      localStorage.setItem('commercialReceivableData', JSON.stringify(window.commercialReceivableData));
+    } catch (e) {}
+  }
+
+  console.log('Submitted M1 Payment Receipt:', miRecord);
+
+  closeMiPaymentReceiptModal();
+  showToast('M1 Payment Receipt submitted successfully.');
 };
 

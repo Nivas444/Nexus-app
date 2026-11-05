@@ -1791,6 +1791,49 @@
       async getProjects() {
         return await request('/commercial/projects', { method: 'GET' });
       },
+      async savePmProjectDetails(details) {
+        return await request('/commercial/projects/save-pm-details', {
+          method: 'POST',
+          body: JSON.stringify(details)
+        });
+      },
+      async getProjectExpenses(poNo, siteId) {
+        let url = '/commercial/projects/expenses?';
+        const params = [];
+        if (poNo) params.push(`po_no=${encodeURIComponent(poNo)}`);
+        if (siteId) params.push(`site_id=${encodeURIComponent(siteId)}`);
+        return await request(url + params.join('&'), { method: 'GET' });
+      },
+      async getProjectMaterials(poNo, siteId) {
+        let url = '/commercial/projects/materials?';
+        const params = [];
+        if (poNo) params.push(`po_no=${encodeURIComponent(poNo)}`);
+        if (siteId) params.push(`site_id=${encodeURIComponent(siteId)}`);
+        return await request(url + params.join('&'), { method: 'GET' });
+      },
+      async getPoLineItems(poNo, query) {
+        let url = `/commercial/projects/po-line-items?po_no=${encodeURIComponent(poNo)}`;
+        if (query) url += `&q=${encodeURIComponent(query)}`;
+        return await request(url, { method: 'GET' });
+      },
+      async saveProjectExpense(expenseData) {
+        return await request('/commercial/projects/expenses', {
+          method: 'POST',
+          body: JSON.stringify(expenseData)
+        });
+      },
+      async editProjectUpdate(payload) {
+        return await request('/commercial/projects/edit-project-update', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async saveProjectMaterial(materialData) {
+        return await request('/commercial/projects/materials', {
+          method: 'POST',
+          body: JSON.stringify(materialData)
+        });
+      },
       async deleteProject(projectId) {
         return await request(`/commercial/projects/${encodeURIComponent(projectId)}`, {
           method: 'DELETE'

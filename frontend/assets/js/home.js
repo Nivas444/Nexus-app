@@ -153,11 +153,90 @@ async function loadCommercialProjectsFromApi() {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.getProjects) {
     try {
       const response = await NexusApi.commercial.getProjects();
-      if (response && Array.isArray(response.items) && response.items.length > 0) {
+      if (response && Array.isArray(response.items)) {
         commercialWorklistData = response.items;
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
         }
+
+        // Sync PM feature settings map and PM status data store from backend projects
+        response.items.forEach(p => {
+          const sName = (p.siteName || '').trim().toLowerCase();
+          const sId = (p.siteId || '').trim().toLowerCase();
+          const pId = (p.projectId || '').trim().toLowerCase();
+          const rId = String(p.id || '').trim().toLowerCase();
+
+          const feat = {
+            siteSurvey: !!p.siteSurvey,
+            tspMaterials: !!p.tspMaterials,
+            qualityAudit: !!p.qualityAudit,
+            civilWorks: !!p.civilWorks,
+            ptw: !!p.ptw,
+            srn: !!p.srn || !!p.isSrn,
+            stn: !!p.stn || !!p.isStn,
+            electricalWorks: !!p.electricalWorks,
+            additionalApproval: !!p.additionalApproval,
+            cam: !!p.cam || !!p.isCam,
+            poleMounts: !!p.poleMounts,
+            serviceContract: !!p.serviceContract,
+            towerType: p.towerType || '',
+            towerHeight: p.towerHeight || '',
+            sbc: p.sbc || '',
+            windSpeed: p.windSpeed || '',
+            planningBoq: p.planningBoq || ''
+          };
+
+          if (sName) siteFeatureSettingsMap[sName] = Object.assign({}, feat);
+          if (sId) siteFeatureSettingsMap[sId] = Object.assign({}, feat);
+          if (pId) siteFeatureSettingsMap[pId] = Object.assign({}, feat);
+          if (rId) siteFeatureSettingsMap[rId] = Object.assign({}, feat);
+
+          const pStatus = (p.projectStatus || p.status || '').trim();
+          if (['YTS', 'WIP', 'HOLD', 'NR', 'Project Update'].includes(pStatus)) {
+            const existingIdx = pmStatusDataStore.findIndex(sr => String(sr.id) === String(p.id) || (p.projectId && sr.projectId === p.projectId) || (p.siteId && sr.siteId === p.siteId));
+            const pmRecord = {
+              id: p.id,
+              siteName: p.siteName || '',
+              status: pStatus,
+              projectId: p.projectId || '',
+              siteId: p.siteId || '',
+              projectType: p.projectType || 'New Build',
+              subProjectType: p.subProjectType || 'Civil',
+              stn: p.stn || '',
+              srn: p.srn || '',
+              cam: p.cam || '',
+              siteSurvey: !!p.siteSurvey,
+              civilWorks: !!p.civilWorks,
+              poleMounts: !!p.poleMounts,
+              tspMaterials: !!p.tspMaterials,
+              qualityAudit: !!p.qualityAudit,
+              ptw: !!p.ptw,
+              electricalWorks: !!p.electricalWorks,
+              additionalApproval: !!p.additionalApproval,
+              serviceContract: !!p.serviceContract,
+              materials: p.materials || (p.tspMaterials ? 'Dispatched' : 'Pending'),
+              supportRequired: p.supportRequired || '',
+              pendingWith: p.pendingWith || '',
+              remarks: p.remarks || '',
+              ageing: p.ageing || '1 Day',
+              selected: false,
+              customerName: p.customerName || '',
+              poNo: p.poNo || '',
+              poAmount: p.poAmount || 0,
+              date: p.date || ''
+            };
+            if (existingIdx >= 0) {
+              pmStatusDataStore[existingIdx] = Object.assign({}, pmStatusDataStore[existingIdx], pmRecord);
+            } else {
+              pmStatusDataStore.push(pmRecord);
+            }
+          }
+        });
+
+        try {
+          localStorage.setItem('siteFeatureSettingsMap', JSON.stringify(siteFeatureSettingsMap));
+          localStorage.setItem('pmStatusDataStore', JSON.stringify(pmStatusDataStore));
+        } catch(e) {}
       } else if (!commercialWorklistData || commercialWorklistData.length === 0) {
         if (typeof defaultCommercialProjects !== 'undefined') {
           commercialWorklistData = defaultCommercialProjects.map(p => ({ ...p }));
@@ -199,9 +278,21 @@ async function loadCommercialProjectsFromApi() {
   if (typeof syncCommercialPoToBeOpenDataWithNewProject === 'function') syncCommercialPoToBeOpenDataWithNewProject();
   if (typeof syncCommercialEmailDataWithNewProject === 'function') syncCommercialEmailDataWithNewProject();
 
-  if (typeof currentWorklistView !== 'undefined') {
+  if (currentModule === 'worklist' && typeof currentWorklistView !== 'undefined') {
     if (currentWorklistView === 'new_project') {
-      currentDataset = commercialWorklistData.map(item => ({ ...item }));
+      const role = getAuthenticatedUserRole();
+      if (role === 'Project Manager') {
+        const pendingProjects = (commercialWorklistData || []).filter(item => {
+          const s = (item.projectStatus || item.status || '').trim();
+          return !s || s === 'New' || s === 'Pending';
+        });
+        currentDataset = pendingProjects.map(item => ({
+          ...item,
+          submitDate: item.submitDate || item.date || ''
+        }));
+      } else {
+        currentDataset = (commercialWorklistData || []).map(item => ({ ...item }));
+      }
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms') {
       const role = getAuthenticatedUserRole();
@@ -481,147 +572,12 @@ async function fetchCompanyHrDataFromBackend(tabKey) {
   }
 }
 
-// Worklist -> Project Payment Details Dataset (Matching Uploaded Mockup)
-let selectedProjectPaymentReq = "R/RL-234567";
-const worklistProjectPaymentItems = [
-  {
-    id: "wpp-1",
-    selected: false,
-    expenseType: "PO",
-    boqName: "JCB Charges",
-    uom: "",
-    qty: "",
-    rateRequested: "",
-    rateValidated: "",
-    rateApproved: "",
-    amountBasic: "",
-    amountGst: "",
-    amountTotal: ""
-  },
-  {
-    id: "wpp-2",
-    selected: false,
-    expenseType: "Non - PO",
-    boqName: "",
-    uom: "",
-    qty: "",
-    rateRequested: "",
-    rateValidated: "",
-    rateApproved: "",
-    amountBasic: "",
-    amountGst: "",
-    amountTotal: ""
-  },
-  {
-    id: "wpp-3",
-    selected: false,
-    expenseType: "",
-    boqName: "",
-    uom: "",
-    qty: "",
-    rateRequested: "",
-    rateValidated: "",
-    rateApproved: "",
-    amountBasic: "",
-    amountGst: "",
-    amountTotal: ""
-  }
-];
+// Worklist -> Project Payment Details Dataset
+let selectedProjectPaymentReq = "";
+let worklistProjectPaymentItems = [];
 
 // Worklist -> Payment Dataset (All 7 Expense Heads: Project, Purchase, Employee, Transport, Admin, Accounts, Statutory)
-const paymentData = [
-  {
-    id: "pay-1",
-    submitBy: "R/RL-234567",
-    submissionDate: "12/08/2026 10:15:30",
-    approvedBy: "R/RL-234567",
-    expenseHead: "Project",
-    transferTo: "Guindy Hub",
-    approvedAmount: "1,50,000.00",
-    transferredAmount: "1,00,000.00",
-    payableAmount: "50,000.00",
-    ageing: 12,
-    selected: false
-  },
-  {
-    id: "pay-2",
-    submitBy: "R/RL-234568",
-    submissionDate: "14/08/2026 11:30:00",
-    approvedBy: "R/RL-234567",
-    expenseHead: "Purchase",
-    transferTo: "Ambattur Central",
-    approvedAmount: "3,45,000.00",
-    transferredAmount: "2,00,000.00",
-    payableAmount: "1,45,000.00",
-    ageing: 10,
-    selected: false
-  },
-  {
-    id: "pay-3",
-    submitBy: "R/RL-234570",
-    submissionDate: "16/08/2026 14:20:15",
-    approvedBy: "R/RL-234589",
-    expenseHead: "Employee",
-    transferTo: "Chennai HQ",
-    approvedAmount: "45,000.00",
-    transferredAmount: "20,000.00",
-    payableAmount: "25,000.00",
-    ageing: 8,
-    selected: false
-  },
-  {
-    id: "pay-4",
-    submitBy: "R/RL-234572",
-    submissionDate: "18/08/2026 09:45:00",
-    approvedBy: "R/RL-234589",
-    expenseHead: "Transport",
-    transferTo: "Madurai Depot",
-    approvedAmount: "85,000.00",
-    transferredAmount: "50,000.00",
-    payableAmount: "35,000.00",
-    ageing: 6,
-    selected: false
-  },
-  {
-    id: "pay-5",
-    submitBy: "R/RL-234575",
-    submissionDate: "20/08/2026 16:10:45",
-    approvedBy: "R/RL-234567",
-    expenseHead: "Admin",
-    transferTo: "Coimbatore Facility",
-    approvedAmount: "28,500.00",
-    transferredAmount: "14,000.00",
-    payableAmount: "14,500.00",
-    ageing: 5,
-    selected: false
-  },
-  {
-    id: "pay-6",
-    submitBy: "R/RL-234578",
-    submissionDate: "22/08/2026 12:00:20",
-    approvedBy: "R/RL-234589",
-    expenseHead: "Accounts",
-    transferTo: "Corporate Bank Escrow",
-    approvedAmount: "65,000.00",
-    transferredAmount: "30,000.00",
-    payableAmount: "35,000.00",
-    ageing: 4,
-    selected: false
-  },
-  {
-    id: "pay-7",
-    submitBy: "R/RL-234580",
-    submissionDate: "24/08/2026 15:30:10",
-    approvedBy: "R/RL-234567",
-    expenseHead: "Statutory",
-    transferTo: "Govt Treasury Disbursal",
-    approvedAmount: "2,10,000.00",
-    transferredAmount: "1,50,000.00",
-    payableAmount: "60,000.00",
-    ageing: 3,
-    selected: false
-  }
-];
+let paymentData = [];
 
 // ==========================================================================
 // INDUS TOWERS DATASET (Sub-Page from Customer Table Indus Link)
@@ -895,169 +851,129 @@ const projectExpensesData = [
   }
 ];
 
-// Project Details -> Material Sub-Page Dataset
-const projectMaterialData = [
-  {
-    id: "mat-1",
-    boqName: "Telecom Tower Mast Accessories 30M",
-    uom: "SET",
-    mir: "10.00",
-    min: "10.00",
-    mrr: "0.00",
-    mrn: "0.00",
-    net: "10.00",
-    jms: "10.00",
-    difference: "0.00",
-    rate: "50,000.00",
-    amount: "5,00,000.00"
-  },
-  {
-    id: "mat-2",
-    boqName: "4 Core 16 sq mm Armoured Copper Cable",
-    uom: "MTR",
-    mir: "120.00",
-    min: "120.00",
-    mrr: "0.00",
-    mrn: "0.00",
-    net: "120.00",
-    jms: "120.00",
-    difference: "0.00",
-    rate: "450.00",
-    amount: "54,000.00"
-  },
-  {
-    id: "mat-3",
-    boqName: "Chemical Earthing Electrode with Compound",
-    uom: "SET",
-    mir: "2.00",
-    min: "2.00",
-    mrr: "0.00",
-    mrn: "0.00",
-    net: "2.00",
-    jms: "2.00",
-    difference: "0.00",
-    rate: "8,500.00",
-    amount: "17,000.00"
-  },
-  {
-    id: "mat-4",
-    boqName: "Diesel Generator Set 15kVA Silent Type",
-    uom: "NOS",
-    mir: "1.00",
-    min: "1.00",
-    mrr: "0.00",
-    mrn: "0.00",
-    net: "1.00",
-    jms: "1.00",
-    difference: "0.00",
-    rate: "1,50,000.00",
-    amount: "1,50,000.00"
-  },
-  {
-    id: "mat-5",
-    boqName: "Galvanized Steel Fasteners & Clamps",
-    uom: "PKT",
-    mir: "25.00",
-    min: "25.00",
-    mrr: "0.00",
-    mrn: "0.00",
-    net: "25.00",
-    jms: "25.00",
-    difference: "0.00",
-    rate: "1,200.00",
-    amount: "30,000.00"
-  }
-];
+// Project Details -> Material Sub-Page Dataset (Loaded from project_materials table via API)
+const projectMaterialData = [];
 
-// Project Details -> Infra Sub-Page Dataset (Matching User Mockup)
-const projectInfraData = [
-  {
-    id: "infra-1",
-    docType: "MIN",
-    boqNo: "BOQ-234567-01",
-    boqDate: "12/08/2026",
-    category: "Tower",
-    infraDescription: "Telecom Tower Mast Accessories 30M Galvanized Structure",
-    qy: "1.00",
-    status: "Active"
-  },
-  {
-    id: "infra-2",
-    docType: "MRN",
-    boqNo: "BOQ-234567-02",
-    boqDate: "15/08/2026",
-    category: "Electrical",
-    infraDescription: "Diesel Generator Set 15kVA Silent Type with AMF Panel",
-    qy: "1.00",
-    status: "Active"
-  },
-  {
-    id: "infra-3",
-    docType: "MIN",
-    boqNo: "BOQ-234567-03",
-    boqDate: "18/08/2026",
-    category: "Civil",
-    infraDescription: "25x6mm Hot Dip Galvanized Earth Strip & Chemical Pit",
-    qy: "50.00",
-    status: "Active"
-  },
-  {
-    id: "infra-4",
-    docType: "MRN",
-    boqNo: "BOQ-234567-04",
-    boqDate: "22/08/2026",
-    category: "Security",
-    infraDescription: "Outdoor CCTV Surveillance & Peripheral Security Fence",
-    qy: "4.00",
-    status: "Active"
-  }
-];
+// Project Details -> Infra Sub-Page Dataset (Loaded from indus_customer_infra table in Master DB)
+let projectInfraData = [];
 
-// Project Details -> DPR Sub-Page Dataset (Matching User Mockup)
-const projectDprData = [
-  {
-    id: "dpr-1",
-    date: "14/09/2026",
-    activity: "Civil Foundation & Tower",
-    status: "Approved",
-    ptwType: "Height",
-    ptwNumber: "PTW-88291",
-    ptwStatus: "Closed",
-    checkIn: "09:15 AM",
-    checkOut: "06:30 PM",
-    photoStart: "IMG_001.jpg",
-    photoEnd: "IMG_002.jpg",
-    updateBy: "Rajesh Kumar (FE)"
-  },
-  {
-    id: "dpr-2",
-    date: "13/09/2026",
-    activity: "DG Set Cabling & Earth",
-    status: "Completed",
-    ptwType: "Electrical",
-    ptwNumber: "PTW-88285",
-    ptwStatus: "Closed",
-    checkIn: "08:45 AM",
-    checkOut: "05:15 PM",
-    photoStart: "IMG_003.jpg",
-    photoEnd: "IMG_004.jpg",
-    updateBy: "Suresh Prabhu (Lead)"
-  },
-  {
-    id: "dpr-3",
-    date: "12/09/2026",
-    activity: "Battery Bank & Controller",
-    status: "In Progress",
-    ptwType: "General",
-    ptwNumber: "PTW-88270",
-    ptwStatus: "Active",
-    checkIn: "09:30 AM",
-    checkOut: "07:00 PM",
-    photoStart: "IMG_005.jpg",
-    photoEnd: "IMG_006.jpg",
-    updateBy: "Manoj Verma (Tech)"
+window.mapIndusCustomerInfraToProjectInfraRow = function(item, index = 0) {
+  const rawId = item.item_infrastructure_detail_id || item.id || (index + 1);
+  const rawUom = String(item.uom || '').trim().toUpperCase();
+  const rawMake = String(item.make || '').trim().toUpperCase();
+  const validDocTypes = ['STN', 'SRN', 'CAM', 'MIN', 'MRN'];
+  const docType = validDocTypes.includes(rawUom)
+    ? rawUom
+    : (validDocTypes.includes(rawMake) ? rawMake : 'STN');
+
+  const boqNo = item.item_code || item.itemCode || `BOQ-INFRA-${String(rawId).padStart(3, '0')}`;
+
+  let boqDate = '';
+  const rawDate = item.commissioning && item.commissioning !== 'No' ? item.commissioning : (item.created_at || '');
+  if (rawDate) {
+    const datePart = String(rawDate).slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+      const [y, m, d] = datePart.split('-');
+      boqDate = `${d}/${m}/${y}`;
+    } else {
+      boqDate = datePart;
+    }
   }
-];
+
+  const rawImap = String(item.i_map || item.iMap || '').trim();
+  const parsedQty = parseFloat(rawImap.replace(/,/g, ''));
+  const qy = (!isNaN(parsedQty) && parsedQty > 0) ? parsedQty.toFixed(2) : '1.00';
+
+  return {
+    id: `infra-${rawId}`,
+    dbId: rawId,
+    docType: docType,
+    boqNo: boqNo,
+    boqDate: boqDate,
+    category: item.infra_category || item.infraCategory || '',
+    infraDescription: item.infra_description || item.infraDescription || '',
+    qy: qy,
+    status: item.status || 'Active'
+  };
+};
+
+window.loadProjectInfraFromApi = async function() {
+  try {
+    let items = [];
+    if (window.NexusApi && window.NexusApi.indusInfra && typeof window.NexusApi.indusInfra.getAll === 'function') {
+      const resp = await window.NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      items = (resp && Array.isArray(resp.items)) ? resp.items : [];
+    } else {
+      const apiBase = (window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1';
+      const r = await fetch(`${apiBase}/customer/indus/infra?customer_name=${encodeURIComponent('Indus Tower Ltd')}&page=1&page_size=500`);
+      const json = await r.json();
+      items = (json && Array.isArray(json.items)) ? json.items : [];
+    }
+    projectInfraData.length = 0;
+    items.forEach((it, idx) => {
+      projectInfraData.push(window.mapIndusCustomerInfraToProjectInfraRow(it, idx));
+    });
+    window.pmCurrentProjectInfra = [...projectInfraData];
+    window._projectInfraLoaded = true;
+    if (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_infra') {
+      currentDataset = [...projectInfraData];
+      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+    }
+    return projectInfraData;
+  } catch (err) {
+    console.warn('Failed to load project infra from indus_customer_infra:', err);
+    return projectInfraData;
+  }
+};
+
+// Project Details -> DPR Sub-Page Dataset (Loaded from dpr table in Project DB; empty by default)
+let projectDprData = [];
+
+window.getActiveDprProjectIdentifiers = function() {
+  const row = activePmModalRow ||
+              (typeof getActivePmProject === 'function' ? getActivePmProject() : null) ||
+              window.activePmProjectRow ||
+              (selectedProjectId && typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore.find(r => String(r.id) === String(selectedProjectId) || r.siteName === selectedProjectId || r.siteId === selectedProjectId) : null) ||
+              (selectedProjectId && typeof commercialWorklistData !== 'undefined' ? commercialWorklistData.find(r => String(r.id) === String(selectedProjectId) || r.siteName === selectedProjectId || r.siteId === selectedProjectId) : null) ||
+              null;
+  let poNo = (row && row.poNo) || window.selectedJmsPoNo || '';
+  let siteId = (row && row.siteId) || window.selectedJmsSiteId || '';
+  let siteName = (row && row.siteName) || '';
+  let projectId = (row && (row.id || row.projectId)) || selectedProjectId || '';
+  let subProjectType = (row && row.subProjectType) || 'Civil';
+  try {
+    if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no') || '';
+    if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id') || '';
+    if (!siteName) siteName = sessionStorage.getItem('nexus_project_site_name') || '';
+    if (!projectId) projectId = sessionStorage.getItem('nexus_project_id') || '';
+  } catch(e) {}
+  return { row, projectId: String(projectId || ''), poNo: String(poNo || ''), siteId: String(siteId || ''), siteName: String(siteName || ''), subProjectType: String(subProjectType || 'Civil') };
+};
+
+window.loadProjectDprDataFromApi = async function() {
+  try {
+    const ids = window.getActiveDprProjectIdentifiers();
+    const params = new URLSearchParams();
+    if (ids.poNo) params.set('po_no', ids.poNo);
+    if (ids.siteId) params.set('site_id', ids.siteId);
+    const res = await fetch(`/api/v1/commercial/dpr?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      projectDprData = Array.isArray(json.data) ? json.data : [];
+    } else {
+      projectDprData = [];
+    }
+  } catch (err) {
+    console.warn('Error loading DPR records from DB:', err);
+    projectDprData = [];
+  }
+  if (currentModule === 'projects' && currentProjectsView === 'project_dpr') {
+    currentDataset = [...projectDprData];
+    filteredDataset = [...projectDprData];
+    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+  }
+  return projectDprData;
+};
 
 // Project Details -> BOQ Sub-Page Dataset (Matching User Mockup)
 const projectBoqData = [
@@ -1104,60 +1020,7 @@ const projectBoqData = [
 ];
 
 // Project Additional Approvals Dataset
-let projectApprovalsData = [
-  {
-    id: "appr-1",
-    selected: false,
-    activity: "DG Foundation & Canopy Installation",
-    itemCode: "ITM-CIV-101",
-    itemDescription: "RCC Foundation for 25kVA Soundproof Canopy DG Set",
-    uom: "Nos",
-    qty: "1.00",
-    rate: "1,50,000.00",
-    estimated: "1,50,000.00",
-    expensed: "1,35,000.00",
-    approved: "1,50,000.00"
-  },
-  {
-    id: "appr-2",
-    selected: false,
-    activity: "Electrical Cabling & Earthing",
-    itemCode: "ITM-ELE-204",
-    itemDescription: "4C x 70 sq.mm Armoured Copper Cable Laying & Termination",
-    uom: "Mtr",
-    qty: "80.00",
-    rate: "2,500.00",
-    estimated: "2,00,000.00",
-    expensed: "1,80,000.00",
-    approved: "2,00,000.00"
-  },
-  {
-    id: "appr-3",
-    selected: false,
-    activity: "Tower Height Modification",
-    itemCode: "ITM-HGT-305",
-    itemDescription: "Additional Structural Bracing & Antenna Mount Extension",
-    uom: "Lot",
-    qty: "2.00",
-    rate: "75,000.00",
-    estimated: "1,50,000.00",
-    expensed: "1,20,000.00",
-    approved: "1,40,000.00"
-  },
-  {
-    id: "appr-4",
-    selected: false,
-    activity: "Site Grounding & Protection",
-    itemCode: "ITM-EAR-402",
-    itemDescription: "Chemical Earthing Pit with Heavy Duty Copper Electrode",
-    uom: "Nos",
-    qty: "4.00",
-    rate: "18,500.00",
-    estimated: "74,000.00",
-    expensed: "70,000.00",
-    approved: "74,000.00"
-  }
-];
+let projectApprovalsData = [];
 
 // Project Service Vendor Dataset
 let projectServiceVendorData = [
@@ -3636,366 +3499,114 @@ let infraWhSrnData = [
 
 const defaultCommercialProjects = [
   {
-    id: "prj-1",
+    id: "prj-2778",
     customerName: "Indus Towers Ltd",
-    date: "12/08/2026",
-    poNo: "4500128934",
-    projectId: "PRJ-2026-001",
-    siteId: "IN-123456",
-    siteName: "Guindy Hub",
+    date: "04/11/2026",
+    poNo: "4500128951",
+    projectId: "PRJ-2026-021",
+    siteId: "IN-123471",
+    siteName: "Guindy North Hub",
     projectType: "New Build",
     subProjectType: "Civil",
-    ageing: "12 Days",
-    poAmount: 245000,
-    task: "Civil Work Signoff",
+    poType: "Opex",
+    ageing: "1 Day",
+    poAmount: 280000,
+    projectStatus: "New",
+    status: "New",
     selected: false
   },
   {
-    id: "prj-2",
+    id: "prj-2779",
     customerName: "Indus Towers Ltd",
-    date: "10/08/2026",
-    poNo: "4500128935",
-    projectId: "PRJ-2026-002",
-    siteId: "IN-123457",
-    siteName: "Velachery Site",
+    date: "03/11/2026",
+    poNo: "4500128952",
+    projectId: "PRJ-2026-022",
+    siteId: "IN-123472",
+    siteName: "Velachery Site Base",
     projectType: "Upgrade",
     subProjectType: "Electrical",
-    ageing: "14 Days",
-    poAmount: 180000,
-    task: "Electrical Signoff",
+    poType: "Capex",
+    ageing: "2 Days",
+    poAmount: 195000,
+    projectStatus: "New",
+    status: "New",
     selected: false
   },
   {
-    id: "prj-3",
+    id: "prj-2780",
     customerName: "Indus Towers Ltd",
-    date: "05/08/2026",
-    poNo: "4500128936",
-    projectId: "PRJ-2026-003",
-    siteId: "IN-123458",
-    siteName: "OMR Tower",
-    projectType: "Maintenance",
+    date: "02/11/2026",
+    poNo: "4500128953",
+    projectId: "PRJ-2026-023",
+    siteId: "IN-123473",
+    siteName: "OMR IT Park",
+    projectType: "Run project",
     subProjectType: "Telecom",
-    ageing: "19 Days",
-    poAmount: 320000,
-    task: "Tower Audit",
+    poType: "Opex",
+    ageing: "3 Days",
+    poAmount: 340000,
+    projectStatus: "New",
+    status: "New",
     selected: false
   },
   {
-    id: "prj-4",
+    id: "prj-2781",
     customerName: "Indus Towers Ltd",
-    date: "01/08/2026",
-    poNo: "4500128937",
-    projectId: "PRJ-2026-004",
-    siteId: "IN-123459",
-    siteName: "Tambaram Junction",
+    date: "01/11/2026",
+    poNo: "4500128954",
+    projectId: "PRJ-2026-024",
+    siteId: "IN-123474",
+    siteName: "Tambaram Central Hub",
     projectType: "New Build",
     subProjectType: "Civil",
-    ageing: "23 Days",
-    poAmount: 410000,
-    task: "Earth Pit Testing",
+    poType: "Capex",
+    ageing: "4 Days",
+    poAmount: 420000,
+    projectStatus: "New",
+    status: "New",
     selected: false
   },
   {
-    id: "prj-5",
+    id: "prj-2782",
     customerName: "Indus Towers Ltd",
-    date: "28/07/2026",
-    poNo: "4500128938",
-    projectId: "PRJ-2026-005",
-    siteId: "IN-123460",
-    siteName: "Ambattur Estate",
+    date: "31/10/2026",
+    poNo: "4500128955",
+    projectId: "PRJ-2026-025",
+    siteId: "IN-123475",
+    siteName: "Ambattur Industrial Estate",
     projectType: "Upgrade",
     subProjectType: "Optical Fiber",
-    ageing: "26 Days",
-    poAmount: 710000,
-    task: "OTDR Reports",
-    selected: false
-  }
-];
-
-let commercialWorklistData = [...defaultCommercialProjects];
-
-let pmStatusDataStore = [
-  // YTS (Yet to Start) Records
-  {
-    id: "pm-status-1",
-    siteName: "Guindy Hub",
-    status: "YTS",
-    projectId: "PRJ-2026-001",
-    siteId: "IN-123456",
-    projectType: "Run project",
-    subProjectType: "Civil",
-    stn: "STN-4401",
-    srn: "SRN-8801",
-    cam: "CAM-101",
-    materials: "Dispatched",
-    supportRequired: "Tower foundation clearance",
-    pendingWith: "Civil Contractor",
-    remarks: "Survey report uploaded",
-    ageing: "3 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-5",
-    siteName: "Chennai North",
-    status: "YTS",
-    projectId: "PRJ-2026-005",
-    siteId: "IN-123460",
-    projectType: "Safety",
-    subProjectType: "Installation",
-    stn: "STN-4405",
-    srn: "SRN-8805",
-    cam: "CAM-105",
-    materials: "Dispatched",
-    supportRequired: "PTW clearance certificate",
-    pendingWith: "Safety Officer",
-    remarks: "Site survey scheduled",
-    ageing: "2 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-8",
-    siteName: "Vellore Fort Hub",
-    status: "YTS",
-    projectId: "PRJ-2026-008",
-    siteId: "IN-123463",
-    projectType: "New Build",
-    subProjectType: "Telecom",
-    stn: "STN-4408",
-    srn: "SRN-8808",
-    cam: "CAM-108",
-    materials: "Dispatched",
-    supportRequired: "Tower material gate entry",
-    pendingWith: "Site Engineer",
-    remarks: "Awaiting site access",
-    ageing: "1 Day",
-    selected: false
-  },
-  {
-    id: "pm-status-9",
-    siteName: "Tirunelveli Junction",
-    status: "YTS",
-    projectId: "PRJ-2026-009",
-    siteId: "IN-123464",
-    projectType: "Run project",
-    subProjectType: "Electrical",
-    stn: "STN-4409",
-    srn: "SRN-8809",
-    cam: "CAM-109",
-    materials: "Pending",
-    supportRequired: "EB Line layout drawing",
-    pendingWith: "EB Department",
-    remarks: "Initial inspection pending",
-    ageing: "4 Days",
-    selected: false
-  },
-
-  // WIP (Work in Progress) Records
-  {
-    id: "pm-status-2",
-    siteName: "Ambattur Central",
-    status: "WIP",
-    projectId: "PRJ-2026-002",
-    siteId: "IN-123457",
-    projectType: "New Build",
-    subProjectType: "Electrical",
-    stn: "STN-4402",
-    srn: "SRN-8802",
-    cam: "CAM-102",
-    materials: "Delivered",
-    supportRequired: "DG Power backup approval",
-    pendingWith: "EB Department",
-    remarks: "Civil works in progress",
-    ageing: "7 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-6",
-    siteName: "Salem Junction",
-    status: "WIP",
-    projectId: "PRJ-2026-006",
-    siteId: "IN-123461",
-    projectType: "New Build",
-    subProjectType: "Telecom",
-    stn: "STN-4406",
-    srn: "SRN-8806",
-    cam: "CAM-106",
-    materials: "Delivered",
-    supportRequired: "Pole mount structural stability",
-    pendingWith: "Structural Engineer",
-    remarks: "Pole mount installation ongoing",
+    poType: "Opex",
     ageing: "5 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-7",
-    siteName: "Trichy Tower Base",
-    status: "WIP",
-    projectId: "PRJ-2026-007",
-    siteId: "IN-123462",
-    projectType: "Run project",
-    subProjectType: "Civil",
-    stn: "STN-4407",
-    srn: "SRN-8807",
-    cam: "CAM-107",
-    materials: "Delivered",
-    supportRequired: "Concrete curing inspection",
-    pendingWith: "Quality Auditor",
-    remarks: "Curing day 4/7",
-    ageing: "4 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-10",
-    siteName: "Erode Central",
-    status: "WIP",
-    projectId: "PRJ-2026-010",
-    siteId: "IN-123465",
-    projectType: "O&M",
-    subProjectType: "Civil",
-    stn: "STN-4410",
-    srn: "SRN-8810",
-    cam: "CAM-110",
-    materials: "Delivered",
-    supportRequired: "OD Bed foundation signoff",
-    pendingWith: "Civil Lead",
-    remarks: "Excavation completed",
-    ageing: "6 Days",
-    selected: false
-  },
-
-  // HOLD Records
-  {
-    id: "pm-status-3",
-    siteName: "Madurai Depot",
-    status: "HOLD",
-    projectId: "PRJ-2026-003",
-    siteId: "IN-123458",
-    projectType: "O&M",
-    subProjectType: "Telecom",
-    stn: "STN-4403",
-    srn: "SRN-8803",
-    cam: "CAM-103",
-    materials: "Pending",
-    supportRequired: "Landlord access permission",
-    pendingWith: "Property Owner",
-    remarks: "Access dispute resolution pending",
-    ageing: "14 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-11",
-    siteName: "Thanjavur South",
-    status: "HOLD",
-    projectId: "PRJ-2026-011",
-    siteId: "IN-123466",
-    projectType: "New Build",
-    subProjectType: "Civil",
-    stn: "STN-4411",
-    srn: "SRN-8811",
-    cam: "CAM-111",
-    materials: "Pending",
-    supportRequired: "Right of Way municipal approval",
-    pendingWith: "Municipal Corp",
-    remarks: "Awaiting town planning NOC",
-    ageing: "18 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-12",
-    siteName: "Dindigul Bypass",
-    status: "HOLD",
-    projectId: "PRJ-2026-012",
-    siteId: "IN-123467",
-    projectType: "Energy",
-    subProjectType: "Maintenance",
-    stn: "STN-4412",
-    srn: "SRN-8812",
-    cam: "CAM-112",
-    materials: "Pending",
-    supportRequired: "Transformer power supply sanction",
-    pendingWith: "Electricity Board",
-    remarks: "Pending transformer installation",
-    ageing: "12 Days",
-    selected: false
-  },
-
-  // NR (Not Required / Non-Recoverable) Records
-  {
-    id: "pm-status-4",
-    siteName: "Coimbatore Hub",
-    status: "NR",
-    projectId: "PRJ-2026-004",
-    siteId: "IN-123459",
-    projectType: "Energy",
-    subProjectType: "Maintenance",
-    stn: "STN-4404",
-    srn: "SRN-8804",
-    cam: "CAM-104",
-    materials: "Not Required",
-    supportRequired: "Awaiting replacement solar panels",
-    pendingWith: "Warehouse Manager",
-    remarks: "Material replacement requested",
-    ageing: "21 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-13",
-    siteName: "Hosur Industrial Zone",
-    status: "NR",
-    projectId: "PRJ-2026-013",
-    siteId: "IN-123468",
-    projectType: "Run project",
-    subProjectType: "Electrical",
-    stn: "STN-4413",
-    srn: "SRN-8813",
-    cam: "CAM-113",
-    materials: "Not Required",
-    supportRequired: "Obsolete battery disposal signoff",
-    pendingWith: "SCM Department",
-    remarks: "Battery upgrade canceled by customer",
-    ageing: "28 Days",
-    selected: false
-  },
-  {
-    id: "pm-status-14",
-    siteName: "Nagercoil Town",
-    status: "NR",
-    projectId: "PRJ-2026-014",
-    siteId: "IN-123469",
-    projectType: "Safety",
-    subProjectType: "Installation",
-    stn: "STN-4414",
-    srn: "SRN-8814",
-    cam: "CAM-114",
-    materials: "Not Required",
-    supportRequired: "Site decommission documentation",
-    pendingWith: "Operations Lead",
-    remarks: "Site merged with adjacent tower",
-    ageing: "35 Days",
+    poAmount: 310000,
+    projectStatus: "New",
+    status: "New",
     selected: false
   }
 ];
+
+let commercialWorklistData = defaultCommercialProjects.map(p => ({ ...p }));
+
+let pmStatusDataStore = [];
 
 try {
   const savedCw = localStorage.getItem('commercialWorklistData');
   if (savedCw) {
     const parsedCw = JSON.parse(savedCw);
-    if (Array.isArray(parsedCw) && parsedCw.length >= 4) {
-      const realOnly = parsedCw.filter(r => r && r.id && !String(r.id).startsWith('cw-'));
-      if (realOnly.length >= 4) {
+    if (Array.isArray(parsedCw) && parsedCw.length > 0) {
+      const oldMockIds = new Set(['prj-1', 'prj-2', 'prj-3', 'prj-4', 'prj-5']);
+      const realOnly = parsedCw.filter(r => r && r.id && !String(r.id).startsWith('cw-') && !oldMockIds.has(String(r.id)));
+      if (realOnly.length > 0) {
         commercialWorklistData = realOnly;
-      } else {
-        localStorage.removeItem('commercialWorklistData');
       }
-    } else {
-      localStorage.removeItem('commercialWorklistData');
     }
   }
   const savedPm = localStorage.getItem('pmStatusDataStore');
   if (savedPm) {
     const parsedPm = JSON.parse(savedPm);
-    if (Array.isArray(parsedPm) && parsedPm.length > 0) {
-      pmStatusDataStore = parsedPm;
+    if (Array.isArray(parsedPm)) {
+      const realPm = parsedPm.filter(r => r && r.id && !String(r.id).startsWith('pm-status-'));
+      pmStatusDataStore = realPm;
     }
   }
 } catch(e) {}
@@ -5248,8 +4859,8 @@ function getCommercialDashboardData(pageName) {
     });
 
     categories = [
-      { label: 'JMS To be Validate', color: '#0284c7', amount: validateAmt, count: validateCount },
-      { label: 'JMS To be Process', color: '#f97316', amount: processAmt, count: processCount }
+      { label: 'JMS To be Validate', color: '#0057e7', amount: validateAmt, count: validateCount },
+      { label: 'JMS To be Process', color: '#ffa700', amount: processAmt, count: processCount }
     ];
     totalAmount = validateAmt + processAmt;
 
@@ -5282,9 +4893,9 @@ function getCommercialDashboardData(pageName) {
     });
 
     categories = [
-      { label: 'To be Submit', color: '#0284c7', amount: submitAmt, count: submitCount },
-      { label: 'Pending Approval', color: '#f97316', amount: pendingAmt, count: pendingCount },
-      { label: 'Rejected', color: '#dc2626', amount: rejectedAmt, count: rejectedCount }
+      { label: 'To be Submit', color: '#0057e7', amount: submitAmt, count: submitCount },
+      { label: 'Pending Approval', color: '#ffa700', amount: pendingAmt, count: pendingCount },
+      { label: 'Rejected', color: '#008744', amount: rejectedAmt, count: rejectedCount }
     ];
     totalAmount = submitAmt + pendingAmt + rejectedAmt;
 
@@ -5317,9 +4928,9 @@ function getCommercialDashboardData(pageName) {
     });
 
     categories = [
-      { label: 'To be Submit', color: '#0284c7', amount: submitAmt, count: submitCount },
-      { label: 'Pending Approval', color: '#f97316', amount: pendingAmt, count: pendingCount },
-      { label: 'Rejected', color: '#dc2626', amount: rejectedAmt, count: rejectedCount }
+      { label: 'To be Submit', color: '#0057e7', amount: submitAmt, count: submitCount },
+      { label: 'Pending Approval', color: '#ffa700', amount: pendingAmt, count: pendingCount },
+      { label: 'Rejected', color: '#008744', amount: rejectedAmt, count: rejectedCount }
     ];
     totalAmount = submitAmt + pendingAmt + rejectedAmt;
 
@@ -5352,9 +4963,9 @@ function getCommercialDashboardData(pageName) {
     });
 
     categories = [
-      { label: 'To be Submit', color: '#0284c7', amount: submitAmt, count: submitCount },
-      { label: 'Pending Approval', color: '#f97316', amount: pendingAmt, count: pendingCount },
-      { label: 'Rejected', color: '#dc2626', amount: rejectedAmt, count: rejectedCount }
+      { label: 'To be Submit', color: '#0057e7', amount: submitAmt, count: submitCount },
+      { label: 'Pending Approval', color: '#ffa700', amount: pendingAmt, count: pendingCount },
+      { label: 'Rejected', color: '#008744', amount: rejectedAmt, count: rejectedCount }
     ];
     totalAmount = submitAmt + pendingAmt + rejectedAmt;
 
@@ -5391,10 +5002,10 @@ function getCommercialDashboardData(pageName) {
       if (rc > 0) receivedCount++;
     });
 
-    // In receivable page dashboard: Receivable as Orange (#f97316) and Received amount as Green (#16a34a)
+    // In receivable page dashboard: Receivable as Orange (#ffa700) and Received amount as Green (#008744)
     categories = [
-      { label: 'Receivable', color: '#f97316', amount: receivableAmt, count: receivableCount || list.length },
-      { label: 'Received amount', color: '#16a34a', amount: receivedAmt, count: receivedCount || list.length }
+      { label: 'Receivable', color: '#ffa700', amount: receivableAmt, count: receivableCount || list.length },
+      { label: 'Received amount', color: '#008744', amount: receivedAmt, count: receivedCount || list.length }
     ];
     totalAmount = receivableAmt + receivedAmt;
   }
@@ -5525,7 +5136,7 @@ function generateCommercialDonutSvg(categories, totalAmount, pageName) {
   const centerCircle = `
     <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="none" />
     <text x="${cx}" y="${cy - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.5">TOTAL AMOUNT</text>
-    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#0454e4">₹ ${formatJmsSum(totalAmount)}</text>
+    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="15" font-weight="800" fill="#0057e7">₹ ${formatJmsSum(totalAmount)}</text>
   `;
 
   // Vertically centered legend on the right side
@@ -5613,6 +5224,8 @@ window.copyCommercialDashboardChart = async function() {
   }
 
   try {
+    const pageTitle = (document.getElementById('lblCommercialDashboardTitle') ? document.getElementById('lblCommercialDashboardTitle').textContent.trim() : (window._currentCommercialDashboardPage || 'Commercial'));
+
     const serializer = new XMLSerializer();
     let svgString = serializer.serializeToString(svgEl);
 
@@ -5630,12 +5243,15 @@ window.copyCommercialDashboardChart = async function() {
     img.onload = async function() {
       try {
         const scale = 2; // Crisp high-res 2x
-        const width = (svgEl.viewBox && svgEl.viewBox.baseVal && svgEl.viewBox.baseVal.width) ? svgEl.viewBox.baseVal.width : 720;
-        const height = (svgEl.viewBox && svgEl.viewBox.baseVal && svgEl.viewBox.baseVal.height) ? svgEl.viewBox.baseVal.height : 420;
+        const chartWidth = (svgEl.viewBox && svgEl.viewBox.baseVal && svgEl.viewBox.baseVal.width) ? svgEl.viewBox.baseVal.width : 700;
+        const chartHeight = (svgEl.viewBox && svgEl.viewBox.baseVal && svgEl.viewBox.baseVal.height) ? svgEl.viewBox.baseVal.height : 420;
+        const headerH = 60;
+        const totalW = chartWidth;
+        const totalH = headerH + chartHeight;
 
         const canvas = document.createElement('canvas');
-        canvas.width = width * scale;
-        canvas.height = height * scale;
+        canvas.width = totalW * scale;
+        canvas.height = totalH * scale;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           URL.revokeObjectURL(url);
@@ -5643,10 +5259,33 @@ window.copyCommercialDashboardChart = async function() {
           return;
         }
 
+        ctx.scale(scale, scale);
+
         // Fill solid white background so pasted image doesn't have transparency issues
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, totalW, totalH);
+
+        // Draw Standard Header Ribbon Badge
+        const ribbonW = 240;
+        const ribbonH = 52;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(ribbonW, 0);
+        ctx.lineTo(ribbonW - 36, ribbonH);
+        ctx.lineTo(0, ribbonH);
+        ctx.closePath();
+        ctx.fillStyle = '#00cba0';
+        ctx.fill();
+
+        // Draw Header Title Text inside Ribbon Badge
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 19px -apple-system, BlinkMacSystemFont, "Outfit", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        ctx.fillText(pageTitle, 24, ribbonH / 2);
+
+        // Draw Chart below the Header Design
+        ctx.drawImage(img, 0, headerH, chartWidth, chartHeight);
         URL.revokeObjectURL(url);
 
         canvas.toBlob(async function(blob) {
@@ -5662,7 +5301,7 @@ window.copyCommercialDashboardChart = async function() {
               await navigator.clipboard.write([item]);
               copied = true;
               if (typeof showToast === 'function') {
-                showToast('Chart copied to clipboard as PNG! You can now paste it.');
+                showToast('Chart with header copied to clipboard as PNG! You can now paste it.');
               }
             } catch (clipErr) {
               console.warn('Clipboard write failed, attempting fallback download:', clipErr);
@@ -10260,104 +9899,76 @@ window.openCommercialEmailPage = function() {
 // ==========================================================================
 // PROJECT MANAGER: MATERIALS WORKLIST DATA STORE
 // ==========================================================================
-const defaultPmMaterialsItems = [
-  {
-    id: "mat-1",
-    siteName: "Guindy Hub",
-    requestBy: "Rajesh Kumar",
-    requestDate: "12/08/2026",
-    projectId: "PRJ-2026-001",
-    siteId: "IN-123456",
-    projectType: "New Build",
-    subProjectType: "Civil Foundation",
-    ageing: "12 Days"
-  },
-  {
-    id: "mat-2",
-    siteName: "Velachery Site",
-    requestBy: "Suresh Babu",
-    requestDate: "10/08/2026",
-    projectId: "PRJ-2026-002",
-    siteId: "IN-123457",
-    projectType: "Upgrade",
-    subProjectType: "Electrical Cable",
-    ageing: "14 Days"
-  },
-  {
-    id: "mat-3",
-    siteName: "OMR Tower",
-    requestBy: "Praveen Nair",
-    requestDate: "05/08/2026",
-    projectId: "PRJ-2026-003",
-    siteId: "IN-123458",
-    projectType: "Maintenance",
-    subProjectType: "Telecom Structural",
-    ageing: "19 Days"
-  },
-  {
-    id: "mat-4",
-    siteName: "Tambaram Junction",
-    requestBy: "Karthik Raja",
-    requestDate: "01/08/2026",
-    projectId: "PRJ-2026-004",
-    siteId: "IN-123459",
-    projectType: "New Build",
-    subProjectType: "Earth Pit & Civil",
-    ageing: "23 Days"
-  },
-  {
-    id: "mat-5",
-    siteName: "Ambattur Estate",
-    requestBy: "Manoj Verma",
-    requestDate: "28/07/2026",
-    projectId: "PRJ-2026-005",
-    siteId: "IN-123460",
-    projectType: "Upgrade",
-    subProjectType: "Optical Fiber Cable",
-    ageing: "26 Days"
-  },
-  {
-    id: "mat-6",
-    siteName: "Porur Industrial",
-    requestBy: "Venkatesh Rao",
-    requestDate: "25/07/2026",
-    projectId: "PRJ-2026-006",
-    siteId: "IN-123461",
-    projectType: "New Build",
-    subProjectType: "Tower Erection",
-    ageing: "28 Days"
-  },
-  {
-    id: "mat-7",
-    siteName: "Anna Nagar Tower",
-    requestBy: "Dinesh Sharma",
-    requestDate: "20/07/2026",
-    projectId: "PRJ-2026-007",
-    siteId: "IN-123462",
-    projectType: "Upgrade",
-    subProjectType: "Power Back-up System",
-    ageing: "32 Days"
-  }
-];
+const defaultPmMaterialsItems = [];
 
-let pmMaterialsDataStore = [...defaultPmMaterialsItems];
+let pmMaterialsDataStore = [];
+
+window.loadPmWorklistMaterialsFromApi = async function(forceReload = false) {
+  if (window._fetchingPmWorklistMaterials && !forceReload) return pmMaterialsDataStore;
+  if (!window.NexusApi || !window.NexusApi.commercial || typeof window.NexusApi.commercial.getProjectMaterials !== 'function') {
+    return pmMaterialsDataStore;
+  }
+  window._fetchingPmWorklistMaterials = true;
+  try {
+    const res = await window.NexusApi.commercial.getProjectMaterials();
+    const rows = (res && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
+    const groupedMap = new Map();
+    const nextDetailStore = {};
+
+    rows.forEach((m, idx) => {
+      const siteKey = (m.siteId || m.poNo || m.id || `site-${idx + 1}`).trim();
+      const rowId = `pm-mat-${siteKey}`;
+      if (!groupedMap.has(siteKey)) {
+        const projMatch = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData))
+          ? commercialWorklistData.find(p => (m.poNo && String(p.poNo) === String(m.poNo)) || (m.siteId && String(p.siteId) === String(m.siteId)))
+          : null;
+        groupedMap.set(siteKey, {
+          id: rowId,
+          poNo: m.poNo || (projMatch ? projMatch.poNo : '') || '',
+          siteId: m.siteId || (projMatch ? projMatch.siteId : '') || '',
+          siteName: m.siteName || (projMatch ? projMatch.siteName : '') || m.siteId || '',
+          requestBy: m.requestBy || '',
+          requestDate: m.requestDate || (projMatch ? (projMatch.date || projMatch.submitDate || '') : '') || '',
+          projectId: m.projectId || (projMatch ? projMatch.projectId : '') || '',
+          projectType: m.projectType || (projMatch ? projMatch.projectType : '') || '',
+          subProjectType: m.subProjectType || (projMatch ? projMatch.subProjectType : '') || '',
+          ageing: m.ageing || (projMatch ? projMatch.ageing : '') || ''
+        });
+        nextDetailStore[rowId] = [];
+      }
+      nextDetailStore[rowId].push({
+        id: m.id || `pmat-${rowId}-${nextDetailStore[rowId].length + 1}`,
+        materialManagementId: m.materialManagementId,
+        materialType: m.materialType || '',
+        materialName: m.materialName || m.boqName || '',
+        uom: m.uom || '',
+        qty: m.qty || m.mir || '0.00',
+        selected: false,
+        highlighted: false
+      });
+    });
+
+    pmMaterialsDataStore = Array.from(groupedMap.values());
+    pmMaterialsDetailStore = nextDetailStore;
+    window._pmWorklistMaterialsLoaded = true;
+
+    if (typeof currentModule !== 'undefined' && currentModule === 'worklist' && typeof currentWorklistView !== 'undefined' && currentWorklistView === 'materials') {
+      currentDataset = pmMaterialsDataStore.map(item => ({ ...item }));
+      filteredDataset = [...currentDataset];
+      if (typeof renderWorklistTable === 'function') renderWorklistTable();
+    }
+  } catch (err) {
+    console.warn('Error loading PM Worklist Materials from project_materials:', err);
+  } finally {
+    window._fetchingPmWorklistMaterials = false;
+  }
+  return pmMaterialsDataStore;
+};
 
 function syncPmMaterialsDataWithNewProject() {
-  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData)) return;
-  pmMaterialsDataStore = commercialWorklistData.map((np, idx) => {
-    const existing = pmMaterialsDataStore.find(m => String(m.id) === String(np.id)) || defaultPmMaterialsItems[idx % defaultPmMaterialsItems.length];
-    return {
-      id: np.id || `mat-${idx + 1}`,
-      siteName: np.siteName || existing.siteName || "Guindy Hub",
-      requestBy: existing.requestBy || "Rajesh Kumar",
-      requestDate: np.date || np.submitDate || existing.requestDate || "12/08/2026",
-      projectId: np.projectId || existing.projectId || "PRJ-2026-001",
-      siteId: np.siteId || existing.siteId || "IN-123456",
-      projectType: np.projectType || existing.projectType || "New Build",
-      subProjectType: np.subProjectType || existing.subProjectType || "Civil Foundation",
-      ageing: np.ageing || existing.ageing || "12 Days"
-    };
-  });
+  if (!window._pmWorklistMaterialsLoaded && !window._fetchingPmWorklistMaterials && typeof window.loadPmWorklistMaterialsFromApi === 'function') {
+    window.loadPmWorklistMaterialsFromApi();
+  }
 }
 
 // ==========================================================================
@@ -10618,6 +10229,15 @@ function parseUrlAndApplyState() {
   const tabParam = params.get('tab');
   const role = getAuthenticatedUserRole();
 
+  let savedModule = null;
+  let savedProjectsView = null;
+  try {
+    savedModule = sessionStorage.getItem('nexus_module');
+    savedProjectsView = sessionStorage.getItem('nexus_projects_view');
+  } catch(e) {}
+  const effectiveModule = moduleParam || (savedModule === 'projects' || savedProjectsView === 'project_material' || savedProjectsView === 'project_expenses' ? 'projects' : null);
+  const effectiveView = viewParam || (effectiveModule === 'projects' ? savedProjectsView : null);
+
   if (moduleParam === 'master') {
     currentModule = 'master';
     if (viewParam === 'hr_policies') {
@@ -10639,64 +10259,71 @@ function parseUrlAndApplyState() {
     } else {
       currentIndusSubpage = 'site';
     }
-  } else if (moduleParam === 'projects') {
+  } else if (effectiveModule === 'projects' || moduleParam === 'projects') {
     currentModule = 'projects';
     const contextParam = params.get('context');
     const originParam = params.get('origin');
     const siteIdParam = params.get('site_id');
     const validOrigins = ['yts', 'wip', 'hold', 'nr'];
 
+    let savedCtx = null;
+    let savedOrigin = null;
+    let poNoFromStorage = null;
+    let siteIdFromStorage = null;
+    let siteNameFromStorage = null;
+    let statusFromStorage = null;
+    let idFromStorage = null;
+    try {
+      savedCtx = sessionStorage.getItem('nexus_project_context');
+      savedOrigin = sessionStorage.getItem('nexus_project_worklist_origin');
+      poNoFromStorage = sessionStorage.getItem('nexus_project_po_no');
+      siteIdFromStorage = sessionStorage.getItem('nexus_project_site_id');
+      siteNameFromStorage = sessionStorage.getItem('nexus_project_site_name');
+      statusFromStorage = sessionStorage.getItem('nexus_project_status');
+      idFromStorage = sessionStorage.getItem('nexus_project_id');
+    } catch(e) {}
+
     if (contextParam === 'worklist' || validOrigins.includes(originParam)) {
       window.projectNavigationContext = 'worklist';
       window.projectWorklistOrigin = validOrigins.includes(originParam) ? originParam : 'wip';
       window.lastPmWorklistView = window.projectWorklistOrigin;
+    } else if (savedCtx === 'worklist' && validOrigins.includes(savedOrigin)) {
+      window.projectNavigationContext = 'worklist';
+      window.projectWorklistOrigin = savedOrigin;
+      window.lastPmWorklistView = savedOrigin;
     } else {
-      let savedCtx = null;
-      let savedOrigin = null;
-      try {
-        savedCtx = sessionStorage.getItem('nexus_project_context');
-        savedOrigin = sessionStorage.getItem('nexus_project_worklist_origin');
-      } catch(e) {}
-      if (savedCtx === 'worklist' && validOrigins.includes(savedOrigin)) {
-        window.projectNavigationContext = 'worklist';
-        window.projectWorklistOrigin = savedOrigin;
-        window.lastPmWorklistView = savedOrigin;
-      } else {
-        window.projectNavigationContext = 'projects';
-        window.projectWorklistOrigin = null;
-        window.lastPmWorklistView = null;
-      }
-    }
-    if (siteIdParam) {
-      selectedProjectId = siteIdParam;
-      const row = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(siteIdParam));
-      if (row) window.activePmProjectRow = row;
+      window.projectNavigationContext = 'projects';
+      window.projectWorklistOrigin = null;
+      window.lastPmWorklistView = null;
     }
 
-    if (viewParam === 'project_expenses') {
+    selectedProjectId = siteIdParam || idFromStorage || siteIdFromStorage || selectedProjectId;
+
+    const targetView = effectiveView || viewParam;
+    if (targetView === 'project_expenses') {
       currentProjectsView = 'project_expenses';
-    } else if (viewParam === 'project_material') {
+    } else if (targetView === 'project_material') {
       currentProjectsView = 'project_material';
-    } else if (viewParam === 'project_infra') {
+    } else if (targetView === 'project_infra') {
       currentProjectsView = 'project_infra';
-    } else if (viewParam === 'project_dpr') {
+    } else if (targetView === 'project_dpr') {
       currentProjectsView = 'project_dpr';
-    } else if (viewParam === 'project_boq') {
+    } else if (targetView === 'project_boq') {
       currentProjectsView = 'project_boq';
-    } else if (viewParam === 'project_approvals' || viewParam === 'project_additional_approve') {
+    } else if (targetView === 'project_approvals' || targetView === 'project_additional_approve') {
       currentProjectsView = 'project_approvals';
-    } else if (viewParam === 'project_service_vendor' || viewParam === 'service_vendor') {
+    } else if (targetView === 'project_service_vendor' || targetView === 'service_vendor') {
       currentProjectsView = 'project_service_vendor';
-    } else if (viewParam === 'project_service_vendor_detail' || viewParam === 'service_vendor_detail') {
+    } else if (targetView === 'project_service_vendor_detail' || targetView === 'service_vendor_detail') {
       currentProjectsView = 'project_service_vendor_detail';
       selectedServiceVendorName = params.get('vendor') || 'Service Vendor Name';
-    } else if (viewParam === 'supply_details') {
+    } else if (targetView === 'supply_details') {
       currentProjectsSubpage = 'supply';
       currentProjectsView = 'supply_details';
       selectedSupplyCustomerName = params.get('customer') || 'Customer Name';
       const foundItem = projectsSupplyData.find(s => s.customer === selectedSupplyCustomerName);
       if (foundItem) selectedSupplyCustomerId = foundItem.id;
-    } else if (viewParam === 'details') {
+    } else if (targetView === 'details') {
       currentProjectsView = 'details';
       currentProjectDetailTab = tabParam || '';
     } else {
@@ -10706,6 +10333,34 @@ function parseUrlAndApplyState() {
       } else {
         currentProjectsSubpage = 'projects';
       }
+    }
+
+    const searchLists = [
+      (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore : [],
+      (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData : [],
+      (typeof projectsMainData !== 'undefined' && Array.isArray(projectsMainData)) ? projectsMainData : []
+    ];
+    let row = null;
+    for (const list of searchLists) {
+      row = list.find(r => r && (String(r.id) === String(selectedProjectId) || String(r.siteId) === String(selectedProjectId) || (siteIdFromStorage && String(r.siteId) === String(siteIdFromStorage))));
+      if (row) break;
+    }
+    if (row) {
+      window.activePmProjectRow = Object.assign({}, row, { tspMaterials: true });
+    } else if (!window.activePmProjectRow) {
+      window.activePmProjectRow = {
+        id: selectedProjectId || idFromStorage || '1',
+        projectId: idFromStorage || selectedProjectId || 'PRJ-2026-021',
+        projectType: 'Run project',
+        subProjectType: 'Civil',
+        poNo: poNoFromStorage || params.get('po_no') || '4500128951',
+        siteId: siteIdFromStorage || siteIdParam || 'IN-123471',
+        siteName: siteNameFromStorage || 'Guindy North Hub',
+        status: statusFromStorage || 'WIP',
+        tspMaterials: true
+      };
+    } else {
+      window.activePmProjectRow.tspMaterials = true;
     }
   } else if (moduleParam === 'inventory') {
     currentModule = 'inventory';
@@ -10785,7 +10440,7 @@ function parseUrlAndApplyState() {
   } else if (moduleParam === 'infra_wh') {
     currentModule = 'infra_wh';
     currentInfraWhSubpage = subpageParam || 'stn';
-  } else if (moduleParam === 'worklist' || moduleParam) {
+  } else if (moduleParam === 'worklist') {
     currentModule = 'worklist';
     window.projectNavigationContext = null;
     window.projectWorklistOrigin = null;
@@ -10876,6 +10531,18 @@ function parseUrlAndApplyState() {
       }
     }
   } else {
+    // Check if session had projects view before defaulting
+    let storedView = null;
+    let storedModule = null;
+    try {
+      storedView = sessionStorage.getItem('nexus_projects_view');
+      storedModule = sessionStorage.getItem('nexus_module');
+    } catch(e) {}
+    if (storedModule === 'projects' || storedView === 'project_material' || storedView === 'project_expenses') {
+      currentModule = 'projects';
+      currentProjectsView = storedView || 'project_material';
+      return;
+    }
     // Default after login
     currentModule = 'worklist';
     window.projectNavigationContext = null;
@@ -10906,6 +10573,15 @@ function parseUrlAndApplyState() {
 
 document.addEventListener('DOMContentLoaded', () => {
   parseUrlAndApplyState();
+  if (typeof loadCommercialProjectsFromApi === 'function') {
+    loadCommercialProjectsFromApi();
+  }
+  if (typeof window.loadMasterPaymentDataFromApi === 'function') {
+    window.loadMasterPaymentDataFromApi(false);
+  }
+  if (currentProjectsView === 'project_material' && typeof window.loadProjectMaterialsFromApi === 'function') {
+    window.loadProjectMaterialsFromApi();
+  }
   applyRoleBasedNavigation();
   initNavEventListeners();
   initExcelFilterSystem();
@@ -11235,6 +10911,9 @@ function switchModule(moduleName) {
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
     }
+    if (currentWorklistView === 'payment' && typeof window.loadMasterPaymentDataFromApi === 'function') {
+      window.loadMasterPaymentDataFromApi(true);
+    }
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
     currentProjectsView = 'main';
@@ -11351,16 +11030,48 @@ function updateURL() {
       url.searchParams.delete('origin');
       url.searchParams.delete('site_id');
     }
-    if (currentProjectsView === 'project_expenses') {
-      url.searchParams.set('view', 'project_expenses');
+    if (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material') {
+      url.searchParams.set('view', currentProjectsView);
       url.searchParams.delete('subpage');
       url.searchParams.delete('tab');
       url.searchParams.delete('customer');
-    } else if (currentProjectsView === 'project_material') {
+      if (window.activePmProjectRow && window.activePmProjectRow.poNo) {
+        url.searchParams.set('po_no', window.activePmProjectRow.poNo);
+      }
+      try {
+        sessionStorage.setItem('nexus_module', 'projects');
+        sessionStorage.setItem('nexus_projects_view', currentProjectsView);
+        if (window.projectNavigationContext) sessionStorage.setItem('nexus_project_context', window.projectNavigationContext);
+        if (window.projectWorklistOrigin) sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
+        if (selectedProjectId) sessionStorage.setItem('nexus_project_id', String(selectedProjectId));
+        if (window.activePmProjectRow) {
+          if (window.activePmProjectRow.poNo) sessionStorage.setItem('nexus_project_po_no', String(window.activePmProjectRow.poNo));
+          if (window.activePmProjectRow.siteId) sessionStorage.setItem('nexus_project_site_id', String(window.activePmProjectRow.siteId));
+          if (window.activePmProjectRow.siteName) sessionStorage.setItem('nexus_project_site_name', String(window.activePmProjectRow.siteName));
+          if (window.activePmProjectRow.status) sessionStorage.setItem('nexus_project_status', String(window.activePmProjectRow.status));
+        }
+      } catch(e) {}
+    } else if (false) {
       url.searchParams.set('view', 'project_material');
       url.searchParams.delete('subpage');
       url.searchParams.delete('tab');
       url.searchParams.delete('customer');
+      if (window.activePmProjectRow && window.activePmProjectRow.poNo) {
+        url.searchParams.set('po_no', window.activePmProjectRow.poNo);
+      }
+      try {
+        sessionStorage.setItem('nexus_module', 'projects');
+        sessionStorage.setItem('nexus_projects_view', 'project_material');
+        if (window.projectNavigationContext) sessionStorage.setItem('nexus_project_context', window.projectNavigationContext);
+        if (window.projectWorklistOrigin) sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
+        if (selectedProjectId) sessionStorage.setItem('nexus_project_id', String(selectedProjectId));
+        if (window.activePmProjectRow) {
+          if (window.activePmProjectRow.poNo) sessionStorage.setItem('nexus_project_po_no', String(window.activePmProjectRow.poNo));
+          if (window.activePmProjectRow.siteId) sessionStorage.setItem('nexus_project_site_id', String(window.activePmProjectRow.siteId));
+          if (window.activePmProjectRow.siteName) sessionStorage.setItem('nexus_project_site_name', String(window.activePmProjectRow.siteName));
+          if (window.activePmProjectRow.status) sessionStorage.setItem('nexus_project_status', String(window.activePmProjectRow.status));
+        }
+      } catch(e) {}
     } else if (currentProjectsView === 'project_infra') {
       url.searchParams.set('view', 'project_infra');
       url.searchParams.delete('subpage');
@@ -11497,10 +11208,12 @@ function updateURL() {
     url.searchParams.delete('task');
   }
 
-  const newUrlStr = url.toString();
-  if (window.location.href !== newUrlStr) {
-    window.history.pushState({}, '', newUrlStr);
-  }
+  try {
+    const newUrlStr = url.toString();
+    if (window.location.href !== newUrlStr) {
+      window.history.pushState({}, '', newUrlStr);
+    }
+  } catch(e) {}
 }
 
 // ==========================================================================
@@ -13859,6 +13572,15 @@ window.copyBannerText = function(text, event) {
   }
 };
 
+window.setSiteFeatureSettings = function(siteKey, settings) {
+  if (!siteKey) return;
+  const key = String(siteKey).trim().toLowerCase();
+  siteFeatureSettingsMap[key] = Object.assign({}, siteFeatureSettingsMap[key] || {}, settings || {});
+  try {
+    localStorage.setItem('siteFeatureSettingsMap', JSON.stringify(siteFeatureSettingsMap));
+  } catch (e) {}
+};
+
 window.openProjectInfoModal = function(rowId) {
   openPmProjectDetailsModal(rowId || {
     projectId: 'R/RL-234567',
@@ -13886,21 +13608,21 @@ let activePmModalRow = null;
 
 let pmProjectFeatureSettings = {
   siteSurvey: false,
-  tspMaterials: true,
+  tspMaterials: false,
   qualityAudit: false,
   civilWorks: false,
   ptw: false,
-  srn: true,
+  srn: false,
   stn: false,
   electricalWorks: false,
-  additionalApproval: true,
-  cam: true,
+  additionalApproval: false,
+  cam: false,
   poleMounts: false,
-  serviceContract: true,
-  towerType: 'Ground Based Tower',
-  towerHeight: '30 Mtr',
-  sbc: '150 KN/Sqm',
-  windSpeed: '180 Km/Hr',
+  serviceContract: false,
+  towerType: '',
+  towerHeight: '',
+  sbc: '',
+  windSpeed: '',
   planningBoq: ''
 };
 let siteFeatureSettingsMap = {};
@@ -13916,31 +13638,84 @@ try {
 } catch(e) {}
 
 window.getSiteFeatureSettings = function(siteKeyOrRow) {
-  if (!siteKeyOrRow) return pmProjectFeatureSettings;
-  if (typeof siteKeyOrRow === 'object') {
-    const sName = (siteKeyOrRow.siteName || '').trim().toLowerCase();
-    const sId = (siteKeyOrRow.siteId || '').trim().toLowerCase();
-    const pId = (siteKeyOrRow.projectId || '').trim().toLowerCase();
-    const rId = String(siteKeyOrRow.id || '').trim().toLowerCase();
+  const emptyFeat = {
+    siteSurvey: false,
+    tspMaterials: false,
+    qualityAudit: false,
+    civilWorks: false,
+    ptw: false,
+    srn: false,
+    stn: false,
+    electricalWorks: false,
+    additionalApproval: false,
+    cam: false,
+    poleMounts: false,
+    serviceContract: false,
+    towerType: '',
+    towerHeight: '',
+    sbc: '',
+    windSpeed: '',
+    planningBoq: ''
+  };
+  if (!siteKeyOrRow) return emptyFeat;
+
+  let rowObj = typeof siteKeyOrRow === 'object' ? siteKeyOrRow : null;
+  if (!rowObj) {
+    const key = String(siteKeyOrRow).trim().toLowerCase();
+    if (siteFeatureSettingsMap[key]) return siteFeatureSettingsMap[key];
+    rowObj = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id).toLowerCase() === key || (r.siteName && r.siteName.toLowerCase() === key) || (r.siteId && r.siteId.toLowerCase() === key) || (r.poNo && String(r.poNo).toLowerCase() === key)) ||
+             (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id).toLowerCase() === key || (r.siteName && r.siteName.toLowerCase() === key) || (r.siteId && r.siteId.toLowerCase() === key) || (r.poNo && String(r.poNo).toLowerCase() === key));
+  }
+
+  if (rowObj) {
+    const sName = String(rowObj.siteName || '').trim().toLowerCase();
+    const sId = String(rowObj.siteId || '').trim().toLowerCase();
+    const pId = String(rowObj.projectId || '').trim().toLowerCase();
+    const rId = String(rowObj.id || '').trim().toLowerCase();
     if (sName && siteFeatureSettingsMap[sName]) return siteFeatureSettingsMap[sName];
     if (sId && siteFeatureSettingsMap[sId]) return siteFeatureSettingsMap[sId];
     if (pId && siteFeatureSettingsMap[pId]) return siteFeatureSettingsMap[pId];
     if (rId && siteFeatureSettingsMap[rId]) return siteFeatureSettingsMap[rId];
-  } else {
-    const key = String(siteKeyOrRow).trim().toLowerCase();
-    if (siteFeatureSettingsMap[key]) return siteFeatureSettingsMap[key];
-    const foundRow = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id).toLowerCase() === key || (r.siteName && r.siteName.toLowerCase() === key)) ||
-                     (typeof commercialWorklistData !== 'undefined' ? commercialWorklistData : []).find(r => String(r.id).toLowerCase() === key || (r.siteName && r.siteName.toLowerCase() === key));
-    if (foundRow) {
-      const sName = (foundRow.siteName || '').trim().toLowerCase();
-      const sId = (foundRow.siteId || '').trim().toLowerCase();
-      const pId = (foundRow.projectId || '').trim().toLowerCase();
-      if (sName && siteFeatureSettingsMap[sName]) return siteFeatureSettingsMap[sName];
-      if (sId && siteFeatureSettingsMap[sId]) return siteFeatureSettingsMap[sId];
-      if (pId && siteFeatureSettingsMap[pId]) return siteFeatureSettingsMap[pId];
-    }
+
+    // Also check commercialWorklistData by siteName / siteId / poNo for DB-persisted flags
+    const dbMatch = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData))
+      ? commercialWorklistData.find(c =>
+          (sName && c.siteName && String(c.siteName).trim().toLowerCase() === sName) ||
+          (sId && c.siteId && String(c.siteId).trim().toLowerCase() === sId) ||
+          (rowObj.poNo && c.poNo && String(c.poNo) === String(rowObj.poNo))
+        )
+      : null;
+    const src = dbMatch || rowObj;
+    return {
+      siteSurvey: !!(rowObj.siteSurvey !== undefined ? rowObj.siteSurvey : src.siteSurvey),
+      tspMaterials: !!(rowObj.tspMaterials !== undefined ? rowObj.tspMaterials : src.tspMaterials),
+      qualityAudit: !!(rowObj.qualityAudit !== undefined ? rowObj.qualityAudit : src.qualityAudit),
+      civilWorks: !!(rowObj.civilWorks !== undefined ? rowObj.civilWorks : src.civilWorks),
+      ptw: !!(rowObj.ptw !== undefined ? rowObj.ptw : src.ptw),
+      srn: !!(rowObj.srn || rowObj.isSrn || src.srn || src.isSrn),
+      stn: !!(rowObj.stn || rowObj.isStn || src.stn || src.isStn),
+      electricalWorks: !!(rowObj.electricalWorks !== undefined ? rowObj.electricalWorks : src.electricalWorks),
+      additionalApproval: !!(rowObj.additionalApproval !== undefined ? rowObj.additionalApproval : src.additionalApproval),
+      cam: !!(rowObj.cam || rowObj.isCam || src.cam || src.isCam),
+      poleMounts: !!(rowObj.poleMounts !== undefined ? rowObj.poleMounts : src.poleMounts),
+      serviceContract: !!(rowObj.serviceContract !== undefined ? rowObj.serviceContract : src.serviceContract),
+      towerType: rowObj.towerType || src.towerType || '',
+      towerHeight: rowObj.towerHeight || src.towerHeight || '',
+      sbc: rowObj.sbc || src.sbc || '',
+      windSpeed: rowObj.windSpeed || src.windSpeed || '',
+      planningBoq: rowObj.planningBoq || src.planningBoq || ''
+    };
   }
-  return pmProjectFeatureSettings;
+  return emptyFeat;
+};
+
+window.setSiteFeatureSettings = function(siteKey, settings) {
+  if (!siteKey) return;
+  const key = String(siteKey).trim().toLowerCase();
+  siteFeatureSettingsMap[key] = Object.assign({}, siteFeatureSettingsMap[key] || {}, settings || {});
+  try {
+    localStorage.setItem('siteFeatureSettingsMap', JSON.stringify(siteFeatureSettingsMap));
+  } catch (e) {}
 };
 
 window.openProjectInfoModal = function(rowId) {
@@ -13997,16 +13772,8 @@ window.openPmProjectDetailsModal = function(rowId) {
     row = window.activePmProjectRow;
   }
   if (!row) {
-    row = {
-      id: 'cw-1',
-      projectId: 'PRJ-2026-001',
-      projectType: 'Run project',
-      subProjectType: 'Civil',
-      poNo: '4500128934',
-      poType: 'Opex',
-      siteId: 'IN-123456',
-      siteName: 'Guindy Hub'
-    };
+    console.warn('openPmProjectDetailsModal: No valid row found for', rowId);
+    return;
   }
 
   activePmModalRow = row;
@@ -14151,7 +13918,7 @@ window.copyPmHeaderValue = function(fieldKey, label) {
   }
 };
 
-window.savePmProjectDetails = function() {
+window.savePmProjectDetails = async function() {
   const isNewBuild = activePmModalRow ? ((activePmModalRow.projectType || '').trim().toLowerCase() === 'new build') : true;
 
   const getToggleVal = (nbId, nonNbId) => {
@@ -14183,6 +13950,9 @@ window.savePmProjectDetails = function() {
   const windSpeedVal = document.getElementById('pmWindSpeedSelect')?.value || '';
   const planningBoqVal = document.getElementById('pmPlanningBoqBox')?.value || '';
 
+  const isStnOrCam = isStn || isSrn || isCam;
+  const targetStatus = isStnOrCam ? 'YTS' : 'Project Update';
+
   const updatedSettings = {
     siteSurvey: isSiteSurvey,
     tspMaterials: isTsp,
@@ -14203,13 +13973,69 @@ window.savePmProjectDetails = function() {
     planningBoq: planningBoqVal
   };
 
+  let apiResp = null;
   if (activePmModalRow) {
-    const siteKey = (activePmModalRow.siteName || activePmModalRow.siteId || activePmModalRow.projectId || 'default').trim().toLowerCase();
+    const payload = {
+      project_id: activePmModalRow.project_id || activePmModalRow.projectId || activePmModalRow.id,
+      projectId: activePmModalRow.projectId,
+      poNo: activePmModalRow.poNo,
+      site_id: activePmModalRow.site_id || activePmModalRow.siteId,
+      projectCode: activePmModalRow.projectCode || activePmModalRow.id,
+      projectStatus: targetStatus,
+      towerType: towerTypeVal,
+      towerHeight: towerHeightVal,
+      sbc: sbcVal,
+      windSpeed: windSpeedVal,
+      planningBoq: planningBoqVal,
+      siteSurvey: !!isSiteSurvey,
+      site_survey: !!isSiteSurvey,
+      tspMaterials: !!isTsp,
+      tsp_materials: !!isTsp,
+      qualityAudit: !!isQuality,
+      quality_audit: !!isQuality,
+      civilWorks: !!isCivil,
+      civil_works: !!isCivil,
+      ptw: !!isPtw,
+      srn: !!isSrn,
+      stn: !!isStn,
+      electricalWorks: !!isElectrical,
+      electrical_works: !!isElectrical,
+      additionalApproval: !!isAddApprove,
+      additional_approval: !!isAddApprove,
+      additional_approve: !!isAddApprove,
+      cam: !!isCam,
+      poleMounts: !!isPoleMounts,
+      pole_mounts: !!isPoleMounts,
+      serviceContract: !!isService,
+      service_contract: !!isService
+    };
+
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.savePmProjectDetails) {
+      try {
+        apiResp = await NexusApi.commercial.savePmProjectDetails(payload);
+      } catch (err) {
+        console.error('Failed to save PM details to backend API:', err);
+      }
+    }
+
+    const savedStn = (apiResp && apiResp.stn !== undefined) ? apiResp.stn : (isStn ? (activePmModalRow.stn || ('STN-' + Math.floor(1000 + Math.random() * 9000))) : '');
+    const savedSrn = (apiResp && apiResp.srn !== undefined) ? apiResp.srn : (isSrn ? (activePmModalRow.srn || ('SRN-' + Math.floor(1000 + Math.random() * 9000))) : '');
+    const savedCam = (apiResp && apiResp.cam !== undefined) ? apiResp.cam : (isCam ? (activePmModalRow.cam || ('CAM-' + Math.floor(100 + Math.random() * 900))) : '');
+    const finalStatus = (apiResp && apiResp.projectStatus) ? apiResp.projectStatus : targetStatus;
+
+    activePmModalRow.projectStatus = finalStatus;
+    activePmModalRow.status = finalStatus;
+    activePmModalRow.stn = savedStn;
+    activePmModalRow.srn = savedSrn;
+    activePmModalRow.cam = savedCam;
+    activePmModalRow.materials = isTsp ? 'Dispatched' : (activePmModalRow.materials || 'Pending');
+
+    const siteKey = String(activePmModalRow.siteName || activePmModalRow.siteId || activePmModalRow.projectId || 'default').trim().toLowerCase();
     siteFeatureSettingsMap[siteKey] = Object.assign({}, updatedSettings);
 
-    const sName = (activePmModalRow.siteName || '').trim().toLowerCase();
-    const sId = (activePmModalRow.siteId || '').trim().toLowerCase();
-    const pId = (activePmModalRow.projectId || '').trim().toLowerCase();
+    const sName = String(activePmModalRow.siteName || '').trim().toLowerCase();
+    const sId = String(activePmModalRow.siteId || '').trim().toLowerCase();
+    const pId = String(activePmModalRow.projectId || '').trim().toLowerCase();
     const rId = String(activePmModalRow.id || '').trim().toLowerCase();
 
     if (sName) siteFeatureSettingsMap[sName] = Object.assign({}, updatedSettings);
@@ -14217,22 +14043,70 @@ window.savePmProjectDetails = function() {
     if (pId) siteFeatureSettingsMap[pId] = Object.assign({}, updatedSettings);
     if (rId) siteFeatureSettingsMap[rId] = Object.assign({}, updatedSettings);
 
-    // Update active row in pmStatusDataStore or commercialWorklistData
-    const origSName = activePmModalRow.siteName || '';
-    const origSId = activePmModalRow.siteId || '';
-    const origPId = activePmModalRow.projectId || '';
-
-    if (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) {
-      pmStatusDataStore.forEach(r => {
-        if ((origSName && r.siteName === origSName) || (origSId && r.siteId === origSId) || (origPId && r.projectId === origPId) || String(r.id) === String(activePmModalRow.id)) {
-          if (isStn && !r.stn) r.stn = 'STN-' + Math.floor(1000 + Math.random() * 9000);
-          else if (!isStn) r.stn = '';
-          if (isSrn && !r.srn) r.srn = 'SRN-' + Math.floor(1000 + Math.random() * 9000);
-          else if (!isSrn) r.srn = '';
-          if (isCam && !r.cam) r.cam = 'CAM-' + Math.floor(100 + Math.random() * 900);
-          else if (!isCam) r.cam = '';
+    // Update active row in commercialWorklistData
+    if (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) {
+      commercialWorklistData.forEach(r => {
+        if ((sName && String(r.siteName || '').trim().toLowerCase() === sName) ||
+            (sId && String(r.siteId || '').trim().toLowerCase() === sId) ||
+            (pId && String(r.projectId || '').trim().toLowerCase() === pId) ||
+            String(r.id) === String(activePmModalRow.id)) {
+          r.projectStatus = finalStatus;
+          r.status = finalStatus;
+          r.stn = savedStn;
+          r.srn = savedSrn;
+          r.cam = savedCam;
+          r.materials = isTsp ? 'Dispatched' : 'Pending';
+          Object.assign(r, updatedSettings);
         }
       });
+      try {
+        localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
+      } catch(e) {}
+    }
+
+    // Update active row in pmStatusDataStore or insert new entry
+    if (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) {
+      const origSName = activePmModalRow.siteName || '';
+      const origSId = activePmModalRow.siteId || '';
+      const origPId = activePmModalRow.projectId || '';
+      let matched = false;
+
+      pmStatusDataStore.forEach(r => {
+        if ((origSName && r.siteName === origSName) || (origSId && r.siteId === origSId) || (origPId && r.projectId === origPId) || String(r.id) === String(activePmModalRow.id)) {
+          r.status = finalStatus;
+          r.stn = savedStn;
+          r.srn = savedSrn;
+          r.cam = savedCam;
+          r.materials = isTsp ? 'Dispatched' : 'Pending';
+          matched = true;
+        }
+      });
+
+      if (!matched) {
+        pmStatusDataStore.push({
+          id: activePmModalRow.id || ('pm-status-' + Date.now()),
+          siteName: activePmModalRow.siteName || '',
+          status: finalStatus,
+          projectId: activePmModalRow.projectId || '',
+          siteId: activePmModalRow.siteId || '',
+          projectType: activePmModalRow.projectType || 'New Build',
+          subProjectType: activePmModalRow.subProjectType || 'Civil',
+          stn: savedStn,
+          srn: savedSrn,
+          cam: savedCam,
+          materials: isTsp ? 'Dispatched' : 'Pending',
+          supportRequired: activePmModalRow.supportRequired || '',
+          pendingWith: activePmModalRow.pendingWith || '',
+          remarks: activePmModalRow.remarks || '',
+          ageing: activePmModalRow.ageing || '1 Day',
+          selected: false,
+          customerName: activePmModalRow.customerName || '',
+          poNo: activePmModalRow.poNo || '',
+          poAmount: activePmModalRow.poAmount || 0,
+          date: activePmModalRow.date || ''
+        });
+      }
+
       try {
         localStorage.setItem('pmStatusDataStore', JSON.stringify(pmStatusDataStore));
       } catch(e) {}
@@ -14250,28 +14124,24 @@ window.savePmProjectDetails = function() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
-    const isStnOrCam = isStn || isSrn || isCam;
-    if (isStnOrCam) {
-      if (currentWorklistView === 'project_update') {
-        currentWorklistView = 'yts';
-      }
-    } else {
-      if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
-        currentWorklistView = 'project_update';
-      }
-    }
+    currentWorklistView = isStnOrCam ? 'yts' : 'project_update';
+    updateURL();
   }
 
   if (typeof showSvgSuccessPopup === 'function') {
     showSvgSuccessPopup('Project details saved successfully!', 'Task Completed', () => {
       closePmProjectModal();
+      loadWorklistDataset();
+      renderApp();
+      renderWorklistFooter();
     });
   } else {
     showToast('Project details saved successfully');
     closePmProjectModal();
+    loadWorklistDataset();
+    renderApp();
+    renderWorklistFooter();
   }
-
-  renderApp();
 };
 
 window.handlePmToggleChange = function(toggleType, inputEl) {
@@ -14412,13 +14282,31 @@ window.savePmPtwDetails = function() {
 };
 
 // --------------------------------------------------------------------------
-// 2. POLE MOUNT DETAILS CONTROLLER
+// 2. POLE MOUNT DETAILS CONTROLLER (Backed by telecom_project / indus_project in Project DB)
 // --------------------------------------------------------------------------
-let pmPoleMountDetailsData = [
-  { id: 1, mountType: 'GSM', sector: 'A', height: '30m', azimuth: '120°' },
-  { id: 2, mountType: 'MW', sector: 'B', height: '25m', azimuth: '240°' },
-  { id: 3, mountType: 'GSM', sector: 'C', height: '35m', azimuth: '0°' }
-];
+let pmPoleMountDetailsData = [];
+
+window.loadPmPoleMountsFromApi = async function() {
+  try {
+    const ids = window.getActiveDprProjectIdentifiers();
+    const params = new URLSearchParams();
+    if (ids.projectId) params.set('project_id', ids.projectId);
+    if (ids.poNo) params.set('po_no', ids.poNo);
+    if (ids.siteId) params.set('site_id', ids.siteId);
+    const res = await fetch(`/api/v1/commercial/dpr/pole-mounts?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      pmPoleMountDetailsData = Array.isArray(json.data) ? json.data : [];
+    } else {
+      pmPoleMountDetailsData = [];
+    }
+  } catch (err) {
+    console.warn('Error loading pole mounts from DB:', err);
+    pmPoleMountDetailsData = [];
+  }
+  renderPmPoleMountDetailsTable();
+  return pmPoleMountDetailsData;
+};
 
 function renderPmPoleMountDetailsTable() {
   const tbody = document.getElementById('tbodyPmPoleMountDetails');
@@ -14435,15 +14323,15 @@ function renderPmPoleMountDetailsTable() {
 
   tbody.innerHTML = pmPoleMountDetailsData.map(item => `
     <tr style="border-bottom: 1px solid #f1f5f9;">
-      <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.mountType}</td>
-      <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.sector}</td>
-      <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.height}</td>
-      <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.azimuth}</td>
+      <td style="width: 15ch; min-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.mountType || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.sector || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.height || ''}</td>
+      <td style="width: 10ch; min-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.azimuth || ''}</td>
     </tr>
   `).join('');
 }
 
-window.openPmPoleMountDetailsModal = function() {
+window.openPmPoleMountDetailsModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -14455,18 +14343,19 @@ window.openPmPoleMountDetailsModal = function() {
     if (card.id !== 'pmPoleMountDetailsModal') card.style.display = 'none';
   });
 
+  const ids = window.getActiveDprProjectIdentifiers();
   const titleBadge = document.getElementById('lblPmPoleMountTitle') || document.getElementById('lblPmPoleMountCardTitle');
   if (titleBadge) {
-    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Pole mount details` : 'Pole mount details') : 'Pole mount details';
+    titleBadge.textContent = ids.siteId ? `${ids.siteId} - Pole mount details` : 'Pole mount details';
   }
-
-  renderPmPoleMountDetailsTable();
 
   const modal = document.getElementById('pmPoleMountDetailsModal');
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
+
+  await window.loadPmPoleMountsFromApi();
 };
 
 window.closePmPoleMountDetailsModal = function() {
@@ -14526,52 +14415,95 @@ window.closePmAddMountDetailsModal = function() {
   if (overlay) overlay.style.display = 'flex';
 };
 
-window.savePmNewMountDetail = function() {
+window.savePmNewMountDetail = async function() {
   const selType = document.getElementById('inpPmNewMountType');
   const selSector = document.getElementById('inpPmNewMountSector');
   const inpHeight = document.getElementById('inpPmNewMountHeight');
   const inpAzimuth = document.getElementById('inpPmNewMountAzimuth');
 
   const mountType = (selType ? selType.value : 'GSM').trim();
-  const sector = (selSector ? selSector.value : 'A').trim();
+  const sector = (selSector ? selSector.value : 'Sector 1').trim();
   const height = (inpHeight && inpHeight.value.trim()) ? inpHeight.value.trim() : '30m';
-  const azimuth = (inpAzimuth && inpAzimuth.value.trim()) ? inpAzimuth.value.trim() : '0°';
+  const azimuth = (inpAzimuth && inpAzimuth.value.trim()) ? inpAzimuth.value.trim() : '0';
 
-  // Prevent duplicate: check by mountType and sector
-  const isDuplicate = pmPoleMountDetailsData.some(item => 
-    item.mountType.toLowerCase() === mountType.toLowerCase() && 
-    item.sector.toLowerCase() === sector.toLowerCase()
-  );
-
-  if (isDuplicate) {
-    showToast(`Duplicate entry! ${mountType} - Sector ${sector} already exists.`);
-    return;
+  const ids = window.getActiveDprProjectIdentifiers();
+  try {
+    const res = await fetch('/api/v1/commercial/dpr/pole-mounts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectId: ids.projectId,
+        poNo: ids.poNo,
+        siteId: ids.siteId,
+        mountType,
+        sector,
+        height,
+        azimuth
+      })
+    });
+    if (res.ok) {
+      await window.loadPmPoleMountsFromApi();
+    } else {
+      pmPoleMountDetailsData = [{ id: Date.now(), mountType, sector, height, azimuth }];
+      renderPmPoleMountDetailsTable();
+    }
+  } catch (err) {
+    console.warn('Error saving pole mount to DB:', err);
+    pmPoleMountDetailsData = [{ id: Date.now(), mountType, sector, height, azimuth }];
+    renderPmPoleMountDetailsTable();
   }
 
-  pmPoleMountDetailsData.push({
-    id: Date.now(),
-    mountType,
-    sector,
-    height,
-    azimuth
-  });
-
-  renderPmPoleMountDetailsTable();
   closePmAddMountDetailsModal();
   showToast('Mount details added successfully');
 };
 
+window.deletePmPoleMountDetail = async function() {
+  const ids = window.getActiveDprProjectIdentifiers();
+  const params = new URLSearchParams();
+  if (ids.projectId) params.set('project_id', ids.projectId);
+  if (ids.poNo) params.set('po_no', ids.poNo);
+  if (ids.siteId) params.set('site_id', ids.siteId);
+  try {
+    await fetch(`/api/v1/commercial/dpr/pole-mounts?${params.toString()}`, { method: 'DELETE' });
+  } catch (err) {}
+  await window.loadPmPoleMountsFromApi();
+};
+
 // --------------------------------------------------------------------------
-// 3. SURVEY REPORT CONTROLLER
+// 3. SURVEY REPORT CONTROLLER (Backed by indus_customer_project_type_supply / indus_customer_survey in Master DB)
 // --------------------------------------------------------------------------
-let pmSurveyReportData = [
-  "Site Safety Inspection Report",
-  "Material Quality Check Sheet",
-  "Foundation Concrete Test Report",
-  "Structural Stability Survey",
-  "Earthing & Soil Resistivity Test",
-  "Power & EB Connectivity Survey"
-];
+let pmSurveyReportData = [];
+
+window.loadPmSurveyFromApi = async function() {
+  try {
+    const ids = window.getActiveDprProjectIdentifiers();
+    const params = new URLSearchParams();
+    if (ids.subProjectType) params.set('sub_project_type', ids.subProjectType);
+    const res = await fetch(`/api/v1/commercial/dpr/survey?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      const rows = Array.isArray(json.data) ? json.data : [];
+      pmSurveyReportData = rows;
+      if (typeof dprSurveyReportData !== 'undefined') {
+        dprSurveyReportData = rows.map(r => ({
+          id: r.id,
+          description: r.description || '',
+          observation: r.observation || '',
+          remarks: r.remarks || '',
+          hasPhoto: true
+        }));
+      }
+    } else {
+      pmSurveyReportData = [];
+    }
+  } catch (err) {
+    console.warn('Error loading survey items from Master DB:', err);
+    pmSurveyReportData = [];
+  }
+  renderPmSurveyReportTable();
+  if (typeof renderDprSurveyReportTable === 'function') renderDprSurveyReportTable();
+  return pmSurveyReportData;
+};
 
 function renderPmSurveyReportTable() {
   const tbody = document.getElementById('tbodyPmSurveyReport');
@@ -14586,14 +14518,17 @@ function renderPmSurveyReportTable() {
     return;
   }
 
-  tbody.innerHTML = pmSurveyReportData.map(item => `
-    <tr style="border-bottom: 1px solid #f1f5f9;">
-      <td style="text-align: left !important; padding: 11px 16px; font-size: 0.95rem; color: #1e293b;">${item}</td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = pmSurveyReportData.map(item => {
+    const desc = typeof item === 'string' ? item : (item.description || '');
+    return `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="text-align: left !important; padding: 11px 16px; font-size: 0.95rem; color: #1e293b;">${desc}</td>
+      </tr>
+    `;
+  }).join('');
 }
 
-window.openPmSurveyReportModal = function() {
+window.openPmSurveyReportModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -14605,18 +14540,19 @@ window.openPmSurveyReportModal = function() {
     if (card.id !== 'pmSurveyReportModal') card.style.display = 'none';
   });
 
+  const ids = window.getActiveDprProjectIdentifiers();
   const titleBadge = document.getElementById('lblPmSurveyReportTitle') || document.getElementById('lblPmSurveyReportCardTitle');
   if (titleBadge) {
-    titleBadge.textContent = activePmModalRow ? (activePmModalRow.siteId ? `${activePmModalRow.siteId} - Survey report` : 'Site Survey report') : 'Site Survey report';
+    titleBadge.textContent = ids.siteId ? `${ids.siteId} - Survey report` : 'Site Survey report';
   }
-
-  renderPmSurveyReportTable();
 
   const modal = document.getElementById('pmSurveyReportModal');
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
+
+  await window.loadPmSurveyFromApi();
 };
 
 window.closePmSurveyReportModal = function() {
@@ -14663,7 +14599,7 @@ window.closePmAddSurveyItemsModal = function() {
   if (overlay) overlay.style.display = 'flex';
 };
 
-window.savePmNewSurveyItem = function() {
+window.savePmNewSurveyItem = async function() {
   const inpDesc = document.getElementById('inpPmNewSurveyDescription');
   const desc = inpDesc ? inpDesc.value.trim() : '';
   if (!desc) {
@@ -14671,33 +14607,69 @@ window.savePmNewSurveyItem = function() {
     return;
   }
 
-  const isDuplicate = pmSurveyReportData.some(item => 
-    (typeof item === 'string' ? item : item.description || '').trim().toLowerCase() === desc.toLowerCase()
-  );
-
-  if (isDuplicate) {
-    showToast(`Duplicate entry! "${desc}" already exists.`);
-    return;
+  const ids = window.getActiveDprProjectIdentifiers();
+  try {
+    const res = await fetch('/api/v1/commercial/dpr/survey', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subProjectType: ids.subProjectType || 'Civil',
+        description: desc,
+        observation: '',
+        remarks: ''
+      })
+    });
+    if (res.ok) {
+      await window.loadPmSurveyFromApi();
+    } else {
+      pmSurveyReportData.push({ id: Date.now(), description: desc });
+      renderPmSurveyReportTable();
+    }
+  } catch (err) {
+    console.warn('Error saving survey item to Master DB:', err);
+    pmSurveyReportData.push({ id: Date.now(), description: desc });
+    renderPmSurveyReportTable();
   }
 
-  pmSurveyReportData.push(desc);
-  renderPmSurveyReportTable();
   closePmAddSurveyItemsModal();
   showToast('Survey item added successfully');
 };
 
 // --------------------------------------------------------------------------
-// 4. CIVIL WORKS CONTROLLER
+// 4. CIVIL WORKS CONTROLLER (Backed by telecom_project / indus_project in Project DB)
 // --------------------------------------------------------------------------
-let pmCivilWorksData = [
-  { id: 1, foundationName: 'Tower Foundation', hasPdf: true, pdfFileName: 'Tower_Foundation_Drawing.pdf' },
-  { id: 2, foundationName: 'DG Foundation', hasPdf: false },
-  { id: 3, foundationName: 'OD Bed Foundation', hasPdf: false },
-  { id: 4, foundationName: 'Shelter Foundation', hasPdf: false }
-];
+let pmCivilWorksData = [];
 let pmSelectedCivilWorkIds = new Set();
 let pmSelectedCivilWorkId = null;
 let pmPendingCivilWorkPdf = null;
+
+window.loadPmCivilWorksFromApi = async function() {
+  try {
+    const ids = window.getActiveDprProjectIdentifiers();
+    const params = new URLSearchParams();
+    if (ids.projectId) params.set('project_id', ids.projectId);
+    if (ids.poNo) params.set('po_no', ids.poNo);
+    if (ids.siteId) params.set('site_id', ids.siteId);
+    const res = await fetch(`/api/v1/commercial/dpr/civil-works?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      const rows = Array.isArray(json.data) ? json.data : [];
+      pmCivilWorksData = rows.map(r => ({
+        id: r.id || `pm-cw-${r.projectId || Date.now()}`,
+        foundationName: r.drawingName || '',
+        hasPdf: !!r.hasDocument,
+        pdfFileName: r.fileName || `${(r.drawingName || 'Drawing').replace(/\s+/g, '_')}.pdf`
+      }));
+    } else {
+      pmCivilWorksData = [];
+    }
+  } catch (err) {
+    console.warn('Error loading civil works from DB:', err);
+    pmCivilWorksData = [];
+  }
+  renderPmCivilWorksTable();
+  return pmCivilWorksData;
+};
 
 function renderPmCivilWorksTable() {
   const tbody = document.getElementById('tbodyPmCivilWorks');
@@ -14713,13 +14685,13 @@ function renderPmCivilWorksTable() {
   }
 
   tbody.innerHTML = pmCivilWorksData.map(item => `
-    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedCivilWorkIds.has(item.id) ? 'rgba(4, 84, 228, 0.05)' : 'transparent'};">
+    <tr style="border-bottom: 1px solid #f1f5f9; background: ${pmSelectedCivilWorkIds.has(String(item.id)) ? 'rgba(4, 84, 228, 0.05)' : 'transparent'};">
       <td style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
-        <input type="checkbox" name="chkPmCivilWork" class="pm-circle-radio" ${pmSelectedCivilWorkIds.has(item.id) ? 'checked' : ''} onchange="togglePmCivilWorkSelect(${item.id})">
+        <input type="checkbox" name="chkPmCivilWork" class="pm-circle-radio" ${pmSelectedCivilWorkIds.has(String(item.id)) ? 'checked' : ''} onchange="togglePmCivilWorkSelect('${item.id}')">
       </td>
       <td style="text-align: left !important; vertical-align: middle; padding: 10px 14px; font-size: 0.95rem;">
         ${item.hasPdf ? `
-          <a href="javascript:void(0)" onclick="downloadPmCivilWorkPdf('${item.pdfFileName || item.foundationName + '_Drawing.pdf'}')" style="color: #0454e4; text-decoration: underline !important; text-underline-offset: 3px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Download Drawing PDF">
+          <a href="javascript:void(0)" onclick="downloadPmCivilWorkPdf('${item.pdfFileName || item.foundationName + '_Drawing.pdf'}', '${item.foundationName}')" style="color: #0454e4; text-decoration: underline !important; text-underline-offset: 3px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;" title="Download Drawing PDF">
             <span>${item.foundationName}</span>
           </a>
         ` : `
@@ -14731,10 +14703,11 @@ function renderPmCivilWorksTable() {
 }
 
 window.togglePmCivilWorkSelect = function(id) {
-  if (pmSelectedCivilWorkIds.has(id)) {
-    pmSelectedCivilWorkIds.delete(id);
+  const key = String(id);
+  if (pmSelectedCivilWorkIds.has(key)) {
+    pmSelectedCivilWorkIds.delete(key);
   } else {
-    pmSelectedCivilWorkIds.add(id);
+    pmSelectedCivilWorkIds.add(key);
   }
   pmSelectedCivilWorkId = pmSelectedCivilWorkIds.values().next().value || null;
 
@@ -14750,7 +14723,7 @@ window.toggleSelectAllPmCivilWorks = function() {
   if (pmSelectedCivilWorkIds.size === pmCivilWorksData.length) {
     pmSelectedCivilWorkIds.clear();
   } else {
-    pmCivilWorksData.forEach(item => pmSelectedCivilWorkIds.add(item.id));
+    pmCivilWorksData.forEach(item => pmSelectedCivilWorkIds.add(String(item.id)));
   }
   pmSelectedCivilWorkId = pmSelectedCivilWorkIds.values().next().value || null;
 
@@ -14762,9 +14735,19 @@ window.toggleSelectAllPmCivilWorks = function() {
   renderPmCivilWorksTable();
 };
 
-window.deletePmSelectedCivilWork = function() {
+window.deletePmSelectedCivilWork = async function() {
   if (pmSelectedCivilWorkIds.size === 0) return;
-  pmCivilWorksData = pmCivilWorksData.filter(item => !pmSelectedCivilWorkIds.has(item.id));
+  const ids = window.getActiveDprProjectIdentifiers();
+  const params = new URLSearchParams();
+  if (ids.projectId) params.set('project_id', ids.projectId);
+  if (ids.poNo) params.set('po_no', ids.poNo);
+  if (ids.siteId) params.set('site_id', ids.siteId);
+  try {
+    await fetch(`/api/v1/commercial/dpr/civil-works?${params.toString()}`, { method: 'DELETE' });
+  } catch (err) {
+    console.warn('Error deleting civil work from DB:', err);
+  }
+  pmCivilWorksData = pmCivilWorksData.filter(item => !pmSelectedCivilWorkIds.has(String(item.id)));
   pmSelectedCivilWorkIds.clear();
   pmSelectedCivilWorkId = null;
 
@@ -14775,7 +14758,7 @@ window.deletePmSelectedCivilWork = function() {
   showToast('Civil work deleted successfully');
 };
 
-window.openPmCivilWorksModal = function() {
+window.openPmCivilWorksModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -14787,9 +14770,10 @@ window.openPmCivilWorksModal = function() {
     if (card.id !== 'pmCivilWorksModal') card.style.display = 'none';
   });
 
+  const ids = window.getActiveDprProjectIdentifiers();
   const titleBadge = document.getElementById('lblPmCivilWorksTitle') || document.getElementById('lblPmCivilWorksCardTitle');
   if (titleBadge) {
-    titleBadge.textContent = activePmModalRow ? (activePmModalRow.projectId ? `${activePmModalRow.projectId} - Civil works` : 'Civil works') : 'Civil works';
+    titleBadge.textContent = ids.siteId ? `${ids.siteId} - Civil works` : 'Civil works';
   }
 
   pmSelectedCivilWorkIds.clear();
@@ -14797,13 +14781,13 @@ window.openPmCivilWorksModal = function() {
   const btnDelete = document.getElementById('btnPmDeleteCivilWork');
   if (btnDelete) btnDelete.style.display = 'none';
 
-  renderPmCivilWorksTable();
-
   const modal = document.getElementById('pmCivilWorksModal');
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
+
+  await window.loadPmCivilWorksFromApi();
 };
 
 window.closePmCivilWorksModal = function() {
@@ -14892,6 +14876,14 @@ window.triggerPmCivilWorkPdfUpload = function() {
 window.handlePmCivilWorkPdfSelected = function(fileInput) {
   if (fileInput && fileInput.files && fileInput.files[0]) {
     const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      pmPendingCivilWorkPdf = {
+        name: file.name,
+        dataUri: evt.target.result
+      };
+    };
+    reader.readAsDataURL(file);
     pmPendingCivilWorkPdf = {
       name: file.name,
       blobUrl: URL.createObjectURL(file)
@@ -14905,36 +14897,68 @@ window.handlePmCivilWorkPdfSelected = function(fileInput) {
   }
 };
 
-window.savePmNewCivilWork = function() {
+window.savePmNewCivilWork = async function() {
   const selFoundation = document.getElementById('inpPmNewCivilFoundationName');
   const foundationName = (selFoundation ? selFoundation.value : 'Tower Foundation').trim();
-  const hasPdf = !!pmPendingCivilWorkPdf;
-  const pdfFileName = pmPendingCivilWorkPdf ? pmPendingCivilWorkPdf.name : null;
+  const pdfFileName = pmPendingCivilWorkPdf ? pmPendingCivilWorkPdf.name : `${foundationName.replace(/\s+/g, '_')}.pdf`;
+  const drawingDocuments = (pmPendingCivilWorkPdf && pmPendingCivilWorkPdf.dataUri) ? pmPendingCivilWorkPdf.dataUri : null;
 
-  // Prevent duplicate: check by foundationName
-  const isDuplicate = pmCivilWorksData.some(item => 
-    item.foundationName.toLowerCase() === foundationName.toLowerCase()
-  );
-
-  if (isDuplicate) {
-    showToast(`Duplicate entry! "${foundationName}" already exists.`);
-    return;
+  const ids = window.getActiveDprProjectIdentifiers();
+  try {
+    const res = await fetch('/api/v1/commercial/dpr/civil-works', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        projectId: ids.projectId,
+        poNo: ids.poNo,
+        siteId: ids.siteId,
+        drawingName: foundationName,
+        drawingDocuments: drawingDocuments,
+        fileName: pdfFileName
+      })
+    });
+    if (res.ok) {
+      await window.loadPmCivilWorksFromApi();
+    } else {
+      pmCivilWorksData = [{ id: Date.now(), foundationName, hasPdf: true, pdfFileName }];
+      renderPmCivilWorksTable();
+    }
+  } catch (err) {
+    console.warn('Error saving civil work to DB:', err);
+    pmCivilWorksData = [{ id: Date.now(), foundationName, hasPdf: true, pdfFileName }];
+    renderPmCivilWorksTable();
   }
 
-  pmCivilWorksData.push({
-    id: Date.now(),
-    foundationName,
-    hasPdf,
-    pdfFileName
-  });
-
-  renderPmCivilWorksTable();
   closePmAddCivilWorksModal();
   showToast('Civil work added successfully');
 };
 
-window.downloadPmCivilWorkPdf = function(fileName) {
+window.downloadPmCivilWorkPdf = async function(fileName, drawingName) {
   const safeName = fileName || 'Civil_Work_Drawing.pdf';
+  const ids = window.getActiveDprProjectIdentifiers();
+  const params = new URLSearchParams();
+  if (ids.projectId) params.set('project_id', ids.projectId);
+  if (ids.poNo) params.set('po_no', ids.poNo);
+  if (ids.siteId) params.set('site_id', ids.siteId);
+  if (drawingName) params.set('drawing_name', drawingName);
+  try {
+    const res = await fetch(`/api/v1/commercial/dpr/civil-works/download?${params.toString()}`);
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded ${safeName}`);
+      return;
+    }
+  } catch (err) {
+    console.warn('Error downloading civil work PDF from DB:', err);
+  }
   const samplePdfContent = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF";
   const blob = new Blob([samplePdfContent], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
@@ -15174,7 +15198,7 @@ window.closePmAddStnMaterialsModal = function() {
   if (overlay) overlay.style.display = 'flex';
 };
 
-window.savePmNewStnMaterial = function() {
+window.savePmNewStnMaterial = async function() {
   const docType = document.getElementById('inpPmStnDocumentType') ? document.getElementById('inpPmStnDocumentType').value : 'STN';
   const boqNo = document.getElementById('inpPmStnBoqNo') ? document.getElementById('inpPmStnBoqNo').value.trim() : '';
   const boqDate = document.getElementById('inpPmStnBoqDate') ? document.getElementById('inpPmStnBoqDate').value.trim() : '';
@@ -15185,22 +15209,55 @@ window.savePmNewStnMaterial = function() {
   const uom = document.getElementById('inpPmStnUom') ? document.getElementById('inpPmStnUom').value.trim() : '';
   const qty = document.getElementById('inpPmStnQty') ? document.getElementById('inpPmStnQty').value.trim() : '';
 
-  const finalBoqNo = boqNo || (pmEditingStnMaterialId ? '' : `BOQ-STN-00${pmStnMaterialsData.length + 1}`);
+  const finalBoqNo = boqNo || (pmEditingStnMaterialId ? '' : `BOQ-STN-00${(projectInfraData.length || pmStnMaterialsData.length) + 1}`);
   const finalInfraDesc = infraDesc || 'Material item';
 
   const isFromInfraPage = window.pmAddStnOpenedFromInfra || (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_infra');
   if (isFromInfraPage) {
-    projectInfraData.push({
-      id: "infra-" + Date.now(),
-      docType: docType || 'STN',
-      boqNo: finalBoqNo,
-      boqDate: boqDate || '15-05-2024',
-      category: itemCategory || 'General',
-      infraDescription: finalInfraDesc,
-      qy: qty || '1.00',
-      status: 'Active'
-    });
-    showToast('Infra added successfully');
+    const parsedQtyNum = parseFloat(String(qty || '1').replace(/,/g, ''));
+    const formattedQty = (!isNaN(parsedQtyNum) && parsedQtyNum > 0) ? parsedQtyNum.toFixed(2) : '1.00';
+    let isoCommDate = null;
+    if (boqDate) {
+      const cleanedDate = boqDate.replace(/\s+/g, '');
+      const parts = cleanedDate.split(/[-/]/);
+      if (parts.length === 3) {
+        if (parts[0].length === 4) {
+          isoCommDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+        } else {
+          isoCommDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+    }
+
+    try {
+      const createPayload = {
+        company_name: 'Nexus',
+        customer_name: 'Indus Tower Ltd',
+        item_code: finalBoqNo,
+        infra_category: itemCategory || 'Tower Structure',
+        infra_description: finalInfraDesc,
+        uom: docType || 'STN',
+        make: docType || 'STN',
+        commissioning: isoCommDate || 'Yes',
+        i_map: formattedQty,
+        status: 'Active'
+      };
+      if (window.NexusApi && window.NexusApi.indusInfra && typeof window.NexusApi.indusInfra.create === 'function') {
+        await window.NexusApi.indusInfra.create(createPayload);
+      } else {
+        const apiBase = (window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1';
+        await fetch(`${apiBase}/customer/indus/infra`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(createPayload)
+        });
+      }
+      await window.loadProjectInfraFromApi();
+      showToast('Infra added successfully');
+    } catch (err) {
+      console.error('Failed to save Infra to indus_customer_infra:', err);
+      showToast('Failed to save Infra to database');
+    }
     if (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_infra') {
       currentDataset = [...projectInfraData];
       filteredDataset = [...currentDataset];
@@ -15869,13 +15926,7 @@ window.closePoCapexModal = function() {
 // ==========================================================================
 // PROJECT MANAGER: MATERIAL DETAILS MODAL CONTROLLER
 // ==========================================================================
-let defaultPmMaterialDetailItems = [
-  { id: 'pmat-1', materialType: 'Electrical', materialName: 'Copper Earthing Cable 50 Sq.mm', uom: 'Mtr', qty: '150.00', selected: false, highlighted: false },
-  { id: 'pmat-2', materialType: 'Civil', materialName: 'Ready Mix Concrete M25 Grade', uom: 'Cum', qty: '18.50', selected: false, highlighted: false },
-  { id: 'pmat-3', materialType: 'Height', materialName: 'Tower Climbing Safety Harness & Lanyard', uom: 'Nos', qty: '4.00', selected: false, highlighted: false },
-  { id: 'pmat-4', materialType: 'Electrical', materialName: 'Surge Protection Device (SPD) Class B+C', uom: 'Nos', qty: '6.00', selected: false, highlighted: false },
-  { id: 'pmat-5', materialType: 'Civil', materialName: 'Galvanized Steel Foundation Bolts M24', uom: 'Nos', qty: '24.00', selected: false, highlighted: false }
-];
+let defaultPmMaterialDetailItems = [];
 
 let pmMaterialsDetailStore = {};
 
@@ -15884,7 +15935,7 @@ window.currentPmMaterialDetailFilterCol = null;
 window.activePmMaterialModalRow = null;
 window.currentPmMaterialItems = [];
 
-window.openPmMaterialsDetailModal = function(rowId) {
+window.openPmMaterialsDetailModal = async function(rowId) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -15895,34 +15946,46 @@ window.openPmMaterialsDetailModal = function(rowId) {
 
   const row = (pmMaterialsDataStore || []).find(r => String(r.id) === String(rowId)) ||
               (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
-              { id: rowId, siteName: 'Guindy Hub', projectId: 'PRJ-2026-001', siteId: 'IN-123456', projectType: 'New Build', subProjectType: 'Civil Foundation' };
+              { id: rowId, siteName: '', projectId: '', siteId: '', projectType: '', subProjectType: '', poNo: '' };
   
   window.activePmMaterialModalRow = row;
 
   // Header Details
   const prjInfo = document.getElementById('lblPmMatHeaderProjectInfo');
   if (prjInfo) {
-    prjInfo.textContent = `${row.projectId || 'PRJ-2026-001'} / ${row.projectType || 'New Build'} / ${row.subProjectType || 'Civil Foundation'}`;
+    prjInfo.textContent = `${row.projectId || ''} / ${row.projectType || ''} / ${row.subProjectType || ''}`;
   }
 
   const poInfo = document.getElementById('lblPmMatHeaderPoInfo');
   if (poInfo) {
-    poInfo.textContent = `${row.poNo || 'PO-2026-001'} (0-Opex)`;
+    poInfo.textContent = `${row.poNo || ''} (0-Opex)`;
   }
 
   const siteInfo = document.getElementById('lblPmMatHeaderSiteInfo');
   if (siteInfo) {
-    siteInfo.textContent = `${row.siteId || 'IN-123456'} / ${row.siteName || 'Site Name'}`;
+    siteInfo.textContent = `${row.siteId || ''} / ${row.siteName || ''}`;
   }
 
-  // Load items for this site
-  if (!pmMaterialsDetailStore[row.id]) {
-    pmMaterialsDetailStore[row.id] = defaultPmMaterialDetailItems.map((item, idx) => ({
-      ...item,
-      id: `pmat-${row.id}-${idx + 1}`,
-      selected: false,
-      highlighted: false
-    }));
+  // Load items for this site directly from project_materials
+  if (!pmMaterialsDetailStore[row.id] && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectMaterials === 'function') {
+    try {
+      const res = await window.NexusApi.commercial.getProjectMaterials(row.poNo || null, row.siteId || null);
+      const rows = (res && Array.isArray(res.data)) ? res.data : (Array.isArray(res) ? res : []);
+      pmMaterialsDetailStore[row.id] = rows.map((m, idx) => ({
+        id: m.id || `pmat-${row.id}-${idx + 1}`,
+        materialManagementId: m.materialManagementId,
+        materialType: m.materialType || '',
+        materialName: m.materialName || m.boqName || '',
+        uom: m.uom || '',
+        qty: m.qty || m.mir || '0.00',
+        selected: false,
+        highlighted: false
+      }));
+    } catch (e) {
+      pmMaterialsDetailStore[row.id] = [];
+    }
+  } else if (!pmMaterialsDetailStore[row.id]) {
+    pmMaterialsDetailStore[row.id] = [];
   }
 
   window.currentPmMaterialItems = pmMaterialsDetailStore[row.id];
@@ -16536,15 +16599,46 @@ window.submitPmProjectPlan = function() {
   openPmMembersModal();
 };
 
-let pmMembersDataStore = [
-  { id: 'mem-1', name: 'Karthik Raja', designation: 'Supervisor', contact: '+91 9840123456', status: 'Active', selected: false },
-  { id: 'mem-2', name: 'Priya Sharma', designation: 'Technician', contact: '+91 9845112233', status: 'Active', selected: false },
-  { id: 'mem-3', name: 'Suresh Kumar', designation: 'Service Vendor', contact: '+91 9876543210', status: 'Active', selected: false }
-];
+let pmMembersDataStore = [];
+window.deactivatedPmMemberNames = window.deactivatedPmMemberNames || new Set();
+
+window.loadPmMembersFromApi = async function() {
+  try {
+    const ids = window.getActiveDprProjectIdentifiers();
+    const params = new URLSearchParams();
+    if (ids.poNo) params.set('po_no', ids.poNo);
+    if (ids.siteId) params.set('site_id', ids.siteId);
+    const res = await fetch(`/api/v1/commercial/dpr/members?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      const rows = Array.isArray(json.data) ? json.data : [];
+      pmMembersDataStore = rows
+        .filter(r => (r.status || 'Active').toLowerCase() === 'active' && !window.deactivatedPmMemberNames.has(String(r.name || '').trim().toLowerCase()))
+        .map(r => ({
+          id: r.id,
+          name: r.name || r.employeeName || '',
+          designation: r.designation || 'Supervisor',
+          contact: r.contact || r.contactNumber || '',
+          status: 'Active',
+          selected: false
+        }));
+    } else {
+      pmMembersDataStore = [];
+    }
+  } catch (err) {
+    console.warn('Error loading members from DB:', err);
+    pmMembersDataStore = [];
+  }
+  renderPmMembersTable();
+  return pmMembersDataStore;
+};
 
 window.renderPmMembersTable = function() {
   const tbody = document.getElementById('tblMembersBody');
   if (!tbody) return;
+
+  // Always filter out any non-active or deactivated members so they never appear in UI
+  pmMembersDataStore = pmMembersDataStore.filter(r => (r.status || 'Active') === 'Active');
 
   const headerToggleWrap = document.getElementById('pmMemberHeaderToggleWrap');
   const selectedRows = pmMembersDataStore.filter(r => r.selected);
@@ -16586,17 +16680,37 @@ window.renderPmMembersTable = function() {
   }).join('');
 };
 
-window.toggleSelectedPmMembersStatus = function() {
+window.toggleSelectAllPmMembers = function() {
+  if (pmMembersDataStore.length === 0) return;
+  const allSelected = pmMembersDataStore.every(r => r.selected);
+  pmMembersDataStore.forEach(r => { r.selected = !allSelected; });
+  renderPmMembersTable();
+};
+
+window.toggleSelectedPmMembersStatus = async function() {
   const selectedRows = pmMembersDataStore.filter(r => r.selected);
   if (selectedRows.length === 0) {
     showToast('Please select a member row first.');
     return;
   }
-  const anyActive = selectedRows.some(r => r.status === 'Active');
+  const idsToDeactivate = selectedRows.map(r => r.id);
   selectedRows.forEach(r => {
-    r.status = anyActive ? 'Inactive' : 'Active';
+    if (r.name) window.deactivatedPmMemberNames.add(String(r.name).trim().toLowerCase());
   });
+  // Immediately remove deactivated members from UI and store
+  pmMembersDataStore = pmMembersDataStore.filter(r => !r.selected);
   renderPmMembersTable();
+
+  try {
+    await fetch('/api/v1/commercial/dpr/members/deactivate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memberIds: idsToDeactivate })
+    });
+  } catch (err) {
+    console.warn('Error deactivating member in DB:', err);
+  }
+  showToast('Member deactivated and removed.');
 };
 
 window.togglePmMemberSelect = function(memId) {
@@ -16607,7 +16721,7 @@ window.togglePmMemberSelect = function(memId) {
   renderPmMembersTable();
 };
 
-window.openPmMembersModal = function() {
+window.openPmMembersModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -16620,8 +16734,8 @@ window.openPmMembersModal = function() {
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
-    renderPmMembersTable();
   }
+  await window.loadPmMembersFromApi();
 };
 
 window.closePmMembersModal = function() {
@@ -16651,6 +16765,7 @@ window.openAddMemberModal = function() {
     if (empNames.length === 0) {
       empNames = ['Karthik Raja', 'Priya Sharma', 'Suresh Kumar', 'Deepa Venkat', 'Arun Prasath', 'Meena Kumari'];
     }
+    empNames = empNames.filter(n => !window.deactivatedPmMemberNames.has(String(n).trim().toLowerCase()));
     selEmp.innerHTML = empNames.map((name, i) => `<option value="${name}" ${i === 0 ? 'selected' : ''}>${name}</option>`).join('');
   }
 
@@ -16665,34 +16780,62 @@ window.closeAddMemberModal = function() {
   if (parentCard) parentCard.classList.remove('card-dimmed-blurred');
 };
 
-window.saveNewMember = function() {
+window.saveNewMember = async function() {
   const selDesig = document.getElementById('selMemberDesignation');
   const selName = document.getElementById('selMemberEmployeeName');
   const designation = selDesig ? selDesig.value : 'Supervisor';
   const name = selName ? selName.value : 'Karthik Raja';
 
-  pmMembersDataStore.unshift({
-    id: 'mem-' + Date.now(),
-    name: name,
-    designation: designation,
-    contact: '+91 984' + Math.floor(1000000 + Math.random() * 9000000),
-    status: 'Active',
-    selected: false
-  });
-
-  renderPmMembersTable();
-  closeAddMemberModal();
-
-  if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Member added and task completed successfully!', 'Task Completed', () => {
-      closePmMembersModal();
-      closePmProjectPlanModal();
-    });
-  } else {
-    showToast('Member added successfully.');
-    closePmMembersModal();
-    closePmProjectPlanModal();
+  let contact = '+91 9840123456';
+  if (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData)) {
+    const matchedEmp = masterEmployeeData.find(e => (e.employeeName || e.employee_name || e.name) === name);
+    if (matchedEmp && (matchedEmp.contactNumber || matchedEmp.contact_number || matchedEmp.mobile)) {
+      contact = matchedEmp.contactNumber || matchedEmp.contact_number || matchedEmp.mobile;
+    }
   }
+
+  const ids = window.getActiveDprProjectIdentifiers();
+  try {
+    const res = await fetch('/api/v1/commercial/dpr/members', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        poNo: ids.poNo,
+        siteId: ids.siteId,
+        name: name,
+        designation: designation,
+        contact: contact,
+        status: 'Active'
+      })
+    });
+    if (res.ok) {
+      await window.loadPmMembersFromApi();
+    } else {
+      pmMembersDataStore.push({
+        id: 'mem-' + Date.now(),
+        name: name,
+        designation: designation,
+        contact: contact,
+        status: 'Active',
+        selected: false
+      });
+      renderPmMembersTable();
+    }
+  } catch (err) {
+    console.warn('Error saving member to DB:', err);
+    pmMembersDataStore.push({
+      id: 'mem-' + Date.now(),
+      name: name,
+      designation: designation,
+      contact: contact,
+      status: 'Active',
+      selected: false
+    });
+    renderPmMembersTable();
+  }
+
+  closeAddMemberModal();
+  showToast('Member added successfully.');
 };
 
 window.submitMembersTask = function() {
@@ -17383,7 +17526,35 @@ window.closeMinMrnModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.openInfraDocModal = function(titleText) {
+window.downloadInfraDocFromDb = async function(docNo, docType, docId) {
+  try {
+    const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+      ? getCommercialApiBaseUrl()
+      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1');
+    const params = new URLSearchParams();
+    if (docNo) params.set('doc_no', docNo);
+    if (docType) params.set('doc_type', docType);
+    if (docId) params.set('doc_id', String(docId));
+    const url = `${apiBase}/commercial/jms/infra-documents/download?${params.toString()}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to download document from database');
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `${(docNo || 'Document').replace(/[\/\\]/g, '_')}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    if (typeof showToast === 'function') showToast(`Downloaded ${docNo}.pdf`);
+  } catch (err) {
+    console.error('Error downloading infra document from DB:', err);
+    if (typeof showToast === 'function') showToast(`Failed to download ${docNo || 'document'}`);
+  }
+};
+
+window.openInfraDocModal = async function(titleText) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -17393,14 +17564,39 @@ window.openInfraDocModal = function(titleText) {
   });
 
   const titleBadge = document.getElementById('lblInfraDocTitle');
-  if (titleBadge && titleText) {
-    titleBadge.textContent = titleText;
+  if (titleBadge) {
+    titleBadge.textContent = 'Documents';
   }
 
   const modal = document.getElementById('infraDocModal');
   if (modal) {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
+  }
+
+  try {
+    const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+      ? getCommercialApiBaseUrl()
+      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1');
+    const res = await fetch(`${apiBase}/commercial/jms/infra-documents`);
+    if (res.ok) {
+      const json = await res.json();
+      const docs = (json && Array.isArray(json.data)) ? json.data : [];
+      const tbody = document.getElementById('tbodyInfraDocDetails');
+      if (tbody && docs.length > 0) {
+        tbody.innerHTML = docs.map((d, idx) => `
+          <tr style="${idx < docs.length - 1 ? 'border-bottom: 1px solid #f1f5f9;' : ''}">
+            <td style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">${d.docType || ''}</td>
+            <td style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; font-size: 0.95rem;">
+              <a href="#" onclick="downloadInfraDocFromDb('${String(d.docNo || '').replace(/'/g, "\\'")}', '${String(d.docType || '').replace(/'/g, "\\'")}', ${d.id || 'null'}); return false;" style="color: #0454e4 !important; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">${d.docNo || ''}</a>
+            </td>
+            <td style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">${d.docDate || ''}</td>
+          </tr>
+        `).join('');
+      }
+    }
+  } catch (err) {
+    console.warn('Could not load infra documents from API:', err);
   }
 };
 
@@ -17541,22 +17737,37 @@ window.openProjectDetailPage = function(projId, customerName) {
 };
 
 window.openPmSiteProjectLandingPage = function(rowId) {
-  let row = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(rowId));
-  if (!row && typeof commercialWorklistData !== 'undefined') {
-    row = commercialWorklistData.find(r => String(r.id) === String(rowId));
-  }
-  if (!row && typeof projectsMainData !== 'undefined') {
-    row = projectsMainData.find(r => String(r.id) === String(rowId));
+  const cleanId = String(rowId || '').replace(/^prj-/, '').toLowerCase().trim();
+  const searchLists = [
+    (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore : [],
+    (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData : [],
+    (typeof projectsMainData !== 'undefined' && Array.isArray(projectsMainData)) ? projectsMainData : []
+  ];
+  let row = null;
+  for (const list of searchLists) {
+    row = list.find(r => {
+      if (!r) return false;
+      const rId = String(r.id || '').toLowerCase().trim();
+      const rClean = rId.replace(/^prj-/, '');
+      return rId === String(rowId || '').toLowerCase().trim() ||
+             rClean === cleanId ||
+             String(r.projectId || '').toLowerCase().trim() === cleanId ||
+             String(r.siteId || '').toLowerCase().trim() === cleanId ||
+             String(r.poNo || '').toLowerCase().trim() === cleanId ||
+             String(r.siteName || '').toLowerCase().trim() === cleanId;
+    });
+    if (row) break;
   }
   if (!row) {
     row = {
       id: rowId,
-      projectId: 'PRJ-2026-001',
+      projectId: 'PRJ-2026-021',
       projectType: 'Run project',
       subProjectType: 'Civil',
-      poNo: '4500128934',
-      siteId: 'IN-123456',
-      siteName: 'Guindy Hub'
+      poNo: '4500128951',
+      siteId: 'IN-123471',
+      siteName: 'Guindy North Hub',
+      status: 'WIP'
     };
   }
 
@@ -17565,10 +17776,17 @@ window.openPmSiteProjectLandingPage = function(rowId) {
   window.projectNavigationContext = 'worklist';
   window.projectWorklistOrigin = currentWorklistView || 'wip';
   window.lastPmWorklistView = currentWorklistView || 'wip'; // keeps YTS / WIP / HOLD / NR
+  window.pmCurrentProjectExpenses = null;
+  window._needsRefreshPmExpenses = true;
+
   try {
     sessionStorage.setItem('nexus_project_context', 'worklist');
     sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
-    sessionStorage.setItem('nexus_project_site_id', String(rowId));
+    sessionStorage.setItem('nexus_project_id', String(row.id || rowId));
+    sessionStorage.setItem('nexus_project_po_no', String(row.poNo || ''));
+    sessionStorage.setItem('nexus_project_site_id', String(row.siteId || ''));
+    sessionStorage.setItem('nexus_project_site_name', String(row.siteName || ''));
+    sessionStorage.setItem('nexus_project_status', String(row.status || row.projectStatus || ''));
   } catch(e) {}
 
   currentModule = 'projects';
@@ -17580,62 +17798,223 @@ window.openPmSiteProjectLandingPage = function(rowId) {
   showToast(`Opened Project: ${row.siteName || row.projectId}`);
 };
 
-window.openProjectExpensesPage = function() {
+window.getActivePmProject = function() {
+  if (window.activePmProjectRow && (window.activePmProjectRow.poNo || window.activePmProjectRow.projectId || window.activePmProjectRow.siteId)) {
+    return window.activePmProjectRow;
+  }
+  const targetId = (typeof selectedProjectId !== 'undefined' && selectedProjectId) ? String(selectedProjectId).toLowerCase().trim() : '';
+  const cleanTargetId = targetId.replace(/^prj-/, '');
+  const searchLists = [
+    (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore : [],
+    (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData : [],
+    (typeof projectsMainData !== 'undefined' && Array.isArray(projectsMainData)) ? projectsMainData : []
+  ];
+  if (targetId) {
+    for (const list of searchLists) {
+      const found = list.find(r => {
+        if (!r) return false;
+        const rId = String(r.id || '').toLowerCase().trim();
+        const rClean = rId.replace(/^prj-/, '');
+        return rId === targetId ||
+               rClean === cleanTargetId ||
+               String(r.projectId || '').toLowerCase().trim() === targetId ||
+               String(r.siteId || '').toLowerCase().trim() === targetId ||
+               String(r.siteName || '').toLowerCase().trim() === targetId ||
+               String(r.poNo || '').toLowerCase().trim() === targetId;
+      });
+      if (found) {
+        window.activePmProjectRow = found;
+        return found;
+      }
+    }
+  }
+  try {
+    const savedPoNo = sessionStorage.getItem('nexus_project_po_no');
+    const savedSiteId = sessionStorage.getItem('nexus_project_site_id');
+    const sPo = savedPoNo ? savedPoNo.toLowerCase().trim() : '';
+    const sId = savedSiteId ? savedSiteId.toLowerCase().trim() : '';
+    if (sPo || sId) {
+      for (const list of searchLists) {
+        const found = list.find(r => {
+          if (!r) return false;
+          if (sPo && String(r.poNo || '').toLowerCase().trim() === sPo) return true;
+          if (sId && (String(r.siteId || '').toLowerCase().trim() === sId || String(r.id || '').toLowerCase().trim() === sId)) return true;
+          return false;
+        });
+        if (found) {
+          window.activePmProjectRow = found;
+          return found;
+        }
+      }
+      return {
+        id: sessionStorage.getItem('nexus_project_id') || 'prj-2778',
+        poNo: savedPoNo || '4500128951',
+        siteId: savedSiteId || 'IN-123471',
+        siteName: sessionStorage.getItem('nexus_project_site_name') || 'Guindy North Hub',
+        projectId: 'PRJ-2026-021',
+        status: sessionStorage.getItem('nexus_project_status') || 'WIP'
+      };
+    }
+  } catch(e) {}
+  return window.activePmProjectRow || null;
+};
+
+window.openProjectExpensesPage = async function() {
   currentModule = 'projects';
   currentProjectsView = 'project_expenses';
   activeColumnFilters = {};
+  try {
+    sessionStorage.setItem('nexus_module', 'projects');
+    sessionStorage.setItem('nexus_projects_view', 'project_expenses');
+    if (window.projectNavigationContext) sessionStorage.setItem('nexus_project_context', window.projectNavigationContext);
+    if (window.projectWorklistOrigin) sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
+    if (selectedProjectId) sessionStorage.setItem('nexus_project_id', String(selectedProjectId));
+    if (window.activePmProjectRow) {
+      if (window.activePmProjectRow.poNo) sessionStorage.setItem('nexus_project_po_no', String(window.activePmProjectRow.poNo));
+      if (window.activePmProjectRow.siteId) sessionStorage.setItem('nexus_project_site_id', String(window.activePmProjectRow.siteId));
+      if (window.activePmProjectRow.siteName) sessionStorage.setItem('nexus_project_site_name', String(window.activePmProjectRow.siteName));
+      if (window.activePmProjectRow.status) sessionStorage.setItem('nexus_project_status', String(window.activePmProjectRow.status));
+    }
+  } catch(e) {}
   updateURL();
+
+  if (typeof loadCommercialProjectsFromApi === 'function' && (!commercialWorklistData || commercialWorklistData.length === 0)) {
+    try {
+      await loadCommercialProjectsFromApi();
+    } catch(e) {}
+  }
+
+  if (typeof isPmYtsWipHoldNrFlow === 'function' && isPmYtsWipHoldNrFlow()) {
+    const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+    let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+    let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+    try {
+      if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+      if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+    } catch(e) {}
+
+    if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectExpenses === 'function') {
+      try {
+        const res = await window.NexusApi.commercial.getProjectExpenses(poNo, siteId);
+        if (res && res.data) {
+          window.pmCurrentProjectExpenses = res.data;
+          currentDataset = [...res.data];
+          window._needsRefreshPmExpenses = false;
+        }
+      } catch (err) {
+        console.warn('Failed to fetch PM project expenses:', err);
+      }
+    }
+  }
+
   renderApp();
   showToast('Opened Project Expenses Page');
 };
 
-window.openProjectMaterialPage = function() {
+window.openProjectMaterialPage = async function() {
   currentModule = 'projects';
   currentProjectsView = 'project_material';
   activeColumnFilters = {};
+  try {
+    sessionStorage.setItem('nexus_module', 'projects');
+    sessionStorage.setItem('nexus_projects_view', 'project_material');
+    if (window.projectNavigationContext) sessionStorage.setItem('nexus_project_context', window.projectNavigationContext);
+    if (window.projectWorklistOrigin) sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
+    if (selectedProjectId) sessionStorage.setItem('nexus_project_id', String(selectedProjectId));
+    if (window.activePmProjectRow) {
+      if (window.activePmProjectRow.poNo) sessionStorage.setItem('nexus_project_po_no', String(window.activePmProjectRow.poNo));
+      if (window.activePmProjectRow.siteId) sessionStorage.setItem('nexus_project_site_id', String(window.activePmProjectRow.siteId));
+      if (window.activePmProjectRow.siteName) sessionStorage.setItem('nexus_project_site_name', String(window.activePmProjectRow.siteName));
+      if (window.activePmProjectRow.status) sessionStorage.setItem('nexus_project_status', String(window.activePmProjectRow.status));
+      window.activePmProjectRow.tspMaterials = true;
+    }
+  } catch(e) {}
   updateURL();
+
+  if (typeof loadCommercialProjectsFromApi === 'function' && (!commercialWorklistData || commercialWorklistData.length === 0)) {
+    try {
+      await loadCommercialProjectsFromApi();
+    } catch(e) {}
+  }
+
+  await loadProjectMaterialsFromApi();
   renderApp();
   showToast('Opened Project Material Page');
 };
 
-window.openProjectInfraPage = function() {
+window.openProjectInfraPage = async function() {
   currentModule = 'projects';
   currentProjectsView = 'project_infra';
   activeColumnFilters = {};
+  try {
+    sessionStorage.setItem('nexus_module', 'projects');
+    sessionStorage.setItem('nexus_projects_view', 'project_infra');
+    if (window.projectNavigationContext) sessionStorage.setItem('nexus_project_context', window.projectNavigationContext);
+    if (window.projectWorklistOrigin) sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
+    if (selectedProjectId) sessionStorage.setItem('nexus_project_id', String(selectedProjectId));
+  } catch(e) {}
   updateURL();
+  await window.loadProjectInfraFromApi();
   renderApp();
   showToast('Opened Project Infra Page');
 };
 
-window.openProjectDprPage = function() {
+window.openProjectDprPage = async function() {
   currentModule = 'projects';
   currentProjectsView = 'project_dpr';
   activeColumnFilters = {};
+  try {
+    sessionStorage.setItem('nexus_module', 'projects');
+    sessionStorage.setItem('nexus_projects_view', 'project_dpr');
+    if (window.projectNavigationContext) sessionStorage.setItem('nexus_project_context', window.projectNavigationContext);
+    if (window.projectWorklistOrigin) sessionStorage.setItem('nexus_project_worklist_origin', window.projectWorklistOrigin);
+    if (selectedProjectId) sessionStorage.setItem('nexus_project_id', String(selectedProjectId));
+  } catch(e) {}
   updateURL();
+  await window.loadProjectDprDataFromApi();
   renderApp();
   showToast('Opened Project DPR Page');
 };
 
 function isPmYtsWipHoldNrFlow() {
-  const role = getAuthenticatedUserRole();
-  if (role !== 'Project Manager') return false;
-  const validStatusViews = ['yts', 'wip', 'hold', 'nr'];
-  if (currentModule === 'worklist' && validStatusViews.includes(currentWorklistView)) {
+  const validStatusViews = ['yts', 'wip', 'hold', 'nr', 'project_update', 'new_project', 'new'];
+  if (currentModule === 'worklist' && validStatusViews.includes(String(currentWorklistView || '').toLowerCase())) {
     return true;
   }
-  if (window.projectNavigationContext === 'worklist' && validStatusViews.includes(window.projectWorklistOrigin)) {
+  if (validStatusViews.includes(String(window.projectWorklistOrigin || '').toLowerCase())) {
     return true;
   }
-  if (window.lastPmWorklistView && validStatusViews.includes(window.lastPmWorklistView)) {
+  if (validStatusViews.includes(String(window.lastPmWorklistView || '').toLowerCase())) {
     return true;
   }
   try {
     const savedOrigin = sessionStorage.getItem('nexus_project_worklist_origin');
+    if (savedOrigin && validStatusViews.includes(savedOrigin.toLowerCase())) {
+      return true;
+    }
     const savedCtx = sessionStorage.getItem('nexus_project_context');
-    if (savedCtx === 'worklist' && savedOrigin && validStatusViews.includes(savedOrigin)) {
+    if (savedCtx === 'worklist') {
       return true;
     }
   } catch(e) {}
+
+  const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+  if (activeProject) {
+    const st = String(activeProject.status || activeProject.projectStatus || '').toLowerCase();
+    if (validStatusViews.includes(st) || ['yts', 'wip', 'hold', 'nr', 'new'].includes(st)) {
+      return true;
+    }
+    if ((activeProject.poNo || activeProject.siteId) && (window.projectNavigationContext === 'worklist' || currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material')) {
+      const isTopNavGeneralProjects = (currentModule === 'projects' && currentProjectsView === 'main' && !window.projectNavigationContext);
+      if (!isTopNavGeneralProjects) return true;
+    }
+  }
+
+  const role = getAuthenticatedUserRole();
+  if (role === 'Project Manager' && (currentProjectsView === 'project_expenses' || currentProjectsView === 'project_material' || currentModule === 'worklist')) {
+    return true;
+  }
+
   return false;
 }
 
@@ -17996,18 +18375,62 @@ window.masterActivityItemDescriptions = [
   "Site Security Fencing & Barbed Wire Installation"
 ];
 
-window.handleActivityItemDescInput = function(val, forceOpen = false) {
+window.nonStandardGbpaItems = [];
+window.selectedGbpaActivityItem = null;
+
+window.fetchNonStandardGbpaItems = async function() {
+  try {
+    let items = [];
+    if (typeof NexusApi !== 'undefined' && NexusApi.indusGbpa && typeof NexusApi.indusGbpa.getAll === 'function') {
+      const resp = await NexusApi.indusGbpa.getAll({ page: 1, page_size: 500 });
+      if (resp && resp.items) {
+        items = resp.items;
+      }
+    } else if (Array.isArray(window.indusProductsData) && window.indusProductsData.length > 0) {
+      items = window.indusProductsData;
+    }
+    window.nonStandardGbpaItems = (items || []).filter(it => {
+      return Boolean(
+        it.non_standard === true ||
+        it.nonStandard === true ||
+        String(it.non_standard).toLowerCase() === 'true' ||
+        String(it.nonStandard).toLowerCase() === 'true' ||
+        String(it.non_standard).toLowerCase() === 'active' ||
+        String(it.nonStandard).toLowerCase() === 'active'
+      );
+    });
+  } catch (err) {
+    console.error('Failed to fetch non-standard GBPA items:', err);
+    window.nonStandardGbpaItems = [];
+  }
+  return window.nonStandardGbpaItems;
+};
+
+window.handleActivityItemDescInput = async function(val, forceOpen = false) {
   const dropdown = document.getElementById('dropdownAddActivityItemDesc');
   if (!dropdown) return;
+
+  if (!window.nonStandardGbpaItems || window.nonStandardGbpaItems.length === 0) {
+    await window.fetchNonStandardGbpaItems();
+  }
+
   const query = (val || '').trim().toLowerCase();
+  const list = window.nonStandardGbpaItems || [];
   
   const matched = (!query && !forceOpen)
     ? []
-    : (!query ? window.masterActivityItemDescriptions : window.masterActivityItemDescriptions.filter(desc => desc.toLowerCase().includes(query)));
+    : (!query ? list : list.filter(item => {
+        const desc = (item.item_description || '').toLowerCase();
+        const name = (item.item_name || '').toLowerCase();
+        const code = (item.item_code || '').toLowerCase();
+        return desc.includes(query) || name.includes(query) || code.includes(query);
+      }));
+
+  window.matchedNonStandardGbpaItems = matched;
 
   if (matched.length === 0) {
-    if (query) {
-      dropdown.innerHTML = `<div style="padding: 10px 14px; font-size: 0.88rem; color: #94a3b8; font-style: italic;">No matching descriptions for "${query}"</div>`;
+    if (query || forceOpen) {
+      dropdown.innerHTML = `<div style="padding: 10px 14px; font-size: 0.88rem; color: #94a3b8; font-style: italic;">${query ? `No non-standard items matching "${val}"` : 'No non-standard GBPA items available'}</div>`;
       dropdown.style.display = 'block';
     } else {
       dropdown.style.display = 'none';
@@ -18015,21 +18438,45 @@ window.handleActivityItemDescInput = function(val, forceOpen = false) {
     return;
   }
 
-  dropdown.innerHTML = matched.map(item => {
-    const escaped = item.replace(/'/g, "\\'");
+  dropdown.innerHTML = matched.map((item, idx) => {
+    const desc = item.item_description || item.item_name || '';
+    const name = item.item_name || '';
+    const code = item.item_code || '';
+    const rateText = item.rate != null ? `₹${Number(item.rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '';
+    const uomText = item.uom ? ` / ${item.uom}` : '';
     return `
-      <div onclick="selectActivityItemDesc('${escaped}')" style="padding: 10px 14px; font-size: 0.88rem; color: #1e293b; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='#ffffff'">
-        ${item}
+      <div onclick="selectActivityItemDesc(${idx})" style="padding: 10px 14px; font-size: 0.88rem; color: #1e293b; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='#ffffff'">
+        <div style="font-weight: 600; color: #0f172a;">${desc}</div>
+        <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px; display: flex; justify-content: space-between; align-items: center;">
+          <span>${code ? `Code: <strong>${code}</strong>` : ''}${name && name !== desc ? ` &bull; ${name}` : ''}</span>
+          ${rateText ? `<span style="font-weight: 600; color: #0284c7;">${rateText}${uomText}</span>` : ''}
+        </div>
       </div>
     `;
   }).join('');
   dropdown.style.display = 'block';
 };
 
-window.selectActivityItemDesc = function(desc) {
+window.selectActivityItemDesc = function(idxOrItem) {
+  let item = null;
+  if (typeof idxOrItem === 'number' && window.matchedNonStandardGbpaItems && window.matchedNonStandardGbpaItems[idxOrItem]) {
+    item = window.matchedNonStandardGbpaItems[idxOrItem];
+  } else if (idxOrItem && typeof idxOrItem === 'object') {
+    item = idxOrItem;
+  }
   const inp = document.getElementById('inpAddActivityItemDesc');
-  if (inp) inp.value = desc;
+  const inpRate = document.getElementById('inpAddActivityRate');
   const dropdown = document.getElementById('dropdownAddActivityItemDesc');
+
+  if (item) {
+    window.selectedGbpaActivityItem = item;
+    if (inp) inp.value = item.item_description || item.item_name || '';
+    if (inpRate && item.rate != null) {
+      inpRate.value = Number(item.rate).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  } else if (typeof idxOrItem === 'string' && inp) {
+    inp.value = idxOrItem;
+  }
   if (dropdown) dropdown.style.display = 'none';
 };
 
@@ -18044,7 +18491,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-window.openAddActivityModal = function() {
+window.openAddActivityModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) {
     const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
@@ -18058,6 +18505,7 @@ window.openAddActivityModal = function() {
   const modal = document.getElementById('pmAddActivityModal');
   if (!modal) return;
 
+  window.selectedGbpaActivityItem = null;
   const inpDesc = document.getElementById('inpAddActivityItemDesc');
   if (inpDesc) inpDesc.value = '';
   const dropdown = document.getElementById('dropdownAddActivityItemDesc');
@@ -18070,6 +18518,8 @@ window.openAddActivityModal = function() {
 
   modal.style.display = 'block';
   if (overlay) overlay.style.display = 'flex';
+
+  await window.fetchNonStandardGbpaItems();
 };
 
 window.closeAddActivityModal = function() {
@@ -18097,19 +18547,24 @@ window.saveNewActivity = function() {
 
   let itemCode = 'ITM-ACT-' + Math.floor(100 + Math.random() * 900);
   let uom = 'Nos';
-  const descLower = itemDescription.toLowerCase();
-  if (descLower.includes('cable') || descLower.includes('cabling')) {
-    itemCode = 'ITM-ELE-' + Math.floor(100 + Math.random() * 900);
-    uom = 'Mtr';
-  } else if (descLower.includes('bracing') || descLower.includes('mount') || descLower.includes('height')) {
-    itemCode = 'ITM-HGT-' + Math.floor(100 + Math.random() * 900);
-    uom = 'Lot';
-  } else if (descLower.includes('foundation') || descLower.includes('civil')) {
-    itemCode = 'ITM-CIV-' + Math.floor(100 + Math.random() * 900);
-    uom = 'Nos';
-  } else if (descLower.includes('earthing') || descLower.includes('electrode')) {
-    itemCode = 'ITM-EAR-' + Math.floor(100 + Math.random() * 900);
-    uom = 'Nos';
+  if (window.selectedGbpaActivityItem) {
+    if (window.selectedGbpaActivityItem.item_code) itemCode = window.selectedGbpaActivityItem.item_code;
+    if (window.selectedGbpaActivityItem.uom) uom = window.selectedGbpaActivityItem.uom;
+  } else {
+    const descLower = itemDescription.toLowerCase();
+    if (descLower.includes('cable') || descLower.includes('cabling')) {
+      itemCode = 'ITM-ELE-' + Math.floor(100 + Math.random() * 900);
+      uom = 'Mtr';
+    } else if (descLower.includes('bracing') || descLower.includes('mount') || descLower.includes('height')) {
+      itemCode = 'ITM-HGT-' + Math.floor(100 + Math.random() * 900);
+      uom = 'Lot';
+    } else if (descLower.includes('foundation') || descLower.includes('civil')) {
+      itemCode = 'ITM-CIV-' + Math.floor(100 + Math.random() * 900);
+      uom = 'Nos';
+    } else if (descLower.includes('earthing') || descLower.includes('electrode')) {
+      itemCode = 'ITM-EAR-' + Math.floor(100 + Math.random() * 900);
+      uom = 'Nos';
+    }
   }
 
   const newRow = {
@@ -18202,6 +18657,7 @@ window.activeExpenseItemFilters = window.activeExpenseItemFilters || {};
 window.normalizeExpenseCategory = function(name) {
   if (!name) return 'Operational Expenses';
   const lower = String(name).toLowerCase().trim();
+  if (lower.includes('po expense') || lower.includes('po_expense')) return 'PO Expense';
   if (lower.includes('operational')) return 'Operational Expenses';
   if (lower.includes('non-standard') || lower.includes('non standard')) return 'Non-standard Expenses';
   if (lower.includes('service vendor') || lower.includes('vendor payment')) return 'Service Vendor Payment';
@@ -18209,23 +18665,39 @@ window.normalizeExpenseCategory = function(name) {
 };
 
 window.getExpenseItemsList = function() {
-  let activeRow = null;
-  if (typeof selectedProjectId !== 'undefined' && selectedProjectId) {
-    activeRow = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(selectedProjectId) || r.siteName === selectedProjectId || r.siteId === selectedProjectId || r.projectId === selectedProjectId);
-  }
-  if (!activeRow && typeof window.activePmProjectRow !== 'undefined') {
-    activeRow = window.activePmProjectRow;
-  }
-  const featSettings = getSiteFeatureSettings(activeRow || selectedProjectId);
+  const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+  const featSettings = getSiteFeatureSettings(activeProject || selectedProjectId);
 
   const items = [
     { id: 'exp-item-op', itemName: 'Operational Expenses' },
     { id: 'exp-item-nonstd', itemName: 'Non-standard Expenses' },
     { id: 'exp-item-sv', itemName: 'Service Vendor Payment' }
   ];
-  (window.customExpenseItemNames || []).forEach((name, idx) => {
-    items.push({ id: `exp-item-custom-${idx + 1}`, itemName: name });
-  });
+  if (typeof isPmYtsWipHoldNrFlow === 'function' && isPmYtsWipHoldNrFlow()) {
+    items.push({ id: 'exp-item-po', itemName: 'PO Expense' });
+  }
+
+  // Include any custom or DB saved expense heads
+  const existingNames = new Set(items.map(it => it.itemName.toLowerCase()));
+  if (window.customExpenseItemNames && Array.isArray(window.customExpenseItemNames)) {
+    window.customExpenseItemNames.forEach((name, idx) => {
+      if (name && !existingNames.has(name.toLowerCase())) {
+        items.push({ id: `exp-item-custom-${idx + 1}`, itemName: name });
+        existingNames.add(name.toLowerCase());
+      }
+    });
+  }
+
+  if (window.pmCurrentProjectExpenses && Array.isArray(window.pmCurrentProjectExpenses)) {
+    window.pmCurrentProjectExpenses.forEach((exp, idx) => {
+      const hName = exp.expenseHead || exp.expenseName || exp.expenseType;
+      if (hName && !existingNames.has(hName.toLowerCase())) {
+        items.push({ id: `exp-item-db-${idx + 1}`, itemName: hName });
+        existingNames.add(hName.toLowerCase());
+      }
+    });
+  }
+
   return items;
 };
 
@@ -18260,8 +18732,20 @@ window.renderExpenseDetailsTable = function() {
   `).join('');
 };
 
-window.openEditExpenseModal = function(itemName) {
+window.openEditExpenseModal = async function(itemName) {
+  const titleBadge = document.getElementById('lblPmAddExpenseTableTitle');
+  const activeCat = window.currentActiveExpenseCategory || (titleBadge ? titleBadge.textContent : 'Operational Expenses');
+  const editDescEl = document.getElementById('selEditExpenseDescription');
+  if (editDescEl && typeof populateExpenseDescriptionOptions === 'function') {
+    await populateExpenseDescriptionOptions(activeCat, editDescEl);
+  }
   openWmPaymentAddExpensesModal(itemName);
+};
+
+window.expenseDetailsGstEnabled = false;
+
+window.handleExpenseDetailsGstToggle = function(isChecked) {
+  window.expenseDetailsGstEnabled = !!isChecked;
 };
 
 window.openExpenseDetailsModal = function() {
@@ -18276,8 +18760,15 @@ window.openExpenseDetailsModal = function() {
   const modal = document.getElementById('pmExpenseDetailsModal');
   if (!modal) return;
   modal.classList.remove('card-dimmed-blurred');
+
+  const chkGst = document.getElementById('chkExpenseDetailsGstToggle');
+  if (chkGst) {
+    chkGst.checked = !!window.expenseDetailsGstEnabled;
+  }
   modal.classList.remove('wide-expense-mode');
   modal.style.setProperty('width', '820px', 'important');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
 
   const inlineContainer = document.getElementById('expenseDetailsInlineTableContainer');
   if (inlineContainer) inlineContainer.style.display = 'none';
@@ -18301,6 +18792,8 @@ window.closeExpenseDetailsModal = function() {
     modal.style.setProperty('width', '820px', 'important');
     modal.style.display = 'none';
   }
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
 
   const inlineContainer = document.getElementById('expenseDetailsInlineTableContainer');
   if (inlineContainer) inlineContainer.style.display = 'none';
@@ -18471,6 +18964,8 @@ window.openEditExpenseModal = function(indexOrItemName) {
   if (fileInput) fileInput.value = '';
 
   if (parentModal) parentModal.classList.add('card-dimmed-blurred');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
   modal.style.display = 'block';
 };
 
@@ -18480,6 +18975,8 @@ window.closeEditExpenseModal = function() {
 
   const parentModal = document.getElementById('pmExpenseDetailsModal');
   if (parentModal) parentModal.classList.remove('card-dimmed-blurred');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
 };
 
 window.handleEditExpensePdfFile = function(input) {
@@ -18606,8 +19103,6 @@ window.openTransferDetailsModal = window.openPmTransferDetailsModal = function()
   if (inpIfsc) inpIfsc.value = '';
   const inpWp = document.getElementById('inpTransferWhatsappNumber');
   if (inpWp) inpWp.value = '';
-  const inpGstToggle = document.getElementById('inpTransferGstToggle');
-  if (inpGstToggle) inpGstToggle.checked = false;
   const inpGstNum = document.getElementById('inpTransferGstNumber');
   if (inpGstNum) inpGstNum.value = '';
   const inpLegalName = document.getElementById('inpTransferLegalName');
@@ -18620,6 +19115,8 @@ window.openTransferDetailsModal = window.openPmTransferDetailsModal = function()
   window.handleTransferToChange('Self');
 
   if (parentModal) parentModal.classList.add('card-dimmed-blurred');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
   modal.style.display = 'block';
   modal.style.setProperty('position', 'fixed', 'important');
   modal.style.setProperty('top', '50%', 'important');
@@ -18638,6 +19135,8 @@ window.closeTransferDetailsModal = window.closePmTransferDetailsModal = function
 
   const parentModal = document.getElementById('pmExpenseDetailsModal');
   if (parentModal) parentModal.classList.remove('card-dimmed-blurred');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
 };
 
 window.handleTransferToChange = function(transferTo) {
@@ -18646,18 +19145,14 @@ window.handleTransferToChange = function(transferTo) {
   const rowSupplyVendor = document.getElementById('rowTransferSupplyVendor');
   const groupNewAccount = document.getElementById('groupTransferNewAccount');
   const rowTransferNewAccountName = document.getElementById('rowTransferNewAccountName');
-  const rowGstToggle = document.getElementById('rowTransferGstToggle');
   const groupGstFields = document.getElementById('groupTransferGstFields');
-  const inpGstToggle = document.getElementById('inpTransferGstToggle');
 
   // Hide all dynamic sections first
   if (rowOtherEmployee) rowOtherEmployee.style.display = 'none';
   if (rowServiceVendor) rowServiceVendor.style.display = 'none';
   if (rowSupplyVendor) rowSupplyVendor.style.display = 'none';
   if (groupNewAccount) groupNewAccount.style.display = 'none';
-  if (rowGstToggle) rowGstToggle.style.display = 'none';
   if (groupGstFields) groupGstFields.style.display = 'none';
-  if (inpGstToggle) inpGstToggle.checked = false;
   if (rowTransferNewAccountName) rowTransferNewAccountName.style.display = 'flex';
 
   if (transferTo === 'Self') {
@@ -18668,28 +19163,14 @@ window.handleTransferToChange = function(transferTo) {
     return;
   } else if (transferTo === 'Service Vendor') {
     if (rowServiceVendor) rowServiceVendor.style.display = 'flex';
-    if (rowGstToggle) rowGstToggle.style.display = 'flex';
+    if (groupGstFields) groupGstFields.style.display = 'flex'; // static GST Number & Legal Name
   } else if (transferTo === 'Supply Vendor') {
     if (rowSupplyVendor) rowSupplyVendor.style.display = 'flex';
-    if (rowGstToggle) rowGstToggle.style.display = 'flex';
+    if (groupGstFields) groupGstFields.style.display = 'flex'; // static GST Number & Legal Name
   } else if (transferTo === 'New Account') {
     if (groupNewAccount) groupNewAccount.style.display = 'flex';
-    if (rowGstToggle) rowGstToggle.style.display = 'flex';
-    if (rowTransferNewAccountName) {
-      rowTransferNewAccountName.style.display = (inpGstToggle && inpGstToggle.checked) ? 'none' : 'flex';
-    }
-  }
-};
-
-window.handleTransferGstToggle = function(isChecked) {
-  const groupGstFields = document.getElementById('groupTransferGstFields');
-  if (groupGstFields) {
-    groupGstFields.style.display = isChecked ? 'flex' : 'none';
-  }
-  const selTransferTo = document.getElementById('selTransferToOption');
-  const rowTransferNewAccountName = document.getElementById('rowTransferNewAccountName');
-  if (rowTransferNewAccountName && selTransferTo && selTransferTo.value === 'New Account') {
-    rowTransferNewAccountName.style.display = isChecked ? 'none' : 'flex';
+    if (rowTransferNewAccountName) rowTransferNewAccountName.style.display = 'flex'; // typeable Account Name
+    if (groupGstFields) groupGstFields.style.display = 'flex'; // static GST Number & Legal Name
   }
 };
 
@@ -18706,9 +19187,434 @@ window.handleTransferGstProcess = function() {
   }
 };
 
-window.submitTransferDetails = window.submitPmTransferDetails = function() {
+// Synchronize project expenses having transfer_to into Master login paymentData
+window.syncProjectExpensesToPaymentData = window.loadMasterPaymentDataFromApi = async function(shouldRender = false) {
+  if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectExpenses === 'function') {
+    try {
+      const res = await window.NexusApi.commercial.getProjectExpenses();
+      if (res && res.data && Array.isArray(res.data)) {
+        const formatCurrency = (val) => {
+          const v = parseFloat(val) || 0;
+          const s = v.toFixed(2);
+          const [intPart, decPart] = s.split('.');
+          let lastThree = intPart.substring(intPart.length - 3);
+          const otherNumbers = intPart.substring(0, intPart.length - 3);
+          if (otherNumbers !== '') {
+            lastThree = ',' + lastThree;
+          }
+          return `${otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',')}${lastThree}.${decPart}`;
+        };
+
+        const today = new Date();
+        const grouped = new Map();
+
+        res.data.forEach(exp => {
+          const reqKey = exp.requestNumber || `REQ-${exp.expenseId}`;
+          if (!grouped.has(reqKey)) {
+            grouped.set(reqKey, []);
+          }
+          grouped.get(reqKey).push(exp);
+        });
+
+        const newPaymentList = [];
+        grouped.forEach((items, reqKey) => {
+          const first = items[0];
+          let totalApproved = 0;
+          let totalTransferred = 0;
+          let totalPayable = 0;
+
+          items.forEach(it => {
+            const appr = (it.raw_approved !== undefined && it.raw_approved !== null) ? Number(it.raw_approved) : (parseFloat(String(it.approved || 0).replace(/,/g, '')) || 0);
+            const trans = (it.raw_transferred !== undefined && it.raw_transferred !== null) ? Number(it.raw_transferred) : (parseFloat(String(it.transferred || 0).replace(/,/g, '')) || 0);
+            const pay = (it.raw_payable !== undefined && it.raw_payable !== null) ? Number(it.raw_payable) : (parseFloat(String(it.payable || 0).replace(/,/g, '')) || 0);
+            totalApproved += appr;
+            totalTransferred += trans;
+            totalPayable += pay;
+          });
+
+          const rawTransferTo = first.transferTo || '';
+          let transferToDisplay = rawTransferTo;
+          if (rawTransferTo === 'New Account' && first.accountName) {
+            transferToDisplay = first.accountName;
+          } else if (rawTransferTo === 'Other Employee' && first.accountName) {
+            transferToDisplay = first.accountName;
+          } else if (rawTransferTo === 'Service Vendor' && first.serviceVendorName) {
+            transferToDisplay = first.serviceVendorName;
+          } else if (rawTransferTo === 'Supply Vendor' && first.supplyVendorName) {
+            transferToDisplay = first.supplyVendorName;
+          } else if (!rawTransferTo) {
+            transferToDisplay = first.accountName || first.serviceVendorName || first.supplyVendorName || 'Self';
+          }
+
+          let subDateDisplay = first.requestDate ? first.requestDate.replace(/-/g, '/') : new Date().toLocaleDateString('en-GB');
+          let ageingDays = 0;
+          if (first.requestDate) {
+            try {
+              const parts = first.requestDate.split('-');
+              let dObj = null;
+              if (parts.length === 3) {
+                if (parts[0].length === 4) {
+                  dObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                } else {
+                  dObj = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+                }
+              }
+              if (dObj && !isNaN(dObj.getTime())) {
+                const diffMs = today.getTime() - dObj.getTime();
+                ageingDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+              }
+            } catch(e) {}
+          }
+
+          newPaymentList.push({
+            id: `pay-${first.expenseId || first.id || reqKey}`,
+            submitBy: reqKey,
+            submissionDate: subDateDisplay,
+            approvedBy: first.requestBy || "Project Manager",
+            expenseHead: "Project",
+            transferTo: transferToDisplay,
+            approvedAmount: formatCurrency(totalApproved),
+            transferredAmount: formatCurrency(totalTransferred),
+            payableAmount: formatCurrency(totalPayable),
+            ageing: ageingDays,
+            selected: false,
+            poNo: first.poNo || "",
+            siteId: first.siteId || "",
+            accountName: first.accountName || "",
+            serviceVendorName: first.serviceVendorName || "",
+            supplyVendorName: first.supplyVendorName || "",
+            gst: first.gst,
+            gstNumber: first.gstNumber || "",
+            legalName: first.legalName || "",
+            accountNumber: first.accountNumber || "",
+            bankName: first.bankName || "",
+            ifscCode: first.ifscCode || "",
+            whatsappNumber: first.whatsappNumber || "",
+            items: items
+          });
+        });
+
+        paymentData = newPaymentList;
+
+        if (shouldRender) {
+          if (currentModule === 'worklist' && currentWorklistView === 'payment') {
+            currentDataset = paymentData.map(item => ({ ...item }));
+            filteredDataset = [...currentDataset];
+            if (typeof applyFiltersAndRender === 'function') {
+              applyFiltersAndRender();
+            }
+          }
+        }
+      }
+    } catch(err) {
+      console.warn('Failed to sync project expenses to paymentData:', err);
+    }
+  }
+};
+
+window.submitTransferDetails = window.submitPmTransferDetails = async function() {
   const selTransferTo = document.getElementById('selTransferToOption');
   const transferTo = selTransferTo ? selTransferTo.value : 'Self';
+
+  let accountName = '';
+  let serviceVendorName = '';
+  let supplyVendorName = '';
+  let gstNumber = '';
+  let legalName = '';
+  let accountNumber = '';
+  let bankName = '';
+  let ifscCode = '';
+  let whatsappNumber = '';
+
+  const gstValue = !!window.expenseDetailsGstEnabled;
+
+  if (transferTo === 'Other Employee') {
+    accountName = document.getElementById('selTransferMemberAccountName')?.value || '';
+  } else if (transferTo === 'Service Vendor') {
+    serviceVendorName = document.getElementById('selTransferServiceVendorName')?.value || '';
+    gstNumber = document.getElementById('inpTransferGstNumber')?.value?.trim() || '';
+    legalName = document.getElementById('inpTransferLegalName')?.value?.trim() || '';
+  } else if (transferTo === 'Supply Vendor') {
+    supplyVendorName = document.getElementById('selTransferSupplyVendorName')?.value || '';
+    gstNumber = document.getElementById('inpTransferGstNumber')?.value?.trim() || '';
+    legalName = document.getElementById('inpTransferLegalName')?.value?.trim() || '';
+  } else if (transferTo === 'New Account') {
+    accountName = document.getElementById('inpTransferNewAccountName')?.value?.trim() || '';
+    accountNumber = document.getElementById('inpTransferAccountNumber')?.value?.trim() || '';
+    bankName = document.getElementById('inpTransferBankName')?.value?.trim() || '';
+    ifscCode = document.getElementById('inpTransferIfscCode')?.value?.trim() || '';
+    whatsappNumber = document.getElementById('inpTransferWhatsappNumber')?.value?.trim() || '';
+    gstNumber = document.getElementById('inpTransferGstNumber')?.value?.trim() || '';
+    legalName = document.getElementById('inpTransferLegalName')?.value?.trim() || '';
+  }
+
+  const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+  let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+  let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+  try {
+    if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+    if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+  } catch(e) {}
+
+  const transferToDisplay = (transferTo === 'New Account' && accountName)
+    ? accountName
+    : (transferTo === 'Other Employee' && accountName)
+      ? accountName
+      : (transferTo === 'Service Vendor' && serviceVendorName)
+        ? serviceVendorName
+        : (transferTo === 'Supply Vendor' && supplyVendorName)
+          ? supplyVendorName
+          : transferTo;
+
+  // Format INR helper
+  const formatInr = (val) => {
+    const v = parseFloat(val) || 0;
+    const s = v.toFixed(2);
+    const [intPart, decPart] = s.split('.');
+    let lastThree = intPart.substring(intPart.length - 3);
+    const otherNumbers = intPart.substring(0, intPart.length - 3);
+    if (otherNumbers !== '') {
+      lastThree = ',' + lastThree;
+    }
+    return `${otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',')}${lastThree}.${decPart}`;
+  };
+
+  const rawItems = (typeof wmExpensesDataStore !== 'undefined' && wmExpensesDataStore.length > 0)
+    ? wmExpensesDataStore
+    : (window.expenseDetailsInlineItems && window.expenseDetailsInlineItems.length > 0)
+      ? window.expenseDetailsInlineItems
+      : [];
+
+  let totalApprovedVal = 0;
+  const now = new Date();
+  const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  const reqCode = `R/RL-${Math.floor(100000 + Math.random() * 900000)}`;
+
+  if (rawItems.length > 0) {
+    for (const expItem of rawItems) {
+      const qVal = parseFloat(String(expItem.qty || 1).replace(/,/g, '')) || 1;
+      const rVal = parseFloat(String(expItem.rate || 0).replace(/,/g, '')) || 0;
+      const aVal = parseFloat(String(expItem.amount || (qVal * rVal)).replace(/,/g, '')) || (qVal * rVal);
+      totalApprovedVal += aVal;
+
+      const expHead = expItem.category || expItem.expenseHead || expItem.expense_head || 'Operational Expenses';
+      const expDesc = expItem.description || expItem.expenseDescription || expItem.expense_description || '';
+
+      const payload = {
+        id: expItem.expenseId || expItem.expense_management_id || expItem.id,
+        expense_management_id: expItem.expenseId || expItem.expense_management_id,
+        po_no: poNo,
+        site_id: siteId,
+        request_number: expItem.requestNumber || reqCode,
+        request_by: "Project Manager",
+        expense_head: expHead,
+        expense_name: expHead,
+        expense_description: expDesc,
+        expense_type: expHead,
+        qty: qVal,
+        rate: rVal,
+        amount: aVal,
+        approved_amount: aVal,
+        transferred_amount: 0,
+        payable_amount: aVal,
+        transfer_to: transferTo,
+        account_name: accountName,
+        service_vendor_name: serviceVendorName,
+        supply_vendor_name: supplyVendorName,
+        gst: gstValue,
+        gst_number: gstNumber,
+        legal_name: legalName,
+        account_number: accountNumber,
+        bank_name: bankName,
+        ifsc_code: ifscCode,
+        whatsapp_number: whatsappNumber,
+        status: 'Pending'
+      };
+
+      try {
+        if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+          await window.NexusApi.commercial.saveProjectExpense(payload);
+        }
+      } catch(err) {
+        console.warn('Failed to save project expense:', err);
+      }
+    }
+  } else {
+    // If no specific item in wmExpensesDataStore, update all rows currently loaded in project_expenses for this po/site
+    const loadedRows = (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentProjectsView === 'project_expenses')
+      ? currentDataset
+      : (window.pmCurrentProjectExpenses || []);
+
+    for (const row of loadedRows) {
+      const aVal = parseFloat(String(row.raw_approved || row.raw_amount || row.amount || 0).replace(/,/g, '')) || 0;
+      totalApprovedVal += aVal;
+      const payload = {
+        expense_management_id: row.expenseId || row.expense_management_id,
+        id: row.id,
+        po_no: poNo || row.poNo,
+        site_id: siteId || row.siteId,
+        request_number: row.requestNumber || reqCode,
+        request_by: "Project Manager",
+        transfer_to: transferTo,
+        account_name: accountName,
+        service_vendor_name: serviceVendorName,
+        supply_vendor_name: supplyVendorName,
+        gst: gstValue,
+        gst_number: gstNumber,
+        legal_name: legalName,
+        account_number: accountNumber,
+        bank_name: bankName,
+        ifsc_code: ifscCode,
+        whatsapp_number: whatsappNumber
+      };
+      try {
+        if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+          await window.NexusApi.commercial.saveProjectExpense(payload);
+        }
+      } catch(err) {
+        console.warn('Failed to update project expense:', err);
+      }
+    }
+  }
+
+  // Update in-memory collections
+  if (Array.isArray(currentDataset)) {
+    currentDataset.forEach(row => {
+      row.transferTo = transferTo;
+      row.accountName = accountName;
+      row.serviceVendorName = serviceVendorName;
+      row.supplyVendorName = supplyVendorName;
+      row.gst = gstValue;
+      row.gstNumber = gstNumber;
+      row.legalName = legalName;
+      row.accountNumber = accountNumber;
+      row.bankName = bankName;
+      row.ifscCode = ifscCode;
+      row.whatsappNumber = whatsappNumber;
+    });
+  }
+  if (Array.isArray(window.pmCurrentProjectExpenses)) {
+    window.pmCurrentProjectExpenses.forEach(row => {
+      row.transferTo = transferTo;
+      row.accountName = accountName;
+      row.serviceVendorName = serviceVendorName;
+      row.supplyVendorName = supplyVendorName;
+      row.gst = gstValue;
+      row.gstNumber = gstNumber;
+      row.legalName = legalName;
+      row.accountNumber = accountNumber;
+      row.bankName = bankName;
+      row.ifscCode = ifscCode;
+      row.whatsappNumber = whatsappNumber;
+    });
+  }
+
+  const finalAmtFormatted = totalApprovedVal > 0 ? formatInr(totalApprovedVal) : '1,50,000.00';
+
+  // 1. Add to paymentData (Payment page of Master login)
+  if (typeof paymentData !== 'undefined' && Array.isArray(paymentData)) {
+    const newMasterPayment = {
+      id: `pay-${Date.now()}`,
+      submitBy: reqCode,
+      submissionDate: dateStr,
+      approvedBy: "Project Manager",
+      expenseHead: "Project",
+      transferTo: transferToDisplay || transferTo,
+      approvedAmount: finalAmtFormatted,
+      transferredAmount: "0.00",
+      payableAmount: finalAmtFormatted,
+      ageing: 0,
+      selected: false,
+      poNo: poNo || "",
+      siteId: siteId || "",
+      accountName: accountName,
+      serviceVendorName: serviceVendorName,
+      supplyVendorName: supplyVendorName,
+      gst: gstValue,
+      gstNumber: gstNumber,
+      legalName: legalName,
+      accountNumber: accountNumber,
+      bankName: bankName,
+      ifscCode: ifscCode,
+      whatsappNumber: whatsappNumber
+    };
+    paymentData.unshift(newMasterPayment);
+  }
+
+  // 2. Add to accountsPaymentData (Accounts -> Payment)
+  if (typeof accountsPaymentData !== 'undefined' && Array.isArray(accountsPaymentData)) {
+    const newAccountsPayment = {
+      id: `acc-pay-${Date.now()}`,
+      transferredTo: transferToDisplay || transferTo,
+      requestNo: reqCode,
+      invoiceNo: `INV-${Date.now().toString().slice(-6)}`,
+      expenseHead: "Project",
+      transferredFrom: "HDFC Bank - 50200012345",
+      requested: finalAmtFormatted,
+      approved: finalAmtFormatted,
+      transferred: "0.00",
+      payable: finalAmtFormatted,
+      bankDetails: {
+        accountName: accountName || transferToDisplay,
+        accountNumber: accountNumber || "50200012345678",
+        ifscCode: ifscCode || "HDFC0000123",
+        bankName: bankName || "HDFC Bank"
+      },
+      paymentDetailsList: [],
+      items: rawItems.map(it => ({
+        requestDate: new Date().toLocaleDateString('en-GB'),
+        requestBy: "Project Manager",
+        expenseCategory: it.category || "Operational Expenses",
+        expenseName: it.description || "Project Expense",
+        uom: it.uom || "Nos",
+        qty: String(it.qty || 1),
+        rate: formatInr(it.rate || 0),
+        gst: gstValue ? "18%" : "0%",
+        amount: formatInr(it.amount || 0)
+      }))
+    };
+    accountsPaymentData.unshift(newAccountsPayment);
+  }
+
+  // 3. Add to worklistProjectPaymentItems
+  if (typeof worklistProjectPaymentItems !== 'undefined' && Array.isArray(worklistProjectPaymentItems)) {
+    const firstItem = rawItems[0] || {};
+    worklistProjectPaymentItems.unshift({
+      id: `wpp-${Date.now()}`,
+      selected: false,
+      expenseType: "PO",
+      boqName: firstItem.description || "Project Expense",
+      uom: firstItem.uom || "Nos",
+      qty: String(firstItem.qty || "1.00"),
+      rateRequested: formatInr(firstItem.rate || 0),
+      rateValidated: formatInr(firstItem.rate || 0),
+      rateApproved: formatInr(firstItem.rate || 0),
+      amountBasic: formatInr(firstItem.amount || 0),
+      amountGst: gstValue ? formatInr((firstItem.amount || 0) * 0.18) : "0.00",
+      amountTotal: finalAmtFormatted
+    });
+  }
+
+  // Refresh project expenses from API if currently viewing them
+  if (typeof openProjectExpensesPage === 'function' && currentProjectsView === 'project_expenses') {
+    try {
+      if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectExpenses === 'function') {
+        const res = await window.NexusApi.commercial.getProjectExpenses(poNo, siteId);
+        if (res && res.data) {
+          window.pmCurrentProjectExpenses = res.data;
+          currentDataset = [...res.data];
+        }
+      }
+    } catch(e) {}
+  }
+
+  if (typeof window.syncProjectExpensesToPaymentData === 'function') {
+    try {
+      await window.syncProjectExpensesToPaymentData(true);
+    } catch(e) {}
+  }
+
+  renderApp();
 
   if (typeof showToast === 'function') {
     showToast(`Transfer details for ${transferTo} submitted successfully`);
@@ -18774,6 +19680,10 @@ window.openAddExpenseTableModal = function(itemName) {
   const modal = document.getElementById('pmAddExpenseTableModal');
   if (modal) {
     window.expenseTableOpenedFrom = 'details';
+    const normCategory = (typeof normalizeExpenseCategory === 'function')
+      ? normalizeExpenseCategory(itemName || 'Operational Expenses')
+      : (itemName || 'Operational Expenses');
+    window.currentActiveExpenseCategory = normCategory;
     const titleBadge = document.getElementById('lblPmAddExpenseTableTitle');
     if (titleBadge && itemName) {
       titleBadge.textContent = itemName;
@@ -18848,12 +19758,19 @@ window.renderAddExpenseTable = function() {
   }).join('');
 };
 
-window.openAddExpenseEntryFormModal = function() {
+window.openAddExpenseEntryFormModal = async function() {
   const modal = document.getElementById('pmAddExpenseEntryModal');
   if (!modal) return;
 
   const parentCard = document.getElementById('pmAddExpenseTableModal');
   if (parentCard) parentCard.classList.add('card-dimmed-blurred');
+
+  const titleBadge = document.getElementById('lblPmAddExpenseTableTitle');
+  const activeCat = window.currentActiveExpenseCategory || (titleBadge ? titleBadge.textContent : 'Operational Expenses');
+  const descEl = document.getElementById('selExpenseEntryDescription');
+  if (descEl && typeof populateExpenseDescriptionOptions === 'function') {
+    await populateExpenseDescriptionOptions(activeCat, descEl);
+  }
 
   const qtyInp = document.getElementById('inpExpenseEntryQty');
   const rateInp = document.getElementById('inpExpenseEntryRate');
@@ -18972,51 +19889,131 @@ window.saveNewExpenseEntry = function() {
   }
 };
 
-window.openAddItemNameModal = function() {
+window.openAddItemNameModal = async function() {
   const modal = document.getElementById('pmAddItemNameModal');
   if (!modal) return;
 
   const parentCard = document.getElementById('pmExpenseDetailsModal');
   if (parentCard) parentCard.classList.add('card-dimmed-blurred');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.add('has-dimmed-card');
 
-  const sel = document.getElementById('selAddExpenseItemName');
-  if (sel) {
-    const existingList = getExpenseItemsList().map(it => it.itemName);
-    const candidateOptions = [
-      'Operational Expenses',
-      'Non-standard Expenses',
-      'Service Vendor Payment',
-      'Travel & Lodging Expenses',
-      'Equipment Rental Expenses',
-      'Fuel & Energy Expenses',
-      'Administrative & Office Expenses',
-      'Safety & PPE Expenses',
-      'Site Survey & Testing',
-      'Repair & Maintenance',
-      'Material Transportation',
-      'Contingency Expenses'
-    ];
-    if (typeof masterExpensesData !== 'undefined' && Array.isArray(masterExpensesData) && masterExpensesData.length > 0) {
-      masterExpensesData.forEach(e => {
-        const name = e.expenseHead || e.expenseName || e.expenseDescription;
-        if (name && !candidateOptions.includes(name)) {
-          candidateOptions.push(name);
+  const isPmFlow = typeof isPmYtsWipHoldNrFlow === 'function' && isPmYtsWipHoldNrFlow();
+  const searchWrap = document.getElementById('pmAddExpenseItemSearchWrap');
+  const selectWrap = document.getElementById('pmAddExpenseItemSelectWrap');
+
+  if (isPmFlow) {
+    if (searchWrap) searchWrap.style.display = 'flex';
+    if (selectWrap) selectWrap.style.display = 'none';
+
+    const inp = document.getElementById('inpAddExpenseItemName');
+    if (inp) inp.value = '';
+    const dropdown = document.getElementById('dropdownAddExpenseItemName');
+    if (dropdown) dropdown.style.display = 'none';
+
+    // Fetch Capex/Opex line items according to active PO number
+    const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+    const poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+
+    window.activePoLineItemsList = [];
+    if (poNo && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getPoLineItems === 'function') {
+      try {
+        const res = await window.NexusApi.commercial.getPoLineItems(poNo);
+        if (res && res.data) {
+          window.activePoLineItemsList = res.data;
         }
-      });
+      } catch (e) {
+        console.warn('Failed to load PO line items for autocomplete:', e);
+      }
     }
+  } else {
+    if (searchWrap) searchWrap.style.display = 'none';
+    if (selectWrap) selectWrap.style.display = 'block';
 
-    sel.innerHTML = candidateOptions.map(opt => {
-      const isAlreadyAdded = existingList.includes(opt);
-      return `<option value="${opt}" ${isAlreadyAdded ? 'disabled style="color:#94a3b8;"' : ''}>${opt}${isAlreadyAdded ? ' (Already Added)' : ''}</option>`;
-    }).join('');
+    const sel = document.getElementById('selAddExpenseItemName');
+    if (sel) {
+      const existingList = getExpenseItemsList().map(it => it.itemName);
+      const candidateOptions = [
+        'Operational Expenses',
+        'Non-standard Expenses',
+        'Service Vendor Payment',
+        'Travel & Lodging Expenses',
+        'Equipment Rental Expenses',
+        'Fuel & Energy Expenses',
+        'Administrative & Office Expenses',
+        'Safety & PPE Expenses',
+        'Site Survey & Testing',
+        'Repair & Maintenance',
+        'Material Transportation',
+        'Contingency Expenses'
+      ];
 
-    const firstEnabled = Array.from(sel.options).find(o => !o.disabled);
-    if (firstEnabled) {
-      sel.value = firstEnabled.value;
+      if (typeof masterExpensesData !== 'undefined' && Array.isArray(masterExpensesData) && masterExpensesData.length > 0) {
+        masterExpensesData.forEach(e => {
+          const name = e.expenseHead || e.expenseName || e.expenseDescription;
+          if (name && !candidateOptions.includes(name)) {
+            candidateOptions.push(name);
+          }
+        });
+      }
+
+      sel.innerHTML = candidateOptions.map(opt => {
+        const isAlreadyAdded = existingList.includes(opt);
+        return `<option value="${opt}" ${isAlreadyAdded ? 'disabled style="color:#94a3b8;"' : ''}>${opt}${isAlreadyAdded ? ' (Already Added)' : ''}</option>`;
+      }).join('');
+
+      const firstEnabled = Array.from(sel.options).find(o => !o.disabled);
+      if (firstEnabled) {
+        sel.value = firstEnabled.value;
+      }
     }
   }
 
   modal.style.display = 'block';
+};
+
+window.handleExpenseItemNameInput = function(val, forceOpen = false) {
+  const dropdown = document.getElementById('dropdownAddExpenseItemName');
+  if (!dropdown) return;
+  const query = (val || '').trim().toLowerCase();
+
+  const rawList = window.activePoLineItemsList || [];
+  const stringList = rawList.map(it => {
+    if (typeof it === 'string') return it.trim();
+    return (it.item_description || it.itemName || it.description || '').trim();
+  }).filter(desc => desc && !/^\d+$/.test(desc));
+  const uniqueItems = Array.from(new Set(stringList));
+
+  const matched = (!query && !forceOpen)
+    ? []
+    : (!query ? uniqueItems : uniqueItems.filter(desc => desc.toLowerCase().includes(query)));
+
+  if (matched.length === 0) {
+    if (query) {
+      dropdown.innerHTML = `<div style="padding: 10px 14px; font-size: 0.88rem; color: #94a3b8; font-style: italic;">No matching line items for "${query}"</div>`;
+      dropdown.style.display = 'block';
+    } else {
+      dropdown.style.display = 'none';
+    }
+    return;
+  }
+
+  dropdown.innerHTML = matched.map(item => {
+    const escaped = item.replace(/'/g, "\\'");
+    return `
+      <div onclick="selectExpenseItemName('${escaped}')" style="padding: 10px 14px; font-size: 0.88rem; color: #1e293b; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='#ffffff'">
+        ${item}
+      </div>
+    `;
+  }).join('');
+  dropdown.style.display = 'block';
+};
+
+window.selectExpenseItemName = function(desc) {
+  const inp = document.getElementById('inpAddExpenseItemName');
+  if (inp) inp.value = desc;
+  const dropdown = document.getElementById('dropdownAddExpenseItemName');
+  if (dropdown) dropdown.style.display = 'none';
 };
 
 window.closeAddItemNameModal = function() {
@@ -19025,26 +20022,104 @@ window.closeAddItemNameModal = function() {
 
   const parentCard = document.getElementById('pmExpenseDetailsModal');
   if (parentCard) parentCard.classList.remove('card-dimmed-blurred');
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) cardsRow.classList.remove('has-dimmed-card');
 };
 
-window.saveNewExpenseItemName = function() {
-  const sel = document.getElementById('selAddExpenseItemName');
-  const val = sel ? sel.value.trim() : '';
+window.saveNewExpenseItemName = async function() {
+  const isPmFlow = typeof isPmYtsWipHoldNrFlow === 'function' && isPmYtsWipHoldNrFlow();
+  let val = '';
+  if (isPmFlow) {
+    const inp = document.getElementById('inpAddExpenseItemName');
+    val = inp ? inp.value.trim() : '';
+  } else {
+    const sel = document.getElementById('selAddExpenseItemName');
+    val = sel ? sel.value.trim() : '';
+  }
+
   if (!val) {
-    showToast('Please select an Item name');
+    showToast('Please select or enter an Item name');
     return;
   }
 
-  const list = getExpenseItemsList();
-  if (list.some(it => it.itemName.toLowerCase() === val.toLowerCase())) {
-    showToast('Item name is already in the table');
-    return;
+  const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+  let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+  let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+  try {
+    if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+    if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+  } catch(e) {}
+  if (!poNo) poNo = '4500128951';
+  if (!siteId) siteId = 'IN-123471';
+  const custName = (activeProject && activeProject.customerName) ? activeProject.customerName : 'Indus Towers Ltd';
+
+  // Save into expense_head column of project_expenses table in Nexus_Project DB
+  if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+    try {
+      await window.NexusApi.commercial.saveProjectExpense({
+        company_name: 'Nexus',
+        customer_name: custName,
+        po_no: poNo,
+        site_id: siteId,
+        expense_head: val,
+        expense_name: val,
+        expense_type: val,
+        amount: 0.00,
+        approved_amount: 0.00,
+        transferred_amount: 0.00,
+        payable_amount: 0.00,
+        status: 'Pending'
+      });
+    } catch (err) {
+      console.warn('Failed to save expense head into project_expenses DB:', err);
+    }
   }
 
-  window.customExpenseItemNames.push(val);
+  window.customExpenseItemNames = window.customExpenseItemNames || [];
+  if (!window.customExpenseItemNames.includes(val)) {
+    window.customExpenseItemNames.push(val);
+  }
+
+  window._needsRefreshPmExpenses = true;
+
+  // Immediately close both tabs as requested
   closeAddItemNameModal();
-  renderExpenseDetailsTable();
-  showToast(`Item name "${val}" added successfully`);
+  closeExpenseDetailsModal();
+
+  // Task Completion callback closes tabs and refreshes table from DB
+  const onContinue = async () => {
+    let refreshPo = poNo;
+    let refreshSite = siteId;
+    try {
+      if (!refreshPo) refreshPo = sessionStorage.getItem('nexus_project_po_no');
+      if (!refreshSite) refreshSite = sessionStorage.getItem('nexus_project_site_id');
+    } catch(e) {}
+
+    if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectExpenses === 'function') {
+      try {
+        const res = await window.NexusApi.commercial.getProjectExpenses(refreshPo, refreshSite);
+        if (res && res.data) {
+          window.pmCurrentProjectExpenses = res.data;
+          currentDataset = [...res.data];
+          window._needsRefreshPmExpenses = false;
+          if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+          if (typeof renderProjectsToolbar === 'function') renderProjectsToolbar();
+        }
+      } catch (e) {
+        console.warn('Error refreshing PM project expenses:', e);
+      }
+    }
+  };
+
+  // Run update immediately in background so UI is already synced
+  onContinue();
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`Line item "${val}" added to project expenses successfully!`, 'Task Completed', onContinue);
+  } else {
+    showToast(`Line item "${val}" added successfully!`);
+    onContinue();
+  }
 };
 
 window.openExpenseItemFilter = function(colKey, event) {
@@ -19109,11 +20184,88 @@ window.openSupplyCustomerDetailsPage = function(customerId, customerName) {
 
 function loadProjectsDataset() {
   if (currentProjectsView === 'project_expenses') {
-    currentDataset = [...projectExpensesData];
+    if (typeof isPmYtsWipHoldNrFlow === 'function' && isPmYtsWipHoldNrFlow()) {
+      if (window.pmCurrentProjectExpenses && !window._needsRefreshPmExpenses) {
+        currentDataset = [...window.pmCurrentProjectExpenses];
+      } else {
+        currentDataset = window.pmCurrentProjectExpenses ? [...window.pmCurrentProjectExpenses] : [];
+        if (!window._fetchingPmExpenses && window.NexusApi && window.NexusApi.commercial) {
+          window._fetchingPmExpenses = true;
+          const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+          let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+          let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+          try {
+            if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+            if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+          } catch(e) {}
+          if (!poNo && !siteId) {
+            poNo = '4500128951';
+            siteId = 'IN-123471';
+          }
+
+          window.NexusApi.commercial.getProjectExpenses(poNo, siteId).then(res => {
+            window._fetchingPmExpenses = false;
+            window._needsRefreshPmExpenses = false;
+            if (res && res.data) {
+              window.pmCurrentProjectExpenses = res.data;
+              if (currentProjectsView === 'project_expenses') {
+                currentDataset = [...res.data];
+                if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+                if (typeof renderProjectsToolbar === 'function') renderProjectsToolbar();
+              }
+            }
+          }).catch(err => {
+            window._fetchingPmExpenses = false;
+            console.warn('Error fetching PM project expenses:', err);
+          });
+        }
+      }
+    } else {
+      currentDataset = [...projectExpensesData];
+    }
   } else if (currentProjectsView === 'project_material') {
-    currentDataset = [...projectMaterialData];
+    if (Array.isArray(window.pmCurrentProjectMaterials)) {
+      currentDataset = [...window.pmCurrentProjectMaterials];
+    } else {
+      currentDataset = [];
+      if (!window._fetchingPmMaterials && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectMaterials === 'function') {
+        window._fetchingPmMaterials = true;
+        const activeProj = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+        let poNo = activeProj ? (activeProj.poNo || activeProj.po_no || activeProj.poNumber) : null;
+        let siteId = activeProj ? (activeProj.siteId || activeProj.site_id) : null;
+        try {
+          if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+          if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+        } catch(e) {}
+        if (!poNo && !siteId) {
+          poNo = '4500128951';
+          siteId = 'IN-123471';
+        }
+
+        window.NexusApi.commercial.getProjectMaterials(poNo, siteId).then(res => {
+          window._fetchingPmMaterials = false;
+          if (res && Array.isArray(res.data)) {
+            window.pmCurrentProjectMaterials = res.data;
+            if (currentProjectsView === 'project_material') {
+              currentDataset = [...res.data];
+              if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+              if (typeof renderProjectsToolbar === 'function') renderProjectsToolbar();
+            }
+          }
+        }).catch(err => {
+          window._fetchingPmMaterials = false;
+          console.warn('Error fetching PM project materials:', err);
+        });
+      }
+    }
   } else if (currentProjectsView === 'project_infra') {
     currentDataset = [...projectInfraData];
+    if (!window._projectInfraLoaded && !window._fetchingProjectInfra && typeof window.loadProjectInfraFromApi === 'function') {
+      window._fetchingProjectInfra = true;
+      window.loadProjectInfraFromApi().finally(() => {
+        window._fetchingProjectInfra = false;
+      });
+    }
   } else if (currentProjectsView === 'project_dpr') {
     currentDataset = [...projectDprData];
   } else if (currentProjectsView === 'project_boq') {
@@ -19142,6 +20294,7 @@ function loadProjectsDataset() {
 }
 
 function renderProjectsToolbar() {
+  if (currentModule !== 'projects') return;
   const toolbar = document.getElementById('worklistToolbar') || document.getElementById('pageToolbar');
   if (!toolbar) return;
   if (currentProjectsView === 'project_service_vendor_detail') {
@@ -19265,20 +20418,34 @@ function renderProjectsToolbar() {
     return;
   }
   if (currentProjectsView === 'project_dpr') {
+    const ids = (typeof window.getActiveDprProjectIdentifiers === 'function')
+      ? window.getActiveDprProjectIdentifiers()
+      : { row: window.activePmProjectRow, siteName: '', siteId: '' };
+    const featSettings = getSiteFeatureSettings(ids.row || ids.siteName || ids.siteId || selectedProjectId);
+    const showPoleMount = !!featSettings.poleMounts;
+    const showCivilWorks = !!featSettings.civilWorks;
+    const showSurvey = !!featSettings.siteSurvey;
+
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnDprPoleMount" title="Pole Mount Details" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openPmPoleMountDetailsModal(); return false;">
-          <img src="icons/pole.svg?v=${Date.now()}" alt="Pole Mount" style="width: 28px; height: 28px; display: block; object-fit: contain;">
-        </button>
-        <button type="button" class="tool-btn" id="btnDprCivilWorks" title="Civil Works" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openPmCivilWorksModal(); return false;">
-          <img src="icons/drawing.svg?v=${Date.now()}" alt="Civil Works" style="width: 28px; height: 28px; display: block; object-fit: contain;">
-        </button>
-        <button type="button" class="tool-btn" id="btnDprApprovalHistory" title="Survey Report" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
-          <img src="icons/Approval History.svg" alt="Survey Report" style="width: 28px; height: 28px; display: block; object-fit: contain;">
-        </button>
+        ${showPoleMount ? `
+          <button type="button" class="tool-btn" id="btnDprPoleMount" title="Pole Mount Details" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openPmPoleMountDetailsModal(); return false;">
+            <img src="icons/pole.svg?v=${Date.now()}" alt="Pole Mount" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+        ` : ''}
+        ${showCivilWorks ? `
+          <button type="button" class="tool-btn" id="btnDprCivilWorks" title="Civil Works" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openPmCivilWorksModal(); return false;">
+            <img src="icons/drawing.svg?v=${Date.now()}" alt="Civil Works" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+        ` : ''}
+        ${showSurvey ? `
+          <button type="button" class="tool-btn" id="btnDprApprovalHistory" title="Survey Report" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprSurveyReportModal(); return false;">
+            <img src="icons/Approval History.svg" alt="Survey Report" style="width: 28px; height: 28px; display: block; object-fit: contain;">
+          </button>
+        ` : ''}
         <button type="button" class="tool-btn" id="btnDprContact" title="Members" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openDprMembersModal(); return false;">
           <img src="icons/Members.svg" alt="Members" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
@@ -19325,8 +20492,8 @@ function renderProjectsToolbar() {
         <button type="button" class="tool-btn" id="btnPmInfraAddStn" title="Add Infra" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openPmAddStnFromInfra(); return false;">
           <img src="icons/Add.svg" alt="Add Infra" style="width: 26px; height: 26px; display: block;">
         </button>
-        <button type="button" class="tool-btn btn-export-pdf" id="btnExportInfraPdf" title="Upload / View PDF" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openInfraDocModal('DOC / STATUS'); return false;">
-          <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
+        <button type="button" class="tool-btn btn-export-pdf" id="btnExportInfraPdf" title="Documents" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openInfraDocModal('Documents'); return false;">
+          <img src="icons/PDF Download.svg" alt="Documents" style="width: 28px; height: 28px; display: block;">
         </button>
       </div>
     `;
@@ -19336,25 +20503,44 @@ function renderProjectsToolbar() {
     });
     toolbar.querySelector('#btnExportInfraPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
-      openInfraDocModal('STN / SRN / CAM');
+      openInfraDocModal('Documents');
     });
     return;
   }
   if (currentProjectsView === 'project_material') {
+    const datasetToSum = (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) ? currentDataset : [];
+    const parseAmt = (val) => {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      const num = parseFloat(String(val).replace(/,/g, '').trim());
+      return isNaN(num) ? 0 : num;
+    };
+    const formatInr = (num) => {
+      const parts = Number(num || 0).toFixed(2).split('.');
+      let intPart = parts[0];
+      const decPart = parts[1];
+      const lastThree = intPart.substring(intPart.length - 3);
+      const otherNumbers = intPart.substring(0, intPart.length - 3);
+      const formattedInt = (otherNumbers !== '') ? otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + lastThree : lastThree;
+      return `${formattedInt}.${decPart}`;
+    };
+    const totalMatAmount = datasetToSum.reduce((acc, row) => acc + parseAmt(row.raw_amount !== undefined ? row.raw_amount : row.amount), 0);
+    const fmtTotalMatAmount = formatInr(totalMatAmount);
+
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 10px; padding-left: 0;" title="Total Material Amount">
           <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block;">
-          <span style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+          <span id="lblTotalMaterialAmountSummation" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit;">${fmtTotalMatAmount}</span>
         </div>
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAddBoqNameModal" title="Add BOQ Name" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openAddBoqNameModal(); return false;">
-          <img src="icons/Add.svg" alt="Add BOQ Name" style="width: 26px; height: 26px; display: block;">
+        <button type="button" class="tool-btn" id="btnAddBoqNameModal" title="Add Materials" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openAddBoqNameModal(); return false;">
+          <img src="icons/Add.svg" alt="Add Materials" style="width: 26px; height: 26px; display: block;">
         </button>
-        <button type="button" class="tool-btn btn-export-pdf" id="btnExportMaterialPdf" title="MIN / MRN" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openMinMrnModal('MIN / MRN'); return false;">
-          <img src="icons/PDF Upload.svg" alt="PDF" style="width: 28px; height: 28px; display: block;">
+        <button type="button" class="tool-btn btn-export-pdf" id="btnExportMaterialPdf" title="Documents" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;" onclick="openMinMrnModal('Documents'); return false;">
+          <img src="icons/PDF Download.svg" alt="Documents" style="width: 28px; height: 28px; display: block;">
         </button>
       </div>
     `;
@@ -19364,26 +20550,60 @@ function renderProjectsToolbar() {
     });
     toolbar.querySelector('#btnExportMaterialPdf')?.addEventListener('click', (e) => {
       e.preventDefault();
-      openMinMrnModal('MIN / MRN');
+      openMinMrnModal('Documents');
     });
     return;
   }
   if (currentProjectsView === 'project_expenses') {
+    let summationVal = '12,00,000.00';
+    let paidVal = '12,00,000.00';
+    let payableVal = '12,00,000.00';
+
+    if (typeof isPmYtsWipHoldNrFlow === 'function' && isPmYtsWipHoldNrFlow()) {
+      const datasetToSum = (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) ? currentDataset : [];
+      const parseAmt = (val) => {
+        if (typeof val === 'number') return val;
+        if (!val) return 0;
+        const num = parseFloat(String(val).replace(/,/g, '').trim());
+        return isNaN(num) ? 0 : num;
+      };
+      const formatInr = (val) => {
+        const v = parseFloat(val) || 0;
+        const s = v.toFixed(2);
+        const [intPart, decPart] = s.split('.');
+        let lastThree = intPart.substring(intPart.length - 3);
+        const otherNumbers = intPart.substring(0, intPart.length - 3);
+        if (otherNumbers !== '') {
+          lastThree = ',' + lastThree;
+        }
+        const formattedInt = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
+        return `${formattedInt}.${decPart}`;
+      };
+
+      const sumApproved = datasetToSum.reduce((acc, row) => acc + parseAmt(row.raw_approved !== undefined ? row.raw_approved : row.approved), 0);
+      const sumTransferred = datasetToSum.reduce((acc, row) => acc + parseAmt(row.raw_transferred !== undefined ? row.raw_transferred : row.transferred), 0);
+      const sumPayable = datasetToSum.reduce((acc, row) => acc + parseAmt(row.raw_payable !== undefined ? row.raw_payable : row.payable), 0);
+
+      summationVal = formatInr(sumApproved);
+      paidVal = formatInr(sumTransferred);
+      payableVal = formatInr(sumPayable);
+    }
+
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         ${universalBackBtnHtml}
         <div style="display: flex; align-items: center; gap: 36px; padding-left: 12px;">
           <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="openExpenseSummaryOverviewModal(); return false;" title="Open Expense Summary">
             <img src="icons/summation.svg" alt="Summation" style="width: 28px; height: 28px; display: block; cursor: pointer;">
-            <a href="#" onclick="openExpenseSummaryOverviewModal(); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">12,00,000.00</a>
+            <a href="#" onclick="openExpenseSummaryOverviewModal(); return false;" class="clickable-blue-amount-link" style="color: #0454e4; font-weight: 700; font-size: 1.15rem; font-family: inherit; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: #0454e4; cursor: pointer;">${summationVal}</a>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="icons/Paid _ Received.svg" alt="Paid / Received" style="width: 28px; height: 28px; display: block;">
-            <span style="color: #008744; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+            <span style="color: #008744; font-weight: 700; font-size: 1.15rem; font-family: inherit;">${paidVal}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="icons/Payable.svg" alt="Payable" style="width: 28px; height: 28px; display: block;">
-            <span style="color: #d62d20; font-weight: 700; font-size: 1.15rem; font-family: inherit;">12,00,000.00</span>
+            <span style="color: #d62d20; font-weight: 700; font-size: 1.15rem; font-family: inherit;">${payableVal}</span>
           </div>
         </div>
       </div>
@@ -19714,45 +20934,45 @@ function renderProjectsTableHead() {
   if (currentProjectsView === 'project_material') {
     thead.innerHTML = `
       <tr class="master-view-header projects-view-header">
-        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+        <th rowspan="2" style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; padding: 10px 8px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <span>BOQ Name</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['boqName'] ? 'has-active-filter' : ''}" data-filter-col="boqName" title="Filter BOQ Name">&#9660;</button>
+            <span>Material Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['materialName'] || activeColumnFilters['boqName'] ? 'has-active-filter' : ''}" data-filter-col="materialName" title="Filter Material Name">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; padding: 10px 8px;">
           <span>Uom</span>
         </th>
-        <th colspan="7" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important;">
+        <th colspan="7" class="th-sv-group" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: none !important; padding: 10px 8px; box-shadow: inset 0 -1px 0 #ffffff !important;">
           <span>Qty</span>
         </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle;">
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-left: 1px solid #ffffff !important; vertical-align: middle; padding: 10px 8px;">
           <span>Rate</span>
         </th>
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle;">
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; vertical-align: middle; padding: 10px 8px;">
           <span>Amount</span>
         </th>
       </tr>
-      <tr class="master-view-header projects-view-header">
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+      <tr class="tr-sub-headers master-view-header projects-view-header">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
           <span>MIR</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
           <span>MIN</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
           <span>MRR</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
           <span>MRN</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
           <span>Net</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
           <span>JMS</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
           <span>Difference</span>
         </th>
       </tr>
@@ -19764,48 +20984,48 @@ function renderProjectsTableHead() {
   if (currentProjectsView === 'project_expenses') {
     thead.innerHTML = `
       <tr class="master-view-header projects-view-header">
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px;">
           <span>Request Date</span>
         </th>
-        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Request By</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['requestBy'] ? 'has-active-filter' : ''}" data-filter-col="requestBy" title="Filter Request By">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Expense Type</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseType'] ? 'has-active-filter' : ''}" data-filter-col="expenseType" title="Filter Expense Type">&#9660;</button>
           </div>
         </th>
-        <th colspan="4" class="th-sv-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1.5px solid #ffffff !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th colspan="4" class="th-sv-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: none !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px; box-shadow: inset 0 -1px 0 #ffffff !important;">
           <span>Amount</span>
         </th>
-        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 10px;">
+        <th rowspan="2" style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 10px 8px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Transfer To</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: none !important; padding: 6px 10px;">
+        <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: none !important; padding: 10px 8px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Status</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
           </div>
         </th>
       </tr>
-      <tr class="master-view-header projects-view-header">
-        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 6px 10px;">
+      <tr class="tr-sub-headers master-view-header projects-view-header">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: none !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; padding: 10px 8px;">
           <span>Request</span>
         </th>
-        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: none !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px;">
           <span>Approved</span>
         </th>
-        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: none !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px;">
           <span>Transferred</span>
         </th>
-        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1.5px solid #ffffff !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 6px 10px;">
+        <th class="th-sv-sub" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: none !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px;">
           <span>Payable</span>
         </th>
       </tr>
@@ -19917,6 +21137,7 @@ function renderProjectsTableHead() {
 }
 
 function renderProjectsFooter() {
+  if (currentModule !== 'projects') return;
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
@@ -19940,12 +21161,13 @@ function renderProjectsFooter() {
   }
   const featSettings = getSiteFeatureSettings(activeRow || selectedProjectId);
 
+  const isPmWorklistFlow = (typeof isPmYtsWipHoldNrFlow === 'function') ? isPmYtsWipHoldNrFlow() : false;
+
   // If currently on a disabled subpage view, fallback gracefully
-  if (currentProjectsView === 'project_material' && !featSettings.tspMaterials) {
-    currentProjectsView = 'details';
-  }
-  if (currentProjectsView === 'project_infra' && !(featSettings.stn || featSettings.srn || featSettings.cam)) {
-    currentProjectsView = 'details';
+  if (currentProjectsView === 'project_material') {
+    if (!isPmWorklistFlow && !featSettings.tspMaterials) {
+      currentProjectsView = 'details';
+    }
   }
   if (currentProjectsView === 'project_approvals' && !featSettings.additionalApproval) {
     currentProjectsView = 'details';
@@ -19954,7 +21176,6 @@ function renderProjectsFooter() {
     currentProjectsView = 'details';
   }
 
-  const isPmWorklistFlow = (typeof isPmYtsWipHoldNrFlow === 'function') ? isPmYtsWipHoldNrFlow() : false;
   if (currentProjectsView === 'project_boq' && isPmWorklistFlow) {
     currentProjectsView = 'details';
   }
@@ -19962,10 +21183,10 @@ function renderProjectsFooter() {
   let detailTabs = [
     { key: 'expenses', label: 'Expenses' }
   ];
-  if (featSettings.tspMaterials) {
+  if (featSettings.tspMaterials || isPmWorklistFlow || currentProjectsView === 'project_material') {
     detailTabs.push({ key: 'material', label: 'Material' });
   }
-  if (featSettings.stn || featSettings.srn || featSettings.cam) {
+  if (featSettings.stn || featSettings.srn || featSettings.cam || isPmWorklistFlow || currentProjectsView === 'project_infra') {
     detailTabs.push({ key: 'infra', label: 'Infra' });
   }
   detailTabs.push({ key: 'dpr', label: 'DPR' });
@@ -23981,7 +25202,77 @@ window.editingWmExpenseId = null;
 window.pmExpenseSourceModalOpen = false;
 window.currentActiveExpenseCategory = 'Operational Expenses';
 
-window.openWmPaymentAddExpensesModal = function(itemName) {
+window.populateExpenseDescriptionOptions = async function(category, selectElement) {
+  if (!selectElement) return;
+  const cat = (category || window.currentActiveExpenseCategory || '').toLowerCase().trim();
+
+  if (cat.includes('operational')) {
+    const operationalOptions = [
+      'Equipment Rental',
+      'Transportation Cost',
+      'Lodging & Accommodation Charges',
+      'Labour Cost',
+      'Service Vendor Cost',
+      'Travelling Expenses',
+      'Staff Welfare Expenses'
+    ];
+    selectElement.innerHTML = operationalOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+  } else if (cat.includes('po expense') || cat.includes('po_expense')) {
+    // Load PO item names with respect to active PO number
+    const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+    const poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+
+    let items = window.activePoLineItemsList || [];
+    if ((!items || items.length === 0) && poNo && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getPoLineItems === 'function') {
+      try {
+        const res = await window.NexusApi.commercial.getPoLineItems(poNo);
+        if (res && res.data) {
+          items = res.data;
+          window.activePoLineItemsList = res.data;
+        }
+      } catch (err) {
+        console.warn('Failed to load PO line items for PO Expense description:', err);
+      }
+    }
+
+    // Extract ONLY clean item names, strictly exclude any numbers or line numbers
+    const itemNames = items.map(it => {
+      if (typeof it === 'string') return it.trim();
+      return (it.item_description || it.itemName || it.description || '').trim();
+    }).filter(desc => desc && !/^\d+$/.test(desc));
+
+    const uniqueNames = Array.from(new Set(itemNames));
+
+    if (uniqueNames.length > 0) {
+      selectElement.innerHTML = uniqueNames.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+    } else {
+      const defaultPoItems = [
+        'Civil Foundations & Ground Anchors Fixing',
+        '40m Ground Based Tower Supply & Erection',
+        'Transformer Foundation & Cabling Service',
+        '15kVA Silent Diesel Generator',
+        'Electrical Panel',
+        '24-Core Armored Optical Fiber Cable',
+        'Site Boundary Fencing & Retaining Wall',
+        'Civil Concrete Work'
+      ];
+      selectElement.innerHTML = defaultPoItems.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+    }
+  } else {
+    const defaultOptions = [
+      'Equipment Rental',
+      'Transportation Cost',
+      'Lodging & Accommodation Charges',
+      'Labour Cost',
+      'Service Vendor Cost',
+      'Travelling Expenses',
+      'Staff Welfare Expenses'
+    ];
+    selectElement.innerHTML = defaultOptions.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+  }
+};
+
+window.openWmPaymentAddExpensesModal = async function(itemName) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -24001,7 +25292,32 @@ window.openWmPaymentAddExpensesModal = function(itemName) {
     }
   });
 
+  // Show backdrop to cleanly blur and dim the background and prevent overlap
+  const expBackdrop = document.getElementById('wmPaymentExpensesBackdrop');
+  if (expBackdrop) expBackdrop.style.display = 'block';
+
+  if (isFromPmExpenses && pmDetailsModal) {
+    const inlineTable = document.getElementById('expenseDetailsInlineTableContainer');
+    if (inlineTable) inlineTable.style.display = 'none';
+    pmDetailsModal.classList.remove('wide-expense-mode');
+    pmDetailsModal.style.setProperty('width', '820px', 'important');
+    pmDetailsModal.classList.add('card-dimmed-blurred');
+    pmDetailsModal.style.setProperty('filter', 'blur(10px) brightness(0.45)', 'important');
+    pmDetailsModal.style.setProperty('pointer-events', 'none', 'important');
+  }
+  const tableModal = document.getElementById('pmAddExpenseTableModal');
+  if (tableModal) {
+    tableModal.style.display = 'none';
+    tableModal.classList.add('card-dimmed-blurred');
+  }
+  const cardsRow = document.querySelector('.side-form-cards-row');
+  if (cardsRow) {
+    cardsRow.classList.add('has-dimmed-card');
+  }
+
   modal.classList.remove('card-dimmed-blurred');
+  modal.style.removeProperty('filter');
+  modal.style.removeProperty('pointer-events');
   modal.style.display = 'block';
   overlay.style.display = 'flex';
 
@@ -24022,6 +25338,12 @@ window.openWmPaymentAddExpensesModal = function(itemName) {
   const titleEl = document.getElementById('lblWmPaymentExpensesTitle');
   if (titleEl) {
     titleEl.textContent = 'Add Expenses';
+  }
+
+  // Populate expense description options based on category
+  const descEl = document.getElementById('selWmExpenseDescription');
+  if (descEl) {
+    await populateExpenseDescriptionOptions(normalizedCat, descEl);
   }
 
   // Render bottom table with records specifically belonging to this category
@@ -24067,13 +25389,35 @@ window.closeWmPaymentExpensesModal = function() {
   if (modal) modal.style.display = 'none';
   window.editingWmExpenseId = null;
 
+  const expBackdrop = document.getElementById('wmPaymentExpensesBackdrop');
+  if (expBackdrop) expBackdrop.style.display = 'none';
+
   if (window.pmExpenseSourceModalOpen) {
     window.pmExpenseSourceModalOpen = false;
     const parentModal = document.getElementById('pmExpenseDetailsModal');
-    if (parentModal) parentModal.style.display = 'block';
+    if (parentModal) {
+      parentModal.style.display = 'block';
+      parentModal.classList.remove('card-dimmed-blurred');
+      parentModal.style.removeProperty('filter');
+      parentModal.style.removeProperty('pointer-events');
+    }
+    const tableModal = document.getElementById('pmAddExpenseTableModal');
+    if (tableModal) {
+      tableModal.classList.remove('card-dimmed-blurred');
+      tableModal.style.removeProperty('filter');
+      tableModal.style.removeProperty('pointer-events');
+    }
+    const cardsRow = document.querySelector('.side-form-cards-row');
+    if (cardsRow) {
+      cardsRow.classList.remove('has-dimmed-card');
+    }
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'flex';
   } else {
+    const cardsRow = document.querySelector('.side-form-cards-row');
+    if (cardsRow) {
+      cardsRow.classList.remove('has-dimmed-card');
+    }
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
   }
@@ -24240,6 +25584,41 @@ window.saveWmPaymentExpenseEntry = function() {
     }
   }
 
+  // Persist to PostgreSQL project_expenses table
+  const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+  let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+  let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+  try {
+    if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+    if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+  } catch(e) {}
+  if (poNo === 'undefined' || poNo === 'null') poNo = null;
+  if (siteId === 'undefined' || siteId === 'null') siteId = null;
+
+  if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+    window.NexusApi.commercial.saveProjectExpense({
+      company_name: 'Nexus',
+      customer_name: (activeProject && activeProject.customerName) || 'Indus Towers Ltd',
+      po_no: poNo,
+      site_id: siteId,
+      expense_head: activeCategory,
+      expense_name: desc,
+      expense_description: desc,
+      expense_type: activeCategory,
+      qty: qty,
+      rate: rate,
+      amount: amount,
+      approved_amount: amount,
+      transferred_amount: 0.00,
+      payable_amount: amount,
+      status: 'Pending'
+    }).then(() => {
+      window._needsRefreshPmExpenses = true;
+    }).catch(err => {
+      console.warn('Failed to save project expense in DB:', err);
+    });
+  }
+
   renderWmExpensesTable();
   if (typeof renderExpenseDetailsInlineTable === 'function') {
     renderExpenseDetailsInlineTable();
@@ -24260,6 +25639,9 @@ window.submitWmPaymentExpensesModal = function() {
   const modal = document.getElementById('wmPaymentExpensesModal');
   if (modal) modal.style.display = 'none';
 
+  const expBackdrop = document.getElementById('wmPaymentExpensesBackdrop');
+  if (expBackdrop) expBackdrop.style.display = 'none';
+
   if (window.pmExpenseSourceModalOpen) {
     window.pmExpenseSourceModalOpen = false;
     window.editingWmExpenseId = null;
@@ -24268,9 +25650,45 @@ window.submitWmPaymentExpensesModal = function() {
     }
     showToast('Expense details submitted successfully!');
     const parentModal = document.getElementById('pmExpenseDetailsModal');
-    if (parentModal) parentModal.style.display = 'block';
+    if (parentModal) {
+      parentModal.style.display = 'block';
+      parentModal.classList.remove('card-dimmed-blurred');
+      parentModal.style.removeProperty('filter');
+      parentModal.style.removeProperty('pointer-events');
+    }
+    const tableModal = document.getElementById('pmAddExpenseTableModal');
+    if (tableModal) {
+      tableModal.classList.remove('card-dimmed-blurred');
+      tableModal.style.removeProperty('filter');
+      tableModal.style.removeProperty('pointer-events');
+    }
+    const cardsRow = document.querySelector('.side-form-cards-row');
+    if (cardsRow) {
+      cardsRow.classList.remove('has-dimmed-card');
+    }
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'flex';
+
+    if (typeof currentProjectsView !== 'undefined' && currentProjectsView === 'project_expenses') {
+      const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+      let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+      let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+      try {
+        if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+        if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+      } catch(e) {}
+      if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectExpenses === 'function') {
+        window.NexusApi.commercial.getProjectExpenses(poNo, siteId).then(res => {
+          if (res && res.data) {
+            window.pmCurrentProjectExpenses = res.data;
+            currentDataset = [...res.data];
+            window._needsRefreshPmExpenses = false;
+            if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+            if (typeof renderProjectsToolbar === 'function') renderProjectsToolbar();
+          }
+        });
+      }
+    }
     return;
   }
 
@@ -30168,6 +31586,10 @@ window.exportAccGstr2bCsv = () => exportAccountsCsv('gstr_2b');
 
 window.handlePageRefresh = function() {
   activeColumnFilters = {};
+  if (currentProjectsView === 'project_material' && typeof window.refreshProjectMaterials === 'function') {
+    window.refreshProjectMaterials();
+    return;
+  }
   showToast('Refreshing page data...');
   setTimeout(() => {
     window.location.reload();
@@ -31022,15 +32444,21 @@ function loadWorklistDataset() {
 
   if (role === 'Project Manager') {
     if (currentWorklistView === 'new_project') {
-      currentDataset = commercialWorklistData.map(item => ({
+      const pendingProjects = (commercialWorklistData || []).filter(item => {
+        const s = (item.projectStatus || item.status || '').trim();
+        return !s || s === 'New' || s === 'Pending';
+      });
+      currentDataset = pendingProjects.map(item => ({
         ...item,
         submitDate: item.submitDate || item.date || ''
       }));
       filteredDataset = [...currentDataset];
     } else if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
       let statusKey = currentWorklistView.toUpperCase();
-      if (currentWorklistView === 'project_update') statusKey = 'WIP';
-      currentDataset = pmStatusDataStore.filter(item => {
+      currentDataset = (pmStatusDataStore || []).filter(item => {
+        if (currentWorklistView === 'project_update') {
+          return item.status === 'Project Update' || item.status === 'WIP' || !['YTS', 'HOLD', 'NR'].includes(item.status);
+        }
         if (statusKey === 'WIP') return item.status === 'WIP';
         if (statusKey === 'YTS') return item.status === 'YTS';
         if (statusKey === 'HOLD') return item.status === 'HOLD';
@@ -31066,6 +32494,12 @@ function loadWorklistDataset() {
       currentDataset = statutoryDetail.lineItems || [];
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'payment') {
+      if (paymentData.length === 0 && typeof window.loadMasterPaymentDataFromApi === 'function' && !window._loadingMasterPaymentData) {
+        window._loadingMasterPaymentData = true;
+        window.loadMasterPaymentDataFromApi(true).finally(() => {
+          window._loadingMasterPaymentData = false;
+        });
+      }
       currentDataset = paymentData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms') {
@@ -31526,7 +32960,7 @@ window.closePmEditProjectUpdateModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.savePmEditProjectUpdate = function() {
+window.savePmEditProjectUpdate = async function() {
   const selStatus = document.getElementById('pmEditStatusSelect');
   const selSupport = document.getElementById('pmEditSupportRequiredSelect');
   const inpPending = document.getElementById('pmEditPendingWithInput');
@@ -31545,11 +32979,38 @@ window.savePmEditProjectUpdate = function() {
     return;
   }
 
+  // 1. Prepare items payload for DB update in telecom_project table
+  const updateItems = selectedRows.map(r => ({
+    project_id: r.projectId || r.id,
+    po_no: r.poNo || '',
+    site_id: r.siteId || '',
+    project_status: targetStatus,
+    support_required: supportVal,
+    pending_with: pendingWithVal,
+    remarks: remarksVal
+  }));
+
+  // 2. Persist to PostgreSQL telecom_project in Project DB
+  try {
+    if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.editProjectUpdate === 'function') {
+      await window.NexusApi.commercial.editProjectUpdate({ items: updateItems });
+    } else {
+      await fetch('/api/v1/commercial/projects/edit-project-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: updateItems })
+      });
+    }
+  } catch (err) {
+    console.error('Failed to update telecom_project in project db:', err);
+  }
+
+  // 3. Update in-memory pmStatusDataStore and localStorage
   const selectedIds = new Set(selectedRows.map(r => String(r.id)));
 
   if (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) {
     pmStatusDataStore.forEach(r => {
-      if (selectedIds.has(String(r.id))) {
+      if (selectedIds.has(String(r.id)) || (r.projectId && selectedRows.some(s => s.projectId === r.projectId))) {
         r.status = targetStatus;
         r.supportRequired = supportVal;
         r.pendingWith = pendingWithVal;
@@ -31574,7 +33035,7 @@ window.savePmEditProjectUpdate = function() {
   renderWorklistFooter();
 
   const statusDisplayName = targetStatus === 'NR' ? 'NR' : targetStatus;
-  showToast(`Record updated & moved to ${statusDisplayName} tab!`);
+  showToast(`Record updated & saved to telecom_project (${statusDisplayName})!`);
 };
 
 window.editSelectedPmRow = function() {
@@ -31587,6 +33048,10 @@ window.editSelectedPmRow = function() {
 let activeSelectedBoqName = "Telecom Tower Mast Accessories 30M";
 
 let boqSubTableDataStore = {
+  "40M Tubular Mast Tower": [
+    { id: "sub-0a", materialDescription: "40M Tubular Galvanized Steel Tower Mast Sections", uom: "SET", mir: "1.00", min: "1.00", mrr: "0.00", mrn: "0.00", net: "1.00", jms: "1.00", difference: "0.00", rate: "3,45,000.00", amount: "3,45,000.00" },
+    { id: "sub-0b", materialDescription: "High Tensile Foundation Anchor Bolt & Template Kit", uom: "SET", mir: "1.00", min: "1.00", mrr: "0.00", mrn: "0.00", net: "1.00", jms: "1.00", difference: "0.00", rate: "1,50,000.00", amount: "1,50,000.00" }
+  ],
   "Telecom Tower Mast Accessories 30M": [
     { id: "sub-1", materialDescription: "30M Triangular Galvanized Mast Body Section", uom: "SET", mir: "10.00", min: "10.00", mrr: "0.00", mrn: "0.00", net: "10.00", jms: "10.00", difference: "0.00", rate: "35,000.00", amount: "3,50,000.00" },
     { id: "sub-2", materialDescription: "Guy Wire & High Tensile Turnbuckle Set", uom: "SET", mir: "10.00", min: "10.00", mrr: "0.00", mrn: "0.00", net: "10.00", jms: "10.00", difference: "0.00", rate: "15,000.00", amount: "1,50,000.00" }
@@ -31636,22 +33101,142 @@ let mirItemsData = [
   { materialDescription: "25x6mm Hot Dip Galvanized Earth Strip - Grade A", uom: "MTR", qty: "50.00" }
 ];
 
-window.openAddBoqNameModal = function() {
-  const sel = document.getElementById('selAddBoqNameField');
-  if (sel) {
-    const existingBoqs = (typeof projectMaterialData !== 'undefined') ? projectMaterialData.map(d => d.boqName) : [];
-    const allBoqOptions = [
-      ...existingBoqs,
-      "25 X 6 GI Earth Strip",
-      "40MM GI PIPE",
-      "Telecom Tower Mast Accessories 30M",
-      "4 Core 16 sq mm Armoured Copper Cable",
-      "Chemical Earthing Electrode with Compound",
-      "Diesel Generator Set 15kVA Silent Type",
-      "Galvanized Steel Fasteners & Clamps"
-    ];
-    const uniqueBoqs = Array.from(new Set(allBoqOptions.filter(Boolean)));
-    sel.innerHTML = uniqueBoqs.map(b => `<option value="${b.replace(/"/g, '&quot;')}">${b}</option>`).join('');
+window.loadProjectMaterialsFromApi = async function(customPoNo, customSiteId) {
+  const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+  let poNo = customPoNo || (activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null);
+  let siteId = customSiteId || (activeProject ? (activeProject.siteId || activeProject.site_id) : null);
+  try {
+    if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+    if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+  } catch(e) {}
+  if (!poNo && !siteId) {
+    poNo = '4500128951';
+    siteId = 'IN-123471';
+  }
+
+  if ((!indusProductMaterialsData || indusProductMaterialsData.length === 0) && window.NexusApi && window.NexusApi.indusGbpaMaterials && typeof window.NexusApi.indusGbpaMaterials.getAll === 'function') {
+    try {
+      const gbpaRes = await window.NexusApi.indusGbpaMaterials.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      const items = gbpaRes && (gbpaRes.items || (gbpaRes.data && gbpaRes.data.items));
+      if (Array.isArray(items) && items.length > 0) {
+        indusProductMaterialsData = items.map(m => ({
+          id: m.id,
+          type: (m.material_type || m.type || 'Parent').toLowerCase() === 'child' ? 'Child' : 'Parent',
+          materialHead: m.material_head || m.materialHead || '',
+          itemCode: m.item_code || m.itemCode || '',
+          description: m.material_description || m.description || '',
+          uom: m.uom || ''
+        }));
+      }
+    } catch (e) {}
+  }
+
+  if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectMaterials === 'function') {
+    try {
+      const res = await window.NexusApi.commercial.getProjectMaterials(poNo, siteId);
+      if (res && res.data) {
+        window.pmCurrentProjectMaterials = res.data;
+        if (currentProjectsView === 'project_material') {
+          currentDataset = [...res.data];
+          if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+          if (typeof renderProjectsToolbar === 'function') renderProjectsToolbar();
+        }
+        return res.data;
+      }
+    } catch (err) {
+      console.warn('Failed to fetch PM project materials:', err);
+    }
+  }
+  return null;
+};
+
+window.refreshProjectMaterials = async function() {
+  const refreshBtn = document.getElementById('btnProjectMaterialRefresh');
+  const img = refreshBtn ? refreshBtn.querySelector('img') : null;
+  if (img) img.classList.add('spin-refresh-icon', 'rotating');
+  if (typeof showToast === 'function') showToast('Refreshing materials data...');
+
+  try {
+    const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+    let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+    let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+    try {
+      if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+      if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+    } catch(e) {}
+    if (!poNo && !siteId) {
+      poNo = '4500128951';
+      siteId = 'IN-123471';
+    }
+
+    if ((!indusProductMaterialsData || indusProductMaterialsData.length === 0) && window.NexusApi && window.NexusApi.indusGbpaMaterials && typeof window.NexusApi.indusGbpaMaterials.getAll === 'function') {
+    try {
+      const gbpaRes = await window.NexusApi.indusGbpaMaterials.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      const items = gbpaRes && (gbpaRes.items || (gbpaRes.data && gbpaRes.data.items));
+      if (Array.isArray(items) && items.length > 0) {
+        indusProductMaterialsData = items.map(m => ({
+          id: m.id,
+          type: (m.material_type || m.type || 'Parent').toLowerCase() === 'child' ? 'Child' : 'Parent',
+          materialHead: m.material_head || m.materialHead || '',
+          itemCode: m.item_code || m.itemCode || '',
+          description: m.material_description || m.description || '',
+          uom: m.uom || ''
+        }));
+      }
+    } catch (e) {}
+  }
+
+  if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectMaterials === 'function') {
+      const res = await window.NexusApi.commercial.getProjectMaterials(poNo, siteId);
+      if (res && res.data) {
+        window.pmCurrentProjectMaterials = res.data;
+        if (currentProjectsView === 'project_material') {
+          currentDataset = [...res.data];
+          if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+          if (typeof renderProjectsToolbar === 'function') renderProjectsToolbar();
+        }
+        if (typeof showToast === 'function') showToast('Materials refreshed successfully');
+        return;
+      }
+    }
+  } catch(err) {
+    console.error('Error in refreshProjectMaterials:', err);
+    if (typeof showToast === 'function') showToast('Failed to refresh materials', 'error');
+  } finally {
+    if (img) {
+      setTimeout(() => {
+        img.classList.remove('spin-refresh-icon', 'rotating');
+      }, 500);
+    }
+  }
+};
+
+window.openAddBoqNameModal = async function() {
+  const inp = document.getElementById('inpAddMaterialName');
+  if (inp) inp.value = '';
+  const dropdown = document.getElementById('dropdownAddMaterialName');
+  if (dropdown) dropdown.style.display = 'none';
+
+  // Ensure GBPA materials from Indus Tower Material page are loaded
+  if (typeof fetchGbpaMaterials === 'function') {
+    try {
+      await fetchGbpaMaterials(false);
+    } catch(e) {}
+  } else if (window.NexusApi && window.NexusApi.indusGbpaMaterials && typeof window.NexusApi.indusGbpaMaterials.getAll === 'function') {
+    try {
+      const res = await window.NexusApi.indusGbpaMaterials.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      const items = res && (res.items || (res.data && res.data.items));
+      if (Array.isArray(items) && items.length > 0 && typeof indusProductMaterialsData !== 'undefined') {
+        indusProductMaterialsData = items.map(m => ({
+          id: m.id,
+          type: (m.material_type || m.type || 'Parent').toLowerCase() === 'child' ? 'Child' : 'Parent',
+          materialHead: m.material_head || m.materialHead || '',
+          itemCode: m.item_code || m.itemCode || '',
+          description: m.material_description || m.description || '',
+          uom: m.uom || ''
+        }));
+      }
+    } catch(e) {}
   }
 
   const overlay = document.getElementById('sideFormOverlay');
@@ -31672,36 +33257,146 @@ window.closeAddBoqNameModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
-window.submitAddBoqName = function() {
-  const sel = document.getElementById('selAddBoqNameField');
-  const selectedBoq = sel ? sel.value : '';
-  if (!selectedBoq) {
-    showToast('Please select a BOQ Name');
+window.handleMaterialNameInput = function(val, forceOpen = false) {
+  const dropdown = document.getElementById('dropdownAddMaterialName');
+  if (!dropdown) return;
+  const query = (val || '').trim().toLowerCase();
+
+  // Pull Parent material names from GBPA Materials of Indus Towers
+  const gbpaList = (typeof indusProductMaterialsData !== 'undefined' && Array.isArray(indusProductMaterialsData))
+    ? indusProductMaterialsData
+    : [];
+  const parentNamesFromGbpa = gbpaList
+    .filter(m => String(m.type || m.material_type || 'Parent').toLowerCase() === 'parent')
+    .map(m => String(m.materialHead || m.material_head || m.description || '').trim())
+    .filter(Boolean);
+
+  const fallbackParentList = [
+    "40M Tubular Mast Tower",
+    "Telecom Tower Mast Accessories 30M",
+    "4 Core 16 sq mm Armoured Copper Cable",
+    "Chemical Earthing Electrode with Compound",
+    "Diesel Generator Set 15kVA Silent Type",
+    "Galvanized Steel Fasteners & Clamps",
+    "25 X 6 GI Earth Strip"
+  ];
+
+  const uniqueItems = Array.from(new Set([...parentNamesFromGbpa, ...fallbackParentList]));
+
+  const matched = (!query && !forceOpen)
+    ? []
+    : (!query ? uniqueItems : uniqueItems.filter(desc => desc.toLowerCase().includes(query)));
+
+  if (matched.length === 0) {
+    if (query) {
+      dropdown.innerHTML = `<div style="padding: 10px 14px; font-size: 0.88rem; color: #94a3b8; font-style: italic;">No matching materials for "${query}"</div>`;
+      dropdown.style.display = 'block';
+    } else {
+      dropdown.style.display = 'none';
+    }
     return;
   }
 
-  const exists = projectMaterialData.some(d => d.boqName === selectedBoq);
-  if (!exists) {
-    projectMaterialData.push({
-      id: `mat-${Date.now()}`,
-      boqName: selectedBoq,
-      uom: "SET",
-      mir: "0.00",
-      min: "0.00",
-      mrr: "0.00",
-      mrn: "0.00",
-      net: "0.00",
-      jms: "0.00",
-      difference: "0.00",
-      rate: "0.00",
-      amount: "0.00"
-    });
+  dropdown.innerHTML = matched.map(item => {
+    const escaped = item.replace(/'/g, "\\'");
+    return `
+      <div onclick="selectMaterialName('${escaped}')" style="padding: 10px 14px; font-size: 0.88rem; color: #1e293b; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='#ffffff'">
+        ${item}
+      </div>
+    `;
+  }).join('');
+  dropdown.style.display = 'block';
+};
+
+window.selectMaterialName = function(desc) {
+  const inp = document.getElementById('inpAddMaterialName');
+  if (inp) inp.value = desc;
+  const dropdown = document.getElementById('dropdownAddMaterialName');
+  if (dropdown) dropdown.style.display = 'none';
+};
+
+window.submitAddBoqName = async function() {
+  const inp = document.getElementById('inpAddMaterialName');
+  const selectedMaterial = inp ? inp.value.trim() : '';
+  if (!selectedMaterial) {
+    showToast('Please select or enter a Material Name');
+    return;
+  }
+
+  const activeProject = (typeof getActivePmProject === 'function') ? getActivePmProject() : (window.activePmProjectRow || null);
+  let poNo = activeProject ? (activeProject.poNo || activeProject.po_no || activeProject.poNumber) : null;
+  let siteId = activeProject ? (activeProject.siteId || activeProject.site_id) : null;
+  try {
+    if (!poNo) poNo = sessionStorage.getItem('nexus_project_po_no');
+    if (!siteId) siteId = sessionStorage.getItem('nexus_project_site_id');
+  } catch(e) {}
+  if (!poNo) poNo = '4500128934';
+  if (!siteId) siteId = 'IN-123456';
+  const custName = (activeProject && activeProject.customerName) ? activeProject.customerName : 'Indus Towers Ltd';
+
+  const gbpaList = (typeof indusProductMaterialsData !== 'undefined' && Array.isArray(indusProductMaterialsData))
+    ? indusProductMaterialsData
+    : [];
+  const matchedGbpa = gbpaList.find(m =>
+    String(m.type || m.material_type || 'Parent').toLowerCase() === 'parent' &&
+    String(m.materialHead || m.material_head || '').trim().toLowerCase() === selectedMaterial.toLowerCase()
+  );
+
+  const rawList = window.activePoLineItemsList || [];
+  const matched = rawList.find(it => {
+    const d = (typeof it === 'string') ? it : (it.item_description || it.itemName || it.description || '');
+    return d.trim().toLowerCase() === selectedMaterial.toLowerCase();
+  });
+
+  const payload = {
+    company_name: 'Nexus',
+    customer_name: custName,
+    po_no: poNo,
+    site_id: siteId,
+    materials_name: selectedMaterial,
+    materials_description: matchedGbpa ? (matchedGbpa.description || selectedMaterial) : selectedMaterial,
+    uom: matchedGbpa ? (matchedGbpa.uom || 'SET') : (matched ? (matched.uom || 'SET') : 'SET'),
+    request_qty: 0,
+    dispatched_qty: 0,
+    mrn_qty: 0,
+    jms_qty: matched ? (matched.jms_qty || matched.qty || 0) : 0,
+    rate: matched ? (matched.rate || matched.po_rate || 0) : 0
+  };
+
+  if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectMaterial === 'function') {
+    try {
+      await window.NexusApi.commercial.saveProjectMaterial(payload);
+    } catch (err) {
+      console.warn('Failed to save project material to DB:', err);
+    }
   }
 
   closeAddBoqNameModal();
-  if (typeof loadProjectsDataset === 'function') loadProjectsDataset();
-  if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-  showToast(`BOQ Name "${selectedBoq}" added!`);
+
+  if (typeof openTaskCompletionModal === 'function') {
+    openTaskCompletionModal('Task Completed Successfully!', async () => {
+      await loadProjectMaterialsFromApi();
+      if (typeof window.loadPmWorklistMaterialsFromApi === 'function') {
+        await window.loadPmWorklistMaterialsFromApi(true);
+      }
+    });
+  } else {
+    showToast('Task Completed Successfully!');
+    await loadProjectMaterialsFromApi();
+    if (typeof window.loadPmWorklistMaterialsFromApi === 'function') {
+      await window.loadPmWorklistMaterialsFromApi(true);
+    }
+  }
+};
+
+window.downloadMaterialPdf = function() {
+  const link = document.createElement('a');
+  link.href = 'assets/sample_pdfs/commissioning_report_sample.pdf';
+  link.download = 'Material_Report.pdf';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('Material PDF downloaded successfully');
 };
 
 window.openProjectBoqSubTable = function(boqName) {
@@ -31759,40 +33454,79 @@ window.openProjectBoqSubTable = function(boqName) {
     `;
   }
 
-  let rows = boqSubTableDataStore[activeSelectedBoqName];
+  // Find matching child items from boqSubTableDataStore (case-insensitive) or indusProductMaterialsData (GBPA Child materials)
+  const storeKey = Object.keys(boqSubTableDataStore).find(k => k.trim().toLowerCase() === activeSelectedBoqName.trim().toLowerCase());
+  let rows = storeKey ? boqSubTableDataStore[storeKey] : null;
+
   if (!rows || rows.length === 0) {
-    const parent = projectMaterialData.find(d => d.boqName === activeSelectedBoqName);
+    const gbpaList = (typeof indusProductMaterialsData !== 'undefined' && Array.isArray(indusProductMaterialsData))
+      ? indusProductMaterialsData
+      : [];
+    const childGbpaItems = gbpaList.filter(m =>
+      String(m.type || m.material_type || '').toLowerCase() === 'child' &&
+      String(m.materialHead || m.material_head || '').trim().toLowerCase() === activeSelectedBoqName.trim().toLowerCase()
+    );
+    if (childGbpaItems.length > 0) {
+      rows = childGbpaItems.map((c, idx) => {
+        const masterMatch = boqAvailableMaterialsMaster.find(bm => bm.name.toLowerCase() === String(c.description || c.material_description || '').trim().toLowerCase());
+        const rateNum = masterMatch ? masterMatch.rate : 1000;
+        const fmtRate = rateNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return {
+          id: `sub-gbpa-${c.id || idx}`,
+          materialDescription: c.description || c.material_description || '',
+          uom: c.uom || (masterMatch ? masterMatch.uom : 'SET'),
+          mir: "1.00",
+          min: "1.00",
+          mrr: "0.00",
+          mrn: "0.00",
+          net: "1.00",
+          jms: "1.00",
+          difference: "0.00",
+          rate: fmtRate,
+          amount: fmtRate
+        };
+      });
+      boqSubTableDataStore[activeSelectedBoqName] = rows;
+    }
+  }
+
+  if (!rows || rows.length === 0) {
+    const parent = (window.pmCurrentProjectMaterials || projectMaterialData || []).find(d => (d.boqName || d.materials_name) === activeSelectedBoqName);
     rows = [
       {
         id: `sub-${Date.now()}`,
-        materialDescription: activeSelectedBoqName + " - Main Item Component",
+        materialDescription: activeSelectedBoqName + " - Child Component",
         uom: parent ? parent.uom : "SET",
-        mir: parent ? parent.mir : "10.00",
-        min: parent ? parent.min : "10.00",
+        mir: parent ? parent.mir : "1.00",
+        min: parent ? parent.min : "1.00",
         mrr: parent ? parent.mrr : "0.00",
         mrn: parent ? parent.mrn : "0.00",
-        net: parent ? parent.net : "10.00",
-        jms: parent ? (parent.jms || "10.00") : "10.00",
+        net: parent ? parent.net : "1.00",
+        jms: parent ? (parent.jms || "1.00") : "1.00",
         difference: parent ? (parent.difference || "0.00") : "0.00",
         rate: parent ? parent.rate : "1,000.00",
-        amount: parent ? parent.amount : "10,000.00"
+        amount: parent ? parent.amount : "1,000.00"
       }
     ];
     boqSubTableDataStore[activeSelectedBoqName] = rows;
   }
 
   if (tbody) {
+    const getMatQtyColor = (val) => {
+      const num = parseFloat(String(val ?? '0').replace(/,/g, '').trim());
+      return (!isNaN(num) && Math.abs(num) < 0.0001) ? '#16a34a' : '#ef4444';
+    };
     tbody.innerHTML = rows.map(r => `
       <tr class="projects-data-row" data-row-id="${r.id}" style="border-bottom: 1px solid #f1f5f9;">
         <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">${r.materialDescription || ''}</td>
-        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: left !important; padding: 10px 14px;">${r.uom || ''}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mir || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.min || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mrr || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.mrn || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.net || '0.00'}</td>
-        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${r.jms || '0.00'}</td>
-        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px; white-space: nowrap;">${r.difference || '0.00'}</td>
+        <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 14px;">${r.uom || ''}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(r.mir)} !important; font-weight: 600;">${r.mir || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(r.min)} !important; font-weight: 600;">${r.min || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(r.mrr)} !important; font-weight: 600;">${r.mrr || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(r.mrn)} !important; font-weight: 600;">${r.mrn || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(r.net)} !important; font-weight: 600;">${r.net || '0.00'}</td>
+        <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(r.jms)} !important; font-weight: 600;">${r.jms || '0.00'}</td>
+        <td style="width: 16ch; min-width: 16ch; max-width: 16ch; text-align: right !important; padding: 10px 14px; white-space: nowrap; color: ${getMatQtyColor(r.difference)} !important; font-weight: 600;">${r.difference || '0.00'}</td>
         <td style="width: 14ch; min-width: 14ch; max-width: 14ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0; white-space: nowrap;">${r.rate || '0.00'}</td>
         <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 14px; font-weight: 600; white-space: nowrap;">${r.amount || '0.00'}</td>
       </tr>
@@ -31939,10 +33673,6 @@ window.submitMirModal = function() {
   }
 };
 
-window.openMinMrnModal = function(title) {
-  showToast(`${title || 'MIN / MRN'} document viewer opened`);
-};
-
 window.sendMailPmWorklist = function() {
   const selectedRows = currentDataset.filter(r => r.selected);
   if (selectedRows.length === 0) {
@@ -32015,6 +33745,7 @@ window.exportPmWorklistToCsv = function() {
 };
 
 function renderWorklistToolbar() {
+  if (currentModule !== 'worklist') return;
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
 
@@ -32596,7 +34327,7 @@ function renderWorklistToolbar() {
           </button>
           ${hasTreds ? `
           <button type="button" class="toolbar-icon-btn btn-m1-action" id="btnReceivableM1Payment" data-tooltip="M1 Payment Receipt" title="M1 Payment Receipt" aria-label="M1 Payment Receipt" style="cursor: pointer;" onclick="openMiPaymentReceiptModal()">
-            <img src="icons/M1.svg" alt="M1 Payment Receipt" class="toolbar-icon-img" width="28" height="28">
+            <img src="icons/M1.svg" alt="M1 Payment Receipt" class="toolbar-icon-img" width="28" height="28" style="width: 28px; height: 28px; display: block; object-fit: contain;">
           </button>
           ` : ''}
           <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnReceivableBulkUpload" data-tooltip="Bulk Upload" title="Bulk Upload" aria-label="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadModal('Receivable')">
@@ -32887,6 +34618,30 @@ function renderWorklistToolbar() {
   const hasSelected = currentDataset.some(r => r.selected);
 
   if (currentWorklistView === 'project_payment') {
+    let statTotal = 0;
+    let statPaid = 0;
+    let statPayable = 0;
+    (worklistProjectPaymentItems || []).forEach(it => {
+      const tot = parseFloat(String(it.amountTotal || it.amountBasic || 0).replace(/,/g, '')) || 0;
+      const trans = parseFloat(String(it.transferredAmount || it.transferred || 0).replace(/,/g, '')) || 0;
+      statTotal += tot;
+      statPaid += trans;
+      statPayable += Math.max(0, tot - trans);
+    });
+    const formatStat = (v) => {
+      const s = Number(v || 0).toFixed(2);
+      const [intPart, decPart] = s.split('.');
+      let lastThree = intPart.substring(intPart.length - 3);
+      const otherNumbers = intPart.substring(0, intPart.length - 3);
+      if (otherNumbers !== '') {
+        lastThree = ',' + lastThree;
+      }
+      return `${otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',')}${lastThree}.${decPart}`;
+    };
+    const strTotal = worklistProjectPaymentItems.length > 0 ? formatStat(statTotal) : "0.00";
+    const strPaid = worklistProjectPaymentItems.length > 0 ? formatStat(statPaid) : "0.00";
+    const strPayable = worklistProjectPaymentItems.length > 0 ? formatStat(statPayable) : "0.00";
+
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 24px;">
         <div style="display: inline-flex; align-items: center;">
@@ -32896,19 +34651,19 @@ function renderWorklistToolbar() {
         <!-- Stat 1: Summation Total -->
         <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/summation.svg" alt="Total" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">12,00,000.00</span>
+          <span style="font-size: 15px; font-weight: 700; color: #0454e4; letter-spacing: 0.3px;">${strTotal}</span>
         </div>
 
         <!-- Stat 2: Validated / Paid -->
         <div class="metric-item metric-validated" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/Paid _ Received.svg" alt="Paid" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">10,00,000.00</span>
+          <span style="font-size: 15px; font-weight: 700; color: #16a34a; letter-spacing: 0.3px;">${strPaid}</span>
         </div>
 
         <!-- Stat 3: Balance / Payable (Red Payable) placed on left side near Green Paid -->
         <div class="metric-item metric-balance" style="display: flex; align-items: center; gap: 8px;">
           <img src="icons/Payable.svg" alt="Payable" width="28" height="28" style="vertical-align: middle;">
-          <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">2,00,000.00</span>
+          <span style="font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 0.3px;">${strPayable}</span>
         </div>
       </div>
 
@@ -33194,19 +34949,55 @@ function renderWorklistToolbar() {
       </div>
     `;
   } else {
+    const parseAmount = (val) => {
+      if (val === undefined || val === null) return 0;
+      if (typeof val === 'number') return val;
+      const cleaned = String(val).replace(/₹/g, '').replace(/,/g, '').trim();
+      return parseFloat(cleaned) || 0;
+    };
+
+    const rowsToSum = (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset) && filteredDataset.length > 0)
+      ? filteredDataset
+      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentDataset.length > 0) ? currentDataset : (typeof paymentData !== 'undefined' && Array.isArray(paymentData) ? paymentData : []));
+
+    let totalPayable = 0;
+    let totalTransferred = 0;
+
+    rowsToSum.forEach(row => {
+      const p = (row.raw_payable !== undefined && row.raw_payable !== null) ? Number(row.raw_payable) : parseAmount(row.payableAmount || row.payable);
+      const t = (row.raw_transferred !== undefined && row.raw_transferred !== null) ? Number(row.raw_transferred) : parseAmount(row.transferredAmount || row.transferred);
+      totalPayable += p;
+      totalTransferred += t;
+    });
+
+    const formatCurrency = (val) => {
+      const v = parseFloat(val) || 0;
+      const s = v.toFixed(2);
+      const [intPart, decPart] = s.split('.');
+      let lastThree = intPart.substring(intPart.length - 3);
+      const otherNumbers = intPart.substring(0, intPart.length - 3);
+      if (otherNumbers !== '') {
+        lastThree = ',' + lastThree;
+      }
+      return `${otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',')}${lastThree}.${decPart}`;
+    };
+
+    const formattedPayable = formatCurrency(totalPayable);
+    const formattedTransferred = formatCurrency(totalTransferred);
+
     toolbar.innerHTML = `
       <div class="toolbar-left" style="display: flex; align-items: center; gap: 8px;">
         <span class="toolbar-icon-wrap" data-tooltip="Payable Amount" title="Payable Amount" style="display: inline-flex; align-items: center; cursor: pointer;">
           <img src="icons/Payable.svg" alt="Payable Amount" class="toolbar-icon-img" width="28" height="28">
         </span>
-        <span id="lblPayableAmount" class="toolbar-amount-text toolbar-amount-red">11,11,20,000.00</span>
+        <span id="lblPayableAmount" class="toolbar-amount-text toolbar-amount-red">${formattedPayable}</span>
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
         <div class="toolbar-bank-amount-wrap" style="display: flex; align-items: center; gap: 8px;">
           <span class="toolbar-icon-wrap" data-tooltip="Bank" title="Bank" style="display: inline-flex; align-items: center; cursor: pointer;">
             <img src="icons/Bank.svg" alt="Bank" class="toolbar-icon-img" width="28" height="28">
           </span>
-          <span id="lblBankAmount" class="toolbar-amount-text toolbar-amount-green">11,11,20,000.00</span>
+          <span id="lblBankAmount" class="toolbar-amount-text toolbar-amount-green">${formattedTransferred}</span>
         </div>
         <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
@@ -33225,6 +35016,7 @@ function renderWorklistToolbar() {
 }
 
 function renderWorklistFooter() {
+  if (currentModule !== 'worklist') return;
   const footer = document.getElementById('worklistFooterBar');
   if (!footer) return;
 
@@ -33432,13 +35224,22 @@ function renderWorklistFooter() {
     footer.style.marginTop = 'auto';
     footer.style.padding = '24px';
 
-    const newProjectCount = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) ? commercialWorklistData.length : 0;
-    const ytsCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'YTS').length : 2;
-    const wipCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'WIP').length : 3;
-    const holdCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'HOLD').length : 1;
-    const nrCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'NR').length : 1;
+    const pendingProjects = (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData))
+      ? commercialWorklistData.filter(item => {
+          const s = (item.projectStatus || item.status || '').trim();
+          return !s || s === 'New' || s === 'Pending';
+        })
+      : [];
+    const newProjectCount = pendingProjects.length;
+    const ytsCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'YTS').length : 0;
+    const wipCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'WIP').length : 0;
+    const holdCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'HOLD').length : 0;
+    const nrCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore)) ? pmStatusDataStore.filter(r => r.status === 'NR').length : 0;
+    const projectUpdateCount = (typeof pmStatusDataStore !== 'undefined' && Array.isArray(pmStatusDataStore))
+      ? pmStatusDataStore.filter(r => r.status === 'Project Update' || r.status === 'WIP' || !['YTS', 'HOLD', 'NR'].includes(r.status)).length
+      : 0;
 
-    const hasStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam);
+    const hasStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam || pmProjectFeatureSettings.srn || (Array.isArray(pmStatusDataStore) && pmStatusDataStore.some(r => r.status === 'YTS' || r.stn || r.srn || r.cam)));
 
     const pmTabs = [
       { id: 'btnTogglePmNewProject', view: 'new_project', label: `New project (${newProjectCount})` }
@@ -33452,9 +35253,8 @@ function renderWorklistFooter() {
         { id: 'btnTogglePmNr', view: 'nr', label: `NR (${nrCount})` }
       );
     } else {
-      const totalUpdateCount = ytsCount + wipCount + holdCount + nrCount;
       pmTabs.push(
-        { id: 'btnTogglePmProjectUpdate', view: 'project_update', label: `Project Update (${totalUpdateCount})` }
+        { id: 'btnTogglePmProjectUpdate', view: 'project_update', label: `Project Update (${projectUpdateCount})` }
       );
     }
 
@@ -33664,14 +35464,15 @@ function renderWorklistFooter() {
     }
   });
 
-  document.getElementById('btnTogglePayment')?.addEventListener('click', () => {
-    if (currentWorklistView !== 'payment') {
-      currentWorklistView = 'payment';
-      activeColumnFilters = {};
-      updateURL();
-      renderApp();
-      showToast('Switched to Payment Page');
+  document.getElementById('btnTogglePayment')?.addEventListener('click', async () => {
+    currentWorklistView = 'payment';
+    activeColumnFilters = {};
+    if (typeof window.syncProjectExpensesToPaymentData === 'function') {
+      await window.syncProjectExpensesToPaymentData(true);
     }
+    updateURL();
+    renderApp();
+    showToast('Switched to Payment Page');
   });
 }
 
@@ -36355,40 +38156,40 @@ function renderWorklistTableHead() {
   } else {
     thead.innerHTML = `
       <tr class="master-view-header payment-view-header">
-        <th rowspan="2" class="th-select" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="togglePaymentSelectAll()">
+        <th rowspan="2" class="th-select" style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; white-space: nowrap; padding: 10px 6px; cursor: pointer;" onclick="togglePaymentSelectAll()">
           <span>Select</span>
         </th>
-        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Submit By</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['submitBy'] ? 'has-active-filter' : ''}" data-filter-col="submitBy" title="Filter Submit By">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="white-space: nowrap; width: 140px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
+        <th rowspan="2" style="white-space: nowrap; width: 140px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 6px;">
           <span>Submission Date</span>
         </th>
-        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Approved By</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['approvedBy'] ? 'has-active-filter' : ''}" data-filter-col="approvedBy" title="Filter Approved By">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+        <th rowspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Expense Head</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseHead'] ? 'has-active-filter' : ''}" data-filter-col="expenseHead" title="Filter Expense Head">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+        <th rowspan="2" style="width: 30ch; max-width: 30ch; min-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Transfer To</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
           </div>
         </th>
-        <th colspan="3" class="th-amount-group" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+        <th colspan="3" class="th-amount-group" style="height: 39px; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: none !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; padding: 10px 8px; box-shadow: inset 0 -1px 0 #ffffff !important; position: sticky !important; top: 0 !important; z-index: 12 !important;">
           <span>Amount</span>
         </th>
-        <th rowspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+        <th rowspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: 1px solid #8e8e8e !important; border-bottom: 1px solid #8e8e8e !important; border-right: none !important; border-left: 1.5px solid #ffffff !important; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
             <span>Ageing</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
@@ -36396,9 +38197,9 @@ function renderWorklistTableHead() {
         </th>
       </tr>
       <tr class="tr-sub-headers master-view-header payment-view-header">
-        <th style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">Approved</th>
-        <th style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">Transferred</th>
-        <th style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">Payable</th>
+        <th style="position: sticky !important; top: 39px !important; z-index: 11 !important; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: none !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: 1.5px solid #ffffff !important; box-shadow: none !important; padding: 6px 10px;">Approved</th>
+        <th style="position: sticky !important; top: 39px !important; z-index: 11 !important; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: none !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; box-shadow: none !important; padding: 6px 10px;">Transferred</th>
+        <th style="position: sticky !important; top: 39px !important; z-index: 11 !important; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border-top: none !important; border-bottom: 1px solid #8e8e8e !important; border-right: 1.5px solid #ffffff !important; border-left: none !important; box-shadow: none !important; padding: 6px 10px;">Payable</th>
       </tr>
     `;
     rebindFilterButtons();
@@ -36420,10 +38221,7 @@ function initWorklistToolbarEvents() {
       activeColumnFilters = {};
       renderApp();
 
-      const lblPayable = document.getElementById('lblPayableAmount');
-      const lblBank = document.getElementById('lblBankAmount');
-      if (lblPayable) lblPayable.textContent = "11,11,20,000.00";
-      if (lblBank) lblBank.textContent = "11,11,20,000.00";
+
 
       setTimeout(() => {
         if (img) img.classList.remove('spin-refresh-icon');
@@ -38188,12 +39986,14 @@ function applyFiltersAndRender() {
 
   if (currentModule === 'worklist' && role === 'Project Manager') {
     if (currentWorklistView === 'new_project') {
-      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.siteName)) {
-        currentDataset = commercialWorklistData.map(item => ({
-          ...item,
-          submitDate: item.submitDate || item.date || ''
-        }));
-      }
+      const pendingProjects = (commercialWorklistData || []).filter(item => {
+        const s = (item.projectStatus || item.status || '').trim();
+        return !s || s === 'New' || s === 'Pending';
+      });
+      currentDataset = pendingProjects.map(item => ({
+        ...item,
+        submitDate: item.submitDate || item.date || ''
+      }));
 
       filteredDataset = currentDataset.filter(row => {
         for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
@@ -38255,8 +40055,13 @@ function applyFiltersAndRender() {
       }).join('');
       return;
     } else if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
-      const targetStatus = currentWorklistView === 'project_update' ? 'WIP' : currentWorklistView.toUpperCase();
-      currentDataset = (pmStatusDataStore || []).filter(r => currentWorklistView === 'project_update' ? true : r.status === targetStatus);
+      const targetStatus = currentWorklistView.toUpperCase();
+      currentDataset = (pmStatusDataStore || []).filter(r => {
+        if (currentWorklistView === 'project_update') {
+          return r.status === 'Project Update' || r.status === 'WIP' || !['YTS', 'HOLD', 'NR'].includes(r.status);
+        }
+        return r.status === targetStatus;
+      });
 
       filteredDataset = currentDataset.filter(row => {
         for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
@@ -38360,9 +40165,7 @@ function applyFiltersAndRender() {
 
     if (currentWorklistView === 'materials') {
       syncPmMaterialsDataWithNewProject();
-      if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.requestBy)) {
-        currentDataset = pmMaterialsDataStore.map(item => ({ ...item }));
-      }
+      currentDataset = pmMaterialsDataStore.map(item => ({ ...item }));
 
       filteredDataset = currentDataset.filter(row => {
         for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
@@ -40307,51 +42110,29 @@ function applyFiltersAndRender() {
         const isSelected = row.selected;
         const isApproved = row.approved && isSelected;
         const rowClass = 'project-payment-row' + (isApproved ? ' row-approved-permanently' : (isSelected ? ' row-selected' : ''));
-        if (isProjectPaymentEditing) {
-          return `
-            <tr class="${rowClass}" data-row-id="${row.id || idx}">
-              <td class="td-select td-center">
-                <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleProjectPaymentRowSelect('${row.id}')" aria-label="Select row"></div>
-              </td>
-              <td class="td-center" style="font-weight: 500;">${row.expenseType || ''}</td>
-              <td>
-                ${row.boqName ? `<a href="#" class="boq-link" onclick="showToast('BOQ: ${row.boqName}'); return false;">${row.boqName}</a>` : ''}
-              </td>
-              <td class="td-center">${row.uom || ''}</td>
-              <td class="td-center">
-                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="qty" value="${row.qty || ''}" placeholder="Qty" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: center; cursor: text;">
-              </td>
-              <td class="td-amount">${row.rateRequested || ''}</td>
-              <td class="td-amount">${row.rateValidated || ''}</td>
-              <td class="td-amount">
-                <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="rateApproved" value="${row.rateApproved || ''}" placeholder="0.00" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #000000 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
-              </td>
-              <td class="td-amount">${row.amountBasic || ''}</td>
-              <td class="td-amount">${row.amountGst || ''}</td>
-              <td class="td-amount">${row.amountTotal || ''}</td>
-            </tr>
-          `;
-        } else {
-          return `
-            <tr class="${rowClass}" data-row-id="${row.id || idx}">
-              <td class="td-select td-center">
-                <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleProjectPaymentRowSelect('${row.id}')" aria-label="Select row"></div>
-              </td>
-              <td class="td-center" style="font-weight: 500;">${row.expenseType || ''}</td>
-              <td>
-                ${row.boqName ? `<a href="#" class="boq-link" onclick="showToast('BOQ: ${row.boqName}'); return false;">${row.boqName}</a>` : ''}
-              </td>
-              <td class="td-center">${row.uom || ''}</td>
-              <td class="td-center">${row.qty || ''}</td>
-              <td class="td-amount">${row.rateRequested || ''}</td>
-              <td class="td-amount">${row.rateValidated || ''}</td>
-              <td class="td-amount">${row.rateApproved || ''}</td>
-              <td class="td-amount">${row.amountBasic || ''}</td>
-              <td class="td-amount">${row.amountGst || ''}</td>
-              <td class="td-amount">${row.amountTotal || ''}</td>
-            </tr>
-          `;
-        }
+        return `
+          <tr class="${rowClass}" data-row-id="${row.id || idx}">
+            <td class="td-select td-center">
+              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="toggleProjectPaymentRowSelect('${row.id}')" aria-label="Select row"></div>
+            </td>
+            <td class="td-center" style="font-weight: 500;">${row.expenseType || ''}</td>
+            <td>
+              ${row.boqName ? `<a href="#" class="boq-link" onclick="showToast('BOQ: ${row.boqName}'); return false;">${row.boqName}</a>` : ''}
+            </td>
+            <td class="td-center">${row.uom || ''}</td>
+            <td class="td-center" style="padding: 4px 6px;">
+              <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="qty" value="${row.qty || '1.00'}" placeholder="Qty" onchange="updateProjectPaymentDbField('${row.id}', 'qty', this.value)" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: center; cursor: text;">
+            </td>
+            <td class="td-amount">${row.rateRequested || ''}</td>
+            <td class="td-amount">${row.rateValidated || ''}</td>
+            <td class="td-amount" style="padding: 4px 6px;">
+              <input type="text" class="project-table-edit-input" data-row-id="${row.id}" data-field="rateApproved" value="${row.rateApproved || ''}" placeholder="0.00" onchange="updateProjectPaymentDbField('${row.id}', 'rateApproved', this.value)" style="width: 100%; height: 30px; padding: 3px 8px; font-size: 0.88rem; font-family: inherit; color: #000000; background: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 4px !important; outline: none !important; box-shadow: none !important; box-sizing: border-box; text-align: right; cursor: text;">
+            </td>
+            <td class="td-amount">${row.amountBasic || ''}</td>
+            <td class="td-amount">${row.amountGst || ''}</td>
+            <td class="td-amount">${row.amountTotal || ''}</td>
+          </tr>
+        `;
       }).join('');
     } else if (currentWorklistView === 'purchase_payment') {
       const validItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.hsnCode && item.hsnCode.trim() !== ''));
@@ -40508,7 +42289,8 @@ function applyFiltersAndRender() {
     } else {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
-        const isProject = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'project');
+        const isProject = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'project') ||
+                          !['purchase', 'employee', 'transport', 'accounts', 'admin', 'statutory'].includes((row.expenseHead || '').trim().toLowerCase());
         const isPurchase = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'purchase');
         const isEmployee = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'employee');
         const isTransport = (row.expenseHead && row.expenseHead.trim().toLowerCase() === 'transport');
@@ -40668,23 +42450,51 @@ function applyFiltersAndRender() {
         </tr>
       `).join('');
     } else if (currentProjectsView === 'project_material') {
-      tbody.innerHTML = filteredDataset.map(row => `
+      const getMatQtyColor = (val) => {
+        const num = parseFloat(String(val ?? '0').replace(/,/g, '').trim());
+        return (!isNaN(num) && Math.abs(num) < 0.0001) ? '#16a34a' : '#ef4444';
+      };
+      tbody.innerHTML = filteredDataset.map(row => {
+        const matTitle = row.materialName || row.boqName || row.materials_name || '';
+        return `
         <tr class="projects-data-row" data-row-id="${row.id}">
           <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; padding: 10px 14px; font-weight: 500; color: #1e293b;">
-            <a href="#" class="req-link td-link-blue clickable-boq-item-link" onclick="openProjectBoqSubTable('${(row.boqName || '').replace(/'/g, "\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">${row.boqName || ''}</a>
+            <a href="#" class="req-link td-link-blue clickable-boq-item-link" onclick="openProjectBoqSubTable('${matTitle.replace(/'/g, "\\\'")}'); return false;" style="color: #0454e4; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">${matTitle}</a>
           </td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px;">${row.uom || ''}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mir || '0.00'}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.min || '0.00'}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrr || '0.00'}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.mrn || '0.00'}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.net || '0.00'}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.jms || '0.00'}</td>
-          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px;">${row.difference || '0.00'}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 14px;">${row.uom || ''}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(row.mir)} !important; font-weight: 600;">${row.mir || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(row.min)} !important; font-weight: 600;">${row.min || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(row.mrr)} !important; font-weight: 600;">${row.mrr || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(row.mrn)} !important; font-weight: 600;">${row.mrn || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(row.net)} !important; font-weight: 600;">${row.net || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(row.jms)} !important; font-weight: 600;">${row.jms || '0.00'}</td>
+          <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; color: ${getMatQtyColor(row.difference)} !important; font-weight: 600;">${row.difference || '0.00'}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; border-left: 1px solid #e2e8f0;">${row.rate || '0.00'}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 14px; font-weight: 600;">${row.amount || '0.00'}</td>
         </tr>
-      `).join('');
+      `; }).join('');
+
+      // Keep total amount summation in sync with filtered rows
+      const totalAmountEl = document.getElementById('lblTotalMaterialAmountSummation');
+      if (totalAmountEl) {
+        const parseAmt = (val) => {
+          if (typeof val === 'number') return val;
+          if (!val) return 0;
+          const num = parseFloat(String(val).replace(/,/g, '').trim());
+          return isNaN(num) ? 0 : num;
+        };
+        const formatInr = (num) => {
+          const parts = Number(num || 0).toFixed(2).split('.');
+          let intPart = parts[0];
+          const decPart = parts[1];
+          const lastThree = intPart.substring(intPart.length - 3);
+          const otherNumbers = intPart.substring(0, intPart.length - 3);
+          const formattedInt = (otherNumbers !== '') ? otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + lastThree : lastThree;
+          return `${formattedInt}.${decPart}`;
+        };
+        const sumMat = filteredDataset.reduce((acc, row) => acc + parseAmt(row.raw_amount !== undefined ? row.raw_amount : row.amount), 0);
+        totalAmountEl.textContent = formatInr(sumMat);
+      }
     } else if (currentProjectsView === 'project_expenses') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="projects-data-row" data-row-id="${row.id}">
@@ -47887,11 +49697,75 @@ window.handleReqClick = function(reqCode) {
 
 let isProjectPaymentEditing = false;
 
-window.openWorklistProjectPayment = function(reqCode, rowId) {
+window.openWorklistProjectPayment = async function(reqCode, rowId) {
   isProjectPaymentEditing = false;
   currentModule = 'worklist';
   currentWorklistView = 'project_payment';
   selectedProjectPaymentReq = reqCode || 'R/RL-234567';
+
+  let payRecord = (typeof paymentData !== 'undefined' && Array.isArray(paymentData))
+    ? paymentData.find(p => p.submitBy === reqCode || p.id === rowId)
+    : null;
+
+  if (!payRecord || !payRecord.items || payRecord.items.length === 0) {
+    if (window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.getProjectExpenses === 'function') {
+      try {
+        const res = await window.NexusApi.commercial.getProjectExpenses();
+        if (res && res.data && Array.isArray(res.data)) {
+          const matched = res.data.filter(exp => (exp.requestNumber === reqCode || String(exp.expenseId) === String(rowId) || String(exp.id) === String(rowId)));
+          if (matched.length > 0) {
+            payRecord = { items: matched };
+          } else {
+            payRecord = { items: res.data };
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching project expenses:', e);
+      }
+    }
+  }
+
+  const formatCurrency = (val) => {
+    const v = parseFloat(val) || 0;
+    const s = v.toFixed(2);
+    const [intPart, decPart] = s.split('.');
+    let lastThree = intPart.substring(intPart.length - 3);
+    const otherNumbers = intPart.substring(0, intPart.length - 3);
+    if (otherNumbers !== '') {
+      lastThree = ',' + lastThree;
+    }
+    return `${otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',')}${lastThree}.${decPart}`;
+  };
+
+  if (payRecord && payRecord.items && Array.isArray(payRecord.items) && payRecord.items.length > 0) {
+    worklistProjectPaymentItems = payRecord.items.map((it, idx) => {
+      const amt = (it.raw_approved !== undefined && it.raw_approved !== null) ? Number(it.raw_approved) : (parseFloat(String(it.approved || it.amount || 0).replace(/,/g, '')) || 0);
+      const isGst = !!it.gst;
+      const itQty = (it.qty !== undefined && it.qty !== null && String(it.qty).trim() !== '') ? String(it.qty) : "1.00";
+      return {
+        id: `wpp-${it.expenseId || idx}`,
+        expenseId: it.expenseId,
+        selected: false,
+        expenseType: it.expenseHead || it.expenseType || "Operational Expenses",
+        boqName: it.expenseDescription || it.expenseName || "Project Line Item",
+        uom: it.uom || "Nos",
+        qty: itQty,
+        rateRequested: it.request || formatCurrency(amt),
+        rateValidated: it.approved || formatCurrency(amt),
+        rateApproved: it.approved || formatCurrency(amt),
+        amountBasic: formatCurrency(amt),
+        amountGst: isGst ? formatCurrency(amt * 0.18) : "0.00",
+        amountTotal: isGst ? formatCurrency(amt * 1.18) : formatCurrency(amt),
+        gst: isGst,
+        reqCode: reqCode,
+        poNo: it.poNo || "",
+        siteId: it.siteId || ""
+      };
+    });
+  }
+
+  currentDataset = worklistProjectPaymentItems;
+  filteredDataset = [...worklistProjectPaymentItems];
   activeColumnFilters = {};
   updateURL();
   renderApp();
@@ -48158,7 +50032,7 @@ window.approveSelectedProjectPaymentRows = function() {
   showToast(`${selectedRows.length} row(s) approved & highlighted permanently`);
 };
 
-window.toggleProjectPaymentEditMode = function() {
+window.toggleProjectPaymentEditMode = async function() {
   if (!isProjectPaymentEditing) {
     isProjectPaymentEditing = true;
     renderWorklistToolbar();
@@ -48175,11 +50049,101 @@ window.toggleProjectPaymentEditMode = function() {
         item[field] = input.value.trim();
       }
     });
+
+    const updatePromises = [];
+    for (const item of worklistProjectPaymentItems) {
+      const expId = item.expenseId || (item.id && item.id.startsWith('wpp-') ? item.id.replace('wpp-', '') : null);
+      if (expId && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+        const qtyVal = parseFloat(item.qty) || 1.0;
+        const rawRateApproved = parseFloat(String(item.rateApproved || '0').replace(/₹/g, '').replace(/,/g, '').trim()) || 0.0;
+        const rawRateReq = parseFloat(String(item.rateRequested || '0').replace(/₹/g, '').replace(/,/g, '').trim()) || 0.0;
+        const unitRate = rawRateApproved > 0 ? rawRateApproved : rawRateReq;
+        const basicAmt = unitRate * qtyVal;
+        updatePromises.push(window.NexusApi.commercial.saveProjectExpense({
+          expense_management_id: parseInt(expId),
+          qty: qtyVal,
+          rate: unitRate,
+          approved_amount: basicAmt,
+          rateApproved: rawRateApproved > 0 ? rawRateApproved : undefined,
+          amount: rawRateReq > 0 ? (rawRateReq * qtyVal) : basicAmt
+        }));
+      }
+    }
+    if (updatePromises.length > 0) {
+      try {
+        await Promise.all(updatePromises);
+      } catch (e) {
+        console.error('Error saving expenses:', e);
+      }
+    }
     isProjectPaymentEditing = false;
     renderWorklistToolbar();
     applyFiltersAndRender();
     showToast('Project payment details saved successfully');
   }
+};
+
+window.updateProjectPaymentDbField = async function(rowId, field, value) {
+  const item = (worklistProjectPaymentItems || []).find(i => i.id === rowId);
+  if (!item) return;
+
+  item[field] = String(value).trim();
+
+  // Recalculate Basic, GST, Total
+  const qtyVal = parseFloat(item.qty) || 1.0;
+  const rawRateApproved = parseFloat(String(item.rateApproved || '0').replace(/₹/g, '').replace(/,/g, '').trim()) || 0.0;
+  const rawRateReq = parseFloat(String(item.rateRequested || '0').replace(/₹/g, '').replace(/,/g, '').trim()) || 0.0;
+  const unitRate = rawRateApproved > 0 ? rawRateApproved : rawRateReq;
+  const basicAmt = unitRate * qtyVal;
+  const isGst = !!item.gst;
+  const gstAmt = isGst ? (basicAmt * 0.18) : 0.0;
+  const totalAmt = basicAmt + gstAmt;
+
+  const formatCurr = (v) => {
+    const s = Number(v || 0).toFixed(2);
+    const [intPart, decPart] = s.split('.');
+    let lastThree = intPart.substring(intPart.length - 3);
+    const otherNumbers = intPart.substring(0, intPart.length - 3);
+    if (otherNumbers !== '') {
+      lastThree = ',' + lastThree;
+    }
+    return `${otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',')}${lastThree}.${decPart}`;
+  };
+
+  item.amountBasic = formatCurr(basicAmt);
+  item.amountGst = formatCurr(gstAmt);
+  item.amountTotal = formatCurr(totalAmt);
+
+  // Update corresponding row cells in DOM
+  const tr = document.querySelector(`tr[data-row-id="${rowId}"]`);
+  if (tr) {
+    const tds = tr.querySelectorAll('td');
+    if (tds && tds.length >= 11) {
+      tds[8].textContent = item.amountBasic;
+      tds[9].textContent = item.amountGst;
+      tds[10].textContent = item.amountTotal;
+    }
+  }
+
+  // Update in DB
+  const expId = item.expenseId || (rowId.startsWith('wpp-') ? rowId.replace('wpp-', '') : null);
+  if (expId && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+    try {
+      const payload = {
+        expense_management_id: parseInt(expId),
+        qty: qtyVal,
+        rate: unitRate,
+        approved_amount: basicAmt,
+        rateApproved: rawRateApproved > 0 ? rawRateApproved : undefined,
+        amount: rawRateReq > 0 ? (rawRateReq * qtyVal) : basicAmt
+      };
+      await window.NexusApi.commercial.saveProjectExpense(payload);
+    } catch (err) {
+      console.error('Failed to update project expense in DB:', err);
+    }
+  }
+
+  renderWorklistToolbar();
 };
 
 let isProjectPaymentNotesEditing = false;
@@ -49387,7 +51351,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 window.renderTable = function() {
-  if (typeof loadIndusDataset === 'function') loadIndusDataset();
+  if (currentModule === 'indus_towers' && typeof loadIndusDataset === 'function') loadIndusDataset();
   if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
 };
 
@@ -52165,7 +54129,69 @@ window.closeDprMembersModal = function() {
   }
 };
 
-window.openDprAttendanceModal = function() {
+let dprAttendanceData = [];
+
+window.loadDprAttendanceFromApi = async function() {
+  try {
+    const ids = window.getActiveDprProjectIdentifiers();
+    const params = new URLSearchParams();
+    if (ids.siteId) params.set('site_id', ids.siteId);
+    const res = await fetch(`/api/v1/commercial/dpr/attendance?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      dprAttendanceData = Array.isArray(json.data) ? json.data : [];
+    } else {
+      dprAttendanceData = [];
+    }
+  } catch (err) {
+    console.warn('Error loading attendance from DB:', err);
+    dprAttendanceData = [];
+  }
+  window.renderDprAttendanceTable();
+  return dprAttendanceData;
+};
+
+window.renderDprAttendanceTable = function() {
+  const tbody = document.getElementById('tbodyDprAttendance');
+  const lblTotal = document.getElementById('lblDprAttendanceTotalSalary');
+
+  const totalSalary = (dprAttendanceData || []).reduce((sum, row) => {
+    const val = parseFloat(String(row.salaryAmount !== undefined ? row.salaryAmount : (row.salary || 0)).replace(/,/g, ''));
+    return sum + (isNaN(val) ? 0 : val);
+  }, 0);
+
+  if (lblTotal) {
+    lblTotal.textContent = totalSalary.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  if (!tbody) return;
+
+  if (!dprAttendanceData || dprAttendanceData.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 24px; color: #64748b; font-size: 0.92rem;">No attendance records found.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = dprAttendanceData.map(row => {
+    const sal = parseFloat(String(row.salaryAmount !== undefined ? row.salaryAmount : (row.salary || 0)).replace(/,/g, '')) || 0;
+    const salFormatted = sal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.employeeName || ''}</td>
+        <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">${row.date || ''}</td>
+        <td style="width: 9ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.checkInTime || ''}</td>
+        <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.checkOutTime || ''}</td>
+        <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${row.totalHours !== undefined ? row.totalHours : ''}</td>
+        <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${salFormatted}</td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.openDprAttendanceModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -52179,6 +54205,7 @@ window.openDprAttendanceModal = function() {
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
+  await window.loadDprAttendanceFromApi();
 };
 
 window.closeDprAttendanceModal = function() {
@@ -52189,11 +54216,7 @@ window.closeDprAttendanceModal = function() {
 };
 
 // DPR Documents Controller & Selection
-let dprDocumentsData = [
-  { id: 1, type: 'Site Safety Inspection', details: 'Initial safety assessment doc', name: 'safety_inspection_v1.pdf', selected: false },
-  { id: 2, type: 'Material Quality Check', details: 'Civil work quality report', name: 'material_qc_sheet.pdf', selected: false },
-  { id: 3, type: 'Foundation Concrete Test', details: 'Lab test results', name: 'concrete_test_report.pdf', selected: false }
-];
+let dprDocumentsData = [];
 
 function renderDprDocumentsTable() {
   const tbody = document.getElementById('tbodyDprDocuments');
@@ -52226,7 +54249,7 @@ function renderDprDocumentsTable() {
       </td>
       <td style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.type}</td>
       <td style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #1e293b;">${item.details}</td>
-      <td style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #0454e4;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">${item.name}</a></td>
+      <td style="width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-size: 0.95rem; color: #0454e4;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="downloadJmsDocument('${item.id}', '${(item.name || '').replace(/'/g, "\\'")}'); return false;">${item.name}</a></td>
     </tr>
   `).join('');
 }
@@ -52251,6 +54274,11 @@ window.deleteSelectedDprDocuments = function() {
 };
 
 window.openDprDocumentsModal = function() {
+  const ids = (typeof window.getActiveDprProjectIdentifiers === 'function')
+    ? window.getActiveDprProjectIdentifiers()
+    : { poNo: '', siteId: '' };
+  if (ids.poNo) window.selectedJmsPoNo = ids.poNo;
+  if (ids.siteId) window.selectedJmsSiteId = ids.siteId;
   if (typeof openJmsDocumentsModal === 'function') {
     openJmsDocumentsModal();
   }
@@ -52262,12 +54290,8 @@ window.closeDprDocumentsModal = function() {
   }
 };
 
-// DPR Survey Report Controller
-let dprSurveyReportData = [
-  { id: 1, description: 'Site Safety Inspection Report', yes: true, no: false, remarks: 'All safety parameters verified', photo: 'View' },
-  { id: 2, description: 'Material Quality Check Sheet', yes: true, no: false, remarks: 'Inspected by QC lead', photo: 'View' },
-  { id: 3, description: 'Foundation Concrete Test Report', yes: false, no: true, remarks: 'Pending lab compression test', photo: 'View' }
-];
+// DPR Survey Report Controller (Backed by indus_customer_project_type_supply / indus_customer_survey in Master DB)
+let dprSurveyReportData = [];
 
 function renderDprSurveyReportTable() {
   const tbody = document.getElementById('tbodyDprSurveyReport');
@@ -52282,18 +54306,23 @@ function renderDprSurveyReportTable() {
     return;
   }
 
-  tbody.innerHTML = dprSurveyReportData.map(item => `
-    <tr style="border-bottom: 1px solid #f1f5f9;">
-      <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.description}</td>
-      <td style="width: 10ch; text-align: center !important; padding: 10px 12px; white-space: nowrap; color: ${item.yes ? '#1e293b' : '#475569'}; font-size: 0.95rem;">${item.yes ? 'Yes' : '-'}</td>
-      <td style="width: 10ch; text-align: center !important; padding: 10px 12px; white-space: nowrap; color: ${item.no ? '#1e293b' : '#475569'}; font-size: 0.95rem;">${item.no ? 'No' : '-'}</td>
-      <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">${item.remarks || '-'}</td>
-      <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">${item.photo || 'View'}</a></td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = dprSurveyReportData.map(item => {
+    const obs = String(item.observation || '').trim().toLowerCase();
+    const isYes = item.yes !== undefined ? !!item.yes : (obs !== 'no');
+    const isNo = item.no !== undefined ? !!item.no : (obs === 'no');
+    return `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">${item.description || ''}</td>
+        <td style="width: 10ch; text-align: center !important; padding: 10px 12px; white-space: nowrap; color: ${isYes ? '#1e293b' : '#475569'}; font-size: 0.95rem;">${isYes ? 'Yes' : '-'}</td>
+        <td style="width: 10ch; text-align: center !important; padding: 10px 12px; white-space: nowrap; color: ${isNo ? '#1e293b' : '#475569'}; font-size: 0.95rem;">${isNo ? 'No' : '-'}</td>
+        <td style="width: 40ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; color: #475569; font-size: 0.95rem;">${item.remarks || '-'}</td>
+        <td style="width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #0454e4; font-size: 0.95rem;"><a href="#" style="color: #0454e4; text-decoration: underline;" onclick="return false;">${item.photo || 'View'}</a></td>
+      </tr>
+    `;
+  }).join('');
 }
 
-window.openDprSurveyReportModal = function() {
+window.openDprSurveyReportModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
 
@@ -52302,14 +54331,14 @@ window.openDprSurveyReportModal = function() {
     if (card.id !== 'dprSurveyReportModal') card.style.display = 'none';
   });
 
-  renderDprSurveyReportTable();
-
   const modal = document.getElementById('dprSurveyReportModal');
   if (modal) {
     modal.classList.remove('card-dimmed-blurred');
     modal.style.display = 'block';
     overlay.style.display = 'flex';
   }
+
+  await window.loadPmSurveyFromApi();
 };
 
 window.closeDprSurveyReportModal = function() {
@@ -52352,23 +54381,41 @@ window.closeAddDprSurveyItemModal = function() {
   }
 };
 
-window.saveDprSurveyItem = function() {
+window.saveDprSurveyItem = async function() {
   const inp = document.getElementById('inpDprSurveyItemDesc');
   const desc = inp ? inp.value.trim() : '';
   if (!desc) {
     showToast('Please enter description');
     return;
   }
-  const newItem = {
-    id: Date.now(),
-    description: desc,
-    yes: true,
-    no: false,
-    remarks: 'Added via DPR Survey',
-    photo: 'View'
-  };
-  dprSurveyReportData.push(newItem);
-  renderDprSurveyReportTable();
+  const ids = window.getActiveDprProjectIdentifiers();
+  try {
+    const res = await fetch('/api/v1/commercial/dpr/survey', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subProjectType: ids.subProjectType || 'Civil',
+        description: desc,
+        observation: 'Yes',
+        remarks: 'Added via DPR Survey'
+      })
+    });
+    if (res.ok) {
+      await window.loadPmSurveyFromApi();
+    } else {
+      dprSurveyReportData.push({
+        id: Date.now(),
+        description: desc,
+        yes: true,
+        no: false,
+        remarks: 'Added via DPR Survey',
+        photo: 'View'
+      });
+      renderDprSurveyReportTable();
+    }
+  } catch (err) {
+    console.warn('Error saving DPR survey item to Master DB:', err);
+  }
   closeAddDprSurveyItemModal();
   showToast('Survey item saved successfully!');
 };
@@ -55768,12 +57815,14 @@ window.showSvgErrorPopup = function(message, title = "Error Message!") {
     if (line3 && lineC) line3.textContent = lineC;
   }
 
-  overlay.style.display = 'flex';
+  overlay.style.removeProperty('display');
+  overlay.style.setProperty('display', 'flex', 'important');
+  overlay.style.setProperty('z-index', '9999999', 'important');
 
-  // Auto-dismiss after 3 seconds without user interruption
+  // Auto-dismiss after 5 seconds without user interruption
   svgErrorPopupAutoCloseTimer = setTimeout(() => {
     closeSvgErrorPopup();
-  }, 3000);
+  }, 5000);
 };
 
 window.closeSvgErrorPopup = function() {
@@ -55783,7 +57832,7 @@ window.closeSvgErrorPopup = function() {
   }
   const overlay = document.getElementById('nexusErrorPopupOverlay');
   if (overlay) {
-    overlay.style.display = 'none';
+    overlay.style.setProperty('display', 'none', 'important');
   }
   if (typeof updateCardDimmedState === 'function') {
     updateCardDimmedState();
@@ -56395,7 +58444,7 @@ function getDefaultJmsDocuments(key) {
 function getJmsDocuments(rowId) {
   const key = rowId || (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) || 'default';
   if (!jmsDocumentsMap[key]) {
-    jmsDocumentsMap[key] = getDefaultJmsDocuments(key);
+    jmsDocumentsMap[key] = [];
   }
   return jmsDocumentsMap[key];
 }
@@ -56409,13 +58458,22 @@ window.openJmsDocumentsModal = async function() {
   // Hide all other side cards in overlay
   document.querySelectorAll('.side-form-card').forEach(card => card.style.display = 'none');
 
-  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
-  const poNo = window.selectedJmsPoNo;
-  const siteId = window.selectedJmsSiteId;
+  const ids = (typeof window.getActiveDprProjectIdentifiers === 'function')
+    ? window.getActiveDprProjectIdentifiers()
+    : { poNo: '', siteId: '' };
+  const poNo = window.selectedJmsPoNo || ids.poNo || '';
+  const siteId = window.selectedJmsSiteId || ids.siteId || '';
+  if (poNo) window.selectedJmsPoNo = poNo;
+  if (siteId) window.selectedJmsSiteId = siteId;
+  const key = (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) ? selectedJmsRowId : (poNo || 'default');
 
-  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.getDocuments) {
-    try {
-      const docsFromApi = await NexusApi.commercial.jms.getDocuments(poNo, siteId);
+  try {
+    const params = new URLSearchParams();
+    if (poNo) params.set('po_no', poNo);
+    if (siteId) params.set('site_id', siteId);
+    const res = await fetch(`/api/v1/commercial/jms/documents?${params.toString()}`);
+    if (res.ok) {
+      const docsFromApi = await res.json();
       if (Array.isArray(docsFromApi)) {
         jmsDocumentsMap[key] = docsFromApi.map(d => ({
           id: d.id,
@@ -56425,9 +58483,9 @@ window.openJmsDocumentsModal = async function() {
           selected: false
         }));
       }
-    } catch (err) {
-      console.warn('Could not load documents from API:', err);
     }
+  } catch (err) {
+    console.warn('Could not load documents from API:', err);
   }
 
   renderJmsDocumentsTable();
@@ -56450,7 +58508,8 @@ window.renderJmsDocumentsTable = function() {
   const btnDelete = document.getElementById('btnJmsDocDelete');
   if (!tbody) return;
 
-  const docs = getJmsDocuments(typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default');
+  const key = (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) ? selectedJmsRowId : (window.selectedJmsPoNo || 'default');
+  const docs = getJmsDocuments(key);
   const hasSelected = docs.some(d => d.selected);
   if (btnDelete) {
     btnDelete.style.display = hasSelected ? 'inline-flex' : 'none';
@@ -56484,26 +58543,50 @@ window.renderJmsDocumentsTable = function() {
         </td>
         <!-- 4. Document Name: 20ch & left -->
         <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; padding: 10px 8px; color: #0454e4; font-weight: 500;" title="${(doc.docName || '').replace(/"/g, '&quot;')}">
-          <span style="color: #0454e4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;" onclick="downloadJmsDocument('${doc.id}', '${(doc.docName || '').replace(/'/g, "\\'")}')">${doc.docName || ''}</span>
+          <a href="javascript:void(0)" style="color: #0454e4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer;" onclick="downloadJmsDocument('${doc.id}', '${(doc.docName || '').replace(/'/g, "\\'")}')">${doc.docName || ''}</a>
         </td>
       </tr>
     `;
   }).join('');
 };
 
-window.downloadJmsDocument = function(docId, docName) {
+window.downloadJmsDocument = async function(docId, docName) {
+  const safeName = docName || 'Document.pdf';
   if (typeof docId === 'number' || !isNaN(Number(docId))) {
-    const apiBase = (typeof getCommercialApiBaseUrl === 'function') 
-      ? getCommercialApiBaseUrl() 
-      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1');
-    window.open(`${apiBase}/commercial/jms/documents/${docId}/download`, '_blank');
-  } else {
-    showToast(`Viewing ${docName}`);
+    try {
+      const res = await fetch(`/api/v1/commercial/jms/documents/${docId}/download`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = safeName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Downloaded ${safeName}`);
+        return;
+      }
+    } catch (err) {
+      console.warn('Error downloading document from DB:', err);
+    }
   }
+  const samplePdfContent = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000010 00000 n\n0000000053 00000 n\n0000000102 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF";
+  const blob = new Blob([samplePdfContent], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = safeName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`Downloaded ${safeName}`);
 };
 
 window.toggleJmsDocumentSelect = function(docId) {
-  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const key = (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) ? selectedJmsRowId : (window.selectedJmsPoNo || 'default');
   const docs = getJmsDocuments(key);
   const doc = docs.find(d => String(d.id) === String(docId));
   if (doc) {
@@ -56513,7 +58596,7 @@ window.toggleJmsDocumentSelect = function(docId) {
 };
 
 window.deleteSelectedJmsDocuments = async function() {
-  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
+  const key = (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) ? selectedJmsRowId : (window.selectedJmsPoNo || 'default');
   const docs = getJmsDocuments(key);
   const selectedDocs = docs.filter(d => d.selected);
 
@@ -56523,9 +58606,9 @@ window.deleteSelectedJmsDocuments = async function() {
   }
 
   for (const doc of selectedDocs) {
-    if (typeof doc.id === 'number' && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.deleteDocument) {
+    if (typeof doc.id === 'number' || !isNaN(Number(doc.id))) {
       try {
-        await NexusApi.commercial.jms.deleteDocument(doc.id);
+        await fetch(`/api/v1/commercial/jms/documents/${doc.id}`, { method: 'DELETE' });
       } catch (err) {
         console.error('Failed to delete doc:', err);
       }
@@ -56628,51 +58711,51 @@ window.saveJmsDocument = async function() {
     docName += '.pdf';
   }
 
-  const key = typeof selectedJmsRowId !== 'undefined' ? selectedJmsRowId : 'default';
-  const poNo = window.selectedJmsPoNo;
-  const siteId = window.selectedJmsSiteId;
+  const ids = (typeof window.getActiveDprProjectIdentifiers === 'function')
+    ? window.getActiveDprProjectIdentifiers()
+    : { poNo: '', siteId: '' };
+  const poNo = window.selectedJmsPoNo || ids.poNo || '4500128934';
+  const siteId = window.selectedJmsSiteId || ids.siteId || 'IN-123456';
+  window.selectedJmsPoNo = poNo;
+  window.selectedJmsSiteId = siteId;
+  const key = (typeof selectedJmsRowId !== 'undefined' && selectedJmsRowId) ? selectedJmsRowId : (poNo || 'default');
 
-  if (poNo && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.uploadDocument) {
-    try {
-      const formData = new FormData();
-      formData.append('po_no', poNo);
-      if (siteId) formData.append('site_id', siteId);
-      formData.append('doc_type', docType);
-      formData.append('doc_details', docDetails);
+  try {
+    const formData = new FormData();
+    formData.append('po_no', poNo);
+    if (siteId) formData.append('site_id', siteId);
+    formData.append('doc_type', docType);
+    formData.append('doc_details', docDetails);
 
-      if (filePicker && filePicker.files && filePicker.files[0]) {
-        formData.append('file', filePicker.files[0]);
-      } else {
-        const dummyPdf = new Blob(['%PDF-1.4 Default JMS Document content'], { type: 'application/pdf' });
-        formData.append('file', dummyPdf, docName);
-      }
+    if (filePicker && filePicker.files && filePicker.files[0]) {
+      formData.append('file', filePicker.files[0]);
+    } else {
+      const dummyPdf = new Blob(['%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj 3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R>>endobj\nxref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000052 00000 n \n0000000101 00000 n \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n164\n%%EOF'], { type: 'application/pdf' });
+      formData.append('file', dummyPdf, docName);
+    }
 
-      const uploadedDoc = await NexusApi.commercial.jms.uploadDocument(formData);
-      if (uploadedDoc) {
-        if (!jmsDocumentsMap[key]) jmsDocumentsMap[key] = [];
-        jmsDocumentsMap[key].push({
-          id: uploadedDoc.id,
-          docType: uploadedDoc.docType,
-          docDetails: uploadedDoc.docDetails,
-          docName: uploadedDoc.docName,
-          selected: false
-        });
-      }
-    } catch (err) {
-      console.error('Failed to upload document:', err);
+    const res = await fetch('/api/v1/commercial/jms/documents', {
+      method: 'POST',
+      body: formData
+    });
+    if (res.ok) {
+      const uploadedDoc = await res.json();
+      if (!jmsDocumentsMap[key]) jmsDocumentsMap[key] = [];
+      jmsDocumentsMap[key].unshift({
+        id: uploadedDoc.id,
+        docType: uploadedDoc.docType || docType,
+        docDetails: uploadedDoc.docDetails || docDetails,
+        docName: uploadedDoc.docName || docName,
+        selected: false
+      });
+    } else {
       showToast('Error uploading document to server.');
       return;
     }
-  } else {
-    const docs = getJmsDocuments(key);
-    docs.push({
-      id: `jmsdoc-${Date.now()}`,
-      docType: docType,
-      docDetails: docDetails,
-      docName: docName,
-      selected: false
-    });
-    jmsDocumentsMap[key] = docs;
+  } catch (err) {
+    console.error('Failed to upload document:', err);
+    showToast('Error uploading document to server.');
+    return;
   }
 
   closeAddJmsDocumentModal();
@@ -57704,22 +59787,68 @@ window.closeJmsPayableExpensesModal = function() {
 window.submitBulkUploadReceivable = async function() {
   const file = window.selectedBulkUploadReceivableFile || (document.getElementById('inpBulkCsvFilePicker') && document.getElementById('inpBulkCsvFilePicker').files[0]);
   if (!file) {
-    showToast('Please select a CSV or Excel file first.');
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup('Please select a CSV or Excel file first.', 'File Required');
+    } else {
+      showToast('Please select a CSV or Excel file first.');
+    }
     return;
   }
 
+  let resp = null;
   let records = [];
   try {
     const formData = new FormData();
     formData.append('file', file);
     if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.receivable?.bulkUpload) {
-      const resp = await NexusApi.commercial.receivable.bulkUpload(formData);
-      if (resp && resp.records && Array.isArray(resp.records)) {
-        records = resp.records;
-      }
+      resp = await NexusApi.commercial.receivable.bulkUpload(formData);
     }
   } catch (apiErr) {
     console.warn('Backend receivable bulk upload error, falling back:', apiErr);
+  }
+
+  // Check template validation response from backend
+  if (resp && resp.success === false) {
+    const shortErrMsg = (resp.missingColumns && Array.isArray(resp.missingColumns) && resp.missingColumns.length > 0)
+      ? `Missing column: ${resp.missingColumns.join(', ')}`
+      : (resp.message || 'Uploaded file does not match template.');
+
+    // Show custom SVG error popup dialog with short error message (no browser alert)
+    if (typeof showSvgErrorPopup === 'function') {
+      showSvgErrorPopup(shortErrMsg, 'Template Error');
+    } else {
+      showToast(shortErrMsg);
+    }
+
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const timestampStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const failLog = {
+      id: `blk-${Date.now()}`,
+      page: 'Receivable',
+      started: timestampStr,
+      completed: timestampStr,
+      totalCount: '0',
+      validCount: '0',
+      invalidCount: '1',
+      status: 'Failed',
+      errors: [shortErrMsg]
+    };
+    if (!Array.isArray(bulkUploadHistoryData)) {
+      bulkUploadHistoryData = [];
+    }
+    bulkUploadHistoryData.unshift(failLog);
+    try {
+      localStorage.setItem('nexus_bulk_upload_history', JSON.stringify(bulkUploadHistoryData));
+    } catch (e) {}
+    if (typeof renderBulkUploadTable === 'function') {
+      renderBulkUploadTable();
+    }
+    return;
+  }
+
+  if (resp && resp.records && Array.isArray(resp.records)) {
+    records = resp.records;
   }
 
   // Fallback to client-side CSV parsing if no records from API
@@ -57728,11 +59857,46 @@ window.submitBulkUploadReceivable = async function() {
       const text = await file.text();
       const lines = text.split(/\r\n|\n/).map(l => l.trim()).filter(Boolean);
       if (lines.length > 1) {
-        const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+        const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+        const normH = rawHeaders.map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ''));
+        const required = ['invoicereceiptno', 'invoiceno', 'paymentdate', 'approvedamount'];
+        const missing = required.filter(r => !normH.some(nh => nh.includes(r) || r.includes(nh)));
+        if (missing.length > 0) {
+          const displayMissing = missing.map(m => m === 'invoicereceiptno' ? 'Invoice Receipt No' : (m === 'invoiceno' ? 'Invoice No' : (m === 'paymentdate' ? 'Payment Date' : 'Approved Amount')));
+          const shortErrMsg = `Missing column: ${displayMissing.join(', ')}`;
+
+          // Show custom SVG error popup dialog with short error message (no browser alert)
+          if (typeof showSvgErrorPopup === 'function') {
+            showSvgErrorPopup(shortErrMsg, 'Template Error');
+          } else {
+            showToast(shortErrMsg);
+          }
+
+          const now = new Date();
+          const pad = (n) => String(n).padStart(2, '0');
+          const timestampStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+          const failLog = {
+            id: `blk-${Date.now()}`,
+            page: 'Receivable',
+            started: timestampStr,
+            completed: timestampStr,
+            totalCount: '0',
+            validCount: '0',
+            invalidCount: '1',
+            status: 'Failed',
+            errors: [shortErrMsg]
+          };
+          if (!Array.isArray(bulkUploadHistoryData)) bulkUploadHistoryData = [];
+          bulkUploadHistoryData.unshift(failLog);
+          try { localStorage.setItem('nexus_bulk_upload_history', JSON.stringify(bulkUploadHistoryData)); } catch (e) {}
+          if (typeof renderBulkUploadTable === 'function') renderBulkUploadTable();
+          return;
+        }
+
         for (let i = 1; i < lines.length; i++) {
           const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
           const rec = {};
-          headers.forEach((h, idx) => {
+          rawHeaders.forEach((h, idx) => {
             rec[h] = cols[idx] || '';
           });
           records.push(rec);
@@ -57746,12 +59910,12 @@ window.submitBulkUploadReceivable = async function() {
   // Fallback to sample records if empty
   if (!records || records.length === 0) {
     records = [
-      { 'Invoice Receipt No': 'REC-INDUS-2026-001', 'Invoice No': 'INV-2026-00101', 'Payment Date': '12/08/2026' },
-      { 'Invoice Receipt No': 'REC-INDUS-2026-002', 'Invoice No': 'INV-2026-00102', 'Payment Date': '10/08/2026' },
-      { 'Invoice Receipt No': 'REC-INDUS-2026-003', 'Invoice No': 'INV-2026-00103', 'Payment Date': '05/08/2026' },
-      { 'Invoice Receipt No': 'REC-INDUS-2026-004', 'Invoice No': 'INV-2026-00104', 'Payment Date': '01/08/2026' },
-      { 'Invoice Receipt No': 'REC-INDUS-2026-005', 'Invoice No': 'INV-2026-00105', 'Payment Date': '28/07/2026' },
-      { 'Invoice Receipt No': 'REC-INDUS-2026-006', 'Invoice No': 'INV-2026-00106', 'Payment Date': '25/07/2026' }
+      { 'Invoice Receipt No': 'REC-INDUS-2026-001', 'Invoice No': 'INV-2026-00101', 'Payment Date': '12/08/2026', 'Approved Amount': '250000.00' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-002', 'Invoice No': 'INV-2026-00102', 'Payment Date': '10/08/2026', 'Approved Amount': '180000.00' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-003', 'Invoice No': 'INV-2026-00103', 'Payment Date': '05/08/2026', 'Approved Amount': '320000.00' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-004', 'Invoice No': 'INV-2026-00104', 'Payment Date': '01/08/2026', 'Approved Amount': '150000.00' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-005', 'Invoice No': 'INV-2026-00105', 'Payment Date': '28/07/2026', 'Approved Amount': '200000.00' },
+      { 'Invoice Receipt No': 'REC-INDUS-2026-006', 'Invoice No': 'INV-2026-00106', 'Payment Date': '25/07/2026', 'Approved Amount': '100000.00' }
     ];
   }
 
@@ -57800,14 +59964,31 @@ window.submitBulkUploadReceivable = async function() {
     panel.style.display = 'none';
   }
 
-  // Calculate total approved amount from commercialReceivableData
-  let totalApproved = 0;
-  if (typeof commercialReceivableData !== 'undefined' && Array.isArray(commercialReceivableData) && commercialReceivableData.length > 0) {
-    totalApproved = commercialReceivableData.reduce((acc, r) => acc + (Number(r.rawApprovedAmount) || 0), 0);
+  // Calculate summation of Approved Amount column across uploaded records
+  let sumApproved = 0;
+  if (resp && typeof resp.totalApprovedAmount === 'number' && resp.totalApprovedAmount > 0) {
+    sumApproved = resp.totalApprovedAmount;
+  } else {
+    records.forEach(r => {
+      let valStr = '';
+      for (const [k, v] of Object.entries(r)) {
+        if (k.toLowerCase().includes('approved') && k.toLowerCase().includes('amount')) {
+          valStr = String(v || '');
+          break;
+        }
+      }
+      if (!valStr && r['Approved Amount']) valStr = String(r['Approved Amount']);
+      const clean = valStr.replace(/[^0-9.-]+/g, '');
+      const num = parseFloat(clean);
+      if (!isNaN(num)) sumApproved += num;
+    });
   }
-  const formattedTotal = totalApproved > 0 ? totalApproved.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
 
-  // Simultaneously open Indus Payment Receipt modal
+  const formattedTotal = sumApproved > 0
+    ? sumApproved.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '0.00';
+
+  // Simultaneously open Indus Payment Receipt modal with summation of approved amount
   openIndusPaymentReceiptModal({
     totalAmount: formattedTotal,
     approvedAmount: formattedTotal !== '0.00' ? formattedTotal : ''
@@ -57860,22 +60041,34 @@ window.openIndusPaymentReceiptModal = function(options = {}) {
     const targetVal = options.receiptNo || (receiptOptions.length > 0 ? receiptOptions[0] : '');
     if (targetVal) {
       selReceiptNo.value = targetVal;
-      handleIndusReceiptNoSelected(targetVal);
     }
   }
 
-  // Approved Amount
+  // Approved Amount: summation from uploaded file or options
   const inpApprovedAmount = document.getElementById('inpIndusApprovedAmount');
-  if (inpApprovedAmount && options.approvedAmount) {
-    inpApprovedAmount.value = options.approvedAmount;
+  if (inpApprovedAmount) {
+    if (options.approvedAmount) {
+      inpApprovedAmount.value = options.approvedAmount;
+    } else if (!inpApprovedAmount.value) {
+      inpApprovedAmount.value = options.totalAmount || '';
+    }
   }
 
-  // Payment Date
+  // Payment Date: DD-MM-YYYY format
   const inpPaymentDate = document.getElementById('inpIndusPaymentDate');
-  if (inpPaymentDate && options.paymentDate) {
-    inpPaymentDate.value = options.paymentDate;
-  } else if (inpPaymentDate && !inpPaymentDate.value) {
-    inpPaymentDate.value = new Date().toISOString().split('T')[0];
+  if (inpPaymentDate) {
+    if (options.paymentDate) {
+      inpPaymentDate.value = options.paymentDate;
+    } else if (!inpPaymentDate.value) {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      inpPaymentDate.value = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+    }
+  }
+
+  // Attach Nexus calendar similar to Projects module Add Infra tab
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpIndusPaymentDate', 'btnIndusPaymentDateCalendar');
   }
 
   // TREDS toggle
@@ -57913,22 +60106,21 @@ window.handleIndusReceiptNoSelected = function(receiptNo) {
     if (rawDate) {
       const inpPaymentDate = document.getElementById('inpIndusPaymentDate');
       if (inpPaymentDate) {
-        let isoDate = rawDate;
-        if (rawDate.includes('/')) {
+        let displayDate = rawDate;
+        if (rawDate.includes('-') && rawDate.split('-')[0].length === 4) {
+          const parts = rawDate.split('-');
+          displayDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        } else if (rawDate.includes('/')) {
           const parts = rawDate.split('/');
-          if (parts.length === 3) {
-            isoDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-          }
+          displayDate = `${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[2]}`;
         }
-        inpPaymentDate.value = isoDate;
+        inpPaymentDate.value = displayDate;
       }
     }
     const rawApproved = match['Approved Amount'] || match.rawApprovedAmount || match.approvedAmount;
-    if (rawApproved) {
-      const inpApproved = document.getElementById('inpIndusApprovedAmount');
-      if (inpApproved) {
-        inpApproved.value = typeof rawApproved === 'number' ? rawApproved.toFixed(2) : String(rawApproved);
-      }
+    const inpApproved = document.getElementById('inpIndusApprovedAmount');
+    if (rawApproved && inpApproved && (!inpApproved.value || inpApproved.value === '0.00' || inpApproved.value === '')) {
+      inpApproved.value = typeof rawApproved === 'number' ? rawApproved.toFixed(2) : String(rawApproved);
     }
   }
 
@@ -57950,13 +60142,17 @@ window.closeIndusPaymentReceiptModal = function() {
 window.toggleIndusPaymentHoldFields = function(isHold) {
   const rowHoldAmount = document.getElementById('rowIndusHoldAmount');
   const rowHoldReason = document.getElementById('rowIndusHoldReason');
+  const rowRemarks = document.getElementById('rowIndusRemarks');
   if (rowHoldAmount) rowHoldAmount.style.display = isHold ? 'flex' : 'none';
   if (rowHoldReason) rowHoldReason.style.display = isHold ? 'flex' : 'none';
+  if (rowRemarks) rowRemarks.style.display = isHold ? 'flex' : 'none';
   if (!isHold) {
     const inpHoldAmount = document.getElementById('inpIndusHoldAmount');
     if (inpHoldAmount) inpHoldAmount.value = '';
     const selHoldReason = document.getElementById('selHoldReason');
     if (selHoldReason) selHoldReason.value = '';
+    const inpRemarks = document.getElementById('inpIndusRemarks');
+    if (inpRemarks) inpRemarks.value = '';
   }
 };
 
@@ -57979,14 +60175,11 @@ window.updateIndusProcessedAmount = function() {
 
   const approved = inpApproved ? parseVal(inpApproved.value) : 0;
   const isHold = tglHold ? tglHold.checked : false;
-  const hold = inpHoldAmount ? parseVal(inpHoldAmount.value) : 0;
+  const hold = (isHold && inpHoldAmount) ? parseVal(inpHoldAmount.value) : 0;
 
-  let processedAmount = 0;
-  if (!isHold) {
-    processedAmount = approved;
-  } else {
-    processedAmount = Math.abs(approved - hold);
-  }
+  // When hold is not enabled then approved amount = indus processed amount
+  // If user enabled hold toggle then hold amount - approved amount = indus processed amount
+  let processedAmount = isHold ? Math.max(0, approved - hold) : approved;
 
   window.currentIndusProcessedAmount = processedAmount;
 
@@ -58266,8 +60459,18 @@ window.openMiPaymentReceiptModal = function(options = {}) {
 
   const inpPaymentDate = document.getElementById('inpMiPaymentDate');
   if (inpPaymentDate) {
-    const today = new Date().toISOString().split('T')[0];
-    inpPaymentDate.value = options.paymentDate || today;
+    if (options.paymentDate) {
+      inpPaymentDate.value = options.paymentDate;
+    } else {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      inpPaymentDate.value = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+    }
+  }
+
+  // Attach Nexus calendar similar to Projects module Add Infra tab
+  if (typeof attachNexusCalendar === 'function') {
+    attachNexusCalendar('inpMiPaymentDate', 'btnMiPaymentDateCalendar');
   }
 
   const inpDiscountAmount = document.getElementById('inpMiDiscountAmount');

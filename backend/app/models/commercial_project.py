@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, BigInteger, String, Numeric, Text, Date, DateTime, Boolean, UniqueConstraint, LargeBinary
+from sqlalchemy import Column, Integer, BigInteger, String, Numeric, Text, Date, Time, DateTime, Boolean, UniqueConstraint, LargeBinary
 from sqlalchemy.orm import deferred
 from sqlalchemy.sql import func
 from app.db.base import Base
@@ -39,26 +39,27 @@ class TelecomProject(Base):
     tower_height = Column(Numeric, nullable=True)
     sbc = Column(Numeric, nullable=True)
     wind_speed = Column(Numeric, nullable=True)
-    site_survey = Column(Text, nullable=True)
-    stn = Column(Text, nullable=True)
-    srn = Column(Text, nullable=True)
-    cam = Column(String(100), nullable=True)
-    tsp_materials = Column(Text, nullable=True)
-    civil_works = Column(Text, nullable=True)
+    site_survey = Column(Boolean, default=False, nullable=True)
+    stn = Column(Boolean, default=False, nullable=True)
+    srn = Column(Boolean, default=False, nullable=True)
+    cam = Column(Boolean, default=False, nullable=True)
+    tsp_materials = Column(Boolean, default=False, nullable=True)
+    civil_works = Column(Boolean, default=False, nullable=True)
     drawing_name = Column(String(255), nullable=True)
     drawing_documents = Column(Text, nullable=True)
-    electrical_works = Column(Text, nullable=True)
-    pole_mounts = Column(Text, nullable=True)
+    electrical_works = Column(Boolean, default=False, nullable=True)
+    pole_mounts = Column(Boolean, default=False, nullable=True)
     mount_type = Column(String(100), nullable=True)
     sector = Column(Numeric, nullable=True)
     height = Column(Numeric, nullable=True)
     azimuth = Column(Numeric, nullable=True)
-    quality_audit = Column(Text, nullable=True)
+    quality_audit = Column(Boolean, default=False, nullable=True)
     audit_type = Column(String(100), nullable=True)
-    ptw = Column(Text, nullable=True)
+    ptw = Column(Boolean, default=False, nullable=True)
     ptw_type = Column(String(100), nullable=True)
-    additional_approval = Column(Text, nullable=True)
-    service_contract = Column(Text, nullable=True)
+    additional_approval = Column(Boolean, default=False, nullable=True)
+    additional_approve = Column(Boolean, default=False, nullable=True)
+    service_contract = Column(Boolean, default=False, nullable=True)
     project_status = Column(String(100), nullable=True)
     completion_date = Column(Date, nullable=True)
     completed_ageing = Column(BigInteger, nullable=True)
@@ -85,6 +86,8 @@ class TelecomProject(Base):
     po_amendment_merged_documents = deferred(Column(LargeBinary, nullable=True))
     invoice_supporting_documents = Column(Text, nullable=True)
     po_material_difference = Column(Numeric, nullable=True)
+    additional_approve = Column(Boolean, default=False, nullable=True)
+    remarks = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
 
@@ -165,12 +168,21 @@ class ProjectExpense(Base):
     qty = Column(Numeric(15, 2), nullable=True)
     rate = Column(Numeric(15, 2), nullable=True)
     amount = Column(Numeric(15, 2), nullable=True)
+    approved_amount = Column(Numeric(15, 2), nullable=True, default=0)
+    transferred_amount = Column(Numeric(15, 2), nullable=True, default=0)
+    payable_amount = Column(Numeric(15, 2), nullable=True, default=0)
     gst_amount = Column(Numeric(15, 2), nullable=True)
     total_amount = Column(Numeric(15, 2), nullable=True)
+    status = Column(String(100), nullable=True, default="Pending")
+    gst = Column(Boolean, nullable=True, default=False)
     gst_number = Column(String(50), nullable=True)
     gst_name = Column(String(255), nullable=True)
+    legal_name = Column(String(255), nullable=True)
     gst_type = Column(String(100), nullable=True)
     transfer_to = Column(String(255), nullable=True)
+    account_name = Column(String(255), nullable=True)
+    service_vendor_name = Column(String(255), nullable=True)
+    supply_vendor_name = Column(String(255), nullable=True)
     account_number = Column(String(100), nullable=True)
     ifsc_code = Column(String(20), nullable=True)
     bank_name = Column(String(255), nullable=True)
@@ -261,6 +273,8 @@ class DprRecord(Base):
     start_photo = Column(Text, nullable=True)
     end_photo = Column(Text, nullable=True)
     status = Column(String(50), nullable=True)
+    i_map_check_in = Column(DateTime, nullable=True)
+    i_map_check_out = Column(DateTime, nullable=True)
     h_ptw_number = Column(String(100), nullable=True)
     h_ptw_documents = Column(Text, nullable=True)
     h_ptw_status = Column(String(50), nullable=True)
@@ -310,4 +324,106 @@ class EmailApproval(Base):
 
     def __repr__(self) -> str:
         return f"<EmailApproval(id={self.approval_tracking_id}, po_no='{self.po_no}', subject='{self.subject}')>"
+
+
+class ProjectMaterial(Base):
+    """
+    SQLAlchemy ORM Model mapping PostgreSQL `project_materials` table
+    in `Nexus_Project DB`.
+    """
+    __tablename__ = "project_materials"
+
+    material_management_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    company_name = Column(String(255), nullable=True, default="Nexus")
+    customer_name = Column(String(255), nullable=True)
+    po_no = Column(String(100), nullable=True, index=True)
+    site_id = Column(String(100), nullable=True, index=True)
+    request_by = Column(String(255), nullable=True)
+    request_date = Column(Date, nullable=True)
+    materials_name = Column(String(255), nullable=True)
+    materials_description = Column(Text, nullable=True)
+    materials_type = Column(String(100), nullable=True)
+    purchase_type = Column(String(100), nullable=True)
+    uom = Column(String(50), nullable=True)
+    request_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    approved_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    dispatched_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    received_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    mr_number = Column(String(100), nullable=True)
+    mr_date = Column(Date, nullable=True)
+    min_number = Column(String(100), nullable=True)
+    min_date = Column(Date, nullable=True)
+    dispatched_by = Column(String(255), nullable=True)
+    min_received_by = Column(String(255), nullable=True)
+    min_received_date = Column(Date, nullable=True)
+    min_documents = Column(Text, nullable=True)
+    mrr_number = Column(String(100), nullable=True)
+    mrr_request_by = Column(String(255), nullable=True)
+    mrr_request_date = Column(Date, nullable=True)
+    mrr_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    mrn_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    mrn_number = Column(String(100), nullable=True)
+    mrn_date = Column(Date, nullable=True)
+    mrn_received_by = Column(String(255), nullable=True)
+    mrn_documents = Column(Text, nullable=True)
+    jms_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    net_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    used_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    difference_qty = Column(Numeric(15, 2), nullable=True, default=0)
+    rate = Column(Numeric(15, 2), nullable=True, default=0)
+    amount = Column(Numeric(15, 2), nullable=True, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<ProjectMaterial(id={self.material_management_id}, po_no='{self.po_no}', name='{self.materials_name}')>"
+
+
+class ProjectAttendance(Base):
+    """
+    SQLAlchemy ORM Model mapping PostgreSQL `attendance` table
+    in `Nexus_Project DB`.
+    """
+    __tablename__ = "attendance"
+
+    attendance_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    site_id = Column(String(100), nullable=True, index=True)
+    employee_id = Column(String(100), nullable=True)
+    employee_name = Column(String(255), nullable=True)
+    date = Column(Date, nullable=True)
+    check_in_time = Column(Time, nullable=True)
+    check_out_time = Column(Time, nullable=True)
+    total_hours = Column(Numeric(10, 2), nullable=True)
+    salary_per_day = Column(Numeric(15, 2), nullable=True)
+    salary_amount = Column(Numeric(15, 2), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<ProjectAttendance(id={self.attendance_id}, site_id='{self.site_id}', name='{self.employee_name}')>"
+
+
+class ProjectMember(Base):
+    """
+    SQLAlchemy ORM Model mapping PostgreSQL `members` table
+    in `Nexus_Project DB`.
+    """
+    __tablename__ = "members"
+
+    member_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
+    company_name = Column(String(255), nullable=True, default="Nexus")
+    po_no = Column(String(100), nullable=True, index=True)
+    site_id = Column(String(100), nullable=True, index=True)
+    employee_id = Column(String(100), nullable=True)
+    employee_name = Column(String(255), nullable=True)
+    designation = Column(String(150), nullable=True)
+    contact_number = Column(String(50), nullable=True)
+    status = Column(String(50), nullable=True, default="Active")
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<ProjectMember(id={self.member_id}, po_no='{self.po_no}', name='{self.employee_name}')>"
+
+
 

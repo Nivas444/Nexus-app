@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20261010_2245">
+  <link rel="stylesheet" href="assets/css/home.css?v=20261105_1205">
 </head>
 
 <body>
@@ -5166,12 +5166,13 @@
               </div>
             </div>
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
-              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Item Category</label>
+              <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Category</label>
               <div class="pm-select-wrapper" style="flex: 1; position: relative;">
                 <select id="inpPmStnItemCategory" class="pm-custom-select">
                   <option value="Active">Active</option>
                   <option value="Passive">Passive</option>
                   <option value="Tower Structure">Tower Structure</option>
+                  <option value="Diesel Generator">Diesel Generator</option>
                   <option value="Power & DG">Power & DG</option>
                   <option value="Civil & Foundation">Civil & Foundation</option>
                   <option value="Electrical & Earthing">Electrical & Earthing</option>
@@ -6124,6 +6125,13 @@
               Expense Details
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <div id="wrapExpenseDetailsGstToggle" style="display: inline-flex; align-items: center; gap: 6px; margin: 0 4px;" title="GST Toggle">
+                <span style="font-size: 0.9rem; font-weight: 600; color: #475569;">GST</span>
+                <label class="toggle-slide-switch" id="toggleWrapExpenseDetailsGst" title="GST Toggle" style="margin: 0; position: relative; display: inline-block;">
+                  <input type="checkbox" id="chkExpenseDetailsGstToggle" onchange="handleExpenseDetailsGstToggle(this.checked)">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
               <button type="button" class="toolbar-icon-btn" id="btnAddExpenseItemNameBtn" title="Add Item Name" onclick="openAddItemNameModal()"
                 style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
                 <img src="icons/Add.svg" alt="Add" width="28" height="28">
@@ -6209,11 +6217,11 @@
           <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
             <div class="side-form-title-badge" id="lblPmAddItemNameTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
-              Add Item Name
+              Add Line Item
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
               <button type="button" class="toolbar-icon-btn" id="btnSaveExpenseItemNameBtn" title="Save" onclick="saveNewExpenseItemName()"
-                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center;">
+                style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
                 <img src="icons/Save.svg" alt="Save" width="28" height="28">
               </button>
               <button type="button" class="side-form-close-btn" id="btnClosePmAddItemNameModal" onclick="closeAddItemNameModal()"
@@ -6226,7 +6234,22 @@
             <!-- Field: Item name -->
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
               <label style="min-width: 140px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Item name</label>
-              <div style="flex: 1; position: relative;">
+              
+              <!-- Search Autocomplete Input for PM YTS/WIP/HOLD/NR (Capex/Opex line items by PO number) -->
+              <div id="pmAddExpenseItemSearchWrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" id="inpAddExpenseItemName" placeholder="Enter keywords to search line item..." class="form-input-control" autocomplete="off"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box;"
+                  oninput="handleExpenseItemNameInput(this.value)" onfocus="handleExpenseItemNameInput(this.value, true)">
+                <button type="button" id="btnSearchAddExpenseItemName" onclick="handleExpenseItemNameInput(document.getElementById('inpAddExpenseItemName').value, true)" title="Search Line Item"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                  <img src="icons/Search.svg" alt="Search" style="width: 20px; height: 20px; display: block;">
+                </button>
+                <div id="dropdownAddExpenseItemName" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1100; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
+                </div>
+              </div>
+
+              <!-- Standard Select Dropdown for other modules / logins -->
+              <div id="pmAddExpenseItemSelectWrap" style="display: none; flex: 1; position: relative;">
                 <select id="selAddExpenseItemName" class="form-input-control"
                   style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
                   <option value="Operational Expenses">Operational Expenses</option>
@@ -6326,16 +6349,13 @@
               <div style="flex: 1; position: relative;">
                 <select id="selExpenseEntryDescription" class="form-input-control"
                   style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
-                  <option value="Civil Foundation Work & Excavation">Civil Foundation Work & Excavation</option>
-                  <option value="Electrical Cabling & Termination">Electrical Cabling & Termination</option>
-                  <option value="Equipment Rental & Crane Hire">Equipment Rental & Crane Hire</option>
-                  <option value="Site Diesel Generator Fuel">Site Diesel Generator Fuel</option>
-                  <option value="Soil Testing & Geotech Survey">Soil Testing & Geotech Survey</option>
-                  <option value="Tower Structural Erection">Tower Structural Erection</option>
-                  <option value="Earthing & Surge Protection">Earthing & Surge Protection</option>
-                  <option value="Manpower & Labour Charges">Manpower & Labour Charges</option>
-                  <option value="Material Transportation & Logistics">Material Transportation & Logistics</option>
-                  <option value="Miscellaneous Site Operations">Miscellaneous Site Operations</option>
+                  <option value="Equipment Rental">Equipment Rental</option>
+                  <option value="Transportation Cost">Transportation Cost</option>
+                  <option value="Lodging & Accommodation Charges">Lodging & Accommodation Charges</option>
+                  <option value="Labour Cost">Labour Cost</option>
+                  <option value="Service Vendor Cost">Service Vendor Cost</option>
+                  <option value="Travelling Expenses">Travelling Expenses</option>
+                  <option value="Staff Welfare Expenses">Staff Welfare Expenses</option>
                 </select>
               </div>
             </div>
@@ -6408,16 +6428,13 @@
               <div style="flex: 1; position: relative;">
                 <select id="selEditExpenseDescription" class="form-input-control"
                   style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
-                  <option value="Civil Foundation Work & Excavation">Civil Foundation Work & Excavation</option>
-                  <option value="Electrical Cabling & Termination">Electrical Cabling & Termination</option>
-                  <option value="Equipment Rental & Crane Hire">Equipment Rental & Crane Hire</option>
-                  <option value="Site Diesel Generator Fuel">Site Diesel Generator Fuel</option>
-                  <option value="Soil Testing & Geotech Survey">Soil Testing & Geotech Survey</option>
-                  <option value="Tower Structural Erection">Tower Structural Erection</option>
-                  <option value="Earthing & Surge Protection">Earthing & Surge Protection</option>
-                  <option value="Manpower & Labour Charges">Manpower & Labour Charges</option>
-                  <option value="Material Transportation & Logistics">Material Transportation & Logistics</option>
-                  <option value="Miscellaneous Site Operations">Miscellaneous Site Operations</option>
+                  <option value="Equipment Rental">Equipment Rental</option>
+                  <option value="Transportation Cost">Transportation Cost</option>
+                  <option value="Lodging & Accommodation Charges">Lodging & Accommodation Charges</option>
+                  <option value="Labour Cost">Labour Cost</option>
+                  <option value="Service Vendor Cost">Service Vendor Cost</option>
+                  <option value="Travelling Expenses">Travelling Expenses</option>
+                  <option value="Staff Welfare Expenses">Staff Welfare Expenses</option>
                 </select>
               </div>
             </div>
@@ -6564,17 +6581,6 @@
                   <input type="text" class="form-input-control" id="inpTransferWhatsappNumber" placeholder="Enter Whatsapp Number"
                     style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
                 </div>
-              </div>
-            </div>
-
-            <!-- 6. GST field name as left side and toggle as center -->
-            <div class="pm-field-row" id="rowTransferGstToggle" style="display: none; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0;">
-              <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left; margin: 0;">GST</label>
-              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <label class="toggle-slide-switch" style="margin: 0; position: relative; display: inline-block;">
-                  <input type="checkbox" id="inpTransferGstToggle" onchange="handleTransferGstToggle(this.checked)">
-                  <span class="toggle-slide-slider"></span>
-                </label>
               </div>
             </div>
 
@@ -9083,11 +9089,16 @@
             <!-- 2. Payment Date (Field with Calendar Icon) -->
             <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
               <label class="form-label" for="inpIndusPaymentDate" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Payment Date</label>
-              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative;">
-                <input type="date" class="form-input-control date-picker-control" id="inpIndusPaymentDate" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
-                <span class="input-pdf-badge btn-calendar-trigger" title="Select Payment Date" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center;" onclick="const el = document.getElementById('inpIndusPaymentDate'); if (el) { el.showPicker ? el.showPicker() : el.focus(); }">
-                  <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
-                </span>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpIndusPaymentDate" placeholder="DD - MM - YYYY" readonly
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(this, document.getElementById('btnIndusPaymentDateCalendar')); }"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 44px 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a; outline: none; cursor: pointer;">
+                <button type="button" id="btnIndusPaymentDateCalendar" class="input-pdf-badge btn-calendar-trigger"
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(document.getElementById('inpIndusPaymentDate'), this); }"
+                  title="Select Payment Date" aria-label="Select Payment Date"
+                  style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; z-index: 5;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" style="width: 26px; height: 26px; pointer-events: none; display: block; object-fit: contain;">
+                </button>
               </div>
             </div>
 
@@ -9143,8 +9154,8 @@
               </div>
             </div>
 
-            <!-- 8. Remarks (Typeable Input Field, Present as Last Field) -->
-            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+            <!-- 8. Remarks (Visible when Hold toggle is active; Typeable Input Field) -->
+            <div class="form-row-group" id="rowIndusRemarks" style="display: none; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
               <label class="form-label" for="inpIndusRemarks" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Remarks</label>
               <div class="form-input-wrap" style="flex: 1;">
                 <input type="text" class="form-input-control" id="inpIndusRemarks" placeholder="Enter Remarks" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
@@ -9201,11 +9212,16 @@
             <!-- 3. Payment Date (Field with Calendar Icon) -->
             <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
               <label class="form-label" for="inpMiPaymentDate" style="flex: 0 0 160px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">Payment Date</label>
-              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative;">
-                <input type="date" class="form-input-control date-picker-control" id="inpMiPaymentDate" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
-                <span class="input-pdf-badge btn-calendar-trigger" title="Select Payment Date" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center;" onclick="const el = document.getElementById('inpMiPaymentDate'); if (el) { el.showPicker ? el.showPicker() : el.focus(); }">
-                  <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
-                </span>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpMiPaymentDate" placeholder="DD - MM - YYYY" readonly
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(this, document.getElementById('btnMiPaymentDateCalendar')); }"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 44px 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a; outline: none; cursor: pointer;">
+                <button type="button" id="btnMiPaymentDateCalendar" class="input-pdf-badge btn-calendar-trigger"
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(document.getElementById('inpMiPaymentDate'), this); }"
+                  title="Select Payment Date" aria-label="Select Payment Date"
+                  style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; z-index: 5;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" style="width: 26px; height: 26px; pointer-events: none; display: block; object-fit: contain;">
+                </button>
               </div>
             </div>
 
@@ -10702,7 +10718,7 @@
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 8px;">
             <div style="display: flex; align-items: center; gap: 12px; height: 100%;">
               <div class="side-form-title-badge" id="lblCommercialDashboardTitle"
-                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+                style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; width: 240px; min-width: 240px; box-sizing: border-box; padding: 0 48px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
                 Dashboard
               </div>
               <button type="button" class="side-top-icon-btn" id="btnCopyCommercialDashboardChart" onclick="copyCommercialDashboardChart()" title="Copy Chart with Legend as PNG"
@@ -12676,7 +12692,7 @@
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblMinMrnTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              MIN / MRN</div>
+              Documents</div>
             <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseMinMrnModal" onclick="closeMinMrnModal()"
                 aria-label="Close"
@@ -12759,7 +12775,7 @@
             style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblInfraDocTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              STN / SRN / CAM</div>
+              Documents</div>
             <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseInfraDocModal"
                 onclick="closeInfraDocModal()" aria-label="Close"
@@ -12791,8 +12807,8 @@
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     MIN</td>
                   <td
-                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
-                    MIN-234567-01</td>
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; font-size: 0.95rem;">
+                    <a href="#" onclick="downloadInfraDocFromDb('MIN-234567-01', 'MIN'); return false;" style="color: #0454e4 !important; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">MIN-234567-01</a></td>
                   <td
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     12/08/2026</td>
@@ -12802,8 +12818,8 @@
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     MRN</td>
                   <td
-                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
-                    MRN-234567-01</td>
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; font-size: 0.95rem;">
+                    <a href="#" onclick="downloadInfraDocFromDb('MRN-234567-01', 'MRN'); return false;" style="color: #0454e4 !important; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">MRN-234567-01</a></td>
                   <td
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     16/08/2026</td>
@@ -12813,8 +12829,8 @@
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     MIN</td>
                   <td
-                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
-                    MIN-234567-02</td>
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; font-size: 0.95rem;">
+                    <a href="#" onclick="downloadInfraDocFromDb('MIN-234567-02', 'MIN'); return false;" style="color: #0454e4 !important; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">MIN-234567-02</a></td>
                   <td
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     22/08/2026</td>
@@ -12824,8 +12840,8 @@
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     MRN</td>
                   <td
-                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
-                    MRN-234567-02</td>
+                    style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; font-size: 0.95rem;">
+                    <a href="#" onclick="downloadInfraDocFromDb('MRN-234567-02', 'MRN'); return false;" style="color: #0454e4 !important; text-decoration: underline !important; text-underline-offset: 3px; cursor: pointer; font-weight: 600;">MRN-234567-02</a></td>
                   <td
                     style="width: 33.33%; text-align: center !important; padding: 12px 8px; white-space: nowrap; color: #334155; font-size: 0.95rem;">
                     28/08/2026</td>
@@ -12973,14 +12989,14 @@
           </div>
         </div>
 
-        <!-- Add BOQ Name Modal Tab (Triggered by + icon near PDF icon in Materials toolbar) -->
+        <!-- Add Materials Modal Tab (Triggered by + icon near PDF icon in Materials toolbar) -->
         <div class="side-form-card side-contact-popup" id="addBoqNameModal"
           style="display: none; width: 620px !important; max-width: 96vw; background: #ffffff; border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,0.22); overflow: hidden; margin: auto;">
           <div class="side-form-header"
             style="position: relative; padding: 0 18px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; width: 100%; height: 52px; margin-bottom: 9px;">
             <div class="side-form-title-badge" id="lblAddBoqNameTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Add BOQ Name</div>
+              Add Materials</div>
             <div class="side-header-top-icons" style="margin-left: auto;">
               <button type="button" class="side-form-close-btn" id="btnCloseAddBoqNameModal"
                 onclick="closeAddBoqNameModal()" aria-label="Close"
@@ -12988,13 +13004,20 @@
             </div>
           </div>
           <div style="padding: 24px 32px 30px 32px; display: flex; flex-direction: column; gap: 24px;">
-            <!-- Field: BOQ Name -->
+            <!-- Field: Material Name -->
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
-              <label for="selAddBoqNameField" style="width: 170px; min-width: 170px; font-size: 0.95rem; font-weight: 600; color: #1e293b; margin: 0;">BOQ Name</label>
-              <div style="flex: 1; position: relative;">
-                <select id="selAddBoqNameField" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; outline: none; box-sizing: border-box;">
-                  <!-- Options populated dynamically -->
-                </select>
+              <label for="inpAddMaterialName" style="width: 170px; min-width: 170px; font-size: 0.95rem; font-weight: 600; color: #1e293b; margin: 0;">Material Name</label>
+              <!-- Search Autocomplete Input with properties from add line item tab in expense page -->
+              <div id="pmAddMaterialSearchWrap" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" id="inpAddMaterialName" placeholder="Enter keywords to search material..." class="form-input-control" autocomplete="off"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box;"
+                  oninput="handleMaterialNameInput(this.value)" onfocus="handleMaterialNameInput(this.value, true)">
+                <button type="button" id="btnSearchAddMaterialName" onclick="handleMaterialNameInput(document.getElementById('inpAddMaterialName').value, true)" title="Search Material Name"
+                  style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                  <img src="icons/Search.svg" alt="Search" style="width: 20px; height: 20px; display: block;">
+                </button>
+                <div id="dropdownAddMaterialName" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 1100; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
+                </div>
               </div>
             </div>
             <!-- Centered Submit Icon Button -->
@@ -13153,7 +13176,10 @@
               <div class="side-form-title-badge" id="lblDprAttendanceTitle"
                 style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 68px 0 28px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
                 Attendance</div>
-              <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Attendance">
+              <div style="display: inline-flex; align-items: center; gap: 6px;">
+                <img src="icons/summation.svg" alt="Summation" style="width: 24px; height: 24px; display: block; object-fit: contain; cursor: pointer;" title="Total Attendance Salary">
+                <span id="lblDprAttendanceTotalSalary" style="font-size: 13px; font-weight: 700; color: #0454e4; white-space: nowrap;">0.00</span>
+              </div>
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center;">
               <button type="button" class="side-form-close-btn" id="btnCloseDprAttendanceModal"
@@ -13193,30 +13219,6 @@
                 </tr>
               </thead>
               <tbody id="tbodyDprAttendance">
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Rajesh Kumar</td>
-                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">28/08/2026</td>
-                  <td style="width: 9ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">09:00</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">18:00</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">9.0</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">1,200</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Suresh Prabhu</td>
-                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">28/08/2026</td>
-                  <td style="width: 9ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">09:30</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">18:30</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">9.0</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">1,500</td>
-                </tr>
-                <tr>
-                  <td style="width: 30ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">Manoj Verma</td>
-                  <td style="width: 12ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #475569; font-size: 0.95rem;">28/08/2026</td>
-                  <td style="width: 9ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">09:15</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">17:45</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">8.5</td>
-                  <td style="width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-size: 0.95rem;">950</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -16188,6 +16190,10 @@
     </div>
   </div>
 
+  <!-- Dedicated backdrop overlay to cleanly blur and dim the background tab -->
+  <div id="wmPaymentExpensesBackdrop"
+    style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.55) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; z-index: 100000 !important;"></div>
+
   <!-- Warehouse Manager: Payment Add Expenses Combined Modal (Unified Seamless Tab) -->
   <div class="side-form-card" id="wmPaymentExpensesModal"
     style="display: none; width: 980px !important; max-width: 96vw; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100001 !important; margin: 0 !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.55) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; animation: none !important;">
@@ -16218,16 +16224,13 @@
           <div style="flex: 1; position: relative;">
             <select id="selWmExpenseDescription" class="form-input-control"
               style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
-              <option value="Civil Foundation Work & Excavation">Civil Foundation Work & Excavation</option>
-              <option value="Electrical Cabling & Termination">Electrical Cabling & Termination</option>
-              <option value="Equipment Rental & Crane Hire">Equipment Rental & Crane Hire</option>
-              <option value="Site Diesel Generator Fuel">Site Diesel Generator Fuel</option>
-              <option value="Soil Testing & Geotech Survey">Soil Testing & Geotech Survey</option>
-              <option value="Tower Structural Erection">Tower Structural Erection</option>
-              <option value="Earthing & Surge Protection">Earthing & Surge Protection</option>
-              <option value="Manpower & Labour Charges">Manpower & Labour Charges</option>
-              <option value="Material Transportation & Logistics">Material Transportation & Logistics</option>
-              <option value="Miscellaneous Site Operations">Miscellaneous Site Operations</option>
+              <option value="Equipment Rental">Equipment Rental</option>
+              <option value="Transportation Cost">Transportation Cost</option>
+              <option value="Lodging & Accommodation Charges">Lodging & Accommodation Charges</option>
+              <option value="Labour Cost">Labour Cost</option>
+              <option value="Service Vendor Cost">Service Vendor Cost</option>
+              <option value="Travelling Expenses">Travelling Expenses</option>
+              <option value="Staff Welfare Expenses">Staff Welfare Expenses</option>
             </select>
           </div>
         </div>
@@ -16694,7 +16697,7 @@
     </div>
   </div>
 
-  <script src="assets/js/api.js?v=20261010_2245"></script>
+  <script src="assets/js/api.js?v=20261105_1300"></script>
   <script src="assets/js/utils/toast.js?v=20261012_01"></script>
   <script src="assets/js/utils/formatters.js?v=20261012_01"></script>
   <script src="assets/js/components/excel-filters.js?v=20261012_01"></script>
@@ -16704,7 +16707,7 @@
   <script src="assets/js/modules/master/master-expenses.js?v=20261012_01"></script>
   <script src="assets/js/modules/master/master-hr-policies.js?v=20261012_01"></script>
   <script src="assets/js/modules/indus/indus-towers.js?v=20261012_01"></script>
-  <script src="assets/js/home.js?v=20261010_2245"></script>
+  <script src="assets/js/home.js?v=20261105_1300"></script>
 </body>
 
 </html>

@@ -37,6 +37,33 @@ class CommercialProjectItem(BaseModel):
     receiptNo: Optional[str] = None
     receiptDate: Optional[str] = None
     ersNo: Optional[str] = None
+    projectStatus: Optional[str] = None
+    status: Optional[str] = None
+    towerType: Optional[str] = None
+    towerHeight: Optional[str] = None
+    sbc: Optional[str] = None
+    windSpeed: Optional[str] = None
+    planningBoq: Optional[str] = None
+    siteSurvey: Optional[bool] = None
+    tspMaterials: Optional[bool] = None
+    qualityAudit: Optional[bool] = None
+    stn: Optional[str] = None
+    isStn: Optional[bool] = None
+    civilWorks: Optional[bool] = None
+    ptw: Optional[bool] = None
+    srn: Optional[str] = None
+    isSrn: Optional[bool] = None
+    electricalWorks: Optional[bool] = None
+    additionalApproval: Optional[bool] = None
+    additionalApprove: Optional[bool] = None
+    cam: Optional[str] = None
+    isCam: Optional[bool] = None
+    poleMounts: Optional[bool] = None
+    serviceContract: Optional[bool] = None
+    supportRequired: Optional[str] = None
+    pendingWith: Optional[str] = None
+    remarks: Optional[str] = None
+    materials: Optional[str] = None
 
 
 class CommercialProjectListResponse(BaseModel):
@@ -81,6 +108,40 @@ class CommercialProjectDeleteResponse(BaseModel):
     success: bool
     deleted_count: int
     message: str
+
+
+class SavePmProjectDetailsRequest(BaseModel):
+    project_id: Optional[Any] = None
+    po_no: Optional[str] = None
+    site_id: Optional[str] = None
+    project_status: Optional[str] = None
+    tower_type: Optional[str] = None
+    tower_height: Optional[Union[float, str]] = None
+    sbc: Optional[Union[float, str]] = None
+    wind_speed: Optional[Union[float, str]] = None
+    planning_boq: Optional[str] = None
+    site_survey: Optional[bool] = None
+    tsp_materials: Optional[bool] = None
+    quality_audit: Optional[bool] = None
+    stn: Optional[bool] = None
+    civil_works: Optional[bool] = None
+    ptw: Optional[bool] = None
+    srn: Optional[bool] = None
+    electrical_works: Optional[bool] = None
+    additional_approval: Optional[bool] = None
+    additional_approve: Optional[bool] = None
+    cam: Optional[bool] = None
+    pole_mounts: Optional[bool] = None
+    service_contract: Optional[bool] = None
+    support_required: Optional[str] = None
+    pending_with: Optional[str] = None
+    remarks: Optional[str] = None
+
+
+class SavePmProjectDetailsResponse(BaseModel):
+    success: bool
+    message: str
+    project: Optional[CommercialProjectItem] = None
 
 
 # ==========================================

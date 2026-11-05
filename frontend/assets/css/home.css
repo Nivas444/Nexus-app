@@ -54,8 +54,11 @@
 
 html,
 body {
-  min-height: 100vh;
   height: 100%;
+  max-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -63,10 +66,12 @@ body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #ffffff;
   color: var(--text-dark);
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  min-height: 100vh !important;
+  overflow: hidden !important;
 }
 
 /* ==========================================================================
@@ -317,12 +322,13 @@ body {
   max-width: 100%;
   margin: 0;
   padding: 0;
-  flex: 1 0 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 76px - 44px);
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
   background: #ffffff;
   position: relative;
+  overflow: hidden !important;
 }
 
 /* Action Toolbar */
@@ -420,7 +426,8 @@ body {
 
 .btn-dashboard-action:hover .toolbar-icon-img,
 .btn-refresh-action:hover .toolbar-icon-img,
-.btn-bank-action:hover .toolbar-icon-img {
+.btn-bank-action:hover .toolbar-icon-img,
+.btn-m1-action:hover .toolbar-icon-img {
   transform: scale(1.15);
   filter: drop-shadow(0 2px 6px rgba(255, 167, 0, 0.45));
 }
@@ -487,8 +494,39 @@ body {
   overflow-x: auto;
   background: #ffffff;
   border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: none !important;
   -webkit-overflow-scrolling: touch;
+}
+
+.worklist-main-full > .table-container-full {
+  width: 100%;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: none !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modern clean scrollbar for table container */
+.worklist-main-full > .table-container-full::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.worklist-main-full > .table-container-full::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.worklist-main-full > .table-container-full::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.worklist-main-full > .table-container-full::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .worklist-table-full {
@@ -508,6 +546,9 @@ body {
 .master-view-header th,
 .po-view-header th,
 .payment-view-header th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
   background: #8c9399 !important;
   /* Medium Grey Header */
   color: #ffffff !important;
@@ -526,22 +567,70 @@ body {
   text-align: center !important;
   vertical-align: middle;
   letter-spacing: 0.3px;
-  position: relative;
   user-select: none;
   white-space: nowrap;
 }
 
+.worklist-table-full thead th[rowspan="2"],
+.worklist-table-full thead tr th[rowspan="2"],
+.master-view-header th[rowspan="2"],
+.payment-view-header th[rowspan="2"] {
+  z-index: 12 !important;
+}
+
+.worklist-table-full thead th.th-select,
+.payment-view-header th.th-select {
+  z-index: 14 !important;
+}
+
+.worklist-table-full thead tr.tr-sub-headers th,
+.worklist-table-full thead tr.project-payment-header-row2 th,
+tr.tr-sub-headers th,
+.payment-view-header.tr-sub-headers th,
+.payment-view-header tr.tr-sub-headers th,
+.projects-view-header.tr-sub-headers th,
+tr.tr-sub-headers.projects-view-header th,
+.projects-view-header .th-sv-sub,
+th.th-sv-sub,
+.tr-sub-headers th,
+.wm-qty-sub-header,
+.purchase-amount-sub-header,
+.wm-grn-sub-header,
+.wm-min-sub-header,
+.wm-mrn-sub-header,
+.wm-supply-sub-header {
+  position: sticky !important;
+  top: 39px !important;
+  z-index: 11 !important;
+}
+
 /* Payment Grouped Header: Solid White Horizontal Line under "Amount" */
-.payment-view-header .th-amount-group {
+.worklist-table-full thead tr.payment-view-header th.th-amount-group,
+.payment-view-header .th-amount-group,
+th.th-amount-group,
+.payment-view-header th.th-amount-group {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 12 !important;
+  height: 39px !important;
+  box-sizing: border-box !important;
   border-top: 1px solid #8e8e8e !important;
-  border-bottom: 1px solid #ffffff !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 -1px 0 #ffffff !important;
   border-right: 1.5px solid #ffffff !important;
+  border-left: none !important;
   padding: 10px 8px !important;
   text-align: center !important;
 }
 
 /* Payment Sub-headers: Approved, Transferred, Payable with White Dividing Lines */
-.tr-sub-headers th {
+.worklist-table-full thead tr.tr-sub-headers th,
+.tr-sub-headers th,
+.payment-view-header.tr-sub-headers th,
+tr.tr-sub-headers.payment-view-header th {
+  position: sticky !important;
+  top: 39px !important;
+  z-index: 11 !important;
   background: #8c9399 !important;
   color: #ffffff !important;
   font-family: 'Outfit', sans-serif;
@@ -553,6 +642,7 @@ body {
   border-top: none !important;
   border-bottom: 1px solid #8e8e8e !important;
   border-right: 1.5px solid #ffffff !important;
+  box-shadow: none !important;
   /* CRISP WHITE VERTICAL LINE BETWEEN SUB-HEADERS */
   text-align: center !important;
   vertical-align: middle !important;
@@ -608,7 +698,9 @@ body {
 }
 
 .projects-view-header .th-sv-group {
-  border-bottom: 1.5px solid #ffffff !important;
+  border-top: 1px solid #8e8e8e !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 -1px 0 #ffffff !important;
   border-right: 1.5px solid #ffffff !important;
   text-align: center !important;
 }
@@ -619,11 +711,22 @@ body {
   text-align: center !important;
 }
 
-.projects-view-header .th-sv-sub {
-  border-top: 1.5px solid #ffffff !important;
+.projects-view-header .th-sv-sub,
+.projects-view-header.tr-sub-headers th,
+tr.tr-sub-headers.projects-view-header th {
+  position: sticky !important;
+  top: 39px !important;
+  z-index: 11 !important;
+  border-top: none !important;
   border-bottom: 1px solid #8e8e8e !important;
   border-right: 1.5px solid #ffffff !important;
   text-align: center !important;
+  background-color: #8c9399 !important;
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
 }
 
 /* Product Details Bottom Segmented Sub-Navigation (Matching Image 2 Mockup) */
@@ -730,17 +833,27 @@ body {
 /* Payment Grouped Amount Headers - Solid Crisp White Horizontal Divider */
 th.th-amount-group,
 .payment-view-header th.th-amount-group {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 12 !important;
+  height: 39px !important;
+  box-sizing: border-box !important;
   background: #8c9399 !important;
   color: #ffffff !important;
   font-weight: 700;
-  border: none !important;
-  border-top: none !important;
-  border-bottom: 1px solid #ffffff !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.45) !important;
+  border-top: 1px solid #8e8e8e !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 -1px 0 #ffffff !important;
+  border-right: 1.5px solid #ffffff !important;
+  border-left: none !important;
 }
 
 tr.tr-sub-headers th,
-.payment-view-header tr.tr-sub-headers th {
+.payment-view-header tr.tr-sub-headers th,
+.payment-view-header.tr-sub-headers th {
+  position: sticky !important;
+  top: 39px !important;
+  z-index: 11 !important;
   background: #8c9399 !important;
   color: #ffffff !important;
   font-size: 0.88rem;
@@ -748,8 +861,9 @@ tr.tr-sub-headers th,
   padding: 8px 12px;
   border: none !important;
   border-top: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.45) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.45) !important;
+  border-bottom: 1px solid #8e8e8e !important;
+  border-right: 1.5px solid #ffffff !important;
+  box-shadow: none !important;
 }
 
 /* Table Body Rows - NO VERTICAL LINES */
@@ -957,14 +1071,39 @@ input[type="checkbox"].pr-circle-checkbox:focus-visible {
    5. SEGMENTED TOGGLE BUTTONS (NO TOP/BOTTOM/OUTER CORNERS, ONLY 1PX DIVIDER)
    ========================================================================== */
 .worklist-footer-bar {
+  flex: 0 0 auto !important;
+  width: 100%;
   margin-top: auto !important;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 24px 24px 24px 24px;
-  background: #ffffff;
+  padding: 10px 24px !important;
+  background: #ffffff !important;
+  border-top: none !important;
+  z-index: 30 !important;
+  position: relative !important;
+  box-shadow: none !important;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+#poAmendApprovalPendingSubmitArea,
+#wccApprovalPendingSubmitArea,
+#adminManagerSubmitArea,
+#pmStatusSubmitArea,
+#wmPrSubmitArea,
+#purchasePrSubmitArea,
+#purchaseRfqSubmitArea,
+#wmMinSubmitArea,
+#wmMinDetailSubmitArea,
+#wmMrnDetailSubmitArea,
+#wmMtnSubmitArea,
+#wmStnSubmitArea,
+#wmSrnSubmitArea,
+#accManagerSubmitArea,
+#accGstr2bDownloadArea {
+  flex: 0 0 auto !important;
+  background: #ffffff;
 }
 
 /* Removed top, bottom and corner borders from button box */
@@ -2115,9 +2254,12 @@ input[type="checkbox"].pr-circle-checkbox:focus-visible {
 
 /* Card Dimmed & Blurred state when child popup is active */
 .card-dimmed-blurred,
-.side-form-card.card-dimmed-blurred {
-  filter: blur(4px) brightness(0.6) opacity(0.6) !important;
+.side-form-card.card-dimmed-blurred,
+#pmExpenseDetailsModal.card-dimmed-blurred,
+#pmAddExpenseTableModal.card-dimmed-blurred {
+  filter: blur(8px) brightness(0.55) opacity(0.55) !important;
   pointer-events: none !important;
+  user-select: none !important;
   transition: filter 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -2128,7 +2270,9 @@ input[type="checkbox"].pr-circle-checkbox:focus-visible {
 #pmMembersModal.card-dimmed-blurred~#pmAddMemberModal,
 #dprSurveyReportModal.card-dimmed-blurred~#dprAddSurveyItemModal,
 #pmExpenseDetailsModal.card-dimmed-blurred~#pmAddItemNameModal,
-#pmExpenseDetailsModal.card-dimmed-blurred~#pmEditExpenseModal {
+#pmExpenseDetailsModal.card-dimmed-blurred~#pmEditExpenseModal,
+#pmExpenseDetailsModal.card-dimmed-blurred~#wmPaymentExpensesModal,
+#pmExpenseDetailsModal.card-dimmed-blurred~#pmTransferDetailsModal {
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
@@ -3489,7 +3633,7 @@ td.col-master-vendor-status {
    8. EXCEL-STYLE FILTER POPUP (SIMPLIFIED, CIRCULAR BUTTONS & SVG ICONS)
    ========================================================================== */
 .excel-filter-dropdown {
-  position: absolute;
+  position: fixed !important;
   top: 100px;
   left: 100px;
   width: 250px;
@@ -4286,20 +4430,50 @@ input[type="date"].date-picker-control {
   gap: 14px;
 }
 
-.project-payment-header-row1 th,
-.project-payment-header-row2 th {
+.worklist-table-full thead tr.project-payment-header-row1 th,
+.project-payment-header-row1 th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 12 !important;
+  height: 39px !important;
+  box-sizing: border-box !important;
   background-color: #8c9399 !important;
   color: #ffffff !important;
   font-weight: 700 !important;
   text-align: center !important;
   vertical-align: middle !important;
-  border: 1px solid #ffffff !important;
+  border-top: 1px solid #8e8e8e !important;
+  border-bottom: 1px solid #8e8e8e !important;
+  border-right: 1.5px solid #ffffff !important;
+  border-left: none !important;
   padding: 8px 10px !important;
   font-size: 0.88rem !important;
 }
 
+.worklist-table-full thead tr.project-payment-header-row1 th[colspan],
 .project-payment-header-row1 th[colspan] {
-  border-bottom: 1.5px solid #ffffff !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 -1px 0 #ffffff !important;
+}
+
+.worklist-table-full thead tr.project-payment-header-row2 th,
+.project-payment-header-row2 th {
+  position: sticky !important;
+  top: 39px !important;
+  z-index: 11 !important;
+  box-sizing: border-box !important;
+  background-color: #8c9399 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  border-top: none !important;
+  border-bottom: 1px solid #8e8e8e !important;
+  border-right: 1.5px solid #ffffff !important;
+  border-left: none !important;
+  box-shadow: none !important;
+  padding: 8px 10px !important;
+  font-size: 0.88rem !important;
 }
 
 .clickable-project-link {
@@ -4465,20 +4639,32 @@ select.project-notes-edit-input {
   justify-content: flex-start !important;
 }
 
-/* Amount Header borders: No border above, crisp 1.5px white border below matching other headers */
+/* Amount Header borders: No border above, crisp 1px white line below matching other headers */
 .payment-view-header .th-amount-group,
 th.th-amount-group,
 .payment-view-header th.th-amount-group {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 12 !important;
+  height: 39px !important;
+  box-sizing: border-box !important;
   border-top: 1px solid #8e8e8e !important;
-  border-bottom: 1.5px solid #ffffff !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 -1px 0 #ffffff !important;
   border-right: 1.5px solid #ffffff !important;
+  border-left: none !important;
 }
 
 tr.tr-sub-headers th,
-.payment-view-header tr.tr-sub-headers th {
+.payment-view-header tr.tr-sub-headers th,
+.payment-view-header.tr-sub-headers th {
+  position: sticky !important;
+  top: 39px !important;
+  z-index: 11 !important;
   border-top: none !important;
   border-top-width: 0 !important;
   border-top-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* PO Supplier Detail View Blue Icon Filter */
@@ -5199,28 +5385,29 @@ td.col-loc-incharge {
 
 /* ─── NEXUS SVG ERROR POPUP MODAL ────────────────────────────────────────── */
 .nexus-error-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(15, 23, 42, 0.62);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(15, 23, 42, 0.62) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999999;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999999 !important;
   animation: nexusErrFadeIn 0.2s ease-out forwards;
 }
 
 .nexus-error-popup-content {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   animation: nexusErrPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  max-width: 95vw;
+  max-width: 95vw !important;
+  z-index: 10000000 !important;
 }
 
 .nexus-error-svg-card {

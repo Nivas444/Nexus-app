@@ -59,10 +59,13 @@ def parse_commissioning_value(val: Any) -> Optional[date]:
         elif val_str in ["no", "false", "0", "inactive", "null", "none"]:
             return None
         else:
-            try:
-                return datetime.strptime(val[:10], "%Y-%m-%d").date()
-            except Exception:
-                return date.today()
+            cleaned = val.replace(" ", "").strip()
+            for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%Y/%m/%d"):
+                try:
+                    return datetime.strptime(cleaned[:10], fmt).date()
+                except Exception:
+                    continue
+            return date.today()
     return None
 
 class IndusInfraRepository:

@@ -296,14 +296,46 @@ async function loadCommercialProjectsFromApi() {
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms') {
       const role = getAuthenticatedUserRole();
-      let visibleData = commercialJmsData;
-      if (role !== 'Project Manager') {
-        visibleData = (commercialJmsData || []).filter(item => {
-          const tLower = (item.task || '').trim().toLowerCase();
-          return !tLower.includes('pending') && !tLower.includes('wcc') && !tLower.includes('amend') && tLower !== 'jms approval pending';
+      let visibleData = (commercialJmsData || []).filter(item => {
+        const tLower = (item.task || '').trim().toLowerCase();
+        return !tLower.includes('wcc') && !tLower.includes('po amend') && !tLower.includes('amendment') && !tLower.includes('receivable');
+      });
+      const realItems = visibleData.filter(item => !String(item.id || '').startsWith('cw-') && !String(item.siteId || '').startsWith('IN-12345'));
+      if (realItems.length > 0) {
+        visibleData = realItems;
+      }
+      if (role === 'Project Manager') {
+        const pmTasks = ["Approval Pending", "Rejected"];
+        currentDataset = visibleData.map((item, idx) => {
+          const rawT = (item.task || '').toLowerCase();
+          let normTask = pmTasks[idx % pmTasks.length];
+          if (item._userModified && (item.task === 'Approval Pending' || item.task === 'Rejected')) {
+            normTask = item.task;
+          } else if (rawT.includes('reject')) {
+            normTask = 'Rejected';
+          } else if (rawT.includes('pending') || rawT.includes('approval')) {
+            normTask = 'Approval Pending';
+          }
+          return {
+            ...item,
+            task: normTask
+          };
+        });
+      } else {
+        const jmsStates = ["JMS to be validate", "Approval Pending", "Rejected"];
+        currentDataset = visibleData.map((item, idx) => {
+          const rawT = (item.task || '').toLowerCase();
+          let normTask = 'JMS to be validate';
+          if (rawT.includes('reject')) normTask = 'Rejected';
+          else if (rawT.includes('pending') || rawT.includes('approval')) normTask = 'Approval Pending';
+          else if (rawT.includes('validate')) normTask = 'JMS to be validate';
+          else normTask = jmsStates[idx % jmsStates.length];
+          return {
+            ...item,
+            task: normTask
+          };
         });
       }
-      currentDataset = visibleData.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'po_amend') {
       if (!commercialPoAmendData || !Array.isArray(commercialPoAmendData) || commercialPoAmendData.length !== 6) {
@@ -3663,7 +3695,7 @@ const defaultJmsItems = [
     supportRequired: "Power Connection Clearance",
     pendingWith: "Site Engineer",
     remarks: "Pending verification",
-    task: "JMS to be process",
+    task: "Approval Pending",
     ageing: "18 Days",
     amount: "₹ 3,80,000.00",
     rawAmount: 380000
@@ -3680,7 +3712,7 @@ const defaultJmsItems = [
     supportRequired: "Site Soil Testing & Topo Survey",
     pendingWith: "Site Engineer",
     remarks: "Pending verification",
-    task: "JMS to be validate",
+    task: "Rejected",
     ageing: "24 Days",
     amount: "₹ 6,20,000.00",
     rawAmount: 620000
@@ -3714,7 +3746,7 @@ const defaultJmsItems = [
     supportRequired: "Site Survey Documentation",
     pendingWith: "Civil Lead",
     remarks: "Pending verification",
-    task: "JMS to be validate",
+    task: "Approval Pending",
     ageing: "10 Days",
     amount: "₹ 2,75,000.00",
     rawAmount: 275000
@@ -3759,29 +3791,62 @@ window.calculateAgeingFromEndDate = calculateAgeingFromEndDate;
 
 function syncCommercialJmsDataWithNewProject() {
   if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData) || commercialWorklistData.length === 0) {
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('commercialWorklistData');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            commercialWorklistData = parsed;
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (typeof commercialWorklistData === 'undefined' || !Array.isArray(commercialWorklistData) || commercialWorklistData.length === 0) {
     commercialJmsData = defaultJmsItems.map(item => ({ ...item }));
     return;
   }
-  commercialJmsData = commercialWorklistData.map((np, idx) => {
-    const existing = (commercialJmsData || []).find(j => String(j.id) === String(np.id) || j.poNo === np.poNo) || (defaultJmsItems && defaultJmsItems[idx % defaultJmsItems.length]);
-    const npTask = np.task || np.current_task;
-    let assignedTask = npTask || "JMS to be validate";
+  const jmsEligible = commercialWorklistData.filter(np => {
+    const t = (np.task || np.current_task || '').toLowerCase();
+    const s = (np.projectStatus || np.status || '').toLowerCase();
+    if (t.includes('wcc') || s.includes('wcc')) return false;
+    if (t.includes('po amend') || t.includes('amendment') || s.includes('po amend') || s.includes('amendment')) return false;
+    if (t.includes('receivable') || s.includes('receivable')) return false;
+    if (t.includes('invoice') || s.includes('invoice')) return false;
+    return true;
+  });
+  const sourceList = jmsEligible.length > 0 ? jmsEligible : (commercialWorklistData.length > 0 ? commercialWorklistData.slice(0, 5) : defaultJmsItems);
+  const jmsStates = ["JMS to be validate", "Approval Pending", "Rejected"];
+  commercialJmsData = sourceList.map((np, idx) => {
+    const existing = (commercialJmsData || []).find(j => String(j.id) === String(np.id) || (np.poNo && j.poNo === np.poNo));
+    
+    // Distribute randomized states across the 3 tasks unless user explicitly modified it in session
+    let assignedTask = "";
+    if (existing && existing.task && jmsStates.includes(existing.task) && existing._userModified) {
+      assignedTask = existing.task;
+    } else {
+      assignedTask = jmsStates[idx % jmsStates.length];
+    }
+    
     const rawAmt = np.poAmount || (existing ? (existing.rawAmount || 245000) : 245000);
     const computedAgeing = np.ageing || (np.completionDate ? calculateAgeingFromEndDate(np.completionDate) : "0 Days");
     return {
       id: np.id || `jms-${idx + 1}`,
-      date: np.date || (existing && existing.date) || "12/08/2026",
-      poNo: np.poNo || (existing && existing.poNo) || "4500128934",
-      projectId: np.projectId || (existing && existing.projectId) || "PRJ-2026-001",
-      siteName: np.siteName || (existing && existing.siteName) || "Guindy Hub",
-      siteId: np.siteId || (existing && existing.siteId) || "IN-123456",
+      date: np.date || np.submitDate || (existing && existing.date) || "12/08/2026",
+      poNo: np.poNo || (existing && existing.poNo) || "",
+      projectId: np.projectId || np.project_code || (existing && existing.projectId) || "",
+      siteName: np.siteName || (existing && existing.siteName) || "",
+      siteId: np.siteId || (existing && existing.siteId) || "",
       projectType: np.projectType || (existing && existing.projectType) || "New Build",
       subProjectType: np.subProjectType || (existing && existing.subProjectType) || "Civil",
       poType: np.poType || (existing && existing.poType) || "Opex",
-      supportRequired: (existing && existing.supportRequired) || "Site Survey Documentation",
-      pendingWith: (existing && existing.pendingWith) || "Project Manager",
-      remarks: (existing && existing.remarks) || "Pending verification",
+      supportRequired: np.supportRequired || (existing && existing.supportRequired) || "Site Survey Documentation",
+      pendingWith: np.pendingWith || (existing && existing.pendingWith) || "Project Manager",
+      remarks: np.remarks || (existing && existing.remarks) || "Pending verification",
       task: assignedTask,
+      _userModified: existing ? !!existing._userModified : false,
       ageing: computedAgeing,
       amount: formatIndianCurrency(rawAmt),
       rawAmount: rawAmt
@@ -3986,10 +4051,45 @@ function getDefaultJmsLineItems(poNo, baseAmt) {
 }
 
 function getJmsDetailItems(rowId) {
+  const role = (typeof getAuthenticatedUserRole === 'function') ? getAuthenticatedUserRole() : '';
+  const parentInDataset = (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset))
+    ? currentDataset.find(r => String(r.id) === String(rowId))
+    : null;
+  const parentInJms = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData))
+    ? commercialJmsData.find(r => String(r.id) === String(rowId))
+    : null;
+  const parentRow = parentInDataset || parentInJms || (defaultJmsItems && defaultJmsItems[0]);
+  const rawAmt = parentRow ? (parentRow.rawAmount || 245000) : 245000;
+  let task = window.selectedJmsParentTask || (parentRow && parentRow.task ? parentRow.task : '');
+  if (role === 'Project Manager') {
+    if (!String(task).toLowerCase().includes('reject')) {
+      task = 'Approval Pending';
+    } else {
+      task = 'Rejected';
+    }
+  }
+  const isApprovalPending = task.toLowerCase().includes('pending') || task.toLowerCase().includes('approval');
+  const isRejected = task.toLowerCase().includes('reject');
+
   if (!jmsDetailItemsMap[rowId]) {
-    const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(rowId)) || (defaultJmsItems && defaultJmsItems[0]);
-    const rawAmt = parentRow ? (parentRow.rawAmount || 245000) : 245000;
-    jmsDetailItemsMap[rowId] = getDefaultJmsLineItems(parentRow ? parentRow.poNo : '', rawAmt);
+    const items = getDefaultJmsLineItems(parentRow ? parentRow.poNo : '', rawAmt);
+    if (isApprovalPending) {
+      items.forEach(it => {
+        it.highlighted = true;
+        it.jmsStatus = 'Approved';
+      });
+    }
+    jmsDetailItemsMap[rowId] = items;
+  } else if (isApprovalPending) {
+    jmsDetailItemsMap[rowId].forEach(it => {
+      it.highlighted = true;
+      it.jmsStatus = 'Approved';
+    });
+  } else if (isRejected) {
+    jmsDetailItemsMap[rowId].forEach(it => {
+      it.highlighted = false;
+      it.jmsStatus = 'Not Approved';
+    });
   }
   return jmsDetailItemsMap[rowId];
 }
@@ -4003,13 +4103,37 @@ window.openJmsDetailPage = function(rowId) {
     ? commercialJmsData.find(r => String(r.id) === String(rowId))
     : null;
   const parentRow = parentInDataset || parentInJms;
+  const role = (typeof getAuthenticatedUserRole === 'function') ? getAuthenticatedUserRole() : '';
+  let normTask = 'Approval Pending';
   if (parentRow && parentRow.task) {
-    window.selectedJmsParentTask = parentRow.task;
+    const rawT = String(parentRow.task).toLowerCase();
+    if (rawT.includes('reject')) normTask = 'Rejected';
+    else if (role !== 'Project Manager' && rawT.includes('validate')) normTask = 'JMS to be validate';
+    else if (rawT.includes('pending') || rawT.includes('approval')) normTask = 'Approval Pending';
+    else if (role === 'Project Manager') normTask = 'Approval Pending';
+  } else if (role === 'Project Manager') {
+    normTask = 'Approval Pending';
+  }
+  window.selectedJmsParentTask = normTask;
+  if (parentInDataset) {
+    parentInDataset.task = normTask;
+    parentInDataset._userModified = true;
+  }
+  if (parentInJms) {
+    parentInJms.task = normTask;
+    parentInJms._userModified = true;
   }
   if (parentRow) {
     window.selectedJmsPoNo = parentRow.poNo;
     window.selectedJmsSiteId = parentRow.siteId;
   }
+  try {
+    sessionStorage.setItem('selectedJmsRowId', String(rowId || ''));
+    if (window.selectedJmsPoNo) sessionStorage.setItem('selectedJmsPoNo', String(window.selectedJmsPoNo));
+    if (window.selectedJmsSiteId) sessionStorage.setItem('selectedJmsSiteId', String(window.selectedJmsSiteId));
+    sessionStorage.setItem('selectedJmsParentTask', String(normTask));
+  } catch(e) {}
+
   currentWorklistView = 'jms_detail';
   activeColumnFilters = {};
   loadWorklistDataset();
@@ -4025,16 +4149,42 @@ window.openJmsDetailPage = function(rowId) {
 async function loadJmsDetailFromApi(poNo, siteId) {
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.jms && NexusApi.commercial.jms.getPoDetails) {
     try {
+      const role = (typeof getAuthenticatedUserRole === 'function') ? getAuthenticatedUserRole() : '';
+      const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId) || (r.poNo && r.poNo === poNo));
       const res = await NexusApi.commercial.jms.getPoDetails(poNo, siteId);
       if (res && Array.isArray(res.lineItems) && res.lineItems.length > 0) {
-        currentDataset = res.lineItems.map(item => {
+        let currentTask = window.selectedJmsParentTask || (parentRow ? parentRow.task : '');
+        if (role === 'Project Manager') {
+          if (!String(currentTask).toLowerCase().includes('reject')) {
+            currentTask = 'Approval Pending';
+          } else {
+            currentTask = 'Rejected';
+          }
+        } else {
+          if (!currentTask) currentTask = 'JMS to be validate';
+        }
+        window.selectedJmsParentTask = currentTask;
+        const isApprovalPending = String(currentTask).trim().toLowerCase().includes('pending') || String(currentTask).trim().toLowerCase().includes('approval');
+        const isRejected = String(currentTask).trim().toLowerCase().includes('reject');
+
+        currentDataset = res.lineItems.map((item, lIdx) => {
           const rateVal = parseFloat(item.rate) || 0;
           const qtyVal = parseFloat(item.jmsQty) || 0;
           const amtVal = parseFloat(item.amount) || (rateVal * qtyVal);
-          const isAppr = (item.jmsStatus === 'Approved');
+          
+          let isAppr = false;
+          if (isApprovalPending) {
+            isAppr = true;
+          } else if (isRejected) {
+            isAppr = false;
+          } else {
+            isAppr = (item.jmsStatus === 'Approved');
+          }
+          const jmsStatus = isAppr ? 'Approved' : 'Not Approved';
+
           return {
             id: item.id,
-            lineNo: String(item.lineNo || ''),
+            lineNo: String(item.lineNo || ((lIdx + 1) * 10)),
             itemCode: item.itemCode || '',
             itemName: item.itemName || '',
             uom: item.uom || 'Nos',
@@ -4048,7 +4198,7 @@ async function loadJmsDetailFromApi(poNo, siteId) {
             materialDifference: item.materialDifference,
             amount: formatJmsSum(amtVal),
             rawAmount: amtVal,
-            jmsStatus: item.jmsStatus || 'Not Approved',
+            jmsStatus: jmsStatus,
             highlighted: isAppr,
             selected: false
           };
@@ -4058,14 +4208,25 @@ async function loadJmsDetailFromApi(poNo, siteId) {
           jmsDetailItemsMap[selectedJmsRowId] = currentDataset;
         }
 
-        const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => String(r.id) === String(selectedJmsRowId) || r.poNo === poNo);
         if (parentRow) {
           if (res.poType) parentRow.poType = res.poType;
-          if (res.task) {
-            parentRow.task = res.task;
-            window.selectedJmsParentTask = res.task;
+          if (role === 'Project Manager') {
+            parentRow.task = isRejected ? 'Rejected' : 'Approval Pending';
+            parentRow._userModified = true;
+          } else {
+            if (!parentRow.task || !['JMS to be validate', 'Approval Pending', 'Rejected'].includes(parentRow.task)) {
+              parentRow.task = window.selectedJmsParentTask || 'JMS to be validate';
+            }
           }
+          window.selectedJmsParentTask = parentRow.task;
         }
+
+        try {
+          sessionStorage.setItem('selectedJmsRowId', String(selectedJmsRowId || ''));
+          if (poNo) sessionStorage.setItem('selectedJmsPoNo', String(poNo));
+          if (siteId) sessionStorage.setItem('selectedJmsSiteId', String(siteId));
+          sessionStorage.setItem('selectedJmsParentTask', String(window.selectedJmsParentTask || ''));
+        } catch(e) {}
 
         const totalEl = document.getElementById('lblJmsDetailTotalAmount');
         if (totalEl) {
@@ -4146,59 +4307,36 @@ window.toggleJmsDetailSelectAll = function() {
 };
 
 window.highlightSelectedJmsDetailRows = async function() {
-  const isValidateTask = (String(window.selectedJmsParentTask || '').trim().toLowerCase() === 'jms to be validate');
-  
-  if (isValidateTask) {
-    const selectedRows = currentDataset.filter(r => r.selected);
-    if (!selectedRows || selectedRows.length === 0) {
-      showToast('Please select a row first.');
-      return;
-    }
-
-    const allAlreadyApproved = selectedRows.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
-    const newStatus = allAlreadyApproved ? 'Not Approved' : 'Approved';
-
-    // Call API to persist approved status in telecom_indus_po
-    const idsToApprove = selectedRows.map(r => r.id).filter(id => typeof id === 'number');
-    if (idsToApprove.length > 0 && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.approveRows) {
-      try {
-        await NexusApi.commercial.jms.approveRows(idsToApprove, newStatus);
-      } catch (err) {
-        console.error('Failed to update approval status via API:', err);
-        showToast('Error updating row approval status in database.');
-        return;
-      }
-    }
-
-    selectedRows.forEach(r => {
-      r.highlighted = (newStatus === 'Approved');
-      r.jmsStatus = newStatus;
-    });
-
-    applyFiltersAndRender();
-    updateJmsDetailActionIcons();
-    renderWorklistFooter();
-    showToast(newStatus === 'Approved' ? `Approved ${selectedRows.length} row${selectedRows.length > 1 ? 's' : ''}!` : `Unapproved ${selectedRows.length} row${selectedRows.length > 1 ? 's' : ''}.`);
+  const selectedRows = currentDataset.filter(r => r.selected);
+  if (!selectedRows || selectedRows.length === 0) {
+    showToast('Please select a row first.');
     return;
   }
 
-  // Preserve existing flow for other tasks
-  let count = 0;
-  currentDataset.forEach(r => {
-    if (r.selected || r.highlighted) {
-      r.highlighted = true;
-      r.selected = true;
-      count++;
+  const allAlreadyApproved = selectedRows.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
+  const newStatus = allAlreadyApproved ? 'Not Approved' : 'Approved';
+
+  // Call API to persist approved status in telecom_indus_po
+  const idsToApprove = selectedRows.map(r => r.id).filter(id => typeof id === 'number');
+  if (idsToApprove.length > 0 && typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.approveRows) {
+    try {
+      await NexusApi.commercial.jms.approveRows(idsToApprove, newStatus);
+    } catch (err) {
+      console.error('Failed to update approval status via API:', err);
+      showToast('Error updating row approval status in database.');
+      return;
     }
-  });
-  if (count > 0) {
-    applyFiltersAndRender();
-    updateJmsDetailActionIcons();
-    renderWorklistFooter();
-    showToast(`Validated and highlighted ${count} row${count > 1 ? 's' : ''}!`);
-  } else {
-    showToast('Please select a row first.');
   }
+
+  selectedRows.forEach(r => {
+    r.highlighted = (newStatus === 'Approved');
+    r.jmsStatus = newStatus;
+  });
+
+  applyFiltersAndRender();
+  updateJmsDetailActionIcons();
+  renderWorklistFooter();
+  showToast(newStatus === 'Approved' ? `Approved ${selectedRows.length} row${selectedRows.length > 1 ? 's' : ''}!` : `Unapproved ${selectedRows.length} row${selectedRows.length > 1 ? 's' : ''}.`);
 };
 
 let isJmsDetailEditMode = false;
@@ -4295,13 +4433,21 @@ window.addJmsDetailRow = function() {
 };
 
 window.updateJmsDetailActionIcons = function() {
+  const currentTask = String(window.selectedJmsParentTask || '').trim().toLowerCase();
+  const isApprovalPending = currentTask.includes('pending') || currentTask.includes('approval');
   const allApproved = currentDataset.length > 0 && currentDataset.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
   const hasSelected = currentDataset.some(r => r.selected || r.highlighted);
   const btnTick = document.getElementById('btnJmsDetailApproveTick');
   const btnEdit = document.getElementById('btnJmsDetailEdit');
-  const showApprovalIcons = !allApproved && hasSelected;
-  if (btnTick) btnTick.style.display = showApprovalIcons ? 'inline-flex' : 'none';
-  if (btnEdit) btnEdit.style.display = showApprovalIcons ? 'inline-flex' : 'none';
+  
+  if (isApprovalPending) {
+    if (btnTick) btnTick.style.display = 'none';
+    if (btnEdit) btnEdit.style.display = 'none';
+  } else {
+    const showApprovalIcons = !allApproved && hasSelected;
+    if (btnTick) btnTick.style.display = showApprovalIcons ? 'inline-flex' : 'none';
+    if (btnEdit) btnEdit.style.display = showApprovalIcons ? 'inline-flex' : 'none';
+  }
 
   const btnPoFilter = document.getElementById('btnJmsDetailPoFilter');
   const btnMatFilter = document.getElementById('btnJmsDetailMaterialFilter');
@@ -4322,8 +4468,8 @@ window.handleJmsDetailSubmitClick = async function() {
 
   if (taskStr.includes('pending') || taskStr.includes('approval')) {
     openJmsPdfUploadModal();
-  } else if (taskStr === 'jms to be validate' || taskStr.includes('validate')) {
-    // Where task is jms to be validate, verify all rows are approved
+  } else {
+    // Both 'JMS to be validate' and 'Rejected': verify all rows are approved
     const allApproved = currentDataset.length > 0 && currentDataset.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
     if (!allApproved) {
       showToast('Every line item must be approved before submission.');
@@ -4343,16 +4489,17 @@ window.handleJmsDetailSubmitClick = async function() {
       }
     }
 
-    // Transition task to 'JMS approval pending'
+    // Transition task to 'Approval Pending'
     if (parentRow) {
-      parentRow.task = "JMS approval pending";
+      parentRow.task = "Approval Pending";
+      parentRow._userModified = true;
     }
-    window.selectedJmsParentTask = "JMS approval pending";
+    window.selectedJmsParentTask = "Approval Pending";
     if (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) {
       const npRow = commercialWorklistData.find(np => np.poNo === poNo || String(np.id) === String(selectedJmsRowId));
       if (npRow) {
-        npRow.task = "JMS approval pending";
-        npRow.current_task = "JMS approval pending";
+        npRow.task = "Approval Pending";
+        npRow.current_task = "Approval Pending";
       }
       if (typeof localStorage !== 'undefined') {
         localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
@@ -4361,7 +4508,10 @@ window.handleJmsDetailSubmitClick = async function() {
     if (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData)) {
       const jRow = commercialJmsData.find(j => j.poNo === poNo || String(j.id) === String(selectedJmsRowId));
       if (jRow) {
-        jRow.task = "JMS approval pending";
+        jRow.task = "Approval Pending";
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('commercialJmsData', JSON.stringify(commercialJmsData));
       }
     }
 
@@ -4373,16 +4523,114 @@ window.handleJmsDetailSubmitClick = async function() {
     setTimeout(() => {
       backToJmsList();
     }, 1200);
-  } else if (taskStr === 'jms to be process' || taskStr.includes('process') || taskStr.includes('commercial')) {
-    // For PO of 'JMS to be process', when user approves all lines and clicks submit icon, Select Work Type modal appears
-    const allApproved = currentDataset.length > 0 && currentDataset.every(r => (r.highlighted || r.jmsStatus === 'Approved'));
-    if (!allApproved) {
-      showToast('Every line item must be approved before submission.');
-      return;
+  }
+};
+
+let isRejectingJmsRow = false;
+window.handleJmsDetailRejectClick = async function() {
+  if (isRejectingJmsRow) return;
+
+  const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => 
+    String(r.id) === String(selectedJmsRowId) || (window.selectedJmsPoNo && r.poNo === window.selectedJmsPoNo)
+  );
+  const poNo = window.selectedJmsPoNo || (parentRow && parentRow.poNo);
+  const siteId = window.selectedJmsSiteId || (parentRow && parentRow.siteId);
+
+  if (!poNo) {
+    showToast('No PO selected to reject.');
+    return;
+  }
+
+  const btnReject = document.getElementById('btnJmsDetailReject') || document.getElementById('btnJmsApprovalPendingReject');
+  const origBtnOpacity = btnReject ? btnReject.style.opacity : '1';
+  const origBtnPointerEvents = btnReject ? btnReject.style.pointerEvents : 'auto';
+
+  try {
+    isRejectingJmsRow = true;
+    if (btnReject) {
+      btnReject.disabled = true;
+      btnReject.style.opacity = '0.5';
+      btnReject.style.pointerEvents = 'none';
     }
-    openJmsSelectWorkTypeModal();
-  } else {
-    submitJmsDetail();
+
+    let rejResult = null;
+    if (typeof NexusApi !== 'undefined' && NexusApi.commercial?.jms?.rejectRow) {
+      rejResult = await NexusApi.commercial.jms.rejectRow(poNo, siteId, 'jms');
+    } else {
+      const resp = await fetch('/api/v1/commercial/jms/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-user-role': (typeof getAuthenticatedUserRole === 'function' ? getAuthenticatedUserRole() : 'Project Manager') },
+        body: JSON.stringify({ poNo, siteId, workflow: 'jms' })
+      });
+      if (!resp.ok) {
+        let errDetail = 'Failed to reject JMS';
+        try {
+          const errJson = await resp.json();
+          if (errJson && errJson.detail) errDetail = errJson.detail;
+        } catch (e) {}
+        throw new Error(errDetail);
+      }
+      rejResult = await resp.json();
+    }
+
+    if (selectedJmsRowId && jmsDetailItemsMap[selectedJmsRowId]) {
+      jmsDetailItemsMap[selectedJmsRowId].forEach(it => {
+        it.highlighted = false;
+        it.jmsStatus = 'Not Approved';
+        it.selected = false;
+      });
+    }
+
+    if (parentRow) {
+      parentRow.task = 'Rejected';
+      parentRow._userModified = true;
+    }
+    window.selectedJmsParentTask = 'Rejected';
+
+    if (typeof commercialWorklistData !== 'undefined' && Array.isArray(commercialWorklistData)) {
+      const npRow = commercialWorklistData.find(np => np.poNo === poNo || String(np.id) === String(selectedJmsRowId));
+      if (npRow) {
+        npRow.task = 'Rejected';
+        npRow.current_task = 'Rejected';
+        npRow.project_status = 'Rejected';
+        npRow.status = 'Rejected';
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('commercialWorklistData', JSON.stringify(commercialWorklistData));
+      }
+    }
+
+    if (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData)) {
+      const jRow = commercialJmsData.find(j => j.poNo === poNo || String(j.id) === String(selectedJmsRowId));
+      if (jRow) {
+        jRow.task = 'Rejected';
+        jRow._userModified = true;
+      }
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('commercialJmsData', JSON.stringify(commercialJmsData));
+      }
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`PO #${poNo} JMS rejected successfully.`, 'Task Completed');
+    } else {
+      showToast(`PO #${poNo} JMS rejected successfully.`);
+    }
+
+    setTimeout(() => {
+      backToJmsList();
+    }, 1200);
+
+  } catch (err) {
+    console.error('Error rejecting JMS:', err);
+    showToast(err.message || 'Failed to reject JMS');
+  } finally {
+    isRejectingJmsRow = false;
+    if (btnReject) {
+      btnReject.disabled = false;
+      btnReject.style.opacity = origBtnOpacity;
+      btnReject.style.pointerEvents = origBtnPointerEvents;
+    }
   }
 };
 
@@ -4429,22 +4677,20 @@ window.submitJmsPdfUpload = function() {
 };
 
 window.submitJmsDetail = function() {
-  if (selectedJmsRowId) {
-    const parentRow = commercialJmsData.find(r => String(r.id) === String(selectedJmsRowId));
-    if (parentRow) {
-      const taskStr = (parentRow.task || '').toLowerCase();
-      if (taskStr === 'jms to be process' || taskStr.includes('process')) {
-        const idx = commercialJmsData.findIndex(r => String(r.id) === String(selectedJmsRowId));
-        if (idx !== -1) {
-          commercialJmsData.splice(idx, 1);
-        }
-      } else {
-        parentRow.task = "JMS to be process";
-      }
-    }
+  const role = (typeof getAuthenticatedUserRole === 'function') ? getAuthenticatedUserRole() : '';
+  const poNo = window.selectedJmsPoNo;
+  const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => 
+    String(r.id) === String(selectedJmsRowId) || (poNo && r.poNo === poNo)
+  );
+  if (parentRow) {
+    parentRow.task = (role === 'Project Manager') ? "Approved" : "Approval Pending";
+    parentRow._userModified = true;
+  }
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('commercialJmsData', JSON.stringify(commercialJmsData));
   }
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('JMS validation completed and submitted successfully!', 'Task Completed');
+    showSvgSuccessPopup('JMS document uploaded and submitted successfully!', 'Task Completed');
   } else {
     showToast('Task completed successfully!');
   }
@@ -4835,34 +5081,60 @@ function getCommercialDashboardData(pageName) {
   let totalAmount = 0;
 
   if (pName.includes('jms')) {
-    const list = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData) && commercialJmsData.length > 0)
-      ? commercialJmsData
-      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'jms')
-        ? currentDataset
-        : (typeof defaultJmsItems !== 'undefined' ? defaultJmsItems : []));
+    const role = (typeof getAuthenticatedUserRole === 'function') ? getAuthenticatedUserRole() : '';
+    const list = (role === 'Project Manager' && typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'jms' && currentDataset.length > 0)
+      ? currentDataset
+      : ((typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData) && commercialJmsData.length > 0)
+        ? commercialJmsData
+        : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'jms')
+          ? currentDataset
+          : (typeof defaultJmsItems !== 'undefined' ? defaultJmsItems : [])));
 
     let validateAmt = 0, validateCount = 0;
-    let processAmt = 0, processCount = 0;
+    let pendingAmt = 0, pendingCount = 0;
+    let rejectedAmt = 0, rejectedCount = 0;
 
     list.forEach(r => {
       const amt = (r.rawAmount !== undefined && r.rawAmount !== null && !isNaN(Number(r.rawAmount)))
         ? Number(r.rawAmount)
         : (r.amount ? (parseFloat(String(r.amount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
       const t = String(r.task || '').toLowerCase();
-      if (t.includes('process')) {
-        processAmt += amt;
-        processCount++;
+      if (role === 'Project Manager') {
+        if (t.includes('reject')) {
+          rejectedAmt += amt;
+          rejectedCount++;
+        } else {
+          pendingAmt += amt;
+          pendingCount++;
+        }
       } else {
-        validateAmt += amt;
-        validateCount++;
+        if (t.includes('reject')) {
+          rejectedAmt += amt;
+          rejectedCount++;
+        } else if (t.includes('pending') || t.includes('approval')) {
+          pendingAmt += amt;
+          pendingCount++;
+        } else {
+          validateAmt += amt;
+          validateCount++;
+        }
       }
     });
 
-    categories = [
-      { label: 'JMS To be Validate', color: '#0057e7', amount: validateAmt, count: validateCount },
-      { label: 'JMS To be Process', color: '#ffa700', amount: processAmt, count: processCount }
-    ];
-    totalAmount = validateAmt + processAmt;
+    if (role === 'Project Manager') {
+      categories = [
+        { label: 'Approval Pending', color: '#ffa700', amount: pendingAmt, count: pendingCount },
+        { label: 'Rejected', color: '#ef4444', amount: rejectedAmt, count: rejectedCount }
+      ];
+      totalAmount = pendingAmt + rejectedAmt;
+    } else {
+      categories = [
+        { label: 'JMS To be Validate', color: '#0057e7', amount: validateAmt, count: validateCount },
+        { label: 'Approval Pending', color: '#ffa700', amount: pendingAmt, count: pendingCount },
+        { label: 'Rejected', color: '#ef4444', amount: rejectedAmt, count: rejectedCount }
+      ];
+      totalAmount = validateAmt + pendingAmt + rejectedAmt;
+    }
 
   } else if (pName.includes('po amend') || pName.includes('po_amend')) {
     const list = (typeof commercialPoAmendData !== 'undefined' && Array.isArray(commercialPoAmendData) && commercialPoAmendData.length > 0)
@@ -5008,6 +5280,114 @@ function getCommercialDashboardData(pageName) {
       { label: 'Received amount', color: '#008744', amount: receivedAmt, count: receivedCount || list.length }
     ];
     totalAmount = receivableAmt + receivedAmt;
+  } else if (pName.includes('srn')) {
+    const list = (typeof worklistSrnData !== 'undefined' && Array.isArray(worklistSrnData) && worklistSrnData.length > 0)
+      ? worklistSrnData
+      : ((typeof wmSrnDataStore !== 'undefined' && Array.isArray(wmSrnDataStore) && wmSrnDataStore.length > 0)
+        ? wmSrnDataStore
+        : (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) ? currentDataset : []));
+    let completedAmt = 0, completedCount = 0;
+    let pendingAmt = 0, pendingCount = 0;
+    list.forEach(r => {
+      const amt = (r.rawAmount !== undefined && r.rawAmount !== null && !isNaN(Number(r.rawAmount)))
+        ? Number(r.rawAmount)
+        : (r.amount ? (parseFloat(String(r.amount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const st = String(r.status || r.srnStatus || '').toLowerCase();
+      if (st.includes('complete') || st.includes('approved') || st.includes('closed')) {
+        completedAmt += amt;
+        completedCount++;
+      } else {
+        pendingAmt += amt;
+        pendingCount++;
+      }
+    });
+    categories = [
+      { label: 'Completed SRN', color: '#008744', amount: completedAmt, count: completedCount },
+      { label: 'Pending SRN', color: '#ffa700', amount: pendingAmt, count: pendingCount }
+    ];
+    totalAmount = completedAmt + pendingAmt;
+  } else if (pName.includes('stn')) {
+    const list = (typeof worklistStnData !== 'undefined' && Array.isArray(worklistStnData) && worklistStnData.length > 0)
+      ? worklistStnData
+      : ((typeof wmStnDataStore !== 'undefined' && Array.isArray(wmStnDataStore) && wmStnDataStore.length > 0)
+        ? wmStnDataStore
+        : (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) ? currentDataset : []));
+    let dispatchedAmt = 0, dispatchedCount = 0;
+    let pendingAmt = 0, pendingCount = 0;
+    list.forEach(r => {
+      const amt = (r.rawAmount !== undefined && r.rawAmount !== null && !isNaN(Number(r.rawAmount)))
+        ? Number(r.rawAmount)
+        : (r.amount ? (parseFloat(String(r.amount).replace(/[^0-9.-]+/g, '')) || 0) : 0);
+      const st = String(r.status || r.stnStatus || '').toLowerCase();
+      if (st.includes('dispatch') || st.includes('complete') || st.includes('approved')) {
+        dispatchedAmt += amt;
+        dispatchedCount++;
+      } else {
+        pendingAmt += amt;
+        pendingCount++;
+      }
+    });
+    categories = [
+      { label: 'Dispatched STN', color: '#0057e7', amount: dispatchedAmt, count: dispatchedCount },
+      { label: 'Pending STN', color: '#ffa700', amount: pendingAmt, count: pendingCount }
+    ];
+    totalAmount = dispatchedAmt + pendingAmt;
+  } else if (pName.includes('payment')) {
+    const list = (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset) && currentWorklistView === 'payment' && filteredDataset.length > 0)
+      ? filteredDataset
+      : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && currentWorklistView === 'payment' && currentDataset.length > 0)
+        ? currentDataset
+        : ((typeof paymentData !== 'undefined' && Array.isArray(paymentData) && paymentData.length > 0)
+          ? paymentData
+          : ((typeof accountsPaymentData !== 'undefined' && Array.isArray(accountsPaymentData) && accountsPaymentData.length > 0)
+            ? accountsPaymentData
+            : ((typeof wmPaymentDataStore !== 'undefined' && Array.isArray(wmPaymentDataStore) && wmPaymentDataStore.length > 0)
+              ? wmPaymentDataStore
+              : []))));
+
+    const parseAmt = (val) => {
+      if (val === undefined || val === null) return 0;
+      if (typeof val === 'number') return isNaN(val) ? 0 : val;
+      const cleaned = String(val).replace(/[^0-9.-]+/g, '').trim();
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    };
+
+    let totalApproved = 0, approvedCount = 0;
+    let totalTransferred = 0, transferredCount = 0;
+    let totalPayable = 0, payableCount = 0;
+
+    list.forEach(r => {
+      const appr = (r.raw_approved !== undefined && r.raw_approved !== null)
+        ? Number(r.raw_approved)
+        : parseAmt(r.approvedAmount || r.approved || r.amount);
+
+      const trans = (r.raw_transferred !== undefined && r.raw_transferred !== null)
+        ? Number(r.raw_transferred)
+        : parseAmt(r.transferredAmount || r.transferred || r.paid);
+
+      const pay = (r.raw_payable !== undefined && r.raw_payable !== null)
+        ? Number(r.raw_payable)
+        : (r.payableAmount !== undefined || r.payable !== undefined
+          ? parseAmt(r.payableAmount || r.payable)
+          : Math.max(0, appr - trans));
+
+      totalApproved += appr;
+      if (appr > 0) approvedCount++;
+
+      totalTransferred += trans;
+      if (trans > 0) transferredCount++;
+
+      totalPayable += pay;
+      if (pay > 0) payableCount++;
+    });
+
+    categories = [
+      { label: 'Approved', color: '#008744', amount: totalApproved, count: approvedCount || list.length },
+      { label: 'Transferred', color: '#ffa700', amount: totalTransferred, count: transferredCount || list.length },
+      { label: 'Payable', color: '#ef4444', amount: totalPayable, count: payableCount || list.length }
+    ];
+    totalAmount = totalApproved + totalTransferred + totalPayable;
   }
 
   return { categories, totalAmount };
@@ -5187,11 +5567,16 @@ window.openCommercialDashboard = function(pageName) {
   const panel = document.getElementById('commercialDashboardModal');
   if (!panel || !overlay) return;
 
-  // If already open for this page, toggle it closed
+  const now = Date.now();
+  // If already open for this page, toggle it closed (guard against double trigger from multiple listeners within 400ms)
   if (panel.style.display === 'block' && window._currentCommercialDashboardPage === pageName) {
+    if (window._lastCommercialDashboardOpenTime && (now - window._lastCommercialDashboardOpenTime < 400)) {
+      return;
+    }
     closeCommercialDashboard();
     return;
   }
+  window._lastCommercialDashboardOpenTime = now;
 
   // Hide any existing open modal panel inside overlay
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
@@ -6250,7 +6635,7 @@ window.submitPoAmendStatusModal = async function() {
     } else {
       const resp = await fetch('/api/v1/commercial/jms/submit-amendment-status', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-role': 'Commercial Manager' },
+        headers: { 'Content-Type': 'application/json', 'x-user-role': (typeof getAuthenticatedUserRole === 'function' ? getAuthenticatedUserRole() : 'Project Manager') },
         body: JSON.stringify({ poNo, siteId, workflow: 'po_amend', revisionNo: revNo, approvedDate })
       });
       if (!resp.ok) {
@@ -6359,7 +6744,7 @@ window.rejectCurrentPoAmendRow = async function() {
     } else {
       const resp = await fetch('/api/v1/commercial/jms/reject', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-user-role': 'Commercial Manager' },
+        headers: { 'Content-Type': 'application/json', 'x-user-role': (typeof getAuthenticatedUserRole === 'function' ? getAuthenticatedUserRole() : 'Project Manager') },
         body: JSON.stringify({ poNo, siteId, workflow: 'po_amend' })
       });
       if (!resp.ok) {
@@ -9992,11 +10377,41 @@ const SRN_STATUS_SEQUENCE = [
   'To Be Returned'
 ];
 
+const STN_STATUS_ORDER = [
+  'BOQ Request Pending',
+  'BOQ Pending',
+  'Dispatch Request Pending',
+  'Dispatch Approval Pending',
+  'Dispatch Pending',
+  'Dispatched',
+  'Received'
+];
+
+const STN_STATUS_RANK = {
+  'BOQ Request Pending': 1,
+  'BOQ Pending': 2,
+  'Dispatch Request Pending': 3,
+  'Dispatch Approval Pending': 4,
+  'Dispatch Pending': 5,
+  'Dispatched': 6,
+  'Received': 7
+};
+
+function sortStnByStatusOrder(items) {
+  if (!Array.isArray(items)) return items;
+  return [...items].sort((a, b) => {
+    const rankA = STN_STATUS_RANK[a.status] !== undefined ? STN_STATUS_RANK[a.status] : 99;
+    const rankB = STN_STATUS_RANK[b.status] !== undefined ? STN_STATUS_RANK[b.status] : 99;
+    return rankA - rankB;
+  });
+}
+
 const defaultWorklistStnItems = [
   {
     id: "stn-1",
     stnNo: "STN-2026-001",
-    boqNo: "BOQ-2026-101",
+    boqNo: "",
+    boqDate: "",
     projectId: "PRJ-2026-001",
     siteName: "Guindy Central Hub",
     infraCategory: "Civil",
@@ -10004,12 +10419,15 @@ const defaultWorklistStnItems = [
     status: "BOQ Request Pending",
     ageing: "3 Days",
     remarks: "i-map pending",
+    receivedLocation: "",
+    receivedBy: "",
     selected: false
   },
   {
     id: "stn-2",
     stnNo: "STN-2026-002",
     boqNo: "BOQ-2026-102",
+    boqDate: "2026-08-10",
     projectId: "PRJ-2026-002",
     siteName: "Ambattur Industrial Estate",
     infraCategory: "Electrical",
@@ -10017,58 +10435,88 @@ const defaultWorklistStnItems = [
     status: "BOQ Pending",
     ageing: "6 Days",
     remarks: "received",
+    receivedLocation: "",
+    receivedBy: "",
     selected: false
   },
   {
     id: "stn-3",
     stnNo: "STN-2026-003",
     boqNo: "BOQ-2026-103",
+    boqDate: "2026-08-12",
     projectId: "PRJ-2026-003",
     siteName: "Madurai East Tower",
     infraCategory: "Power",
     qty: "8.00",
-    status: "To be Taken",
-    ageing: "11 Days",
+    status: "Dispatch Request Pending",
+    ageing: "9 Days",
     remarks: "i-map pending",
+    receivedLocation: "",
+    receivedBy: "",
     selected: false
   },
   {
     id: "stn-4",
     stnNo: "STN-2026-004",
     boqNo: "BOQ-2026-104",
+    boqDate: "2026-08-14",
     projectId: "PRJ-2026-004",
     siteName: "Coimbatore South Hub",
     infraCategory: "Tower Infra",
-    qty: "4.00",
-    status: "Dispatch Request Pending",
-    ageing: "14 Days",
+    qty: "12.00",
+    status: "Dispatch Approval Pending",
+    ageing: "12 Days",
     remarks: "received",
+    receivedLocation: "",
+    receivedBy: "",
     selected: false
   },
   {
     id: "stn-5",
     stnNo: "STN-2026-005",
     boqNo: "BOQ-2026-105",
+    boqDate: "2026-08-16",
     projectId: "PRJ-2026-005",
     siteName: "Salem Steel Plant Node",
     infraCategory: "Telecom",
     qty: "18.00",
-    status: "Dispatch Request Send",
-    ageing: "18 Days",
+    status: "Dispatch Pending",
+    ageing: "15 Days",
     remarks: "i-map pending",
+    receivedLocation: "",
+    receivedBy: "",
     selected: false
   },
   {
     id: "stn-6",
     stnNo: "STN-2026-006",
     boqNo: "BOQ-2026-106",
+    boqDate: "2026-08-18",
     projectId: "PRJ-2026-006",
     siteName: "Trichy Central Junction",
     infraCategory: "Civil",
     qty: "30.00",
-    status: "Taken",
-    ageing: "22 Days",
+    status: "Dispatched",
+    ageing: "18 Days",
     remarks: "received",
+    receivedLocation: "",
+    receivedBy: "",
+    selected: false
+  },
+  {
+    id: "stn-7",
+    stnNo: "STN-2026-007",
+    boqNo: "BOQ-2026-107",
+    boqDate: "2026-08-20",
+    projectId: "PRJ-2026-007",
+    siteName: "Tirunelveli Solar Park",
+    infraCategory: "Solar",
+    qty: "15.00",
+    status: "Received",
+    ageing: "21 Days",
+    remarks: "received",
+    receivedLocation: "",
+    receivedBy: "",
     selected: false
   }
 ];
@@ -10166,28 +10614,77 @@ function normalizeWorklistRemarksVal(rem, idx = 0) {
   return (idx % 2 === 0) ? 'i-map pending' : 'received';
 }
 
-let worklistStnData = defaultWorklistStnItems.map((item, idx) => ({
-  ...item,
-  qty: normalizeWorklistQtyVal(item.qty),
-  remarks: normalizeWorklistRemarksVal(item.remarks, idx)
-}));
+function normalizeWorklistStnItem(item, idx = 0) {
+  const hasNoBoq = (!item.boqNo || !String(item.boqNo).trim()) && (!item.boqDate || !String(item.boqDate).trim());
+  let st = item.status;
+  if (hasNoBoq) {
+    st = 'BOQ Request Pending';
+  }
+  return {
+    ...item,
+    status: st,
+    boqNo: item.boqNo || '',
+    boqDate: item.boqDate || '',
+    receivedLocation: item.receivedLocation || item.received_location || '',
+    receivedBy: item.receivedBy || item.received_by || '',
+    qty: normalizeWorklistQtyVal(item.qty),
+    remarks: normalizeWorklistRemarksVal(item.remarks, idx)
+  };
+}
 
-let worklistSrnData = defaultWorklistSrnItems.map((item, idx) => ({
-  ...item,
-  qty: normalizeWorklistQtyVal(item.qty),
-  remarks: normalizeWorklistRemarksVal(item.remarks, idx)
-}));
+let worklistStnData = defaultWorklistStnItems.map((item, idx) => normalizeWorklistStnItem(item, idx));
+
+window.loadWorklistStnFromApi = async function() {
+  try {
+    const res = await fetch('/api/v1/commercial/stn');
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json.data) && json.data.length > 0) {
+        worklistStnData = json.data.map((item, idx) => normalizeWorklistStnItem(item, idx));
+        worklistStnData = sortStnByStatusOrder(worklistStnData);
+        try {
+          localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
+        } catch(e) {}
+        if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'stn') {
+          currentDataset = sortStnByStatusOrder(worklistStnData.map(r => ({ ...r })));
+          filteredDataset = [...currentDataset];
+          if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error loading STN data from API:', err);
+  }
+};
 
 try {
   const savedStn = localStorage.getItem('worklistStnData');
   if (savedStn) {
     const parsed = JSON.parse(savedStn);
     if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].stnNo) {
-      worklistStnData = parsed.map((item, idx) => ({
-        ...item,
-        qty: normalizeWorklistQtyVal(item.qty),
-        remarks: normalizeWorklistRemarksVal(item.remarks, idx)
-      }));
+      const statusMigrationMap = {
+        'To be Taken': 'Dispatch Request Pending',
+        'Dispatch Request Send': 'Dispatch Approval Pending',
+        'Taken': 'Dispatched'
+      };
+      worklistStnData = parsed.map((item, idx) => {
+        const migratedStatus = statusMigrationMap[item.status] || item.status;
+        return normalizeWorklistStnItem({
+          ...item,
+          status: migratedStatus
+        }, idx);
+      });
+      // Deduplicate by stnNo in case previous duplicate rows were stored in localStorage
+      const seenStnNos = new Set();
+      const deduped = [];
+      worklistStnData.forEach(item => {
+        const key = String(item.stnNo || item.id || '').trim();
+        if (key && !seenStnNos.has(key)) {
+          seenStnNos.add(key);
+          deduped.push(item);
+        }
+      });
+      worklistStnData = sortStnByStatusOrder(deduped);
     }
   }
 } catch(e) {}
@@ -10235,7 +10732,8 @@ function parseUrlAndApplyState() {
     savedModule = sessionStorage.getItem('nexus_module');
     savedProjectsView = sessionStorage.getItem('nexus_projects_view');
   } catch(e) {}
-  const effectiveModule = moduleParam || (savedModule === 'projects' || savedProjectsView === 'project_material' || savedProjectsView === 'project_expenses' ? 'projects' : null);
+  const isWorklistViewParam = ['srn', 'stn', 'jms', 'materials', 'payment', 'project_update', 'yts', 'wip', 'hold', 'nr', 'new_project', 'pr', 'min', 'mrn', 'mtn'].includes(viewParam);
+  const effectiveModule = moduleParam || (isWorklistViewParam ? 'worklist' : (savedModule === 'projects' || savedProjectsView === 'project_material' || savedProjectsView === 'project_expenses' ? 'projects' : null));
   const effectiveView = viewParam || (effectiveModule === 'projects' ? savedProjectsView : null);
 
   if (moduleParam === 'master') {
@@ -10460,14 +10958,29 @@ function parseUrlAndApplyState() {
       } else {
         currentWorklistView = pmViews.includes(viewParam) ? viewParam : 'new_project';
       }
+      if (viewParam === 'jms_detail') {
+        const poParam = params.get('po_no') || sessionStorage.getItem('selectedJmsPoNo');
+        const siteParam = params.get('site_id') || sessionStorage.getItem('selectedJmsSiteId');
+        const rowIdParam = params.get('row_id') || sessionStorage.getItem('selectedJmsRowId');
+        let taskParam = params.get('task') || sessionStorage.getItem('selectedJmsParentTask');
+        if (!taskParam || !taskParam.toLowerCase().includes('reject')) {
+          taskParam = 'Approval Pending';
+        } else {
+          taskParam = 'Rejected';
+        }
+        if (poParam) window.selectedJmsPoNo = poParam;
+        if (siteParam) window.selectedJmsSiteId = siteParam;
+        if (rowIdParam) selectedJmsRowId = rowIdParam;
+        window.selectedJmsParentTask = taskParam;
+      }
     } else if (role === 'Commercial Manager') {
       const commercialViews = ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'];
       currentWorklistView = commercialViews.includes(viewParam) ? viewParam : 'new_project';
       if (viewParam === 'jms_detail') {
-        const poParam = params.get('po_no');
-        const siteParam = params.get('site_id');
-        const rowIdParam = params.get('row_id');
-        const taskParam = params.get('task');
+        const poParam = params.get('po_no') || sessionStorage.getItem('selectedJmsPoNo');
+        const siteParam = params.get('site_id') || sessionStorage.getItem('selectedJmsSiteId');
+        const rowIdParam = params.get('row_id') || sessionStorage.getItem('selectedJmsRowId');
+        const taskParam = params.get('task') || sessionStorage.getItem('selectedJmsParentTask');
         if (poParam) window.selectedJmsPoNo = poParam;
         if (siteParam) window.selectedJmsSiteId = siteParam;
         if (rowIdParam) selectedJmsRowId = rowIdParam;
@@ -10914,6 +11427,12 @@ function switchModule(moduleName) {
     if (currentWorklistView === 'payment' && typeof window.loadMasterPaymentDataFromApi === 'function') {
       window.loadMasterPaymentDataFromApi(true);
     }
+    try {
+      sessionStorage.setItem('nexus_module', 'worklist');
+      sessionStorage.removeItem('nexus_projects_view');
+      sessionStorage.removeItem('nexus_project_context');
+      sessionStorage.removeItem('nexus_project_worklist_origin');
+    } catch(e) {}
   } else if (moduleName === 'projects') {
     currentProjectsSubpage = 'projects';
     currentProjectsView = 'main';
@@ -11191,10 +11710,22 @@ function updateURL() {
   }
 
   if (currentModule === 'worklist' && currentWorklistView === 'jms_detail') {
-    if (window.selectedJmsPoNo) url.searchParams.set('po_no', window.selectedJmsPoNo);
-    if (window.selectedJmsSiteId) url.searchParams.set('site_id', window.selectedJmsSiteId);
-    if (selectedJmsRowId) url.searchParams.set('row_id', selectedJmsRowId);
-    if (window.selectedJmsParentTask) url.searchParams.set('task', window.selectedJmsParentTask);
+    if (window.selectedJmsPoNo) {
+      url.searchParams.set('po_no', window.selectedJmsPoNo);
+      try { sessionStorage.setItem('selectedJmsPoNo', window.selectedJmsPoNo); } catch(e) {}
+    }
+    if (window.selectedJmsSiteId) {
+      url.searchParams.set('site_id', window.selectedJmsSiteId);
+      try { sessionStorage.setItem('selectedJmsSiteId', window.selectedJmsSiteId); } catch(e) {}
+    }
+    if (selectedJmsRowId) {
+      url.searchParams.set('row_id', selectedJmsRowId);
+      try { sessionStorage.setItem('selectedJmsRowId', selectedJmsRowId); } catch(e) {}
+    }
+    if (window.selectedJmsParentTask) {
+      url.searchParams.set('task', window.selectedJmsParentTask);
+      try { sessionStorage.setItem('selectedJmsParentTask', window.selectedJmsParentTask); } catch(e) {}
+    }
   } else if (currentModule === 'worklist' && currentWorklistView === 'min_detail' && activeWmMinRowId) {
     url.searchParams.set('site_id', activeWmMinRowId);
   } else if (currentModule === 'worklist' && currentWorklistView === 'mrn_detail' && activeWmMrnRowId) {
@@ -15119,9 +15650,83 @@ window.updatePmStnInstallationTypeVisibility = function() {
   }
 };
 
+window.pmInfraItemsCache = [];
+
+async function populatePmInfraDropdowns(selectedCategory = '', selectedDesc = '') {
+  const selCat = document.getElementById('inpPmStnItemCategory');
+  const selDesc = document.getElementById('inpPmStnInfraDesc');
+  if (!selCat && !selDesc) return;
+
+  try {
+    let items = [];
+    if (window.NexusApi && window.NexusApi.indusInfra && typeof window.NexusApi.indusInfra.getAll === 'function') {
+      const resp = await window.NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      items = (resp && Array.isArray(resp.items)) ? resp.items : [];
+    } else {
+      const apiBase = (window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1';
+      const res = await fetch(`${apiBase}/customer/indus/infra?page_size=500`);
+      if (res.ok) {
+        const json = await res.json();
+        items = Array.isArray(json.items) ? json.items : (Array.isArray(json) ? json : []);
+      }
+    }
+    window.pmInfraItemsCache = items;
+
+    const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s => String(s));
+
+    // Categories
+    const categories = Array.from(new Set(items.map(it => it.infra_category || it.infraCategory).filter(Boolean))).sort();
+    if (selCat) {
+      selCat.innerHTML = '<option value="" disabled selected>Select Infra Category</option>' +
+        categories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+      if (selectedCategory && categories.includes(selectedCategory)) {
+        selCat.value = selectedCategory;
+      }
+    }
+
+    // Descriptions
+    const descriptions = Array.from(new Set(items.map(it => it.infra_description || it.infraDescription).filter(Boolean))).sort();
+    if (selDesc) {
+      selDesc.innerHTML = '<option value="" disabled selected>Select Infra Description</option>' +
+        descriptions.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+      if (selectedDesc && descriptions.includes(selectedDesc)) {
+        selDesc.value = selectedDesc;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to populate PM infra dropdowns:', err);
+  }
+}
+window.populatePmInfraDropdowns = populatePmInfraDropdowns;
+
+window.handlePmInfraCategoryChange = function(categoryVal) {
+  const selDesc = document.getElementById('inpPmStnInfraDesc');
+  if (!selDesc || !window.pmInfraItemsCache) return;
+  const filtered = window.pmInfraItemsCache.filter(it => (it.infra_category || it.infraCategory) === categoryVal);
+  const descs = Array.from(new Set((filtered.length > 0 ? filtered : window.pmInfraItemsCache).map(it => it.infra_description || it.infraDescription).filter(Boolean))).sort();
+  const currentVal = selDesc.value;
+  const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s => String(s));
+  selDesc.innerHTML = '<option value="" disabled selected>Select Infra Description</option>' +
+    descs.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+  if (currentVal && descs.includes(currentVal)) {
+    selDesc.value = currentVal;
+  }
+};
+
+window.handlePmInfraDescChange = function(descVal) {
+  const selCat = document.getElementById('inpPmStnItemCategory');
+  if (!selCat || !window.pmInfraItemsCache) return;
+  const match = window.pmInfraItemsCache.find(it => (it.infra_description || it.infraDescription) === descVal);
+  if (match && (match.infra_category || match.infraCategory)) {
+    selCat.value = match.infra_category || match.infraCategory;
+  }
+};
+
 window.openPmAddStnMaterialsModal = function(editItem) {
   const overlay = document.getElementById('sideFormOverlay');
   if (!overlay) return;
+
+  populatePmInfraDropdowns(editItem ? editItem.itemCategory : '', editItem ? editItem.infraDesc : '');
 
   const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
   cards.forEach(card => {
@@ -18491,6 +19096,38 @@ document.addEventListener('click', function(e) {
   }
 });
 
+async function populatePmActivityOptions() {
+  const sel = document.getElementById('selAddActivityName');
+  if (!sel) return;
+  try {
+    let items = [];
+    if (window.NexusApi && window.NexusApi.indusProjects && typeof window.NexusApi.indusProjects.getActivities === 'function') {
+      const resp = await window.NexusApi.indusProjects.getActivities();
+      items = (resp && Array.isArray(resp.items)) ? resp.items : [];
+    } else {
+      const apiBase = (window.NexusApi && window.NexusApi.baseUrl) ? window.NexusApi.baseUrl : 'http://127.0.0.1:8000/api/v1';
+      const res = await fetch(`${apiBase}/customer/indus/projects/activities/list`);
+      if (res.ok) {
+        const json = await res.json();
+        items = Array.isArray(json.items) ? json.items : (Array.isArray(json) ? json : []);
+      }
+    }
+    const currentVal = sel.value;
+    const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s => String(s));
+    const activities = Array.from(new Set(items.map(it => it.activity).filter(Boolean))).sort();
+    if (activities.length > 0) {
+      sel.innerHTML = '<option value="" disabled selected>Select Activity</option>' +
+        activities.map(act => `<option value="${esc(act)}">${esc(act)}</option>`).join('');
+      if (currentVal && activities.includes(currentVal)) {
+        sel.value = currentVal;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to populate PM activity options:', err);
+  }
+}
+window.populatePmActivityOptions = populatePmActivityOptions;
+
 window.openAddActivityModal = async function() {
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) {
@@ -18519,6 +19156,7 @@ window.openAddActivityModal = async function() {
   modal.style.display = 'block';
   if (overlay) overlay.style.display = 'flex';
 
+  await populatePmActivityOptions();
   await window.fetchNonStandardGbpaItems();
 };
 
@@ -32432,7 +33070,11 @@ function loadWorklistDataset() {
   }
 
   if (currentWorklistView === 'stn') {
-    currentDataset = worklistStnData.map(item => ({ ...item }));
+    if (typeof loadWorklistStnFromApi === 'function' && (!worklistStnData || worklistStnData.length === 0 || !window._stnLoadedFromApi)) {
+      window._stnLoadedFromApi = true;
+      loadWorklistStnFromApi();
+    }
+    currentDataset = sortStnByStatusOrder(worklistStnData.map(item => normalizeWorklistStnItem(item)));
     filteredDataset = [...currentDataset];
     return;
   }
@@ -32507,23 +33149,55 @@ function loadWorklistDataset() {
       if (typeof loadCommercialProjectsFromApi === 'function' && (!commercialWorklistData || commercialWorklistData.length === 0)) {
         loadCommercialProjectsFromApi();
       }
-      const pmJmsTasks = ["JMS to be validate", "JMS approval pending"];
-      currentDataset = commercialJmsData.map((item, idx) => {
-        let pmTask = pmJmsTasks[idx % pmJmsTasks.length];
-        const tLower = (item.task || '').toLowerCase();
-        if (tLower.includes('validate') || tLower.includes('process')) {
-          pmTask = "JMS to be validate";
-        } else if (tLower.includes('pending') || tLower.includes('submit') || tLower.includes('approval')) {
-          pmTask = "JMS approval pending";
+      let visibleData = (commercialJmsData || []).filter(item => {
+        const tLower = (item.task || '').trim().toLowerCase();
+        return !tLower.includes('wcc') && !tLower.includes('po amend') && !tLower.includes('amendment') && !tLower.includes('receivable');
+      });
+      const realItems = visibleData.filter(item => !String(item.id || '').startsWith('cw-') && !String(item.siteId || '').startsWith('IN-12345'));
+      if (realItems.length > 0) {
+        visibleData = realItems;
+      }
+      const pmTasks = ["Approval Pending", "Rejected"];
+      currentDataset = visibleData.map((item, idx) => {
+        const rawT = (item.task || '').toLowerCase();
+        let normTask = pmTasks[idx % pmTasks.length];
+        if (item._userModified && (item.task === 'Approval Pending' || item.task === 'Rejected')) {
+          normTask = item.task;
+        } else if (rawT.includes('reject')) {
+          normTask = 'Rejected';
+        } else if (rawT.includes('pending') || rawT.includes('approval')) {
+          normTask = 'Approval Pending';
         }
         return {
           ...item,
-          task: pmTask
+          task: normTask
         };
       });
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms_detail') {
-      const parentId = selectedJmsRowId || 'cw-1';
+      const role = (typeof getAuthenticatedUserRole === 'function') ? getAuthenticatedUserRole() : '';
+      if (!selectedJmsRowId) {
+        try { selectedJmsRowId = sessionStorage.getItem('selectedJmsRowId'); } catch(e) {}
+      }
+      if (!window.selectedJmsPoNo) {
+        try { window.selectedJmsPoNo = sessionStorage.getItem('selectedJmsPoNo'); } catch(e) {}
+      }
+      if (!window.selectedJmsSiteId) {
+        try { window.selectedJmsSiteId = sessionStorage.getItem('selectedJmsSiteId'); } catch(e) {}
+      }
+      if (!window.selectedJmsParentTask) {
+        try { window.selectedJmsParentTask = sessionStorage.getItem('selectedJmsParentTask'); } catch(e) {}
+      }
+      if (role === 'Project Manager') {
+        const rawT = String(window.selectedJmsParentTask || '').toLowerCase();
+        if (!rawT.includes('reject')) {
+          window.selectedJmsParentTask = 'Approval Pending';
+        } else {
+          window.selectedJmsParentTask = 'Rejected';
+        }
+      }
+      const parentId = selectedJmsRowId || (currentDataset && currentDataset[0] ? currentDataset[0].id : (commercialJmsData && commercialJmsData[0] ? commercialJmsData[0].id : 'jms-1'));
+      selectedJmsRowId = parentId;
       currentDataset = getJmsDetailItems(parentId);
       filteredDataset = [...currentDataset];
       if (window.selectedJmsPoNo && typeof loadJmsDetailFromApi === 'function') {
@@ -32550,7 +33224,7 @@ function loadWorklistDataset() {
     return;
   }
 
-  const isCommercialView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email'].includes(currentWorklistView);
+  const isCommercialView = (role === 'Commercial Manager') || ['new_project', 'jms', 'po_amend', 'wcc', 'invoice', 'receivable', 'po_to_be_open', 'email', 'jms_detail', 'po_amend_detail', 'wcc_detail'].includes(currentWorklistView);
   if (isCommercialView) {
     if (typeof loadCommercialProjectsFromApi === 'function' && (!commercialWorklistData || commercialWorklistData.length === 0)) {
       loadCommercialProjectsFromApi();
@@ -32565,11 +33239,27 @@ function loadWorklistDataset() {
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'jms') {
       syncCommercialJmsDataWithNewProject();
-      const visibleData = (commercialJmsData || []).filter(item => {
+      let visibleData = (commercialJmsData || []).filter(item => {
         const tLower = (item.task || '').trim().toLowerCase();
-        return !tLower.includes('pending') && !tLower.includes('wcc') && !tLower.includes('amend') && tLower !== 'jms approval pending';
+        return !tLower.includes('wcc') && !tLower.includes('po amend') && !tLower.includes('amendment') && !tLower.includes('receivable');
       });
-      currentDataset = visibleData.map(item => ({ ...item }));
+      const realItems = visibleData.filter(item => !String(item.id || '').startsWith('cw-') && !String(item.siteId || '').startsWith('IN-12345'));
+      if (realItems.length > 0) {
+        visibleData = realItems;
+      }
+      const jmsStates = ["JMS to be validate", "Approval Pending", "Rejected"];
+      currentDataset = visibleData.map((item, idx) => {
+        const rawT = (item.task || '').toLowerCase();
+        let normTask = 'JMS to be validate';
+        if (rawT.includes('reject')) normTask = 'Rejected';
+        else if (rawT.includes('pending') || rawT.includes('approval')) normTask = 'Approval Pending';
+        else if (rawT.includes('validate')) normTask = 'JMS to be validate';
+        else normTask = jmsStates[idx % jmsStates.length];
+        return {
+          ...item,
+          task: normTask
+        };
+      });
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'po_amend') {
       if (!commercialPoAmendData || !Array.isArray(commercialPoAmendData) || commercialPoAmendData.length !== 6) {
@@ -32590,7 +33280,20 @@ function loadWorklistDataset() {
         loadCommercialWccFromApi();
       }
     } else if (currentWorklistView === 'jms_detail') {
+      if (!selectedJmsRowId) {
+        try { selectedJmsRowId = sessionStorage.getItem('selectedJmsRowId'); } catch(e) {}
+      }
+      if (!window.selectedJmsPoNo) {
+        try { window.selectedJmsPoNo = sessionStorage.getItem('selectedJmsPoNo'); } catch(e) {}
+      }
+      if (!window.selectedJmsSiteId) {
+        try { window.selectedJmsSiteId = sessionStorage.getItem('selectedJmsSiteId'); } catch(e) {}
+      }
+      if (!window.selectedJmsParentTask) {
+        try { window.selectedJmsParentTask = sessionStorage.getItem('selectedJmsParentTask'); } catch(e) {}
+      }
       const parentId = selectedJmsRowId || 'jms-1';
+      selectedJmsRowId = parentId;
       currentDataset = getJmsDetailItems(parentId);
       filteredDataset = [...currentDataset];
       if (window.selectedJmsPoNo && typeof loadJmsDetailFromApi === 'function') {
@@ -32740,14 +33443,14 @@ window.toggleSelectAllPmStatus = function(selectAll) {
 };
 
 window.toggleWorklistRowSelected = function(rowId, isChecked) {
+  const isStn = currentWorklistView === 'stn';
   if (currentDataset) {
-    const row = currentDataset.find(r => String(r.id) === String(rowId));
+    const row = currentDataset.find(r => String(r.id) === String(rowId) || (isStn && String(r.stnNo) === String(rowId)));
     if (row) row.selected = isChecked !== undefined ? isChecked : !row.selected;
   }
-  const isStn = currentWorklistView === 'stn';
   const sourceStore = isStn ? worklistStnData : worklistSrnData;
   if (sourceStore) {
-    const storeRow = sourceStore.find(r => String(r.id) === String(rowId));
+    const storeRow = sourceStore.find(r => String(r.id) === String(rowId) || (isStn && String(r.stnNo) === String(rowId)));
     if (storeRow) storeRow.selected = isChecked !== undefined ? isChecked : !storeRow.selected;
   }
   applyFiltersAndRender();
@@ -32775,11 +33478,278 @@ window.toggleSelectAllWorklistRows = function(forceState) {
 
 window.updateWorklistSubmitVisibility = function() {
   const isStn = currentWorklistView === 'stn';
-  const submitBtn = document.getElementById(isStn ? 'btnWorklistStnSubmit' : 'btnWorklistSrnSubmit');
-  if (submitBtn) {
-    const hasSelected = currentDataset && currentDataset.some(r => r.selected);
-    submitBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+  if (isStn) {
+    const centeredRow = document.getElementById('rowWorklistStnSubmitAction');
+    if (centeredRow) {
+      centeredRow.style.display = hasSelected ? 'table-row' : 'none';
+    }
+  } else {
+    const submitBtn = document.getElementById('btnWorklistSrnSubmit');
+    if (submitBtn) {
+      submitBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+    }
   }
+};
+
+window.openAddStnBoqModal = function(rows) {
+  window._pendingBoqStnRows = rows;
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('modalAddStnBoq');
+  if (!modal || !overlay) return;
+
+  const txtNo = document.getElementById('txtStnBoqNo');
+  const txtDate = document.getElementById('txtStnBoqDate');
+  const firstRow = rows && rows[0] ? rows[0] : null;
+
+  if (txtNo) txtNo.value = (firstRow && firstRow.boqNo) ? firstRow.boqNo : '';
+  if (txtDate) txtDate.value = (firstRow && firstRow.boqDate) ? firstRow.boqDate : '';
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'modalAddStnBoq') card.style.display = 'none';
+  });
+
+  modal.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeAddStnBoqModal = function() {
+  const modal = document.getElementById('modalAddStnBoq');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  window._pendingBoqStnRows = null;
+};
+
+window.submitAddStnBoqForm = async function() {
+  const txtNo = document.getElementById('txtStnBoqNo');
+  const txtDate = document.getElementById('txtStnBoqDate');
+  const boqNo = txtNo ? txtNo.value.trim() : '';
+  const boqDate = txtDate ? txtDate.value.trim() : '';
+
+  if (!boqNo) {
+    showToast('Please enter BOQ No.');
+    if (txtNo) txtNo.focus();
+    return;
+  }
+  if (!boqDate) {
+    showToast('Please select BOQ Date.');
+    if (txtDate) txtDate.focus();
+    return;
+  }
+
+  const targetRows = window._pendingBoqStnRows || (currentDataset || []).filter(r => r.selected && r.status === 'BOQ Request Pending');
+  if (!targetRows || targetRows.length === 0) {
+    showToast('No BOQ Request Pending rows selected.');
+    closeAddStnBoqModal();
+    return;
+  }
+
+  for (const row of targetRows) {
+    row.boqNo = boqNo;
+    row.boqDate = boqDate;
+    row.status = 'Dispatch Request Pending';
+    row.selected = false;
+
+    const storeRow = worklistStnData.find(sr => String(sr.id) === String(row.id) || String(sr.stnNo) === String(row.stnNo));
+    if (storeRow) {
+      storeRow.boqNo = boqNo;
+      storeRow.boqDate = boqDate;
+      storeRow.status = 'Dispatch Request Pending';
+      storeRow.selected = false;
+    }
+
+    // Persist to indus_project_infra table in Project DB
+    try {
+      const res = await fetch('/api/v1/commercial/stn/boq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: row.id,
+          stnNo: row.stnNo,
+          boqNo: boqNo,
+          boqDate: boqDate
+        })
+      });
+      if (res.ok) {
+        const resJson = await res.json();
+        if (resJson && resJson.data && resJson.data.id) {
+          row.id = resJson.data.id;
+          if (storeRow) storeRow.id = resJson.data.id;
+        }
+      }
+    } catch(e) {
+      console.warn('API error saving STN BOQ:', e);
+    }
+  }
+
+  try {
+    localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
+  } catch(e) {}
+
+  closeAddStnBoqModal();
+  showToast('BOQ details added. Status updated to Dispatch Request Pending.');
+  currentDataset = sortStnByStatusOrder(currentDataset);
+  applyFiltersAndRender();
+  updateWorklistSubmitVisibility();
+};
+
+window.handleStnDispatchLocationChange = function() {
+  const selLoc = document.getElementById('selStnDispatchLocation');
+  const grpName = document.getElementById('grpStnReceiptName');
+  if (!selLoc || !grpName) return;
+  const val = (selLoc.value || '').trim().toLowerCase();
+  if (val === 'site') {
+    grpName.style.display = 'flex';
+  } else {
+    grpName.style.display = 'none';
+  }
+};
+
+window.openAddStnDispatchModal = async function(rows) {
+  window._pendingDispatchStnRows = rows;
+  const overlay = document.getElementById('sideFormOverlay');
+  const modal = document.getElementById('modalAddStnDispatch');
+  if (!modal || !overlay) return;
+
+  const selLoc = document.getElementById('selStnDispatchLocation');
+  const selName = document.getElementById('selStnReceiptName');
+  if (selLoc) selLoc.value = 'Site';
+  window.handleStnDispatchLocationChange();
+
+  // Load members from respective site details
+  const firstRow = rows && rows[0] ? rows[0] : null;
+  const siteId = firstRow ? (firstRow.siteId || firstRow.siteName || '') : '';
+  const poNo = firstRow ? (firstRow.projectId || '') : '';
+
+  let members = [];
+  try {
+    const params = new URLSearchParams();
+    if (poNo) params.set('po_no', poNo);
+    if (siteId) params.set('site_id', siteId);
+    const res = await fetch(`/api/v1/commercial/dpr/members?${params.toString()}`);
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json.data) && json.data.length > 0) {
+        members = json.data.map(m => m.name || m.employeeName).filter(Boolean);
+      }
+    }
+  } catch (e) {
+    console.warn('Error fetching members for site:', e);
+  }
+
+  if (members.length === 0) {
+    if (typeof pmMembersDataStore !== 'undefined' && Array.isArray(pmMembersDataStore) && pmMembersDataStore.length > 0) {
+      members = pmMembersDataStore.map(m => m.name || m.employeeName).filter(Boolean);
+    }
+    if (members.length === 0) {
+      members = ['Karthik Raja', 'Priya Sharma', 'Suresh Kumar', 'Deepa Venkat', 'Arun Prasath', 'Meena Kumari'];
+    }
+  }
+
+  members = [...new Set(members)];
+
+  if (selName) {
+    selName.innerHTML = members.map(m => `<option value="${m}">${m}</option>`).join('');
+    if (members.length > 0) {
+      selName.value = members[0];
+    }
+  }
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'modalAddStnDispatch') card.style.display = 'none';
+  });
+
+  modal.style.display = 'block';
+  overlay.style.display = 'flex';
+};
+
+window.closeAddStnDispatchModal = function() {
+  const modal = document.getElementById('modalAddStnDispatch');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+  window._pendingDispatchStnRows = null;
+};
+
+window.submitAddStnDispatchForm = async function() {
+  const selLoc = document.getElementById('selStnDispatchLocation');
+  const selName = document.getElementById('selStnReceiptName');
+  const dispatchLocation = selLoc ? selLoc.value.trim() : '';
+  const isWarehouse = dispatchLocation.toLowerCase() === 'warehouse';
+  const receiptName = isWarehouse ? '' : (selName ? selName.value.trim() : '');
+
+  if (!dispatchLocation) {
+    showToast('Please select Dispatch Location.');
+    if (selLoc) selLoc.focus();
+    return;
+  }
+  if (!isWarehouse && !receiptName) {
+    showToast('Please select Receipt Name.');
+    if (selName) selName.focus();
+    return;
+  }
+
+  const targetRows = window._pendingDispatchStnRows || (currentDataset || []).filter(r => r.selected && r.status === 'Dispatch Request Pending');
+  if (!targetRows || targetRows.length === 0) {
+    showToast('No Dispatch Request Pending rows selected.');
+    closeAddStnDispatchModal();
+    return;
+  }
+
+  for (const row of targetRows) {
+    row.receivedLocation = dispatchLocation;
+    row.received_location = dispatchLocation;
+    row.receivedBy = receiptName;
+    row.received_by = receiptName;
+    row.status = 'Dispatch Approval Pending';
+    row.selected = false;
+
+    const storeRow = worklistStnData.find(sr => String(sr.id) === String(row.id) || String(sr.stnNo) === String(row.stnNo));
+    if (storeRow) {
+      storeRow.receivedLocation = dispatchLocation;
+      storeRow.received_location = dispatchLocation;
+      storeRow.receivedBy = receiptName;
+      storeRow.received_by = receiptName;
+      storeRow.status = 'Dispatch Approval Pending';
+      storeRow.selected = false;
+    }
+
+    // Persist to indus_project_infra table in Project DB
+    try {
+      const res = await fetch('/api/v1/commercial/stn/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: row.id,
+          stnNo: row.stnNo,
+          dispatchLocation: dispatchLocation,
+          receiptName: receiptName
+        })
+      });
+      if (res.ok) {
+        const resJson = await res.json();
+        if (resJson && resJson.data && resJson.data.id) {
+          row.id = resJson.data.id;
+          if (storeRow) storeRow.id = resJson.data.id;
+        }
+      }
+    } catch(e) {
+      console.warn('API error saving STN Dispatch:', e);
+    }
+  }
+
+  try {
+    localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
+  } catch(e) {}
+
+  closeAddStnDispatchModal();
+  showToast('Dispatch details saved. Status updated to Dispatch Approval Pending.');
+  currentDataset = sortStnByStatusOrder(currentDataset);
+  applyFiltersAndRender();
+  updateWorklistSubmitVisibility();
 };
 
 window.submitSelectedWorklistStnRows = function() {
@@ -32788,15 +33758,54 @@ window.submitSelectedWorklistStnRows = function() {
     showToast('Please select at least one row to submit.');
     return;
   }
-  const selectedIds = new Set(selectedRows.map(r => String(r.id)));
-  worklistStnData = worklistStnData.filter(r => !selectedIds.has(String(r.id)));
-  currentDataset = worklistStnData.map(r => ({ ...r }));
-  try {
-    localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
-  } catch(e) {}
-  showToast(`${selectedRows.length} STN record(s) submitted successfully.`);
-  applyFiltersAndRender();
-  updateWorklistSubmitVisibility();
+
+  // 1. If any selected row has status 'BOQ Request Pending', open Add BOQ modal
+  const boqPendingRows = selectedRows.filter(r => r.status === 'BOQ Request Pending');
+  if (boqPendingRows.length > 0) {
+    openAddStnBoqModal(boqPendingRows);
+    return;
+  }
+
+  // 2. If any selected row has status 'Dispatch Request Pending', open Add Dispatch Details modal
+  const dispatchPendingRows = selectedRows.filter(r => r.status === 'Dispatch Request Pending');
+  if (dispatchPendingRows.length > 0) {
+    openAddStnDispatchModal(dispatchPendingRows);
+    return;
+  }
+
+  // 3. For rows in subsequent statuses, advance to next stage
+  const nextStatusMap = {
+    'Dispatch Approval Pending': 'Dispatch Pending',
+    'Dispatch Pending': 'Dispatched',
+    'Dispatched': 'Received'
+  };
+
+  let updatedCount = 0;
+  selectedRows.forEach(row => {
+    const nextSt = nextStatusMap[row.status];
+    if (nextSt) {
+      row.status = nextSt;
+      row.selected = false;
+      const storeRow = worklistStnData.find(sr => String(sr.id) === String(row.id) || String(sr.stnNo) === String(row.stnNo));
+      if (storeRow) {
+        storeRow.status = nextSt;
+        storeRow.selected = false;
+      }
+      updatedCount++;
+    }
+  });
+
+  if (updatedCount > 0) {
+    try {
+      localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
+    } catch(e) {}
+    showToast(`${updatedCount} STN record(s) submitted successfully.`);
+    currentDataset = sortStnByStatusOrder(currentDataset);
+    applyFiltersAndRender();
+    updateWorklistSubmitVisibility();
+  } else {
+    showToast('Selected STN record(s) processed.');
+  }
 };
 
 window.submitSelectedWorklistSrnRows = function() {
@@ -32818,7 +33827,7 @@ window.submitSelectedWorklistSrnRows = function() {
 
 window.exportWorklistStnToCsv = function() {
   const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (worklistStnData || []);
-  const headers = ["STN No", "BOQ No", "Project ID", "Site Name", "Infra Category", "Qty", "Status", "Ageing", "Remarks"];
+  const headers = ["STN No", "BOQ No", "Project ID", "Site Name", "Infra Category", "Qty", "Status", "Received Location", "Received By", "Ageing", "Remarks"];
   const escapeCsv = (str) => {
     if (str === null || str === undefined) return '""';
     const s = String(str).replace(/"/g, '""');
@@ -32832,6 +33841,8 @@ window.exportWorklistStnToCsv = function() {
     escapeCsv(r.infraCategory),
     escapeCsv(r.qty),
     escapeCsv(r.status),
+    escapeCsv(r.receivedLocation || r.received_location || ''),
+    escapeCsv(r.receivedBy || r.received_by || ''),
     escapeCsv(r.ageing),
     escapeCsv(r.remarks)
   ].join(','));
@@ -32879,14 +33890,20 @@ window.exportWorklistSrnToCsv = function() {
 };
 
 window.openWorklistStnDashboard = function() {
-  if (typeof switchModule === 'function') {
-    switchModule('projects');
+  if (typeof openCommercialDashboard === 'function') {
+    openCommercialDashboard('STN');
   }
 };
 
 window.openWorklistSrnDashboard = function() {
-  if (typeof switchModule === 'function') {
-    switchModule('projects');
+  if (typeof openCommercialDashboard === 'function') {
+    openCommercialDashboard('SRN');
+  }
+};
+
+window.openWorklistPaymentDashboard = function() {
+  if (typeof openCommercialDashboard === 'function') {
+    openCommercialDashboard('Payment');
   }
 };
 
@@ -34179,9 +35196,11 @@ function renderWorklistToolbar() {
           <button type="button" class="toolbar-icon-btn btn-bulk-upload-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}BulkUpload" data-tooltip="Bulk Upload" title="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadSidePanel('${isStn ? 'STN' : 'SRN'}')">
             <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
           </button>
-          <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Submit" data-tooltip="Submit" title="Submit" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;" onclick="${isStn ? 'submitSelectedWorklistStnRows()' : 'submitSelectedWorklistSrnRows()'}">
+          ${!isStn ? `
+          <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWorklistSrnSubmit" data-tooltip="Submit" title="Submit" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;" onclick="submitSelectedWorklistSrnRows()">
             <img src="icons/Submit.svg" alt="Submit" class="toolbar-icon-img" width="28" height="28">
           </button>
+          ` : ''}
         </div>
       `;
       return;
@@ -35002,7 +36021,7 @@ function renderWorklistToolbar() {
         <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="display: ${hasSelected ? 'flex' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
-        <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnPaymentDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard">
+        <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnPaymentDashboard" data-tooltip="Dashboard" title="Dashboard" aria-label="Dashboard" onclick="openCommercialDashboard('Payment')">
           <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
         </button>
         <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnCsvAction" data-tooltip="CSV Upload" aria-label="CSV Upload">
@@ -35280,6 +36299,13 @@ function renderWorklistFooter() {
 
     pmTabs.forEach(tab => {
       document.getElementById(tab.id)?.addEventListener('click', () => {
+        currentModule = 'worklist';
+        try {
+          sessionStorage.setItem('nexus_module', 'worklist');
+          sessionStorage.removeItem('nexus_projects_view');
+          sessionStorage.removeItem('nexus_project_context');
+          sessionStorage.removeItem('nexus_project_worklist_origin');
+        } catch(e) {}
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
@@ -35319,7 +36345,7 @@ function renderWorklistFooter() {
     const jmsVisibleItems = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData))
       ? commercialJmsData.filter(item => {
           const tLower = (item.task || '').trim().toLowerCase();
-          return !tLower.includes('pending') && tLower !== 'jms approval pending';
+          return !tLower.includes('wcc') && !tLower.includes('po amend') && !tLower.includes('amendment') && !tLower.includes('receivable');
         })
       : [];
     const jmsCount = (currentWorklistView === 'jms' && typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset))
@@ -35489,7 +36515,7 @@ function updateCommercialWorklistFooterCount() {
       const jmsVisible = (typeof commercialJmsData !== 'undefined' && Array.isArray(commercialJmsData))
         ? commercialJmsData.filter(item => {
             const tLower = (item.task || '').trim().toLowerCase();
-            return !tLower.includes('pending') && tLower !== 'jms approval pending';
+            return !tLower.includes('wcc') && !tLower.includes('po amend') && !tLower.includes('amendment') && !tLower.includes('receivable');
           })
         : [];
       return jmsVisible.length;
@@ -37135,14 +38161,28 @@ function renderWorklistTableHead() {
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
             </div>
           </th>
-          <!-- 9. Ageing: 10ch, center, filterable -->
+          <!-- 9. Received Location: 18ch, left content, center header, filterable -->
+          <th style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Received Location</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['receivedLocation'] ? 'has-active-filter' : ''}" data-filter-col="receivedLocation" title="Filter Received Location">&#9660;</button>
+            </div>
+          </th>
+          <!-- 10. Received By: 18ch, left content, center header, filterable -->
+          <th style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Received By</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['receivedBy'] ? 'has-active-filter' : ''}" data-filter-col="receivedBy" title="Filter Received By">&#9660;</button>
+            </div>
+          </th>
+          <!-- 11. Ageing: 10ch, center, filterable -->
           <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Ageing</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
             </div>
           </th>
-          <!-- 10. Remarks: 25ch, left content, center header, filterable -->
+          <!-- 12. Remarks: 25ch, left content, center header, filterable -->
           <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Remarks</span>
@@ -38208,9 +39248,10 @@ function renderWorklistTableHead() {
 
 
 function initWorklistToolbarEvents() {
-  document.getElementById('btnPaymentDashboard')?.addEventListener('click', () => {
-    showToast('Payment Dashboard opened');
-  });
+  const btnPayDash = document.getElementById('btnPaymentDashboard');
+  if (btnPayDash && !btnPayDash.onclick) {
+    btnPayDash.onclick = () => openCommercialDashboard('Payment');
+  }
 
   const btnRefresh = document.getElementById('btnPaymentRefresh');
   if (btnRefresh) {
@@ -40232,6 +41273,7 @@ function applyFiltersAndRender() {
       const sourceStore = isStn ? worklistStnData : worklistSrnData;
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => isStn ? r.stnNo : r.srnNo)) {
         currentDataset = sourceStore.map(item => ({ ...item }));
+        if (isStn) currentDataset = sortStnByStatusOrder(currentDataset);
       }
 
       filteredDataset = currentDataset.filter(row => {
@@ -40244,25 +41286,29 @@ function applyFiltersAndRender() {
         return true;
       });
 
+      if (isStn) {
+        filteredDataset = sortStnByStatusOrder(filteredDataset);
+      }
+
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="10" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No ${isStn ? 'STN' : 'SRN'} records match the filter criteria.</td>
+            <td colspan="${isStn ? 12 : 10}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No ${isStn ? 'STN' : 'SRN'} records match the filter criteria.</td>
           </tr>
         `;
         updateWorklistSubmitVisibility();
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map((row) => {
+      const rowsHtml = filteredDataset.map((row) => {
         const numVal = isStn ? row.stnNo : row.srnNo;
         const rawQty = parseFloat(row.qty);
         const formattedQty = !isNaN(rawQty) ? rawQty.toFixed(2) : (row.qty || '0.00');
         return `
           <tr class="${row.selected ? 'row-selected' : ''}" data-row-id="${row.id}" style="${row.selected ? 'background: rgba(0, 203, 160, 0.08);' : ''}">
             <!-- 1. Select: 8ch & center (Circle radio button with green select marker) -->
-            <td class="td-select" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
-              <div class="radio-select-indicator ${row.selected ? 'selected' : ''}" onclick="toggleWorklistRowSelected('${row.id}')" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
+            <td class="td-select" onclick="toggleWorklistRowSelected('${row.id}')" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; cursor: pointer;">
+              <div class="radio-select-indicator ${row.selected ? 'selected' : ''}" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
             </td>
             <!-- 2. STN/SRN No: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
@@ -40292,17 +41338,40 @@ function applyFiltersAndRender() {
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #0f172a; font-weight: 600;">
               ${row.status || ''}
             </td>
-            <!-- 9. Ageing: 10ch & center -->
+            ${isStn ? `
+            <!-- 9. Received Location: 18ch & left -->
+            <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.receivedLocation || row.received_location || '').replace(/"/g, '&quot;')}">
+              ${row.receivedLocation || row.received_location || ''}
+            </td>
+            <!-- 10. Received By: 18ch & left -->
+            <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.receivedBy || row.received_by || '').replace(/"/g, '&quot;')}">
+              ${row.receivedBy || row.received_by || ''}
+            </td>
+            ` : ''}
+            <!-- Ageing: 10ch & center -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
               ${row.ageing || ''}
             </td>
-            <!-- 10. Remarks: 25ch & left -->
+            <!-- Remarks: 25ch & left -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
               ${row.remarks || ''}
             </td>
           </tr>
         `;
       }).join('');
+
+      const hasSelected = isStn && (currentDataset && currentDataset.some(r => r.selected));
+      const submitRowHtml = (isStn && hasSelected) ? `
+        <tr id="rowWorklistStnSubmitAction" style="background: transparent !important; border: none !important; border-top: none !important; border-bottom: none !important;">
+          <td colspan="${isStn ? 12 : 10}" style="text-align: center !important; vertical-align: middle; padding: 22px 0 14px 0; border: none !important; border-top: none !important; border-bottom: none !important; background: transparent !important;">
+            <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWorklistStnSubmit" data-tooltip="Submit" title="Submit" aria-label="Submit" onclick="submitSelectedWorklistStnRows()" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; padding: 4px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: none !important;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="border: none !important; outline: none !important; display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsHtml + submitRowHtml;
       updateWorklistSubmitVisibility();
       return;
     }
@@ -40404,30 +41473,44 @@ function applyFiltersAndRender() {
 
     if (currentWorklistView === 'jms') {
       syncCommercialJmsDataWithNewProject();
+      const jmsStates = ["JMS to be validate", "Approval Pending", "Rejected"];
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => r.task)) {
-        if (role === 'Project Manager') {
-          const pmJmsTasks = ["JMS to be validate", "JMS approval pending"];
-          currentDataset = commercialJmsData.map((item, idx) => {
-            let pmTask = pmJmsTasks[idx % pmJmsTasks.length];
+        currentDataset = (commercialJmsData || [])
+          .filter(item => {
+            const tLower = (item.task || '').trim().toLowerCase();
+            return !tLower.includes('wcc') && !tLower.includes('po amend') && !tLower.includes('amendment') && !tLower.includes('receivable');
+          })
+          .map((item, idx) => {
+            let assignedTask = jmsStates[idx % jmsStates.length];
             const tLower = (item.task || '').toLowerCase();
-            if (tLower.includes('validate') || tLower.includes('process')) {
-              pmTask = "JMS to be validate";
+            if (tLower.includes('reject')) {
+              assignedTask = "Rejected";
             } else if (tLower.includes('pending') || tLower.includes('submit') || tLower.includes('approval')) {
-              pmTask = "JMS approval pending";
+              assignedTask = "Approval Pending";
+            } else if (tLower.includes('validate')) {
+              assignedTask = "JMS to be validate";
             }
             return {
               ...item,
-              task: pmTask
+              task: assignedTask
             };
           });
-        } else {
-          currentDataset = (commercialJmsData || [])
-            .filter(item => {
-              const tLower = (item.task || '').trim().toLowerCase();
-              return !tLower.includes('pending') && tLower !== 'jms approval pending';
-            })
-            .map(item => ({ ...item }));
-        }
+      } else {
+        currentDataset = currentDataset.map((item, idx) => {
+          let assignedTask = jmsStates[idx % jmsStates.length];
+          const tLower = (item.task || '').toLowerCase();
+          if (tLower.includes('reject')) {
+            assignedTask = "Rejected";
+          } else if (tLower.includes('pending') || tLower.includes('submit') || tLower.includes('approval')) {
+            assignedTask = "Approval Pending";
+          } else if (tLower.includes('validate')) {
+            assignedTask = "JMS to be validate";
+          }
+          return {
+            ...item,
+            task: assignedTask
+          };
+        });
       }
 
       filteredDataset = currentDataset.filter(row => {
@@ -40459,11 +41542,11 @@ function applyFiltersAndRender() {
 
       tbody.innerHTML = filteredDataset.map(row => {
         return `
-          <tr data-row-id="${row.id}" onclick="handleWccPoNoClick('${row.id}', '${row.poNo}', '${row.task}')" style="cursor: pointer;">
+          <tr data-row-id="${row.id}" onclick="openJmsDetailPage('${row.id}')" style="cursor: pointer;">
             <!-- 1. PO No -->
             <td style="${isJmsColumnsExpanded ? 'width: 120px; min-width: 120px;' : 'width: 11%;'} text-align: center !important; white-space: nowrap; vertical-align: middle; padding: 10px 6px;">
               ${row.poNo ? `
-                <a href="javascript:void(0)" onclick="openJmsDetailPage('${row.id}')" style="color: #0454e4; font-weight: 500; text-decoration: none; cursor: pointer;" title="Open JMS Detail Validation">${row.poNo || ''}</a>
+                <a href="javascript:void(0)" onclick="event.stopPropagation(); openJmsDetailPage('${row.id}')" style="color: #0454e4; font-weight: 500; text-decoration: none; cursor: pointer;" title="Open JMS Detail Validation">${row.poNo || ''}</a>
               ` : `
                 <span style="color: #0454e4; font-weight: 500;">-</span>
               `}
@@ -40797,13 +41880,32 @@ function applyFiltersAndRender() {
         `;
       }).join('');
 
-      if (allHighlighted) {
+      const currentRole = (typeof getAuthenticatedUserRole === 'function') ? getAuthenticatedUserRole() : '';
+      const parentRow = (typeof commercialJmsData !== 'undefined' ? commercialJmsData : []).find(r => 
+        String(r.id) === String(selectedJmsRowId) || (r.poNo && r.poNo === window.selectedJmsPoNo)
+      );
+      const currentTaskStr = String(window.selectedJmsParentTask || (parentRow && parentRow.task) || (currentRole === 'Project Manager' ? 'Approval Pending' : '')).trim().toLowerCase();
+      const isApprovalPending = currentTaskStr.includes('pending') || currentTaskStr.includes('approval');
+      const isRejected = currentTaskStr.includes('reject');
+
+      if (allHighlighted || isApprovalPending) {
         rowsHtml += `
           <tr id="rowJmsDetailSubmitAction" style="background: transparent; border: none !important; border-bottom: none !important;">
             <td colspan="8" style="text-align: center; padding: 24px 0 16px 0; border: none !important; border-bottom: none !important; border-top: none !important; background: transparent !important; text-decoration: none !important;">
-              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="handleJmsDetailSubmitClick()" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; text-decoration: none !important; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: none !important;" title="Submit JMS Validation">
-                <img src="icons/Submit.svg" alt="Submit" width="36" height="36" style="border: none !important; text-decoration: none !important;">
-              </button>
+              ${isApprovalPending ? `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin: 0 auto;">
+                  <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="handleJmsDetailSubmitClick()" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; text-decoration: none !important; padding: 6px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none !important;" title="Upload Signed PDF Document">
+                    <img src="icons/Submit.svg" alt="Submit" width="36" height="36" style="border: none !important; text-decoration: none !important;">
+                  </button>
+                  <button type="button" class="toolbar-icon-btn btn-reject-action" id="btnJmsDetailReject" aria-label="Reject" onclick="handleJmsDetailRejectClick()" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; text-decoration: none !important; padding: 6px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none !important;" title="Reject JMS Validation">
+                    <img src="icons/Reject.svg" alt="Reject" width="36" height="36" style="border: none !important; text-decoration: none !important;">
+                  </button>
+                </div>
+              ` : `
+                <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsDetailSubmit" aria-label="Submit" onclick="handleJmsDetailSubmitClick()" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; text-decoration: none !important; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: none !important;" title="Submit JMS Validation">
+                  <img src="icons/Submit.svg" alt="Submit" width="36" height="36" style="border: none !important; text-decoration: none !important;">
+                </button>
+              `}
             </td>
           </tr>
         `;

@@ -120,7 +120,14 @@ class JmsService:
         project_type = proj.project_type if proj else "New Build"
         sub_project_type = proj.sub_project_type if proj else "Civil"
         po_type = proj.po_type if proj and proj.po_type else "Opex"
-        task = proj.current_task if proj and proj.current_task else "JMS to be validate"
+        raw_task = (proj.current_task or "").strip().lower() if proj else ""
+        raw_status = (proj.project_status or "").strip().lower() if proj else ""
+        if "reject" in raw_task or "reject" in raw_status:
+            task = "Rejected"
+        elif "pending" in raw_task or "approval" in raw_task or "pending" in raw_status or "approval" in raw_status:
+            task = "Approval Pending"
+        else:
+            task = "JMS to be validate"
 
         return JmsPoDetailResponse(
             poNo=po_no,

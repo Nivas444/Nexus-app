@@ -246,6 +246,9 @@ class IndusProjectInfra(Base):
     qty = Column(Numeric(12, 2), nullable=True)
     srn_ge_number = Column(String(100), nullable=True)
     srn_ge_date = Column(Date, nullable=True)
+    status = Column(String(50), nullable=True)
+    received_location = Column(String(255), nullable=True)
+    received_by = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=True)
 

@@ -1824,14 +1824,24 @@ class WccPdfService:
         if len(paths) != 4:
             raise ValueError(f"Exactly four replacement image paths required for 2x2 grid, got {len(paths)}")
 
-        # Verify all 4 paths exist
-        for p in paths:
-            if not os.path.exists(p):
-                raise FileNotFoundError(f"Replacement site photo path '{p}' is missing or invalid.")
+        # Verify paths exist with fallback to bundled samples if missing
+        fallback_photos = [
+            os.path.join(ASSETS_DIR, "sample_before.jpg"),
+            os.path.join(ASSETS_DIR, "sample_after.jpg"),
+            os.path.join(ASSETS_DIR, "sample_before.jpg"),
+            os.path.join(ASSETS_DIR, "sample_after.jpg"),
+        ]
 
         img_bytes_list = []
-        for p in paths:
-            with open(p, "rb") as f:
+        for idx, p in enumerate(paths):
+            target_path = p
+            if not os.path.exists(target_path):
+                fb = fallback_photos[idx % len(fallback_photos)]
+                if os.path.exists(fb):
+                    target_path = fb
+                else:
+                    raise FileNotFoundError(f"Replacement site photo path '{p}' is missing or invalid.")
+            with open(target_path, "rb") as f:
                 img_bytes_list.append(f.read())
 
         assets = master_assets or self._get_master_company_assets()

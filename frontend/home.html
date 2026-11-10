@@ -119,6 +119,16 @@
       </table>
     </div>
 
+    <!-- Centered Submit and Reject Area for Commercial Manager: JMS Approval Pending Subpage -->
+    <div id="jmsApprovalPendingSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; gap: 24px; padding: 18px 0 12px 0;">
+      <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnJmsApprovalPendingSubmit" onclick="handleJmsDetailSubmitClick()" title="Upload Signed PDF Document" aria-label="Submit" style="background: transparent; border: none; cursor: pointer; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
+        <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+      </button>
+      <button type="button" class="toolbar-icon-btn btn-reject-action" id="btnJmsApprovalPendingReject" onclick="handleJmsDetailRejectClick()" title="Reject JMS Validation" aria-label="Reject" style="background: transparent; border: none; cursor: pointer; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
+        <img src="icons/Reject.svg" alt="Reject" width="34" height="34" style="display: block;">
+      </button>
+    </div>
+
     <!-- Centered Submit and Reject Area for Commercial Manager: PO Amend Approval Pending Subpage -->
     <div id="poAmendApprovalPendingSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; gap: 24px; padding: 18px 0 12px 0;">
       <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPoAmendApprovalPendingSubmit" onclick="handlePoAmendRowSubmit()" title="Submit PO Amendment Status" aria-label="Submit" style="background: transparent; border: none; cursor: pointer; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
@@ -5168,22 +5178,18 @@
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Category</label>
               <div class="pm-select-wrapper" style="flex: 1; position: relative;">
-                <select id="inpPmStnItemCategory" class="pm-custom-select">
-                  <option value="Active">Active</option>
-                  <option value="Passive">Passive</option>
-                  <option value="Tower Structure">Tower Structure</option>
-                  <option value="Diesel Generator">Diesel Generator</option>
-                  <option value="Power & DG">Power & DG</option>
-                  <option value="Civil & Foundation">Civil & Foundation</option>
-                  <option value="Electrical & Earthing">Electrical & Earthing</option>
-                  <option value="Optical & Telecom">Optical & Telecom</option>
-                  <option value="Others">Others</option>
+                <select id="inpPmStnItemCategory" class="pm-custom-select" onchange="handlePmInfraCategoryChange(this.value)">
+                  <option value="" disabled selected>Select Infra Category</option>
                 </select>
               </div>
             </div>
             <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Infra Description</label>
-              <input type="text" id="inpPmStnInfraDesc" class="form-input-control" placeholder="Enter Infra Description" style="flex: 1; height: 38px; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 14px; font-size: 0.92rem; outline: none; color: #0f172a;">
+              <div class="pm-select-wrapper" style="flex: 1; position: relative;">
+                <select id="inpPmStnInfraDesc" class="pm-custom-select" onchange="handlePmInfraDescChange(this.value)">
+                  <option value="" disabled selected>Select Infra Description</option>
+                </select>
+              </div>
             </div>
             <div class="pm-field-row" id="rowPmStnInstallationType" style="display: none; align-items: center; justify-content: space-between; gap: 18px;">
               <label class="pm-field-label" style="min-width: 140px; width: 140px;">Installation Type</label>
@@ -6049,6 +6055,93 @@
           </div>
         </div>
 
+        <!-- Add BOQ Modal Tab (STN Project Manager) -->
+        <div class="side-form-card" id="modalAddStnBoq"
+          style="display: none; width: 520px !important; max-width: 96vw; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); background: #ffffff; border-radius: 12px; overflow: hidden;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblAddStnBoqTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add BOQ
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddStnBoqModal" onclick="closeAddStnBoqModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="side-form-body" style="padding: 16px 24px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="txtStnBoqNo" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; min-width: 160px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">BOQ No <span style="color: #ef4444;">*</span></label>
+              <div style="flex: 1; position: relative;">
+                <input type="text" class="form-input-control" id="txtStnBoqNo" placeholder="Enter BOQ No"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; box-sizing: border-box;">
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="txtStnBoqDate" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; min-width: 160px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">BOQ Date <span style="color: #ef4444;">*</span></label>
+              <div style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="txtStnBoqDate" placeholder="DD-MM-YYYY" readonly
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(this, document.getElementById('btnStnBoqDateCalendar')); }"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 44px 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; background: #ffffff; cursor: pointer; box-sizing: border-box;">
+                <button type="button" id="btnStnBoqDateCalendar" class="input-pdf-badge btn-calendar-trigger"
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(document.getElementById('txtStnBoqDate'), this); }"
+                  title="Select Date" aria-label="Select Date"
+                  style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; z-index: 5;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" style="width: 24px; height: 24px; pointer-events: none; display: block; object-fit: contain;">
+                </button>
+              </div>
+            </div>
+            <!-- Submit icon below the last field as centered -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnSubmitAddStnBoq" onclick="submitAddStnBoqForm()"
+                title="Submit BOQ" aria-label="Submit" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Dispatch Details Modal Tab (STN Project Manager) -->
+        <div class="side-form-card" id="modalAddStnDispatch"
+          style="display: none; width: 520px !important; max-width: 96vw; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); background: #ffffff; border-radius: 12px; overflow: hidden;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblAddStnDispatchTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Add Dispatch Details
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnCloseAddStnDispatchModal" onclick="closeAddStnDispatchModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div class="side-form-body" style="padding: 16px 24px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="selStnDispatchLocation" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; min-width: 160px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">Dispatch Location <span style="color: #ef4444;">*</span></label>
+              <div style="flex: 1; position: relative;">
+                <select id="selStnDispatchLocation" onchange="handleStnDispatchLocationChange()" class="form-input-control"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; background: #ffffff; box-sizing: border-box;">
+                  <option value="Site">Site</option>
+                  <option value="Warehouse">Warehouse</option>
+                </select>
+              </div>
+            </div>
+            <div id="grpStnReceiptName" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+              <label for="selStnReceiptName" style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin: 0; min-width: 160px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">Receipt Name <span style="color: #ef4444;">*</span></label>
+              <div style="flex: 1; position: relative;">
+                <select id="selStnReceiptName" class="form-input-control"
+                  style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #94a3b8; padding: 0 12px; font-size: 0.9rem; color: #1e293b; outline: none; background: #ffffff; box-sizing: border-box;">
+                </select>
+              </div>
+            </div>
+            <!-- Submit icon below the last field as centered -->
+            <div style="display: flex; justify-content: center; align-items: center; margin-top: 14px; padding-top: 8px;">
+              <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnSubmitAddStnDispatch" onclick="submitAddStnDispatchForm()"
+                title="Submit Dispatch Details" aria-label="Submit" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                <img src="icons/Submit.svg" alt="Submit" width="36" height="36">
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Add Activity Modal Tab (Additional Approve) -->
         <div class="side-form-card" id="pmAddActivityModal"
           style="display: none; width: 620px !important; max-width: 96vw; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
@@ -6074,11 +6167,7 @@
               <label style="min-width: 170px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Activity</label>
               <div style="flex: 1; position: relative;">
                 <select id="selAddActivityName" class="form-input-control" style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.95rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a; box-sizing: border-box;">
-                  <option value="Civil Works" selected>Civil Works</option>
-                  <option value="Electrical Installation">Electrical Installation</option>
-                  <option value="DG Foundation & Canopy Installation">DG Foundation & Canopy Installation</option>
-                  <option value="Tower Height Modification">Tower Height Modification</option>
-                  <option value="Site Grounding & Protection">Site Grounding & Protection</option>
+                  <option value="" disabled selected>Select Activity</option>
                 </select>
               </div>
             </div>

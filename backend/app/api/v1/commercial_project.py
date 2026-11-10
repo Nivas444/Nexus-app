@@ -929,6 +929,31 @@ def list_dpr_members(
     else:
         rows = q.order_by(ProjectMember.member_id.asc()).all()
 
+    if not rows:
+        default_members = [
+            ("Karthik Raja", "Project Engineer", "+91 9840123456"),
+            ("Priya Sharma", "Site Supervisor", "+91 9840123457"),
+            ("Suresh Kumar", "Civil Engineer", "+91 9840123458"),
+            ("Deepa Venkat", "Quality Inspector", "+91 9840123459"),
+            ("Arun Prasath", "Safety Officer", "+91 9840123460"),
+            ("Meena Kumari", "Technical Lead", "+91 9840123461"),
+        ]
+        created = []
+        for name, desig, contact in default_members:
+            m = ProjectMember(
+                company_name="Nexus",
+                po_no=po_no.strip() if po_no else "PRJ-2026-001",
+                site_id=site_id.strip() if site_id else "Guindy Central Hub",
+                employee_name=name,
+                designation=desig,
+                contact_number=contact,
+                status="Active"
+            )
+            db.add(m)
+            created.append(m)
+        db.commit()
+        rows = created
+
     # Build lookup of employee contact numbers from company_employee_details in Master DB
     emp_contacts = {}
     try:
@@ -1451,4 +1476,308 @@ def download_dpr_civil_works_pdf(
             "Access-Control-Expose-Headers": "Content-Disposition"
         }
     )
+
+
+# --------------------------------------------------------------------------
+# STN INFRASTRUCTURE MANAGEMENT ENDPOINTS (indus_project_infra in Project DB)
+# --------------------------------------------------------------------------
+
+@router.get("/stn", summary="List STN items from indus_project_infra in Project DB")
+def list_stn_infra_items(
+    po_no: Optional[str] = Query(None),
+    site_id: Optional[str] = Query(None),
+    db: Session = Depends(get_project_db)
+):
+    from app.models.commercial_project import IndusProjectInfra
+    from datetime import date
+    from decimal import Decimal
+
+    q = db.query(IndusProjectInfra).filter(
+        or_(
+            IndusProjectInfra.document_type == "STN",
+            IndusProjectInfra.document_type.is_(None)
+        )
+    )
+    if po_no and po_no.strip():
+        q = q.filter(IndusProjectInfra.po_no == po_no.strip())
+    if site_id and site_id.strip():
+        q = q.filter(IndusProjectInfra.site_id == site_id.strip())
+
+    rows = q.order_by(IndusProjectInfra.infrastructure_management_id.asc()).all()
+
+    # If empty, auto-seed with standard STN items to initialize table
+    if not rows:
+        seed_data = [
+            {
+                "document_type": "STN",
+                "document_number": "STN-2026-001",
+                "boq_number": None,
+                "boq_date": None,
+                "po_no": "PRJ-2026-001",
+                "site_id": "Guindy Central Hub",
+                "infra_category": "Civil",
+                "qty": Decimal("10.00"),
+                "status": "BOQ Request Pending",
+                "boq_ageing": 3,
+                "documents": "i-map pending",
+                "received_location": None,
+                "received_by": None
+            },
+            {
+                "document_type": "STN",
+                "document_number": "STN-2026-002",
+                "boq_number": "BOQ-2026-102",
+                "boq_date": date(2026, 8, 10),
+                "po_no": "PRJ-2026-002",
+                "site_id": "Ambattur Industrial Estate",
+                "infra_category": "Electrical",
+                "qty": Decimal("25.00"),
+                "status": "BOQ Pending",
+                "boq_ageing": 6,
+                "documents": "received",
+                "received_location": None,
+                "received_by": None
+            },
+            {
+                "document_type": "STN",
+                "document_number": "STN-2026-003",
+                "boq_number": "BOQ-2026-103",
+                "boq_date": date(2026, 8, 12),
+                "po_no": "PRJ-2026-003",
+                "site_id": "Madurai East Tower",
+                "infra_category": "Power",
+                "qty": Decimal("8.00"),
+                "status": "Dispatch Request Pending",
+                "boq_ageing": 9,
+                "documents": "i-map pending",
+                "received_location": None,
+                "received_by": None
+            },
+            {
+                "document_type": "STN",
+                "document_number": "STN-2026-004",
+                "boq_number": "BOQ-2026-104",
+                "boq_date": date(2026, 8, 14),
+                "po_no": "PRJ-2026-004",
+                "site_id": "Coimbatore South Hub",
+                "infra_category": "Tower Infra",
+                "qty": Decimal("12.00"),
+                "status": "Dispatch Approval Pending",
+                "boq_ageing": 12,
+                "documents": "received",
+                "received_location": None,
+                "received_by": None
+            },
+            {
+                "document_type": "STN",
+                "document_number": "STN-2026-005",
+                "boq_number": "BOQ-2026-105",
+                "boq_date": date(2026, 8, 16),
+                "po_no": "PRJ-2026-005",
+                "site_id": "Salem Steel Plant Node",
+                "infra_category": "Telecom",
+                "qty": Decimal("18.00"),
+                "status": "Dispatch Pending",
+                "boq_ageing": 15,
+                "documents": "i-map pending",
+                "received_location": None,
+                "received_by": None
+            },
+            {
+                "document_type": "STN",
+                "document_number": "STN-2026-006",
+                "boq_number": "BOQ-2026-106",
+                "boq_date": date(2026, 8, 18),
+                "po_no": "PRJ-2026-006",
+                "site_id": "Trichy Central Junction",
+                "infra_category": "Civil",
+                "qty": Decimal("30.00"),
+                "status": "Dispatched",
+                "boq_ageing": 18,
+                "documents": "received",
+                "received_location": None,
+                "received_by": None
+            },
+            {
+                "document_type": "STN",
+                "document_number": "STN-2026-007",
+                "boq_number": "BOQ-2026-107",
+                "boq_date": date(2026, 8, 20),
+                "po_no": "PRJ-2026-007",
+                "site_id": "Tirunelveli Solar Park",
+                "infra_category": "Solar",
+                "qty": Decimal("15.00"),
+                "status": "Received",
+                "boq_ageing": 21,
+                "documents": "received",
+                "received_location": None,
+                "received_by": None
+            }
+        ]
+        created_rows = []
+        for item in seed_data:
+            rec = IndusProjectInfra(
+                company_name="Nexus",
+                document_type=item["document_type"],
+                document_number=item["document_number"],
+                boq_number=item["boq_number"],
+                boq_date=item["boq_date"],
+                po_no=item["po_no"],
+                site_id=item["site_id"],
+                infra_category=item["infra_category"],
+                qty=item["qty"],
+                status=item["status"],
+                boq_ageing=item["boq_ageing"],
+                documents=item["documents"],
+                received_location=item["received_location"],
+                received_by=item["received_by"]
+            )
+            db.add(rec)
+            created_rows.append(rec)
+        db.commit()
+        for r in created_rows:
+            db.refresh(r)
+        rows = created_rows
+
+    result = []
+    for r in rows:
+        # Rule: when row contains no boq no and boq date then that row status should become Boq request pending
+        has_no_boq = (not r.boq_number or not str(r.boq_number).strip()) and not r.boq_date
+        st = "BOQ Request Pending" if has_no_boq else (r.status or "BOQ Request Pending")
+        result.append({
+            "id": r.infrastructure_management_id,
+            "stnNo": r.document_number or f"STN-2026-{r.infrastructure_management_id:03d}",
+            "boqNo": r.boq_number or "",
+            "boqDate": r.boq_date.strftime("%Y-%m-%d") if r.boq_date else "",
+            "projectId": r.po_no or "PRJ-2026-001",
+            "siteName": r.site_id or "Guindy Central Hub",
+            "infraCategory": r.infra_category or "Civil",
+            "qty": f"{float(r.qty):.2f}" if r.qty is not None else "0.00",
+            "status": st,
+            "ageing": f"{r.boq_ageing or 3} Days",
+            "remarks": r.documents or "i-map pending",
+            "receivedLocation": r.received_location or "",
+            "receivedBy": r.received_by or ""
+        })
+    return {"success": True, "data": result}
+
+
+@router.post("/stn/boq", summary="Update BOQ details for STN row in indus_project_infra")
+def update_stn_boq_details(
+    payload: dict,
+    db: Session = Depends(get_project_db)
+):
+    from app.models.commercial_project import IndusProjectInfra
+    from datetime import datetime
+
+    row_id = payload.get("id")
+    stn_no = payload.get("stnNo") or payload.get("stn_no")
+    boq_no = payload.get("boqNo") or payload.get("boq_no") or payload.get("boq_number")
+    boq_date_str = payload.get("boqDate") or payload.get("boq_date")
+
+    if not boq_no:
+        raise HTTPException(status_code=400, detail="BOQ No is required")
+
+    boq_date = None
+    if boq_date_str:
+        for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%Y/%m/%d"):
+            try:
+                boq_date = datetime.strptime(str(boq_date_str).strip(), fmt).date()
+                break
+            except Exception:
+                pass
+
+    record = None
+    if row_id is not None:
+        try:
+            record = db.query(IndusProjectInfra).filter(IndusProjectInfra.infrastructure_management_id == int(row_id)).first()
+        except (ValueError, TypeError):
+            pass
+    if not record and stn_no:
+        record = db.query(IndusProjectInfra).filter(IndusProjectInfra.document_number == str(stn_no).strip()).first()
+
+    if not record:
+        record = IndusProjectInfra(
+            company_name="Nexus",
+            document_type="STN",
+            document_number=str(stn_no or "STN-2026-001").strip(),
+            boq_number=str(boq_no).strip(),
+            boq_date=boq_date,
+            status="Dispatch Request Pending"
+        )
+        db.add(record)
+    else:
+        record.boq_number = str(boq_no).strip()
+        record.boq_date = boq_date
+        record.status = "Dispatch Request Pending"
+
+    db.commit()
+    db.refresh(record)
+
+    return {
+        "success": True,
+        "data": {
+            "id": record.infrastructure_management_id,
+            "stnNo": record.document_number,
+            "boqNo": record.boq_number,
+            "boqDate": record.boq_date.strftime("%Y-%m-%d") if record.boq_date else "",
+            "status": record.status
+        }
+    }
+
+
+@router.post("/stn/dispatch", summary="Update dispatch details for STN row in indus_project_infra")
+def update_stn_dispatch_details(
+    payload: dict,
+    db: Session = Depends(get_project_db)
+):
+    from app.models.commercial_project import IndusProjectInfra
+
+    row_id = payload.get("id")
+    stn_no = payload.get("stnNo") or payload.get("stn_no")
+    dispatch_location = payload.get("dispatchLocation") or payload.get("receivedLocation") or payload.get("received_location") or payload.get("location") or ""
+    receipt_name = payload.get("receiptName") or payload.get("receivedBy") or payload.get("received_by") or ""
+
+    is_warehouse = str(dispatch_location).strip().lower() == "warehouse"
+    final_location = "Warehouse" if is_warehouse else str(dispatch_location).strip()
+    final_receipt_name = None if is_warehouse else (str(receipt_name).strip() or None)
+
+    record = None
+    if row_id is not None:
+        try:
+            record = db.query(IndusProjectInfra).filter(IndusProjectInfra.infrastructure_management_id == int(row_id)).first()
+        except (ValueError, TypeError):
+            pass
+    if not record and stn_no:
+        record = db.query(IndusProjectInfra).filter(IndusProjectInfra.document_number == str(stn_no).strip()).first()
+
+    if not record:
+        record = IndusProjectInfra(
+            company_name="Nexus",
+            document_type="STN",
+            document_number=str(stn_no or "STN-2026-001").strip(),
+            received_location=final_location,
+            received_by=final_receipt_name,
+            status="Dispatch Approval Pending"
+        )
+        db.add(record)
+    else:
+        record.received_location = final_location
+        record.received_by = final_receipt_name
+        record.status = "Dispatch Approval Pending"
+
+    db.commit()
+    db.refresh(record)
+
+    return {
+        "success": True,
+        "data": {
+            "id": record.infrastructure_management_id,
+            "stnNo": record.document_number,
+            "receivedLocation": record.received_location,
+            "receivedBy": record.received_by or "",
+            "status": record.status
+        }
+    }
+
 

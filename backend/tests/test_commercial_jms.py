@@ -596,3 +596,276 @@ def test_select_works_submission_api_and_persistence(client: TestClient, project
         project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
         project_db_session.commit()
 
+
+
+def test_jms_approval_pending_reject_workflow(client: TestClient, project_db_session: Session):
+    test_po = "TEST-JMS-REJ-001"
+    test_site = "SITE-JMS-REJ-01"
+
+    try:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+        # 1. Create a project in Approval Pending
+        proj = TelecomProject(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            site_name="Test Reject Site",
+            project_code="PRJ-REJ-001",
+            project_type="New Build",
+            sub_project_type="Civil",
+            po_type="Capex",
+            po_amount=Decimal("150000.00"),
+            current_task="Approval Pending",
+            project_status="Approval Pending"
+        )
+        line = TelecomIndusPo(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            line_number="10",
+            item_code="GBPA-REJ-01",
+            item_description="Reject Test Line Item",
+            uom="Nos",
+            po_qty=Decimal("1.00"),
+            po_rate=Decimal("150000.00"),
+            po_amount=Decimal("150000.00"),
+            po_total_amount=Decimal("150000.00"),
+            jms_qty=Decimal("1.00"),
+            jms_amount=Decimal("150000.00"),
+            jms_status="Approved"
+        )
+        project_db_session.add_all([proj, line])
+        project_db_session.commit()
+
+        # 2. Reject the JMS PO via API
+        resp = client.post(
+            "/api/v1/commercial/jms/reject",
+            json={
+                "poNo": test_po,
+                "siteId": test_site,
+                "workflow": "jms"
+            },
+            headers={"x-user-role": "Project Manager"}
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["task"] == "Rejected"
+
+        # 3. Verify in DB
+        db_proj = project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).first()
+        assert db_proj is not None
+        assert db_proj.current_task == "Rejected"
+        assert db_proj.project_status == "Rejected"
+
+        db_line = project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).first()
+        assert db_line is not None
+        assert db_line.jms_status == "Not Approved"
+
+    finally:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+
+def test_project_manager_jms_data_and_approval_pending_task(client, project_db_session):
+    test_po = "4500999880"
+    test_site = "SITE-PM-001"
+
+    try:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+        proj = TelecomProject(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            site_name="PM Test Site",
+            project_code="PRJ-PM-001",
+            project_type="New Build",
+            sub_project_type="Civil",
+            po_type="Capex",
+            po_amount=Decimal("180000.00"),
+            current_task="JMS approval pending",
+            project_status="JMS Approval Pending"
+        )
+        line = TelecomIndusPo(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            line_number="10",
+            item_code="GBPA-PM-001",
+            item_description="PM Test Line Item",
+            uom="Nos",
+            po_qty=Decimal("1.00"),
+            po_rate=Decimal("180000.00"),
+            po_amount=Decimal("180000.00"),
+            po_total_amount=Decimal("180000.00"),
+            jms_qty=Decimal("1.00"),
+            jms_amount=Decimal("180000.00"),
+            jms_status="Approved"
+        )
+        project_db_session.add_all([proj, line])
+        project_db_session.commit()
+
+        res = client.get(f"/api/v1/commercial/jms/po-details?po_no={test_po}&site_id={test_site}", headers={"x-user-role": "Project Manager"})
+        assert res.status_code == 200
+        det = res.json()
+        assert det["task"] == "Approval Pending"
+        assert det["lineItems"][0]["jmsStatus"] == "Approved"
+
+    finally:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+
+def test_project_manager_jms_approval_pending_and_rejected_functionality(client, project_db_session):
+    test_po = "4500999881"
+    test_site = "SITE-PM-002"
+
+    try:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+        proj = TelecomProject(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            site_name="PM Test Site",
+            project_code="PRJ-PM-001",
+            project_type="New Build",
+            sub_project_type="Civil",
+            po_type="Capex",
+            po_amount=Decimal("200000.00"),
+            current_task="Approval Pending",
+            project_status="Approval Pending"
+        )
+        line = TelecomIndusPo(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            line_number="10",
+            item_code="GBPA-PM-001",
+            item_description="PM Test Line",
+            uom="Nos",
+            po_qty=Decimal("1.00"),
+            po_rate=Decimal("200000.00"),
+            po_amount=Decimal("200000.00"),
+            po_total_amount=Decimal("200000.00"),
+            jms_qty=Decimal("1.00"),
+            jms_amount=Decimal("200000.00"),
+            jms_status="Approved"
+        )
+        project_db_session.add_all([proj, line])
+        project_db_session.commit()
+
+        # Details in Approval Pending state: line item must be Approved
+        res_appr = client.get(f"/api/v1/commercial/jms/po-details?po_no={test_po}&site_id={test_site}", headers={"x-user-role": "Project Manager"})
+        assert res_appr.status_code == 200
+        det_appr = res_appr.json()
+        assert det_appr["task"] == "Approval Pending"
+        assert det_appr["lineItems"][0]["jmsStatus"] == "Approved"
+
+        # Project Manager rejects the JMS PO
+        res_rej = client.post(
+            "/api/v1/commercial/jms/reject",
+            json={
+                "poNo": test_po,
+                "siteId": test_site,
+                "workflow": "jms"
+            },
+            headers={"x-user-role": "Project Manager"}
+        )
+        assert res_rej.status_code == 200
+        assert res_rej.json()["task"] == "Rejected"
+
+        # Details in Rejected state: line item must be Not Approved
+        res_det = client.get(f"/api/v1/commercial/jms/po-details?po_no={test_po}&site_id={test_site}", headers={"x-user-role": "Project Manager"})
+        assert res_det.status_code == 200
+        det_rej = res_det.json()
+        assert det_rej["task"] == "Rejected"
+        assert det_rej["lineItems"][0]["jmsStatus"] == "Not Approved"
+
+    finally:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+
+def test_project_manager_jms_approval_pending_persistence_and_refresh(client, project_db_session):
+    """
+    Verifies that for Project Manager login, 'JMS approval pending' in the database
+    is reliably presented as 'Approval Pending', both on initial load and simulated page refresh,
+    and line items remain Approved so Submit and Reject action controls are available.
+    """
+    test_po = "4500999882"
+    test_site = "SITE-PM-REFRESH"
+
+    try:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()
+
+        proj = TelecomProject(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            site_name="PM Refresh Site",
+            project_code="PRJ-PM-REFRESH",
+            project_type="New Build",
+            sub_project_type="Civil",
+            po_type="Capex",
+            po_amount=Decimal("150000.00"),
+            current_task="JMS approval pending",
+            project_status="JMS Approval Pending"
+        )
+        line = TelecomIndusPo(
+            company_name="Nexus",
+            customer_name="Indus Towers Ltd",
+            po_no=test_po,
+            site_id=test_site,
+            line_number="10",
+            item_code="GBPA-REFRESH-01",
+            item_description="PM Refresh Line Item",
+            uom="Nos",
+            po_qty=Decimal("1.00"),
+            po_rate=Decimal("150000.00"),
+            po_amount=Decimal("150000.00"),
+            po_total_amount=Decimal("150000.00"),
+            jms_qty=Decimal("1.00"),
+            jms_amount=Decimal("150000.00"),
+            jms_status="Approved"
+        )
+        project_db_session.add_all([proj, line])
+        project_db_session.commit()
+
+        # Initial fetch
+        r1 = client.get(f"/api/v1/commercial/jms/po-details?po_no={test_po}&site_id={test_site}", headers={"x-user-role": "Project Manager"})
+        assert r1.status_code == 200
+        d1 = r1.json()
+        assert d1["task"] == "Approval Pending"
+        assert d1["lineItems"][0]["jmsStatus"] == "Approved"
+
+        # Simulated page refresh (second fetch on view=jms_detail)
+        r2 = client.get(f"/api/v1/commercial/jms/po-details?po_no={test_po}&site_id={test_site}", headers={"x-user-role": "Project Manager"})
+        assert r2.status_code == 200
+        d2 = r2.json()
+        assert d2["task"] == "Approval Pending"
+        assert d2["lineItems"][0]["jmsStatus"] == "Approved"
+
+    finally:
+        project_db_session.query(TelecomIndusPo).filter(TelecomIndusPo.po_no == test_po).delete()
+        project_db_session.query(TelecomProject).filter(TelecomProject.po_no == test_po).delete()
+        project_db_session.commit()

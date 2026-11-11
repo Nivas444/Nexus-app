@@ -235,6 +235,7 @@ class IndusProjectInfra(Base):
     document_number = Column(String(100), nullable=True)
     document_date = Column(Date, nullable=True)
     documents = Column(Text, nullable=True)
+    remarks = Column(Text, nullable=True)
     boq_number = Column(String(100), nullable=True)
     boq_date = Column(Date, nullable=True)
     boq_ageing = Column(Integer, nullable=True)

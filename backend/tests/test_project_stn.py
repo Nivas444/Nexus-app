@@ -65,3 +65,41 @@ def test_stn_flow():
     members = res_m.get("data") if isinstance(res_m, dict) else res_m
     assert isinstance(members, list)
     assert len(members) > 0
+
+    # 6. Verify Dispatch Planned status support and absence of Dispatch Pending
+    stn_list_res = client.get("/api/v1/commercial/stn")
+    assert stn_list_res.status_code == 200
+    stn_items = stn_list_res.json().get("data", [])
+    statuses = [item.get("status") for item in stn_items]
+    assert "Dispatch Pending" not in statuses, "Dispatch Pending status should be removed from STN"
+    assert "Dispatch Planned" in statuses, "Dispatch Planned status should be present in STN"
+
+    # Test updating status to Dispatch Planned
+    dispatch_planned_payload = {
+        "stn_no": stn_no,
+        "status": "Dispatch Planned"
+    }
+    dp_res = client.post("/api/v1/commercial/stn/dispatch", json=dispatch_planned_payload)
+    assert dp_res.status_code == 200
+    assert dp_res.json().get("data", {}).get("status") == "Dispatch Planned"
+
+    # 7. Test BOQ Request Pending -> BOQ Pending mail request flow and BOQ Pending -> Dispatch Request Pending submission
+    boq_pending_req = {
+        "stn_no": "STN-2026-001",
+        "status": "BOQ Pending"
+    }
+    bpr_res = client.post("/api/v1/commercial/stn/dispatch", json=boq_pending_req)
+    assert bpr_res.status_code == 200
+    assert bpr_res.json().get("data", {}).get("status") == "BOQ Pending"
+
+    # Now submit BOQ details for this BOQ Pending row
+    boq_sub_req = {
+        "stn_no": "STN-2026-001",
+        "boq_number": "BOQ-FINAL-8888",
+        "boq_date": "2026-11-12"
+    }
+    bsub_res = client.post("/api/v1/commercial/stn/boq", json=boq_sub_req)
+    assert bsub_res.status_code == 200
+    assert bsub_res.json().get("data", {}).get("boqNo") == "BOQ-FINAL-8888"
+    assert bsub_res.json().get("data", {}).get("boqDate") == "2026-11-12"
+    assert bsub_res.json().get("data", {}).get("status") == "Dispatch Request Pending"

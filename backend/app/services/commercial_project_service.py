@@ -927,10 +927,10 @@ class CommercialProjectService:
 
 
         if payload.project_status is not None:
-
-
-
             proj.project_status = payload.project_status
+        else:
+            is_stn_or_cam = bool(proj.stn or proj.srn or proj.cam)
+            proj.project_status = "YTS" if is_stn_or_cam else "WIP"
 
 
 

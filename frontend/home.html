@@ -5987,6 +5987,117 @@
           </div>
         </div>
 
+        <!-- Task Modal Tab -->
+        <div class="side-form-card project-info-modal-card" id="pmTaskModal"
+          style="display: none; width: 620px !important; max-width: 96vw; margin: auto;">
+          <div class="side-form-header" style="position: relative; padding: 0 16px 0 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; height: 52px; margin-bottom: 12px;">
+            <div class="side-form-title-badge" id="lblPmTaskTitle"
+              style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+              Task
+            </div>
+            <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-form-close-btn" id="btnClosePmTaskModal" onclick="closePmTaskModal()"
+                aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0;">&times;</button>
+            </div>
+          </div>
+          <div style="height: 14px;"></div>
+
+          <div style="padding: 10px 24px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <!-- 1. Select Task dropdown -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left;">Select Task</label>
+              <select id="selPmTaskType" class="form-input-control" style="flex: 1; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                <option value="Survey to be complete" selected>Survey to be complete</option>
+                <option value="MIR to be raise">MIR to be raise</option>
+                <option value="Project to be complete">Project to be complete</option>
+              </select>
+            </div>
+
+            <!-- 2. Task Date with calendar icon & functionality -->
+            <div class="pm-field-row" style="display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left;">Task Date</label>
+              <div style="position: relative; flex: 1; display: flex; align-items: center;">
+                <input type="text" id="inpPmTaskDate" class="form-input-control nexus-cal-input" placeholder="DD/MM/YYYY" readonly style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; color: #0f172a; background: #ffffff; cursor: pointer;" onclick="openPmTaskCalendar(this, event)">
+                <button type="button" id="btnPmTaskDateCalendar" class="btn-calendar-trigger" style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; padding: 0; display: flex; align-items: center;" onclick="openPmTaskCalendar(document.getElementById('inpPmTaskDate'), event)">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22">
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Site Visit Required toggle (field left, toggle centered, no bottom line) -->
+            <div class="pm-field-row" style="position: relative; display: flex; align-items: center; min-height: 38px;">
+              <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left; margin: 0;">Site Visit Required</label>
+              <div style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center;">
+                <label class="pm-task-toggle-switch">
+                  <input type="checkbox" id="chkPmSiteVisitRequired">
+                  <span class="pm-task-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 4. E-PTW, H-PTW, M-PTW toggles: field left, toggle centered, dropdown right -->
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              
+              <!-- E-PTW -->
+              <div class="pm-field-row" style="position: relative; display: flex; align-items: center; min-height: 38px;">
+                <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left; margin: 0;">E-PTW</label>
+                <div style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center;">
+                  <label class="pm-task-toggle-switch">
+                    <input type="checkbox" id="chkPmTaskEPtw" onchange="togglePmTaskPtwDropdown('E', this.checked)">
+                    <span class="pm-task-toggle-slider"></span>
+                  </label>
+                </div>
+                <div id="rowPmTaskEPtwDropdown" style="display: none; margin-left: auto; width: 220px; max-width: 220px;">
+                  <select id="selPmTaskEPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 36px 0 12px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 12px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                    <!-- Options populated from DPR page -->
+                  </select>
+                </div>
+              </div>
+
+              <!-- H-PTW -->
+              <div class="pm-field-row" style="position: relative; display: flex; align-items: center; min-height: 38px;">
+                <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left; margin: 0;">H-PTW</label>
+                <div style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center;">
+                  <label class="pm-task-toggle-switch">
+                    <input type="checkbox" id="chkPmTaskHPtw" onchange="togglePmTaskPtwDropdown('H', this.checked)">
+                    <span class="pm-task-toggle-slider"></span>
+                  </label>
+                </div>
+                <div id="rowPmTaskHPtwDropdown" style="display: none; margin-left: auto; width: 220px; max-width: 220px;">
+                  <select id="selPmTaskHPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 36px 0 12px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 12px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                    <!-- Options populated from DPR page -->
+                  </select>
+                </div>
+              </div>
+
+              <!-- M-PTW -->
+              <div class="pm-field-row" style="position: relative; display: flex; align-items: center; min-height: 38px;">
+                <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left; margin: 0;">M-PTW</label>
+                <div style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center;">
+                  <label class="pm-task-toggle-switch">
+                    <input type="checkbox" id="chkPmTaskMPtw" onchange="togglePmTaskPtwDropdown('M', this.checked)">
+                    <span class="pm-task-toggle-slider"></span>
+                  </label>
+                </div>
+                <div id="rowPmTaskMPtwDropdown" style="display: none; margin-left: auto; width: 220px; max-width: 220px;">
+                  <select id="selPmTaskMPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 36px 0 12px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 12px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                    <!-- Options populated from DPR page -->
+                  </select>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Centered Submit icon below last field -->
+            <div style="display: flex; justify-content: center; margin-top: 14px;">
+              <button type="button" class="toolbar-icon-btn" id="btnSubmitPmTaskFinal" onclick="submitPmTaskFinalDetails()"
+                title="Submit Task" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Service Vendor: Invoice Amount Modal Tab (Copied from Receivable) -->
         <div class="side-form-card" id="serviceVendorInvoiceAmountPanel" style="display: none; width: 620px; max-width: 95vw;">
           <!-- Header Ribbon Badge: Invoice Amount + Summation Total + Close -->
@@ -16796,7 +16907,7 @@
   <script src="assets/js/modules/master/master-expenses.js?v=20261012_01"></script>
   <script src="assets/js/modules/master/master-hr-policies.js?v=20261012_01"></script>
   <script src="assets/js/modules/indus/indus-towers.js?v=20261012_01"></script>
-  <script src="assets/js/home.js?v=20261105_1300"></script>
+  <script src="assets/js/home.js?v=20261111_1825"></script>
 </body>
 
 </html>

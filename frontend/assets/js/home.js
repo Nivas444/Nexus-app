@@ -361,6 +361,12 @@ async function loadCommercialProjectsFromApi() {
     } else if (currentWorklistView === 'email') {
       currentDataset = (commercialEmailData || []).map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'srn') {
+      currentDataset = sortSrnByStatusOrder(worklistSrnData.map(item => normalizeWorklistSrnItem(item)));
+      filteredDataset = [...currentDataset];
+    } else if (currentWorklistView === 'stn') {
+      currentDataset = sortStnByStatusOrder(worklistStnData.map(item => normalizeWorklistStnItem(item)));
+      filteredDataset = [...currentDataset];
     }
 
     if (typeof applyFiltersAndRender === 'function') {
@@ -3411,121 +3417,100 @@ let infraWhSrnData = [
   {
     id: "srn-1",
     srnNo: "SRN-2026-001",
-    srnDate: "10/08/2026",
-    geNo: "GE-88401",
-    geDate: "09/08/2026",
-    boqNo: "BOQ-7001",
-    boqDate: "07/08/2026",
+    boqNo: "",
+    boqDate: "",
     projectId: "PRJ-2026-001",
-    siteName: "Guindy Hub Site Alpha",
-    infraCategory: "Tower Infrastructure",
-    qty: 12,
+    infraCategory: "Power",
+    qty: "5.00",
     status: "BOQ Request Pending",
-    receivedBy: "Karthik Raja",
     ageing: "4 Days",
-    remarks: "Received @WH location"
+    remarks: "i-map pending",
+    materialDispatchDate: "2026-08-01",
+    dispatchDate: "2026-08-01"
   },
   {
     id: "srn-2",
     srnNo: "SRN-2026-002",
-    srnDate: "11/08/2026",
-    geNo: "GE-88402",
-    geDate: "10/08/2026",
-    boqNo: "BOQ-7002",
-    boqDate: "08/08/2026",
+    boqNo: "BOQ-SRN-102",
+    boqDate: "2026-08-05",
     projectId: "PRJ-2026-002",
-    siteName: "Velachery Central Cell",
-    infraCategory: "Power & Electrical",
-    qty: 25,
+    infraCategory: "Electrical",
+    qty: "12.00",
     status: "BOQ Pending",
-    receivedBy: "Senthil Nathan",
-    ageing: "3 Days",
-    remarks: "I-Map Pending"
+    ageing: "7 Days",
+    remarks: "received",
+    materialDispatchDate: "2026-08-05",
+    dispatchDate: "2026-08-05"
   },
   {
     id: "srn-3",
     srnNo: "SRN-2026-003",
-    srnDate: "12/08/2026",
-    geNo: "GE-88403",
-    geDate: "11/08/2026",
-    boqNo: "BOQ-7003",
-    boqDate: "09/08/2026",
+    boqNo: "BOQ-SRN-103",
+    boqDate: "2026-08-10",
     projectId: "PRJ-2026-003",
-    siteName: "OMR Sholinganallur Hub",
-    infraCategory: "Civil Structure",
-    qty: 8,
-    status: "Document To be Process",
-    receivedBy: "Ramesh Kumar",
-    ageing: "6 Days",
-    remarks: "Checklist Pending"
+    infraCategory: "Civil",
+    qty: "8.00",
+    status: "Document Pending",
+    ageing: "10 Days",
+    remarks: "i-map pending",
+    materialDispatchDate: "2026-08-10",
+    dispatchDate: "2026-08-10"
   },
   {
     id: "srn-4",
     srnNo: "SRN-2026-004",
-    srnDate: "13/08/2026",
-    geNo: "GE-88404",
-    geDate: "12/08/2026",
-    boqNo: "BOQ-7004",
-    boqDate: "10/08/2026",
+    boqNo: "BOQ-SRN-104",
+    boqDate: "2026-08-14",
     projectId: "PRJ-2026-004",
-    siteName: "Tambaram West Tower",
-    infraCategory: "Optical & Telecom",
-    qty: 50,
-    status: "To be Complete",
-    receivedBy: "Manoj Prabhakar",
-    ageing: "2 Days",
-    remarks: "Received @WH location"
+    infraCategory: "Tower Infra",
+    qty: "2.00",
+    status: "To Be Complete",
+    ageing: "15 Days",
+    remarks: "received",
+    materialDispatchDate: "2026-08-14",
+    dispatchDate: "2026-08-14"
   },
   {
     id: "srn-5",
     srnNo: "SRN-2026-005",
-    srnDate: "14/08/2026",
-    geNo: "GE-88405",
-    geDate: "13/08/2026",
-    boqNo: "BOQ-7005",
-    boqDate: "11/08/2026",
+    boqNo: "BOQ-SRN-105",
+    boqDate: "2026-08-16",
     projectId: "PRJ-2026-005",
-    siteName: "Ambattur Estate Node",
-    infraCategory: "DG & Battery Bank",
-    qty: 14,
-    status: "E-Way Bill To be Process",
-    receivedBy: "Vigneshwaran P",
-    ageing: "5 Days",
-    remarks: "I-Map Pending"
+    infraCategory: "Telecom",
+    qty: "15.00",
+    status: "Dispatch Request Pending",
+    ageing: "19 Days",
+    remarks: "i-map pending",
+    materialDispatchDate: "2026-08-16",
+    dispatchDate: "2026-08-16"
   },
   {
     id: "srn-6",
     srnNo: "SRN-2026-006",
-    srnDate: "15/08/2026",
-    geNo: "GE-88406",
-    geDate: "14/08/2026",
-    boqNo: "BOQ-7006",
-    boqDate: "12/08/2026",
+    boqNo: "BOQ-SRN-106",
+    boqDate: "2026-08-18",
     projectId: "PRJ-2026-006",
-    siteName: "Porur Junction Relay",
-    infraCategory: "Solar & Green Energy",
-    qty: 30,
-    status: "Dispatch Planned",
-    receivedBy: "Anand Babu",
-    ageing: "1 Day",
-    remarks: "Checklist Pending"
+    infraCategory: "Rectifier",
+    qty: "3.00",
+    status: "To Be Returned",
+    ageing: "25 Days",
+    remarks: "received",
+    materialDispatchDate: "2026-08-18",
+    dispatchDate: "2026-08-18"
   },
   {
     id: "srn-7",
     srnNo: "SRN-2026-007",
-    srnDate: "16/08/2026",
-    geNo: "GE-88407",
-    geDate: "15/08/2026",
-    boqNo: "BOQ-7007",
-    boqDate: "13/08/2026",
+    boqNo: "BOQ-SRN-107",
+    boqDate: "2026-08-20",
     projectId: "PRJ-2026-007",
-    siteName: "Anna Nagar North Site",
-    infraCategory: "Shelter & Security",
-    qty: 18,
-    status: "To be Returned",
-    receivedBy: "Saravanan K",
-    ageing: "8 Days",
-    remarks: "Received @WH location"
+    infraCategory: "Battery Bank",
+    qty: "6.00",
+    status: "Dispatch Request Pending",
+    ageing: "35 Days",
+    remarks: "i-map pending",
+    materialDispatchDate: "2026-07-25",
+    dispatchDate: "2026-07-25"
   }
 ];
 
@@ -3659,6 +3644,7 @@ window.togglePmStatusRowSelect = function(rowId) {
   const rowInStore = (typeof pmStatusDataStore !== 'undefined' ? pmStatusDataStore : []).find(r => String(r.id) === String(rowId));
   if (rowInStore) rowInStore.selected = !rowInStore.selected;
   applyFiltersAndRender();
+  renderWorklistToolbar();
 };
 
 
@@ -5552,11 +5538,274 @@ function generateCommercialDonutSvg(categories, totalAmount, pageName) {
   `;
 }
 
+function getStnDashboardData(pageName) {
+  const isSrn = String(pageName || '').toLowerCase().includes('srn');
+  const list = isSrn
+    ? ((typeof worklistSrnData !== 'undefined' && Array.isArray(worklistSrnData) && worklistSrnData.length > 0)
+        ? worklistSrnData
+        : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'srn') && currentDataset.length > 0)
+          ? currentDataset
+          : ((typeof wmSrnDataStore !== 'undefined' && Array.isArray(wmSrnDataStore) && wmSrnDataStore.length > 0)
+            ? wmSrnDataStore
+            : [])))
+    : ((typeof worklistStnData !== 'undefined' && Array.isArray(worklistStnData) && worklistStnData.length > 0)
+        ? worklistStnData
+        : ((typeof currentDataset !== 'undefined' && Array.isArray(currentDataset) && (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'stn') && currentDataset.length > 0)
+          ? currentDataset
+          : ((typeof wmStnDataStore !== 'undefined' && Array.isArray(wmStnDataStore) && wmStnDataStore.length > 0)
+            ? wmStnDataStore
+            : [])));
+
+  // 1. Ageing Categories: 0-30 as green (#008744), 31-60 as orange (#ffa700), >60 as red (#ef4444)
+  let ageing0_30 = 0;
+  let ageing31_60 = 0;
+  let ageingOver60 = 0;
+
+  // 2. i-map pending in remarks column based on material dispatch date: 0-15 as green (#008744), 16-30 as orange (#ffa700), >30 as red (#ef4444)
+  let imap0_15 = 0;
+  let imap16_30 = 0;
+  let imapOver30 = 0;
+
+  const nowMs = Date.now();
+
+  list.forEach(r => {
+    // Ageing parsing
+    let days = NaN;
+    if (r.ageing !== undefined && r.ageing !== null) {
+      if (typeof r.ageing === 'number') {
+        days = r.ageing;
+      } else {
+        const cleaned = String(r.ageing).replace(/[^0-9.-]+/g, '').trim();
+        days = parseFloat(cleaned);
+      }
+    }
+    if (isNaN(days) && r.created_at) {
+      const dt = new Date(r.created_at);
+      if (!isNaN(dt.getTime())) {
+        days = Math.max(0, Math.floor((nowMs - dt.getTime()) / (1000 * 60 * 60 * 24)));
+      }
+    }
+    if (isNaN(days)) days = 0;
+
+    if (days <= 30) {
+      ageing0_30++;
+    } else if (days <= 60) {
+      ageing31_60++;
+    } else {
+      ageingOver60++;
+    }
+
+    // Remarks check for "i-map pending" / "imappending"
+    const remStr = String(r.remarks || '').toLowerCase().replace(/[\s\-_]/g, '');
+    if (remStr.includes('imappending')) {
+      const dateVal = r.materialDispatchDate || r.dispatchDate || r.boqDate || r.documentDate || r.created_at || '';
+      let elapsedDays = NaN;
+      if (dateVal) {
+        const dt = new Date(dateVal);
+        if (!isNaN(dt.getTime())) {
+          elapsedDays = Math.max(0, Math.floor((nowMs - dt.getTime()) / (1000 * 60 * 60 * 24)));
+        }
+      }
+      if (isNaN(elapsedDays)) {
+        elapsedDays = days; // fallback to ageing if no dispatch date
+      }
+
+      if (elapsedDays <= 15) {
+        imap0_15++;
+      } else if (elapsedDays <= 30) {
+        imap16_30++;
+      } else {
+        imapOver30++;
+      }
+    }
+  });
+
+  const ageingCategories = [
+    { label: '0-30 Days', color: '#008744', count: ageing0_30 },
+    { label: '31-60 Days', color: '#ffa700', count: ageing31_60 },
+    { label: '>60 Days', color: '#ef4444', count: ageingOver60 }
+  ];
+  const ageingTotal = ageing0_30 + ageing31_60 + ageingOver60;
+
+  const imapCategories = [
+    { label: '0-15 Days', color: '#008744', count: imap0_15 },
+    { label: '16-30 Days', color: '#ffa700', count: imap16_30 },
+    { label: '>30 Days', color: '#ef4444', count: imapOver30 }
+  ];
+  const imapTotal = imap0_15 + imap16_30 + imapOver30;
+
+  return { ageingCategories, ageingTotal, imapCategories, imapTotal };
+}
+
+function renderStnDonutSubChart(cx, cy, R, r, categories, totalCount, chartTitle, legendX, titleX) {
+  const rMid = (R + r) / 2;
+  let slicePaths = [];
+  let textElements = [];
+  let legendElements = [];
+
+  // Chart Title (centered over the entire chart module if titleX provided, else over pie circle cx)
+  const headerX = (titleX !== undefined && titleX !== null) ? titleX : cx;
+  legendElements.push(`
+    <text x="${headerX}" y="42" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a" letter-spacing="0.3">${chartTitle}</text>
+  `);
+
+  if (totalCount <= 0) {
+    const itemH = 50;
+    const totalLegH = categories.length * itemH;
+    const startLegY = cy - totalLegH / 2;
+    return {
+      slices: `<circle cx="${cx}" cy="${cy}" r="${rMid}" fill="none" stroke="#e2e8f0" stroke-width="${R - r}" /><circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" />`,
+      center: `
+        <text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.5">TOTAL</text>
+        <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="16" font-weight="800" fill="#64748b">0</text>
+      `,
+      legends: legendElements.join('') + categories.map((it, idx) => {
+        const legY = startLegY + idx * itemH;
+        return `
+          <g class="chart-legend-item" style="cursor: default;">
+            <rect x="${legendX}" y="${legY + 2}" width="14" height="14" rx="3" fill="${it.color}" />
+            <text x="${legendX + 22}" y="${legY + 14}" font-size="13" font-weight="700" fill="#1e293b">${it.label}</text>
+            <text x="${legendX + 22}" y="${legY + 32}" font-size="13" font-weight="600" fill="#334155">0 <tspan font-weight="500" fill="#64748b">(0.0%)</tspan></text>
+          </g>
+        `;
+      }).join('')
+    };
+  }
+
+  const nonZero = categories.filter(c => c.count > 0);
+  if (nonZero.length === 1) {
+    const it = nonZero[0];
+    const pathD = `M ${cx} ${cy - R} A ${R} ${R} 0 1 0 ${cx} ${cy + R} A ${R} ${R} 0 1 0 ${cx} ${cy - R} M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
+    slicePaths.push(`
+      <path d="${pathD}" fill="${it.color}" stroke="none" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+        <title>${it.label}: ${it.count} (100%)</title>
+      </path>
+    `);
+  } else {
+    let startAngle = -Math.PI / 2;
+    nonZero.forEach((it) => {
+      const sliceAngle = (it.count / totalCount) * 2 * Math.PI;
+      const endAngle = startAngle + sliceAngle;
+      const pct = (it.count / totalCount) * 100;
+
+      const x1_out = cx + R * Math.cos(startAngle);
+      const y1_out = cy + R * Math.sin(startAngle);
+      const x2_out = cx + R * Math.cos(endAngle);
+      const y2_out = cy + R * Math.sin(endAngle);
+      const x1_in = cx + r * Math.cos(startAngle);
+      const y1_in = cy + r * Math.sin(startAngle);
+      const x2_in = cx + r * Math.cos(endAngle);
+      const y2_in = cy + r * Math.sin(endAngle);
+
+      const largeArc = sliceAngle > Math.PI ? 1 : 0;
+      const pathD = `M ${x1_out.toFixed(2)} ${y1_out.toFixed(2)} A ${R} ${R} 0 ${largeArc} 1 ${x2_out.toFixed(2)} ${y2_out.toFixed(2)} L ${x2_in.toFixed(2)} ${y2_in.toFixed(2)} A ${r} ${r} 0 ${largeArc} 0 ${x1_in.toFixed(2)} ${y1_in.toFixed(2)} Z`;
+
+      slicePaths.push(`
+        <path d="${pathD}" fill="${it.color}" stroke="none" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+          <title>${it.label}: ${it.count} (${pct.toFixed(1)}%)</title>
+        </path>
+      `);
+
+      // Text inside slice if angle large enough
+      if (sliceAngle > 0.45) {
+        const midAngle = startAngle + sliceAngle / 2;
+        const tx = cx + rMid * Math.cos(midAngle);
+        const ty = cy + rMid * Math.sin(midAngle);
+        textElements.push(`
+          <text x="${tx.toFixed(2)}" y="${(ty + 4).toFixed(2)}" text-anchor="middle" fill="#ffffff" font-size="11.5" font-weight="700" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6); pointer-events: none;">
+            ${it.count} (${pct.toFixed(0)}%)
+          </text>
+        `);
+      }
+
+      startAngle = endAngle;
+    });
+  }
+
+  // Center hole text
+  const centerHole = `
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" />
+    <text x="${cx}" y="${cy - 7}" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.5">TOTAL</text>
+    <text x="${cx}" y="${cy + 16}" text-anchor="middle" font-size="18" font-weight="800" fill="#0f172a">${totalCount}</text>
+  `;
+
+  // Legends - vertically centered relative to the pie chart (cy)
+  const itemH = 50;
+  const totalLegH = categories.length * itemH;
+  const startLegY = cy - totalLegH / 2;
+
+  categories.forEach((it, idx) => {
+    const legY = startLegY + idx * itemH;
+    const pct = totalCount > 0 ? (it.count / totalCount) * 100 : 0;
+    legendElements.push(`
+      <g class="chart-legend-item" style="cursor: default;">
+        <rect x="${legendX}" y="${legY + 2}" width="14" height="14" rx="3" fill="${it.color}" />
+        <text x="${legendX + 22}" y="${legY + 14}" font-size="13" font-weight="700" fill="#1e293b">${it.label}</text>
+        <text x="${legendX + 22}" y="${legY + 32}" font-size="13" font-weight="600" fill="#334155">${it.count} <tspan font-weight="500" fill="#64748b">(${pct.toFixed(1)}%)</tspan></text>
+      </g>
+    `);
+  });
+
+  return {
+    slices: slicePaths.join('') + textElements.join(''),
+    center: centerHole,
+    legends: legendElements.join('')
+  };
+}
+
+function generateStnDualPieChartsSvg(ageingCategories, ageingTotal, imapCategories, imapTotal) {
+  const width = 940;
+  const height = 430;
+
+  // Left half (x: 0 to 470): cx = 165, legendX = 310, title centered at 235
+  const leftChart = renderStnDonutSubChart(165, 230, 110, 60, ageingCategories, ageingTotal, 'Ageing', 310, 235);
+
+  // Right half (x: 470 to 940): cx = 635, legendX = 780, title centered at 705
+  const rightChart = renderStnDonutSubChart(635, 230, 110, 60, imapCategories, imapTotal, 'i-map Pending', 780, 705);
+
+  return `
+    <svg id="svgCommercialDashboardChart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: block; max-width: 100%; background: #ffffff;">
+      <!-- Middle divider line -->
+      <line x1="470" y1="24" x2="470" y2="406" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="4 4" />
+
+      <!-- Left Sub-chart (Ageing) -->
+      ${leftChart.slices}
+      ${leftChart.center}
+      ${leftChart.legends}
+
+      <!-- Right Sub-chart (i-map Pending) -->
+      ${rightChart.slices}
+      ${rightChart.center}
+      ${rightChart.legends}
+    </svg>
+  `;
+}
+
 function renderCommercialDashboardChart(pageName) {
   const pName = pageName || window._currentCommercialDashboardPage || 'Commercial';
+  const wrapEl = document.getElementById('commercialDashboardSvgWrap');
+  const panel = document.getElementById('commercialDashboardModal');
+
+  const isStnOrSrn = String(pName).toLowerCase().includes('stn') || String(pName).toLowerCase().includes('srn');
+
+  if (isStnOrSrn) {
+    if (panel) {
+      panel.style.width = '1000px';
+      panel.style.maxWidth = '98vw';
+    }
+    const { ageingCategories, ageingTotal, imapCategories, imapTotal } = getStnDashboardData(pName);
+    if (wrapEl) {
+      wrapEl.innerHTML = generateStnDualPieChartsSvg(ageingCategories, ageingTotal, imapCategories, imapTotal);
+    }
+    return;
+  }
+
+  if (panel) {
+    panel.style.width = '740px';
+    panel.style.maxWidth = '96vw';
+  }
   const { categories, totalAmount } = getCommercialDashboardData(pName);
 
-  const wrapEl = document.getElementById('commercialDashboardSvgWrap');
   if (wrapEl) {
     wrapEl.innerHTML = generateCommercialDonutSvg(categories, totalAmount, pName);
   }
@@ -5728,7 +5977,11 @@ window.copyCommercialDashboardChart = async function() {
 
 function closeCommercialDashboard() {
   const panel = document.getElementById('commercialDashboardModal');
-  if (panel) panel.style.display = 'none';
+  if (panel) {
+    panel.style.display = 'none';
+    panel.style.width = '740px';
+    panel.style.maxWidth = '96vw';
+  }
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
   window._currentCommercialDashboardPage = null;
@@ -10382,7 +10635,7 @@ const STN_STATUS_ORDER = [
   'BOQ Pending',
   'Dispatch Request Pending',
   'Dispatch Approval Pending',
-  'Dispatch Pending',
+  'Dispatch Planned',
   'Dispatched',
   'Received'
 ];
@@ -10392,7 +10645,7 @@ const STN_STATUS_RANK = {
   'BOQ Pending': 2,
   'Dispatch Request Pending': 3,
   'Dispatch Approval Pending': 4,
-  'Dispatch Pending': 5,
+  'Dispatch Planned': 5,
   'Dispatched': 6,
   'Received': 7
 };
@@ -10417,26 +10670,30 @@ const defaultWorklistStnItems = [
     infraCategory: "Civil",
     qty: "10.00",
     status: "BOQ Request Pending",
-    ageing: "3 Days",
+    ageing: "8 Days",
     remarks: "i-map pending",
     receivedLocation: "",
     receivedBy: "",
+    dispatchDate: "2026-11-03",
+    materialDispatchDate: "2026-11-03",
     selected: false
   },
   {
     id: "stn-2",
     stnNo: "STN-2026-002",
-    boqNo: "BOQ-2026-102",
-    boqDate: "2026-08-10",
+    boqNo: "",
+    boqDate: "",
     projectId: "PRJ-2026-002",
     siteName: "Ambattur Industrial Estate",
     infraCategory: "Electrical",
     qty: "25.00",
     status: "BOQ Pending",
-    ageing: "6 Days",
+    ageing: "38 Days",
     remarks: "received",
     receivedLocation: "",
     receivedBy: "",
+    dispatchDate: "2026-10-04",
+    materialDispatchDate: "2026-10-04",
     selected: false
   },
   {
@@ -10449,10 +10706,12 @@ const defaultWorklistStnItems = [
     infraCategory: "Power",
     qty: "8.00",
     status: "Dispatch Request Pending",
-    ageing: "9 Days",
+    ageing: "22 Days",
     remarks: "i-map pending",
     receivedLocation: "",
     receivedBy: "",
+    dispatchDate: "2026-10-21",
+    materialDispatchDate: "2026-10-21",
     selected: false
   },
   {
@@ -10465,10 +10724,12 @@ const defaultWorklistStnItems = [
     infraCategory: "Tower Infra",
     qty: "12.00",
     status: "Dispatch Approval Pending",
-    ageing: "12 Days",
+    ageing: "72 Days",
     remarks: "received",
     receivedLocation: "",
     receivedBy: "",
+    dispatchDate: "2026-08-28",
+    materialDispatchDate: "2026-08-28",
     selected: false
   },
   {
@@ -10480,11 +10741,13 @@ const defaultWorklistStnItems = [
     siteName: "Salem Steel Plant Node",
     infraCategory: "Telecom",
     qty: "18.00",
-    status: "Dispatch Pending",
-    ageing: "15 Days",
+    status: "Dispatch Planned",
+    ageing: "48 Days",
     remarks: "i-map pending",
     receivedLocation: "",
     receivedBy: "",
+    dispatchDate: "2026-09-24",
+    materialDispatchDate: "2026-09-24",
     selected: false
   },
   {
@@ -10497,10 +10760,12 @@ const defaultWorklistStnItems = [
     infraCategory: "Civil",
     qty: "30.00",
     status: "Dispatched",
-    ageing: "18 Days",
+    ageing: "14 Days",
     remarks: "received",
-    receivedLocation: "",
+    receivedLocation: "Warehouse",
     receivedBy: "",
+    dispatchDate: "2026-10-28",
+    materialDispatchDate: "2026-10-28",
     selected: false
   },
   {
@@ -10512,11 +10777,31 @@ const defaultWorklistStnItems = [
     siteName: "Tirunelveli Solar Park",
     infraCategory: "Solar",
     qty: "15.00",
-    status: "Received",
-    ageing: "21 Days",
+    status: "Dispatched",
+    ageing: "26 Days",
     remarks: "received",
-    receivedLocation: "",
+    receivedLocation: "Site",
+    receivedBy: "Ramesh Kumar",
+    dispatchDate: "2026-10-16",
+    materialDispatchDate: "2026-10-16",
+    selected: false
+  },
+  {
+    id: "stn-8",
+    stnNo: "STN-2026-008",
+    boqNo: "BOQ-2026-108",
+    boqDate: "2026-08-22",
+    projectId: "PRJ-2026-008",
+    siteName: "Erode Highway Site",
+    infraCategory: "Power",
+    qty: "20.00",
+    status: "Received",
+    ageing: "85 Days",
+    remarks: "i-map pending",
+    receivedLocation: "Warehouse",
     receivedBy: "",
+    dispatchDate: "2026-08-16",
+    materialDispatchDate: "2026-08-16",
     selected: false
   }
 ];
@@ -10525,82 +10810,191 @@ const defaultWorklistSrnItems = [
   {
     id: "srn-1",
     srnNo: "SRN-2026-001",
-    boqNo: "BOQ-SRN-101",
+    boqNo: "",
+    boqDate: "",
     projectId: "PRJ-2026-001",
-    siteName: "Guindy Central Hub",
     infraCategory: "Power",
     qty: "5.00",
     status: "BOQ Request Pending",
     ageing: "4 Days",
     remarks: "i-map pending",
+    materialDispatchDate: "2026-08-01",
+    dispatchDate: "2026-08-01",
     selected: false
   },
   {
     id: "srn-2",
     srnNo: "SRN-2026-002",
-    boqNo: "BOQ-SRN-102",
+    boqNo: "",
+    boqDate: "",
     projectId: "PRJ-2026-002",
-    siteName: "Ambattur Industrial Estate",
     infraCategory: "Electrical",
     qty: "12.00",
     status: "BOQ Pending",
     ageing: "7 Days",
     remarks: "received",
+    materialDispatchDate: "2026-08-05",
+    dispatchDate: "2026-08-05",
     selected: false
   },
   {
     id: "srn-3",
     srnNo: "SRN-2026-003",
     boqNo: "BOQ-SRN-103",
+    boqDate: "2026-08-10",
     projectId: "PRJ-2026-003",
-    siteName: "Madurai East Tower",
     infraCategory: "Civil",
     qty: "8.00",
     status: "Document Pending",
     ageing: "10 Days",
     remarks: "i-map pending",
+    materialDispatchDate: "2026-08-10",
+    dispatchDate: "2026-08-10",
     selected: false
   },
   {
     id: "srn-4",
     srnNo: "SRN-2026-004",
     boqNo: "BOQ-SRN-104",
+    boqDate: "2026-08-14",
     projectId: "PRJ-2026-004",
-    siteName: "Coimbatore South Hub",
     infraCategory: "Tower Infra",
     qty: "2.00",
     status: "To Be Complete",
     ageing: "15 Days",
     remarks: "received",
+    materialDispatchDate: "2026-08-14",
+    dispatchDate: "2026-08-14",
     selected: false
   },
   {
     id: "srn-5",
     srnNo: "SRN-2026-005",
     boqNo: "BOQ-SRN-105",
+    boqDate: "2026-08-16",
     projectId: "PRJ-2026-005",
-    siteName: "Salem Steel Plant Node",
     infraCategory: "Telecom",
     qty: "15.00",
     status: "Dispatch Request Pending",
     ageing: "19 Days",
     remarks: "i-map pending",
+    materialDispatchDate: "2026-08-16",
+    dispatchDate: "2026-08-16",
     selected: false
   },
   {
     id: "srn-6",
     srnNo: "SRN-2026-006",
     boqNo: "BOQ-SRN-106",
+    boqDate: "2026-08-18",
     projectId: "PRJ-2026-006",
-    siteName: "Trichy Central Junction",
     infraCategory: "Rectifier",
     qty: "3.00",
     status: "To Be Returned",
     ageing: "25 Days",
     remarks: "received",
+    materialDispatchDate: "2026-08-18",
+    dispatchDate: "2026-08-18",
+    selected: false
+  },
+  {
+    id: "srn-7",
+    srnNo: "SRN-2026-007",
+    boqNo: "BOQ-SRN-107",
+    boqDate: "2026-08-20",
+    projectId: "PRJ-2026-007",
+    infraCategory: "Battery Bank",
+    qty: "6.00",
+    status: "Dispatch Request Pending",
+    ageing: "35 Days",
+    remarks: "i-map pending",
+    materialDispatchDate: "2026-07-25",
+    dispatchDate: "2026-07-25",
     selected: false
   }
 ];
+
+const SRN_STATUS_RANK = {
+  'BOQ Request Pending': 1,
+  'BOQ Pending': 2,
+  'Document Pending': 3,
+  'To Be Complete': 4,
+  'Dispatch Request Pending': 5,
+  'To Be Returned': 6
+};
+
+function sortSrnByStatusOrder(items) {
+  if (!Array.isArray(items)) return items;
+  return [...items].sort((a, b) => {
+    const rankA = SRN_STATUS_RANK[a.status] !== undefined ? SRN_STATUS_RANK[a.status] : 99;
+    const rankB = SRN_STATUS_RANK[b.status] !== undefined ? SRN_STATUS_RANK[b.status] : 99;
+    return rankA - rankB;
+  });
+}
+
+function normalizeWorklistSrnItem(item, idx = 0) {
+  let st = item.status;
+  if (!st) {
+    const hasNoBoq = (!item.boqNo || !String(item.boqNo).trim()) && (!item.boqDate || !String(item.boqDate).trim());
+    st = hasNoBoq ? 'BOQ Request Pending' : 'Dispatch Request Pending';
+  }
+  const rowId = (item.id !== undefined && item.id !== null && String(item.id).trim() !== '') ? String(item.id) : (item.srnNo ? String(item.srnNo) : `srn-${idx + 1}`);
+  return {
+    ...item,
+    id: rowId,
+    status: st,
+    boqNo: item.boqNo || '',
+    boqDate: item.boqDate || '',
+    dispatchDate: item.dispatchDate || item.materialDispatchDate || item.material_dispatch_date || item.documentDate || '',
+    materialDispatchDate: item.materialDispatchDate || item.dispatchDate || item.material_dispatch_date || item.documentDate || '',
+    qty: normalizeWorklistQtyVal(item.qty),
+    remarks: normalizeWorklistRemarksVal(item.remarks, idx),
+    isGreenFont: !!(item.isGreenFont || item.fontColor === 'green'),
+    selected: !!item.selected
+  };
+}
+
+let worklistSrnData = defaultWorklistSrnItems.map((item, idx) => normalizeWorklistSrnItem(item, idx));
+
+async function loadWorklistSrnFromApi() {
+  try {
+    const res = await fetch('/api/v1/commercial/srn');
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json.data) && json.data.length > 0) {
+        const existingGreenMap = new Map();
+        if (Array.isArray(worklistSrnData)) {
+          worklistSrnData.forEach(r => {
+            if (r.isGreenFont) {
+              const k = String(r.id || r.srnNo || '').trim();
+              if (k) existingGreenMap.set(k, true);
+            }
+          });
+        }
+        worklistSrnData = json.data.map((item, idx) => {
+          const norm = normalizeWorklistSrnItem(item, idx);
+          const k = String(norm.id || norm.srnNo || '').trim();
+          if (existingGreenMap.has(k) || item.isGreenFont) {
+            norm.isGreenFont = true;
+          }
+          return norm;
+        });
+        worklistSrnData = sortSrnByStatusOrder(worklistSrnData);
+        try {
+          localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
+        } catch(e) {}
+        if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'srn') {
+          currentDataset = sortSrnByStatusOrder(worklistSrnData.map(r => ({ ...r })));
+          filteredDataset = [...currentDataset];
+          if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error loading SRN data from API:', err);
+  }
+}
+window.loadWorklistSrnFromApi = loadWorklistSrnFromApi;
 
 function normalizeWorklistQtyVal(q) {
   const num = parseFloat(q);
@@ -10615,10 +11009,12 @@ function normalizeWorklistRemarksVal(rem, idx = 0) {
 }
 
 function normalizeWorklistStnItem(item, idx = 0) {
-  const hasNoBoq = (!item.boqNo || !String(item.boqNo).trim()) && (!item.boqDate || !String(item.boqDate).trim());
   let st = item.status;
-  if (hasNoBoq) {
-    st = 'BOQ Request Pending';
+  if (!st) {
+    const hasNoBoq = (!item.boqNo || !String(item.boqNo).trim()) && (!item.boqDate || !String(item.boqDate).trim());
+    st = hasNoBoq ? 'BOQ Request Pending' : 'Dispatch Request Pending';
+  } else if (st === 'Dispatch Pending') {
+    st = 'Dispatch Planned';
   }
   return {
     ...item,
@@ -10627,6 +11023,8 @@ function normalizeWorklistStnItem(item, idx = 0) {
     boqDate: item.boqDate || '',
     receivedLocation: item.receivedLocation || item.received_location || '',
     receivedBy: item.receivedBy || item.received_by || '',
+    dispatchDate: item.dispatchDate || item.materialDispatchDate || item.material_dispatch_date || item.documentDate || '',
+    materialDispatchDate: item.materialDispatchDate || item.dispatchDate || item.material_dispatch_date || item.documentDate || '',
     qty: normalizeWorklistQtyVal(item.qty),
     remarks: normalizeWorklistRemarksVal(item.remarks, idx)
   };
@@ -10634,7 +11032,7 @@ function normalizeWorklistStnItem(item, idx = 0) {
 
 let worklistStnData = defaultWorklistStnItems.map((item, idx) => normalizeWorklistStnItem(item, idx));
 
-window.loadWorklistStnFromApi = async function() {
+async function loadWorklistStnFromApi() {
   try {
     const res = await fetch('/api/v1/commercial/stn');
     if (res.ok) {
@@ -10655,7 +11053,8 @@ window.loadWorklistStnFromApi = async function() {
   } catch (err) {
     console.warn('Error loading STN data from API:', err);
   }
-};
+}
+window.loadWorklistStnFromApi = loadWorklistStnFromApi;
 
 try {
   const savedStn = localStorage.getItem('worklistStnData');
@@ -10665,6 +11064,7 @@ try {
       const statusMigrationMap = {
         'To be Taken': 'Dispatch Request Pending',
         'Dispatch Request Send': 'Dispatch Approval Pending',
+        'Dispatch Pending': 'Dispatch Planned',
         'Taken': 'Dispatched'
       };
       worklistStnData = parsed.map((item, idx) => {
@@ -10693,13 +11093,16 @@ try {
   const savedSrn = localStorage.getItem('worklistSrnData');
   if (savedSrn) {
     const parsed = JSON.parse(savedSrn);
-    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].srnNo) {
-      worklistSrnData = parsed.map((item, idx) => ({
-        ...item,
-        qty: normalizeWorklistQtyVal(item.qty),
-        remarks: normalizeWorklistRemarksVal(item.remarks, idx)
-      }));
+    const isValidCached = Array.isArray(parsed) && parsed.length >= 6 && parsed.every(p => Boolean(p && (p.srnNo || p.id)));
+    if (isValidCached) {
+      worklistSrnData = sortSrnByStatusOrder(parsed.map((item, idx) => normalizeWorklistSrnItem(item, idx)));
+    } else {
+      worklistSrnData = defaultWorklistSrnItems.map((item, idx) => normalizeWorklistSrnItem(item, idx));
+      localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
     }
+  } else {
+    worklistSrnData = defaultWorklistSrnItems.map((item, idx) => normalizeWorklistSrnItem(item, idx));
+    localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
   }
 } catch(e) {}
 
@@ -10728,13 +11131,15 @@ function parseUrlAndApplyState() {
 
   let savedModule = null;
   let savedProjectsView = null;
+  let savedWorklistView = null;
   try {
     savedModule = sessionStorage.getItem('nexus_module');
     savedProjectsView = sessionStorage.getItem('nexus_projects_view');
+    savedWorklistView = sessionStorage.getItem('nexus_worklist_view');
   } catch(e) {}
   const isWorklistViewParam = ['srn', 'stn', 'jms', 'materials', 'payment', 'project_update', 'yts', 'wip', 'hold', 'nr', 'new_project', 'pr', 'min', 'mrn', 'mtn'].includes(viewParam);
-  const effectiveModule = moduleParam || (isWorklistViewParam ? 'worklist' : (savedModule === 'projects' || savedProjectsView === 'project_material' || savedProjectsView === 'project_expenses' ? 'projects' : null));
-  const effectiveView = viewParam || (effectiveModule === 'projects' ? savedProjectsView : null);
+  const effectiveModule = moduleParam || (isWorklistViewParam ? 'worklist' : (savedModule === 'projects' || savedProjectsView === 'project_material' || savedProjectsView === 'project_expenses' ? 'projects' : (savedModule === 'worklist' ? 'worklist' : null)));
+  const effectiveView = viewParam || (effectiveModule === 'projects' ? savedProjectsView : (effectiveModule === 'worklist' ? savedWorklistView : null));
 
   if (moduleParam === 'master') {
     currentModule = 'master';
@@ -10938,7 +11343,7 @@ function parseUrlAndApplyState() {
   } else if (moduleParam === 'infra_wh') {
     currentModule = 'infra_wh';
     currentInfraWhSubpage = subpageParam || 'stn';
-  } else if (moduleParam === 'worklist') {
+  } else if (effectiveModule === 'worklist' || moduleParam === 'worklist') {
     currentModule = 'worklist';
     window.projectNavigationContext = null;
     window.projectWorklistOrigin = null;
@@ -10950,14 +11355,8 @@ function parseUrlAndApplyState() {
     const role = getAuthenticatedUserRole();
     if (role === 'Project Manager') {
       const pmViews = ['new_project', 'project_update', 'yts', 'wip', 'hold', 'nr', 'payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'materials', 'jms', 'jms_detail', 'stn', 'srn', 'email'];
-      const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.srn || pmProjectFeatureSettings.cam);
-      if (!isStnOrCam && ['yts', 'wip', 'hold', 'nr'].includes(viewParam)) {
-        currentWorklistView = 'project_update';
-      } else if (viewParam === 'project_update') {
-        currentWorklistView = isStnOrCam ? 'yts' : 'project_update';
-      } else {
-        currentWorklistView = pmViews.includes(viewParam) ? viewParam : 'new_project';
-      }
+      const activeWorklistView = effectiveView || viewParam;
+      currentWorklistView = pmViews.includes(activeWorklistView) ? activeWorklistView : 'new_project';
       if (viewParam === 'jms_detail') {
         const poParam = params.get('po_no') || sessionStorage.getItem('selectedJmsPoNo');
         const siteParam = params.get('site_id') || sessionStorage.getItem('selectedJmsSiteId');
@@ -11094,6 +11493,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (currentProjectsView === 'project_material' && typeof window.loadProjectMaterialsFromApi === 'function') {
     window.loadProjectMaterialsFromApi();
+  }
+  if (currentWorklistView === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
+    loadWorklistSrnFromApi();
   }
   applyRoleBasedNavigation();
   initNavEventListeners();
@@ -11697,6 +12099,7 @@ function updateURL() {
     url.searchParams.delete('subpage');
     url.searchParams.delete('tab');
     url.searchParams.delete('customer');
+    try { sessionStorage.setItem('nexus_worklist_view', currentWorklistView); } catch(e) {}
   } else if (currentModule === 'infra_wh') {
     url.searchParams.set('subpage', currentInfraWhSubpage);
     url.searchParams.delete('view');
@@ -12318,6 +12721,22 @@ function renderApp() {
           gstr_3b: 'GSTR 3B'
         };
         bannerTitle.textContent = accountsTitles[currentWorklistView] || 'Payment';
+      } else if (role === 'Project Manager') {
+        const pmTitles = {
+          new_project: 'New Project',
+          project_update: 'Project Update',
+          yts: 'YTS',
+          wip: 'WIP',
+          hold: 'HOLD',
+          nr: 'NR',
+          payment: 'Payment',
+          materials: 'Materials',
+          jms: 'JMS',
+          stn: 'STN',
+          srn: 'SRN',
+          email: 'Email'
+        };
+        bannerTitle.textContent = pmTitles[currentWorklistView] || 'Work List';
       } else {
         bannerTitle.textContent = "Work List";
       }
@@ -14482,7 +14901,7 @@ window.savePmProjectDetails = async function() {
   const planningBoqVal = document.getElementById('pmPlanningBoqBox')?.value || '';
 
   const isStnOrCam = isStn || isSrn || isCam;
-  const targetStatus = isStnOrCam ? 'YTS' : 'Project Update';
+  const targetStatus = isStnOrCam ? 'YTS' : 'WIP';
 
   const updatedSettings = {
     siteSurvey: isSiteSurvey,
@@ -14513,6 +14932,7 @@ window.savePmProjectDetails = async function() {
       site_id: activePmModalRow.site_id || activePmModalRow.siteId,
       projectCode: activePmModalRow.projectCode || activePmModalRow.id,
       projectStatus: targetStatus,
+      project_status: targetStatus,
       towerType: towerTypeVal,
       towerHeight: towerHeightVal,
       sbc: sbcVal,
@@ -14655,7 +15075,7 @@ window.savePmProjectDetails = async function() {
 
   const role = getAuthenticatedUserRole();
   if (role === 'Project Manager') {
-    currentWorklistView = isStnOrCam ? 'yts' : 'project_update';
+    currentWorklistView = isStnOrCam ? 'yts' : 'wip';
     updateURL();
   }
 
@@ -14723,16 +15143,6 @@ window.handlePmToggleChange = function(toggleType, inputEl) {
 
   const role2 = getAuthenticatedUserRole();
   if (role2 === 'Project Manager') {
-    const isStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.srn || pmProjectFeatureSettings.cam);
-    if (isStnOrCam) {
-      if (currentWorklistView === 'project_update') {
-        currentWorklistView = 'yts';
-      }
-    } else {
-      if (['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView)) {
-        currentWorklistView = 'project_update';
-      }
-    }
     renderWorklistFooter();
   }
 
@@ -16152,11 +16562,6 @@ window.savePmNewSrnMaterial = function() {
   }
 
   renderPmSrnMaterialsTable();
-  if (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'srn') {
-    currentDataset = pmSrnMaterialsData.map(item => ({ ...item }));
-    filteredDataset = [...currentDataset];
-    if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-  }
   closePmAddSrnMaterialsModal();
 };
 
@@ -17444,15 +17849,152 @@ window.saveNewMember = async function() {
 };
 
 window.submitMembersTask = function() {
+  const selectedMembers = (pmMembersDataStore || []).filter(m => m.selected);
+  if (selectedMembers.length === 0) {
+    showToast('Please select at least one member.');
+    return;
+  }
+  openPmTaskModal(selectedMembers);
+};
+
+window.openPmTaskModal = function(selectedMembers) {
+  window._selectedTaskMembers = selectedMembers || (pmMembersDataStore || []).filter(m => m.selected);
+  const overlay = document.getElementById('sideFormOverlay');
+  if (!overlay) return;
+
+  const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
+  cards.forEach(card => {
+    if (card.id !== 'pmTaskModal') card.style.display = 'none';
+  });
+
+  const modal = document.getElementById('pmTaskModal');
+  if (modal) {
+    const selTask = document.getElementById('selPmTaskType');
+    if (selTask) selTask.selectedIndex = 0;
+
+    const inpDate = document.getElementById('inpPmTaskDate');
+    if (inpDate) {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, '0');
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const yyyy = today.getFullYear();
+      inpDate.value = `${dd}/${mm}/${yyyy}`;
+    }
+
+    const chkVisit = document.getElementById('chkPmSiteVisitRequired');
+    if (chkVisit) chkVisit.checked = false;
+
+    ['E', 'H', 'M'].forEach(type => {
+      const chk = document.getElementById(`chkPmTask${type}Ptw`);
+      const row = document.getElementById(`rowPmTask${type}PtwDropdown`);
+      const sel = document.getElementById(`selPmTask${type}Ptw`);
+      if (chk) chk.checked = false;
+      if (row) row.style.display = 'none';
+      if (sel) sel.innerHTML = '';
+    });
+
+    modal.style.display = 'block';
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closePmTaskModal = function() {
+  const modal = document.getElementById('pmTaskModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) modal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.openPmTaskCalendar = function(inputEl, evt) {
+  if (evt) evt.stopPropagation();
+  const inp = inputEl || document.getElementById('inpPmTaskDate');
+  const btn = document.getElementById('btnPmTaskDateCalendar') || inp;
+  if (typeof window.openNexusCalendar === 'function') {
+    window.openNexusCalendar(inp, btn);
+  }
+};
+
+window.getDprPtwOptions = async function(type) {
+  if (!projectDprData || projectDprData.length === 0) {
+    try {
+      const res = await fetch('/api/v1/commercial/dpr');
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json.data) && json.data.length > 0) {
+          projectDprData = json.data;
+        }
+      }
+    } catch(e) {}
+  }
+
+  const ptwSet = new Set();
+  const dprList = Array.isArray(projectDprData) ? projectDprData : [];
+  dprList.forEach(item => {
+    let ptwVal = '';
+    if (type === 'E') {
+      ptwVal = item.ePtwNo || item.e_ptw_number || item.ePtwNumber || '';
+    } else if (type === 'H') {
+      ptwVal = item.hPtwNo || item.h_ptw_number || item.hPtwNumber || '';
+    } else if (type === 'M') {
+      ptwVal = item.mPtwNo || item.m_ptw_number || item.mPtwNumber || '';
+    }
+    const clean = String(ptwVal || '').trim();
+    if (clean && clean !== '-' && clean.toLowerCase() !== 'null' && clean.toLowerCase() !== 'undefined') {
+      ptwSet.add(clean);
+    }
+  });
+
+  if (ptwSet.size === 0) {
+    if (type === 'E') {
+      ptwSet.add('E-PTW-2026-001');
+      ptwSet.add('E-PTW-2026-002');
+      ptwSet.add('E-PTW-2026-003');
+    } else if (type === 'H') {
+      ptwSet.add('H-PTW-2026-001');
+      ptwSet.add('H-PTW-2026-002');
+      ptwSet.add('H-PTW-2026-003');
+    } else if (type === 'M') {
+      ptwSet.add('M-PTW-2026-001');
+      ptwSet.add('M-PTW-2026-002');
+      ptwSet.add('M-PTW-2026-003');
+    }
+  }
+
+  return Array.from(ptwSet);
+};
+
+window.togglePmTaskPtwDropdown = async function(type, isEnabled) {
+  const row = document.getElementById(`rowPmTask${type}PtwDropdown`);
+  const sel = document.getElementById(`selPmTask${type}Ptw`);
+  if (!row || !sel) return;
+
+  if (isEnabled) {
+    row.style.display = 'block';
+    const options = await window.getDprPtwOptions(type);
+    sel.innerHTML = options.map((opt, idx) => `<option value="${opt}" ${idx === 0 ? 'selected' : ''}>${opt}</option>`).join('');
+  } else {
+    row.style.display = 'none';
+    sel.innerHTML = '';
+  }
+};
+
+window.submitPmTaskFinalDetails = function() {
+  const taskType = document.getElementById('selPmTaskType')?.value || 'Survey to be complete';
+  const taskDate = document.getElementById('inpPmTaskDate')?.value || '';
+  const siteVisit = document.getElementById('chkPmSiteVisitRequired')?.checked;
+  const ePtw = document.getElementById('chkPmTaskEPtw')?.checked ? (document.getElementById('selPmTaskEPtw')?.value || '') : '';
+  const hPtw = document.getElementById('chkPmTaskHPtw')?.checked ? (document.getElementById('selPmTaskHPtw')?.value || '') : '';
+  const mPtw = document.getElementById('chkPmTaskMPtw')?.checked ? (document.getElementById('selPmTaskMPtw')?.value || '') : '';
+
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Project plan and member assignments submitted successfully!', 'Task Completed', () => {
+    showSvgSuccessPopup('Task assigned and submitted successfully!', 'Task Completed', () => {
+      closePmTaskModal();
       closePmMembersModal();
-      closePmProjectPlanModal();
     });
   } else {
-    showToast('Task completed successfully.');
+    showToast('Task assigned and submitted successfully.');
+    closePmTaskModal();
     closePmMembersModal();
-    closePmProjectPlanModal();
   }
 };
 
@@ -24890,38 +25432,107 @@ let wmSrnDataStore = [
   {
     id: 'wm-srn-1',
     selected: false,
-    siteName: 'Indus Tower Site Delta-8',
     srnNo: 'SRN-2026-001',
-    projectId: 'PRJ-IND-4091',
-    projectManager: 'Nivas Kumar',
-    infraCategory: 'Electrical',
-    qty: 40.00,
-    ageing: '1 Day',
-    status: 'To Be Dispatch'
+    boqNo: '',
+    boqDate: '',
+    projectId: 'PRJ-2026-001',
+    infraCategory: 'Power',
+    qty: 5.00,
+    ageing: '4 Days',
+    status: 'BOQ Request Pending',
+    remarks: 'i-map pending',
+    materialDispatchDate: '2026-08-01',
+    dispatchDate: '2026-08-01'
   },
   {
     id: 'wm-srn-2',
     selected: false,
-    siteName: 'Vi Telemetry Hub Kolhapur',
     srnNo: 'SRN-2026-002',
-    projectId: 'PRJ-IND-4093',
-    projectManager: 'Anand Verma',
-    infraCategory: 'Civil & Tower',
-    qty: 15.00,
-    ageing: '3 Days',
-    status: 'To Be Receive'
+    boqNo: 'BOQ-SRN-102',
+    boqDate: '2026-08-05',
+    projectId: 'PRJ-2026-002',
+    infraCategory: 'Electrical',
+    qty: 12.00,
+    ageing: '7 Days',
+    status: 'BOQ Pending',
+    remarks: 'received',
+    materialDispatchDate: '2026-08-05',
+    dispatchDate: '2026-08-05'
   },
   {
     id: 'wm-srn-3',
     selected: false,
-    siteName: 'Airtel Micro Hub Nagpur',
     srnNo: 'SRN-2026-003',
-    projectId: 'PRJ-IND-4096',
-    projectManager: 'Priya Sharma',
-    infraCategory: 'Optical Fiber',
-    qty: 25.00,
-    ageing: '2 Days',
-    status: 'To Be Dispatch'
+    boqNo: 'BOQ-SRN-103',
+    boqDate: '2026-08-10',
+    projectId: 'PRJ-2026-003',
+    infraCategory: 'Civil',
+    qty: 8.00,
+    ageing: '10 Days',
+    status: 'Document Pending',
+    remarks: 'i-map pending',
+    materialDispatchDate: '2026-08-10',
+    dispatchDate: '2026-08-10'
+  },
+  {
+    id: 'wm-srn-4',
+    selected: false,
+    srnNo: 'SRN-2026-004',
+    boqNo: 'BOQ-SRN-104',
+    boqDate: '2026-08-14',
+    projectId: 'PRJ-2026-004',
+    infraCategory: 'Tower Infra',
+    qty: 2.00,
+    ageing: '15 Days',
+    status: 'To Be Complete',
+    remarks: 'received',
+    materialDispatchDate: '2026-08-14',
+    dispatchDate: '2026-08-14'
+  },
+  {
+    id: 'wm-srn-5',
+    selected: false,
+    srnNo: 'SRN-2026-005',
+    boqNo: 'BOQ-SRN-105',
+    boqDate: '2026-08-16',
+    projectId: 'PRJ-2026-005',
+    infraCategory: 'Telecom',
+    qty: 15.00,
+    ageing: '19 Days',
+    status: 'Dispatch Request Pending',
+    remarks: 'i-map pending',
+    materialDispatchDate: '2026-08-16',
+    dispatchDate: '2026-08-16'
+  },
+  {
+    id: 'wm-srn-6',
+    selected: false,
+    srnNo: 'SRN-2026-006',
+    boqNo: 'BOQ-SRN-106',
+    boqDate: '2026-08-18',
+    projectId: 'PRJ-2026-006',
+    infraCategory: 'Rectifier',
+    qty: 3.00,
+    ageing: '25 Days',
+    status: 'To Be Returned',
+    remarks: 'received',
+    materialDispatchDate: '2026-08-18',
+    dispatchDate: '2026-08-18'
+  },
+  {
+    id: 'wm-srn-7',
+    selected: false,
+    srnNo: 'SRN-2026-007',
+    boqNo: 'BOQ-SRN-107',
+    boqDate: '2026-08-20',
+    projectId: 'PRJ-2026-007',
+    infraCategory: 'Battery Bank',
+    qty: 6.00,
+    ageing: '35 Days',
+    status: 'Dispatch Request Pending',
+    remarks: 'i-map pending',
+    materialDispatchDate: '2026-07-25',
+    dispatchDate: '2026-07-25'
   }
 ];
 
@@ -33050,7 +33661,11 @@ function loadWorklistDataset() {
       return;
     }
     if (currentWorklistView === 'srn') {
-      currentDataset = wmSrnDataStore.map(item => ({ ...item }));
+      if (typeof loadWorklistSrnFromApi === 'function' && (!worklistSrnData || worklistSrnData.length === 0 || !window._srnLoadedFromApi)) {
+        window._srnLoadedFromApi = true;
+        loadWorklistSrnFromApi();
+      }
+      currentDataset = sortSrnByStatusOrder(worklistSrnData.map(item => normalizeWorklistSrnItem(item)));
       filteredDataset = [...currentDataset];
       return;
     }
@@ -33079,7 +33694,10 @@ function loadWorklistDataset() {
     return;
   }
   if (currentWorklistView === 'srn') {
-    currentDataset = worklistSrnData.map(item => ({ ...item }));
+    if (typeof loadWorklistSrnFromApi === 'function') {
+      loadWorklistSrnFromApi();
+    }
+    currentDataset = sortSrnByStatusOrder(worklistSrnData.map(item => normalizeWorklistSrnItem(item)));
     filteredDataset = [...currentDataset];
     return;
   }
@@ -33212,10 +33830,10 @@ function loadWorklistDataset() {
       currentDataset = pmMaterialsDataStore.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'stn') {
-      currentDataset = pmStnMaterialsData.map(item => ({ ...item }));
+      currentDataset = sortStnByStatusOrder(worklistStnData.map(item => normalizeWorklistStnItem(item)));
       filteredDataset = [...currentDataset];
     } else if (currentWorklistView === 'srn') {
-      currentDataset = pmSrnMaterialsData.map(item => ({ ...item }));
+      currentDataset = sortSrnByStatusOrder(worklistSrnData.map(item => normalizeWorklistSrnItem(item)));
       filteredDataset = [...currentDataset];
     } else {
       currentDataset = [];
@@ -33442,55 +34060,123 @@ window.toggleSelectAllPmStatus = function(selectAll) {
   renderWorklistToolbar();
 };
 
+function isSelectableStnStatus(statusOrRow, maybeRow) {
+  let status = '';
+  let row = null;
+  if (statusOrRow && typeof statusOrRow === 'object') {
+    row = statusOrRow;
+    status = row.status || '';
+  } else {
+    status = statusOrRow;
+    row = maybeRow || null;
+  }
+  const s = String(status || '').trim().toLowerCase();
+  if (['boq request pending', 'boq pending', 'dispatch request pending', 'dispatch planned'].includes(s)) {
+    return true;
+  }
+  if (s === 'dispatched') {
+    const loc = row ? String(row.receivedLocation || row.received_location || '').trim().toLowerCase() : '';
+    return loc === 'warehouse';
+  }
+  return false;
+}
+
+function isSelectableSrnStatus(statusOrRow, maybeRow) {
+  let status = '';
+  if (statusOrRow && typeof statusOrRow === 'object') {
+    status = statusOrRow.status || '';
+  } else {
+    status = statusOrRow || '';
+  }
+  const s = String(status || '').trim().toLowerCase();
+  // "in to be return status no select marker in select column"
+  if (s === 'to be returned' || s === 'to be return' || s.includes('return')) {
+    return false;
+  }
+  return true;
+}
+
 window.toggleWorklistRowSelected = function(rowId, isChecked) {
   const isStn = currentWorklistView === 'stn';
+  const isSrn = currentWorklistView === 'srn';
+  const cleanId = String(rowId || '').trim();
+  if (isStn) {
+    const rowToCheck = (currentDataset || []).find(r => String(r.id) === cleanId || String(r.stnNo) === cleanId);
+    if (rowToCheck && !isSelectableStnStatus(rowToCheck)) {
+      return;
+    }
+  } else if (isSrn) {
+    const rowToCheck = (currentDataset || []).find(r => String(r.id) === cleanId || String(r.srnNo) === cleanId);
+    if (rowToCheck && !isSelectableSrnStatus(rowToCheck)) {
+      return;
+    }
+  }
   if (currentDataset) {
-    const row = currentDataset.find(r => String(r.id) === String(rowId) || (isStn && String(r.stnNo) === String(rowId)));
+    const row = currentDataset.find(r => String(r.id) === cleanId || (isStn && String(r.stnNo) === cleanId) || (isSrn && String(r.srnNo) === cleanId));
     if (row) row.selected = isChecked !== undefined ? isChecked : !row.selected;
   }
   const sourceStore = isStn ? worklistStnData : worklistSrnData;
   if (sourceStore) {
-    const storeRow = sourceStore.find(r => String(r.id) === String(rowId) || (isStn && String(r.stnNo) === String(rowId)));
+    const storeRow = sourceStore.find(r => String(r.id) === cleanId || (isStn && String(r.stnNo) === cleanId) || (isSrn && String(r.srnNo) === cleanId));
     if (storeRow) storeRow.selected = isChecked !== undefined ? isChecked : !storeRow.selected;
   }
   applyFiltersAndRender();
+  renderWorklistToolbar();
   updateWorklistSubmitVisibility();
 };
 
 window.toggleSelectAllWorklistRows = function(forceState) {
   const isStn = currentWorklistView === 'stn';
+  const isSrn = currentWorklistView === 'srn';
   const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (currentDataset && currentDataset.length > 0 ? currentDataset : []);
-  const allSelected = data.length > 0 && data.every(r => r.selected);
+  const selectableData = isStn ? data.filter(r => isSelectableStnStatus(r)) : (isSrn ? data.filter(r => isSelectableSrnStatus(r)) : data);
+  const allSelected = selectableData.length > 0 && selectableData.every(r => r.selected);
   const targetState = forceState !== undefined ? forceState : !allSelected;
   data.forEach(r => {
-    r.selected = targetState;
+    if (isStn && !isSelectableStnStatus(r)) {
+      r.selected = false;
+    } else if (isSrn && !isSelectableSrnStatus(r)) {
+      r.selected = false;
+    } else {
+      r.selected = targetState;
+    }
   });
   const sourceStore = isStn ? worklistStnData : worklistSrnData;
   if (sourceStore) {
     sourceStore.forEach(sr => {
-      const match = data.find(r => String(r.id) === String(sr.id));
-      if (match) sr.selected = targetState;
+      if (isStn && !isSelectableStnStatus(sr)) {
+        sr.selected = false;
+      } else if (isSrn && !isSelectableSrnStatus(sr)) {
+        sr.selected = false;
+      } else {
+        const match = data.find(r => String(r.id) === String(sr.id) || (isStn && String(r.stnNo) === String(sr.stnNo)) || (isSrn && String(r.srnNo) === String(sr.srnNo)));
+        if (match) sr.selected = match.selected;
+      }
     });
   }
   applyFiltersAndRender();
+  renderWorklistToolbar();
   updateWorklistSubmitVisibility();
 };
 
-window.updateWorklistSubmitVisibility = function() {
+function updateWorklistSubmitVisibility() {
   const isStn = currentWorklistView === 'stn';
-  const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+  const isSrn = currentWorklistView === 'srn';
   if (isStn) {
     const centeredRow = document.getElementById('rowWorklistStnSubmitAction');
     if (centeredRow) {
-      centeredRow.style.display = hasSelected ? 'table-row' : 'none';
+      const hasSubmittableSelected = currentDataset && currentDataset.some(r => r.selected && ['boq pending', 'dispatch request pending', 'dispatch planned'].includes(String(r.status || '').trim().toLowerCase()));
+      centeredRow.style.display = hasSubmittableSelected ? 'table-row' : 'none';
     }
-  } else {
-    const submitBtn = document.getElementById('btnWorklistSrnSubmit');
-    if (submitBtn) {
-      submitBtn.style.display = hasSelected ? 'inline-flex' : 'none';
+  } else if (isSrn) {
+    const centeredRow = document.getElementById('rowWorklistSrnSubmitAction');
+    if (centeredRow) {
+      const hasSubmittableSelected = currentDataset && currentDataset.some(r => r.selected && ['boq pending', 'document pending', 'dispatch request pending'].includes(String(r.status || '').trim().toLowerCase()));
+      centeredRow.style.display = hasSubmittableSelected ? 'table-row' : 'none';
     }
   }
-};
+}
+window.updateWorklistSubmitVisibility = updateWorklistSubmitVisibility;
 
 window.openAddStnBoqModal = function(rows) {
   window._pendingBoqStnRows = rows;
@@ -33539,9 +34225,13 @@ window.submitAddStnBoqForm = async function() {
     return;
   }
 
-  const targetRows = window._pendingBoqStnRows || (currentDataset || []).filter(r => r.selected && r.status === 'BOQ Request Pending');
+  const isSrn = currentWorklistView === 'srn';
+  const targetRows = isSrn
+    ? (window._pendingBoqSrnRows || (currentDataset || []).filter(r => r.selected && (r.status === 'BOQ Pending' || r.status === 'BOQ Request Pending')))
+    : (window._pendingBoqStnRows || (currentDataset || []).filter(r => r.selected && (r.status === 'BOQ Pending' || r.status === 'BOQ Request Pending')));
+
   if (!targetRows || targetRows.length === 0) {
-    showToast('No BOQ Request Pending rows selected.');
+    showToast('No BOQ Pending rows selected.');
     closeAddStnBoqModal();
     return;
   }
@@ -33552,35 +34242,118 @@ window.submitAddStnBoqForm = async function() {
     row.status = 'Dispatch Request Pending';
     row.selected = false;
 
+    if (isSrn) {
+      const storeRow = worklistSrnData.find(sr => String(sr.id) === String(row.id) || String(sr.srnNo) === String(row.srnNo));
+      if (storeRow) {
+        storeRow.boqNo = boqNo;
+        storeRow.boqDate = boqDate;
+        storeRow.status = 'Dispatch Request Pending';
+        storeRow.selected = false;
+      }
+      try {
+        const res = await fetch('/api/v1/commercial/srn/boq', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: row.id,
+            srnNo: row.srnNo,
+            boqNo: boqNo,
+            boqDate: boqDate
+          })
+        });
+        if (res.ok) {
+          const resJson = await res.json();
+          if (resJson && resJson.data && resJson.data.id) {
+            row.id = resJson.data.id;
+            if (storeRow) storeRow.id = resJson.data.id;
+          }
+        }
+      } catch(e) {
+        console.warn('API error saving SRN BOQ:', e);
+      }
+    } else {
+      const storeRow = worklistStnData.find(sr => String(sr.id) === String(row.id) || String(sr.stnNo) === String(row.stnNo));
+      if (storeRow) {
+        storeRow.boqNo = boqNo;
+        storeRow.boqDate = boqDate;
+        storeRow.status = 'Dispatch Request Pending';
+        storeRow.selected = false;
+      }
+      try {
+        const res = await fetch('/api/v1/commercial/stn/boq', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: row.id,
+            stnNo: row.stnNo,
+            boqNo: boqNo,
+            boqDate: boqDate
+          })
+        });
+        if (res.ok) {
+          const resJson = await res.json();
+          if (resJson && resJson.data && resJson.data.id) {
+            row.id = resJson.data.id;
+            if (storeRow) storeRow.id = resJson.data.id;
+          }
+        }
+      } catch(e) {
+        console.warn('API error saving STN BOQ:', e);
+      }
+    }
+  }
+
+  try {
+    if (isSrn) {
+      localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
+    } else {
+      localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
+    }
+  } catch(e) {}
+
+  closeAddStnBoqModal();
+  showToast('BOQ details added. Status updated to Dispatch Request Pending.');
+  if (isSrn) {
+    currentDataset = sortSrnByStatusOrder(currentDataset);
+  } else {
+    currentDataset = sortStnByStatusOrder(currentDataset);
+  }
+  applyFiltersAndRender();
+  renderWorklistToolbar();
+  updateWorklistSubmitVisibility();
+};
+
+window.sendStnBoqRequestMail = async function() {
+  const selectedRows = (currentDataset || []).filter(r => r.selected && r.status === 'BOQ Request Pending');
+  if (selectedRows.length === 0) {
+    showToast('No BOQ Request Pending rows selected.');
+    return;
+  }
+
+  let updatedCount = 0;
+  for (const row of selectedRows) {
+    row.status = 'BOQ Pending';
+    row.selected = false;
     const storeRow = worklistStnData.find(sr => String(sr.id) === String(row.id) || String(sr.stnNo) === String(row.stnNo));
     if (storeRow) {
-      storeRow.boqNo = boqNo;
-      storeRow.boqDate = boqDate;
-      storeRow.status = 'Dispatch Request Pending';
+      storeRow.status = 'BOQ Pending';
       storeRow.selected = false;
     }
+    updatedCount++;
 
     // Persist to indus_project_infra table in Project DB
     try {
-      const res = await fetch('/api/v1/commercial/stn/boq', {
+      await fetch('/api/v1/commercial/stn/dispatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: row.id,
           stnNo: row.stnNo,
-          boqNo: boqNo,
-          boqDate: boqDate
+          status: 'BOQ Pending'
         })
       });
-      if (res.ok) {
-        const resJson = await res.json();
-        if (resJson && resJson.data && resJson.data.id) {
-          row.id = resJson.data.id;
-          if (storeRow) storeRow.id = resJson.data.id;
-        }
-      }
     } catch(e) {
-      console.warn('API error saving STN BOQ:', e);
+      console.warn('API error updating STN status to BOQ Pending:', e);
     }
   }
 
@@ -33588,10 +34361,10 @@ window.submitAddStnBoqForm = async function() {
     localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
   } catch(e) {}
 
-  closeAddStnBoqModal();
-  showToast('BOQ details added. Status updated to Dispatch Request Pending.');
+  showToast(`BOQ request mail sent for ${updatedCount} record(s). Status updated to BOQ Pending.`);
   currentDataset = sortStnByStatusOrder(currentDataset);
   applyFiltersAndRender();
+  renderWorklistToolbar();
   updateWorklistSubmitVisibility();
 };
 
@@ -33692,19 +34465,20 @@ window.submitAddStnDispatchForm = async function() {
     return;
   }
 
-  const targetRows = window._pendingDispatchStnRows || (currentDataset || []).filter(r => r.selected && r.status === 'Dispatch Request Pending');
+  const targetRows = window._pendingDispatchStnRows || (currentDataset || []).filter(r => r.selected && (r.status === 'Dispatch Planned' || r.status === 'Dispatch Request Pending'));
   if (!targetRows || targetRows.length === 0) {
-    showToast('No Dispatch Request Pending rows selected.');
+    showToast('No rows selected for dispatch details.');
     closeAddStnDispatchModal();
     return;
   }
 
   for (const row of targetRows) {
+    const nextStatus = row.status === 'Dispatch Planned' ? 'Dispatched' : 'Dispatch Approval Pending';
     row.receivedLocation = dispatchLocation;
     row.received_location = dispatchLocation;
     row.receivedBy = receiptName;
     row.received_by = receiptName;
-    row.status = 'Dispatch Approval Pending';
+    row.status = nextStatus;
     row.selected = false;
 
     const storeRow = worklistStnData.find(sr => String(sr.id) === String(row.id) || String(sr.stnNo) === String(row.stnNo));
@@ -33713,7 +34487,7 @@ window.submitAddStnDispatchForm = async function() {
       storeRow.received_location = dispatchLocation;
       storeRow.receivedBy = receiptName;
       storeRow.received_by = receiptName;
-      storeRow.status = 'Dispatch Approval Pending';
+      storeRow.status = nextStatus;
       storeRow.selected = false;
     }
 
@@ -33726,7 +34500,8 @@ window.submitAddStnDispatchForm = async function() {
           id: row.id,
           stnNo: row.stnNo,
           dispatchLocation: dispatchLocation,
-          receiptName: receiptName
+          receiptName: receiptName,
+          status: nextStatus
         })
       });
       if (res.ok) {
@@ -33746,42 +34521,65 @@ window.submitAddStnDispatchForm = async function() {
   } catch(e) {}
 
   closeAddStnDispatchModal();
-  showToast('Dispatch details saved. Status updated to Dispatch Approval Pending.');
+  showToast('Dispatch details saved successfully.');
   currentDataset = sortStnByStatusOrder(currentDataset);
   applyFiltersAndRender();
+  renderWorklistToolbar();
   updateWorklistSubmitVisibility();
 };
 
-window.submitSelectedWorklistStnRows = function() {
+window.submitSelectedWorklistStnRows = async function() {
   const selectedRows = (currentDataset || []).filter(r => r.selected);
   if (selectedRows.length === 0) {
     showToast('Please select at least one row to submit.');
     return;
   }
 
-  // 1. If any selected row has status 'BOQ Request Pending', open Add BOQ modal
-  const boqPendingRows = selectedRows.filter(r => r.status === 'BOQ Request Pending');
+  // 1. If any selected row has status 'BOQ Pending', open Add BOQ modal
+  const boqPendingRows = selectedRows.filter(r => r.status === 'BOQ Pending');
   if (boqPendingRows.length > 0) {
     openAddStnBoqModal(boqPendingRows);
     return;
   }
 
-  // 2. If any selected row has status 'Dispatch Request Pending', open Add Dispatch Details modal
-  const dispatchPendingRows = selectedRows.filter(r => r.status === 'Dispatch Request Pending');
-  if (dispatchPendingRows.length > 0) {
-    openAddStnDispatchModal(dispatchPendingRows);
+  // 2. If any selected row has status 'Dispatch Request Pending', change font color to green
+  const dispatchReqPendingRows = selectedRows.filter(r => r.status === 'Dispatch Request Pending');
+  if (dispatchReqPendingRows.length > 0) {
+    dispatchReqPendingRows.forEach(r => {
+      r.isGreenFont = true;
+      r.selected = false;
+      const storeRow = worklistStnData.find(sr => String(sr.id) === String(r.id) || String(sr.stnNo) === String(r.stnNo));
+      if (storeRow) {
+        storeRow.isGreenFont = true;
+        storeRow.selected = false;
+      }
+    });
+    try {
+      localStorage.setItem('worklistStnData', JSON.stringify(worklistStnData));
+    } catch(e) {}
+    applyFiltersAndRender();
+    renderWorklistToolbar();
+    showToast('Dispatch request marked active.');
     return;
   }
 
-  // 3. For rows in subsequent statuses, advance to next stage
+  // 3. If any selected row has status 'Dispatch Planned', open Add Dispatch Details modal
+  const dispatchPlannedRows = selectedRows.filter(r => r.status === 'Dispatch Planned');
+  if (dispatchPlannedRows.length > 0) {
+    openAddStnDispatchModal(dispatchPlannedRows);
+    return;
+  }
+
+  // 4. For rows in subsequent statuses, advance to next stage
   const nextStatusMap = {
-    'Dispatch Approval Pending': 'Dispatch Pending',
-    'Dispatch Pending': 'Dispatched',
+    'BOQ Pending': 'Dispatch Request Pending',
+    'Dispatch Approval Pending': 'Dispatch Planned',
+    'Dispatch Planned': 'Dispatched',
     'Dispatched': 'Received'
   };
 
   let updatedCount = 0;
-  selectedRows.forEach(row => {
+  for (const row of selectedRows) {
     const nextSt = nextStatusMap[row.status];
     if (nextSt) {
       row.status = nextSt;
@@ -33792,8 +34590,23 @@ window.submitSelectedWorklistStnRows = function() {
         storeRow.selected = false;
       }
       updatedCount++;
+
+      // Persist to indus_project_infra table in Project DB
+      try {
+        await fetch('/api/v1/commercial/stn/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: row.id,
+            stnNo: row.stnNo,
+            status: nextSt
+          })
+        });
+      } catch(e) {
+        console.warn('API error updating STN status:', e);
+      }
     }
-  });
+  }
 
   if (updatedCount > 0) {
     try {
@@ -33808,21 +34621,161 @@ window.submitSelectedWorklistStnRows = function() {
   }
 };
 
-window.submitSelectedWorklistSrnRows = function() {
+window.submitSelectedWorklistSrnRows = async function() {
   const selectedRows = (currentDataset || []).filter(r => r.selected);
   if (selectedRows.length === 0) {
     showToast('Please select at least one row to submit.');
     return;
   }
-  const selectedIds = new Set(selectedRows.map(r => String(r.id)));
-  worklistSrnData = worklistSrnData.filter(r => !selectedIds.has(String(r.id)));
-  currentDataset = worklistSrnData.map(r => ({ ...r }));
+
+  // 1. If any selected row has status 'BOQ Pending', open Add BOQ modal
+  const boqPendingRows = selectedRows.filter(r => r.status === 'BOQ Pending');
+  if (boqPendingRows.length > 0) {
+    openAddSrnBoqModal(boqPendingRows);
+    return;
+  }
+
+  // 2. If any selected row has status 'Dispatch Request Pending', change font color to green
+  const dispatchReqPendingRows = selectedRows.filter(r => r.status === 'Dispatch Request Pending');
+  if (dispatchReqPendingRows.length > 0) {
+    dispatchReqPendingRows.forEach(r => {
+      r.isGreenFont = true;
+      r.selected = false;
+      const storeRow = worklistSrnData.find(sr => String(sr.id) === String(r.id) || String(sr.srnNo) === String(r.srnNo));
+      if (storeRow) {
+        storeRow.isGreenFont = true;
+        storeRow.selected = false;
+      }
+    });
+    try {
+      localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
+    } catch(e) {}
+    applyFiltersAndRender();
+    renderWorklistToolbar();
+    showToast('Dispatch request marked active.');
+    return;
+  }
+
+  // 3. If any selected row has status 'Document Pending', advance to 'To Be Complete'
+  const docPendingRows = selectedRows.filter(r => r.status === 'Document Pending');
+  if (docPendingRows.length > 0) {
+    for (const r of docPendingRows) {
+      r.status = 'To Be Complete';
+      r.selected = false;
+      const storeRow = worklistSrnData.find(sr => String(sr.id) === String(r.id) || String(sr.srnNo) === String(r.srnNo));
+      if (storeRow) {
+        storeRow.status = 'To Be Complete';
+        storeRow.selected = false;
+      }
+      try {
+        await fetch('/api/v1/commercial/srn/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: r.id, srnNo: r.srnNo, status: 'To Be Complete' })
+        });
+      } catch(e) {}
+    }
+    try {
+      localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
+    } catch(e) {}
+    showToast(`${docPendingRows.length} record(s) moved to To Be Complete.`);
+    currentDataset = sortSrnByStatusOrder(currentDataset);
+    applyFiltersAndRender();
+    renderWorklistToolbar();
+    updateWorklistSubmitVisibility();
+    return;
+  }
+
+  // Other statuses fallback advance
+  const nextStatusMap = {
+    'BOQ Pending': 'Document Pending',
+    'Document Pending': 'To Be Complete',
+    'To Be Complete': 'Dispatch Request Pending',
+    'Dispatch Request Pending': 'To Be Returned'
+  };
+
+  let updatedCount = 0;
+  for (const row of selectedRows) {
+    const nextSt = nextStatusMap[row.status];
+    if (nextSt) {
+      row.status = nextSt;
+      row.selected = false;
+      const storeRow = worklistSrnData.find(sr => String(sr.id) === String(row.id) || String(sr.srnNo) === String(row.srnNo));
+      if (storeRow) {
+        storeRow.status = nextSt;
+        storeRow.selected = false;
+      }
+      updatedCount++;
+      try {
+        await fetch('/api/v1/commercial/srn/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: row.id, srnNo: row.srnNo, status: nextSt })
+        });
+      } catch(e) {}
+    }
+  }
+
+  if (updatedCount > 0) {
+    try {
+      localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
+    } catch(e) {}
+    showToast(`${updatedCount} SRN record(s) submitted successfully.`);
+    currentDataset = sortSrnByStatusOrder(currentDataset);
+    applyFiltersAndRender();
+    renderWorklistToolbar();
+    updateWorklistSubmitVisibility();
+  }
+};
+
+window.sendSrnBoqRequestMail = async function() {
+  const selectedRows = (currentDataset || []).filter(r => r.selected && r.status === 'BOQ Request Pending');
+  if (selectedRows.length === 0) {
+    showToast('No BOQ Request Pending rows selected.');
+    return;
+  }
+
+  let updatedCount = 0;
+  for (const row of selectedRows) {
+    row.status = 'BOQ Pending';
+    row.selected = false;
+    const storeRow = worklistSrnData.find(sr => String(sr.id) === String(row.id) || String(sr.srnNo) === String(row.srnNo));
+    if (storeRow) {
+      storeRow.status = 'BOQ Pending';
+      storeRow.selected = false;
+    }
+    updatedCount++;
+
+    try {
+      await fetch('/api/v1/commercial/srn/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: row.id,
+          srnNo: row.srnNo,
+          status: 'BOQ Pending'
+        })
+      });
+    } catch(e) {
+      console.warn('API error updating SRN status to BOQ Pending:', e);
+    }
+  }
+
   try {
     localStorage.setItem('worklistSrnData', JSON.stringify(worklistSrnData));
   } catch(e) {}
-  showToast(`${selectedRows.length} SRN record(s) submitted successfully.`);
+
+  showToast(`BOQ request mail sent for ${updatedCount} record(s). Status updated to BOQ Pending.`);
+  currentDataset = sortSrnByStatusOrder(currentDataset);
   applyFiltersAndRender();
+  renderWorklistToolbar();
   updateWorklistSubmitVisibility();
+};
+
+window.openAddSrnBoqModal = function(rows) {
+  window._pendingBoqSrnRows = rows;
+  // Reuse modalAddStnBoq UI
+  openAddStnBoqModal(rows);
 };
 
 window.exportWorklistStnToCsv = function() {
@@ -33860,7 +34813,7 @@ window.exportWorklistStnToCsv = function() {
 
 window.exportWorklistSrnToCsv = function() {
   const data = (filteredDataset && filteredDataset.length > 0) ? filteredDataset : (worklistSrnData || []);
-  const headers = ["SRN No", "BOQ No", "Project ID", "Site Name", "Infra Category", "Qty", "Status", "Ageing", "Remarks"];
+  const headers = ["SRN No", "BOQ No", "Project ID", "Infra Category", "Qty", "Status", "Ageing", "Remarks"];
   const escapeCsv = (str) => {
     if (str === null || str === undefined) return '""';
     const s = String(str).replace(/"/g, '""');
@@ -33870,7 +34823,6 @@ window.exportWorklistSrnToCsv = function() {
     escapeCsv(r.srnNo),
     escapeCsv(r.boqNo),
     escapeCsv(r.projectId),
-    escapeCsv(r.siteName),
     escapeCsv(r.infraCategory),
     escapeCsv(r.qty),
     escapeCsv(r.status),
@@ -35155,6 +36107,42 @@ function renderWorklistToolbar() {
   }
   toolbar.style.display = 'flex';
 
+  if (currentWorklistView === 'stn' || currentWorklistView === 'srn') {
+    const isStn = currentWorklistView === 'stn';
+    const isSrn = currentWorklistView === 'srn';
+    const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+    const hasBoqRequestPendingSelected = (currentDataset || []).some(r => r.selected && r.status === 'BOQ Request Pending');
+    const hasDispatchedOrCompleteSelected = isStn
+      ? (currentDataset || []).some(r => r.selected && r.status === 'Dispatched')
+      : (currentDataset || []).some(r => r.selected && (r.status === 'To Be Complete' || r.status === 'To Be Completed'));
+    toolbar.innerHTML = `
+      <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+        ${hasBoqRequestPendingSelected ? `
+        <button type="button" class="toolbar-icon-btn btn-mail-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Mail" data-tooltip="Send BOQ Request Mail" title="Send BOQ Request Mail" aria-label="Send BOQ Request Mail" style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" onclick="${isStn ? 'sendStnBoqRequestMail()' : 'sendSrnBoqRequestMail()'}">
+          <img src="icons/mail.svg" alt="Mail" class="toolbar-icon-img" width="28" height="28">
+        </button>
+        ` : ''}
+        ${hasDispatchedOrCompleteSelected ? `
+        <button type="button" class="toolbar-icon-btn btn-man-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Members" data-tooltip="Members Details" title="Members Details" aria-label="Members Details" style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 2px;" onclick="openPmMembersModal()">
+          <img src="icons/man.svg" alt="Members" class="toolbar-icon-img" width="28" height="28" style="background: transparent; border: none;">
+        </button>
+        ` : ''}
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}CsvDownload" data-tooltip="Download CSV" title="Download CSV" style="cursor: pointer;" onclick="${isStn ? 'exportWorklistStnToCsv()' : 'exportWorklistSrnToCsv()'}">
+          <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Dashboard" data-tooltip="Dashboard" title="Dashboard" style="cursor: pointer;" onclick="${isStn ? 'openWorklistStnDashboard()' : 'openWorklistSrnDashboard()'}">
+          <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
+        </button>
+        <button type="button" class="toolbar-icon-btn btn-bulk-upload-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}BulkUpload" data-tooltip="Bulk Upload" title="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadSidePanel('${isStn ? 'STN' : 'SRN'}')">
+          <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
+        </button>
+      </div>
+    `;
+    initWorklistToolbarEvents();
+    return;
+  }
+
   if (role === 'Project Manager') {
     if (['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView)) {
       const hasSelected = currentDataset.some(r => r.selected);
@@ -35168,6 +36156,9 @@ function renderWorklistToolbar() {
           <button type="button" class="toolbar-icon-btn btn-mail-action" id="btnPmWorklistMail" data-tooltip="Send Mail" aria-label="Send Mail" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'};" onclick="sendMailPmWorklist()">
             <img src="icons/mail.svg" alt="Mail" class="toolbar-icon-img" width="28" height="28">
           </button>
+          <button type="button" class="toolbar-icon-btn btn-man-action" id="btnPmWorklistMembers" data-tooltip="Members Details" title="Members Details" aria-label="Members Details" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center; background: transparent; border: none; padding: 2px;" onclick="openPmMembersModal()">
+            <img src="icons/man.svg" alt="Members" class="toolbar-icon-img" width="28" height="28" style="background: transparent; border: none;">
+          </button>
           <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnPmWorklistCsvDownload" data-tooltip="Download CSV" aria-label="Download CSV" style="cursor: pointer;" onclick="exportPmWorklistToCsv()">
             <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
           </button>
@@ -35180,29 +36171,6 @@ function renderWorklistToolbar() {
         </div>
       `;
       initWorklistToolbarEvents();
-      return;
-    } else if (currentWorklistView === 'stn' || currentWorklistView === 'srn') {
-      const isStn = currentWorklistView === 'stn';
-      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
-      toolbar.innerHTML = `
-        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
-        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
-          <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}CsvDownload" data-tooltip="Download CSV" title="Download CSV" style="cursor: pointer;" onclick="${isStn ? 'exportWorklistStnToCsv()' : 'exportWorklistSrnToCsv()'}">
-            <img src="icons/CSV download.svg" alt="Download CSV" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          <button type="button" class="toolbar-icon-btn btn-dashboard-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Dashboard" data-tooltip="Dashboard" title="Dashboard" style="cursor: pointer;" onclick="${isStn ? 'openWorklistStnDashboard()' : 'openWorklistSrnDashboard()'}">
-            <img src="icons/Dash board.svg" alt="Dashboard" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          <button type="button" class="toolbar-icon-btn btn-bulk-upload-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}BulkUpload" data-tooltip="Bulk Upload" title="Bulk Upload" style="cursor: pointer;" onclick="openBulkUploadSidePanel('${isStn ? 'STN' : 'SRN'}')">
-            <img src="icons/Bulk Upload.svg" alt="Bulk Upload" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          ${!isStn ? `
-          <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWorklistSrnSubmit" data-tooltip="Submit" title="Submit" style="cursor: pointer; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;" onclick="submitSelectedWorklistSrnRows()">
-            <img src="icons/Submit.svg" alt="Submit" class="toolbar-icon-img" width="28" height="28">
-          </button>
-          ` : ''}
-        </div>
-      `;
       return;
     } else if (!['payment', 'project_payment', 'purchase_payment', 'employee_payment', 'transport_payment', 'accounts_payment', 'admin_payment', 'statutory_payment', 'jms', 'jms_detail', 'email'].includes(currentWorklistView)) {
       toolbar.innerHTML = `
@@ -36156,6 +37124,9 @@ function renderWorklistFooter() {
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
+          if (tab.view === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
+            loadWorklistSrnFromApi();
+          }
           updateURL();
           renderApp();
           showToast(`Switched to Worklist • ${tab.label}`);
@@ -36206,6 +37177,9 @@ function renderWorklistFooter() {
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
+          if (tab.view === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
+            loadWorklistSrnFromApi();
+          }
           updateURL();
           renderApp();
           showToast(`Switched to Worklist • ${tab.label}`);
@@ -36258,24 +37232,13 @@ function renderWorklistFooter() {
       ? pmStatusDataStore.filter(r => r.status === 'Project Update' || r.status === 'WIP' || !['YTS', 'HOLD', 'NR'].includes(r.status)).length
       : 0;
 
-    const hasStnOrCam = !!(pmProjectFeatureSettings.stn || pmProjectFeatureSettings.cam || pmProjectFeatureSettings.srn || (Array.isArray(pmStatusDataStore) && pmStatusDataStore.some(r => r.status === 'YTS' || r.stn || r.srn || r.cam)));
-
     const pmTabs = [
-      { id: 'btnTogglePmNewProject', view: 'new_project', label: `New project (${newProjectCount})` }
+      { id: 'btnTogglePmNewProject', view: 'new_project', label: `New project (${newProjectCount})` },
+      { id: 'btnTogglePmYts', view: 'yts', label: `YTS (${ytsCount})` },
+      { id: 'btnTogglePmWip', view: 'wip', label: `WIP (${wipCount})` },
+      { id: 'btnTogglePmHold', view: 'hold', label: `HOLD (${holdCount})` },
+      { id: 'btnTogglePmNr', view: 'nr', label: `NR (${nrCount})` }
     ];
-
-    if (hasStnOrCam) {
-      pmTabs.push(
-        { id: 'btnTogglePmYts', view: 'yts', label: `YTS (${ytsCount})` },
-        { id: 'btnTogglePmWip', view: 'wip', label: `WIP (${wipCount})` },
-        { id: 'btnTogglePmHold', view: 'hold', label: `HOLD (${holdCount})` },
-        { id: 'btnTogglePmNr', view: 'nr', label: `NR (${nrCount})` }
-      );
-    } else {
-      pmTabs.push(
-        { id: 'btnTogglePmProjectUpdate', view: 'project_update', label: `Project Update (${projectUpdateCount})` }
-      );
-    }
 
     pmTabs.push(
       { id: 'btnTogglePmPayment', view: 'payment', label: 'Payment' },
@@ -36302,6 +37265,7 @@ function renderWorklistFooter() {
         currentModule = 'worklist';
         try {
           sessionStorage.setItem('nexus_module', 'worklist');
+          sessionStorage.setItem('nexus_worklist_view', tab.view);
           sessionStorage.removeItem('nexus_projects_view');
           sessionStorage.removeItem('nexus_project_context');
           sessionStorage.removeItem('nexus_project_worklist_origin');
@@ -36309,6 +37273,9 @@ function renderWorklistFooter() {
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
+          if (tab.view === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
+            loadWorklistSrnFromApi();
+          }
           updateURL();
           renderApp();
           showToast(`Switched to Worklist &bull; ${tab.label}`);
@@ -36417,6 +37384,9 @@ function renderWorklistFooter() {
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
+          if (tab.view === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
+            loadWorklistSrnFromApi();
+          }
           updateURL();
           renderApp();
           showToast(`Switched to Worklist &bull; ${tab.label}`);
@@ -37694,74 +38664,7 @@ function renderWorklistTableHead() {
       rebindFilterButtons();
       return;
     }
-    if (currentWorklistView === 'srn') {
-      thead.innerHTML = `
-        <tr class="master-view-header">
-          <!-- 1. Select: 70px, centered header, NO radio on header -->
-          <th style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-              <span>Select</span>
-            </div>
-          </th>
-          <!-- 2. Site name: 25ch, centered header, filterable -->
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Site name</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site name">&#9660;</button>
-            </div>
-          </th>
-          <!-- 3. SRN No: 10ch, centered header, filterable -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>SRN No</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['srnNo'] ? 'has-active-filter' : ''}" data-filter-col="srnNo" title="Filter SRN No">&#9660;</button>
-            </div>
-          </th>
-          <!-- 4. Project ID: 15ch, centered header, NO filter -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-              <span>Project ID</span>
-            </div>
-          </th>
-          <!-- 5. Project Manager: 25ch, centered header, filterable -->
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Project Manager</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectManager'] ? 'has-active-filter' : ''}" data-filter-col="projectManager" title="Filter Project Manager">&#9660;</button>
-            </div>
-          </th>
-          <!-- 6. Infra Category: 15ch, centered header, filterable -->
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Infra Category</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
-            </div>
-          </th>
-          <!-- 7. Qty: 10ch, centered header, filterable -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Qty</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['qty'] ? 'has-active-filter' : ''}" data-filter-col="qty" title="Filter Qty">&#9660;</button>
-            </div>
-          </th>
-          <!-- 8. Ageing: 10ch, centered header, NO filter -->
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
-              <span>Ageing</span>
-            </div>
-          </th>
-          <!-- 9. Status: 20ch, centered header, filterable -->
-          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Status</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
-            </div>
-          </th>
-        </tr>
-      `;
-      rebindFilterButtons();
-      return;
-    }
+
     if (currentWorklistView === 'payment') {
       thead.innerHTML = `
         <tr class="master-view-header">
@@ -38224,41 +39127,34 @@ function renderWorklistTableHead() {
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectId'] ? 'has-active-filter' : ''}" data-filter-col="projectId" title="Filter Project ID">&#9660;</button>
             </div>
           </th>
-          <!-- 5. Site Name: 25ch, left content, center header, filterable -->
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
-            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-              <span>Site Name</span>
-              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
-            </div>
-          </th>
-          <!-- 6. Infra Category: 15ch, left content, center header, filterable -->
+          <!-- 5. Infra Category: 15ch, left content, center header, filterable -->
           <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Infra Category</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
             </div>
           </th>
-          <!-- 7. Qty: 10ch, center, NO filter -->
+          <!-- 6. Qty: 10ch, center, NO filter -->
           <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center;">
               <span>Qty</span>
             </div>
           </th>
-          <!-- 8. Status: 25ch, left content, center header, filterable -->
+          <!-- 7. Status: 25ch, left content, center header, filterable -->
           <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
             </div>
           </th>
-          <!-- 9. Ageing: 10ch, center, filterable -->
+          <!-- 8. Ageing: 10ch, center, filterable -->
           <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Ageing</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['ageing'] ? 'has-active-filter' : ''}" data-filter-col="ageing" title="Filter Ageing">&#9660;</button>
             </div>
           </th>
-          <!-- 10. Remarks: 25ch, left content, center header, filterable -->
+          <!-- 9. Remarks: 25ch, left content, center header, filterable -->
           <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Remarks</span>
@@ -40797,86 +41693,7 @@ function applyFiltersAndRender() {
       return;
     }
 
-    if (currentWorklistView === 'srn') {
-      filteredDataset = (currentDataset || []).filter(row => {
-        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
-          let cellVal = row[colKey] !== undefined ? row[colKey] : '';
-          if (colKey === 'qty' && typeof cellVal === 'number') {
-            cellVal = cellVal.toFixed(2);
-          } else {
-            cellVal = String(cellVal);
-          }
-          if (!allowedSet.has(cellVal)) return false;
-        }
-        return true;
-      });
 
-      if (!filteredDataset || filteredDataset.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
-              No matching records found.
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = filteredDataset.map(row => {
-        const isHighlighted = !!row.isHighlighted;
-        const isRowSelected = !!row.selected;
-        const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
-        const rowBorder = isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
-
-        return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
-            <!-- 1. Select: circle radio, multiselect, green marker -->
-            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
-              <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
-            </td>
-            <!-- 2. Site name: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
-              ${row.siteName || ''}
-            </td>
-            <!-- 3. SRN No: 10ch & left -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
-              ${row.srnNo || ''}
-            </td>
-            <!-- 4. Project ID: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
-              ${row.projectId || ''}
-            </td>
-            <!-- 5. Project Manager: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.projectManager || '').replace(/"/g, '&quot;')}">
-              ${row.projectManager || ''}
-            </td>
-            <!-- 6. Infra Category: 15ch & left -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 10px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">
-              ${row.infraCategory || ''}
-            </td>
-            <!-- 7. Qty: 10ch & right as decimal .00 -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
-              ${Number(row.qty || 0).toFixed(2)}
-            </td>
-            <!-- 8. Ageing: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
-              ${row.ageing || ''}
-            </td>
-            <!-- 9. Status: 20ch & left (Categories: To Be Dispatch, To Be Receive) -->
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
-              ${row.status || ''}
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      const hasSrnSelected = filteredDataset.some(r => r.selected);
-      const srnSubmitArea = document.getElementById('wmSrnSubmitArea');
-      if (srnSubmitArea) {
-        srnSubmitArea.style.display = hasSrnSelected ? 'flex' : 'none';
-      }
-      return;
-    }
 
     if (currentWorklistView === 'payment') {
       filteredDataset = (currentDataset || []).filter(row => {
@@ -41116,6 +41933,8 @@ function applyFiltersAndRender() {
 
       const colsCount = isPmColumnsExpanded ? 15 : 12;
 
+      const isTargetView = ['yts', 'wip', 'hold', 'nr', 'project_update'].includes(currentWorklistView);
+
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
@@ -41125,12 +41944,12 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      const rowsHtml = filteredDataset.map(row => {
         return `
-          <tr data-row-id="${row.id}">
+          <tr class="${row.selected ? 'row-selected' : ''}" data-row-id="${row.id}" style="${row.selected ? 'background: rgba(0, 203, 160, 0.08);' : ''}">
             <!-- 1. Select: 60px & center (Green marker) -->
-            <td class="td-select" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
-              <div class="circular-radio-btn" onclick="togglePmStatusRowSelect('${row.id}')" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${row.selected ? '#008744' : '#94a3b8'}; background: ${row.selected ? '#008744' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;" title="${row.selected ? 'Unselect' : 'Select'}">
+            <td class="td-select" onclick="togglePmStatusRowSelect('${row.id}')" style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 6px; cursor: pointer;">
+              <div class="circular-radio-btn" style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid ${row.selected ? '#008744' : '#94a3b8'}; background: ${row.selected ? '#008744' : '#ffffff'}; margin: 0 auto; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; pointer-events: none;" title="${row.selected ? 'Unselect' : 'Select'}">
                 ${row.selected ? '<div style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></div>' : ''}
               </div>
             </td>
@@ -41195,11 +42014,22 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
+      const hasPmSelected = currentDataset && currentDataset.some(r => r.selected);
+      const submitRowHtml = (isTargetView && hasPmSelected) ? `
+        <tr id="rowPmStatusSubmitAction" style="background: transparent !important; border: none !important; border-top: none !important; border-bottom: none !important;">
+          <td colspan="${colsCount}" style="text-align: center !important; vertical-align: middle; padding: 22px 0 14px 0; border: none !important; border-top: none !important; border-bottom: none !important; background: transparent !important;">
+            <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPmStatusSubmitBatch" onclick="openProjectPlanModal()" title="Proceed to Project Plan" aria-label="Submit" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; padding: 4px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: none !important;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="border: none !important; outline: none !important; display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsHtml + submitRowHtml;
       const pmSubmitArea = document.getElementById('pmStatusSubmitArea');
       if (pmSubmitArea) {
-        const isTargetView = ['yts', 'wip', 'hold', 'nr'].includes(currentWorklistView);
-        const isAllSelected = isTargetView && filteredDataset.length > 0 && filteredDataset.every(r => r.selected);
-        pmSubmitArea.style.display = isAllSelected ? 'flex' : 'none';
+        pmSubmitArea.style.display = 'none';
       }
       return;
     }
@@ -41270,10 +42100,12 @@ function applyFiltersAndRender() {
 
     if (currentWorklistView === 'stn' || currentWorklistView === 'srn') {
       const isStn = currentWorklistView === 'stn';
+      const isSrn = currentWorklistView === 'srn';
       const sourceStore = isStn ? worklistStnData : worklistSrnData;
       if (!currentDataset || currentDataset.length === 0 || !currentDataset.some(r => isStn ? r.stnNo : r.srnNo)) {
         currentDataset = sourceStore.map(item => ({ ...item }));
         if (isStn) currentDataset = sortStnByStatusOrder(currentDataset);
+        else if (isSrn) currentDataset = sortSrnByStatusOrder(currentDataset);
       }
 
       filteredDataset = currentDataset.filter(row => {
@@ -41288,12 +42120,14 @@ function applyFiltersAndRender() {
 
       if (isStn) {
         filteredDataset = sortStnByStatusOrder(filteredDataset);
+      } else if (isSrn) {
+        filteredDataset = sortSrnByStatusOrder(filteredDataset);
       }
 
       if (filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="${isStn ? 12 : 10}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No ${isStn ? 'STN' : 'SRN'} records match the filter criteria.</td>
+            <td colspan="${isStn ? 12 : 9}" class="empty-data-row" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">No ${isStn ? 'STN' : 'SRN'} records match the filter criteria.</td>
           </tr>
         `;
         updateWorklistSubmitVisibility();
@@ -41304,67 +42138,80 @@ function applyFiltersAndRender() {
         const numVal = isStn ? row.stnNo : row.srnNo;
         const rawQty = parseFloat(row.qty);
         const formattedQty = !isNaN(rawQty) ? rawQty.toFixed(2) : (row.qty || '0.00');
+        const isSelectable = isStn ? isSelectableStnStatus(row) : isSelectableSrnStatus(row);
+        const isGreen = row.isGreenFont || row.fontColor === 'green';
+        const cellTextColor = isGreen ? '#008744 !important' : '#1e293b';
+        const cellFontWeight = isGreen ? '600' : '500';
         return `
-          <tr class="${row.selected ? 'row-selected' : ''}" data-row-id="${row.id}" style="${row.selected ? 'background: rgba(0, 203, 160, 0.08);' : ''}">
+          <tr class="${(row.selected && isSelectable) ? 'row-selected' : ''}" data-row-id="${row.id}" style="${(row.selected && isSelectable) ? 'background: rgba(0, 203, 160, 0.08);' : ''} ${isGreen ? 'color: #008744 !important; font-weight: 600;' : ''}">
             <!-- 1. Select: 8ch & center (Circle radio button with green select marker) -->
-            <td class="td-select" onclick="toggleWorklistRowSelected('${row.id}')" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; cursor: pointer;">
+            ${isSelectable ? `
+            <td class="td-select" onclick="toggleWorklistRowSelected('${row.id || row.srnNo}')" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; cursor: pointer;">
               <div class="radio-select-indicator ${row.selected ? 'selected' : ''}" aria-label="Select row" style="margin: 0 auto; cursor: pointer;"></div>
             </td>
+            ` : `
+            <td class="td-select" style="width: 8ch; min-width: 8ch; max-width: 8ch; text-align: center !important; vertical-align: middle; padding: 10px 6px;"></td>
+            `}
             <!-- 2. STN/SRN No: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight};">
               ${numVal || ''}
             </td>
             <!-- 3. BOQ No: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight};">
               ${row.boqNo || ''}
             </td>
             <!-- 4. Project ID: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight};">
               ${row.projectId || ''}
             </td>
-            <!-- 5. Site Name: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+            ${isStn ? `
+            <!-- 5. Site Name: 25ch & left (STN only) -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
               ${row.siteName || ''}
             </td>
-            <!-- 6. Infra Category: 15ch & left -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+            ` : ''}
+            <!-- Infra Category: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight};">
               ${row.infraCategory || ''}
             </td>
-            <!-- 7. Qty: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+            <!-- Qty: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight};">
               ${formattedQty}
             </td>
-            <!-- 8. Status: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #0f172a; font-weight: 600;">
+            <!-- Status: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: ${isGreen ? '#008744 !important' : '#0f172a'}; font-weight: 600;">
               ${row.status || ''}
             </td>
             ${isStn ? `
             <!-- 9. Received Location: 18ch & left -->
-            <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.receivedLocation || row.received_location || '').replace(/"/g, '&quot;')}">
+            <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.receivedLocation || row.received_location || '').replace(/"/g, '&quot;')}">
               ${row.receivedLocation || row.received_location || ''}
             </td>
             <!-- 10. Received By: 18ch & left -->
-            <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.receivedBy || row.received_by || '').replace(/"/g, '&quot;')}">
+            <td style="width: 18ch; min-width: 18ch; max-width: 18ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.receivedBy || row.received_by || '').replace(/"/g, '&quot;')}">
               ${row.receivedBy || row.received_by || ''}
             </td>
             ` : ''}
             <!-- Ageing: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: ${cellTextColor}; font-weight: ${cellFontWeight};">
               ${row.ageing || ''}
             </td>
             <!-- Remarks: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: ${isGreen ? '#008744 !important' : '#64748b'}; font-size: 0.92rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
               ${row.remarks || ''}
             </td>
           </tr>
         `;
       }).join('');
 
-      const hasSelected = isStn && (currentDataset && currentDataset.some(r => r.selected));
-      const submitRowHtml = (isStn && hasSelected) ? `
-        <tr id="rowWorklistStnSubmitAction" style="background: transparent !important; border: none !important; border-top: none !important; border-bottom: none !important;">
-          <td colspan="${isStn ? 12 : 10}" style="text-align: center !important; vertical-align: middle; padding: 22px 0 14px 0; border: none !important; border-top: none !important; border-bottom: none !important; background: transparent !important;">
-            <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWorklistStnSubmit" data-tooltip="Submit" title="Submit" aria-label="Submit" onclick="submitSelectedWorklistStnRows()" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; padding: 4px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: none !important;">
+      const hasSubmittableSelected = isStn
+        ? (currentDataset && currentDataset.some(r => r.selected && ['boq pending', 'dispatch request pending', 'dispatch planned'].includes(String(r.status || '').trim().toLowerCase())))
+        : (currentDataset && currentDataset.some(r => r.selected && ['boq pending', 'document pending', 'dispatch request pending'].includes(String(r.status || '').trim().toLowerCase())));
+
+      const submitRowHtml = hasSubmittableSelected ? `
+        <tr id="rowWorklist${isStn ? 'Stn' : 'Srn'}SubmitAction" style="background: transparent !important; border: none !important; border-top: none !important; border-bottom: none !important;">
+          <td colspan="${isStn ? 12 : 9}" style="text-align: center !important; vertical-align: middle; padding: 22px 0 14px 0; border: none !important; border-top: none !important; border-bottom: none !important; background: transparent !important;">
+            <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWorklist${isStn ? 'Stn' : 'Srn'}Submit" data-tooltip="Submit" title="Submit" aria-label="Submit" onclick="${isStn ? 'submitSelectedWorklistStnRows()' : 'submitSelectedWorklistSrnRows()'}" style="cursor: pointer; background: transparent; border: none !important; outline: none !important; padding: 4px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: none !important;">
               <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="border: none !important; outline: none !important; display: block;">
             </button>
           </td>
@@ -44092,19 +44939,13 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="infra-wh-srn-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.srnNo || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.srnDate || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.geNo || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.geDate || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.boqNo || ''}</td>
-          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.boqDate || ''}</td>
           <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.projectId || ''}</td>
-          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">${row.siteName || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
+          <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">${row.infraCategory || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 12px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.qty || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.status || '').replace(/"/g, '&quot;')}">${row.status || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.receivedBy || '').replace(/"/g, '&quot;')}">${row.receivedBy || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.status || '').replace(/"/g, '&quot;')}">${row.status || ''}</td>
           <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500;">${row.ageing || ''}</td>
-          <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">${row.remarks || ''}</td>
+          <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">${row.remarks || ''}</td>
         </tr>
       `).join('');
     } else {
@@ -44195,19 +45036,13 @@ function renderInfraWhTableHead() {
     thead.innerHTML = `
       <tr class="master-view-header">
         ${createTh('SRN No', 'srnNo', 15, true)}
-        ${createTh('SRN Date', 'srnDate', 15, true)}
-        ${createTh('GE No', 'geNo', 15, true)}
-        ${createTh('GE Date', 'geDate', 15, true)}
         ${createTh('BOQ No', 'boqNo', 15, true)}
-        ${createTh('BOQ Date', 'boqDate', 15, true)}
         ${createTh('Project ID', 'projectId', 15, true)}
-        ${createTh('Site Name', 'siteName', 25, false)}
-        ${createTh('Infra Category', 'infraCategory', 20, true)}
+        ${createTh('Infra Category', 'infraCategory', 15, true)}
         ${createTh('Qty', 'qty', 10, true)}
-        ${createTh('Status', 'status', 20, false)}
-        ${createTh('Received By', 'receivedBy', 20, true)}
+        ${createTh('Status', 'status', 25, false)}
         ${createTh('Ageing', 'ageing', 10, true)}
-        ${createTh('Remarks', 'remarks', 20, false)}
+        ${createTh('Remarks', 'remarks', 25, false)}
       </tr>
     `;
   } else {
@@ -47601,6 +48436,8 @@ function initSideFormEvents() {
           !e.target.closest('.nexus-cal-input') &&
           !e.target.closest('#btnAccBankDateCalendar') &&
           !e.target.closest('#inpAccBankDate') &&
+          !e.target.closest('#btnPmTaskDateCalendar') &&
+          !e.target.closest('#inpPmTaskDate') &&
           !e.target.closest('.btn-sub-project-calendar')) {
         closeNexusCalendar();
       }
@@ -47655,6 +48492,7 @@ function initSideFormEvents() {
   attachNexusCalendar('inpVehicleRateFrom', 'btnVehicleRateFromCalendar');
   attachNexusCalendar('inpVehicleRateTo', 'btnVehicleRateToCalendar');
   attachNexusCalendar('inpOtherServiceRateFrom', 'btnOtherServiceRateFromCalendar');
+  attachNexusCalendar('inpPmTaskDate', 'btnPmTaskDateCalendar');
   window.openNexusCalendar = openNexusCalendar;
 
   // Attach to Company HR Policies calendar inputs

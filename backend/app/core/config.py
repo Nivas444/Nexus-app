@@ -23,6 +23,15 @@ class Settings(BaseSettings):
     DB_USER: str = Field(default="postgres")
     DB_PASSWORD: str = Field(default="")
     
+    # Database Schemas (for Supabase or schema-separated deployments)
+    DB_MASTER_SCHEMA: str = Field(default="nexus_master")
+    DB_PROJECT_SCHEMA: str = Field(default="nexus_project")
+    DB_ACCOUNTS_SCHEMA: str = Field(default="nexus_accounts")
+    DB_ADMIN_SCHEMA: str = Field(default="nexus_admin")
+    DB_INFRA_INVENTORY_SCHEMA: str = Field(default="nexus_infra_inventory")
+    DB_INVENTORY_SCHEMA: str = Field(default="nexus_inventory")
+    DB_PURCHASE_SCHEMA: str = Field(default="nexus_purchase")
+    
     # CORS configuration for frontend
     CORS_ORIGINS: List[str] = [
         "http://localhost",

@@ -668,12 +668,27 @@ def list_dpr_records(
             "siteId": r.site_id or "",
             "siteName": r.site_name or "",
             "projectCode": r.project_code or "",
+            "projectId": r.project_code or "",
             "date": r.date.strftime("%d/%m/%Y") if r.date else "",
-            "stage": r.stage or "",
+            "ptwDate": r.date.strftime("%d/%m/%Y") if r.date else "",
+            "requestDate": r.date.strftime("%d/%m/%Y") if r.date else "",
+            "stage": r.stage or "Stage 1",
             "activity": r.activity or "",
             "startPhoto": r.start_photo or "View",
             "endPhoto": r.end_photo or "View",
             "status": r.status or "Pending",
+            "ptwStatus": r.ptw_status or ("Approval Pending" if (r.ptw_number or r.h_ptw_number or r.e_ptw_number or r.c_ptw_number or r.m_ptw_number) else "To be Raise"),
+            "ptwType": r.ptw_type or ("H-PTW" if r.h_ptw_number else ("E-PTW" if r.e_ptw_number else ("C-PTW" if r.c_ptw_number else "E-PTW"))),
+            "ptwNo": r.ptw_number or r.h_ptw_number or r.e_ptw_number or r.c_ptw_number or r.m_ptw_number or "",
+            "projectType": r.project_type or "New Build",
+            "subProjectType": r.sub_project_type or r.activity or "Civil Work",
+            "supervisor": r.team_leader or r.e_stag_supervisor or r.h_stag_supervisor or r.c_ptw_supervisor or "",
+            "teamLeader": r.team_leader or r.e_stag_supervisor or r.h_stag_supervisor or r.c_ptw_supervisor or "",
+            "auditEngineer": r.audit_engineer_name or "",
+            "auditEngineerName": r.audit_engineer_name or "",
+            "auditEngineerContactNumber": r.audit_engineer_contact_number or "",
+            "mobileNumber": r.audit_engineer_contact_number or "",
+            "imapOffer": r.imap_offer or ("Completed" if r.i_map_check_out else "Pending"),
             "checkIn": r.i_map_check_in.strftime("%I:%M %p") if r.i_map_check_in else "-",
             "checkOut": r.i_map_check_out.strftime("%I:%M %p") if r.i_map_check_out else "-",
             "hPtwNo": r.h_ptw_number or "-",
@@ -687,7 +702,12 @@ def list_dpr_records(
             "cPtwStatus": r.c_ptw_status or "Pending",
             "mPtwNo": r.m_ptw_number or "-",
             "mPtwDocs": r.m_ptw_documents or "View",
-            "mPtwStatus": r.m_ptw_status or "Pending"
+            "mPtwStatus": r.m_ptw_status or "Pending",
+            "taskname": r.taskname or "",
+            "siteVisitRequired": bool(r.site_visit_required),
+            "eStagSupervisor": r.e_stag_supervisor or "",
+            "hStagSupervisor": r.h_stag_supervisor or "",
+            "cPtwSupervisor": r.c_ptw_supervisor or ""
         })
     return {"success": True, "count": len(data), "data": data}
 
@@ -724,6 +744,11 @@ def create_dpr_record(
         m_ptw_number=payload.get("mPtwNo") or payload.get("m_ptw_number"),
         m_ptw_documents=payload.get("mPtwDocs") or payload.get("m_ptw_documents"),
         m_ptw_status=payload.get("mPtwStatus") or payload.get("m_ptw_status"),
+        taskname=payload.get("taskname") or payload.get("taskName") or payload.get("taskType"),
+        site_visit_required=bool(payload.get("siteVisitRequired") or payload.get("site_visit_required")),
+        e_stag_supervisor=payload.get("eStagSupervisor") or payload.get("e_stag_supervisor") or payload.get("ePtwSupervisor") or payload.get("ePtw"),
+        h_stag_supervisor=payload.get("hStagSupervisor") or payload.get("h_stag_supervisor") or payload.get("hPtwSupervisor") or payload.get("hPtw"),
+        c_ptw_supervisor=payload.get("cPtwSupervisor") or payload.get("c_ptw_supervisor") or payload.get("mPtwSupervisor") or payload.get("mPtw"),
     )
     db.add(rec)
     db.commit()
@@ -757,13 +782,56 @@ def update_dpr_record(
         ("stage", "stage"), ("activity", "activity"), ("status", "status"),
         ("poNo", "po_no"), ("po_no", "po_no"), ("siteId", "site_id"), ("site_id", "site_id"),
         ("siteName", "site_name"), ("site_name", "site_name"),
+        ("projectCode", "project_code"), ("project_code", "project_code"),
+        ("projectId", "project_code"), ("project_id", "project_code"),
         ("hPtwNo", "h_ptw_number"), ("hPtwStatus", "h_ptw_status"),
         ("ePtwNo", "e_ptw_number"), ("ePtwStatus", "e_ptw_status"),
         ("cPtwNo", "c_ptw_number"), ("cPtwStatus", "c_ptw_status"),
         ("mPtwNo", "m_ptw_number"), ("mPtwStatus", "m_ptw_status"),
+        ("ptwNo", "ptw_number"), ("ptw_number", "ptw_number"), ("ptwNumber", "ptw_number"),
+        ("ptwStatus", "ptw_status"), ("ptw_status", "ptw_status"),
+        ("ptwType", "ptw_type"), ("ptw_type", "ptw_type"),
+        ("projectType", "project_type"), ("project_type", "project_type"),
+        ("subProjectType", "sub_project_type"), ("sub_project_type", "sub_project_type"),
+        ("supervisor", "team_leader"), ("teamLeader", "team_leader"), ("team_leader", "team_leader"),
+        ("auditEngineer", "audit_engineer_name"), ("auditEngineerName", "audit_engineer_name"), ("audit_engineer_name", "audit_engineer_name"),
+        ("mobileNumber", "audit_engineer_contact_number"), ("auditEngineerContactNumber", "audit_engineer_contact_number"), ("audit_engineer_contact_number", "audit_engineer_contact_number"),
+        ("imapOffer", "imap_offer"), ("i_map_offer", "imap_offer"),
+        ("taskname", "taskname"), ("taskName", "taskname"), ("taskType", "taskname"),
+        ("siteVisitRequired", "site_visit_required"), ("site_visit_required", "site_visit_required"),
+        ("eStagSupervisor", "e_stag_supervisor"), ("e_stag_supervisor", "e_stag_supervisor"),
+        ("hStagSupervisor", "h_stag_supervisor"), ("h_stag_supervisor", "h_stag_supervisor"),
+        ("cPtwSupervisor", "c_ptw_supervisor"), ("c_ptw_supervisor", "c_ptw_supervisor"),
     ]:
         if k in payload and payload[k] is not None:
             setattr(rec, attr, payload[k])
+    
+    # Sync PTW number & document to specific PTW type columns if relevant
+    if "ptwNo" in payload or "ptw_number" in payload:
+        new_ptw = payload.get("ptwNo") if "ptwNo" in payload else payload.get("ptw_number")
+        rec.ptw_number = new_ptw
+        ptw_t = str(rec.ptw_type or "").upper()
+        if "H-PTW" in ptw_t:
+            rec.h_ptw_number = new_ptw
+        elif "E-PTW" in ptw_t:
+            rec.e_ptw_number = new_ptw
+        elif "C-PTW" in ptw_t:
+            rec.c_ptw_number = new_ptw
+        elif "M-PTW" in ptw_t:
+            rec.m_ptw_number = new_ptw
+
+    if "docUrl" in payload or "doc_url" in payload:
+        doc_val = payload.get("docUrl") or payload.get("doc_url")
+        ptw_t = str(rec.ptw_type or "").upper()
+        if "H-PTW" in ptw_t:
+            rec.h_ptw_documents = doc_val
+        elif "E-PTW" in ptw_t:
+            rec.e_ptw_documents = doc_val
+        elif "C-PTW" in ptw_t:
+            rec.c_ptw_documents = doc_val
+        elif "M-PTW" in ptw_t:
+            rec.m_ptw_documents = doc_val
+
     if "date" in payload and payload["date"]:
         d = _parse_date_val(payload["date"])
         if d:

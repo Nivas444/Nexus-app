@@ -260,6 +260,16 @@
       department: 'Finance & Accounts',
       phone: '+91 98765 00006',
       location: 'Chennai, India'
+    },
+    {
+      email: 'mis@nexus.com',
+      aliases: ['mis', 'mis@nexus.com'],
+      pwdHash: 'c2c92b10e40913ce064253a19ec504a40cdc25e40ca8a1757a8e10852ded10ec',
+      name: 'MIS',
+      role: 'MIS',
+      department: 'Management Information System',
+      phone: '+91 98765 00007',
+      location: 'Chennai, India'
     }
   ];
 
@@ -269,6 +279,37 @@
     auth: {
       async login(email, password) {
         const normalized = (email || '').trim().toLowerCase();
+
+        // Frontend-only authentication for MIS credential as requested
+        if (normalized === 'mis@nexus.com' || normalized === 'mis') {
+          const user = FRONTEND_USERS_CONFIG.find(u => 
+            u.email.toLowerCase() === normalized || 
+            (u.aliases && u.aliases.includes(normalized))
+          );
+          const inputHash = await sha256Hex(password);
+          if (!user || user.pwdHash !== inputHash) {
+            const err = new Error('Invalid email or password');
+            err.status = 401;
+            err.detail = 'Invalid email or password';
+            throw err;
+          }
+          const profile = {
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            department: user.department,
+            phone: user.phone,
+            location: user.location,
+            token: 'offline_token_' + Date.now()
+          };
+          sessionStorage.setItem('nexus_user', JSON.stringify(profile));
+          sessionStorage.setItem('nexus_role', profile.role);
+          sessionStorage.setItem('nexus_token', profile.token);
+          localStorage.setItem('nexus_user', JSON.stringify(profile));
+          localStorage.setItem('nexus_role', profile.role);
+          localStorage.setItem('nexus_token', profile.token);
+          return { success: true, user: profile };
+        }
 
         // 1. Attempt backend API authentication first
         try {
@@ -2185,6 +2226,105 @@
           method: 'POST',
           body: JSON.stringify({ poNo, siteId })
         });
+      }
+    },
+
+    dpr: {
+      async list(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return await request(`/commercial/dpr${query ? '?' + query : ''}`, { method: 'GET' });
+      },
+      async update(dprId, payload) {
+        return await request(`/commercial/dpr/${encodeURIComponent(dprId)}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async create(payload) {
+        return await request('/commercial/dpr', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    purchase: {
+      async listPr() {
+        return await request('/purchase/pr', { method: 'GET' });
+      },
+      async createPr(payload) {
+        return await request('/purchase/pr', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async updatePr(prId, payload) {
+        return await request('/purchase/pr/' + encodeURIComponent(prId), {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async selectSuppliers(payload) {
+        return await request('/purchase/pr/select-suppliers', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async listRfq() {
+        return await request('/purchase/rfq', { method: 'GET' });
+      },
+      async saveTerms(payload) {
+        return await request('/purchase/rfq/terms', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async listPo() {
+        return await request('/purchase/po', { method: 'GET' });
+      },
+      async getPo(poId) {
+        return await request('/purchase/po/' + encodeURIComponent(poId), { method: 'GET' });
+      },
+      async updatePoStatus(poId, newStatus) {
+        return await request('/purchase/po/' + encodeURIComponent(poId) + '/status?new_status=' + encodeURIComponent(newStatus), {
+          method: 'PUT'
+        });
+      },
+      async saveTransportDetails(poId, payload) {
+        return await request('/purchase/po/' + encodeURIComponent(poId) + '/transport-details', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async uploadDocuments(poId, payload) {
+        return await request('/purchase/po/' + encodeURIComponent(poId) + '/upload-documents', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async getDocument(poId, docType) {
+        return await request('/purchase/po/' + encodeURIComponent(poId) + '/document/' + encodeURIComponent(docType), {
+          method: 'GET'
+        });
+      },
+      async generatePoPdf(poIdentifier) {
+        if (typeof poIdentifier === 'object') {
+          return await request('/purchase/po/trigger-pdf', {
+            method: 'POST',
+            body: JSON.stringify(poIdentifier)
+          });
+        }
+        return await request('/purchase/po/' + encodeURIComponent(poIdentifier) + '/generate-pdf', {
+          method: 'POST'
+        });
+      },
+      async getPoPdfStatus(poId) {
+        return await request('/purchase/po/' + encodeURIComponent(poId) + '/pdf-status', {
+          method: 'GET'
+        });
+      },
+      getPoPdfUrl(poId) {
+        return `${API_BASE_URL}/purchase/po/${encodeURIComponent(poId)}/pdf`;
       }
     }
   };

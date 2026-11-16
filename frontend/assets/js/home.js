@@ -695,36 +695,17 @@ function openIndusProductDetails(productName, custName) {
   showToast(`Opened Product Details for ${selectedProductName}`);
 }
 
-// Worklist -> PO Dataset
-const poData = [
-  {
-    id: "po-1",
-    submissionDate: "DD/MM/YYYY HH:mm:ss",
-    submittedBy: "R/RL-234567",
-    vendorName: "Guindy",
-    poNo: "2026001",
-    poAmount: "10000.00",
-    selected: false
-  },
-  {
-    id: "po-2",
-    submissionDate: "DD/MM/YYYY HH:mm:ss",
-    submittedBy: "R/RL-234567",
-    vendorName: "Guindy",
-    poNo: "2026001",
-    poAmount: "10000.00",
-    selected: false
-  },
-  {
-    id: "po-3",
-    submissionDate: "DD/MM/YYYY HH:mm:ss",
-    submittedBy: "R/RL-234589",
-    vendorName: "Ambattur",
-    poNo: "2026002",
-    poAmount: "24500.00",
-    selected: false
+// Worklist -> PO Dataset (Empty by default; populated from Purchase PO Approval Pending)
+let poData = [];
+try {
+  const storedMasterPo = sessionStorage.getItem('nexus_master_po_store');
+  if (storedMasterPo) {
+    const parsed = JSON.parse(storedMasterPo);
+    if (Array.isArray(parsed)) {
+      poData = parsed;
+    }
   }
-];
+} catch (e) {}
 
 // Projects Landing Page Dataset (Matching Uploaded User Mockup)
 const projectsSummaryRow = {
@@ -1171,8 +1152,175 @@ const inventoryData = [
     qty: "45.00",
     stockPrice: "4,800.00",
     stockValue: "2,16,000.00"
+  },
+  {
+    id: "inv-3",
+    productDescription: "40M Galvanized Tubular Telecom Tower Mast Structure",
+    productName: "40M Galvanized Tubular Telecom Tower Mast Structure",
+    productCode: "PRD-TTM-001",
+    productMake: "Nexus Infra",
+    whCode: "WH-DEL-01",
+    productHead: "Tower Structure",
+    productType: "Tower Mast",
+    uom: "Nos",
+    qty: "25.00",
+    stockPrice: "4,50,000.00",
+    stockValue: "1,12,50,000.00"
+  },
+  {
+    id: "inv-4",
+    productDescription: "3.5C x 50 Sq.mm Armoured Aluminium Power Cable",
+    productName: "3.5C x 50 Sq.mm Armoured Aluminium Power Cable",
+    productCode: "PRD-CAB-002",
+    productMake: "Polycab",
+    whCode: "WH-DEL-01",
+    productHead: "Power Cable",
+    productType: "Power Cable",
+    uom: "Mtr",
+    qty: "150.00",
+    stockPrice: "450.00",
+    stockValue: "67,500.00"
+  },
+  {
+    id: "inv-5",
+    productDescription: "24F Single Mode Armoured Optical Fiber Cable",
+    productName: "24F Single Mode Armoured Optical Fiber Cable",
+    productCode: "PRD-OFC-003",
+    productMake: "Sterlite",
+    whCode: "WH-DEL-01",
+    productHead: "Optical Fiber",
+    productType: "Fiber Cable",
+    uom: "Mtr",
+    qty: "80.00",
+    stockPrice: "120.00",
+    stockValue: "9,600.00"
+  },
+  {
+    id: "inv-6",
+    productDescription: "Copper Bonded Chemical Earthing Electrode 3M",
+    productName: "Copper Bonded Chemical Earthing Electrode 3M",
+    productCode: "PRD-EAR-004",
+    productMake: "True Power",
+    whCode: "WH-DEL-01",
+    productHead: "Earthing Rod",
+    productType: "Earthing Electrode",
+    uom: "Set",
+    qty: "15.00",
+    stockPrice: "2,800.00",
+    stockValue: "42,000.00"
+  },
+  {
+    id: "inv-7",
+    productDescription: "High Tensile Foundation Anchor Bolts M24 x 1000mm",
+    productName: "High Tensile Foundation Anchor Bolts M24 x 1000mm",
+    productCode: "PRD-ANC-005",
+    productMake: "Unbrako",
+    whCode: "WH-DEL-01",
+    productHead: "Anchor Bolts",
+    productType: "Anchor Bolts",
+    uom: "Nos",
+    qty: "40.00",
+    stockPrice: "850.00",
+    stockValue: "34,000.00"
   }
 ];
+
+const defaultMasterProductsCatalog = [
+  {
+    material_description: "40M Galvanized Tubular Telecom Tower Mast Structure",
+    product_name: "Telecom Tower Mast",
+    productHead: "Tower Structure",
+    msq: 35.00
+  },
+  {
+    material_description: "3.5C x 50 Sq.mm Armoured Aluminium Power Cable",
+    product_name: "Power Cable",
+    productHead: "Power Cable",
+    msq: 650.00
+  },
+  {
+    material_description: "24F Single Mode Armoured Optical Fiber Cable",
+    product_name: "Optical Fiber",
+    productHead: "Optical Fiber",
+    msq: 1280.00
+  },
+  {
+    material_description: "Copper Bonded Chemical Earthing Electrode 3M",
+    product_name: "Earthing Rod",
+    productHead: "Earthing Rod",
+    msq: 45.00
+  },
+  {
+    material_description: "High Tensile Foundation Anchor Bolts M24 x 1000mm",
+    product_name: "Anchor Bolts",
+    productHead: "Anchor Bolts",
+    msq: 200.00
+  }
+];
+
+function getPrRowStockAndCalculatedQty(row) {
+  if (!row) return { stockQty: 0, msq: null, calculatedPr: 0 };
+  const desc = (row.materialDescription || row.description || row.productName || '').trim().toLowerCase();
+  const head = (row.materialHead || row.productHead || '').trim().toLowerCase();
+
+  // 1. New stock qty from Inventory module (inventoryData)
+  let stockQty = null;
+  if (typeof inventoryData !== 'undefined' && Array.isArray(inventoryData)) {
+    const invMatch = inventoryData.find(inv => {
+      const iDesc = (inv.productDescription || inv.productName || '').trim().toLowerCase();
+      const iHead = (inv.productHead || '').trim().toLowerCase();
+      return (desc && (iDesc === desc || iDesc.includes(desc) || desc.includes(iDesc))) ||
+             (head && iHead === head);
+    });
+    if (invMatch && invMatch.qty !== undefined && invMatch.qty !== null && invMatch.qty !== '') {
+      stockQty = parseFloat(String(invMatch.qty).replace(/,/g, ''));
+    }
+  }
+  if (stockQty === null || isNaN(stockQty)) {
+    stockQty = (row.stockQty !== undefined && row.stockQty !== null) ? parseFloat(row.stockQty) : 0;
+  }
+
+  // 2. MSQ from Master DB (masterProductsData or defaultMasterProductsCatalog)
+  let msq = null;
+  if (typeof masterProductsData !== 'undefined' && Array.isArray(masterProductsData)) {
+    const prodMatch = masterProductsData.find(p => {
+      const pDesc = (p.material_description || p.product_name || p.productName || '').trim().toLowerCase();
+      const pHead = (p.material_head || p.productHead || '').trim().toLowerCase();
+      return (desc && (pDesc === desc || pDesc.includes(desc) || desc.includes(pDesc))) ||
+             (head && pHead === head);
+    });
+    if (prodMatch && prodMatch.msq !== undefined && prodMatch.msq !== null && prodMatch.msq !== '') {
+      msq = parseFloat(String(prodMatch.msq).replace(/,/g, ''));
+    }
+  }
+  if (msq === null || isNaN(msq)) {
+    const defMatch = defaultMasterProductsCatalog.find(p => {
+      const pDesc = (p.material_description || '').trim().toLowerCase();
+      const pHead = (p.productHead || '').trim().toLowerCase();
+      return (desc && (pDesc === desc || pDesc.includes(desc) || desc.includes(pDesc))) ||
+             (head && pHead === head);
+    });
+    if (defMatch && defMatch.msq !== undefined) {
+      msq = parseFloat(defMatch.msq);
+    }
+  }
+  if (msq === null || isNaN(msq)) {
+    msq = (row.msq !== undefined && row.msq !== null) ? parseFloat(row.msq) : null;
+  }
+
+  // 3. New stock qty < MSQ then that value (msq - stockQty) should appear in PR column content
+  let calculatedPr = Number(row.prQty || 0);
+  if (msq !== null && !isNaN(msq)) {
+    if (stockQty < msq) {
+      calculatedPr = msq - stockQty;
+    } else {
+      calculatedPr = 0;
+    }
+  }
+
+  return { stockQty, msq, calculatedPr };
+}
+window.getPrRowStockAndCalculatedQty = getPrRowStockAndCalculatedQty;
 
 // Inventory Product Details Dataset
 const inventoryProductDetailsData = [
@@ -24322,7 +24470,10 @@ let isWmPrEditing = false;
 let wmPrDataStore = [
   {
     id: 'wm-pr-1',
+    prNo: 'PR-2026-0001',
     selected: false,
+    submittedToPurchase: false,
+    status: 'PR to be submit',
     submissionDate: '12-10-2026',
     materialHead: 'Tower Structure',
     materialCategory: 'Tower Infrastructure',
@@ -24333,7 +24484,10 @@ let wmPrDataStore = [
   },
   {
     id: 'wm-pr-2',
+    prNo: 'PR-2026-0002',
     selected: false,
+    submittedToPurchase: false,
+    status: 'PR to be submit',
     submissionDate: '12-10-2026',
     materialHead: 'Power Cable',
     materialCategory: 'Electrical & Cabling',
@@ -24344,7 +24498,10 @@ let wmPrDataStore = [
   },
   {
     id: 'wm-pr-3',
+    prNo: 'PR-2026-0003',
     selected: false,
+    submittedToPurchase: false,
+    status: 'PR to be submit',
     submissionDate: '13-10-2026',
     materialHead: 'Optical Fiber',
     materialCategory: 'Optical Fiber',
@@ -24355,7 +24512,10 @@ let wmPrDataStore = [
   },
   {
     id: 'wm-pr-4',
+    prNo: 'PR-2026-0004',
     selected: false,
+    submittedToPurchase: false,
+    status: 'PR to be submit',
     submissionDate: '13-10-2026',
     materialHead: 'Earthing Rod',
     materialCategory: 'Electrical & Cabling',
@@ -24366,7 +24526,10 @@ let wmPrDataStore = [
   },
   {
     id: 'wm-pr-5',
+    prNo: 'PR-2026-0005',
     selected: false,
+    submittedToPurchase: false,
+    status: 'PR to be submit',
     submissionDate: '13-10-2026',
     materialHead: 'Anchor Bolts',
     materialCategory: 'Hardware & Fasteners',
@@ -24484,7 +24647,10 @@ window.saveWmAddProduct = function() {
   const newId = 'wm-pr-' + Date.now();
   const newRow = {
     id: newId,
+    prNo: 'PR-' + year + '-' + String(wmPrDataStore.length + 1).padStart(4, '0'),
     selected: false,
+    submittedToPurchase: false,
+    status: 'PR to be submit',
     submissionDate: dateStr,
     materialHead: meta.head || 'Material',
     materialCategory: cat,
@@ -24529,9 +24695,9 @@ window.handleWmPrEditToggle = function() {
       const val = parseFloat(input.value);
       if (!isNaN(val) && val >= 0) {
         const item = wmPrDataStore.find(r => r.id === rowId);
-        if (item) item.prQty = val;
+        if (item) { item.prQty = val; item.isUserEdited = true; }
         const curItem = currentDataset.find(r => r.id === rowId);
-        if (curItem) curItem.prQty = val;
+        if (curItem) { curItem.prQty = val; curItem.isUserEdited = true; }
       }
     });
 
@@ -24588,8 +24754,20 @@ window.toggleSelectAllWmPr = function(isChecked) {
     });
   }
 
-  currentDataset.forEach(r => r.selected = isChecked);
-  wmPrDataStore.forEach(r => r.selected = isChecked);
+  currentDataset.forEach(r => {
+    if (!r.submittedToPurchase && (r.status || '').toLowerCase() === 'pr to be submit') {
+      r.selected = isChecked;
+    } else {
+      r.selected = false;
+    }
+  });
+  wmPrDataStore.forEach(r => {
+    if (!r.submittedToPurchase && (r.status || '').toLowerCase() === 'pr to be submit') {
+      r.selected = isChecked;
+    } else {
+      r.selected = false;
+    }
+  });
 
   if (!isChecked && isWmPrEditing) {
     isWmPrEditing = false;
@@ -24614,29 +24792,216 @@ function updateWmPrSelectionUI() {
     btnEdit.style.display = selectedCount > 0 ? 'inline-flex' : 'none';
   }
 
+  const submittableSelectedCount = currentDataset.filter(r => r.selected && !r.submittedToPurchase && (r.status || 'PR to be submit').toLowerCase() === 'pr to be submit').length;
   const submitArea = document.getElementById('wmPrSubmitArea');
   if (submitArea) {
-    submitArea.style.display = selectedCount > 0 ? 'flex' : 'none';
+    submitArea.style.display = submittableSelectedCount > 0 ? 'flex' : 'none';
   }
 }
 
+
+// Synchronize PR status back to Warehouse data store (PR)
+function syncWmPrStatus(itemOrKey, newStatus) {
+  if (!itemOrKey || !newStatus) return;
+
+  try {
+    const stored = sessionStorage.getItem('nexus_wm_pr_store');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        wmPrDataStore = parsed;
+      }
+    }
+  } catch (e) {}
+
+  const matchId = typeof itemOrKey === 'string' ? itemOrKey : (itemOrKey.wmPrId || itemOrKey.prId || itemOrKey.id);
+  const matchPrNo = typeof itemOrKey === 'object' ? (itemOrKey.prNo || itemOrKey.prNumber) : null;
+  const matchDesc = typeof itemOrKey === 'object' ? (itemOrKey.materialDescription || itemOrKey.desc) : null;
+
+  let matched = null;
+  if (matchId) {
+    matched = wmPrDataStore.find(r => r.id === matchId || (itemOrKey.wmPrId && r.id === itemOrKey.wmPrId));
+  }
+  if (!matched && matchPrNo) {
+    matched = wmPrDataStore.find(r => r.prNo && r.prNo === matchPrNo);
+  }
+  if (!matched && matchDesc) {
+    matched = wmPrDataStore.find(r => r.materialDescription && r.materialDescription === matchDesc);
+  }
+  if (!matched && itemOrKey) {
+    matched = wmPrDataStore.find(r => r.submittedToPurchase && r.status !== newStatus);
+  }
+
+  if (matched) {
+    matched.status = newStatus;
+    matched.submittedToPurchase = true;
+    matched.selected = false;
+  } else {
+    wmPrDataStore.forEach(r => {
+      if ((matchDesc && r.materialDescription === matchDesc) || (matchPrNo && r.prNo === matchPrNo)) {
+        r.status = newStatus;
+        r.submittedToPurchase = true;
+        r.selected = false;
+      }
+    });
+  }
+
+  try {
+    sessionStorage.setItem('nexus_wm_pr_store', JSON.stringify(wmPrDataStore));
+  } catch (e) {}
+
+  if (typeof role !== 'undefined' && role === 'Warehouse Manager' && typeof currentWorklistView !== 'undefined' && currentWorklistView === 'pr') {
+    if (typeof currentDataset !== 'undefined' && Array.isArray(currentDataset)) {
+      currentDataset.forEach(cd => {
+        const storeMatch = wmPrDataStore.find(s => s.id === cd.id);
+        if (storeMatch) {
+          cd.status = storeMatch.status;
+          cd.submittedToPurchase = storeMatch.submittedToPurchase;
+          cd.selected = false;
+        }
+      });
+    }
+    if (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset)) {
+      filteredDataset.forEach(fd => {
+        const storeMatch = wmPrDataStore.find(s => s.id === fd.id);
+        if (storeMatch) {
+          fd.status = storeMatch.status;
+          fd.submittedToPurchase = storeMatch.submittedToPurchase;
+          fd.selected = false;
+        }
+      });
+    }
+    if (typeof renderWorklistTableBody === 'function') {
+      renderWorklistTableBody();
+    }
+  }
+}
+window.syncWmPrStatus = syncWmPrStatus;
+
+function copyPoToMasterWorklist(poRow) {
+  if (!poRow) return;
+  try {
+    const stored = sessionStorage.getItem('nexus_master_po_store');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        poData = parsed;
+      }
+    }
+  } catch (e) {}
+
+  const poAmountStr = poRow.poAmount || (poRow.poValue !== undefined && poRow.poValue !== null
+    ? (typeof poRow.poValue === 'number'
+        ? `₹${poRow.poValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        : String(poRow.poValue))
+    : '₹0.00');
+
+  const existingIdx = (poData || []).findIndex(p =>
+    (poRow.id && String(p.id) === String(poRow.id)) ||
+    (poRow.poNo && p.poNo === poRow.poNo)
+  );
+
+  const masterPoEntry = {
+    id: poRow.id || `master-po-${Date.now()}`,
+    vendorName: poRow.vendorName || poRow.supplierName || '',
+    supplierName: poRow.supplierName || poRow.vendorName || '',
+    submissionDate: poRow.submissionDate || poRow.poDate || new Date().toISOString().split('T')[0].split('-').reverse().join('-'),
+    submittedBy: poRow.submittedBy || 'Purchase Team',
+    poNo: poRow.poNo || '',
+    poAmount: poAmountStr,
+    poValue: poRow.poValue,
+    status: poRow.status || 'PO Approval Pending',
+    items: Array.isArray(poRow.items) ? poRow.items.map(it => ({ ...it })) : [],
+    transport: poRow.transport ? { ...poRow.transport } : {},
+    prNo: poRow.prNo || '',
+    wmPrId: poRow.wmPrId || '',
+    approved: !!poRow.approved,
+    selected: false
+  };
+
+  if (!Array.isArray(poData)) poData = [];
+  if (existingIdx >= 0) {
+    poData[existingIdx] = { ...poData[existingIdx], ...masterPoEntry };
+  } else {
+    poData.unshift(masterPoEntry);
+  }
+
+  try {
+    sessionStorage.setItem('nexus_master_po_store', JSON.stringify(poData));
+  } catch (e) {}
+}
+window.copyPoToMasterWorklist = copyPoToMasterWorklist;
+
 window.submitWmPr = function() {
   if (!currentDataset) return;
-  const selectedRows = currentDataset.filter(r => r.selected);
+  const selectedRows = currentDataset.filter(r => r.selected && !r.submittedToPurchase && (r.status || 'PR to be submit').toLowerCase() === 'pr to be submit');
   const selectedCount = selectedRows.length;
   if (selectedCount === 0) {
     if (typeof showToast === 'function') {
-      showToast('Please select at least one row to submit');
+      showToast('Please select at least one row with status "PR to be submit" to submit');
     }
     return;
   }
 
-  const selectedIds = new Set(selectedRows.map(r => r.id));
-  wmPrDataStore = wmPrDataStore.filter(r => !selectedIds.has(r.id));
-  currentDataset = currentDataset.filter(r => !selectedIds.has(r.id));
-  if (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset)) {
-    filteredDataset = filteredDataset.filter(r => !selectedIds.has(r.id));
-  }
+  // Ensure purchasePrDataStore is loaded
+  try {
+    const storedPurchasePr = sessionStorage.getItem('nexus_purchase_pr_store');
+    if (storedPurchasePr) {
+      const parsed = JSON.parse(storedPurchasePr);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        purchasePrDataStore = parsed;
+      }
+    }
+  } catch (e) {}
+
+  selectedRows.forEach(r => {
+    // 1. Mark as submitted in WH PR: select marker will disappear, row stays in WH PR table
+    r.submittedToPurchase = true;
+    r.selected = false;
+    r.status = 'PR to be submit';
+
+    const storeRow = wmPrDataStore.find(s => s.id === r.id);
+    if (storeRow) {
+      storeRow.submittedToPurchase = true;
+      storeRow.selected = false;
+      storeRow.status = 'PR to be submit';
+    }
+
+    if (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset)) {
+      const fltRow = filteredDataset.find(f => f.id === r.id);
+      if (fltRow) {
+        fltRow.submittedToPurchase = true;
+        fltRow.selected = false;
+        fltRow.status = 'PR to be submit';
+      }
+    }
+
+    // 2. Add row to purchasePrDataStore with status 'PR to be submit'
+    const alreadyInPurchase = purchasePrDataStore.some(p => p.wmPrId === r.id || (p.prNo && p.prNo === r.prNo));
+    if (!alreadyInPurchase) {
+      const newPurchaseRow = {
+        id: 'pm-pr-' + r.id.replace('wm-pr-', '') + '-' + Date.now(),
+        wmPrId: r.id,
+        prNo: r.prNo || ('PR-' + new Date().getFullYear() + '-' + String(purchasePrDataStore.length + 1).padStart(4, '0')),
+        selected: false,
+        submitBy: 'Rajesh Kumar (Warehouse)',
+        submissionDate: r.submissionDate || new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
+        materialHead: r.materialHead || '',
+        materialCategory: r.materialCategory || '',
+        materialDescription: r.materialDescription || '',
+        uom: r.uom || 'Nos',
+        stockQty: Number(r.stockQty || 0),
+        prQty: Number(r.prQty || 0),
+        status: 'PR to be submit'
+      };
+      purchasePrDataStore.unshift(newPurchaseRow);
+    }
+  });
+
+  try {
+    sessionStorage.setItem('nexus_wm_pr_store', JSON.stringify(wmPrDataStore));
+    sessionStorage.setItem('nexus_purchase_pr_store', JSON.stringify(purchasePrDataStore));
+  } catch (e) {}
 
   isWmPrEditing = false;
 
@@ -25794,9 +26159,225 @@ window.toggleWmRowSelected = function(rowId, isChecked) {
   renderWorklistTableBody();
 };
 
+
+// --------------------------------------------------------------------------
+// Warehouse Manager: GRN Row Selection & All Follow Ups Modal Handlers
+// --------------------------------------------------------------------------
+let activeWmGrnFollowUpRowId = null;
+
+function handleWmGrnRowClick(e, rowId) {
+  if (e && e.target && (e.target.closest('a') || e.target.closest('button') || e.target.closest('input'))) {
+    return;
+  }
+  const row = (currentDataset || []).find(r => r.id === rowId);
+  if (!row) return;
+
+  const isApprovalPending = ((row.status || '').toLowerCase().includes('approval pending') || (row.status || '').toLowerCase().includes('po approval'));
+  if (!isApprovalPending) return;
+
+  const willSelect = !row.selected;
+  (currentDataset || []).forEach(r => { r.selected = false; });
+  (wmGrnDataStore || []).forEach(r => { r.selected = false; });
+
+  row.selected = willSelect;
+  const storeRow = (wmGrnDataStore || []).find(r => r.id === rowId);
+  if (storeRow) storeRow.selected = willSelect;
+
+  if (typeof renderWorklistTableBody === 'function') {
+    renderWorklistTableBody();
+  }
+}
+window.handleWmGrnRowClick = handleWmGrnRowClick;
+
+
+window.handleWmGrnRowSelect = function(rowId, isChecked) {
+  const row = currentDataset && currentDataset.find(r => r.id === rowId);
+  if (row) row.selected = isChecked;
+  const storeRow = wmGrnDataStore && wmGrnDataStore.find(r => r.id === rowId);
+  if (storeRow) storeRow.selected = isChecked;
+
+  if (typeof renderWorklistTableBody === 'function') {
+    renderWorklistTableBody();
+  }
+};
+
+window.handleWmGrnSubmitBatch = function() {
+  const selectedRow = (currentDataset || []).find(r => r.selected && ((r.status || '').toLowerCase().includes('approval pending') || (r.status || '').toLowerCase().includes('po approval')));
+  if (!selectedRow) {
+    if (typeof showToast === 'function') showToast('Please select a row with PO Approval Pending status');
+    return;
+  }
+  openWmGrnFollowUpModal(selectedRow.id);
+};
+
+window.openWmGrnFollowUpModal = function(rowId) {
+  const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+              (wmGrnDataStore && wmGrnDataStore.find(r => r.id === rowId));
+  if (!row) return;
+
+  activeWmGrnFollowUpRowId = row.id;
+
+  const inpPo = document.getElementById('inpWmGrnFollowUpPoNo');
+  const inpSup = document.getElementById('inpWmGrnFollowUpSupplierName');
+  const inpDate = document.getElementById('inpWmGrnFollowUpDate');
+  const txtRemarks = document.getElementById('txtWmGrnFollowUpRemarks');
+
+  if (inpPo) inpPo.value = row.poNo || '';
+  if (inpSup) inpSup.value = row.supplierName || '';
+  if (inpDate) inpDate.value = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
+  if (txtRemarks) txtRemarks.value = 'PO approved. Ready for dispatch.';
+
+  const modal = document.getElementById('wmGrnFollowUpModal');
+  const overlay = document.getElementById('sideFormOverlay');
+  if (modal) {
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+    modal.style.margin = '0';
+    modal.style.zIndex = '100001';
+  }
+  if (overlay) overlay.style.display = 'block';
+};
+
+window.closeWmGrnFollowUpModal = function() {
+  const modal = document.getElementById('wmGrnFollowUpModal');
+  if (modal) modal.style.display = 'none';
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+// Helper to sync approved items from GRN row into matching Purchase PO
+function syncGrnApprovedItemsToPo(grnRow) {
+  if (!grnRow) return;
+  try {
+    const storedPo = sessionStorage.getItem('nexus_purchase_po_store');
+    if (storedPo) {
+      const parsed = JSON.parse(storedPo);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        purchasePoDataStore = parsed;
+      }
+    }
+  } catch (e) {}
+
+  const poMatch = (purchasePoDataStore || []).find(p =>
+    (grnRow.poNo && p.poNo === grnRow.poNo) ||
+    (grnRow.supplierName && p.supplierName === grnRow.supplierName) ||
+    (grnRow.prNo && p.prNo === grnRow.prNo)
+  ) || (purchasePoDataStore && purchasePoDataStore[0]);
+
+  if (poMatch) {
+    poMatch.status = 'Dispatch Pending';
+
+    // Approved rows in subtab of grn page should appear in subtab of po page of purchase login where status is dispatch pending
+    const approvedItems = (grnRow.items || []).filter(it => it.isTicked);
+    const itemsToTransfer = approvedItems.length > 0 ? approvedItems : (grnRow.items || []);
+
+    poMatch.items = itemsToTransfer.map((it, idx) => {
+      const qty = Number(it.receivedQty || it.invoiceQty || it.poQty || it.qty || 0);
+      const rate = Number(it.rate || it.lastPurchaseRate || it.newRate || 0);
+      const basic = Number(it.taxableQty || (qty * rate));
+      const cgst = Number(it.cgst || (basic * 0.09));
+      const sgst = Number(it.sgst || (basic * 0.09));
+      const total = Number(it.totalAmount || it.total || (basic + cgst + sgst));
+      return {
+        id: it.id || `po-item-${Date.now()}-${idx}`,
+        desc: it.materialDescription || it.desc || '',
+        uom: it.uom || 'Nos',
+        rate: rate,
+        qty: qty,
+        poQty: Number(it.poQty || qty),
+        invQty: Number(it.invoiceQty || qty),
+        basic: basic,
+        cgst: cgst,
+        sgst: sgst,
+        total: total,
+        selected: false,
+        highlighted: true,
+        isTicked: true
+      };
+    });
+
+    poMatch.poValue = poMatch.items.reduce((sum, i) => sum + Number(i.total || 0), 0);
+    if (grnRow.transport) {
+      poMatch.transport = { ...grnRow.transport };
+    }
+
+    try {
+      sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+    } catch (e) {}
+  }
+}
+window.syncGrnApprovedItemsToPo = syncGrnApprovedItemsToPo;
+
+window.submitWmGrnFollowUp = function() {
+  const rowId = activeWmGrnFollowUpRowId || (currentDataset && currentDataset.find(r => r.selected)?.id);
+  if (!rowId) return;
+
+  const grnRow = (wmGrnDataStore && wmGrnDataStore.find(r => r.id === rowId)) || (currentDataset && currentDataset.find(r => r.id === rowId));
+  if (grnRow) {
+    grnRow.status = 'Dispatch Pending';
+    grnRow.selected = false;
+  }
+  const curRow = currentDataset && currentDataset.find(r => r.id === rowId);
+  if (curRow) {
+    curRow.status = 'Dispatch Pending';
+    curRow.selected = false;
+  }
+  if (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset)) {
+    const fltRow = filteredDataset.find(r => r.id === rowId);
+    if (fltRow) {
+      fltRow.status = 'Dispatch Pending';
+      fltRow.selected = false;
+    }
+  }
+
+  // Update in Purchase PO table as well
+  try {
+    const storedPo = sessionStorage.getItem('nexus_purchase_po_store');
+    if (storedPo) {
+      const parsed = JSON.parse(storedPo);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        purchasePoDataStore = parsed;
+      }
+    }
+  } catch (e) {}
+
+  const poMatch = (purchasePoDataStore || []).find(p =>
+    (grnRow && grnRow.poNo && p.poNo === grnRow.poNo) ||
+    (grnRow && grnRow.supplierName && p.supplierName === grnRow.supplierName) ||
+    (grnRow && grnRow.prNo && p.prNo === grnRow.prNo)
+  ) || (purchasePoDataStore && purchasePoDataStore[0]);
+
+  if (poMatch) {
+    poMatch.status = 'Dispatch Pending';
+  }
+
+  try {
+    sessionStorage.setItem('nexus_wm_grn_store', JSON.stringify(wmGrnDataStore));
+    sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+  } catch (e) {}
+
+  if (grnRow) syncGrnApprovedItemsToPo(grnRow);
+  closeWmGrnFollowUpModal();
+
+  if (typeof renderWorklistTableBody === 'function') {
+    renderWorklistTableBody();
+  } else if (typeof applyFiltersAndRender === 'function') {
+    applyFiltersAndRender();
+  }
+
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('Follow up submitted successfully! Status changed to Dispatch Pending.', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Status updated to Dispatch Pending');
+  }
+};
+
 window.openWmGrnSupplierModal = function(grnId) {
   activeWmGrnRowId = grnId;
-  const row = wmGrnDataStore.find(r => r.id === grnId);
+  const row = wmGrnDataStore.find(r => r.id === grnId) || (currentDataset && currentDataset.find(r => r.id === grnId));
   if (!row) return;
 
   const lblSupplier = document.getElementById('lblWmGrnSupplierName');
@@ -25818,6 +26399,29 @@ window.openWmGrnSupplierModal = function(grnId) {
     });
   }
 
+  // Handle Transport icon and PDF Download icon based on row status
+  const status = (row.status || '').toLowerCase().trim();
+  const isPoApprovalPending = status.includes('po to be approve') || status.includes('approval pending') || status.includes('po approval');
+  const isInTransit = status.includes('in-transit') || status.includes('in-transist');
+
+  const btnTransport = document.getElementById('btnWmGrnTransport');
+  if (btnTransport) {
+    if (isPoApprovalPending) {
+      btnTransport.style.display = 'none';
+    } else {
+      btnTransport.style.display = 'flex';
+    }
+  }
+
+  const btnPdfDownload = document.getElementById('btnWmGrnSupplierPdfDownload');
+  if (btnPdfDownload) {
+    if (isInTransit) {
+      btnPdfDownload.style.display = 'inline-flex';
+    } else {
+      btnPdfDownload.style.display = 'none';
+    }
+  }
+
   renderWmGrnSupplierItems();
 
   const modal = document.getElementById('wmGrnSupplierModal');
@@ -25834,7 +26438,15 @@ window.openWmGrnSupplierModal = function(grnId) {
   if (overlay) overlay.style.display = 'block';
 };
 
-window.closeWmGrnSupplierModal = function() {
+window.handleWmGrnSupplierPdfDownload = function() {
+  const row = (wmGrnDataStore || []).find(r => r.id === activeWmGrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmGrnRowId));
+  const poNo = row ? (row.poNo || 'PO') : 'PO';
+  if (typeof showToast === 'function') {
+    showToast(`Downloading In-Transit PDF for ${poNo}...`);
+  }
+};
+
+function closeWmGrnSupplierModal() {
   const modal = document.getElementById('wmGrnSupplierModal');
   if (modal) {
     modal.style.display = 'none';
@@ -25850,9 +26462,10 @@ window.closeWmGrnSupplierModal = function() {
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
   }
-};
+}
+window.closeWmGrnSupplierModal = closeWmGrnSupplierModal;
 
-window.renderWmGrnSupplierItems = function() {
+function renderWmGrnSupplierItems() {
   const row = wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
   if (!row || !row.items) return;
 
@@ -26115,7 +26728,7 @@ window.openWmGrnTransportModal = function() {
   }
 };
 
-window.closeWmGrnTransportModal = function() {
+function closeWmGrnTransportModal() {
   const modal = document.getElementById('wmGrnTransportModal');
   if (modal) modal.style.display = 'none';
   const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
@@ -26147,7 +26760,8 @@ window.closeWmGrnTransportModal = function() {
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
   }
-};
+}
+window.closeWmGrnTransportModal = closeWmGrnTransportModal;
 
 window.calculateWmTransportTotal = function() {
   const fc = parseFloat(document.getElementById('inpWmFreightCharges')?.value) || 0;
@@ -27124,7 +27738,7 @@ window.openWmGrnTransportPaymentModal = function() {
   if (overlay) overlay.style.display = 'block';
 };
 
-window.closeWmGrnTransportPaymentModal = function() {
+function closeWmGrnTransportPaymentModal() {
   const modal = document.getElementById('wmGrnTransportPaymentModal');
   if (modal) modal.style.display = 'none';
   const prevModal = document.getElementById('wmGrnSupplierModal');
@@ -27154,9 +27768,10 @@ window.closeWmGrnTransportPaymentModal = function() {
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
   }
-};
+}
+window.closeWmGrnTransportPaymentModal = closeWmGrnTransportPaymentModal;
 
-window.handleWmBeneficiaryTypeChange = function(type) {
+function handleWmBeneficiaryTypeChange(type) {
   const rowTransferType = document.getElementById('rowWmPaymentTransferType');
   const rowAccountName = document.getElementById('rowWmPaymentAccountName');
   const rowAccountNumber = document.getElementById('rowWmPaymentAccountNumber');
@@ -27279,7 +27894,8 @@ window.handleWmBeneficiaryTypeChange = function(type) {
       if (inpIfsc) inpIfsc.value = '';
     }
   }
-};
+}
+window.handleWmBeneficiaryTypeChange = handleWmBeneficiaryTypeChange;
 
 window.submitWmTransportPayment = function() {
   if (['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
@@ -27487,9 +28103,10 @@ window.submitWmTransportPayment = function() {
     return;
   }
 
-  const row = (currentWorklistView === 'min' || currentWorklistView === 'min_detail')
+  const isMinView = (currentWorklistView === 'min' || currentWorklistView === 'min_detail');
+  const row = isMinView
     ? (wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted)))
-    : wmGrnDataStore.find(r => r.id === activeWmGrnRowId);
+    : (wmGrnDataStore.find(r => r.id === activeWmGrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmGrnRowId)));
   if (row) {
     row.isHighlighted = true;
     if (!row.transportPayment) row.transportPayment = {};
@@ -27498,6 +28115,36 @@ window.submitWmTransportPayment = function() {
     row.transportPayment.transferType = document.getElementById('selWmTransferType')?.value;
     row.transportPayment.advancePayment = document.getElementById('inpWmPaymentAdvancePayment')?.value;
     row.transportPayment.freightCharges = document.getElementById('inpWmPaymentFreightCharges')?.value;
+
+    if (!isMinView) {
+      const isApprovalPending = ((row.status || '').toLowerCase().includes('approval pending') || (row.status || '').toLowerCase().includes('po approval'));
+      if (isApprovalPending) {
+        row.status = 'Dispatch Pending';
+        row.selected = false;
+        syncGrnApprovedItemsToPo(row);
+        try {
+          sessionStorage.setItem('nexus_wm_grn_store', JSON.stringify(wmGrnDataStore));
+        } catch (e) {}
+      }
+    }
+  }
+
+  if (currentDataset && Array.isArray(currentDataset)) {
+    const cur = currentDataset.find(r => r.id === (isMinView ? (activeWmMinRowId || row?.id) : activeWmGrnRowId)) || (isMinView ? currentDataset.find(r => r.isHighlighted) : null);
+    if (cur) {
+      cur.isHighlighted = true;
+      if (row && row.status) {
+        cur.status = row.status;
+        cur.selected = false;
+      }
+    }
+  }
+  if (typeof filteredDataset !== 'undefined' && Array.isArray(filteredDataset)) {
+    const flt = filteredDataset.find(r => r.id === (isMinView ? (activeWmMinRowId || row?.id) : activeWmGrnRowId));
+    if (flt && row && row.status) {
+      flt.status = row.status;
+      flt.selected = false;
+    }
   }
   if (currentDataset && Array.isArray(currentDataset)) {
     const cur = currentDataset.find(r => r.id === (currentWorklistView === 'min' ? (activeWmMinRowId || row?.id) : activeWmGrnRowId)) || (currentWorklistView === 'min' ? currentDataset.find(r => r.isHighlighted) : null);
@@ -27505,10 +28152,14 @@ window.submitWmTransportPayment = function() {
   }
 
   // Close modals
-  closeWmGrnTransportPaymentModal();
-  closeWmGrnSupplierModal();
-  closeWmMinSiteModal();
-  closeWmMrnSiteModal();
+  if (typeof closeWmGrnTransportPaymentModal === 'function') closeWmGrnTransportPaymentModal();
+  else if (typeof window.closeWmGrnTransportPaymentModal === 'function') window.closeWmGrnTransportPaymentModal();
+  if (typeof closeWmGrnSupplierModal === 'function') closeWmGrnSupplierModal();
+  else if (typeof window.closeWmGrnSupplierModal === 'function') window.closeWmGrnSupplierModal();
+  if (typeof closeWmMinSiteModal === 'function') closeWmMinSiteModal();
+  else if (typeof window.closeWmMinSiteModal === 'function') window.closeWmMinSiteModal();
+  if (typeof closeWmMrnSiteModal === 'function') closeWmMrnSiteModal();
+  else if (typeof window.closeWmMrnSiteModal === 'function') window.closeWmMrnSiteModal();
 
   // Re-render table with highlighted row
   applyFiltersAndRender();
@@ -27655,7 +28306,7 @@ window.openWmMinSiteModal = function(minId) {
   openWmMinDetail(minId);
 };
 
-window.closeWmMinSiteModal = function() {
+function closeWmMinSiteModal() {
   const modal = document.getElementById('wmMinSiteModal');
   if (modal) {
     modal.style.display = 'none';
@@ -27671,7 +28322,8 @@ window.closeWmMinSiteModal = function() {
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
   }
-};
+}
+window.closeWmMinSiteModal = closeWmMinSiteModal;
 
 window.copyWmMinHeaderValue = function(type, label) {
   const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
@@ -27987,7 +28639,7 @@ window.openWmMrnSiteModal = function(mrnId) {
   openWmMrnDetail(mrnId);
 };
 
-window.closeWmMrnSiteModal = function() {
+function closeWmMrnSiteModal() {
   const modal = document.getElementById('wmMrnSiteModal');
   if (modal) {
     modal.style.display = 'none';
@@ -28003,7 +28655,8 @@ window.closeWmMrnSiteModal = function() {
     const overlay = document.getElementById('sideFormOverlay');
     if (overlay) overlay.style.display = 'none';
   }
-};
+}
+window.closeWmMrnSiteModal = closeWmMrnSiteModal;
 
 window.copyWmMrnHeaderValue = function(type, label) {
   const row = wmMrnDataStore.find(r => r.id === activeWmMrnRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMrnRowId));
@@ -28641,7 +29294,9 @@ let isPurchasePrEditing = false;
 let purchasePrDataStore = [
   {
     id: 'pm-pr-1',
+    prNo: 'PR-2026-0001',
     selected: false,
+    status: 'PR to be submit',
     submitBy: 'Rajesh Kumar (Warehouse)',
     submissionDate: '12-10-2026',
     materialHead: 'Tower Structure',
@@ -28652,7 +29307,9 @@ let purchasePrDataStore = [
   },
   {
     id: 'pm-pr-2',
+    prNo: 'PR-2026-0002',
     selected: false,
+    status: 'PR to be submit',
     submitBy: 'Vikram Singh (Site Engg)',
     submissionDate: '12-10-2026',
     materialHead: 'Power Cable',
@@ -28663,7 +29320,9 @@ let purchasePrDataStore = [
   },
   {
     id: 'pm-pr-3',
+    prNo: 'PR-2026-0003',
     selected: false,
+    status: 'PR to be submit',
     submitBy: 'Anand Sharma (Stores)',
     submissionDate: '13-10-2026',
     materialHead: 'Optical Fiber',
@@ -28674,7 +29333,9 @@ let purchasePrDataStore = [
   },
   {
     id: 'pm-pr-4',
+    prNo: 'PR-2026-0004',
     selected: false,
+    status: 'PR to be submit',
     submitBy: 'Pooja Patel (Site Team)',
     submissionDate: '13-10-2026',
     materialHead: 'Earthing Rod',
@@ -28685,7 +29346,9 @@ let purchasePrDataStore = [
   },
   {
     id: 'pm-pr-5',
+    prNo: 'PR-2026-0005',
     selected: false,
+    status: 'PR to be submit',
     submitBy: 'Suresh Verma (Ops)',
     submissionDate: '14-10-2026',
     materialHead: 'Anchor Bolts',
@@ -28703,6 +29366,7 @@ let purchaseRfqDataStore = [
     supplierName: 'Apex Infra Solutions Pvt Ltd',
     date: '10-10-2026',
     rfqNo: 'RFQ-2026-0891',
+    prNo: 'PR-2026-0891',
     rfqValue: 245000.00,
     status: 'RFQ Pending',
     items: [
@@ -29057,9 +29721,9 @@ window.handlePurchasePrEditToggle = function() {
       const val = parseFloat(input.value);
       if (!isNaN(val) && val >= 0) {
         const item = purchasePrDataStore.find(r => r.id === rowId);
-        if (item) item.prQty = val;
+        if (item) { item.prQty = val; item.isUserEdited = true; }
         const curItem = currentDataset && currentDataset.find(r => r.id === rowId);
-        if (curItem) curItem.prQty = val;
+        if (curItem) { curItem.prQty = val; curItem.isUserEdited = true; }
       }
     });
 
@@ -29144,7 +29808,7 @@ function updatePurchasePrSelectionUI() {
 
   const submitArea = document.getElementById('purchasePrSubmitArea');
   if (submitArea) {
-    submitArea.style.display = selectedCount > 0 ? 'flex' : 'none';
+    submitArea.style.display = 'none';
   }
 }
 
@@ -29157,7 +29821,19 @@ window.togglePurchaseSupplierDropdown = function() {
   menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
 };
 
-window.handlePurchaseSupplierOptChange = function() {
+window.handlePurchaseSupplierOptChange = function(targetEl) {
+  const allChecked = Array.from(document.querySelectorAll('.purchase-supplier-opt-chk:checked'));
+  if (allChecked.length > 3) {
+    if (targetEl) {
+      targetEl.checked = false;
+    } else if (allChecked.length > 0) {
+      allChecked[allChecked.length - 1].checked = false;
+    }
+    if (typeof showToast === 'function') {
+      showToast('Maximum 3 suppliers can be selected');
+    }
+  }
+
   const checkedBoxes = Array.from(document.querySelectorAll('.purchase-supplier-opt-chk:checked'));
   const selectedNames = checkedBoxes.map(chk => chk.value);
   const lbl = document.getElementById('lblPurchaseSupplierDropdownSelected');
@@ -29261,7 +29937,7 @@ window.openPurchaseSelectSupplierModal = function() {
     if (menu) {
       menu.innerHTML = vendorNames.map(name => `
         <label class="supplier-dropdown-option" style="display: flex; align-items: center; gap: 12px; padding: 9px 16px; cursor: pointer; user-select: none;">
-          <input type="checkbox" class="pr-circle-checkbox purchase-supplier-opt-chk" value="${name.replace(/"/g, '&quot;')}" onchange="handlePurchaseSupplierOptChange()">
+          <input type="checkbox" class="pr-circle-checkbox purchase-supplier-opt-chk" value="${name.replace(/"/g, '&quot;')}" onchange="handlePurchaseSupplierOptChange(this)">
           <span style="color: #1e293b; font-size: 0.92rem; font-weight: 500; pointer-events: none;">${name}</span>
         </label>
       `).join('');
@@ -29363,7 +30039,14 @@ window.submitPurchaseSelectSupplier = function() {
       transport: chosenRfq.terms || window.purchaseRfqSelectedTerms || {}
     };
 
+    newPo.wmPrId = chosenRfq.wmPrId;
+    newPo.prNo = chosenRfq.prNo;
     purchasePoDataStore.unshift(newPo);
+    try {
+      sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+    } catch (e) {}
+    syncWmPrStatus(newPo, 'PO Approval Pending');
+    copyPoToMasterWorklist(newPo);
 
     // Unblur and close modals
     const rfqRecModal = document.getElementById('purchaseRfqReceivedModal');
@@ -29409,6 +30092,53 @@ window.submitPurchaseSelectSupplier = function() {
     }
     return;
   }
+
+  // Selected PR rows
+  const selectedPrRows = purchasePrDataStore.filter(r => r.selected);
+  const selectedPrNos = selectedPrRows.map(r => r.prNo || r.pr_no || r.id);
+
+  // Link to purchase_request table in DB and store in according columns (supply_vendor_1, 2, 3)
+  if (window.NexusApi && window.NexusApi.purchase) {
+    try {
+      window.NexusApi.purchase.selectSuppliers({
+        pr_nos: selectedPrNos,
+        suppliers: selectedSuppliers.slice(0, 3)
+      });
+    } catch (e) {
+      console.warn('Could not save selected suppliers to DB:', e);
+    }
+  }
+
+  // Populate RFQ data store with these 3 suppliers sharing the same rfq_id / pr_no
+  selectedPrRows.forEach(prRow => {
+    selectedSuppliers.slice(0, 3).forEach((vendorName, idx) => {
+      const rfqId = `rfq-${prRow.id}-${idx + 1}`;
+      if (!purchaseRfqDataStore.some(r => r.supplierName === vendorName && r.prNo === (prRow.prNo || prRow.id))) {
+        purchaseRfqDataStore.push({
+          id: rfqId,
+          rfqId: prRow.prNo || prRow.id,
+          prNo: prRow.prNo || prRow.id,
+          rfqNo: `RFQ-2026-${String(purchaseRfqDataStore.length + 1).padStart(3, '0')}`,
+          supplierName: vendorName,
+          date: prRow.submissionDate || new Date().toISOString().slice(0, 10),
+          rfqValue: (Number(prRow.prQty) || 10) * 1500,
+          status: 'RFQ Pending',
+          selected: false,
+          items: [
+            {
+              id: `${rfqId}-it-1`,
+              materialDescription: prRow.materialDescription,
+              uom: prRow.uom,
+              qty: prRow.prQty,
+              rate: 1500,
+              total: (Number(prRow.prQty) || 10) * 1500,
+              selected: false
+            }
+          ]
+        });
+      }
+    });
+  });
 
   // Remove/process selected PR rows from active PR worklist
   purchasePrDataStore = purchasePrDataStore.filter(r => !r.selected);
@@ -29504,6 +30234,7 @@ window.submitPurchaseAddTerms = function() {
   const rfq = purchaseRfqDataStore.find(r => r.id === activePurchaseRfqId) || (currentDataset && currentDataset.find(r => r.id === activePurchaseRfqId));
   if (rfq) {
     rfq.status = 'RFQ Received';
+    syncWmPrStatus(rfq, 'RFQ Received');
     rfq.terms = {
       transportation: transp,
       paymentTerms: payTerms
@@ -29517,6 +30248,20 @@ window.submitPurchaseAddTerms = function() {
     if (filtRow) {
       filtRow.status = 'RFQ Received';
       filtRow.terms = rfq.terms;
+    }
+
+    // Link add terms tab to transportation scope and payment terms column in purchase table
+    if (window.NexusApi && window.NexusApi.purchase) {
+      try {
+        window.NexusApi.purchase.saveTerms({
+          pr_no: rfq.prNo || rfq.pr_no || rfq.rfqNo || 'PR-2026-0001',
+          rfq_id: rfq.rfqId || rfq.prNo || 'PR-2026-0001',
+          transport_scope: transp,
+          payment_terms: payTerms
+        });
+      } catch (e) {
+        console.warn('Could not save RFQ terms to purchase table in DB:', e);
+      }
     }
   }
 
@@ -29704,7 +30449,9 @@ window.savePurchaseAddProduct = function() {
   const newId = 'pm-pr-' + Date.now();
   const newRow = {
     id: newId,
+    prNo: 'PR-' + year + '-' + String(purchasePrDataStore.length + 1).padStart(4, '0'),
     selected: false,
+    status: 'PR to be submit',
     submitBy: 'Purchase Manager',
     submissionDate: dateStr,
     materialHead: head,
@@ -29758,7 +30505,7 @@ function updatePurchaseRfqSelectionUI() {
 
   const submitArea = document.getElementById('purchaseRfqSubmitArea');
   if (submitArea) {
-    submitArea.style.display = selectedCount > 0 ? 'flex' : 'none';
+    submitArea.style.display = 'none';
   }
 }
 
@@ -29829,6 +30576,56 @@ function ensureRfqItems(rfq, type) {
     ];
   }
 }
+
+
+window.handlePurchaseRfqSubmitBatch = function() {
+  const selectedRows = (filteredDataset || []).filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    if (typeof showToast === 'function') showToast('Please select at least one RFQ');
+    return;
+  }
+
+  const pendingRows = selectedRows.filter(r => (r.status || '').toLowerCase().includes('pending'));
+  const receivedRows = selectedRows.filter(r => (r.status || '').toLowerCase().includes('received'));
+
+  if (pendingRows.length > 0) {
+    // For RFQ Pending: Select supplier modal should NOT appear!
+    // Update status to RFQ Received directly
+    pendingRows.forEach(row => {
+      row.status = 'RFQ Received';
+      row.selected = false;
+      const storeRfq = purchaseRfqDataStore.find(r => r.id === row.id);
+      if (storeRfq) {
+        storeRfq.status = 'RFQ Received';
+        storeRfq.selected = false;
+      }
+      syncWmPrStatus(row, 'RFQ Received');
+    });
+
+    try {
+      sessionStorage.setItem('nexus_purchase_rfq_store', JSON.stringify(purchaseRfqDataStore));
+    } catch (e) {}
+
+    currentDataset = purchaseRfqDataStore.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+    applyFiltersAndRender();
+    updatePurchaseRfqSelectionUI();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('RFQ status updated to RFQ Received!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Status changed to RFQ Received');
+    }
+    return;
+  }
+
+  if (receivedRows.length > 0) {
+    openPurchaseSelectSupplierModal();
+    return;
+  }
+
+  openPurchaseSelectSupplierModal();
+};
 
 window.handlePurchaseRfqSupplierClick = function(rowId) {
   const row = purchaseRfqDataStore.find(r => r.id === rowId) || (currentDataset && currentDataset.find(r => r.id === rowId));
@@ -30403,15 +31200,58 @@ function updatePurchaseRfqReceivedSummation() {
   lbl.textContent = Number(total).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-window.openPurchaseRfqDocInstructionsModal = function() {
+window.openPurchaseRfqDocInstructionsModal = function(sourceModalId) {
   const modal = document.getElementById('purchaseRfqDocModal');
   if (!modal) return;
+
+  // Determine active parent modal to blur
+  let activeParentId = sourceModalId;
+  if (!activeParentId) {
+    const rfqRec = document.getElementById('purchaseRfqReceivedModal');
+    const rfqPend = document.getElementById('purchaseRfqPendingModal');
+    const poApp = document.getElementById('purchasePoApprovalPendingModal');
+    const poDisp = document.getElementById('purchasePoDispatchPendingModal');
+    const poInTransit = document.getElementById('purchasePoInTransitModal');
+    if (rfqRec && rfqRec.style.display !== 'none') activeParentId = 'purchaseRfqReceivedModal';
+    else if (rfqPend && rfqPend.style.display !== 'none') activeParentId = 'purchaseRfqPendingModal';
+    else if (poApp && poApp.style.display !== 'none') activeParentId = 'purchasePoApprovalPendingModal';
+    else if (poDisp && poDisp.style.display !== 'none') activeParentId = 'purchasePoDispatchPendingModal';
+    else if (poInTransit && poInTransit.style.display !== 'none') activeParentId = 'purchasePoInTransitModal';
+  }
+
+  window.activeRfqDocParentModalId = activeParentId;
+
+  if (activeParentId) {
+    const parentEl = document.getElementById(activeParentId);
+    if (parentEl) {
+      parentEl.classList.add('card-dimmed-blurred');
+    }
+  }
+
+  const overlay = document.getElementById('sideFormOverlay');
+  if (overlay && (!overlay.style.display || overlay.style.display === 'none')) {
+    overlay.style.display = 'flex';
+  }
+
   modal.style.display = 'block';
+  modal.style.setProperty('position', 'fixed', 'important');
+  modal.style.setProperty('top', '50%', 'important');
+  modal.style.setProperty('left', '50%', 'important');
+  modal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+  modal.style.setProperty('z-index', '100005', 'important');
 };
 
 window.closePurchaseRfqDocInstructionsModal = function() {
   const modal = document.getElementById('purchaseRfqDocModal');
   if (modal) modal.style.display = 'none';
+
+  if (window.activeRfqDocParentModalId) {
+    const parentEl = document.getElementById(window.activeRfqDocParentModalId);
+    if (parentEl) {
+      parentEl.classList.remove('card-dimmed-blurred');
+    }
+    window.activeRfqDocParentModalId = null;
+  }
 };
 
 window.closePurchaseRfqReceivedModal = function() {
@@ -30772,7 +31612,7 @@ let isPurchasePoDispatchEditing = false;
 
 function ensurePurchasePoItems(row) {
   if (!row) return;
-  if (!row.items || !Array.isArray(row.items) || row.items.length < 4) {
+  if (!row.items || !Array.isArray(row.items) || row.items.length === 0) {
     const itemVals = [
       { desc: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable', uom: 'Mtr', qty: 500, rate: 1200.00 },
       { desc: '11KV HT XLPE Insulated Armoured Cable 3C x 185 Sq.mm', uom: 'Mtr', qty: 300, rate: 1800.00 },
@@ -30814,7 +31654,7 @@ function ensurePurchasePoItems(row) {
   }
 }
 
-window.handlePurchasePoSupplierClick = function(rowId) {
+function handlePurchasePoSupplierClick(rowId) {
   const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
               (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
   if (!row) return;
@@ -30831,12 +31671,13 @@ window.handlePurchasePoSupplierClick = function(rowId) {
   } else {
     openPurchasePoApprovalPendingModal(row.id);
   }
-};
+}
+window.handlePurchasePoSupplierClick = handlePurchasePoSupplierClick;
 
 // --------------------------------------------------------------------------
 // 1. APPROVAL PENDING MODAL
 // --------------------------------------------------------------------------
-window.openPurchasePoApprovalPendingModal = function(rowId) {
+function openPurchasePoApprovalPendingModal(rowId) {
   const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
               (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
   if (!row) return;
@@ -30865,7 +31706,8 @@ window.openPurchasePoApprovalPendingModal = function(rowId) {
 
   renderPurchasePoApprovalPendingTable(row);
   updatePurchasePoApprovalPendingUI(row);
-};
+}
+window.openPurchasePoApprovalPendingModal = openPurchasePoApprovalPendingModal;
 
 window.closePurchasePoApprovalPendingModal = function() {
   const modal = document.getElementById('purchasePoApprovalPendingModal');
@@ -30944,6 +31786,7 @@ window.submitPurchasePoApprovalPending = function() {
   if (row) row.status = 'Dispatch Pending';
   if (storeRow) storeRow.status = 'Dispatch Pending';
   if (filteredRow) filteredRow.status = 'Dispatch Pending';
+  syncWmPrStatus(row || storeRow, 'Dispatch Pending');
 
   closePurchasePoApprovalPendingModal();
 
@@ -30959,7 +31802,7 @@ window.submitPurchasePoApprovalPending = function() {
 // --------------------------------------------------------------------------
 // 2. DISPATCH PENDING MODAL
 // --------------------------------------------------------------------------
-window.openPurchasePoDispatchPendingModal = function(rowId) {
+function openPurchasePoDispatchPendingModal(rowId) {
   const row = (currentDataset || []).find(r => String(r.id) === String(rowId)) ||
               (purchasePoDataStore || []).find(r => String(r.id) === String(rowId));
   if (!row) return;
@@ -30996,7 +31839,8 @@ window.openPurchasePoDispatchPendingModal = function(rowId) {
 
   renderPurchasePoDispatchPendingTable(row);
   updatePurchasePoDispatchPendingUI(row);
-};
+}
+window.openPurchasePoDispatchPendingModal = openPurchasePoDispatchPendingModal;
 
 window.closePurchasePoDispatchPendingModal = function() {
   const modal = document.getElementById('purchasePoDispatchPendingModal');
@@ -31222,7 +32066,7 @@ window.calculatePurchasePoTransportTotal = function() {
   }
 };
 
-window.submitPurchasePoTransportDetails = function() {
+window.submitPurchasePoTransportDetails = async function() {
   if (!activePurchasePoRowId) return;
   const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
               (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
@@ -31233,13 +32077,55 @@ window.submitPurchasePoTransportDetails = function() {
     const txtGst = document.getElementById('inpPurchasePoGstAmount') || document.getElementById('txtPurchasePoGstAmount');
     const txtTotal = document.getElementById('inpPurchasePoTotalAmount') || document.getElementById('txtPurchasePoTransportTotalAmount');
 
+    const logisticName = ddl ? ddl.value : 'VRL Logistics';
+    const transportCharges = parseFloat(txtCharges?.value) || 0;
+    const gstApplicable = chkGst ? chkGst.checked : false;
+    const gstAmount = parseFloat(txtGst?.value) || 0;
+    const totalAmount = parseFloat(txtTotal?.value) || (transportCharges + gstAmount);
+
+    // Take GST details from master db according to supplier/vendor name
+    let vendorGstNumber = '33AABCT2345D1Z2';
+    let vendorGstType = 'SGST';
+    if (typeof masterVendorData !== 'undefined' && Array.isArray(masterVendorData)) {
+      const vMatch = masterVendorData.find(v => {
+        const vName = (v.vendorName || v.vendor_name || '').trim().toLowerCase();
+        const sName = (row.supplierName || '').trim().toLowerCase();
+        return vName && sName && (vName === sName || vName.includes(sName) || sName.includes(vName));
+      });
+      if (vMatch) {
+        if (vMatch.gst_number && vMatch.gst_number !== 'NA') vendorGstNumber = vMatch.gst_number;
+        if (vMatch.gst_type && vMatch.gst_type !== 'NA') vendorGstType = vMatch.gst_type;
+      }
+    }
+
     row.transport = {
-      logisticsName: ddl ? ddl.value : 'VRL Logistics',
-      transportCharges: parseFloat(txtCharges?.value) || 0,
-      gstEnabled: chkGst ? chkGst.checked : false,
-      gstAmount: parseFloat(txtGst?.value) || 0,
-      totalAmount: parseFloat(txtTotal?.value) || (parseFloat(txtCharges?.value) || 0)
+      logisticsName: logisticName,
+      transportCharges: transportCharges,
+      gstEnabled: gstApplicable,
+      gstAmount: gstAmount,
+      totalAmount: totalAmount,
+      gstNumber: vendorGstNumber,
+      gstType: vendorGstType,
+      cgstAmount: vendorGstType.toUpperCase().includes('IGST') ? 0 : Math.round((gstAmount / 2) * 100) / 100,
+      sgstAmount: vendorGstType.toUpperCase().includes('IGST') ? 0 : Math.round((gstAmount / 2) * 100) / 100,
+      igstAmount: vendorGstType.toUpperCase().includes('IGST') ? gstAmount : 0
     };
+
+    // Link and store in purchase table in DB
+    if (window.NexusApi && window.NexusApi.purchase) {
+      try {
+        await window.NexusApi.purchase.saveTransportDetails(activePurchasePoRowId, {
+          logistic_name: logisticName,
+          transport_charges: transportCharges,
+          gst_applicable: gstApplicable,
+          gst_amount: gstAmount,
+          total_amount: totalAmount,
+          supplier_name: row.supplierName
+        });
+      } catch (e) {
+        console.warn('Could not save transport details to purchase table in DB:', e);
+      }
+    }
   }
 
   const modal = document.getElementById('purchasePoTransportDetailsModal');
@@ -31296,26 +32182,74 @@ window.closePurchasePoUploadDocumentsModal = function() {
   if (overlay) overlay.style.display = 'none';
 };
 
+window.purchasePoUploadedDocs = window.purchasePoUploadedDocs || {};
+
 window.handlePurchasePoFileSelect = function(input, labelId) {
   if (input && input.files && input.files[0]) {
+    const file = input.files[0];
     const lbl = document.getElementById(labelId);
     if (lbl) {
-      lbl.textContent = input.files[0].name;
+      lbl.textContent = file.name;
       lbl.style.color = '#0454e4';
       lbl.style.fontWeight = '600';
     }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const activeId = activePurchasePoRowId || 'active';
+      window.purchasePoUploadedDocs[activeId] = window.purchasePoUploadedDocs[activeId] || {};
+      if (labelId.toLowerCase().includes('invoice')) {
+        window.purchasePoUploadedDocs[activeId].invoiceDoc = e.target.result;
+        window.purchasePoUploadedDocs[activeId].invoiceFileName = file.name;
+      } else {
+        window.purchasePoUploadedDocs[activeId].lrDoc = e.target.result;
+        window.purchasePoUploadedDocs[activeId].lrFileName = file.name;
+      }
+    };
+    reader.readAsDataURL(file);
   }
 };
 
-window.submitPurchasePoUploadDocuments = function() {
+window.submitPurchasePoUploadDocuments = async function() {
   if (!activePurchasePoRowId) return;
   const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId));
   const storeRow = (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
   const filteredRow = (filteredDataset || []).find(r => String(r.id) === String(activePurchasePoRowId));
 
-  if (row) row.status = 'In-Transit';
-  if (storeRow) storeRow.status = 'In-Transit';
-  if (filteredRow) filteredRow.status = 'In-Transit';
+  const uploaded = window.purchasePoUploadedDocs?.[activePurchasePoRowId] || {};
+  const invDoc = uploaded.invoiceDoc || null;
+  const lrDoc = uploaded.lrDoc || null;
+
+  if (row) {
+    row.status = 'In-Transit';
+    row.invoiceDocument = invDoc;
+    row.lrDocuments = lrDoc;
+  }
+  if (storeRow) {
+    storeRow.status = 'In-Transit';
+    storeRow.invoiceDocument = invDoc;
+    storeRow.lrDocuments = lrDoc;
+  }
+  if (filteredRow) {
+    filteredRow.status = 'In-Transit';
+    filteredRow.invoiceDocument = invDoc;
+    filteredRow.lrDocuments = lrDoc;
+  }
+  syncWmPrStatus(row || storeRow, 'In-Transit');
+
+  // Link and store in purchase table in DB
+  if (window.NexusApi && window.NexusApi.purchase) {
+    try {
+      await window.NexusApi.purchase.uploadDocuments(activePurchasePoRowId, {
+        invoice_document: invDoc,
+        lr_documents: lrDoc,
+        invoice_filename: uploaded.invoiceFileName,
+        lr_filename: uploaded.lrFileName
+      });
+    } catch (e) {
+      console.warn('Could not save uploaded documents to purchase table in DB:', e);
+    }
+  }
 
   closePurchasePoUploadDocumentsModal();
 
@@ -31362,6 +32296,154 @@ window.openPurchasePoInTransitModal = function(rowId) {
   if (lbl) {
     lbl.textContent = Number(sumVal).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     lbl.style.color = '#0454e4';
+  }
+
+  const btnPdf = document.getElementById('btnPurchasePoInTransitPdfDownload');
+  if (btnPdf) btnPdf.style.display = 'inline-flex';
+};
+
+function downloadBlobOrDataUrl(content, defaultFilename) {
+  if (!content) return false;
+  const link = document.createElement('a');
+  if (content.startsWith('data:') || content.startsWith('blob:') || content.startsWith('http')) {
+    link.href = content;
+  } else {
+    link.href = 'data:application/pdf;base64,' + content;
+  }
+  link.download = defaultFilename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  return true;
+}
+
+window.handlePurchasePoPdfDownload = async function() {
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  const poNo = row ? (row.poNo || 'PO') : 'PO';
+  const rowStatus = String(row?.status || '').toLowerCase();
+
+  // If in Dispatch Pending status, user is downloading the official Purchase Order PDF
+  if (rowStatus.includes('dispatch')) {
+    if (row?.pdfStatus === 'Generating') {
+      if (typeof showToast === 'function') {
+        showToast(`PO PDF for ${poNo} is currently generating in background. Please wait a moment...`);
+      }
+      return;
+    }
+
+    const poDbId = row?.poDbId || (!isNaN(row?.id) && Number(row?.id) > 0 ? Number(row.id) : null);
+
+    if (poDbId && window.NexusApi && window.NexusApi.purchase) {
+      try {
+        const url = window.NexusApi.purchase.getPoPdfUrl(poDbId);
+        // Fetch blob directly to trigger native download without popup blocker or routing issues
+        const resp = await fetch(url);
+        if (resp.ok) {
+          const blob = await resp.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `Purchase_Order_${poNo}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup(`Purchase Order PDF for ${poNo} downloaded!`, 'Task Completed');
+          } else if (typeof showToast === 'function') {
+            showToast(`Purchase Order PDF for ${poNo} downloaded successfully!`);
+          }
+          return;
+        } else {
+          window.open(url, '_blank');
+          return;
+        }
+      } catch (err) {
+        console.warn('Could not fetch PO PDF directly, trying fallback:', err);
+      }
+    }
+
+    if (row?.poDocument || row?.po_document) {
+      const docPath = row.poDocument || row.po_document;
+      const link = document.createElement('a');
+      link.href = docPath;
+      link.download = `Purchase_Order_${poNo}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup(`Purchase Order PDF for ${poNo} downloaded!`, 'Task Completed');
+      } else if (typeof showToast === 'function') {
+        showToast(`Purchase Order PDF for ${poNo} downloaded!`);
+      }
+      return;
+    }
+
+    // Trigger PDF generation if missing or failed
+    if (window.NexusApi && window.NexusApi.purchase) {
+      if (typeof showToast === 'function') showToast(`Generating Purchase Order PDF for ${poNo}...`);
+      try {
+        const res = await window.NexusApi.purchase.generatePoPdf({
+          po_id: poDbId,
+          po_no: row?.poNo,
+          pr_no: row?.prNo,
+          vendor_name: row?.supplierName || row?.vendorName
+        });
+        if (res && res.po_id) {
+          row.poDbId = res.po_id;
+          row.pdfStatus = 'Generated';
+          const url = window.NexusApi.purchase.getPoPdfUrl(res.po_id);
+          window.open(url, '_blank');
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup(`Purchase Order PDF for ${poNo} generated & downloaded!`, 'Task Completed');
+          }
+          return;
+        }
+      } catch (e) {
+        console.warn('PO PDF generation failed on demand:', e);
+      }
+    }
+  }
+
+  const invoiceDoc = row?.invoiceDocument || row?.invoice_document || window.purchasePoUploadedDocs?.[activePurchasePoRowId]?.invoiceDoc;
+
+  if (invoiceDoc) {
+    downloadBlobOrDataUrl(invoiceDoc, `Invoice_${poNo}.pdf`);
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`Invoice document for ${poNo} downloaded successfully!`, 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast(`Invoice document for ${poNo} downloaded successfully!`);
+    }
+    return;
+  }
+
+  if (window.NexusApi && window.NexusApi.purchase && activePurchasePoRowId) {
+    try {
+      const res = await window.NexusApi.purchase.getDocument(activePurchasePoRowId, 'invoice');
+      if (res && res.content) {
+        downloadBlobOrDataUrl(res.content, res.filename || `Invoice_${poNo}.pdf`);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup(`Invoice document for ${poNo} downloaded successfully!`, 'Task Completed');
+        }
+        return;
+      }
+    } catch (e) {
+      console.warn('Could not fetch invoice doc from DB:', e);
+    }
+  }
+
+  // Fallback demo download
+  const link = document.createElement('a');
+  link.href = 'sample.pdf';
+  link.download = `Invoice_${poNo}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`Invoice document for ${poNo} downloaded successfully!`, 'Task Completed');
   }
 };
 
@@ -31455,15 +32537,46 @@ window.closePurchasePoTransportViewModal = function() {
   if (inTransitModal) inTransitModal.classList.remove('card-dimmed-blurred');
 };
 
-window.downloadPurchasePoTransportPdf = function() {
+window.downloadPurchasePoTransportPdf = async function() {
+  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+  const poNo = row ? (row.poNo || 'PO') : 'PO';
+  const lrDoc = row?.lrDocuments || row?.lr_documents || window.purchasePoUploadedDocs?.[activePurchasePoRowId]?.lrDoc;
+
+  if (lrDoc) {
+    downloadBlobOrDataUrl(lrDoc, `LR_${poNo}.pdf`);
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`LR document for ${poNo} downloaded successfully!`, 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast(`LR document for ${poNo} downloaded successfully!`);
+    }
+    return;
+  }
+
+  if (window.NexusApi && window.NexusApi.purchase && activePurchasePoRowId) {
+    try {
+      const res = await window.NexusApi.purchase.getDocument(activePurchasePoRowId, 'lr');
+      if (res && res.content) {
+        downloadBlobOrDataUrl(res.content, res.filename || `LR_${poNo}.pdf`);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup(`LR document for ${poNo} downloaded successfully!`, 'Task Completed');
+        }
+        return;
+      }
+    } catch (e) {
+      console.warn('Could not fetch LR doc from DB:', e);
+    }
+  }
+
+  // Fallback demo download
   const link = document.createElement('a');
   link.href = 'sample.pdf';
-  link.download = `Transport_Details_${activePurchasePoRowId || 'PO'}.pdf`;
+  link.download = `LR_${poNo}.pdf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Transport Details PDF downloaded successfully!', 'Task Completed');
+    showSvgSuccessPopup(`LR document for ${poNo} downloaded successfully!`, 'Task Completed');
   }
 };
 
@@ -33527,6 +34640,18 @@ function loadWorklistDataset() {
   const role = getAuthenticatedUserRole();
   if (role === 'Purchase Manager') {
     if (currentWorklistView === 'pr') {
+      try {
+        const storedPr = sessionStorage.getItem('nexus_purchase_pr_store');
+        if (storedPr) {
+          const parsed = JSON.parse(storedPr);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            purchasePrDataStore = parsed;
+          }
+        }
+      } catch (e) {}
+      purchasePrDataStore.forEach(r => {
+        if (!r.status) r.status = 'PR to be submit';
+      });
       currentDataset = purchasePrDataStore.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
       return;
@@ -33540,6 +34665,15 @@ function loadWorklistDataset() {
       return;
     }
     if (currentWorklistView === 'po') {
+      try {
+        const storedPo = sessionStorage.getItem('nexus_purchase_po_store');
+        if (storedPo) {
+          const parsed = JSON.parse(storedPo);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            purchasePoDataStore = parsed;
+          }
+        }
+      } catch (e) {}
       currentDataset = purchasePoDataStore.map(item => ({
         ...item,
         items: item.items ? item.items.map(it => ({ ...it })) : [],
@@ -33619,11 +34753,33 @@ function loadWorklistDataset() {
   }
   if (role === 'Warehouse Manager') {
     if (currentWorklistView === 'pr') {
+      try {
+        const stored = sessionStorage.getItem('nexus_wm_pr_store');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            wmPrDataStore = parsed;
+          }
+        }
+      } catch (e) {}
+      wmPrDataStore.forEach(r => {
+        if (!r.status) r.status = 'PR to be submit';
+        if (r.submittedToPurchase === undefined) r.submittedToPurchase = false;
+      });
       currentDataset = wmPrDataStore.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
       return;
     }
     if (currentWorklistView === 'grn') {
+      try {
+        const stored = sessionStorage.getItem('nexus_wm_grn_store');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            wmGrnDataStore = parsed;
+          }
+        }
+      } catch (e) {}
       currentDataset = wmGrnDataStore.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
       return;
@@ -33983,6 +35139,31 @@ function loadWorklistDataset() {
   } else if (currentWorklistView === 'po_rfq_compare') {
     currentDataset = poRfqCompareItems;
   } else if (currentWorklistView === 'po') {
+    try {
+      const storedMasterPo = sessionStorage.getItem('nexus_master_po_store');
+      if (storedMasterPo) {
+        const parsed = JSON.parse(storedMasterPo);
+        if (Array.isArray(parsed)) {
+          poData = parsed;
+        }
+      }
+    } catch (e) {}
+    if (!poData || poData.length === 0) {
+      try {
+        let poStore = purchasePoDataStore;
+        const storedPo = sessionStorage.getItem('nexus_purchase_po_store');
+        if (storedPo) {
+          const parsed = JSON.parse(storedPo);
+          if (Array.isArray(parsed) && parsed.length > 0) poStore = parsed;
+        }
+        (poStore || []).forEach(p => {
+          const s = (p.status || '').toLowerCase();
+          if (s.includes('approval pending')) {
+            copyPoToMasterWorklist(p);
+          }
+        });
+      } catch (e) {}
+    }
     currentDataset = poData;
   } else {
     currentDataset = paymentData;
@@ -35983,6 +37164,15 @@ function renderWorklistToolbar() {
       `;
       return;
     }
+    if (currentWorklistView === 'rfq') {
+      toolbar.style.display = 'flex';
+      toolbar.style.minHeight = '52px';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;"></div>
+      `;
+      return;
+    }
     toolbar.innerHTML = '';
     toolbar.style.display = 'none';
     return;
@@ -36929,7 +38119,10 @@ function renderWorklistToolbar() {
   } else if (currentWorklistView === 'po') {
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
-      <div class="toolbar-right" style="display: flex; align-items: center; min-width: 44px; min-height: 44px; justify-content: flex-end;">
+      <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; min-width: 44px; min-height: 44px; justify-content: flex-end;">
+        <button type="button" class="toolbar-icon-btn" id="btnMasterPoApprove" data-tooltip="Approve" aria-label="Approve" style="display: ${hasSelected ? 'inline-flex' : 'none'}; cursor: pointer; align-items: center; justify-content: center; background: transparent; border: none; padding: 0;" onclick="handleMasterPoApprove()">
+          <img src="icons/Approve.svg" alt="Approve" class="toolbar-icon-img" width="28" height="28">
+        </button>
         <button type="button" class="toolbar-icon-btn btn-delete-action" id="btnDeleteAction" data-tooltip="Delete Selected" aria-label="Delete" style="visibility: ${hasSelected ? 'visible' : 'hidden'}; pointer-events: ${hasSelected ? 'auto' : 'none'};">
           <img src="icons/Delete.svg" alt="Delete" class="toolbar-icon-img" width="28" height="28">
         </button>
@@ -38070,7 +39263,7 @@ function renderWorklistTableHead() {
         tableEl.style.tableLayout = 'fixed';
         if (containerEl) {
           containerEl.style.overflowX = 'auto';
-          containerEl.style.marginTop = '18px';
+          containerEl.style.marginTop = '0px';
         }
       } else if (currentWorklistView === 'po') {
         tableEl.style.minWidth = '950px';
@@ -38126,6 +39319,9 @@ function renderWorklistTableHead() {
           </th>
           <th colspan="2" class="wm-qty-col-header" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
             <span>Qty</span>
+          </th>
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Status</span>
           </th>
         </tr>
         <tr class="master-view-header">
@@ -38263,6 +39459,10 @@ function renderWorklistTableHead() {
           <!-- 6. Qty: center header spanning 2 columns with white horizontal line under it (1px) -->
           <th colspan="2" class="wm-qty-col-header" style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 6px 10px;">
             <span>Qty</span>
+          </th>
+          <!-- 7. Status: 15ch & center header -->
+          <th rowspan="2" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Status</span>
           </th>
         </tr>
         <tr class="master-view-header">
@@ -40049,6 +41249,7 @@ function renderWorklistTableHead() {
       <tr class="project-payment-header-row1">
         <th rowspan="2" style="width: 180px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Material Description</th>
         <th rowspan="2" style="width: 60px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">Uom</th>
+        <th rowspan="2" style="width: 70px; background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; vertical-align: middle; border: 1px solid #ffffff; text-align: center;">PR Qty</th>
         <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 1 Name</th>
         <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 2 Name</th>
         <th colspan="4" style="background-color: #9e9e9e !important; color: #ffffff !important; font-weight: 700; text-align: center; border: 1px solid #ffffff;">Vendor 3 Name</th>
@@ -40239,6 +41440,10 @@ function applyFiltersAndRender() {
   const accGstr2bDownloadArea = document.getElementById('accGstr2bDownloadArea');
   if (accGstr2bDownloadArea) {
     accGstr2bDownloadArea.style.display = 'none';
+  }
+  const masterPoSubmitArea = document.getElementById('masterPoSubmitArea');
+  if (masterPoSubmitArea) {
+    masterPoSubmitArea.style.display = 'none';
   }
 
   const role = getAuthenticatedUserRole();
@@ -40865,7 +42070,7 @@ function applyFiltersAndRender() {
         worklistTableEl.style.tableLayout = 'fixed';
         if (tableContainer) {
           tableContainer.style.overflowX = 'auto';
-          tableContainer.style.marginTop = '18px';
+          tableContainer.style.marginTop = '0px';
         }
       } else if (currentWorklistView === 'po') {
         worklistTableEl.style.minWidth = '950px';
@@ -40906,7 +42111,7 @@ function applyFiltersAndRender() {
       if (!filteredDataset || filteredDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
               No PR items found. Click + to add product.
             </td>
           </tr>
@@ -40915,8 +42120,10 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      const rowsHtml = filteredDataset.map(row => {
         const isRowSelected = !!row.selected;
+        const { stockQty, calculatedPr } = getPrRowStockAndCalculatedQty(row);
+        const displayPr = (row.isUserEdited && row.prQty !== undefined && row.prQty !== null && row.prQty !== '') ? Number(row.prQty) : calculatedPr;
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
             <!-- 1. Select: 70px, centered circle checkbox with green marker, multiselect -->
@@ -40924,42 +42131,59 @@ function applyFiltersAndRender() {
               <input type="checkbox" class="pr-circle-checkbox purchase-pr-checkbox" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="handlePurchasePrRowSelect('${row.id}', this.checked)">
             </td>
             <!-- 2. Submit By: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.submitBy || '').replace(/"/g, '&quot;')}">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.submitBy || '').replace(/"/g, '&quot;')}">
               ${row.submitBy || ''}
             </td>
             <!-- 3. Submission Date: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
               ${row.submissionDate || ''}
             </td>
             <!-- 4. Material Head: 20ch & left -->
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialHead || '').replace(/"/g, '&quot;')}">
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialHead || '').replace(/"/g, '&quot;')}">
               ${row.materialHead || ''}
             </td>
             <!-- 5. Material Description: 40ch & left -->
-            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">
               ${row.materialDescription || ''}
             </td>
             <!-- 6. Uom: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
               ${row.uom || ''}
             </td>
             <!-- 7. Stock: 10ch & right with .00 -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
-              ${Number(row.stockQty || 0).toFixed(2)}
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-weight: 500;">
+              ${Number(stockQty).toFixed(2)}
             </td>
             <!-- 8. PR: 10ch & right with .00 (editable input in edit mode) -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #64748b; font-weight: 600;">
               ${isPurchasePrEditing && isRowSelected ? `
-                <input type="number" step="0.01" class="form-input-control purchase-pr-editable-input" data-row-id="${row.id}" value="${Number(row.prQty || 0).toFixed(2)}"
+                <input type="number" step="0.01" class="form-input-control purchase-pr-editable-input" data-row-id="${row.id}" value="${Number(displayPr).toFixed(2)}"
                   style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
                   onkeydown="if(event.key === 'Enter') handlePurchasePrEditToggle();">
               ` : `
-                <span>${Number(row.prQty || 0).toFixed(2)}</span>
+                <span>${Number(displayPr).toFixed(2)}</span>
               `}
+            </td>
+            <!-- 9. Status: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.status || 'PR to be submit').replace(/"/g, '&quot;')}">
+              ${row.status || 'PR to be submit'}
             </td>
           </tr>
         `;
       }).join('');
+
+      const hasSelectedPr = filteredDataset.some(r => r.selected);
+      const submitRowPrHtml = hasSelectedPr ? `
+        <tr id="purchasePrTableSubmitRow">
+          <td colspan="9" style="text-align: center !important; padding: 18px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnPurchasePrSubmitBatch" onclick="openPurchaseSelectSupplierModal()" title="Submit PR" style="background: none; border: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsHtml + submitRowPrHtml;
       updatePurchasePrSelectionUI();
       return;
     }
@@ -40977,7 +42201,7 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      const rowsHtml = filteredDataset.map(row => {
         const isRowSelected = !!row.selected;
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
@@ -40990,24 +42214,37 @@ function applyFiltersAndRender() {
               <span class="purchase-rfq-supplier-link" style="color: #0454e4; cursor: pointer;">${row.supplierName || ''}</span>
             </td>
             <!-- 3. Date: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
               ${row.date || ''}
             </td>
-            <!-- 4. RFQ#: 15ch & center, regular black font -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #000000; font-weight: 500;">
+            <!-- 4. RFQ#: 15ch & center, regular font -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
               ${row.rfqNo || ''}
             </td>
             <!-- 5. RFQ Value: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #64748b; font-weight: 500;">
               ${Number(row.rfqValue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
-            <!-- 6. Status: 15ch & center, regular black font (2 categories: RFQ Pending, RFQ Received) -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #000000; font-weight: 500;">
+            <!-- 6. Status: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
               ${row.status || 'RFQ Pending'}
             </td>
           </tr>
         `;
       }).join('');
+
+      const hasSelectedRfq = filteredDataset.some(r => r.selected);
+      const submitRowRfqHtml = hasSelectedRfq ? `
+        <tr id="purchaseRfqTableSubmitRow">
+          <td colspan="6" style="text-align: center !important; padding: 18px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnPurchaseRfqSubmitBatch" onclick="openPurchaseSelectSupplierModal()" title="Select Supplier" style="background: none; border: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsHtml + submitRowRfqHtml;
       updatePurchaseRfqSelectionUI();
       return;
     }
@@ -41119,7 +42356,7 @@ function applyFiltersAndRender() {
   if (currentModule === 'worklist' && role === 'Warehouse Manager') {
     if (currentWorklistView === 'pr') {
       const wmSubmitArea = document.getElementById('wmPrSubmitArea');
-      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+      const hasSelected = currentDataset && currentDataset.some(r => r.selected && !r.submittedToPurchase && (r.status || 'PR to be submit').toLowerCase() === 'pr to be submit');
       if (wmSubmitArea) {
         wmSubmitArea.style.display = hasSelected ? 'flex' : 'none';
       }
@@ -41127,7 +42364,7 @@ function applyFiltersAndRender() {
       if (!currentDataset || currentDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+            <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
               No PR items found. Click + to add product.
             </td>
           </tr>
@@ -41137,41 +42374,49 @@ function applyFiltersAndRender() {
 
       tbody.innerHTML = currentDataset.map(row => {
         const isRowSelected = !!row.selected;
+        const { stockQty, calculatedPr } = getPrRowStockAndCalculatedQty(row);
+        const displayPr = (row.isUserEdited && row.prQty !== undefined && row.prQty !== null && row.prQty !== '') ? Number(row.prQty) : calculatedPr;
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isRowSelected ? '#f0fdf4' : '#ffffff'};">
-            <!-- 1. Select: circle radio / checkbox with green marker, multiselect -->
+            <!-- 1. Select: circle radio / checkbox with green marker; disappears after submit or non-PR to be submit -->
             <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
-              <input type="checkbox" class="pr-circle-checkbox" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="handleWmPrRowSelect('${row.id}', this.checked)">
+              ${(!row.submittedToPurchase && (row.status || 'PR to be submit').toLowerCase() === 'pr to be submit') ? `
+                <input type="checkbox" class="pr-circle-checkbox" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="handleWmPrRowSelect('${row.id}', this.checked)">
+              ` : ''}
             </td>
             <!-- 2. Submission date: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
               ${row.submissionDate || ''}
             </td>
             <!-- 3. Material Head: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
               ${row.materialHead || ''}
             </td>
             <!-- 4. Material Description: 40ch & left -->
-            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">
+            <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.materialDescription || '').replace(/"/g, '&quot;')}">
               ${row.materialDescription || ''}
             </td>
             <!-- 5. Uom: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b;">
               ${row.uom || ''}
             </td>
             <!-- 6a. Stock: 15ch & right with decimal .00 -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
-              ${Number(row.stockQty || 0).toFixed(2)}
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-weight: 500;">
+              ${Number(stockQty).toFixed(2)}
             </td>
             <!-- 6b. PR: 15ch & right with decimal .00 -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #64748b; font-weight: 600;">
               ${isWmPrEditing && isRowSelected ? `
-                <input type="number" step="0.01" class="form-input-control wm-pr-editable-input" data-row-id="${row.id}" value="${Number(row.prQty || 0).toFixed(2)}"
+                <input type="number" step="0.01" class="form-input-control wm-pr-editable-input" data-row-id="${row.id}" value="${Number(displayPr).toFixed(2)}"
                   style="width: 100%; height: 32px; text-align: right; border-radius: 6px; border: 1.5px solid #00cba0; padding: 2px 8px; font-size: 0.92rem; outline: none; background: #ffffff; box-sizing: border-box;"
                   onkeydown="if(event.key === 'Enter') handleWmPrEditToggle();">
               ` : `
-                <span>${Number(row.prQty || 0).toFixed(2)}</span>
+                <span>${Number(displayPr).toFixed(2)}</span>
               `}
+            </td>
+            <!-- 7. Status: 15ch & left content -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.status || 'PR to be submit').replace(/"/g, '&quot;')}">
+              ${row.status || 'PR to be submit'}
             </td>
           </tr>
         `;
@@ -44171,12 +45416,12 @@ function applyFiltersAndRender() {
         }).join('');
       }
     } else if (currentWorklistView === 'po_supplier') {
-      tbody.innerHTML = filteredDataset.map((row, idx) => {
+      const rowsHtml = filteredDataset.map((row, idx) => {
         const isSelected = row.selected;
         return `
           <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id || idx}">
-            <td class="td-select td-center">
-              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="togglePoSupplierRowSelect('${row.id}')" aria-label="Select row"></div>
+            <td class="td-select td-center" onclick="togglePoSupplierRowSelect('${row.id}')" style="cursor: pointer;">
+              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" aria-label="Select row"></div>
             </td>
             <td style="padding: 8px 12px; font-weight: 500; text-align: left !important;">${row.materialDescription || ''}</td>
             <td style="width: 15ch; max-width: 15ch; min-width: 15ch; text-align: right !important; padding: 8px 10px; white-space: nowrap;">${row.uom || ''}</td>
@@ -44198,6 +45443,19 @@ function applyFiltersAndRender() {
           </tr>
         `;
       }).join('');
+
+      const hasSelectedPoSupplier = (filteredDataset || []).some(r => r.selected) || (poSupplierItems || []).some(r => r.selected);
+      const submitRowPoSupplierHtml = hasSelectedPoSupplier ? `
+        <tr id="masterPoSupplierTableSubmitRow">
+          <td colspan="10" style="text-align: center !important; padding: 18px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnMasterPoSupplierSubmit" onclick="handleMasterPoSupplierSubmit()" title="Submit PO" style="background: none; border: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsHtml + submitRowPoSupplierHtml;
     } else if (currentWorklistView === 'po_rfq_compare') {
       tbody.innerHTML = `
         <tr>
@@ -44215,26 +45473,52 @@ function applyFiltersAndRender() {
           <td>&nbsp;</td>
           <td>&nbsp;</td>
           <td>&nbsp;</td>
+          <td>&nbsp;</td>
         </tr>
       `;
     } else if (currentWorklistView === 'po') {
-      tbody.innerHTML = filteredDataset.map(row => {
-        const isSelected = row.selected;
-        return `
-          <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}">
-            <td class="td-select">
-              <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" onclick="selectRow('${row.id}')" aria-label="Select row"></div>
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No PO records found.
             </td>
-            <td>
-              <a href="#" class="req-link td-link-blue" onclick="openWorklistPoSupplier('${row.vendorName}', '${row.poNo}'); return false;">${row.vendorName}</a>
-            </td>
-            <td class="td-center">${row.submissionDate}</td>
-            <td style="color: #000000; font-weight: 400;">${row.submittedBy}</td>
-            <td class="td-center">${row.poNo}</td>
-            <td class="td-amount">${row.poAmount}</td>
           </tr>
         `;
-      }).join('');
+      } else {
+        const rowsHtml = filteredDataset.map(row => {
+          const isSelected = !!row.selected;
+          const isApproved = !!row.approved;
+          return `
+            <tr class="${isSelected ? 'row-selected' : ''}" data-row-id="${row.id}" style="${isApproved ? 'background-color: #dcfce7 !important;' : ''}">
+              <td class="td-select" onclick="selectRow('${row.id}')" style="cursor: pointer;">
+                <div class="radio-select-indicator ${isSelected ? 'selected' : ''}" aria-label="Select row"></div>
+              </td>
+              <td>
+                <a href="#" class="req-link td-link-blue" onclick="openWorklistPoSupplier('${row.vendorName || row.supplierName || ''}', '${row.poNo || ''}'); return false;">${row.vendorName || row.supplierName || ''}</a>
+              </td>
+              <td class="td-center" style="color: #64748b;">${row.submissionDate || row.poDate || ''}</td>
+              <td style="color: #64748b; font-weight: 400;">${row.submittedBy || 'Purchase Team'}</td>
+              <td class="td-center" style="color: #64748b;">${row.poNo || ''}</td>
+              <td class="td-amount" style="color: #64748b;">${row.poAmount || (row.poValue ? `₹${parseFloat(row.poValue).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '₹0.00')}</td>
+            </tr>
+          `;
+        }).join('');
+
+        const hasSelectedPo = filteredDataset.some(r => r.selected);
+        const submitRowPoHtml = hasSelectedPo ? `
+          <tr id="masterPoTableSubmitRow">
+            <td colspan="6" style="text-align: center !important; padding: 18px 0; border: none !important; background: transparent !important;">
+              <button type="button" id="btnMasterPoSubmit" onclick="handleMasterPoSubmit()" title="Submit PO" style="background: none; border: none; padding: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+              </button>
+            </td>
+          </tr>
+        ` : '';
+
+        tbody.innerHTML = rowsHtml + submitRowPoHtml;
+      }
+      updateMasterPoSubmitVisibility();
     } else {
       tbody.innerHTML = filteredDataset.map(row => {
         const isSelected = row.selected;
@@ -51606,13 +52890,308 @@ var sortDataset = window.sortDataset;
 // ==========================================================================
 window.selectRow = function(rowId) {
   currentDataset = currentDataset.map(row => {
-    if (row.id === rowId) {
+    if (String(row.id) === String(rowId)) {
       return { ...row, selected: !row.selected };
     }
     return row;
   });
+  if (currentWorklistView === 'po') {
+    poData = poData.map(p => {
+      if (String(p.id) === String(rowId)) {
+        return { ...p, selected: !p.selected };
+      }
+      return p;
+    });
+  }
   applyFiltersAndRender();
   updateDeleteButtonVisibility();
+  updateMasterPoSubmitVisibility();
+};
+
+function updateMasterPoSubmitVisibility() {
+  const masterPoSubmitArea = document.getElementById('masterPoSubmitArea');
+  if (masterPoSubmitArea) {
+    masterPoSubmitArea.style.display = 'none';
+  }
+}
+window.updateMasterPoSubmitVisibility = updateMasterPoSubmitVisibility;
+
+window.handleMasterPoApprove = function() {
+  let selectedRows = (currentDataset || []).filter(r => r.selected);
+  if (!selectedRows.length) {
+    selectedRows = (poData || []).filter(r => r.selected);
+  }
+  if (!selectedRows.length && (currentDataset || []).length === 1) {
+    selectedRows = [...currentDataset];
+  }
+  if (!selectedRows.length) {
+    if (typeof showToast === 'function') showToast('Please select a PO row to approve');
+    return;
+  }
+  selectedRows.forEach(r => {
+    r.approved = true;
+    const pMatch = (poData || []).find(p => String(p.id) === String(r.id) || (p.poNo && p.poNo === r.poNo));
+    if (pMatch) pMatch.approved = true;
+  });
+  try {
+    sessionStorage.setItem('nexus_master_po_store', JSON.stringify(poData));
+  } catch (e) {}
+  applyFiltersAndRender();
+  updateMasterPoSubmitVisibility();
+  if (typeof showToast === 'function') {
+    showToast(`${selectedRows.length} PO row(s) approved`);
+  }
+};
+
+window.triggerAsyncPoPdfGeneration = function(poRow) {
+  if (!poRow) return;
+  const poId = (!isNaN(poRow.id) && Number(poRow.id) > 0) ? Number(poRow.id) : null;
+  const payload = {
+    po_id: poId,
+    po_no: poRow.poNo || null,
+    pr_no: poRow.prNo || null,
+    vendor_name: poRow.supplierName || poRow.vendorName || null
+  };
+
+  // Prevent duplicate generation for repeated clicks
+  if (poRow.pdfStatus === 'Generating') {
+    return;
+  }
+  poRow.pdfStatus = 'Generating';
+  try {
+    sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+  } catch (e) {}
+
+  if (window.NexusApi && window.NexusApi.purchase && typeof window.NexusApi.purchase.generatePoPdf === 'function') {
+    window.NexusApi.purchase.generatePoPdf(payload)
+      .then(res => {
+        if (res && res.po_id) {
+          poRow.poDbId = res.po_id;
+          poRow.pdfStatus = res.status || 'Generating';
+          pollPoPdfStatus(res.po_id, poRow);
+        }
+      })
+      .catch(err => {
+        console.warn('[PO PDF] Background PDF generation error (non-blocking):', err);
+        poRow.pdfStatus = 'Failed';
+      });
+  }
+};
+
+function pollPoPdfStatus(dbPoId, targetRow, attempts) {
+  const count = attempts || 0;
+  if (!dbPoId || count > 20) return;
+  setTimeout(async () => {
+    try {
+      if (window.NexusApi && window.NexusApi.purchase && typeof window.NexusApi.purchase.getPoPdfStatus === 'function') {
+        const stat = await window.NexusApi.purchase.getPoPdfStatus(dbPoId);
+        if (stat && stat.pdf_status) {
+          targetRow.pdfStatus = stat.pdf_status;
+          if (stat.po_document) targetRow.poDocument = stat.po_document;
+          try {
+            sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+          } catch (e) {}
+          if (stat.pdf_status === 'Generated') {
+            console.log('[PO PDF] PO PDF generation completed for:', targetRow.poNo || dbPoId);
+            return;
+          }
+          if (stat.pdf_status === 'Generating') {
+            pollPoPdfStatus(dbPoId, targetRow, count + 1);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[PO PDF] Status check polling failed:', e);
+    }
+  }, 1500);
+}
+
+window.handleMasterPoSubmit = function() {
+  let rowsToSubmit = (currentDataset || []).filter(r => r.approved);
+  if (!rowsToSubmit.length) {
+    rowsToSubmit = (poData || []).filter(r => r.approved);
+  }
+  if (!rowsToSubmit.length) {
+    rowsToSubmit = (currentDataset || []).filter(r => r.selected);
+  }
+  if (!rowsToSubmit.length) {
+    rowsToSubmit = (poData || []).filter(r => r.selected);
+  }
+  if (!rowsToSubmit.length && (currentDataset || []).length === 1) {
+    rowsToSubmit = [...currentDataset];
+  }
+  if (!rowsToSubmit.length) {
+    if (typeof showToast === 'function') showToast('Please select and approve a PO row before submitting');
+    return;
+  }
+
+  try {
+    const storedPo = sessionStorage.getItem('nexus_purchase_po_store');
+    if (storedPo) {
+      const parsed = JSON.parse(storedPo);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        purchasePoDataStore = parsed;
+      }
+    }
+  } catch (e) {}
+
+  const submittedRowIds = new Set();
+  const submittedPoNos = new Set();
+
+  rowsToSubmit.forEach(selRow => {
+    submittedRowIds.add(String(selRow.id));
+    if (selRow.poNo) submittedPoNos.add(selRow.poNo);
+
+    // Match in purchasePoDataStore and set status to Dispatch Pending
+    let pMatch = (purchasePoDataStore || []).find(p =>
+      (selRow.poNo && p.poNo === selRow.poNo) ||
+      (selRow.id && String(p.id) === String(selRow.id)) ||
+      (selRow.supplierName && p.supplierName === selRow.supplierName) ||
+      (selRow.vendorName && p.supplierName === selRow.vendorName)
+    );
+
+    let targetPoRow = pMatch;
+    if (pMatch) {
+      pMatch.status = 'Dispatch Pending';
+      pMatch.approved = true;
+      if (typeof syncWmPrStatus === 'function') {
+        syncWmPrStatus(pMatch, 'Dispatch Pending');
+      }
+    } else {
+      const newPurchasePo = {
+        ...selRow,
+        status: 'Dispatch Pending',
+        approved: true
+      };
+      purchasePoDataStore.unshift(newPurchasePo);
+      targetPoRow = newPurchasePo;
+      if (typeof syncWmPrStatus === 'function') {
+        syncWmPrStatus(newPurchasePo, 'Dispatch Pending');
+      }
+    }
+
+    // Trigger automatic Purchase Order PDF generation asynchronously in background
+    triggerAsyncPoPdfGeneration(targetPoRow || selRow);
+  });
+
+  // Remove submitted rows from poData so that row shouldn't be available in PO page in Master login
+  poData = (poData || []).filter(p => !submittedRowIds.has(String(p.id)) && (!p.poNo || !submittedPoNos.has(p.poNo)));
+
+  try {
+    sessionStorage.setItem('nexus_master_po_store', JSON.stringify(poData));
+    sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+  } catch (e) {}
+
+  currentDataset = [...poData];
+  filteredDataset = [...poData];
+
+  applyFiltersAndRender();
+  updateMasterPoSubmitVisibility();
+
+  // Task Completion Popup arises
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('PO approved & submitted with Dispatch Pending status!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Task Completed: PO submitted with Dispatch Pending status');
+  }
+};
+
+window.handleMasterPoSupplierSubmit = function() {
+  const hasSelected = (poSupplierItems || []).some(r => r.selected || r.approved);
+  if (!hasSelected) {
+    if (typeof showToast === 'function') showToast('Please select a row before submitting');
+    return;
+  }
+
+  try {
+    const storedPo = sessionStorage.getItem('nexus_purchase_po_store');
+    if (storedPo) {
+      const parsed = JSON.parse(storedPo);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        purchasePoDataStore = parsed;
+      }
+    }
+  } catch (e) {}
+
+  // Find matching PO in poData or purchasePoDataStore
+  let matchingPo = (poData || []).find(p =>
+    (selectedPoNo && p.poNo === selectedPoNo) ||
+    (selectedPoSupplierName && (p.vendorName === selectedPoSupplierName || p.supplierName === selectedPoSupplierName))
+  );
+
+  let pMatch = (purchasePoDataStore || []).find(p =>
+    (selectedPoNo && p.poNo === selectedPoNo) ||
+    (selectedPoSupplierName && (p.supplierName === selectedPoSupplierName || p.vendorName === selectedPoSupplierName)) ||
+    (matchingPo && ((matchingPo.poNo && p.poNo === matchingPo.poNo) || (matchingPo.id && String(p.id) === String(matchingPo.id))))
+  );
+
+  if (pMatch) {
+    pMatch.status = 'Dispatch Pending';
+    pMatch.approved = true;
+    if (typeof syncWmPrStatus === 'function') {
+      syncWmPrStatus(pMatch, 'Dispatch Pending');
+    }
+  } else if (matchingPo) {
+    const newPurchasePo = {
+      ...matchingPo,
+      status: 'Dispatch Pending',
+      approved: true
+    };
+    purchasePoDataStore.unshift(newPurchasePo);
+    if (typeof syncWmPrStatus === 'function') {
+      syncWmPrStatus(newPurchasePo, 'Dispatch Pending');
+    }
+  } else {
+    const newPurchasePo = {
+      id: 'po-' + Date.now(),
+      poNo: selectedPoNo || 'PO-2026-001',
+      supplierName: selectedPoSupplierName || 'Supplier Name',
+      vendorName: selectedPoSupplierName || 'Supplier Name',
+      status: 'Dispatch Pending',
+      approved: true
+    };
+    purchasePoDataStore.unshift(newPurchasePo);
+    if (typeof syncWmPrStatus === 'function') {
+      syncWmPrStatus(newPurchasePo, 'Dispatch Pending');
+    }
+  }
+
+  // Trigger automatic Purchase Order PDF generation asynchronously in background
+  const targetPoRow = pMatch || matchingPo || (purchasePoDataStore && purchasePoDataStore[0]);
+  if (typeof triggerAsyncPoPdfGeneration === 'function') {
+    triggerAsyncPoPdfGeneration(targetPoRow);
+  }
+
+  // Remove submitted PO from poData
+  if (matchingPo) {
+    poData = (poData || []).filter(p => String(p.id) !== String(matchingPo.id) && (!matchingPo.poNo || p.poNo !== matchingPo.poNo));
+  } else if (selectedPoNo || selectedPoSupplierName) {
+    poData = (poData || []).filter(p =>
+      (!selectedPoNo || p.poNo !== selectedPoNo) &&
+      (!selectedPoSupplierName || (p.vendorName !== selectedPoSupplierName && p.supplierName !== selectedPoSupplierName))
+    );
+  }
+
+  try {
+    sessionStorage.setItem('nexus_master_po_store', JSON.stringify(poData));
+    sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+  } catch (e) {}
+
+  // Navigate back to PO page in Master login
+  isPoSupplierEditing = false;
+  currentWorklistView = 'po';
+  activeColumnFilters = {};
+  updateURL();
+  loadWorklistDataset();
+  applyFiltersAndRender();
+  updateMasterPoSubmitVisibility();
+
+  // Task Completion Popup arises
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup('PO approved & submitted with Dispatch Pending status!', 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast('Task Completed: PO submitted with Dispatch Pending status');
+  }
 };
 
 function updateDeleteButtonVisibility() {
@@ -52200,8 +53779,17 @@ document.addEventListener('click', (e) => {
     isProjectPaymentNotesEditing = false;
     const notesModal = document.getElementById('projectPaymentNotesModal');
     if (notesModal) notesModal.style.display = 'none';
-    const overlay = document.getElementById('sideFormOverlay');
-    if (overlay) overlay.style.display = 'none';
+    if (window.previousPoModalId) {
+      const prevModal = document.getElementById(window.previousPoModalId);
+      if (prevModal) {
+        prevModal.style.display = 'flex';
+        prevModal.classList.remove('card-dimmed-blurred');
+      }
+      window.previousPoModalId = null;
+    } else {
+      const overlay = document.getElementById('sideFormOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
   }
   if (e.target.closest('#btnCloseProjectPaymentBankModal')) {
     isProjectPaymentBankEditing = false;
@@ -52662,20 +54250,38 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Open Notes tab from Purchase Detail
-window.openPurchaseNotesTab = function() {
-  const overlay = document.getElementById('sideFormOverlay');
-  if (!overlay) return;
-
-  // Hide purchase modal, show notes modal
-  const allCards = overlay.querySelectorAll('.side-form-card');
-  allCards.forEach(c => c.style.display = 'none');
-
+// Open Notes tab from Purchase Detail / PO Subtabs
+window.openPurchaseNotesTab = function(sourceModalId) {
+  if (sourceModalId) {
+    window.previousPoModalId = sourceModalId;
+  }
   const notesModal = document.getElementById('projectPaymentNotesModal');
   if (notesModal) {
     notesModal.style.display = 'block';
+    notesModal.style.zIndex = '100005';
+    notesModal.style.position = 'fixed';
+    notesModal.style.top = '50%';
+    notesModal.style.left = '50%';
+    notesModal.style.transform = 'translate(-50%, -50%)';
   }
-  overlay.style.display = 'flex';
+  if (typeof renderProjectPaymentNotesTable === 'function') {
+    renderProjectPaymentNotesTable();
+  }
+  if (sourceModalId) {
+    const srcEl = document.getElementById(sourceModalId);
+    if (srcEl) {
+      srcEl.classList.add('card-dimmed-blurred');
+    }
+  } else {
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) {
+      const allCards = overlay.querySelectorAll('.side-form-card');
+      allCards.forEach(c => {
+        if (c.id !== 'projectPaymentNotesModal') c.style.display = 'none';
+      });
+      overlay.style.display = 'flex';
+    }
+  }
 };
 
 // Open Bank tab from Purchase Detail
@@ -55786,11 +57392,32 @@ let poRfqCompareItems = [];
 
 window.openWorklistPoSupplier = function(vendorName, poNo) {
   isPoSupplierEditing = false;
-  poSupplierItems.forEach(item => item.selected = false);
-  currentModule = 'worklist';
-  currentWorklistView = 'po_supplier';
   selectedPoSupplierName = vendorName || 'Supplier Name';
   selectedPoNo = poNo || 'PO #';
+
+  const matchingPo = (poData || []).find(p => (poNo && p.poNo === poNo) || (vendorName && (p.vendorName === vendorName || p.supplierName === vendorName))) ||
+                     (purchasePoDataStore || []).find(p => (poNo && p.poNo === poNo) || (vendorName && p.supplierName === vendorName));
+  if (matchingPo && Array.isArray(matchingPo.items) && matchingPo.items.length > 0) {
+    poSupplierItems = matchingPo.items.map((it, idx) => ({
+      id: it.id || `pos-${idx + 1}`,
+      selected: false,
+      approved: false,
+      materialDescription: it.desc || it.materialDescription || 'Material',
+      uom: it.uom || 'Nos',
+      stock: String(it.stock || '10'),
+      pr: String(it.qty || it.pr || '1'),
+      existing: String(it.rate || it.existing || '0.00'),
+      newRate: String(it.rate || it.newRate || '0.00'),
+      basic: String(it.basic || '0.00'),
+      gst: String((parseFloat(it.cgst || 0) + parseFloat(it.sgst || 0)) || it.gst || '0.00'),
+      total: String(it.total || '0.00')
+    }));
+  } else {
+    poSupplierItems.forEach(item => { item.selected = false; });
+  }
+
+  currentModule = 'worklist';
+  currentWorklistView = 'po_supplier';
   activeColumnFilters = {};
   updateURL();
   renderApp();
@@ -55808,7 +57435,14 @@ function updatePoRfqCompareTotals() {
 
   rows.forEach(r => {
     const cells = r.querySelectorAll('td');
-    if (cells.length >= 14) {
+    if (cells.length >= 15) {
+      const v1 = parseFloat(cells[6].textContent.replace(/,/g, '').trim()) || 0;
+      const v2 = parseFloat(cells[10].textContent.replace(/,/g, '').trim()) || 0;
+      const v3 = parseFloat(cells[14].textContent.replace(/,/g, '').trim()) || 0;
+      v1Total += v1;
+      v2Total += v2;
+      v3Total += v3;
+    } else if (cells.length >= 14) {
       const v1 = parseFloat(cells[5].textContent.replace(/,/g, '').trim()) || 0;
       const v2 = parseFloat(cells[9].textContent.replace(/,/g, '').trim()) || 0;
       const v3 = parseFloat(cells[13].textContent.replace(/,/g, '').trim()) || 0;
@@ -55886,6 +57520,13 @@ window.approveSelectedPoSupplierRows = function() {
   selectedRows.forEach(item => {
     item.approved = true;
   });
+  const matchingPo = (poData || []).find(p => (selectedPoNo && p.poNo === selectedPoNo) || (selectedPoSupplierName && (p.vendorName === selectedPoSupplierName || p.supplierName === selectedPoSupplierName)));
+  if (matchingPo) {
+    matchingPo.approved = true;
+    try {
+      sessionStorage.setItem('nexus_master_po_store', JSON.stringify(poData));
+    } catch (e) {}
+  }
   applyFiltersAndRender();
   showToast(`${selectedRows.length} row(s) approved & highlighted`);
 };

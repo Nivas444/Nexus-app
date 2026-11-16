@@ -128,7 +128,7 @@
     if (inpGstType) {
       inpGstType.disabled = isReadOnly || !isGstOn;
       inpGstType.style.background = (isReadOnly || !isGstOn) ? '#f8fafc' : '#ffffff';
-      inpGstType.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#1e293b';
+      inpGstType.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#64748b';
       inpGstType.style.cursor = (isReadOnly || !isGstOn) ? 'not-allowed' : 'pointer';
       inpGstType.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
     }
@@ -137,7 +137,7 @@
       inpGstNumber.readOnly = isReadOnly || !isGstOn;
       inpGstNumber.disabled = isReadOnly || !isGstOn;
       inpGstNumber.style.background = (isReadOnly || !isGstOn) ? '#f8fafc' : '#ffffff';
-      inpGstNumber.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#1e293b';
+      inpGstNumber.style.color = (isReadOnly || !isGstOn) ? '#64748b' : '#64748b';
       inpGstNumber.style.cursor = (isReadOnly || !isGstOn) ? 'not-allowed' : 'text';
       inpGstNumber.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
     }
@@ -148,7 +148,7 @@
       inpAddress.readOnly = isReadOnly;
       inpAddress.disabled = isReadOnly;
       inpAddress.style.background = isReadOnly ? '#f8fafc' : '#ffffff';
-      inpAddress.style.color = isReadOnly ? '#64748b' : '#1e293b';
+      inpAddress.style.color = isReadOnly ? '#64748b' : '#64748b';
       inpAddress.style.cursor = isReadOnly ? 'not-allowed' : 'text';
       inpAddress.style.borderColor = isReadOnly ? '#cbd5e1' : '#00cba0';
     }
@@ -194,7 +194,7 @@
     if (inpGstType) {
       inpGstType.disabled = !isTelecomDetailsEditing || !isGstOn;
       inpGstType.style.background = (!isTelecomDetailsEditing || !isGstOn) ? '#f8fafc' : '#ffffff';
-      inpGstType.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#1e293b';
+      inpGstType.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#64748b';
       inpGstType.style.cursor = (!isTelecomDetailsEditing || !isGstOn) ? 'not-allowed' : 'pointer';
       inpGstType.style.borderColor = !isTelecomDetailsEditing ? '#cbd5e1' : '#00cba0';
     }
@@ -203,7 +203,7 @@
       inpGstNumber.readOnly = !isTelecomDetailsEditing || !isGstOn;
       inpGstNumber.disabled = !isTelecomDetailsEditing || !isGstOn;
       inpGstNumber.style.background = (!isTelecomDetailsEditing || !isGstOn) ? '#f8fafc' : '#ffffff';
-      inpGstNumber.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#1e293b';
+      inpGstNumber.style.color = (!isTelecomDetailsEditing || !isGstOn) ? '#64748b' : '#64748b';
       inpGstNumber.style.cursor = (!isTelecomDetailsEditing || !isGstOn) ? 'not-allowed' : 'text';
       inpGstNumber.style.borderColor = !isTelecomDetailsEditing ? '#cbd5e1' : '#00cba0';
     }
@@ -462,9 +462,9 @@
         const isInactive = (row.status || '').toLowerCase().includes('in');
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.officeName || '').replace(/"/g, '&quot;')}">${row.officeName || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.latitude || ''}</td>
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.longitude || ''}</td>
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b; font-weight: 500;" title="${(row.officeName || '').replace(/"/g, '&quot;')}">${row.officeName || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #64748b; font-family: monospace;">${row.latitude || ''}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #64748b; font-family: monospace;">${row.longitude || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>
@@ -700,9 +700,9 @@
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
             <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${(row.name || '').replace(/"/g, '&quot;')}">${row.name || ''}</td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-family: monospace;">${row.contact || ''}</td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b; font-weight: 500;" title="${(row.designation || '').replace(/"/g, '&quot;')}">${row.designation || ''}</td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #64748b; font-family: monospace;">${row.contact || ''}</td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b;" title="${(row.email || '').replace(/"/g, '&quot;')}">${row.email || ''}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
               <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${row.status || 'Active'}</span>
             </td>

@@ -294,6 +294,8 @@ function initFormSubmission() {
             window.location.href = 'home.html?module=worklist&view=attendance';
           } else if (userProfile.role === 'Accounts Manager') {
             window.location.href = 'home.html?module=worklist&view=payment';
+          } else if (userProfile.role === 'MIS' || userProfile.role === 'MIS Manager') {
+            window.location.href = 'home.html?module=worklist&view=ptw';
           } else {
             window.location.href = 'home.html?module=worklist&view=payment';
           }

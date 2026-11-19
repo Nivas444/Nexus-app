@@ -15,6 +15,7 @@ Generates official Delivery Challan (Not for Sale) and statutory E-Way Bill docu
 import io
 import os
 import re
+import base64
 import tempfile
 import logging
 from decimal import Decimal
@@ -55,6 +56,47 @@ logger = logging.getLogger(__name__)
 
 # Global in-memory cache for generated Delivery Challan PDFs
 _DC_PDF_CACHE: Dict[str, bytes] = {}
+
+def _render_pdf_to_base64_pngs(pdf_bytes: bytes, dpi: int = 144) -> List[str]:
+    """
+    Renders PDF bytes into a list of base64 data URLs ('data:image/png;base64,...').
+    Supports pypdfium2 (preferred) and fitz (PyMuPDF) with graceful fallback.
+    """
+    if not pdf_bytes:
+        return []
+
+    # 1. Try pypdfium2
+    try:
+        import pypdfium2 as pdfium
+        pdf = pdfium.PdfDocument(pdf_bytes)
+        scale = max(1.0, dpi / 72.0)
+        pages_b64 = []
+        for page in pdf:
+            pil_image = page.render(scale=scale).to_pil()
+            buf = io.BytesIO()
+            pil_image.save(buf, format="PNG")
+            b64_str = base64.b64encode(buf.getvalue()).decode("ascii")
+            pages_b64.append(f"data:image/png;base64,{b64_str}")
+        if pages_b64:
+            return pages_b64
+    except Exception as e_pdfium:
+        logger.debug(f"pypdfium2 rendering fallback: {e_pdfium}")
+
+    # 2. Try fitz (PyMuPDF)
+    try:
+        import fitz
+        doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+        pages_b64 = []
+        for page in doc:
+            pix = page.get_pixmap(dpi=dpi)
+            b64_str = base64.b64encode(pix.tobytes("png")).decode("ascii")
+            pages_b64.append(f"data:image/png;base64,{b64_str}")
+        if pages_b64:
+            return pages_b64
+    except Exception as e_fitz:
+        logger.warning(f"fitz rendering fallback: {e_fitz}")
+
+    return []
 
 # Register standard Unicode fonts
 FONT_NORMAL = "Helvetica"
@@ -521,11 +563,11 @@ class DeliveryChallanPdfService:
 
         doc_left = Paragraph(
             f"<b>Document No :</b> {doc_no}<br/><br/>"
-            f"<b>Transport Name :</b> {trans_name}",
+            f"<b>Document Date :</b> {doc_date}",
             style_txt
         )
         doc_right = Paragraph(
-            f"<b>Document Date :</b> {doc_date}<br/><br/>"
+            f"<b>Transport Name :</b> {trans_name}<br/><br/>"
             f"<b>Vehicle No :</b> {veh_no}",
             style_txt
         )
@@ -1272,13 +1314,22 @@ class DeliveryChallanPdfService:
         if not regenerate:
             if doc_no in _DC_PDF_CACHE or os.path.exists(target_path):
                 logger.info(f"Returning cached PDF for document {doc_no}")
+                cached_bytes = _DC_PDF_CACHE.get(doc_no) or _DC_PDF_CACHE.get(min_id)
+                if not cached_bytes and os.path.exists(target_path):
+                    try:
+                        with open(target_path, "rb") as f_in:
+                            cached_bytes = f_in.read()
+                    except Exception:
+                        cached_bytes = None
+                page_images = _render_pdf_to_base64_pngs(cached_bytes, dpi=144)
                 return {
                     "success": True,
                     "cached": True,
                     "document_no": doc_no,
                     "eway_included": has_eway,
                     "pdf_url": f"assets/generated_pdfs/{pdf_filename}",
-                    "download_url": f"/api/v1/purchase/min/{min_id}/delivery-challan-pdf"
+                    "download_url": f"/api/v1/purchase/min/{min_id}/delivery-challan-pdf",
+                    "pages": page_images
                 }
 
         # 1. Generate Delivery Challan PDF bytes
@@ -1326,8 +1377,12 @@ class DeliveryChallanPdfService:
 
             _DC_PDF_CACHE[doc_no] = dc_bytes
             _DC_PDF_CACHE[min_id] = dc_bytes
+            final_bytes = dc_bytes
 
             logger.info(f"Successfully generated Delivery Challan PDF at {target_path}")
+
+        # Render high-resolution page images for seamless HTML5 preview
+        page_images = _render_pdf_to_base64_pngs(final_bytes, dpi=144)
 
         return {
             "success": True,
@@ -1335,5 +1390,6 @@ class DeliveryChallanPdfService:
             "document_no": doc_no,
             "eway_included": has_eway,
             "pdf_url": f"assets/generated_pdfs/{pdf_filename}",
-            "download_url": f"/api/v1/purchase/min/{min_id}/delivery-challan-pdf"
+            "download_url": f"/api/v1/purchase/min/{min_id}/delivery-challan-pdf",
+            "pages": page_images
         }

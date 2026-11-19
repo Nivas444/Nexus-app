@@ -6053,50 +6053,56 @@
             <div id="containerPmTaskPtwGroup" style="display: flex; flex-direction: column; gap: 14px;">
               
               <!-- E-PTW -->
-              <div class="pm-field-row" id="rowPmTaskEPtw" style="position: relative; display: flex; align-items: center; min-height: 38px;">
+              <div class="pm-field-row" id="rowPmTaskEPtw" style="display: flex; align-items: center; min-height: 38px; gap: 14px;">
                 <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left; margin: 0; flex-shrink: 0;">E-PTW</label>
-                <div id="wrapPmTaskEPtwToggle" style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.25s ease;">
-                  <label class="pm-task-toggle-switch">
-                    <input type="checkbox" id="chkPmTaskEPtw" onchange="togglePmTaskPtwDropdown('E', this.checked)">
-                    <span class="pm-task-toggle-slider"></span>
-                  </label>
-                </div>
-                <div id="rowPmTaskEPtwDropdown" style="display: none; position: absolute; left: 200px; right: 0; z-index: 1;">
-                  <select id="selPmTaskEPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
-                    <!-- Options populated from indus_esh -->
-                  </select>
+                <div id="wrapPmTaskEPtwContainer" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px;">
+                  <div id="wrapPmTaskEPtwToggle" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <label class="pm-task-toggle-switch">
+                      <input type="checkbox" id="chkPmTaskEPtw" onchange="togglePmTaskPtwDropdown('E', this.checked)">
+                      <span class="pm-task-toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div id="rowPmTaskEPtwDropdown" style="display: none; flex: 1;">
+                    <select id="selPmTaskEPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                      <!-- Options populated from indus_esh -->
+                    </select>
+                  </div>
                 </div>
               </div>
 
               <!-- H-PTW -->
-              <div class="pm-field-row" id="rowPmTaskHPtw" style="position: relative; display: flex; align-items: center; min-height: 38px;">
+              <div class="pm-field-row" id="rowPmTaskHPtw" style="display: flex; align-items: center; min-height: 38px; gap: 14px;">
                 <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left; margin: 0; flex-shrink: 0;">H-PTW</label>
-                <div id="wrapPmTaskHPtwToggle" style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.25s ease;">
-                  <label class="pm-task-toggle-switch">
-                    <input type="checkbox" id="chkPmTaskHPtw" onchange="togglePmTaskPtwDropdown('H', this.checked)">
-                    <span class="pm-task-toggle-slider"></span>
-                  </label>
-                </div>
-                <div id="rowPmTaskHPtwDropdown" style="display: none; position: absolute; left: 200px; right: 0; z-index: 1;">
-                  <select id="selPmTaskHPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
-                    <!-- Options populated from indus_esh -->
-                  </select>
+                <div id="wrapPmTaskHPtwContainer" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px;">
+                  <div id="wrapPmTaskHPtwToggle" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <label class="pm-task-toggle-switch">
+                      <input type="checkbox" id="chkPmTaskHPtw" onchange="togglePmTaskPtwDropdown('H', this.checked)">
+                      <span class="pm-task-toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div id="rowPmTaskHPtwDropdown" style="display: none; flex: 1;">
+                    <select id="selPmTaskHPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                      <!-- Options populated from indus_esh -->
+                    </select>
+                  </div>
                 </div>
               </div>
 
               <!-- M-PTW -->
-              <div class="pm-field-row" id="rowPmTaskMPtw" style="position: relative; display: flex; align-items: center; min-height: 38px;">
+              <div class="pm-field-row" id="rowPmTaskMPtw" style="display: flex; align-items: center; min-height: 38px; gap: 14px;">
                 <label style="font-weight: 600; color: #334155; font-size: 0.92rem; width: 140px; min-width: 140px; text-align: left; margin: 0; flex-shrink: 0;">M-PTW</label>
-                <div id="wrapPmTaskMPtwToggle" style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; z-index: 2; transition: all 0.25s ease;">
-                  <label class="pm-task-toggle-switch">
-                    <input type="checkbox" id="chkPmTaskMPtw" onchange="togglePmTaskPtwDropdown('M', this.checked)">
-                    <span class="pm-task-toggle-slider"></span>
-                  </label>
-                </div>
-                <div id="rowPmTaskMPtwDropdown" style="display: none; position: absolute; left: 200px; right: 0; z-index: 1;">
-                  <select id="selPmTaskMPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
-                    <!-- Options populated from indus_esh -->
-                  </select>
+                <div id="wrapPmTaskMPtwContainer" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px;">
+                  <div id="wrapPmTaskMPtwToggle" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <label class="pm-task-toggle-switch">
+                      <input type="checkbox" id="chkPmTaskMPtw" onchange="togglePmTaskPtwDropdown('M', this.checked)">
+                      <span class="pm-task-toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div id="rowPmTaskMPtwDropdown" style="display: none; flex: 1;">
+                    <select id="selPmTaskMPtw" class="form-input-control" style="width: 100%; height: 38px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 42px 0 14px; font-size: 0.92rem; background: #ffffff url('icons/dropdown-arrow.svg') no-repeat right 16px center / 16px auto; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; color: #0f172a;">
+                      <!-- Options populated from indus_esh -->
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -17252,9 +17258,12 @@
     </div>
 
     <!-- Viewer Body -->
-    <div style="flex: 1 1 auto; height: calc(100% - 52px); min-height: 0; position: relative; background: #1e293b; padding: 0; display: block; overflow: hidden; box-sizing: border-box;">
+    <div id="wrapNexusDcViewerBody" style="flex: 1 1 auto; height: calc(100% - 52px); min-height: 0; position: relative; background: #525659; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; overflow-x: auto; box-sizing: border-box;">
+      <div id="nexusDcPagesContainer" style="display: flex; flex-direction: column; align-items: center; gap: 24px; transition: transform 0.15s ease; transform-origin: top center; width: 100%; max-width: 900px;">
+        <!-- High-res rendered pages inserted dynamically -->
+      </div>
       <iframe id="iframeNexusDcPdfPreview" src="about:blank"
-        style="width: 100%; height: 100%; min-height: 100%; border: none; background: #525659; display: block;"
+        style="display: none; width: 100%; height: 100%; min-height: 100%; border: none; background: #525659;"
         title="Delivery Challan and E-Way Bill Preview">
       </iframe>
     </div>

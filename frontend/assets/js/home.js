@@ -18259,9 +18259,11 @@ window.openPmTaskModal = function(selectedMembers) {
     if (chkVisit) chkVisit.checked = false;
 
     ['E', 'H', 'M'].forEach(type => {
+      const container = document.getElementById(`wrapPmTask${type}PtwContainer`);
       const chk = document.getElementById(`chkPmTask${type}Ptw`);
       const row = document.getElementById(`rowPmTask${type}PtwDropdown`);
       const sel = document.getElementById(`selPmTask${type}Ptw`);
+      if (container) container.style.justifyContent = 'center';
       if (chk) chk.checked = false;
       if (row) row.style.display = 'none';
       if (sel) sel.innerHTML = '';
@@ -18338,15 +18340,19 @@ window.getDprPtwOptions = async function(type) {
 };
 
 window.togglePmTaskPtwDropdown = async function(type, isEnabled) {
+  const container = document.getElementById(`wrapPmTask${type}PtwContainer`);
   const row = document.getElementById(`rowPmTask${type}PtwDropdown`);
   const sel = document.getElementById(`selPmTask${type}Ptw`);
   if (!row || !sel) return;
 
   if (isEnabled) {
+    if (container) container.style.justifyContent = 'flex-start';
     row.style.display = 'block';
+    row.style.flex = '1';
     const options = await window.getDprPtwOptions(type);
     sel.innerHTML = options.map((opt, idx) => `<option value="${opt}" ${idx === 0 ? 'selected' : ''}>${opt}</option>`).join('');
   } else {
+    if (container) container.style.justifyContent = 'center';
     row.style.display = 'none';
     sel.innerHTML = '';
   }
@@ -27156,23 +27162,51 @@ window.handleWmGrnTransportPdfUpload = function(event) {
 
 let currentNexusDcZoom = 1.0;
 let currentNexusDcDownloadUrl = '';
+let currentNexusDcPages = [];
 let currentNexusDcDocNo = '';
-
 let currentNexusDcBlobUrl = null;
 
-window.openNexusDcPdfPreview = function(pdfUrlOrBlobUrl, downloadUrl, docNo) {
+window.openNexusDcPdfPreview = function(pagesOrUrl, downloadUrl, docNo) {
   currentNexusDcZoom = 1.0;
-  currentNexusDcDownloadUrl = downloadUrl || pdfUrlOrBlobUrl;
+  currentNexusDcDownloadUrl = downloadUrl || '';
   currentNexusDcDocNo = docNo || 'Delivery_Challan';
-
-  const iframe = document.getElementById('iframeNexusDcPdfPreview');
-  if (iframe) {
-    const cleanUrl = String(pdfUrlOrBlobUrl).split('#')[0];
-    iframe.src = `${cleanUrl}#zoom=100&toolbar=1&navpanes=1`;
-  }
 
   const zoomLbl = document.getElementById('lblNexusDcZoomLevel');
   if (zoomLbl) zoomLbl.textContent = '100%';
+
+  const container = document.getElementById('nexusDcPagesContainer');
+  const iframe = document.getElementById('iframeNexusDcPdfPreview');
+
+  if (Array.isArray(pagesOrUrl) && pagesOrUrl.length > 0) {
+    currentNexusDcPages = pagesOrUrl;
+    if (iframe) {
+      iframe.style.display = 'none';
+      iframe.src = 'about:blank';
+    }
+    if (container) {
+      container.style.display = 'flex';
+      container.style.transform = 'scale(1)';
+      container.innerHTML = pagesOrUrl.map((pgSrc, idx) => `
+        <div class="nexus-dc-page-wrap" style="width: 100%; display: flex; justify-content: center;">
+          <img src="${pgSrc}" alt="Delivery Challan Page ${idx + 1}"
+            style="width: 100%; max-width: 860px; height: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.5); border-radius: 4px; background: #ffffff; display: block;" />
+        </div>
+      `).join('');
+    }
+  } else {
+    currentNexusDcPages = [];
+    if (container) {
+      container.style.display = 'none';
+      container.innerHTML = '';
+    }
+    if (iframe) {
+      iframe.style.display = 'block';
+      const cleanUrl = String(pagesOrUrl || '').split('#')[0];
+      if (cleanUrl) {
+        iframe.src = `${cleanUrl}#zoom=100&toolbar=1&navpanes=1`;
+      }
+    }
+  }
 
   // Dim the Transport Details modal behind the backdrop
   const transModal = document.getElementById('wmGrnTransportModal');
@@ -27198,6 +27232,9 @@ window.closeNexusDcPdfPreview = function() {
   if (modal) modal.style.display = 'none';
   const iframe = document.getElementById('iframeNexusDcPdfPreview');
   if (iframe) iframe.src = 'about:blank';
+  const container = document.getElementById('nexusDcPagesContainer');
+  if (container) container.innerHTML = '';
+  currentNexusDcPages = [];
 
   // Restore the Transport Details modal
   const transModal = document.getElementById('wmGrnTransportModal');
@@ -27210,6 +27247,12 @@ window.adjustNexusDcZoom = function(delta) {
   const zoomLbl = document.getElementById('lblNexusDcZoomLevel');
   if (zoomLbl) zoomLbl.textContent = `${zoomPct}%`;
 
+  const container = document.getElementById('nexusDcPagesContainer');
+  if (container && currentNexusDcPages.length > 0) {
+    container.style.transform = `scale(${currentNexusDcZoom})`;
+    return;
+  }
+
   const iframe = document.getElementById('iframeNexusDcPdfPreview');
   if (iframe && iframe.src) {
     const baseSrc = iframe.src.split('#')[0];
@@ -27218,6 +27261,38 @@ window.adjustNexusDcZoom = function(delta) {
 };
 
 window.printNexusDcPdf = function() {
+  if (currentNexusDcPages && currentNexusDcPages.length > 0) {
+    const printWindow = window.open('', '_blank', 'width=900,height=800');
+    if (printWindow) {
+      const imgsHtml = currentNexusDcPages.map(src => `<img src="${src}" style="width: 100%; max-width: 100%; page-break-after: always; display: block; margin: 0 auto 20px;" />`).join('');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Delivery Challan - ${currentNexusDcDocNo}</title>
+          <style>
+            @page { size: auto; margin: 10mm; }
+            body { margin: 0; padding: 0; background: #fff; }
+            img { display: block; width: 100%; }
+          </style>
+        </head>
+        <body>
+          ${imgsHtml}
+          <script>
+            window.onload = function() {
+              window.focus();
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      return;
+    }
+  }
+
   const iframe = document.getElementById('iframeNexusDcPdfPreview');
   if (iframe && iframe.contentWindow) {
     try {
@@ -27228,7 +27303,7 @@ window.printNexusDcPdf = function() {
       console.warn('Iframe print access restricted, opening print window:', e);
     }
   }
-  const targetUrl = currentNexusDcBlobUrl || (iframe && iframe.src ? iframe.src.split('#')[0] : '');
+  const targetUrl = currentNexusDcBlobUrl || currentNexusDcDownloadUrl || (iframe && iframe.src ? iframe.src.split('#')[0] : '');
   if (targetUrl) {
     const printWin = window.open(targetUrl, '_blank');
     if (printWin) {
@@ -27372,22 +27447,27 @@ window.handleWmMinTransportPrint = async function(e) {
     row.dcDownloadUrl = fullDownloadUrl;
     row.dcDocNo = docNo;
 
-    // Fetch PDF blob for guaranteed same-origin rendering in iframe
-    try {
-      const streamRes = await fetch(fullPreviewUrl);
-      if (streamRes.ok) {
-        const pdfBlob = await streamRes.blob();
-        if (currentNexusDcBlobUrl) {
-          try { URL.revokeObjectURL(currentNexusDcBlobUrl); } catch (e) {}
+    // If backend returned pre-rendered high-res page images, use them directly for 100% reliable preview!
+    if (resData.pages && Array.isArray(resData.pages) && resData.pages.length > 0) {
+      openNexusDcPdfPreview(resData.pages, fullDownloadUrl, docNo);
+    } else {
+      // Fetch PDF blob for guaranteed same-origin rendering in iframe
+      try {
+        const streamRes = await fetch(fullPreviewUrl);
+        if (streamRes.ok) {
+          const pdfBlob = await streamRes.blob();
+          if (currentNexusDcBlobUrl) {
+            try { URL.revokeObjectURL(currentNexusDcBlobUrl); } catch (e) {}
+          }
+          currentNexusDcBlobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
+          openNexusDcPdfPreview(currentNexusDcBlobUrl, fullDownloadUrl, docNo);
+        } else {
+          openNexusDcPdfPreview(fullPreviewUrl, fullDownloadUrl, docNo);
         }
-        currentNexusDcBlobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
-        openNexusDcPdfPreview(currentNexusDcBlobUrl, fullDownloadUrl, docNo);
-      } else {
+      } catch (e) {
+        console.warn('Direct blob preview failed, falling back to URL preview:', e);
         openNexusDcPdfPreview(fullPreviewUrl, fullDownloadUrl, docNo);
       }
-    } catch (e) {
-      console.warn('Direct blob preview failed, falling back to URL preview:', e);
-      openNexusDcPdfPreview(fullPreviewUrl, fullDownloadUrl, docNo);
     }
 
   } catch (err) {
@@ -27428,7 +27508,7 @@ window.handleWmMinTransportTypeChange = function(type) {
 };
 
 window.saveWmTransportDetails = function() {
-  if (['mtn', 'stn', 'srn'].includes(currentWorklistView) || (typeof activeWmTransferView !== 'undefined' && activeWmTransferView)) {
+  if (['mtn', 'stn', 'srn'].includes(currentWorklistView)) {
     const rowId = (typeof activeWmTransferRowId !== 'undefined') ? activeWmTransferRowId : null;
     const storeMap = {
       mtn: typeof wmMtnDataStore !== 'undefined' ? wmMtnDataStore : [],
@@ -29412,7 +29492,10 @@ window.submitWmMinSiteModal = function() {
 };
 
 window.openWmMinTransportModal = function(transferRow) {
-  const row = transferRow || (typeof activeWmTransferRowId !== 'undefined' && activeWmTransferRowId && currentDataset && currentDataset.find(r => r.id === activeWmTransferRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted)) || wmMinDataStore.find(r => r.id === activeWmMinRowId) || wmMinDataStore[0];
+  activeWmTransferView = null;
+  activeWmTransferRowId = null;
+  const row = transferRow || (currentDataset && currentDataset.find(r => r.selected)) || (currentDataset && currentDataset.find(r => r.isHighlighted)) || wmMinDataStore.find(r => r.id === activeWmMinRowId) || wmMinDataStore[0];
+  if (row) activeWmMinRowId = row.id;
 
   // Show MIN fields, hide GRN, MRN, Supply fields
   const grnFields = document.getElementById('wmGrnTransportFields');
@@ -29424,13 +29507,17 @@ window.openWmMinTransportModal = function(transferRow) {
   if (mrnFields) mrnFields.style.display = 'none';
   if (supplyFields) supplyFields.style.display = 'none';
 
-  // Toggle Header Icons: Hide PDF, Printer hidden until user clicks Submit icon
+  // Toggle Header Icons: Hide PDF, Printer visible if already saved or ready to dispatch
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
   const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
   if (lblPdf) lblPdf.style.display = 'none';
   if (btnPdfDownload) btnPdfDownload.style.display = 'none';
-  if (btnPrint) btnPrint.style.display = 'none';
+  const isAlreadySaved = Boolean(row && row.transport && (row.transport.isSaved || row.transport.submitted || row.status === 'Ready to Dispatch'));
+  if (btnPrint) {
+    btnPrint.style.display = isAlreadySaved ? 'inline-flex' : 'none';
+    btnPrint.disabled = false;
+  }
 
   const t = (row && row.transport) ? row.transport : {
     transportType: 'Rental',

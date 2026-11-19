@@ -34,6 +34,10 @@ from app.models.commercial_project import (
     IndusProjectInfra, DprRecord, EmailApproval, ProjectMaterial
 )
 from app.models.purchase import PurchaseRequest, Purchase
+from app.models.account_payment import AccountPayment
+from app.models.account_purchase import AccountPurchase
+from app.models.admin_transport import AdminTransport
+from app.models.admin_ewaybill import AdminEWayBill
 
 __all__ = [
     "CompanyExpense",
@@ -74,5 +78,9 @@ __all__ = [
     "EmailApproval",
     "ProjectMaterial",
     "PurchaseRequest",
-    "Purchase"
+    "Purchase",
+    "AccountPayment",
+    "AccountPurchase",
+    "AdminTransport",
+    "AdminEWayBill"
 ]

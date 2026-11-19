@@ -4,7 +4,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from fastapi import HTTPException, status
 
+from app.db.session import AccountsSessionLocal
 from app.models.purchase import PurchaseRequest, Purchase
+from app.models.account_payment import AccountPayment
+from app.models.account_purchase import AccountPurchase
+from app.models.admin_transport import AdminTransport
 from app.models.vendor import VendorMaster
 from app.schemas.purchase import (
     PurchaseRequestCreate,
@@ -14,7 +18,10 @@ from app.schemas.purchase import (
     PurchaseUpdate,
     PurchaseTermsRequest,
     PurchaseTransportRequest,
-    PurchaseUploadDocumentsRequest
+    PurchaseUploadDocumentsRequest,
+    TransportPaymentRequest,
+    MinTransportSubmitRequest,
+    AccountPurchaseCreate
 )
 
 class PurchaseService:
@@ -334,6 +341,9 @@ class PurchaseService:
         elif doc_type.lower() in ["lr", "lrdoc", "lr_documents"]:
             doc_content = po.lr_documents
             filename = f"LR_{po.po_no or po.id}.pdf"
+        elif doc_type.lower() in ["po", "podoc", "po_document"]:
+            doc_content = po.po_document
+            filename = f"Purchase_Order_{po.po_no or po.id}.pdf"
         else:
             raise HTTPException(status_code=400, detail=f"Invalid document type: {doc_type}")
 
@@ -341,3 +351,199 @@ class PurchaseService:
             # Fallback placeholder PDF data URL
             doc_content = "data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwgL0xlbmd0aCA0OSAvRmlsdGVyIC9GbGF0ZURlY29kZSA+PgpzdHJlYW0KeJwrVAgwsFBIVMhIzMsvVUjOz1NQCEssUSguKUgsKklNysxLT1UIzUstS80r0VAvAQC9cw9KCmVuZHN0cmVhbQplbmRvYmoK"
         return {"filename": filename, "content": doc_content, "po_no": po.po_no}
+
+    # -------------------------------------------------------------------------
+    # ACCOUNTS DB INTEGRATION (Payment & Purchase Tables)
+    # -------------------------------------------------------------------------
+    def save_transport_payment(self, data: TransportPaymentRequest) -> Dict[str, Any]:
+        """
+        Stores transport payment submission from WH GRN into PostgreSQL `nexus_accounts.payment`.
+        Sets expense_type = 'Transport Charges' and stores financial and bank details.
+        """
+        adb = AccountsSessionLocal()
+        try:
+            now_date = date.today()
+            safe_po = (data.po_no or "001").replace("/", "-")
+            vch_no = f"VCH-TRN-{now_date.strftime('%Y%m%d')}-{safe_po}"
+            payment_record = AccountPayment(
+                company_name=data.company_name or "Nexus",
+                voucher_number=vch_no,
+                voucher_date=now_date,
+                po_no=data.po_no,
+                site_id=data.site_id,
+                site_name=data.site_name,
+                request_date=now_date,
+                request_by=data.request_by or "Warehouse Manager",
+                account_head=data.account_head or "Transport",
+                expense_type="Transport Charges",
+                expense_description=data.remarks or "Transport & Logistics Freight Charges",
+                transferred_from=data.transferred_from or "HDFC Bank - 50200012345",
+                transferred_to=data.transferred_to,
+                amount=data.amount,
+                paid_amount=data.paid_amount,
+                account_number=data.account_number,
+                bank_name=data.bank_name,
+                ifsc_code=data.ifsc_code,
+                partial_payment=bool(data.paid_amount and data.paid_amount < data.amount),
+                ageing=0
+            )
+            adb.add(payment_record)
+            adb.commit()
+            adb.refresh(payment_record)
+            return {
+                "success": True,
+                "payment_id": payment_record.payment_id,
+                "voucher_number": payment_record.voucher_number,
+                "expense_type": payment_record.expense_type,
+                "amount": float(payment_record.amount or 0),
+                "paid_amount": float(payment_record.paid_amount or 0)
+            }
+        finally:
+            adb.close()
+
+    def sync_account_purchase(self, data: AccountPurchaseCreate) -> Dict[str, Any]:
+        """
+        Upserts purchase record into PostgreSQL `nexus_accounts.purchase`.
+        Links partial_payment column to whether partial amount was paid.
+        """
+        adb = AccountsSessionLocal()
+        try:
+            existing = adb.query(AccountPurchase).filter(
+                AccountPurchase.invoice_number == data.invoice_number
+            ).first()
+            now_date = date.today()
+            is_partial = bool(data.partial_payment or ((data.paid_amount or 0) > 0 and (data.payable_amount or 0) > 0))
+            if existing:
+                existing.vendor_name = data.vendor_name
+                existing.basic_amount = data.basic_amount
+                existing.cgst = data.cgst
+                existing.sgst = data.sgst
+                existing.igst = data.igst
+                existing.total_amount = data.total_amount
+                existing.paid_amount = data.paid_amount
+                existing.payable_amount = data.payable_amount
+                existing.partial_payment = is_partial
+                existing.ageing = data.ageing or existing.ageing
+                adb.commit()
+                adb.refresh(existing)
+                return {"success": True, "purchase_id": existing.purchase_id, "updated": True}
+            else:
+                inv_suffix = data.invoice_number[-6:] if len(data.invoice_number) >= 6 else "001"
+                vch_no = data.voucher_number or f"VCH-PUR-{now_date.strftime('%Y%m%d')}-{inv_suffix}"
+                new_row = AccountPurchase(
+                    company_name=data.company_name or "Nexus",
+                    voucher_number=vch_no,
+                    voucher_date=now_date,
+                    vendor_name=data.vendor_name,
+                    invoice_number=data.invoice_number,
+                    invoice_date=now_date,
+                    basic_amount=data.basic_amount,
+                    cgst=data.cgst,
+                    sgst=data.sgst,
+                    igst=data.igst,
+                    total_amount=data.total_amount,
+                    paid_amount=data.paid_amount,
+                    payable_amount=data.payable_amount,
+                    partial_payment=is_partial,
+                    ageing=data.ageing or 0
+                )
+                adb.add(new_row)
+                adb.commit()
+                adb.refresh(new_row)
+                return {"success": True, "purchase_id": new_row.purchase_id, "created": True}
+        finally:
+            adb.close()
+
+    def get_account_purchases(self) -> List[Dict[str, Any]]:
+        """
+        Retrieves all purchase payment records stored in PostgreSQL `nexus_accounts.purchase`.
+        """
+        adb = AccountsSessionLocal()
+        try:
+            rows = adb.query(AccountPurchase).order_by(AccountPurchase.purchase_id.desc()).all()
+            return [
+                {
+                    "purchase_id": r.purchase_id,
+                    "company_name": r.company_name,
+                    "voucher_number": r.voucher_number,
+                    "vendor_name": r.vendor_name,
+                    "invoice_number": r.invoice_number,
+                    "invoice_date": r.invoice_date.strftime("%d-%m-%Y") if r.invoice_date else None,
+                    "basic_amount": float(r.basic_amount or 0),
+                    "cgst": float(r.cgst or 0),
+                    "sgst": float(r.sgst or 0),
+                    "igst": float(r.igst or 0),
+                    "total_amount": float(r.total_amount or 0),
+                    "paid_amount": float(r.paid_amount or 0),
+                    "payable_amount": float(r.payable_amount or 0),
+                    "partial_payment": bool(r.partial_payment),
+                    "ageing": r.ageing or 0
+                }
+                for r in rows
+            ]
+        finally:
+            adb.close()
+
+    def save_min_transport_details(self, data: MinTransportSubmitRequest) -> Dict[str, Any]:
+        """
+        Saves MIN transport details into PostgreSQL:
+        - Transport details (transporter_name, vehicle_number, transport_type, driver_name, whatsapp_number) -> `nexus_admin.transport`
+        - Amount and Advance Payment -> `nexus_accounts.payment` (expense_type='Transport Charges', partial_payment=has_advance_payment)
+        """
+        now_date = date.today()
+        # 1. Save to nexus_admin.transport
+        vch_admin = f"VCH-TRN-{now_date.strftime('%Y%m%d')}-{data.vehicle_number or '001'}"
+        admin_rec = AdminTransport(
+            company_name=data.company_name or "Nexus",
+            voucher_no=vch_admin,
+            voucher_date=now_date,
+            year=now_date.year,
+            month=now_date.strftime("%B"),
+            transporter_name=data.transporter_name,
+            vehicle_number=data.vehicle_number,
+            transport_type=data.transport_type,
+            driver_name=data.driver_name,
+            whatsapp_number=data.whatsapp_number,
+            advance=data.advance_payment if data.has_advance_payment else 0,
+            total_rental_amount=data.amount or 0
+        )
+        self.db.add(admin_rec)
+        self.db.commit()
+        self.db.refresh(admin_rec)
+
+        # 2. Save to nexus_accounts.payment
+        adb = AccountsSessionLocal()
+        try:
+            vch_acc = f"VCH-PAY-TRN-{now_date.strftime('%Y%m%d')}-{admin_rec.transporter_payment_id}"
+            payment_rec = AccountPayment(
+                company_name=data.company_name or "Nexus",
+                voucher_number=vch_acc,
+                voucher_date=now_date,
+                po_no=data.po_no,
+                site_id=data.site_id,
+                site_name=data.site_name,
+                request_date=now_date,
+                request_by=data.request_by or "Warehouse Manager",
+                account_head="Transport",
+                expense_type="Transport Charges",
+                expense_description=f"MIN Transport charges for {data.transporter_name or 'Transporter'} ({data.vehicle_number or ''})",
+                transferred_to=data.transporter_name,
+                transferred_from="HDFC Bank - 50200012345",
+                amount=data.amount or 0,
+                advance_payment=data.advance_payment if data.has_advance_payment else 0,
+                paid_amount=data.advance_payment if data.has_advance_payment else 0,
+                partial_payment=bool(data.has_advance_payment),
+                ageing=0
+            )
+            adb.add(payment_rec)
+            adb.commit()
+            adb.refresh(payment_rec)
+
+            return {
+                "success": True,
+                "transport_payment_id": admin_rec.transporter_payment_id,
+                "payment_id": payment_rec.payment_id,
+                "voucher_number": payment_rec.voucher_number
+            }
+        finally:
+            adb.close()

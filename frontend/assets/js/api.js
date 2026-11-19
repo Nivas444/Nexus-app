@@ -2325,6 +2325,23 @@
       },
       getPoPdfUrl(poId) {
         return `${API_BASE_URL}/purchase/po/${encodeURIComponent(poId)}/pdf`;
+      },
+      async submitTransportPayment(payload) {
+        return await request('/purchase/transport-payment', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async syncPurchasePayment(payload) {
+        return await request('/purchase/payment', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async listPurchasePayments() {
+        return await request('/purchase/payment', {
+          method: 'GET'
+        });
       }
     }
   };

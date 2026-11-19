@@ -172,6 +172,13 @@
       </button>
     </div>
 
+    <!-- Centered Submit Area for Warehouse Manager GRN when user selects row -->
+    <div id="wmGrnSubmitArea" style="display: none; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
+      <button type="button" id="btnWmGrnSubmitBatch" onclick="handleWmGrnMainSubmit()" title="Proceed to Transport Payment" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+        <img src="icons/Submit.svg" alt="Submit" width="36" height="36" style="display: block;">
+      </button>
+    </div>
+
     <!-- Centered Submit Area for Purchase Manager PR (Legacy placeholder kept hidden; in-table submit row used) -->
     <div id="purchasePrSubmitArea" style="display: none !important; width: 100%; justify-content: center; align-items: center; padding: 16px 0 8px 0;">
       <button type="button" id="btnPurchasePrSubmitBatchOld" onclick="openPurchaseSelectSupplierModal()" title="Submit PR" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
@@ -16396,7 +16403,7 @@
           <img src="icons/PDF Download.svg" alt="PDF Download" width="28" height="28">
         </button>
         <!-- Printer icon (For MIN page) -->
-        <button type="button" class="side-top-icon-btn" id="btnWmMinTransportPrint" title="Print Transport Details" onclick="handleWmMinTransportPrint()"
+        <button type="button" class="side-top-icon-btn" id="btnWmMinTransportPrint" title="Print Transport Details" onclick="event.preventDefault(); event.stopPropagation(); handleWmMinTransportPrint(event); return false;"
           style="display: none; background: transparent; border: none; cursor: pointer; padding: 0; align-items: center; justify-content: center;">
           <img src="icons/Printer.svg" alt="Print" width="28" height="28">
         </button>
@@ -16524,6 +16531,35 @@
           <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Whatsapp No</label>
           <div style="flex: 1;">
             <input type="tel" class="form-input-control" id="inpWmMinWhatsappNo" placeholder="Enter Whatsapp No"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 6. Amount (typeable field) -->
+        <div class="pm-field-row" id="rowWmMinAmount" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Amount</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmMinAmount" placeholder="Enter Amount"
+              style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
+          </div>
+        </div>
+
+        <!-- 7. Advance Payment (toggle as centered) -->
+        <div class="pm-field-row" id="rowWmMinAdvanceToggle" style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Advance Payment</label>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+            <label class="toggle-slide-switch" style="margin: 0;">
+              <input type="checkbox" id="tglWmMinAdvancePayment" onchange="handleWmMinAdvancePaymentToggle(this.checked)">
+              <span class="toggle-slide-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 8. Advance Payment Field (typeable field, appears when Advance Payment toggle enabled) -->
+        <div class="pm-field-row" id="rowWmMinAdvancePaymentInput" style="display: none; align-items: center; justify-content: space-between; gap: 16px;">
+          <label style="min-width: 160px; font-weight: 600; color: #334155; font-size: 0.95rem; flex-shrink: 0; text-align: left;">Advance Payment</label>
+          <div style="flex: 1;">
+            <input type="number" step="0.01" class="form-input-control" id="inpWmMinAdvancePayment" placeholder="Enter Advance Payment Amount"
               style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; color: #0f172a; box-sizing: border-box; outline: none;">
           </div>
         </div>
@@ -17170,6 +17206,57 @@
           <text x="200" y="304" class="svg-succ-btn-text" id="svgSuccessPopupBtnLabel">Continue</text>
         </g>
       </svg>
+    </div>
+  </div>
+
+  <!-- Delivery Challan & E-Way Bill PDF Preview & Print Modal -->
+  <div id="nexusDcPdfPreviewBackdrop"
+    style="display: none; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; background: rgba(15, 23, 42, 0.72) !important; backdrop-filter: blur(4px) !important; z-index: 100020 !important;"
+    onclick="if (event.target === this) closeNexusDcPdfPreview()">
+  </div>
+
+  <div id="nexusDcPdfPreviewModal"
+    onclick="event.stopPropagation();"
+    style="display: none; width: 1020px !important; max-width: 95vw !important; height: 90vh !important; max-height: 92vh !important; position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; z-index: 100021 !important; margin: 0 !important; box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.6) !important; background: #ffffff !important; border-radius: 12px !important; overflow: hidden !important; flex-direction: column !important; box-sizing: border-box !important;">
+    <div style="position: relative; padding: 0 16px 0 0; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; height: 52px; min-height: 52px; background: #ffffff; flex-shrink: 0; margin: 0;">
+      <div class="side-form-title-badge"
+        style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.05rem; padding: 0 45px 0 20px; clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0; white-space: nowrap;">
+        Delivery Challan Preview
+      </div>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+        <!-- Zoom Controls -->
+        <button type="button" class="btn-subtle" onclick="adjustNexusDcZoom(-0.15)" title="Zoom Out"
+          style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; color: #334155;">&minus;</button>
+        <span id="lblNexusDcZoomLevel" style="font-size: 0.85rem; font-weight: 600; color: #475569; min-width: 44px; text-align: center;">100%</span>
+        <button type="button" class="btn-subtle" onclick="adjustNexusDcZoom(0.15)" title="Zoom In"
+          style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; color: #334155;">&plus;</button>
+
+        <!-- Print Button -->
+        <button type="button" id="btnNexusDcPdfPrint" title="Print Combined Document" onclick="printNexusDcPdf()"
+          style="display: inline-flex; align-items: center; gap: 6px; background: #00cba0; color: #ffffff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0, 203, 160, 0.25);">
+          <img src="icons/Printer.svg" alt="Print" width="20" height="20" style="filter: brightness(0) invert(1);">
+          <span>Print</span>
+        </button>
+
+        <!-- Download Button -->
+        <button type="button" id="btnNexusDcPdfDownload" title="Download Combined PDF" onclick="downloadNexusDcPdf()"
+          style="display: inline-flex; align-items: center; gap: 6px; background: #3b82f6; color: #ffffff; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);">
+          <img src="icons/PDF Download.svg" alt="Download" width="20" height="20" style="filter: brightness(0) invert(1);">
+          <span>Download</span>
+        </button>
+
+        <!-- Close button -->
+        <button type="button" class="side-form-close-btn" onclick="closeNexusDcPdfPreview()"
+          aria-label="Close" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0; margin-left: 6px;">&times;</button>
+      </div>
+    </div>
+
+    <!-- Viewer Body -->
+    <div style="flex: 1 1 auto; height: calc(100% - 52px); min-height: 0; position: relative; background: #1e293b; padding: 0; display: block; overflow: hidden; box-sizing: border-box;">
+      <iframe id="iframeNexusDcPdfPreview" src="about:blank"
+        style="width: 100%; height: 100%; min-height: 100%; border: none; background: #525659; display: block;"
+        title="Delivery Challan and E-Way Bill Preview">
+      </iframe>
     </div>
   </div>
 

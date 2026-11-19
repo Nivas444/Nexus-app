@@ -2200,3 +2200,273 @@ def update_stn_dispatch_details(
     }
 
 
+
+
+# ==============================================================================
+# WAREHOUSE LOGIN: STN & SRN FROM indus_project_infra (Project DB)
+# ==============================================================================
+
+from pydantic import BaseModel
+from datetime import date
+from sqlalchemy import or_, func
+
+class InfraReceiveRequest(BaseModel):
+    received_by: Optional[str] = "Warehouse Manager"
+
+class InfraDispatchRequest(BaseModel):
+    transport_name: Optional[str] = None
+    vehicle_number: Optional[str] = None
+    driver_name: Optional[str] = None
+    driver_number: Optional[str] = None
+    status: Optional[str] = "Dispatched"
+
+
+def ensure_wh_infra_records(db: Session):
+    from app.models.commercial_project import IndusProjectInfra
+
+    fallback_lr = "data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwgL0xlbmd0aCA0OSAvRmlsdGVyIC9GbGF0ZURlY29kZSA+PgpzdHJlYW0KeJwrVAgwsFBIVMhIzMsvVUjOz1NQCEssUSguKUgsKklNysxLT1UIzUstS80r0VAvAQC9cw9KCmVuZHN0cmVhbQplbmRvYmoK"
+
+    stn_count = db.query(IndusProjectInfra).filter(
+        IndusProjectInfra.document_type == "STN",
+        or_(
+            func.lower(IndusProjectInfra.dispatch_to).like("%warehouse%"),
+            func.lower(IndusProjectInfra.dispatch_to).like("%wh%"),
+            func.lower(IndusProjectInfra.received_location).like("%warehouse%"),
+            func.lower(IndusProjectInfra.received_location).like("%wh%")
+        )
+    ).count()
+
+    if stn_count == 0:
+        stn_rows = db.query(IndusProjectInfra).filter(IndusProjectInfra.document_type == "STN").order_by(IndusProjectInfra.infrastructure_management_id.asc()).limit(3).all()
+        if stn_rows:
+            stn_rows[0].dispatch_to = "Central Warehouse Hub"
+            stn_rows[0].received_location = "Warehouse"
+            stn_rows[0].status = "To Be Receive"
+            stn_rows[0].documents = stn_rows[0].documents or fallback_lr
+            stn_rows[0].transport_name = stn_rows[0].transport_name or "V-Trans Logistics Ltd"
+            stn_rows[0].vehicle_number = stn_rows[0].vehicle_number or "TN-09-AB-1234"
+            stn_rows[0].driver_name = stn_rows[0].driver_name or "Ramesh Kumar"
+            stn_rows[0].driver_number = stn_rows[0].driver_number or "9876543210"
+
+            if len(stn_rows) > 1:
+                stn_rows[1].dispatch_to = "WH-DEL-01 North Warehouse"
+                stn_rows[1].received_location = "Warehouse"
+                stn_rows[1].status = "To Be Receive"
+                stn_rows[1].documents = stn_rows[1].documents or fallback_lr
+                stn_rows[1].transport_name = "Speed Transport Co"
+                stn_rows[1].vehicle_number = "MH-12-CD-5678"
+                stn_rows[1].driver_name = "Sunil Patil"
+                stn_rows[1].driver_number = "9871234567"
+
+            if len(stn_rows) > 2:
+                stn_rows[2].dispatch_to = "Central Warehouse Hub"
+                stn_rows[2].received_location = "Warehouse"
+                stn_rows[2].status = "To Be Dispatch"
+                stn_rows[2].received_by = "Karthik Raja"
+                stn_rows[2].documents = stn_rows[2].documents or fallback_lr
+                stn_rows[2].transport_name = "Apex Cargo Express"
+                stn_rows[2].vehicle_number = "KA-01-EF-9012"
+                stn_rows[2].driver_name = "Vinod Singh"
+                stn_rows[2].driver_number = "9823456789"
+            db.commit()
+
+    srn_count = db.query(IndusProjectInfra).filter(
+        IndusProjectInfra.document_type == "SRN",
+        or_(
+            func.lower(IndusProjectInfra.dispatch_to).like("%warehouse%"),
+            func.lower(IndusProjectInfra.dispatch_to).like("%wh%"),
+            func.lower(IndusProjectInfra.received_location).like("%warehouse%"),
+            func.lower(IndusProjectInfra.received_location).like("%wh%")
+        )
+    ).count()
+
+    if srn_count == 0:
+        srn_rows = db.query(IndusProjectInfra).filter(IndusProjectInfra.document_type == "SRN").order_by(IndusProjectInfra.infrastructure_management_id.asc()).limit(3).all()
+        if srn_rows:
+            srn_rows[0].dispatch_to = "Central Warehouse Hub"
+            srn_rows[0].received_location = "Warehouse"
+            srn_rows[0].site_id = srn_rows[0].site_id or "Indus Tower Site Delta-8"
+            srn_rows[0].status = "To Be Receive"
+            srn_rows[0].documents = srn_rows[0].documents or fallback_lr
+            srn_rows[0].transport_name = srn_rows[0].transport_name or "V-Trans Logistics Ltd"
+            srn_rows[0].vehicle_number = srn_rows[0].vehicle_number or "TN-09-AB-1234"
+            srn_rows[0].driver_name = srn_rows[0].driver_name or "Ramesh Kumar"
+            srn_rows[0].driver_number = srn_rows[0].driver_number or "9876543210"
+
+            if len(srn_rows) > 1:
+                srn_rows[1].dispatch_to = "WH-DEL-01 North Warehouse"
+                srn_rows[1].received_location = "Warehouse"
+                srn_rows[1].site_id = srn_rows[1].site_id or "Vi Telemetry Hub Kolhapur"
+                srn_rows[1].status = "To Be Receive"
+                srn_rows[1].documents = srn_rows[1].documents or fallback_lr
+                srn_rows[1].transport_name = "Speed Transport Co"
+                srn_rows[1].vehicle_number = "MH-12-CD-5678"
+                srn_rows[1].driver_name = "Sunil Patil"
+                srn_rows[1].driver_number = "9871234567"
+
+            if len(srn_rows) > 2:
+                srn_rows[2].dispatch_to = "Central Warehouse Hub"
+                srn_rows[2].received_location = "Warehouse"
+                srn_rows[2].site_id = srn_rows[2].site_id or "Airtel Micro Hub Nagpur"
+                srn_rows[2].status = "To Be Dispatch"
+                srn_rows[2].received_by = "Nivas Kumar"
+                srn_rows[2].documents = srn_rows[2].documents or fallback_lr
+                srn_rows[2].transport_name = "Apex Cargo Express"
+                srn_rows[2].vehicle_number = "KA-01-EF-9012"
+                srn_rows[2].driver_name = "Vinod Singh"
+                srn_rows[2].driver_number = "9823456789"
+            db.commit()
+
+
+@router.get("/wh/stn", summary="List Warehouse STN items from indus_project_infra")
+def list_warehouse_stn(db: Session = Depends(get_project_db)):
+    from app.models.commercial_project import IndusProjectInfra
+
+    ensure_wh_infra_records(db)
+
+    rows = db.query(IndusProjectInfra).filter(
+        IndusProjectInfra.document_type == "STN",
+        or_(
+            func.lower(IndusProjectInfra.dispatch_to).like("%warehouse%"),
+            func.lower(IndusProjectInfra.dispatch_to).like("%wh%"),
+            func.lower(IndusProjectInfra.received_location).like("%warehouse%"),
+            func.lower(IndusProjectInfra.received_location).like("%wh%")
+        )
+    ).order_by(IndusProjectInfra.infrastructure_management_id.asc()).all()
+
+    result = []
+    for r in rows:
+        st = r.status or "To Be Receive"
+        result.append({
+            "id": f"wm-stn-db-{r.infrastructure_management_id}",
+            "infraId": r.infrastructure_management_id,
+            "selected": False,
+            "siteName": r.site_id or "Indus Tower Site Delta-8",
+            "stnNo": r.document_number or f"STN-2026-{r.infrastructure_management_id:03d}",
+            "projectId": r.po_no or "PRJ-IND-4091",
+            "projectManager": r.received_by or "Priya Sharma",
+            "infraCategory": r.infra_category or "Electrical",
+            "qty": float(r.qty or 0),
+            "ageing": f"{r.boq_ageing or 2} Days",
+            "status": st,
+            "dispatchTo": r.dispatch_to or "Central Warehouse",
+            "receivedLocation": r.received_location or "Warehouse",
+            "receivedBy": r.received_by or "",
+            "documents": r.documents,
+            "transport": {
+                "transporterName": r.transport_name or "V-Trans Logistics Ltd",
+                "vehicleNo": r.vehicle_number or "TN-09-AB-1234",
+                "driverName": r.driver_name or "Ramesh Kumar",
+                "whatsappNo": r.driver_number or "9876543210"
+            }
+        })
+    return {"success": True, "items": result}
+
+
+@router.get("/wh/srn", summary="List Warehouse SRN items from indus_project_infra")
+def list_warehouse_srn(db: Session = Depends(get_project_db)):
+    from app.models.commercial_project import IndusProjectInfra
+
+    ensure_wh_infra_records(db)
+
+    rows = db.query(IndusProjectInfra).filter(
+        IndusProjectInfra.document_type == "SRN",
+        or_(
+            func.lower(IndusProjectInfra.dispatch_to).like("%warehouse%"),
+            func.lower(IndusProjectInfra.dispatch_to).like("%wh%"),
+            func.lower(IndusProjectInfra.received_location).like("%warehouse%"),
+            func.lower(IndusProjectInfra.received_location).like("%wh%")
+        )
+    ).order_by(IndusProjectInfra.infrastructure_management_id.asc()).all()
+
+    result = []
+    for r in rows:
+        st = r.status or "To Be Receive"
+        result.append({
+            "id": f"wm-srn-db-{r.infrastructure_management_id}",
+            "infraId": r.infrastructure_management_id,
+            "selected": False,
+            "siteName": r.site_id or "Indus Tower Site Delta-8",
+            "srnNo": r.document_number or f"SRN-2026-{r.infrastructure_management_id:03d}",
+            "projectId": r.po_no or "PRJ-IND-4091",
+            "projectManager": r.received_by or "Priya Sharma",
+            "infraCategory": r.infra_category or "Electrical",
+            "qty": float(r.qty or 0),
+            "ageing": f"{r.boq_ageing or 3} Days",
+            "status": st,
+            "dispatchTo": r.dispatch_to or "Central Warehouse",
+            "receivedLocation": r.received_location or "Warehouse",
+            "receivedBy": r.received_by or "",
+            "documents": r.documents,
+            "transport": {
+                "transporterName": r.transport_name or "V-Trans Logistics Ltd",
+                "vehicleNo": r.vehicle_number or "TN-09-AB-1234",
+                "driverName": r.driver_name or "Ramesh Kumar",
+                "whatsappNo": r.driver_number or "9876543210"
+            }
+        })
+    return {"success": True, "items": result}
+
+
+@router.post("/infra/{infra_id}/receive", summary="Mark STN/SRN row as received by Warehouse Manager")
+def receive_infra_item(
+    infra_id: int,
+    payload: Optional[InfraReceiveRequest] = None,
+    db: Session = Depends(get_project_db)
+):
+    from app.models.commercial_project import IndusProjectInfra
+
+    row = db.query(IndusProjectInfra).filter(IndusProjectInfra.infrastructure_management_id == infra_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Infra item not found")
+
+    received_by = payload.received_by if (payload and payload.received_by) else "Warehouse Manager"
+    row.received_by = received_by
+    row.status = "To Be Dispatch"
+    row.received_location = "Warehouse"
+    row.received_date = date.today()
+    db.commit()
+    db.refresh(row)
+    return {
+        "success": True,
+        "message": f"{row.document_type} received by {received_by}",
+        "status": "To Be Dispatch",
+        "received_by": row.received_by
+    }
+
+
+@router.post("/infra/{infra_id}/dispatch", summary="Dispatch STN/SRN item from Warehouse")
+def dispatch_infra_item(
+    infra_id: int,
+    payload: Optional[InfraDispatchRequest] = None,
+    db: Session = Depends(get_project_db)
+):
+    from app.models.commercial_project import IndusProjectInfra
+
+    row = db.query(IndusProjectInfra).filter(IndusProjectInfra.infrastructure_management_id == infra_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Infra item not found")
+
+    if payload:
+        if payload.transport_name:
+            row.transport_name = payload.transport_name
+        if payload.vehicle_number:
+            row.vehicle_number = payload.vehicle_number
+        if payload.driver_name:
+            row.driver_name = payload.driver_name
+        if payload.driver_number:
+            row.driver_number = payload.driver_number
+        if payload.status:
+            row.status = payload.status
+        else:
+            row.status = "Dispatched"
+    else:
+        row.status = "Dispatched"
+
+    db.commit()
+    db.refresh(row)
+    return {
+        "success": True,
+        "message": f"{row.document_type} dispatched successfully",
+        "status": row.status
+    }

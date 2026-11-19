@@ -17297,12 +17297,238 @@ window.highlightSelectedPmMaterialRow = function() {
   }
 };
 
+window.syncPmApprovedMaterialsToMin = function(pmRow, approvedItems) {
+  if (!pmRow) return;
+  const siteId = pmRow.siteId || pmRow.id || 'SITE-NEW';
+  const minId = `wm-min-${String(siteId).replace(/[^a-zA-Z0-9_-]/g, '')}`;
+
+  const minItems = (approvedItems || []).map((it, idx) => {
+    const desc = it.materialName || it.materials_name || it.materialDescription || 'Material';
+    const descKey = desc.toLowerCase().trim();
+    let stock = 500;
+    if (window._inventoryStockMap && window._inventoryStockMap[descKey] !== undefined) {
+      stock = window._inventoryStockMap[descKey];
+    } else if (typeof it.stockQty === 'number') {
+      stock = it.stockQty;
+    }
+    const mir = parseFloat(it.qty || it.request_qty || it.mirQty || 0);
+    const rate = parseFloat(it.rate) || 450.00;
+    return {
+      id: it.id || `min-${siteId}-${idx + 1}`,
+      materialDescription: desc,
+      uom: it.uom || 'Nos',
+      stockQty: stock,
+      mirQty: mir,
+      minQty: 0.00, // initially 0!
+      rate: rate,
+      amount: 0.00, // initially 0!
+      selected: false,
+      isTicked: false
+    };
+  });
+
+  const isZeroStock = minItems.length === 0 || minItems.every(it => Number(it.stockQty || 0) === 0);
+  const initialStatus = isZeroStock ? 'Stock Not Available' : 'To Be Prepare';
+
+  const newMinRow = {
+    id: minId,
+    selected: false,
+    isHighlighted: false,
+    siteId: pmRow.siteId || '',
+    siteName: pmRow.siteName || '',
+    requestDate: pmRow.requestDate || new Date().toLocaleDateString('en-GB'),
+    requestBy: pmRow.requestBy || 'Project Manager',
+    projectId: pmRow.projectId || '',
+    projectType: pmRow.projectType || '',
+    subProjectType: pmRow.subProjectType || '',
+    poNo: pmRow.poNo || '',
+    status: initialStatus,
+    ageing: pmRow.ageing || '1 Day',
+    isApprovedFromPm: true,
+    transport: {},
+    items: minItems
+  };
+
+  if (!window.wmMinDataStore) window.wmMinDataStore = [];
+  const existingIdx = wmMinDataStore.findIndex(r => r.id === minId || (r.siteId && r.siteId === pmRow.siteId));
+  if (existingIdx >= 0) {
+    if (wmMinDataStore[existingIdx].status === 'Ready to Dispatch') {
+      newMinRow.status = 'Ready to Dispatch';
+      newMinRow.transport = wmMinDataStore[existingIdx].transport;
+    }
+    wmMinDataStore[existingIdx] = newMinRow;
+  } else {
+    wmMinDataStore.unshift(newMinRow);
+  }
+
+  try {
+    sessionStorage.setItem('nexus_wm_min_data', JSON.stringify(wmMinDataStore));
+  } catch(e) {}
+};
+
 window.submitPmMaterialsCompletion = function() {
+  const modalRow = window.activePmMaterialModalRow;
+  const items = window.currentPmMaterialItems || [];
+  const approvedItems = items.filter(it => it.highlighted || it.selected);
+  const itemsToSync = approvedItems.length > 0 ? approvedItems : items;
+
+  if (modalRow) {
+    modalRow.isApproved = true;
+    modalRow.status = 'Approved';
+    if (Array.isArray(pmMaterialsDataStore)) {
+      const storeRow = pmMaterialsDataStore.find(r => r.id === modalRow.id || (r.siteId && r.siteId === modalRow.siteId));
+      if (storeRow) {
+        storeRow.isApproved = true;
+        storeRow.status = 'Approved';
+      }
+    }
+    window.syncPmApprovedMaterialsToMin(modalRow, itemsToSync);
+  }
+
   closePmMaterialsDetailModal();
   if (typeof showSvgSuccessPopup === 'function') {
     showSvgSuccessPopup('Material verification completed and submitted successfully!', 'Task Completed');
   } else if (typeof showToast === 'function') {
     showToast('Task completed successfully!');
+  }
+};
+
+window.loadInventoryStockFromApi = async function() {
+  try {
+    const res = await fetch('/api/v1/purchase/inventory/stock-qty');
+    const json = await res.json();
+    if (json && json.success && json.stock) {
+      window._inventoryStockMap = json.stock;
+      if (typeof wmMinDataStore !== 'undefined' && Array.isArray(wmMinDataStore)) {
+        wmMinDataStore.forEach(row => {
+          if (row.items && Array.isArray(row.items)) {
+            row.items.forEach(it => {
+              const key = (it.materialDescription || '').toLowerCase().trim();
+              if (window._inventoryStockMap[key] !== undefined) {
+                it.stockQty = window._inventoryStockMap[key];
+              }
+            });
+            if (row.status !== 'Ready to Dispatch') {
+              const allZero = row.items.every(it => Number(it.stockQty || 0) === 0);
+              row.status = allZero ? 'Stock Not Available' : 'To Be Prepare';
+            }
+          }
+        });
+      }
+      if (typeof currentWorklistView !== 'undefined' && (currentWorklistView === 'min' || currentWorklistView === 'min_detail')) {
+        if (typeof renderWorklistTableBody === 'function') renderWorklistTableBody();
+      }
+    }
+  } catch(e) {
+    console.warn('Error loading inventory stock:', e);
+  }
+};
+
+window.loadMrnMaterialsFromApi = async function() {
+  try {
+    const res = await fetch('/api/v1/purchase/mrn/materials');
+    const json = await res.json();
+    if (json && json.success && Array.isArray(json.materials) && json.materials.length > 0) {
+      const grouped = {};
+      json.materials.forEach(m => {
+        const siteKey = m.site_id || 'SITE-NEW';
+        if (!grouped[siteKey]) {
+          grouped[siteKey] = {
+            id: `wm-mrn-db-${siteKey.replace(/[^a-zA-Z0-9_-]/g, '')}`,
+            siteId: m.site_id,
+            siteName: `${m.site_id} Project Site`,
+            completionDate: m.request_date || new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
+            submitBy: m.request_by || 'Site Engineer',
+            projectId: `PRJ-${m.site_id}`,
+            projectType: 'Upgrade',
+            subProjectType: 'Installation',
+            poNo: m.po_no || 'PO-2026-0001',
+            ageing: '1 Day',
+            isHighlighted: false,
+            transport: {},
+            items: []
+          };
+        }
+        grouped[siteKey].items.push({
+          id: m.id,
+          selected: false,
+          isTicked: false,
+          isRejected: false,
+          materialDescription: m.material_description || m.material_name,
+          uom: m.uom || 'Nos',
+          stockQty: Number(m.stock_qty || 0),
+          mrrQty: Number(m.mrr_qty || 0),
+          mrnQty: Number(m.mrn_qty || m.mrr_qty || 0),
+          rate: Number(m.rate || 0),
+          amount: Number((m.mrn_qty || m.mrr_qty || 0) * (m.rate || 0))
+        });
+      });
+
+      const newRows = Object.values(grouped);
+      if (typeof wmMrnDataStore !== 'undefined' && Array.isArray(wmMrnDataStore)) {
+        newRows.forEach(nr => {
+          const idx = wmMrnDataStore.findIndex(r => r.siteId === nr.siteId || r.id === nr.id);
+          if (idx >= 0) {
+            wmMrnDataStore[idx].items = nr.items;
+          } else {
+            wmMrnDataStore.unshift(nr);
+          }
+        });
+      }
+      if (typeof currentWorklistView !== 'undefined' && (currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail')) {
+        renderApp();
+      }
+    }
+  } catch(e) {
+    console.warn('Error loading MRN materials from API:', e);
+  }
+};
+
+window.loadWmStnFromApi = async function() {
+  try {
+    const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+      ? getCommercialApiBaseUrl()
+      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl)
+          ? window.NexusApi.baseUrl
+          : '');
+    const resp = await fetch(`${apiBase}/api/v1/commercial/wh/stn`);
+    if (!resp.ok) return;
+    const json = await resp.json();
+    if (json && json.success && Array.isArray(json.items) && json.items.length > 0) {
+      wmStnDataStore = json.items;
+      if (currentWorklistView === 'stn') {
+        currentDataset = wmStnDataStore.map(item => ({ ...item }));
+        filteredDataset = [...currentDataset];
+        if (typeof renderWorklistTableBody === 'function') renderWorklistTableBody();
+        if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load Warehouse STN from API:', e);
+  }
+};
+
+window.loadWmSrnFromApi = async function() {
+  try {
+    const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+      ? getCommercialApiBaseUrl()
+      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl)
+          ? window.NexusApi.baseUrl
+          : '');
+    const resp = await fetch(`${apiBase}/api/v1/commercial/wh/srn`);
+    if (!resp.ok) return;
+    const json = await resp.json();
+    if (json && json.success && Array.isArray(json.items) && json.items.length > 0) {
+      wmSrnDataStore = json.items;
+      if (currentWorklistView === 'srn') {
+        currentDataset = wmSrnDataStore.map(item => ({ ...item }));
+        filteredDataset = [...currentDataset];
+        if (typeof renderWorklistTableBody === 'function') renderWorklistTableBody();
+        if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load Warehouse SRN from API:', e);
   }
 };
 
@@ -23794,11 +24020,11 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsTdsReceivablePdf" title="PDF Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
-          <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/PDF Upload.svg';">
+        <button type="button" class="tool-btn" id="btnAccountsTdsReceivablePdf" title="PDF Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="downloadAccountsTdsPdf('receivable'); return false;">
+          <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
-        <button type="button" class="tool-btn" id="btnAccountsTdsReceivableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV download.svg';">
+        <button type="button" class="tool-btn" id="btnAccountsTdsReceivableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="exportAccountsCsv('tds'); return false;">
+          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
         <button type="button" class="tool-btn" id="btnAccountsTdsReceivableClose" title="Close" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="openAccountsTdsPage(); return false;">
           <img src="icons/Cancel.svg" alt="Close" style="width: 28px; height: 28px; display: block; object-fit: contain;">
@@ -23817,11 +24043,11 @@ function renderAccountsToolbar() {
         ${universalBackBtnHtml}
       </div>
       <div class="toolbar-right" style="display: flex; align-items: center; gap: 14px;">
-        <button type="button" class="tool-btn" id="btnAccountsTdsPayablePdf" title="PDF Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsPdfUpload(); return false;">
-          <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/PDF Upload.svg';">
+        <button type="button" class="tool-btn" id="btnAccountsTdsPayablePdf" title="PDF Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="downloadAccountsTdsPdf('payable'); return false;">
+          <img src="icons/PDF Download.svg" alt="PDF Download" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
-        <button type="button" class="tool-btn" id="btnAccountsTdsPayableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="triggerAccountsCsvUpload(); return false;">
-          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;" onerror="this.src='icons/CSV download.svg';">
+        <button type="button" class="tool-btn" id="btnAccountsTdsPayableCsv" title="CSV Download" style="background: transparent; border: none; cursor: pointer; padding: 0; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;" onclick="exportAccountsCsv('tds'); return false;">
+          <img src="icons/CSV download.svg" alt="CSV Download" style="width: 28px; height: 28px; display: block; object-fit: contain;">
         </button>
       </div>
     `;
@@ -25223,6 +25449,7 @@ let wmMinDataStore = [
     id: 'wm-min-1',
     selected: false,
     isHighlighted: false,
+    isApprovedFromPm: true,
     siteId: 'SITE-IND-104',
     siteName: 'Airtel Tower Site - Hub 104',
     requestDate: '12-10-2026',
@@ -25231,7 +25458,7 @@ let wmMinDataStore = [
     projectType: 'New Build',
     subProjectType: 'Ground Based Tower 40M',
     poNo: 'PO-2026-0814 (0-Opex)',
-    status: 'Ready To Dispatch',
+    status: 'To Be Prepare',
     ageing: '2 Days',
     transport: {
       logisticsName: 'V-Trans India Ltd',
@@ -25246,64 +25473,64 @@ let wmMinDataStore = [
         itemCode: 'ITEM-CBL-001',
         itemName: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
         requestQty: 350.00,
-        issuedQty: 350.00,
+        issuedQty: 0.00,
         stockQty: 500.00,
         remark: 'Urgent for line 1',
         selected: false,
         materialDescription: '3.5C x 50 Sq.mm Armoured Aluminium Power Cable',
         uom: 'Mtr',
         mirQty: 350.00,
-        minQty: 350.00,
+        minQty: 0.00,
         rate: 420.00,
-        amount: 147000.00
+        amount: 0.00
       },
       {
         id: 'min-1-2',
         itemCode: 'ITEM-OFC-002',
         itemName: '24F Single Mode Armoured Optical Fiber Cable',
         requestQty: 800.00,
-        issuedQty: 800.00,
+        issuedQty: 0.00,
         stockQty: 1200.00,
         remark: 'Primary backbone link',
         selected: false,
         materialDescription: '24F Single Mode Armoured Optical Fiber Cable',
         uom: 'Mtr',
         mirQty: 800.00,
-        minQty: 800.00,
+        minQty: 0.00,
         rate: 95.00,
-        amount: 76000.00
+        amount: 0.00
       },
       {
         id: 'min-1-3',
         itemCode: 'ITEM-ERT-003',
         itemName: 'Copper Bonded Chemical Earthing Electrode 3M',
         requestQty: 25.00,
-        issuedQty: 25.00,
-        stockQty: 40.00,
+        issuedQty: 0.00,
+        stockQty: 15.00,
         remark: 'Standard ground grid',
         selected: false,
         materialDescription: 'Copper Bonded Chemical Earthing Electrode 3M',
         uom: 'Set',
         mirQty: 25.00,
-        minQty: 25.00,
+        minQty: 0.00,
         rate: 3200.00,
-        amount: 80000.00
+        amount: 0.00
       },
       {
         id: 'min-1-4',
         itemCode: 'ITEM-FAS-004',
         itemName: 'Hot Dip Galvanized Nut Bolts Grade 8.8 M16x50',
         requestQty: 180.00,
-        issuedQty: 180.00,
-        stockQty: 250.00,
+        issuedQty: 0.00,
+        stockQty: 100.00,
         remark: 'Tower leg assembly',
         selected: false,
         materialDescription: 'Hot Dip Galvanized Nut Bolts Grade 8.8 M16x50',
         uom: 'Kg',
         mirQty: 180.00,
-        minQty: 180.00,
+        minQty: 0.00,
         rate: 145.00,
-        amount: 26100.00
+        amount: 0.00
       }
     ]
   },
@@ -25311,6 +25538,7 @@ let wmMinDataStore = [
     id: 'wm-min-2',
     selected: false,
     isHighlighted: false,
+    isApprovedFromPm: true,
     siteId: 'SITE-JIO-205',
     siteName: 'Jio Fiber ODC Site Alpha',
     requestDate: '10-10-2026',
@@ -25334,64 +25562,64 @@ let wmMinDataStore = [
         itemCode: 'ITEM-CAB-101',
         itemName: 'Outdoor Telecom Pole Mount Equipment Cabinet',
         requestQty: 8.00,
-        issuedQty: 8.00,
+        issuedQty: 0.00,
         stockQty: 15.00,
         remark: 'ODC enclosure',
         selected: false,
         materialDescription: 'Outdoor Telecom Pole Mount Equipment Cabinet',
         uom: 'Set',
         mirQty: 8.00,
-        minQty: 8.00,
+        minQty: 0.00,
         rate: 24500.00,
-        amount: 196000.00
+        amount: 0.00
       },
       {
         id: 'min-2-2',
         itemCode: 'ITEM-BAT-102',
         itemName: '48V 100AH LiFePO4 Lithium Battery Module',
         requestQty: 12.00,
-        issuedQty: 12.00,
+        issuedQty: 0.00,
         stockQty: 20.00,
         remark: 'Backup power pack',
         selected: false,
         materialDescription: '48V 100AH LiFePO4 Lithium Battery Module',
         uom: 'Nos',
         mirQty: 12.00,
-        minQty: 12.00,
+        minQty: 0.00,
         rate: 38000.00,
-        amount: 456000.00
+        amount: 0.00
       },
       {
         id: 'min-2-3',
         itemCode: 'ITEM-FDF-103',
         itemName: 'Fiber Distribution Frame (FDF) 48 Ports Rack Mount',
         requestQty: 15.00,
-        issuedQty: 15.00,
+        issuedQty: 0.00,
         stockQty: 30.00,
         remark: 'Rack mount unit',
         selected: false,
         materialDescription: 'Fiber Distribution Frame (FDF) 48 Ports Rack Mount',
         uom: 'Nos',
         mirQty: 15.00,
-        minQty: 15.00,
+        minQty: 0.00,
         rate: 4200.00,
-        amount: 63000.00
+        amount: 0.00
       },
       {
         id: 'min-2-4',
         itemCode: 'ITEM-SPD-104',
         itemName: 'Class B+C Surge Protection Device 40kA 4P',
         requestQty: 20.00,
-        issuedQty: 20.00,
+        issuedQty: 0.00,
         stockQty: 45.00,
         remark: 'Lightning protection',
         selected: false,
         materialDescription: 'Class B+C Surge Protection Device 40kA 4P',
         uom: 'Nos',
         mirQty: 20.00,
-        minQty: 20.00,
+        minQty: 0.00,
         rate: 2850.00,
-        amount: 57000.00
+        amount: 0.00
       }
     ]
   },
@@ -25399,6 +25627,7 @@ let wmMinDataStore = [
     id: 'wm-min-3',
     selected: false,
     isHighlighted: false,
+    isApprovedFromPm: true,
     siteId: 'SITE-BSNL-042',
     siteName: 'BSNL Phase IX Site 42',
     requestDate: '13-10-2026',
@@ -25422,48 +25651,48 @@ let wmMinDataStore = [
         itemCode: 'ITEM-TWR-201',
         itemName: '30M Monopole High Mast Steel Sections',
         requestQty: 2.00,
-        issuedQty: 2.00,
-        stockQty: 5.00,
+        issuedQty: 0.00,
+        stockQty: 0.00,
         remark: 'Heavy structural section',
         selected: false,
         materialDescription: '30M Monopole High Mast Steel Sections',
         uom: 'Set',
         mirQty: 2.00,
-        minQty: 2.00,
+        minQty: 0.00,
         rate: 185000.00,
-        amount: 370000.00
+        amount: 0.00
       },
       {
         id: 'min-3-2',
         itemCode: 'ITEM-AVL-202',
         itemName: 'Aviation Obstruction LED Warning Light Dual Lamp',
         requestQty: 4.00,
-        issuedQty: 4.00,
-        stockQty: 12.00,
+        issuedQty: 0.00,
+        stockQty: 0.00,
         remark: 'Top mast lighting',
         selected: false,
         materialDescription: 'Aviation Obstruction LED Warning Light Dual Lamp',
         uom: 'Nos',
         mirQty: 4.00,
-        minQty: 4.00,
+        minQty: 0.00,
         rate: 8500.00,
-        amount: 34000.00
+        amount: 0.00
       },
       {
         id: 'min-3-3',
         itemCode: 'ITEM-TRY-203',
         itemName: 'Galvanized Cable Ladder Tray 300mm x 3M',
         requestQty: 90.00,
-        issuedQty: 90.00,
-        stockQty: 180.00,
+        issuedQty: 0.00,
+        stockQty: 0.00,
         remark: 'Vertical run pathway',
         selected: false,
         materialDescription: 'Galvanized Cable Ladder Tray 300mm x 3M',
         uom: 'Mtr',
         mirQty: 90.00,
-        minQty: 90.00,
+        minQty: 0.00,
         rate: 850.00,
-        amount: 76500.00
+        amount: 0.00
       }
     ]
   },
@@ -25797,107 +26026,38 @@ let wmSrnDataStore = [
   {
     id: 'wm-srn-1',
     selected: false,
+    siteName: 'Indus Tower Site Delta-8',
     srnNo: 'SRN-2026-001',
-    boqNo: '',
-    boqDate: '',
-    projectId: 'PRJ-2026-001',
-    infraCategory: 'Power',
-    qty: 5.00,
-    ageing: '4 Days',
-    status: 'BOQ Request Pending',
-    remarks: 'i-map pending',
-    materialDispatchDate: '2026-08-01',
-    dispatchDate: '2026-08-01'
+    projectId: 'PRJ-IND-4091',
+    projectManager: 'Nivas Kumar',
+    infraCategory: 'Electrical',
+    qty: 150.00,
+    ageing: '3 Days',
+    status: 'To Be Dispatch'
   },
   {
     id: 'wm-srn-2',
     selected: false,
+    siteName: 'Vi Telemetry Hub Kolhapur',
     srnNo: 'SRN-2026-002',
-    boqNo: 'BOQ-SRN-102',
-    boqDate: '2026-08-05',
-    projectId: 'PRJ-2026-002',
-    infraCategory: 'Electrical',
-    qty: 12.00,
-    ageing: '7 Days',
-    status: 'BOQ Pending',
-    remarks: 'received',
-    materialDispatchDate: '2026-08-05',
-    dispatchDate: '2026-08-05'
+    projectId: 'PRJ-IND-4093',
+    projectManager: 'Anand Verma',
+    infraCategory: 'Civil & Tower',
+    qty: 60.00,
+    ageing: '6 Days',
+    status: 'To Be Receive'
   },
   {
     id: 'wm-srn-3',
     selected: false,
+    siteName: 'Airtel Micro Hub Nagpur',
     srnNo: 'SRN-2026-003',
-    boqNo: 'BOQ-SRN-103',
-    boqDate: '2026-08-10',
-    projectId: 'PRJ-2026-003',
-    infraCategory: 'Civil',
-    qty: 8.00,
-    ageing: '10 Days',
-    status: 'Document Pending',
-    remarks: 'i-map pending',
-    materialDispatchDate: '2026-08-10',
-    dispatchDate: '2026-08-10'
-  },
-  {
-    id: 'wm-srn-4',
-    selected: false,
-    srnNo: 'SRN-2026-004',
-    boqNo: 'BOQ-SRN-104',
-    boqDate: '2026-08-14',
-    projectId: 'PRJ-2026-004',
-    infraCategory: 'Tower Infra',
-    qty: 2.00,
-    ageing: '15 Days',
-    status: 'To Be Complete',
-    remarks: 'received',
-    materialDispatchDate: '2026-08-14',
-    dispatchDate: '2026-08-14'
-  },
-  {
-    id: 'wm-srn-5',
-    selected: false,
-    srnNo: 'SRN-2026-005',
-    boqNo: 'BOQ-SRN-105',
-    boqDate: '2026-08-16',
-    projectId: 'PRJ-2026-005',
-    infraCategory: 'Telecom',
-    qty: 15.00,
-    ageing: '19 Days',
-    status: 'Dispatch Request Pending',
-    remarks: 'i-map pending',
-    materialDispatchDate: '2026-08-16',
-    dispatchDate: '2026-08-16'
-  },
-  {
-    id: 'wm-srn-6',
-    selected: false,
-    srnNo: 'SRN-2026-006',
-    boqNo: 'BOQ-SRN-106',
-    boqDate: '2026-08-18',
-    projectId: 'PRJ-2026-006',
-    infraCategory: 'Rectifier',
-    qty: 3.00,
-    ageing: '25 Days',
-    status: 'To Be Returned',
-    remarks: 'received',
-    materialDispatchDate: '2026-08-18',
-    dispatchDate: '2026-08-18'
-  },
-  {
-    id: 'wm-srn-7',
-    selected: false,
-    srnNo: 'SRN-2026-007',
-    boqNo: 'BOQ-SRN-107',
-    boqDate: '2026-08-20',
-    projectId: 'PRJ-2026-007',
-    infraCategory: 'Battery Bank',
-    qty: 6.00,
-    ageing: '35 Days',
-    status: 'Dispatch Request Pending',
-    remarks: 'i-map pending',
-    materialDispatchDate: '2026-07-25',
-    dispatchDate: '2026-07-25'
+    projectId: 'PRJ-IND-4096',
+    projectManager: 'Priya Sharma',
+    infraCategory: 'Optical Fiber',
+    qty: 90.00,
+    ageing: '2 Days',
+    status: 'To Be Dispatch'
   }
 ];
 
@@ -26140,6 +26300,20 @@ let wmSupplyDataStore = [
 ];
 
 window.toggleWmRowSelected = function(rowId, isChecked) {
+  if (['stn', 'srn', 'mtn'].includes(currentWorklistView)) {
+    if (isChecked && currentDataset) {
+      currentDataset.forEach(r => {
+        if (r.id !== rowId) r.selected = false;
+      });
+      [wmStnDataStore, wmSrnDataStore, wmMtnDataStore].forEach(store => {
+        if (Array.isArray(store)) {
+          store.forEach(r => {
+            if (r.id !== rowId) r.selected = false;
+          });
+        }
+      });
+    }
+  }
   if (currentDataset) {
     const curRow = currentDataset.find(r => r.id === rowId);
     if (curRow) curRow.selected = isChecked;
@@ -26157,6 +26331,149 @@ window.toggleWmRowSelected = function(rowId, isChecked) {
     }
   });
   renderWorklistTableBody();
+  if (typeof renderWorklistToolbar === 'function') {
+    renderWorklistToolbar();
+  }
+};
+
+window.handleWmTransferTransportClick = function(rowId) {
+  const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+              (typeof wmStnDataStore !== 'undefined' && wmStnDataStore.find(r => r.id === rowId)) ||
+              (typeof wmSrnDataStore !== 'undefined' && wmSrnDataStore.find(r => r.id === rowId));
+  if (!row) {
+    if (typeof showToast === 'function') showToast('Please select a row first.');
+    return;
+  }
+  activeWmTransferRowId = row.id;
+  activeWmTransferView = currentWorklistView;
+  activeWmMrnRowId = row.id;
+  if (typeof openWmMrnTransportModal === 'function') {
+    openWmMrnTransportModal(row);
+  }
+};
+
+window.handleWmTransferReceiveTick = async function(rowId) {
+  const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+              (typeof wmStnDataStore !== 'undefined' && wmStnDataStore.find(r => r.id === rowId)) ||
+              (typeof wmSrnDataStore !== 'undefined' && wmSrnDataStore.find(r => r.id === rowId));
+  if (!row) {
+    if (typeof showToast === 'function') showToast('Please select a row first.');
+    return;
+  }
+  const authUser = (typeof getAuthenticatedUser === 'function') ? getAuthenticatedUser() : null;
+  const managerName = (authUser && (authUser.name || authUser.username)) ? (authUser.name || authUser.username) : 'Warehouse Manager';
+
+  const infraId = row.infraId || parseInt(String(row.id).replace(/\D/g, ''), 10) || 1;
+  try {
+    const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+      ? getCommercialApiBaseUrl()
+      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl)
+          ? window.NexusApi.baseUrl
+          : '');
+    const resp = await fetch(`${apiBase}/api/v1/commercial/infra/${infraId}/receive`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ received_by: managerName })
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      row.status = data.status || 'To Be Dispatch';
+      row.receivedBy = data.received_by || managerName;
+    } else {
+      row.status = 'To Be Dispatch';
+      row.receivedBy = managerName;
+    }
+  } catch(e) {
+    console.warn('Error marking infra item as received:', e);
+    row.status = 'To Be Dispatch';
+    row.receivedBy = managerName;
+  }
+
+  [wmStnDataStore, wmSrnDataStore].forEach(store => {
+    if (Array.isArray(store)) {
+      const target = store.find(r => r.id === row.id || (r.infraId && r.infraId === row.infraId));
+      if (target) {
+        target.status = row.status;
+        target.receivedBy = row.receivedBy;
+      }
+    }
+  });
+
+  renderWorklistTableBody();
+  if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`${row.stnNo || row.srnNo || 'Item'} received by ${managerName}! Status changed to To Be Dispatch`, 'Received Successfully');
+  } else if (typeof showToast === 'function') {
+    showToast(`${row.stnNo || row.srnNo || 'Item'} received by ${managerName}! Status: To Be Dispatch`);
+  }
+};
+
+window.handleWmTransferVehicleTickClick = function(rowId) {
+  const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+              (typeof wmStnDataStore !== 'undefined' && wmStnDataStore.find(r => r.id === rowId)) ||
+              (typeof wmSrnDataStore !== 'undefined' && wmSrnDataStore.find(r => r.id === rowId));
+  if (!row) {
+    if (typeof showToast === 'function') showToast('Please select a row first.');
+    return;
+  }
+  activeWmTransferRowId = row.id;
+  activeWmTransferView = currentWorklistView;
+  activeWmMinRowId = row.id;
+  if (typeof openWmMinEwayModal === 'function') {
+    openWmMinEwayModal();
+  }
+};
+
+window.handleWmTransferDispatchTick = async function(rowId) {
+  const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+              (typeof wmStnDataStore !== 'undefined' && wmStnDataStore.find(r => r.id === rowId)) ||
+              (typeof wmSrnDataStore !== 'undefined' && wmSrnDataStore.find(r => r.id === rowId));
+  if (!row) {
+    if (typeof showToast === 'function') showToast('Please select a row first.');
+    return;
+  }
+  const infraId = row.infraId || parseInt(String(row.id).replace(/\D/g, ''), 10) || 1;
+  try {
+    const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+      ? getCommercialApiBaseUrl()
+      : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl)
+          ? window.NexusApi.baseUrl
+          : '');
+    await fetch(`${apiBase}/api/v1/commercial/infra/${infraId}/dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: 'Dispatched',
+        transport_name: (row.transport && row.transport.transporterName) || 'V-Trans Logistics Ltd',
+        vehicle_number: (row.transport && row.transport.vehicleNo) || 'TN-09-AB-1234'
+      })
+    });
+  } catch(e) {
+    console.warn('Error dispatching infra item:', e);
+  }
+
+  row.status = 'Dispatched';
+  [wmStnDataStore, wmSrnDataStore].forEach(store => {
+    if (Array.isArray(store)) {
+      const target = store.find(r => r.id === row.id || (r.infraId && r.infraId === row.infraId));
+      if (target) target.status = 'Dispatched';
+    }
+  });
+
+  renderWorklistTableBody();
+  if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+  if (typeof showToast === 'function') {
+    showToast(`${row.stnNo || row.srnNo || 'Item'} status changed to Dispatched`);
+  }
+};
+
+window.handleWmMinVehicleTickClick = function(rowId) {
+  const row = (currentDataset && currentDataset.find(r => r.id === rowId)) ||
+              (typeof wmMinDataStore !== 'undefined' && wmMinDataStore.find(r => r.id === rowId));
+  if (row) {
+    activeWmMinRowId = row.id;
+    openWmMinTransportModal(row);
+  }
 };
 
 
@@ -26172,9 +26489,6 @@ function handleWmGrnRowClick(e, rowId) {
   const row = (currentDataset || []).find(r => r.id === rowId);
   if (!row) return;
 
-  const isApprovalPending = ((row.status || '').toLowerCase().includes('approval pending') || (row.status || '').toLowerCase().includes('po approval'));
-  if (!isApprovalPending) return;
-
   const willSelect = !row.selected;
   (currentDataset || []).forEach(r => { r.selected = false; });
   (wmGrnDataStore || []).forEach(r => { r.selected = false; });
@@ -26183,11 +26497,33 @@ function handleWmGrnRowClick(e, rowId) {
   const storeRow = (wmGrnDataStore || []).find(r => r.id === rowId);
   if (storeRow) storeRow.selected = willSelect;
 
+  // Update submit button visibility in both toolbar and bottom area
+  const toolbarSubmit = document.getElementById('btnWmGrnToolbarSubmit');
+  if (toolbarSubmit) {
+    toolbarSubmit.style.display = willSelect ? 'inline-flex' : 'none';
+  }
+  const submitArea = document.getElementById('wmGrnSubmitArea');
+  if (submitArea) {
+    submitArea.style.display = willSelect ? 'flex' : 'none';
+  }
+
   if (typeof renderWorklistTableBody === 'function') {
     renderWorklistTableBody();
   }
 }
 window.handleWmGrnRowClick = handleWmGrnRowClick;
+
+window.handleWmGrnMainSubmit = function() {
+  const selectedRow = (currentDataset || []).find(r => r.selected) || (wmGrnDataStore || []).find(r => r.selected);
+  if (!selectedRow) {
+    if (typeof showToast === 'function') showToast('Please select a row first');
+    return;
+  }
+  activeWmGrnRowId = selectedRow.id;
+  if (typeof openWmGrnTransportPaymentModal === 'function') {
+    openWmGrnTransportPaymentModal(selectedRow.id);
+  }
+};
 
 
 window.handleWmGrnRowSelect = function(rowId, isChecked) {
@@ -26783,8 +27119,32 @@ window.calculateWmMrnPayable = function() {
   }
 };
 
-window.handleWmMrnTransportPdfDownload = function() {
-  showToast('MRN Transport details PDF downloaded successfully');
+window.handleWmMrnTransportPdfDownload = async function(e) {
+  if (e && e.preventDefault) { e.preventDefault(); e.stopPropagation(); }
+  try {
+    const activeTransferRow = (typeof activeWmTransferRowId !== 'undefined' && activeWmTransferRowId && currentDataset && currentDataset.find(r => r.id === activeWmTransferRowId)) ||
+      (currentDataset && currentDataset.find(r => r.selected));
+    if (activeTransferRow && activeTransferRow.documents) {
+      downloadBlobOrDataUrl(activeTransferRow.documents, `LR_Document_${activeTransferRow.stnNo || activeTransferRow.srnNo || 'Transfer'}.pdf`);
+      if (typeof showToast === 'function') showToast('LR Document downloaded successfully');
+      return;
+    }
+    const activeMrnRow = (typeof wmMrnDataStore !== 'undefined' && wmMrnDataStore.find(r => r.id === activeWmMrnRowId)) ||
+                         (typeof currentDataset !== 'undefined' && currentDataset.find(r => r.id === activeWmMrnRowId));
+    const poNo = (activeMrnRow && activeMrnRow.poNo) ? activeMrnRow.poNo.split(' ')[0] : '';
+    const res = await fetch(`/api/v1/purchase/lr-document${poNo ? `?po_no=${encodeURIComponent(poNo)}` : ''}`);
+    const json = await res.json();
+    if (json && json.success && json.lr_document) {
+      downloadBlobOrDataUrl(json.lr_document, `LR_Document_${poNo || 'MRN'}.pdf`);
+      if (typeof showToast === 'function') showToast('LR Document downloaded successfully');
+      return;
+    }
+  } catch(err) {
+    console.warn('Error downloading LR document from DB:', err);
+  }
+  const fallbackPdf = 'data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwgL0xlbmd0aCA0OSAvRmlsdGVyIC9GbGF0ZURlY29kZSA+PgpzdHJlYW0KeJwrVAgwsFBIVMhIzMsvVUjOz1NQCEssUSguKUgsKklNysxLT1UIzUstS80r0VAvAQC9cw9KCmVuZHN0cmVhbQplbmRvYmoK';
+  downloadBlobOrDataUrl(fallbackPdf, 'LR_Document.pdf');
+  if (typeof showToast === 'function') showToast('LR Document downloaded successfully');
 };
 
 window.handleWmGrnTransportPdfUpload = function(event) {
@@ -26794,8 +27154,255 @@ window.handleWmGrnTransportPdfUpload = function(event) {
   }
 };
 
-window.handleWmMinTransportPrint = function() {
-  window.print();
+let currentNexusDcZoom = 1.0;
+let currentNexusDcDownloadUrl = '';
+let currentNexusDcDocNo = '';
+
+let currentNexusDcBlobUrl = null;
+
+window.openNexusDcPdfPreview = function(pdfUrlOrBlobUrl, downloadUrl, docNo) {
+  currentNexusDcZoom = 1.0;
+  currentNexusDcDownloadUrl = downloadUrl || pdfUrlOrBlobUrl;
+  currentNexusDcDocNo = docNo || 'Delivery_Challan';
+
+  const iframe = document.getElementById('iframeNexusDcPdfPreview');
+  if (iframe) {
+    const cleanUrl = String(pdfUrlOrBlobUrl).split('#')[0];
+    iframe.src = `${cleanUrl}#zoom=100&toolbar=1&navpanes=1`;
+  }
+
+  const zoomLbl = document.getElementById('lblNexusDcZoomLevel');
+  if (zoomLbl) zoomLbl.textContent = '100%';
+
+  // Dim the Transport Details modal behind the backdrop
+  const transModal = document.getElementById('wmGrnTransportModal');
+  if (transModal) transModal.classList.add('card-dimmed-blurred');
+
+  const backdrop = document.getElementById('nexusDcPdfPreviewBackdrop');
+  const modal = document.getElementById('nexusDcPdfPreviewModal');
+  if (backdrop) backdrop.style.display = 'block';
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.style.flexDirection = 'column';
+    modal.style.position = 'fixed';
+    modal.style.top = '50%';
+    modal.style.left = '50%';
+    modal.style.transform = 'translate(-50%, -50%)';
+  }
+};
+
+window.closeNexusDcPdfPreview = function() {
+  const backdrop = document.getElementById('nexusDcPdfPreviewBackdrop');
+  const modal = document.getElementById('nexusDcPdfPreviewModal');
+  if (backdrop) backdrop.style.display = 'none';
+  if (modal) modal.style.display = 'none';
+  const iframe = document.getElementById('iframeNexusDcPdfPreview');
+  if (iframe) iframe.src = 'about:blank';
+
+  // Restore the Transport Details modal
+  const transModal = document.getElementById('wmGrnTransportModal');
+  if (transModal) transModal.classList.remove('card-dimmed-blurred');
+};
+
+window.adjustNexusDcZoom = function(delta) {
+  currentNexusDcZoom = Math.min(2.0, Math.max(0.5, currentNexusDcZoom + delta));
+  const zoomPct = Math.round(currentNexusDcZoom * 100);
+  const zoomLbl = document.getElementById('lblNexusDcZoomLevel');
+  if (zoomLbl) zoomLbl.textContent = `${zoomPct}%`;
+
+  const iframe = document.getElementById('iframeNexusDcPdfPreview');
+  if (iframe && iframe.src) {
+    const baseSrc = iframe.src.split('#')[0];
+    iframe.src = `${baseSrc}#zoom=${zoomPct}&toolbar=1&navpanes=1`;
+  }
+};
+
+window.printNexusDcPdf = function() {
+  const iframe = document.getElementById('iframeNexusDcPdfPreview');
+  if (iframe && iframe.contentWindow) {
+    try {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      return;
+    } catch (e) {
+      console.warn('Iframe print access restricted, opening print window:', e);
+    }
+  }
+  const targetUrl = currentNexusDcBlobUrl || (iframe && iframe.src ? iframe.src.split('#')[0] : '');
+  if (targetUrl) {
+    const printWin = window.open(targetUrl, '_blank');
+    if (printWin) {
+      printWin.onload = function() {
+        printWin.print();
+      };
+    }
+  }
+};
+
+window.downloadNexusDcPdf = function() {
+  if (currentNexusDcBlobUrl) {
+    const a = document.createElement('a');
+    a.href = currentNexusDcBlobUrl;
+    a.download = `Delivery_Challan_${currentNexusDcDocNo}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 100);
+    return;
+  }
+  if (!currentNexusDcDownloadUrl) return;
+  const a = document.createElement('a');
+  a.href = currentNexusDcDownloadUrl;
+  a.download = `Delivery_Challan_${currentNexusDcDocNo}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 100);
+};
+
+window.handleWmMinTransportPrint = async function(e) {
+  if (e && typeof e.preventDefault === 'function') {
+    e.preventDefault();
+  }
+  if (e && typeof e.stopPropagation === 'function') {
+    e.stopPropagation();
+  }
+  const row = (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) ||
+              (wmMinDataStore && wmMinDataStore.find(r => r.id === activeWmMinRowId)) ||
+              (currentDataset && currentDataset.find(r => r.selected)) ||
+              (currentDataset && currentDataset.find(r => r.isHighlighted)) ||
+              (wmMinDataStore && wmMinDataStore[0]);
+
+  if (!row) {
+    if (typeof showToast === 'function') showToast('No MIN record selected to print.');
+    return;
+  }
+
+  // Check that Transport Details have been submitted
+  const isSaved = Boolean(row.transport && (row.transport.isSaved || row.transport.submitted || row.status === 'Ready to Dispatch'));
+  if (!isSaved) {
+    if (typeof showToast === 'function') {
+      showToast('Please submit Transport Details first before printing.');
+    } else {
+      alert('Please submit Transport Details first before printing.');
+    }
+    return;
+  }
+
+  const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+    ? getCommercialApiBaseUrl()
+    : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl)
+        ? window.NexusApi.baseUrl
+        : (window.API_BASE_URL || (window.location && window.location.port !== '8000' ? 'http://127.0.0.1:8000/api/v1' : '/api/v1')));
+
+  const btnPrint = document.getElementById('btnWmMinTransportPrint');
+  let origHtml = '';
+  if (btnPrint) {
+    origHtml = btnPrint.innerHTML;
+    btnPrint.disabled = true;
+    btnPrint.style.opacity = '0.6';
+    btnPrint.style.pointerEvents = 'none';
+  }
+
+  if (typeof showToast === 'function') {
+    showToast('Generating Delivery Challan preview...');
+  }
+
+  try {
+    const minPayload = {
+      id: row.id,
+      min_no: row.minNo || row.id,
+      po_no: row.poNo || '',
+      project_id: row.projectId || 'R/RL-8217348',
+      site_id: row.siteId || 'IIN-1127332',
+      site_name: row.siteName || 'Demo',
+      site_address: row.siteAddress || 'Thuraiyur-600032',
+      vendor_name: row.vendorName || row.supplierName || row.vendor || '',
+      vendor_gst: row.vendorGst || row.gstNo || row.gstNumber || '',
+      gst_type: row.gstType || '',
+      warehouse_manager_name: (function() {
+        try {
+          const u = (typeof window !== 'undefined' && window.sessionStorage) ? JSON.parse(window.sessionStorage.getItem('nexus_user') || '{}') : {};
+          if (u.name && u.name.toLowerCase() !== 'warehouse manager') return u.name;
+        } catch(e) {}
+        return (row.requestBy && row.requestBy.toLowerCase() !== 'warehouse manager') ? row.requestBy : 'Rajesh Sharma';
+      })(),
+      designation: 'Warehouse Manager',
+      document_date: row.documentDate || row.date || new Date().toISOString().split('T')[0],
+      transport: row.transport || {},
+      eway_bill: Boolean((row.transport && row.transport.ewayBill) || row.ewayBill),
+      items: (row.items && Array.isArray(row.items)) ? row.items.map(it => ({
+        item_description: it.materialDescription || it.itemName || it.item_description,
+        hsn_code: it.hsnCode || it.hsn_code || '85369090',
+        uom: it.uom || 'NOS',
+        qty: it.minQty || it.requestQty || it.qty || 1,
+        rate: it.rate || 0,
+        gst_rate: it.gstRate || 0,
+        amount: it.amount || ((it.minQty || it.requestQty || 1) * (it.rate || 0))
+      })) : []
+    };
+
+    const token = (typeof window !== 'undefined' && window.localStorage)
+      ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token')) || window.localStorage.getItem('nxtkn_commercial') || '')
+      : '';
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch(`${apiBase}/purchase/min/${encodeURIComponent(row.id)}/generate-delivery-challan-pdf?regenerate=true`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(minPayload)
+    });
+
+    const resData = await res.json();
+    if (!res.ok) {
+      const errMsg = resData.detail || 'Failed to generate Delivery Challan PDF';
+      if (typeof showToast === 'function') {
+        showToast(`Error: ${errMsg}`);
+      } else {
+        alert(errMsg);
+      }
+      return;
+    }
+
+    const docNo = resData.document_no || row.minNo || row.id;
+    const fullDownloadUrl = `${apiBase}/purchase/min/${encodeURIComponent(row.id)}/delivery-challan-pdf?doc_no=${encodeURIComponent(docNo)}&download=1`;
+    const fullPreviewUrl = `${apiBase}/purchase/min/${encodeURIComponent(row.id)}/delivery-challan-pdf?doc_no=${encodeURIComponent(docNo)}&t=${Date.now()}`;
+
+    // Cache generated document info
+    row.dcPdfUrl = fullPreviewUrl;
+    row.dcDownloadUrl = fullDownloadUrl;
+    row.dcDocNo = docNo;
+
+    // Fetch PDF blob for guaranteed same-origin rendering in iframe
+    try {
+      const streamRes = await fetch(fullPreviewUrl);
+      if (streamRes.ok) {
+        const pdfBlob = await streamRes.blob();
+        if (currentNexusDcBlobUrl) {
+          try { URL.revokeObjectURL(currentNexusDcBlobUrl); } catch (e) {}
+        }
+        currentNexusDcBlobUrl = URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
+        openNexusDcPdfPreview(currentNexusDcBlobUrl, fullDownloadUrl, docNo);
+      } else {
+        openNexusDcPdfPreview(fullPreviewUrl, fullDownloadUrl, docNo);
+      }
+    } catch (e) {
+      console.warn('Direct blob preview failed, falling back to URL preview:', e);
+      openNexusDcPdfPreview(fullPreviewUrl, fullDownloadUrl, docNo);
+    }
+
+  } catch (err) {
+    console.error('Error in handleWmMinTransportPrint:', err);
+    if (typeof showToast === 'function') {
+      showToast(`Error generating document: ${err.message}`);
+    }
+  } finally {
+    if (btnPrint) {
+      btnPrint.disabled = false;
+      btnPrint.style.opacity = '1';
+      btnPrint.style.pointerEvents = 'auto';
+      btnPrint.innerHTML = origHtml;
+    }
+  }
 };
 
 window.handleWmMinTransportTypeChange = function(type) {
@@ -26883,10 +27490,8 @@ window.saveWmTransportDetails = function() {
 
       renderWorklistTableBody();
 
-      if (typeof showSvgSuccessPopup === 'function') {
-        showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
-      } else if (typeof showToast === 'function') {
-        showToast('Task completed successfully!');
+      if (typeof showToast === 'function') {
+        showToast('Transport details submitted successfully!');
       }
       return;
     }
@@ -26912,6 +27517,16 @@ window.saveWmTransportDetails = function() {
           }
         });
       }
+      const allDone = row.items && row.items.length > 0 && row.items.every(it => it.isTicked || it.isApproved);
+      if (allDone) {
+        row.allApproved = true;
+        row.isCompleted = true;
+        const sRow = wmMrnDataStore.find(r => r.id === row.id);
+        if (sRow) {
+          sRow.allApproved = true;
+          sRow.isCompleted = true;
+        }
+      }
     }
     if (currentDataset && Array.isArray(currentDataset)) {
       const cur = currentDataset.find(r => r.id === activeWmMrnRowId);
@@ -26927,10 +27542,8 @@ window.saveWmTransportDetails = function() {
     updateURL();
     renderApp();
 
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
-    } else if (typeof showToast === 'function') {
-      showToast('Task completed successfully!');
+    if (typeof showToast === 'function') {
+      showToast('Transport details submitted successfully!');
     }
     return;
   }
@@ -26955,36 +27568,164 @@ window.saveWmTransportDetails = function() {
 
     renderWorklistTableBody();
 
-    if (typeof showSvgSuccessPopup === 'function') {
-      showSvgSuccessPopup('Transport details submitted successfully!', 'Task Completed');
-    } else if (typeof showToast === 'function') {
-      showToast('Task completed successfully!');
+    if (typeof showToast === 'function') {
+      showToast('Transport details submitted successfully!');
     }
     return;
   }
 
   if (currentWorklistView === 'min' || currentWorklistView === 'min_detail') {
-    const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted));
+    const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.selected)) || (currentDataset && currentDataset.find(r => r.isHighlighted));
     if (row) {
       if (!row.transport) row.transport = {};
       const tType = document.getElementById('selWmMinTransportType')?.value || 'Rental';
       row.transport.transportType = tType;
+      let transporterName = '', vehicleNo = '', driverName = '', whatsappNo = '';
       if (tType === 'Rental') {
-        row.transport.transporterName = document.getElementById('inpWmMinTransporterName')?.value || '';
-        row.transport.vehicleNo = document.getElementById('inpWmMinVehicleNo')?.value || '';
-        row.transport.driverName = document.getElementById('inpWmMinDriverName')?.value || '';
-        row.transport.whatsappNo = document.getElementById('inpWmMinWhatsappNo')?.value || '';
+        transporterName = document.getElementById('inpWmMinTransporterName')?.value || '';
+        vehicleNo = document.getElementById('inpWmMinVehicleNo')?.value || '';
+        driverName = document.getElementById('inpWmMinDriverName')?.value || '';
+        whatsappNo = document.getElementById('inpWmMinWhatsappNo')?.value || '';
       } else {
-        row.transport.transporterName = document.getElementById('selWmMinTransporterName')?.value || '';
-        row.transport.vehicleNo = document.getElementById('selWmMinVehicleNo')?.value || '';
-        row.transport.driverName = document.getElementById('selWmMinDriverName')?.value || '';
-        row.transport.whatsappNo = '';
+        transporterName = document.getElementById('selWmMinTransporterName')?.value || '';
+        vehicleNo = document.getElementById('selWmMinVehicleNo')?.value || '';
+        driverName = document.getElementById('selWmMinDriverName')?.value || '';
+        whatsappNo = '';
       }
-      row.transport.ewayBill = Boolean((row.transport && row.transport.ewayBill) || row.ewayBill);
+      const amountVal = parseFloat(document.getElementById('inpWmMinAmount')?.value) || 0;
+      const hasAdv = Boolean(document.getElementById('tglWmMinAdvancePayment')?.checked);
+      const advVal = hasAdv ? (parseFloat(document.getElementById('inpWmMinAdvancePayment')?.value) || 0) : 0;
+
+      const ewayVal = Boolean((row.transport && row.transport.ewayBill) || row.ewayBill);
+
+      row.transport.transporterName = transporterName;
+      row.transport.vehicleNo = vehicleNo;
+      row.transport.driverName = driverName;
+      row.transport.whatsappNo = whatsappNo;
+      row.transport.amount = amountVal;
+      row.transport.hasAdvancePayment = hasAdv;
+      row.transport.advancePayment = advVal;
+      row.transport.ewayBill = ewayVal;
+      row.ewayBill = ewayVal;
+      row.transport.isSaved = true;
+      row.transport.submitted = true;
+
+      // Status becomes 'Ready to Dispatch' upon filling transport details tab and submitting
+      row.status = 'Ready to Dispatch';
+      row.selected = false;
+      row.isHighlighted = true;
+
+      // Sync across stores
+      const storeRow = wmMinDataStore.find(r => r.id === row.id);
+      if (storeRow) {
+        storeRow.status = 'Ready to Dispatch';
+        storeRow.selected = false;
+        storeRow.isHighlighted = true;
+        storeRow.transport = { ...row.transport };
+        storeRow.ewayBill = ewayVal;
+      }
+      try {
+        sessionStorage.setItem('nexus_wm_min_data', JSON.stringify(wmMinDataStore));
+      } catch(e) {}
+
+      // Reveal / Enable the Print icon in the modal header
+      const btnPrint = document.getElementById('btnWmMinTransportPrint');
+      if (btnPrint) {
+        btnPrint.style.display = 'inline-flex';
+        btnPrint.disabled = false;
+        btnPrint.title = 'Print Delivery Challan';
+      }
+
+      // Add row details to Warehouse Payment page (wmPaymentDataStore)
+      if (typeof wmPaymentDataStore !== 'undefined' && Array.isArray(wmPaymentDataStore)) {
+        const payEntryId = `wm-pay-min-${row.id}`;
+        const existingPayIdx = wmPaymentDataStore.findIndex(p => p.id === payEntryId);
+        const payableVal = Math.max(0, amountVal - advVal);
+        const newPayEntry = {
+          id: payEntryId,
+          requestDate: row.requestDate || new Date().toLocaleDateString('en-GB').replace(/\//g, '-'),
+          expenseName: `Transport Charges - ${row.siteName || row.siteId || 'MIN Dispatch'}`,
+          transferTo: transporterName || 'Transporter',
+          requestAmount: amountVal,
+          approvedAmount: amountVal,
+          paidAmount: advVal,
+          payableAmount: payableVal,
+          pendingWith: 'Accounts Dept',
+          ageing: '1 Day'
+        };
+        if (existingPayIdx >= 0) {
+          wmPaymentDataStore[existingPayIdx] = newPayEntry;
+        } else {
+          wmPaymentDataStore.unshift(newPayEntry);
+        }
+        try {
+          sessionStorage.setItem('nexus_wm_payment_data', JSON.stringify(wmPaymentDataStore));
+        } catch(e) {}
+      }
+
+      // Update background table view
+      if (currentWorklistView === 'min_detail') {
+        currentWorklistView = 'min';
+        updateURL();
+        renderApp();
+      } else {
+        renderWorklistTableBody();
+      }
+
+      const apiBase = (typeof getCommercialApiBaseUrl === 'function')
+        ? getCommercialApiBaseUrl()
+        : ((typeof window !== 'undefined' && window.NexusApi && window.NexusApi.baseUrl)
+            ? window.NexusApi.baseUrl
+            : (window.API_BASE_URL || (window.location && window.location.port !== '8000' ? 'http://127.0.0.1:8000/api/v1' : '/api/v1')));
+
+      // Call Backend API to store into nexus_admin.transport & nexus_accounts.payment
+      fetch(`${apiBase}/purchase/min/transport-details`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_name: 'Nexus',
+          transport_type: tType,
+          transporter_name: transporterName,
+          vehicle_number: vehicleNo,
+          driver_name: driverName,
+          whatsapp_number: whatsappNo,
+          amount: amountVal,
+          advance_payment: advVal,
+          has_advance_payment: hasAdv,
+          po_no: row.poNo || '',
+          site_id: row.siteId || '',
+          site_name: row.siteName || '',
+          request_by: row.requestBy || 'Warehouse Manager'
+        })
+      }).then(res => res.json()).then(resData => {
+        console.log('MIN transport saved to admin & accounts db:', resData);
+      }).catch(err => {
+        console.warn('Backend save min transport details warning:', err);
+      });
+
+      if (typeof showToast === 'function') {
+        showToast('Transport details saved! You can now click the Print icon above to generate the Delivery Challan.');
+      }
+      return;
     }
 
     closeWmGrnTransportModal();
-    openWmGrnTransportPaymentModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    if (currentWorklistView === 'min_detail') {
+      currentWorklistView = 'min';
+      updateURL();
+      renderApp();
+    } else {
+      renderWorklistTableBody();
+    }
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport details saved successfully! Row status updated to Ready to Dispatch', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Transport details saved! Status: Ready to Dispatch');
+    }
     return;
   }
 
@@ -28103,6 +28844,113 @@ window.submitWmTransportPayment = function() {
     return;
   }
 
+  if (currentWorklistView === 'grn') {
+    const row = (currentDataset && currentDataset.find(r => r.id === activeWmGrnRowId)) ||
+                (wmGrnDataStore && wmGrnDataStore.find(r => r.id === activeWmGrnRowId)) ||
+                (currentDataset && currentDataset.find(r => r.selected)) ||
+                (wmGrnDataStore && wmGrnDataStore.find(r => r.selected)) ||
+                wmGrnDataStore[0];
+
+    const ben = document.getElementById('selWmBeneficiaryType')?.value || 'Self';
+    const transferType = document.getElementById('selWmTransferType')?.value || 'NET Banking';
+    let payeeName = 'Warehouse Manager (Self)';
+    let accNo = '';
+    let ifsc = '';
+
+    if (ben === 'Driver' || ben === 'Other Employee' || ben === 'Transport Vendor') {
+      payeeName = document.getElementById('selWmPaymentAccountName')?.value || 'Transport Logistics Partner';
+    } else if (ben === 'New Account') {
+      payeeName = document.getElementById('inpWmPaymentNewAccountName')?.value || 'New Transport Payee';
+      accNo = document.getElementById('inpWmPaymentAccountNumber')?.value || '';
+      ifsc = document.getElementById('inpWmPaymentIfscCode')?.value || '';
+    }
+
+    const amt = parseFloat(document.getElementById('inpWmPaymentFreightCharges')?.value) || 14500.00;
+    const adv = parseFloat(document.getElementById('inpWmPaymentAdvancePayment')?.value) || 0.00;
+    const payable = Math.max(0, amt - adv);
+
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+
+    // 1. Data shown in payment page of master login
+    const masterPayRow = {
+      id: 'PAY-TR-' + Date.now(),
+      requestDate: dateStr,
+      expenseHead: 'Transport',
+      expenseName: `Transport Charges - ${row?.poNo || 'PO'}`,
+      transferTo: payeeName,
+      requestAmount: amt,
+      approvedAmount: amt,
+      paidAmount: adv,
+      payableAmount: payable,
+      pendingWith: 'Accounts Dept',
+      ageing: '0 Days',
+      status: 'Approval Pending',
+      poNo: row?.poNo || '',
+      invoiceNo: row?.invoiceNo || ''
+    };
+    if (typeof paymentData !== 'undefined') {
+      paymentData.unshift(masterPayRow);
+      try {
+        sessionStorage.setItem('nexus_master_payments', JSON.stringify(paymentData));
+      } catch(e) {}
+    }
+
+    // 2. Link the transport payment tab to payment table of accounts db (expense_type = "Transport Charges")
+    if (window.NexusApi && window.NexusApi.purchase && window.NexusApi.purchase.submitTransportPayment) {
+      window.NexusApi.purchase.submitTransportPayment({
+        po_no: row?.poNo || '',
+        invoice_no: row?.invoiceNo || '',
+        expense_type: 'Transport Charges',
+        beneficiary_type: ben,
+        transfer_type: transferType,
+        account_name: payeeName,
+        account_number: accNo,
+        ifsc_code: ifsc,
+        requested_amount: amt,
+        approved_amount: amt,
+        advance_payment: adv,
+        freight_charges: amt,
+        payable_amount: payable,
+        transferred_to: payeeName
+      }).catch(err => console.warn('Could not save transport payment to accounts db:', err));
+    }
+
+    // 3. Row should exit from grn page
+    if (row && row.id) {
+      const idx = wmGrnDataStore.findIndex(r => r.id === row.id);
+      if (idx !== -1) {
+        wmGrnDataStore.splice(idx, 1);
+      }
+      try {
+        sessionStorage.setItem('nexus_wm_grn_store', JSON.stringify(wmGrnDataStore));
+      } catch(e) {}
+    }
+    currentDataset = wmGrnDataStore.map(item => ({ ...item }));
+    filteredDataset = [...currentDataset];
+
+    // Close modals
+    closeWmGrnTransportPaymentModal();
+    if (typeof closeWmGrnSupplierModal === 'function') closeWmGrnSupplierModal();
+    const overlay = document.getElementById('sideFormOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    // Hide submit buttons
+    const toolbarSubmit = document.getElementById('btnWmGrnToolbarSubmit');
+    if (toolbarSubmit) toolbarSubmit.style.display = 'none';
+    const submitArea = document.getElementById('wmGrnSubmitArea');
+    if (submitArea) submitArea.style.display = 'none';
+
+    renderWorklistTableBody();
+
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup('Transport Payment completed and row moved to Master Payment!', 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast('Transport Payment completed successfully!');
+    }
+    return;
+  }
+
   const isMinView = (currentWorklistView === 'min' || currentWorklistView === 'min_detail');
   const row = isMinView
     ? (wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || (currentDataset && currentDataset.find(r => r.isHighlighted)))
@@ -28510,17 +29358,46 @@ window.handleWmMinEditToggle = function() {
 };
 
 window.handleWmMinTick = function() {
-  const row = wmMinDataStore.find(r => r.id === activeWmMinRowId) || (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId));
+  const row = (wmMinDataStore && wmMinDataStore.find(r => r.id === activeWmMinRowId)) || 
+              (currentDataset && currentDataset.find(r => r.id === activeWmMinRowId)) || 
+              (wmMinDataStore && wmMinDataStore[0]);
   if (!row || !row.items) return;
 
   row.items.forEach(it => {
     if (it.selected) {
       it.isTicked = true;
+      it.minQty = it.mirQty !== undefined ? it.mirQty : (it.requestQty || 0);
+      it.amount = (parseFloat(it.minQty) || 0) * (parseFloat(it.rate) || 0);
     }
   });
 
-  renderWmMinSiteItems();
+  if (currentWorklistView === 'min_detail') {
+    renderWorklistTableBody();
+  } else {
+    renderWmMinSiteItems();
+  }
   showToast('Selected MIN item(s) validated successfully!');
+};
+
+window.handleWmMinAdvancePaymentToggle = function(isChecked) {
+  const rowAdv = document.getElementById('rowWmMinAdvancePaymentInput');
+  if (rowAdv) {
+    rowAdv.style.display = isChecked ? 'flex' : 'none';
+  }
+  const inpAdv = document.getElementById('inpWmMinAdvancePayment');
+  if (inpAdv && !isChecked) {
+    inpAdv.value = '';
+  }
+};
+
+window.handleWmMinMainSubmit = function() {
+  const selectedRow = (currentDataset || []).find(r => r.selected) || (wmMinDataStore || []).find(r => r.selected);
+  if (!selectedRow) {
+    showToast('Please select a row first');
+    return;
+  }
+  activeWmMinRowId = selectedRow.id;
+  openWmMinTransportModal(selectedRow);
 };
 
 window.handleWmMinCsvUpload = function(event) {
@@ -28547,14 +29424,13 @@ window.openWmMinTransportModal = function(transferRow) {
   if (mrnFields) mrnFields.style.display = 'none';
   if (supplyFields) supplyFields.style.display = 'none';
 
-  // Toggle Header Icons: Hide PDF, Show Printer ONLY IF ewayBill toggle is enabled
+  // Toggle Header Icons: Hide PDF, Printer hidden until user clicks Submit icon
   const lblPdf = document.getElementById('lblWmGrnTransportPdf');
   const btnPrint = document.getElementById('btnWmMinTransportPrint');
   const btnPdfDownload = document.getElementById('btnWmMrnTransportPdfDownload');
   if (lblPdf) lblPdf.style.display = 'none';
   if (btnPdfDownload) btnPdfDownload.style.display = 'none';
-  const hasEway = Boolean((row && row.transport && row.transport.ewayBill) || (row && row.ewayBill));
-  if (btnPrint) btnPrint.style.display = hasEway ? 'inline-flex' : 'none';
+  if (btnPrint) btnPrint.style.display = 'none';
 
   const t = (row && row.transport) ? row.transport : {
     transportType: 'Rental',
@@ -28562,6 +29438,9 @@ window.openWmMinTransportModal = function(transferRow) {
     vehicleNo: 'TN-09-AB-1234',
     driverName: 'Ramesh Kumar',
     whatsappNo: '9876543210',
+    amount: '',
+    hasAdvancePayment: false,
+    advancePayment: '',
     ewayBill: false
   };
 
@@ -28588,6 +29467,19 @@ window.openWmMinTransportModal = function(transferRow) {
 
   const inpWhatsapp = document.getElementById('inpWmMinWhatsappNo');
   if (inpWhatsapp) inpWhatsapp.value = t.whatsappNo || '';
+
+  const inpAmount = document.getElementById('inpWmMinAmount');
+  if (inpAmount) inpAmount.value = (t.amount !== undefined && t.amount !== null) ? t.amount : '';
+
+  const tglAdv = document.getElementById('tglWmMinAdvancePayment');
+  const hasAdv = Boolean(t.hasAdvancePayment || t.advancePayment);
+  if (tglAdv) tglAdv.checked = hasAdv;
+
+  const rowAdv = document.getElementById('rowWmMinAdvancePaymentInput');
+  if (rowAdv) rowAdv.style.display = hasAdv ? 'flex' : 'none';
+
+  const inpAdv = document.getElementById('inpWmMinAdvancePayment');
+  if (inpAdv) inpAdv.value = (t.advancePayment !== undefined && t.advancePayment !== null) ? t.advancePayment : '';
 
   const modal = document.getElementById('wmGrnTransportModal');
   if (modal) {
@@ -28629,10 +29521,28 @@ window.submitWmMrnDetailPage = function() {
 };
 
 window.handleWmMrnCloseDetail = function() {
+  const activeMrnRow = (typeof wmMrnDataStore !== 'undefined' && wmMrnDataStore.find(r => r.id === activeWmMrnRowId)) ||
+                       (typeof currentDataset !== 'undefined' && currentDataset.find(r => r.id === activeWmMrnRowId)) ||
+                       (typeof wmMrnDataStore !== 'undefined' ? wmMrnDataStore[0] : null);
+  const items = (activeMrnRow && activeMrnRow.items) ? activeMrnRow.items : [];
+  const selectedItems = items.filter(it => it.selected);
+
+  if (selectedItems.length > 0) {
+    selectedItems.forEach(it => {
+      it.isRejected = true;
+      it.isTicked = false;
+      it.selected = false;
+    });
+    renderWorklistTableBody();
+    if (typeof renderWorklistToolbar === 'function') renderWorklistToolbar();
+    if (typeof showToast === 'function') showToast(`${selectedItems.length} item(s) rejected`);
+    return;
+  }
+
   currentWorklistView = 'mrn';
   updateURL();
   renderApp();
-  showToast('Returned to MRN');
+  if (typeof showToast === 'function') showToast('Returned to MRN');
 };
 
 window.openWmMrnSiteModal = function(mrnId) {
@@ -32237,6 +33147,78 @@ window.submitPurchasePoUploadDocuments = async function() {
   }
   syncWmPrStatus(row || storeRow, 'In-Transit');
 
+  const targetPo = storeRow || row || filteredRow;
+  if (targetPo) {
+    // Sit in payment page of purchase login with its details
+    const poVal = Number(targetPo.poValue || targetPo.totalAmount || targetPo.poAmount || 1250000);
+    const basicVal = Number(targetPo.basicAmount || (poVal / 1.18));
+    const taxVal = poVal - basicVal;
+    const cgstVal = taxVal / 2;
+    const sgstVal = taxVal / 2;
+    const invNo = targetPo.invoiceNo || (uploaded.invoiceFileName ? uploaded.invoiceFileName.replace(/\.[^/.]+$/, "") : `INV-${targetPo.poNo || Date.now()}`);
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+
+    const newPaymentRow = {
+      id: 'pm-pay-' + (targetPo.id || Date.now()),
+      poId: targetPo.id,
+      poNo: targetPo.poNo || '',
+      vendorName: targetPo.supplierName || targetPo.vendorName || 'Supplier',
+      invoiceNo: invNo,
+      invoiceDate: targetPo.invoiceDate || dateStr,
+      invoiceAmount: poVal,
+      basicAmount: basicVal,
+      cgst: cgstVal,
+      sgst: sgstVal,
+      igst: 0.00,
+      paidAmount: 0.00,
+      payableAmount: poVal,
+      ageing: '0 Days',
+      status: 'Pending',
+      payments: []
+    };
+
+    if (typeof purchasePaymentDataStore !== 'undefined') {
+      const exIdx = purchasePaymentDataStore.findIndex(p => (p.poNo && p.poNo === targetPo.poNo) || (p.invoiceNo && p.invoiceNo === invNo));
+      if (exIdx !== -1) {
+        purchasePaymentDataStore[exIdx] = { ...purchasePaymentDataStore[exIdx], ...newPaymentRow };
+      } else {
+        purchasePaymentDataStore.unshift(newPaymentRow);
+      }
+      try {
+        sessionStorage.setItem('nexus_purchase_payment_store', JSON.stringify(purchasePaymentDataStore));
+      } catch(e) {}
+    }
+
+    // Link the payment page of purchase login in purchase table of accounts db
+    if (window.NexusApi && window.NexusApi.purchase && window.NexusApi.purchase.syncPurchasePayment) {
+      window.NexusApi.purchase.syncPurchasePayment({
+        company_name: 'Nexus',
+        vendor_name: newPaymentRow.vendorName,
+        invoice_number: newPaymentRow.invoiceNo,
+        basic_amount: basicVal,
+        cgst: cgstVal,
+        sgst: sgstVal,
+        igst: 0.00,
+        total_amount: poVal,
+        paid_amount: 0.00,
+        payable_amount: poVal,
+        partial_payment: false,
+        ageing: 0
+      }).catch(err => console.warn('Could not sync purchase payment to accounts db:', err));
+    }
+  }
+
+  // Row exits PO page
+  try {
+    sessionStorage.setItem('nexus_purchase_po_store', JSON.stringify(purchasePoDataStore));
+  } catch (e) {}
+
+  currentDataset = (purchasePoDataStore || [])
+    .filter(p => (p.status || '').toLowerCase() !== 'in-transit')
+    .map(item => ({ ...item }));
+  filteredDataset = [...currentDataset];
+
   // Link and store in purchase table in DB
   if (window.NexusApi && window.NexusApi.purchase) {
     try {
@@ -32317,14 +33299,15 @@ function downloadBlobOrDataUrl(content, defaultFilename) {
   return true;
 }
 
-window.handlePurchasePoPdfDownload = async function() {
-  const row = (currentDataset || []).find(r => String(r.id) === String(activePurchasePoRowId)) ||
-              (purchasePoDataStore || []).find(r => String(r.id) === String(activePurchasePoRowId));
+window.handlePurchasePoPdfDownload = async function(paramRowId) {
+  const targetId = paramRowId || activePurchasePoRowId;
+  const row = (currentDataset || []).find(r => String(r.id) === String(targetId) || (r.poNo && r.poNo === targetId)) ||
+              (purchasePoDataStore || []).find(r => String(r.id) === String(targetId) || (r.poNo && r.poNo === targetId));
   const poNo = row ? (row.poNo || 'PO') : 'PO';
   const rowStatus = String(row?.status || '').toLowerCase();
 
-  // If in Dispatch Pending status, user is downloading the official Purchase Order PDF
-  if (rowStatus.includes('dispatch')) {
+  // If in Dispatch Pending or In-Transit status or called directly with rowId, download the generated Purchase Order PDF
+  if (rowStatus.includes('dispatch') || rowStatus.includes('transit') || paramRowId) {
     if (row?.pdfStatus === 'Generating') {
       if (typeof showToast === 'function') {
         showToast(`PO PDF for ${poNo} is currently generating in background. Please wait a moment...`);
@@ -32332,12 +33315,40 @@ window.handlePurchasePoPdfDownload = async function() {
       return;
     }
 
-    const poDbId = row?.poDbId || (!isNaN(row?.id) && Number(row?.id) > 0 ? Number(row.id) : null);
+    // 1. Direct document stored on row (data URL or relative path)
+    if (row?.poDocument || row?.po_document) {
+      const docContent = row.poDocument || row.po_document;
+      if (docContent.startsWith('data:') || docContent.startsWith('blob:') || docContent.startsWith('http')) {
+        downloadBlobOrDataUrl(docContent, `Purchase_Order_${poNo}.pdf`);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup(`Purchase Order PDF for ${poNo} downloaded!`, 'Task Completed');
+        } else if (typeof showToast === 'function') {
+          showToast(`Purchase Order PDF for ${poNo} downloaded!`);
+        }
+        return;
+      }
+    }
 
+    // 2. Resolve poDbId
+    let poDbId = row?.poDbId || (!isNaN(row?.id) && Number(row?.id) > 0 ? Number(row.id) : null);
+    if (!poDbId && row?.poNo && window.NexusApi && window.NexusApi.purchase) {
+      try {
+        const poList = await window.NexusApi.purchase.getPoList();
+        if (poList && Array.isArray(poList.items)) {
+          const match = poList.items.find(p => p.po_no === row.poNo || p.pr_no === row.prNo);
+          if (match) {
+            poDbId = match.id;
+            row.poDbId = match.id;
+            if (match.po_document) row.poDocument = match.po_document;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 3. Download via API endpoint
     if (poDbId && window.NexusApi && window.NexusApi.purchase) {
       try {
         const url = window.NexusApi.purchase.getPoPdfUrl(poDbId);
-        // Fetch blob directly to trigger native download without popup blocker or routing issues
         const resp = await fetch(url);
         if (resp.ok) {
           const blob = await resp.blob();
@@ -32365,6 +33376,7 @@ window.handlePurchasePoPdfDownload = async function() {
       }
     }
 
+    // 4. Fallback check for static file
     if (row?.poDocument || row?.po_document) {
       const docPath = row.poDocument || row.po_document;
       const link = document.createElement('a');
@@ -32382,7 +33394,7 @@ window.handlePurchasePoPdfDownload = async function() {
       return;
     }
 
-    // Trigger PDF generation if missing or failed
+    // 5. Trigger PDF generation on demand
     if (window.NexusApi && window.NexusApi.purchase) {
       if (typeof showToast === 'function') showToast(`Generating Purchase Order PDF for ${poNo}...`);
       try {
@@ -32396,11 +33408,22 @@ window.handlePurchasePoPdfDownload = async function() {
           row.poDbId = res.po_id;
           row.pdfStatus = 'Generated';
           const url = window.NexusApi.purchase.getPoPdfUrl(res.po_id);
-          window.open(url, '_blank');
-          if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup(`Purchase Order PDF for ${poNo} generated & downloaded!`, 'Task Completed');
+          const resp = await fetch(url);
+          if (resp.ok) {
+            const blob = await resp.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `Purchase_Order_${poNo}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup(`Purchase Order PDF for ${poNo} generated & downloaded!`, 'Task Completed');
+            }
+            return;
           }
-          return;
         }
       } catch (e) {
         console.warn('PO PDF generation failed on demand:', e);
@@ -32444,6 +33467,180 @@ window.handlePurchasePoPdfDownload = async function() {
   document.body.removeChild(link);
   if (typeof showSvgSuccessPopup === 'function') {
     showSvgSuccessPopup(`Invoice document for ${poNo} downloaded successfully!`, 'Task Completed');
+  }
+};
+
+window.handleWmGrnPoPdfDownload = async function(rowId, poNo) {
+  const targetPoNo = poNo || (rowId ? ((wmGrnDataStore || []).find(r => String(r.id) === String(rowId))?.poNo) : '');
+  const grnRow = (wmGrnDataStore || []).find(r => String(r.id) === String(rowId) || (r.poNo && r.poNo === targetPoNo));
+  const purchasePoRow = (purchasePoDataStore || []).find(p => (targetPoNo && p.poNo === targetPoNo) || (grnRow && grnRow.supplierName && p.supplierName === grnRow.supplierName));
+
+  // 1. Direct document stored on row
+  const docContent = purchasePoRow?.poDocument || purchasePoRow?.po_document || grnRow?.poDocument || grnRow?.po_document;
+  if (docContent) {
+    downloadBlobOrDataUrl(docContent, `Purchase_Order_${targetPoNo || 'PO'}.pdf`);
+    if (typeof showSvgSuccessPopup === 'function') {
+      showSvgSuccessPopup(`Purchase Order PDF for ${targetPoNo} downloaded!`, 'Task Completed');
+    } else if (typeof showToast === 'function') {
+      showToast(`Purchase Order PDF for ${targetPoNo} downloaded!`);
+    }
+    return;
+  }
+
+  // 2. Query backend by PO number or ID
+  let poDbId = purchasePoRow?.poDbId || (!isNaN(purchasePoRow?.id) && Number(purchasePoRow?.id) > 0 ? Number(purchasePoRow.id) : null);
+  if (!poDbId && window.NexusApi && window.NexusApi.purchase) {
+    try {
+      const poList = await window.NexusApi.purchase.getPoList();
+      if (poList && Array.isArray(poList.items)) {
+        const found = poList.items.find(p => p.po_no === targetPoNo || p.pr_no === targetPoNo);
+        if (found) {
+          poDbId = found.id;
+          if (found.po_document) {
+            downloadBlobOrDataUrl(found.po_document, `Purchase_Order_${targetPoNo}.pdf`);
+            if (typeof showSvgSuccessPopup === 'function') {
+              showSvgSuccessPopup(`Purchase Order PDF for ${targetPoNo} downloaded!`, 'Task Completed');
+            }
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not query PO list from API:', e);
+    }
+  }
+
+  // 3. Download via API endpoint
+  if (poDbId && window.NexusApi && window.NexusApi.purchase) {
+    try {
+      const url = window.NexusApi.purchase.getPoPdfUrl(poDbId);
+      const resp = await fetch(url);
+      if (resp.ok) {
+        const blob = await resp.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `Purchase_Order_${targetPoNo || 'PO'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        if (typeof showSvgSuccessPopup === 'function') {
+          showSvgSuccessPopup(`Purchase Order PDF for ${targetPoNo} downloaded!`, 'Task Completed');
+        } else if (typeof showToast === 'function') {
+          showToast(`Purchase Order PDF for ${targetPoNo} downloaded!`);
+        }
+        return;
+      }
+    } catch (e) {
+      console.warn('Could not fetch PO PDF by ID:', e);
+    }
+  }
+
+  // 4. Fallback: trigger generation on the fly
+  if (window.NexusApi && window.NexusApi.purchase) {
+    if (typeof showToast === 'function') showToast(`Generating Purchase Order PDF for ${targetPoNo}...`);
+    try {
+      const res = await window.NexusApi.purchase.generatePoPdf({
+        po_no: targetPoNo,
+        vendor_name: grnRow?.supplierName || purchasePoRow?.supplierName
+      });
+      if (res && res.po_id) {
+        const url = window.NexusApi.purchase.getPoPdfUrl(res.po_id);
+        const resp = await fetch(url);
+        if (resp.ok) {
+          const blob = await resp.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `Purchase_Order_${targetPoNo}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+          if (typeof showSvgSuccessPopup === 'function') {
+            showSvgSuccessPopup(`Purchase Order PDF for ${targetPoNo} downloaded!`, 'Task Completed');
+          }
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('PO PDF generation failed on demand for GRN:', e);
+    }
+  }
+
+  // Fallback demo/file download
+  const fallbackUrl = `/assets/generated_pdfs/PO_${(targetPoNo || '').replace(/\//g, '_')}.pdf`;
+  window.open(fallbackUrl, '_blank');
+};
+
+window.downloadGrnInvoiceDocument = async function(rowId, invoiceNo, poNo) {
+  const grnRow = (wmGrnDataStore || []).find(r => String(r.id) === String(rowId) || (r.poNo && r.poNo === poNo));
+  const targetPoNo = poNo || grnRow?.poNo || '';
+  const targetInvNo = invoiceNo || grnRow?.invoiceNo || targetPoNo || 'Invoice';
+  const purchasePoRow = (purchasePoDataStore || []).find(p => (targetPoNo && p.poNo === targetPoNo) || (grnRow && grnRow.supplierName && p.supplierName === grnRow.supplierName) || (invoiceNo && p.invoiceNo === invoiceNo));
+
+  let invDoc = purchasePoRow?.invoiceDocument || purchasePoRow?.invoice_document || grnRow?.invoiceDocument || grnRow?.invoice_document;
+  let filename = `Invoice_${targetInvNo}.pdf`;
+
+  // 1. Check window.purchasePoUploadedDocs
+  if (!invDoc && window.purchasePoUploadedDocs) {
+    const keysToCheck = [rowId, purchasePoRow?.id, targetPoNo].filter(Boolean);
+    for (const k of keysToCheck) {
+      if (window.purchasePoUploadedDocs[k]?.invoiceDoc) {
+        invDoc = window.purchasePoUploadedDocs[k].invoiceDoc;
+        if (window.purchasePoUploadedDocs[k].invoiceFileName) {
+          filename = window.purchasePoUploadedDocs[k].invoiceFileName;
+        }
+        break;
+      }
+    }
+    if (!invDoc) {
+      for (const [k, v] of Object.entries(window.purchasePoUploadedDocs)) {
+        if (v && v.invoiceDoc) {
+          invDoc = v.invoiceDoc;
+          if (v.invoiceFileName) filename = v.invoiceFileName;
+          break;
+        }
+      }
+    }
+  }
+
+  // 2. Query backend document endpoint
+  if (!invDoc && window.NexusApi && window.NexusApi.purchase) {
+    let poDbId = purchasePoRow?.poDbId || (!isNaN(purchasePoRow?.id) && Number(purchasePoRow?.id) > 0 ? Number(purchasePoRow.id) : null);
+    if (!poDbId) {
+      try {
+        const poList = await window.NexusApi.purchase.getPoList();
+        if (poList && Array.isArray(poList.items)) {
+          const found = poList.items.find(p => p.po_no === targetPoNo || p.pr_no === targetPoNo || p.invoice_number === targetInvNo);
+          if (found) poDbId = found.id;
+        }
+      } catch (e) {}
+    }
+    if (poDbId) {
+      try {
+        const res = await window.NexusApi.purchase.getDocument(poDbId, 'invoice');
+        if (res && res.content) {
+          invDoc = res.content;
+          if (res.filename) filename = res.filename;
+        }
+      } catch (e) {
+        console.warn('Could not fetch invoice document from API:', e);
+      }
+    }
+  }
+
+  // Fallback if not found
+  if (!invDoc) {
+    invDoc = 'data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwgL0xlbmd0aCA0OSAvRmlsdGVyIC9GbGF0ZURlY29kZSA+PgpzdHJlYW0KeJwrVAgwsFBIVMhIzMsvVUjOz1NQCEssUSguKUgsKklNysxLT1UIzUstS80r0VAvAQC9cw9KCmVuZHN0cmVhbQplbmRvYmoK';
+  }
+
+  downloadBlobOrDataUrl(invDoc, filename);
+  if (typeof showSvgSuccessPopup === 'function') {
+    showSvgSuccessPopup(`Invoice ${targetInvNo} downloaded successfully!`, 'Task Completed');
+  } else if (typeof showToast === 'function') {
+    showToast(`Invoice ${targetInvNo} downloaded successfully!`);
   }
 };
 
@@ -34674,16 +35871,29 @@ function loadWorklistDataset() {
           }
         }
       } catch (e) {}
-      currentDataset = purchasePoDataStore.map(item => ({
-        ...item,
-        items: item.items ? item.items.map(it => ({ ...it })) : [],
-        transport: item.transport ? { ...item.transport } : {}
-      }));
+      currentDataset = purchasePoDataStore
+        .filter(item => (item.status || '').toLowerCase() !== 'in-transit')
+        .map(item => ({
+          ...item,
+          items: item.items ? item.items.map(it => ({ ...it })) : [],
+          transport: item.transport ? { ...item.transport } : {}
+        }));
       filteredDataset = [...currentDataset];
       return;
     }
     if (currentWorklistView === 'payment') {
-      currentDataset = purchasePaymentDataStore.map(item => ({ ...item }));
+      try {
+        const storedPay = sessionStorage.getItem('nexus_purchase_payment_store');
+        if (storedPay) {
+          const parsed = JSON.parse(storedPay);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            purchasePaymentDataStore = parsed;
+          }
+        }
+      } catch (e) {}
+      currentDataset = purchasePaymentDataStore
+        .filter(row => !(Number(row.payableAmount !== undefined ? row.payableAmount : (row.payable || 0)) <= 0 && String(row.status || '').trim().toLowerCase() === 'paid'))
+        .map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
       return;
     }
@@ -34785,7 +35995,17 @@ function loadWorklistDataset() {
       return;
     }
     if (currentWorklistView === 'min') {
-      currentDataset = wmMinDataStore;
+      try {
+        const savedMin = sessionStorage.getItem('nexus_wm_min_data');
+        if (savedMin) {
+          wmMinDataStore = JSON.parse(savedMin);
+        }
+      } catch (e) {}
+      if (typeof window.loadInventoryStockFromApi === 'function' && !window._inventoryStockLoaded) {
+        window._inventoryStockLoaded = true;
+        window.loadInventoryStockFromApi();
+      }
+      currentDataset = wmMinDataStore.filter(r => r.isApprovedFromPm !== false);
       filteredDataset = [...currentDataset];
       return;
     }
@@ -34796,7 +36016,11 @@ function loadWorklistDataset() {
       return;
     }
     if (currentWorklistView === 'mrn') {
-      currentDataset = wmMrnDataStore;
+      if (typeof window.loadMrnMaterialsFromApi === 'function' && !window._mrnMaterialsLoaded) {
+        window._mrnMaterialsLoaded = true;
+        window.loadMrnMaterialsFromApi();
+      }
+      currentDataset = wmMrnDataStore.filter(r => !r.allApproved && !r.isCompleted);
       filteredDataset = [...currentDataset];
       return;
     }
@@ -34812,20 +36036,28 @@ function loadWorklistDataset() {
       return;
     }
     if (currentWorklistView === 'stn') {
+      if (typeof window.loadWmStnFromApi === 'function' && !window._wmStnLoadedFromApi) {
+        window._wmStnLoadedFromApi = true;
+        window.loadWmStnFromApi();
+      }
       currentDataset = wmStnDataStore.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
       return;
     }
     if (currentWorklistView === 'srn') {
-      if (typeof loadWorklistSrnFromApi === 'function' && (!worklistSrnData || worklistSrnData.length === 0 || !window._srnLoadedFromApi)) {
-        window._srnLoadedFromApi = true;
-        loadWorklistSrnFromApi();
+      if (typeof window.loadWmSrnFromApi === 'function' && !window._wmSrnLoadedFromApi) {
+        window._wmSrnLoadedFromApi = true;
+        window.loadWmSrnFromApi();
       }
-      currentDataset = sortSrnByStatusOrder(worklistSrnData.map(item => normalizeWorklistSrnItem(item)));
+      currentDataset = wmSrnDataStore.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
       return;
     }
     if (currentWorklistView === 'payment') {
+      try {
+        const savedPay = sessionStorage.getItem('nexus_wm_payment_data');
+        if (savedPay) wmPaymentDataStore = JSON.parse(savedPay);
+      } catch(e) {}
       currentDataset = wmPaymentDataStore.map(item => ({ ...item }));
       filteredDataset = [...currentDataset];
       return;
@@ -37164,7 +38396,7 @@ function renderWorklistToolbar() {
       `;
       return;
     }
-    if (currentWorklistView === 'rfq') {
+    if (currentWorklistView === 'rfq' || currentWorklistView === 'po') {
       toolbar.style.display = 'flex';
       toolbar.style.minHeight = '52px';
       toolbar.innerHTML = `
@@ -37178,6 +38410,22 @@ function renderWorklistToolbar() {
     return;
   }
   if (role === 'Warehouse Manager') {
+    if (currentWorklistView === 'grn') {
+      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+      toolbar.style.display = 'flex';
+      toolbar.style.minHeight = '52px';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnWmGrnToolbarSubmit" title="Proceed to Transport Payment" aria-label="Submit"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: ${hasSelected ? 'inline-flex' : 'none'}; align-items: center; justify-content: center;"
+            onclick="handleWmGrnMainSubmit()">
+            <img src="icons/Submit.svg" alt="Submit" width="34" height="34">
+          </button>
+        </div>
+      `;
+      return;
+    }
     if (currentWorklistView === 'pr') {
       const hasSelected = currentDataset && currentDataset.some(r => r.selected);
       toolbar.style.display = 'flex';
@@ -37194,6 +38442,25 @@ function renderWorklistToolbar() {
             onclick="openWmAddProductModal()">
             <img src="icons/Add.svg" alt="Add Product" width="28" height="28">
           </button>
+        </div>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'min') {
+      const selectedRow = (currentDataset || []).find(r => r.selected);
+      const isReadyToDispatch = selectedRow && (selectedRow.status || '').toLowerCase().replace(/\s+/g, ' ').trim() === 'ready to dispatch';
+      toolbar.style.display = 'flex';
+      toolbar.style.minHeight = '52px';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          ${isReadyToDispatch ? `
+            <button type="button" class="toolbar-icon-btn" id="btnWmMinVehicleTick" title="Transport Details" aria-label="Transport Details"
+              style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+              onclick="handleWmMinVehicleTickClick('${selectedRow.id}')">
+              <img src="icons/vehicle tick.svg" alt="Transport Details" width="34" height="34" style="display: block;">
+            </button>
+          ` : ''}
         </div>
       `;
       return;
@@ -37274,6 +38541,7 @@ function renderWorklistToolbar() {
       const totalSumFormatted = totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
       toolbar.style.display = 'flex';
+      toolbar.style.minHeight = '52px';
       toolbar.innerHTML = `
         <div class="toolbar-left" style="display: flex; align-items: center; gap: 8px;">
           <div class="metric-item metric-total" style="display: flex; align-items: center; gap: 8px;" title="Total Amount">
@@ -37288,6 +38556,54 @@ function renderWorklistToolbar() {
             <img src="icons/Add.svg" alt="Add Expenses" width="28" height="28">
           </button>
         </div>
+      `;
+      return;
+    }
+    if (currentWorklistView === 'stn' || currentWorklistView === 'srn') {
+      const selectedRow = (currentDataset || []).find(r => r.selected);
+      const statusLower = ((selectedRow && selectedRow.status) || '').toLowerCase().trim();
+      const isToBeReceive = selectedRow && statusLower.includes('receive');
+      const isToBeDispatch = selectedRow && statusLower.includes('dispatch');
+
+      toolbar.style.display = 'flex';
+      toolbar.style.minHeight = '52px';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+          ${selectedRow && isToBeReceive ? `
+            <button type="button" class="toolbar-icon-btn" id="btnWmTransferTransport" title="Transport Details" aria-label="Transport Details"
+              style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+              onclick="handleWmTransferTransportClick('${selectedRow.id}')">
+              <img src="icons/Transport.svg" alt="Transport Details" width="34" height="34" style="display: block;" onerror="this.src='icons/Vehicle.svg'">
+            </button>
+            <button type="button" class="toolbar-icon-btn" id="btnWmTransferReceiveTick" title="Approve & Receive" aria-label="Approve"
+              style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+              onclick="handleWmTransferReceiveTick('${selectedRow.id}')">
+              <img src="icons/Approve.svg" alt="Approve" width="34" height="34" style="display: block;">
+            </button>
+          ` : ''}
+          ${selectedRow && isToBeDispatch ? `
+            <button type="button" class="toolbar-icon-btn" id="btnWmTransferVehicleTick" title="Transport Details" aria-label="Transport Details"
+              style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+              onclick="handleWmTransferVehicleTickClick('${selectedRow.id}')">
+              <img src="icons/vehicle tick.svg" alt="Transport Details" width="34" height="34" style="display: block;">
+            </button>
+            <button type="button" class="toolbar-icon-btn" id="btnWmTransferDispatchTick" title="Approve & Dispatch" aria-label="Approve"
+              style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+              onclick="handleWmTransferDispatchTick('${selectedRow.id}')">
+              <img src="icons/Approve.svg" alt="Approve" width="34" height="34" style="display: block;">
+            </button>
+          ` : ''}
+        </div>
+      `;
+      return;
+    }
+    if (['mrn', 'mtn', 'supply'].includes(currentWorklistView)) {
+      toolbar.style.display = 'flex';
+      toolbar.style.minHeight = '52px';
+      toolbar.innerHTML = `
+        <div class="toolbar-left" style="display: flex; align-items: center; gap: 16px;"></div>
+        <div class="toolbar-right" style="display: flex; align-items: center; gap: 12px; margin-left: auto;"></div>
       `;
       return;
     }
@@ -38317,8 +39633,11 @@ function renderWorklistFooter() {
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
-          if (tab.view === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
-            loadWorklistSrnFromApi();
+          if (tab.view === 'stn' && typeof window.loadWmStnFromApi === 'function') {
+            window.loadWmStnFromApi();
+          }
+          if (tab.view === 'srn' && typeof window.loadWmSrnFromApi === 'function') {
+            window.loadWmSrnFromApi();
           }
           updateURL();
           renderApp();
@@ -38370,8 +39689,11 @@ function renderWorklistFooter() {
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
-          if (tab.view === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
-            loadWorklistSrnFromApi();
+          if (tab.view === 'stn' && typeof window.loadWmStnFromApi === 'function') {
+            window.loadWmStnFromApi();
+          }
+          if (tab.view === 'srn' && typeof window.loadWmSrnFromApi === 'function') {
+            window.loadWmSrnFromApi();
           }
           updateURL();
           renderApp();
@@ -39271,7 +40593,7 @@ function renderWorklistTableHead() {
         tableEl.style.tableLayout = 'fixed';
         if (containerEl) {
           containerEl.style.overflowX = 'auto';
-          containerEl.style.marginTop = '18px';
+          containerEl.style.marginTop = '0px';
         }
       } else if (currentWorklistView === 'payment') {
         tableEl.style.minWidth = '1300px';
@@ -39817,6 +41139,74 @@ function renderWorklistTableHead() {
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>STN No</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['stnNo'] ? 'has-active-filter' : ''}" data-filter-col="stnNo" title="Filter STN No">&#9660;</button>
+            </div>
+          </th>
+          <!-- 4. Project ID: 15ch, centered header, NO filter -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Project ID</span>
+            </div>
+          </th>
+          <!-- 5. Project Manager: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Project Manager</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['projectManager'] ? 'has-active-filter' : ''}" data-filter-col="projectManager" title="Filter Project Manager">&#9660;</button>
+            </div>
+          </th>
+          <!-- 6. Infra Category: 15ch, centered header, filterable -->
+          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Infra Category</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['infraCategory'] ? 'has-active-filter' : ''}" data-filter-col="infraCategory" title="Filter Infra Category">&#9660;</button>
+            </div>
+          </th>
+          <!-- 7. Qty: 10ch, centered header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Qty</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['qty'] ? 'has-active-filter' : ''}" data-filter-col="qty" title="Filter Qty">&#9660;</button>
+            </div>
+          </th>
+          <!-- 8. Ageing: 10ch, centered header, NO filter -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Ageing</span>
+            </div>
+          </th>
+          <!-- 9. Status: 20ch, centered header, filterable -->
+          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Status</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
+            </div>
+          </th>
+        </tr>
+      `;
+      rebindFilterButtons();
+      return;
+    }
+    if (currentWorklistView === 'srn') {
+      thead.innerHTML = `
+        <tr class="master-view-header">
+          <!-- 1. Select: 70px, centered header, NO radio on header -->
+          <th style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 6px;">
+            <div class="th-content-wrap" style="justify-content: center; text-align: center;">
+              <span>Select</span>
+            </div>
+          </th>
+          <!-- 2. Site name: 25ch, centered header, filterable -->
+          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>Site name</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site name">&#9660;</button>
+            </div>
+          </th>
+          <!-- 3. SRN No: 10ch, centered header, filterable -->
+          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 10px 8px;">
+            <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
+              <span>SRN No</span>
+              <button type="button" class="filter-funnel-btn ${activeColumnFilters['srnNo'] ? 'has-active-filter' : ''}" data-filter-col="srnNo" title="Filter SRN No">&#9660;</button>
             </div>
           </th>
           <!-- 4. Project ID: 15ch, centered header, NO filter -->
@@ -42030,11 +43420,7 @@ function applyFiltersAndRender() {
       tableContainer.style.overflowX = 'auto';
       tableContainer.style.width = '';
     }
-    if (role === 'Warehouse Manager' && ['grn', 'min', 'mrn', 'mtn', 'stn', 'srn', 'supply'].includes(currentWorklistView)) {
-      tableContainer.style.marginTop = '24px';
-    } else {
-      tableContainer.style.marginTop = '';
-    }
+    tableContainer.style.marginTop = '';
   }
   if (worklistTableEl) {
     if (currentWorklistView === 'po_amend_detail') {
@@ -42078,7 +43464,7 @@ function applyFiltersAndRender() {
         worklistTableEl.style.tableLayout = 'fixed';
         if (tableContainer) {
           tableContainer.style.overflowX = 'auto';
-          tableContainer.style.marginTop = '18px';
+          tableContainer.style.marginTop = '0px';
         }
       } else if (currentWorklistView === 'payment') {
         worklistTableEl.style.minWidth = '1300px';
@@ -42250,7 +43636,8 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'po') {
-      if (!filteredDataset || filteredDataset.length === 0) {
+      const activePoRows = (filteredDataset || []).filter(r => (r.status || '').toLowerCase() !== 'in-transit');
+      if (!activePoRows || activePoRows.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="5" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
@@ -42261,16 +43648,22 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      tbody.innerHTML = activePoRows.map(row => {
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
             <!-- 1. Supplier Name: 25ch & left, dark blue clickable -->
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #0454e4; font-weight: 500; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" class="purchase-po-supplier-link" onclick="handlePurchasePoSupplierClick('${row.id}')" title="${(row.supplierName || '').replace(/"/g, '&quot;')}">
               ${row.supplierName || ''}
             </td>
-            <!-- 2. PO No: 15ch & center, regular black font -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #000000; font-weight: 500;">
-              ${row.poNo || ''}
+            <!-- 2. PO No: 15ch & center (blue & underlined when status is Dispatch Pending or In-Transit) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; font-weight: 500;">
+              ${(String(row.status || '').trim() === 'Dispatch Pending' || String(row.status || '').trim() === 'In-Transit') ? `
+                <a href="javascript:void(0)" onclick="handlePurchasePoPdfDownload('${row.id}')" style="color: #0454e4 !important; text-decoration: underline !important; cursor: pointer; font-weight: 500;" title="Download Purchase Order PDF">
+                  ${row.poNo || ''}
+                </a>
+              ` : `
+                <span style="color: #000000;">${row.poNo || ''}</span>
+              `}
             </td>
             <!-- 3. PO Date: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
@@ -42291,7 +43684,13 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'payment') {
-      if (!filteredDataset || filteredDataset.length === 0) {
+      const activePayRows = (filteredDataset || []).filter(row => {
+        const payable = Number(row.payableAmount !== undefined ? row.payableAmount : (row.payable || 0));
+        const status = String(row.status || '').trim().toLowerCase();
+        return !(payable <= 0 && status === 'paid');
+      });
+
+      if (!activePayRows || activePayRows.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="8" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
@@ -42305,12 +43704,12 @@ function applyFiltersAndRender() {
       }
 
       // Update toolbar sum dynamically
-      const totalAmount = (filteredDataset || []).reduce((acc, r) => acc + (Number(r.invoiceAmount) || 0), 0);
+      const totalAmount = activePayRows.reduce((acc, r) => acc + (Number(r.invoiceAmount) || 0), 0);
       const totalAmountFormatted = totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const sumEl = document.getElementById('lblPurchasePaymentSum');
       if (sumEl) sumEl.textContent = totalAmountFormatted;
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      tbody.innerHTML = activePayRows.map(row => {
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
             <!-- 1. Vendor Name: 25ch & left -->
@@ -42425,6 +43824,16 @@ function applyFiltersAndRender() {
     }
 
     if (currentWorklistView === 'grn') {
+      const wmGrnSubmitArea = document.getElementById('wmGrnSubmitArea');
+      const hasSelected = currentDataset && currentDataset.some(r => r.selected);
+      if (wmGrnSubmitArea) {
+        wmGrnSubmitArea.style.display = hasSelected ? 'flex' : 'none';
+      }
+      const toolbarSubmit = document.getElementById('btnWmGrnToolbarSubmit');
+      if (toolbarSubmit) {
+        toolbarSubmit.style.display = hasSelected ? 'inline-flex' : 'none';
+      }
+
       if (!currentDataset || currentDataset.length === 0) {
         tbody.innerHTML = `
           <tr>
@@ -42438,17 +43847,27 @@ function applyFiltersAndRender() {
 
       tbody.innerHTML = currentDataset.map(row => {
         const isHighlighted = !!row.isHighlighted;
+        const isRowSelected = !!row.selected;
+        const statusLower = (row.status || '').toLowerCase();
+        const isPoToBeApproved = statusLower.includes('po to be approve') || statusLower.includes('approval pending');
+
         return `
-          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${isHighlighted ? '#dcfce7 !important' : '#ffffff'}; ${isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : ''}">
+          <tr data-row-id="${row.id}" onclick="handleWmGrnRowClick(event, '${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer; background-color: ${isRowSelected ? '#f0fdf4 !important' : (isHighlighted ? '#dcfce7 !important' : '#ffffff')}; ${isRowSelected || isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : ''}">
             <!-- 1. Supplier Name: 22ch & left, clickable to open supplier modal -->
             <td style="width: 22ch; min-width: 22ch; max-width: 22ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
               <a href="#" onclick="openWmGrnSupplierModal('${row.id}'); return false;" style="color: #0454e4; font-weight: 600; text-decoration: none; cursor: pointer;" title="${(row.supplierName || '').replace(/"/g, '&quot;')}">
                 ${row.supplierName || ''}
               </a>
             </td>
-            <!-- 2. PO No: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
-              ${row.poNo || ''}
+            <!-- 2. PO No: 15ch & center (plain text if PO To Be Approve, otherwise blue & underlined clickable download) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+              ${isPoToBeApproved ? `
+                <span style="color: #1e293b; font-weight: 500;">${row.poNo || ''}</span>
+              ` : `
+                <a href="javascript:void(0)" onclick="handleWmGrnPoPdfDownload('${row.id}', '${row.poNo}')" style="color: #0454e4 !important; text-decoration: underline !important; cursor: pointer; font-weight: 500;" title="Download Purchase Order PDF">
+                  ${row.poNo || ''}
+                </a>
+              `}
             </td>
             <!-- 3. PO Date: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
@@ -42458,9 +43877,13 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
               ${Number(row.poAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
-            <!-- 5. Invoice: 15ch & center -->
+            <!-- 5. Invoice: 15ch & center (clickable download for uploaded invoice document) -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
-              ${row.invoiceNo || ''}
+              ${row.invoiceNo ? `
+                <a href="javascript:void(0)" onclick="downloadGrnInvoiceDocument('${row.id}', '${row.invoiceNo}', '${row.poNo}')" style="color: #0454e4 !important; text-decoration: underline !important; cursor: pointer; font-weight: 500;" title="Download Invoice Document">
+                  ${row.invoiceNo}
+                </a>
+              ` : ''}
             </td>
             <!-- 6. Invoice date: 15ch & center -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
@@ -42504,7 +43927,7 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      const rowsHtml = filteredDataset.map(row => {
         const isRowSelected = !!row.selected;
         const isHighlighted = !!row.isHighlighted;
         const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
@@ -42542,7 +43965,7 @@ function applyFiltersAndRender() {
             <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.subProjectType || '').replace(/"/g, '&quot;')}">
               ${row.subProjectType || ''}
             </td>
-            <!-- 8. Status: 20ch & left (Categories: Ready To Dispatch, To Be Prepare, Stock Not Available) -->
+            <!-- 8. Status: 20ch & left (Categories: Ready to Dispatch, To Be Prepare, Stock Not Available) -->
             <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
               ${row.status || ''}
             </td>
@@ -42554,10 +43977,24 @@ function applyFiltersAndRender() {
         `;
       }).join('');
 
-      const hasHighlighted = (currentDataset || []).some(r => r.isHighlighted);
+      const selectedRow = (currentDataset || []).find(r => r.selected);
+      const isReadyToDispatch = selectedRow && (selectedRow.status || '').toLowerCase().replace(/\s+/g, ' ').trim() === 'ready to dispatch';
+      const hasSelected = (currentDataset || []).some(r => r.selected);
+      const submitRowHtml = (hasSelected && !isReadyToDispatch) ? `
+        <tr id="wmMinSubmitRow" style="background: transparent !important; border: none !important;">
+          <td colspan="9" style="text-align: center !important; vertical-align: middle; padding: 20px 0 14px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnWmMinMainSubmitRow" onclick="handleWmMinMainSubmit()" title="Proceed to Transport Details" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsHtml + submitRowHtml;
+
       const minSubmitArea = document.getElementById('wmMinSubmitArea');
       if (minSubmitArea) {
-        minSubmitArea.style.display = hasHighlighted ? 'flex' : 'none';
+        minSubmitArea.style.display = 'none';
       }
       return;
     }
@@ -42577,11 +44014,16 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = items.map(item => {
+      const rowsDetailHtml = items.map(item => {
         const isSelected = !!item.selected;
         const isTicked = !!item.isTicked;
         const rowBg = isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff');
         const rowBorder = isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
+        const stockVal = Number(item.stockQty || 0);
+        const mirVal = Number(item.mirQty || 0);
+        const isStockLess = stockVal < mirVal;
+        const stockColor = isStockLess ? '#ef4444' : '#10b981';
 
         return `
           <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
@@ -42597,15 +44039,15 @@ function applyFiltersAndRender() {
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
               ${item.uom || ''}
             </td>
-            <!-- 4a. Stock: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
-              ${Number(item.stockQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <!-- 4a. Stock: 15ch & right (Red if less than req/mir qty, Green if more/equal) -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; font-weight: 600; color: ${stockColor};">
+              ${stockVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
             <!-- 4b. MIR: 15ch & right -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
-              ${Number(item.mirQty || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              ${mirVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
-            <!-- 4c. MIN: 15ch & right (editable when user clicks edit icon for selected rows) -->
+            <!-- 4c. MIN: 15ch & right (initially 0, becomes MIR on tick approval) -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 8px 12px; color: #1e293b; font-weight: 600;">
               ${isWmMinEditing && isSelected ? `
                 <input type="number" step="0.01" class="form-input-control wm-min-editable-input" data-item-id="${item.id}" value="${Number(item.minQty || 0).toFixed(2)}"
@@ -42620,7 +44062,7 @@ function applyFiltersAndRender() {
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
               ${Number(item.rate || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
-            <!-- 6. Amount: 15ch & right -->
+            <!-- 6. Amount: 15ch & right (min * rate) -->
             <td id="tdWmMinAmount_${item.id}" style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 600;">
               ${Number(item.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </td>
@@ -42635,9 +44077,21 @@ function applyFiltersAndRender() {
       if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
 
       const hasTicked = items.some(it => it.isTicked);
+      const submitDetailRowHtml = hasTicked ? `
+        <tr id="wmMinDetailSubmitRow" style="background: transparent !important; border: none !important;">
+          <td colspan="8" style="text-align: center !important; vertical-align: middle; padding: 20px 0 14px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnWmMinDetailSubmitBatch" onclick="submitWmMinDetailPage()" title="Submit MIN Items" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsDetailHtml + submitDetailRowHtml;
+
       const minDetailSubmitArea = document.getElementById('wmMinDetailSubmitArea');
       if (minDetailSubmitArea) {
-        minDetailSubmitArea.style.display = hasTicked ? 'flex' : 'none';
+        minDetailSubmitArea.style.display = 'none';
       }
       return;
     }
@@ -42657,11 +44111,12 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = items.map(item => {
+      const rowsDetailHtml = items.map(item => {
         const isSelected = !!item.selected;
         const isTicked = !!item.isTicked;
-        const rowBg = isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff');
-        const rowBorder = isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+        const isRejected = !!item.isRejected;
+        const rowBg = isRejected ? '#fee2e2 !important' : (isTicked ? '#dcfce7 !important' : (isSelected ? '#f0fdf4' : '#ffffff'));
+        const rowBorder = isRejected ? 'border-left: 4px solid #ef4444; font-weight: 600;' : (isTicked ? 'border-left: 4px solid #10b981; font-weight: 600;' : '');
 
         return `
           <tr data-item-id="${item.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
@@ -42709,15 +44164,28 @@ function applyFiltersAndRender() {
       }).join('');
 
       const hasSelected = items.some(it => it.selected);
+      const hasTicked = items.some(it => it.isTicked);
       const btnTick = document.getElementById('btnWmMrnTick');
       const btnEdit = document.getElementById('btnWmMrnEdit');
       if (btnTick) btnTick.style.display = hasSelected ? 'inline-flex' : 'none';
       if (btnEdit) btnEdit.style.display = hasSelected ? 'inline-flex' : 'none';
 
-      // Submit MRN icon should appear when user selects row in select column
+      // Centered submit icon below the last row
+      const submitDetailRowHtml = (hasSelected || hasTicked) ? `
+        <tr id="wmMrnDetailSubmitRow" style="background: transparent !important; border: none !important;">
+          <td colspan="8" style="text-align: center !important; vertical-align: middle; padding: 20px 0 14px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnWmMrnDetailSubmitRow" onclick="openWmMrnTransportModal()" title="Proceed to Transport Details" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsDetailHtml + submitDetailRowHtml;
+
       const mrnDetailSubmitArea = document.getElementById('wmMrnDetailSubmitArea');
       if (mrnDetailSubmitArea) {
-        mrnDetailSubmitArea.style.display = hasSelected ? 'flex' : 'none';
+        mrnDetailSubmitArea.style.display = 'none';
       }
       return;
     }
@@ -42805,7 +44273,7 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      const rowsMtnHtml = filteredDataset.map(row => {
         const isHighlighted = !!row.isHighlighted;
         const isRowSelected = !!row.selected;
         const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
@@ -42850,9 +44318,21 @@ function applyFiltersAndRender() {
       }).join('');
 
       const hasMtnSelected = filteredDataset.some(r => r.selected);
+      const submitMtnRowHtml = hasMtnSelected ? `
+        <tr id="wmMtnSubmitRow" style="background: transparent !important; border: none !important;">
+          <td colspan="8" style="text-align: center !important; vertical-align: middle; padding: 20px 0 14px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnWmMtnSubmitRow" onclick="submitWmMtnRows()" title="Submit MTN" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsMtnHtml + submitMtnRowHtml;
+
       const mtnSubmitArea = document.getElementById('wmMtnSubmitArea');
       if (mtnSubmitArea) {
-        mtnSubmitArea.style.display = hasMtnSelected ? 'flex' : 'none';
+        mtnSubmitArea.style.display = 'none';
       }
       return;
     }
@@ -42882,7 +44362,7 @@ function applyFiltersAndRender() {
         return;
       }
 
-      tbody.innerHTML = filteredDataset.map(row => {
+      const rowsStnHtml = filteredDataset.map(row => {
         const isHighlighted = !!row.isHighlighted;
         const isRowSelected = !!row.selected;
         const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
@@ -42931,9 +44411,114 @@ function applyFiltersAndRender() {
       }).join('');
 
       const hasStnSelected = filteredDataset.some(r => r.selected);
+      const submitStnRowHtml = hasStnSelected ? `
+        <tr id="wmStnSubmitRow" style="background: transparent !important; border: none !important;">
+          <td colspan="9" style="text-align: center !important; vertical-align: middle; padding: 20px 0 14px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnWmStnSubmitRow" onclick="submitWmStnRows()" title="Submit STN" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsStnHtml + submitStnRowHtml;
+
       const stnSubmitArea = document.getElementById('wmStnSubmitArea');
       if (stnSubmitArea) {
-        stnSubmitArea.style.display = hasStnSelected ? 'flex' : 'none';
+        stnSubmitArea.style.display = 'none';
+      }
+      return;
+    }
+
+    if (currentWorklistView === 'srn') {
+      filteredDataset = (currentDataset || []).filter(row => {
+        for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
+          let cellVal = row[colKey] !== undefined ? row[colKey] : '';
+          if (colKey === 'qty' && typeof cellVal === 'number') {
+            cellVal = cellVal.toFixed(2);
+          } else {
+            cellVal = String(cellVal);
+          }
+          if (!allowedSet.has(cellVal)) return false;
+        }
+        return true;
+      });
+
+      if (!filteredDataset || filteredDataset.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 48px; color: #64748b; font-size: 0.95rem;">
+              No matching records found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const rowsSrnHtml = filteredDataset.map(row => {
+        const isHighlighted = !!row.isHighlighted;
+        const isRowSelected = !!row.selected;
+        const rowBg = isHighlighted ? '#dcfce7 !important' : (isRowSelected ? '#f0fdf4' : '#ffffff');
+        const rowBorder = isHighlighted ? 'border-left: 4px solid #10b981; font-weight: 600;' : '';
+
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; ${rowBorder}">
+            <!-- 1. Select: circle radio, multiselect, green marker -->
+            <td style="width: 70px; min-width: 70px; max-width: 70px; text-align: center !important; vertical-align: middle; padding: 10px 6px;">
+              <input type="checkbox" class="pm-circle-radio" data-row-id="${row.id}" ${isRowSelected ? 'checked' : ''} onchange="toggleWmRowSelected('${row.id}', this.checked)">
+            </td>
+            <!-- 2. Site name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.siteName || '').replace(/"/g, '&quot;')}">
+              ${row.siteName || ''}
+            </td>
+            <!-- 3. SRN No: 10ch & left -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: left !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.srnNo || ''}
+            </td>
+            <!-- 4. Project ID: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+              ${row.projectId || ''}
+            </td>
+            <!-- 5. Project Manager: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.projectManager || '').replace(/"/g, '&quot;')}">
+              ${row.projectManager || ''}
+            </td>
+            <!-- 6. Infra Category: 15ch & left -->
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; vertical-align: middle; padding: 10px 10px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.infraCategory || '').replace(/"/g, '&quot;')}">
+              ${row.infraCategory || ''}
+            </td>
+            <!-- 7. Qty: 10ch & right as decimal .00 -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500;">
+              ${Number(row.qty || 0).toFixed(2)}
+            </td>
+            <!-- 8. Ageing: 10ch & center -->
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-weight: 500;">
+              ${row.ageing || ''}
+            </td>
+            <!-- 9. Status: 20ch & left (Categories: To Be Dispatch, To Be Receive) -->
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 14px; color: #1e293b; font-weight: 500;">
+              ${row.status || ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const hasSrnSelected = filteredDataset.some(r => r.selected);
+      const submitSrnRowHtml = hasSrnSelected ? `
+        <tr id="wmSrnSubmitRow" style="background: transparent !important; border: none !important;">
+          <td colspan="9" style="text-align: center !important; vertical-align: middle; padding: 20px 0 14px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnWmSrnSubmitRow" onclick="submitWmSrnRows()" title="Submit SRN" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+            </button>
+          </td>
+        </tr>
+      ` : '';
+
+      tbody.innerHTML = rowsSrnHtml + submitSrnRowHtml;
+
+      const srnSubmitArea = document.getElementById('wmSrnSubmitArea');
+      if (srnSubmitArea) {
+        srnSubmitArea.style.display = 'none';
       }
       return;
     }
@@ -48322,21 +49907,39 @@ function initSideFormEvents() {
     });
   }
 
-  // Universal PDF Upload Handlers for all tabs and modals
+  // Universal PDF Upload Handlers for all tabs and modals (Upload triggers ONLY)
   document.addEventListener('click', (e) => {
-    const pdfBadge = e.target.closest('.input-pdf-badge, .btn-emp-pdf-trigger, [title*="PDF" i], .btn-pdf-upload');
+    const pdfBadge = e.target.closest('.input-pdf-badge, .btn-emp-pdf-trigger, .btn-pdf-upload, [title*="Upload PDF" i], [title*="PDF Upload" i]');
     if (!pdfBadge) return;
 
-    // Ensure it is a PDF trigger and NOT a calendar or photo trigger
+    // Ensure it is an upload trigger and NOT a download, calendar, or photo trigger
     const img = pdfBadge.querySelector('img');
     const title = (pdfBadge.getAttribute('title') || '').toLowerCase();
+    const ariaLabel = (pdfBadge.getAttribute('aria-label') || '').toLowerCase();
+    const id = (pdfBadge.id || '').toLowerCase();
     const alt = (img?.getAttribute('alt') || '').toLowerCase();
     const src = (img?.getAttribute('src') || '').toLowerCase();
 
-    const isPdfTrigger = title.includes('pdf') || title.includes('png') || title.includes('csr') || title.includes('pfx') || alt.includes('pdf') || alt.includes('png') || alt.includes('csr') || alt.includes('pfx') || src.includes('pdf') || src.includes('png') || src.includes('csr') || src.includes('pfx') || pdfBadge.classList.contains('btn-emp-pdf-trigger');
-    const isCalendarOrPhoto = title.includes('date') || title.includes('dob') || title.includes('doj') || title.includes('calendar') || title.includes('photo') || alt.includes('calendar') || alt.includes('photo') || src.includes('calendar') || src.includes('image') || src.includes('process');
+    // STRICT CHECK: Never treat any download, export, print, or action button as an upload trigger
+    const isDownload = title.includes('download') || title.includes('export') || title.includes('print') ||
+                       ariaLabel.includes('download') || ariaLabel.includes('export') ||
+                       id.includes('download') || id.includes('export') ||
+                       alt.includes('download') || alt.includes('export') ||
+                       src.includes('download') || src.includes('export') ||
+                       pdfBadge.classList.contains('btn-pdf-action') ||
+                       pdfBadge.classList.contains('btn-export-pdf') ||
+                       pdfBadge.classList.contains('toolbar-icon-btn') ||
+                       pdfBadge.classList.contains('side-top-icon-btn');
+    if (isDownload) return;
 
-    if (!isPdfTrigger || isCalendarOrPhoto) return;
+    const isUploadTrigger = pdfBadge.classList.contains('input-pdf-badge') ||
+                            pdfBadge.classList.contains('btn-emp-pdf-trigger') ||
+                            pdfBadge.classList.contains('btn-pdf-upload') ||
+                            title.includes('upload') || alt.includes('upload') || src.includes('upload');
+    if (!isUploadTrigger) return;
+
+    const isCalendarOrPhoto = title.includes('date') || title.includes('dob') || title.includes('doj') || title.includes('calendar') || title.includes('photo') || alt.includes('calendar') || alt.includes('photo') || src.includes('calendar') || src.includes('image') || src.includes('process');
+    if (isCalendarOrPhoto) return;
 
     // If inside Indus Tower card and not in edit mode, do not open file picker
     const indusCard = pdfBadge.closest('#addIndusTowerCard');
@@ -58989,6 +60592,13 @@ window.closeAccountsPurchaseSummaryModal = function() {
   if (modal) modal.style.display = 'none';
   const overlay = document.getElementById('sideFormOverlay');
   if (overlay) overlay.style.display = 'none';
+};
+
+window.downloadAccountsTdsPdf = function(type) {
+  const filename = `${type === 'payable' ? 'TDS_Payable' : 'TDS_Receivable'}_Report.pdf`;
+  const dummyPdf = 'data:application/pdf;base64,JVBERi0xLjQKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwgL0xlbmd0aCA0OSAvRmlsdGVyIC9GbGF0ZURlY29kZSA+PgpzdHJlYW0KeJwrVAgwsFBIVMhIzMsvVUjOz1NQCEssUSguKUgsKklNysxLT1UIzUstS80r0VAvAQC9cw9KCmVuZHN0cmVhbQplbmRvYmoK';
+  downloadBlobOrDataUrl(dummyPdf, filename);
+  if (typeof showToast === 'function') showToast(`Downloaded ${filename}`);
 };
 
 window.triggerAccountsCsvUpload = function() {

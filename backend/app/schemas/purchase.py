@@ -144,3 +144,52 @@ class PurchaseUploadDocumentsRequest(BaseModel):
     lr_documents: Optional[str] = None
     invoice_filename: Optional[str] = None
     lr_filename: Optional[str] = None
+
+class TransportPaymentRequest(BaseModel):
+    po_no: Optional[str] = None
+    expense_type: Optional[str] = "Transport Charges"
+    account_head: Optional[str] = "Transport"
+    company_name: Optional[str] = "Nexus"
+    request_by: Optional[str] = "Warehouse Manager"
+    transferred_to: Optional[str] = None
+    transferred_from: Optional[str] = "HDFC Bank - 50200012345"
+    amount: Optional[float] = 0.0
+    paid_amount: Optional[float] = 0.0
+    account_number: Optional[str] = None
+    bank_name: Optional[str] = None
+    ifsc_code: Optional[str] = None
+    remarks: Optional[str] = None
+    site_id: Optional[str] = None
+    site_name: Optional[str] = None
+
+class MinTransportSubmitRequest(BaseModel):
+    company_name: Optional[str] = "Nexus"
+    transport_type: Optional[str] = "Rental"
+    transporter_name: Optional[str] = ""
+    vehicle_number: Optional[str] = ""
+    driver_name: Optional[str] = ""
+    whatsapp_number: Optional[str] = ""
+    amount: Optional[float] = 0.0
+    advance_payment: Optional[float] = 0.0
+    has_advance_payment: Optional[bool] = False
+    po_no: Optional[str] = ""
+    site_id: Optional[str] = ""
+    site_name: Optional[str] = ""
+    request_by: Optional[str] = "Warehouse Manager"
+
+class AccountPurchaseCreate(BaseModel):
+    company_name: Optional[str] = "Nexus"
+    voucher_number: Optional[str] = None
+    vendor_name: str
+    invoice_number: str
+    invoice_date: Optional[str] = None
+    basic_amount: Optional[float] = 0.0
+    cgst: Optional[float] = 0.0
+    sgst: Optional[float] = 0.0
+    igst: Optional[float] = 0.0
+    total_amount: Optional[float] = 0.0
+    paid_amount: Optional[float] = 0.0
+    payable_amount: Optional[float] = 0.0
+    due_date: Optional[str] = None
+    ageing: Optional[int] = 0
+    partial_payment: Optional[bool] = False

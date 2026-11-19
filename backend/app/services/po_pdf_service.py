@@ -1,16 +1,14 @@
 """
 Purchase Order PDF Generation Service for Nexus ERP.
 Generates an official Purchase Order PDF dynamically matching the tax document visual layout:
-- Top border with curved/wavy header badge ('Purchase Order') and top-right official Nexus company logo
-- Seller / Vendor Details section with company info and dynamic 2D QR barcode, with vertical line on left side of QR code
-- Sub-grid with PO No, PO Date, PR No, PR Date, Transport Scope, Payment Terms, Logistics details
-- Bill To and Ship To side-by-side blocks
-- Material / Item details table with Sl #, Description, HSN Code, UOM, Qty, Rate, GST %, Amount
-- Financial totals: Taxable Amount, CGST, SGST, IGST, Grand Total, and Rupees in Words
-- Tax Breakdown table by HSN Code with Total Tax in Words
-- Adaptive page border: curved top, straight sharp square bottom edge ending immediately above the seal
+- Header: Purchase Order green badge (top-left) and official Nexus Company Logo (top-right)
+- Supplier Details & PO Details (two-column section)
+- Bill To & Ship To (two-column section)
+- PO Item Details Table (11 columns with nested CGST & SGST headers)
+- Bottom Summary Section (Rupees in Words on left, Totals breakdown on right)
+- Page border: curved/wavy top, straight sharp square bottom edge ending immediately above the seal
 - Company seal: official circular seal asset placed at bottom-right outside the bordered content area (no text above/below seal)
-- Exact table header grey (#d1d5db) matching invoice PDF; 14pt content text; vertical lines only in table headers and left of QR code
+- Table header grey (#d1d5db) matching invoice PDF; 14pt content text; vertical lines only in table headers
 """
 
 import io
@@ -30,8 +28,6 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle, Paragraph
-from reportlab.graphics.shapes import Drawing
-from reportlab.graphics.barcode.qr import QrCodeWidget
 
 from app.models.purchase import Purchase, PurchaseRequest
 from app.models.vendor import VendorMaster
@@ -81,7 +77,6 @@ for name, p_norm, p_bold in [
             continue
 
 RUPEE_SYM = "\u20b9"
-# Table header grey matching invoice_pdf_service.py exactly
 TABLE_HEADER_GREY = colors.HexColor("#d1d5db")
 HEADER_DIVIDER = colors.HexColor("#ffffff")
 LINE_GREY = colors.HexColor("#cbd5e1")
@@ -369,18 +364,15 @@ class PurchaseOrderPdfService:
     def generate_po_pdf(self, po_id: int) -> bytes:
         """
         Generates official Purchase Order PDF dynamically.
-        Matches tax document layout with:
-        - Header badge 'Purchase Order' and top-right official Nexus Company Logo (image.png)
-        - Seller / Vendor details with dynamic 2D QR barcode, with vertical line left side of QR code
-        - Bill To and Ship To sections
-        - Dynamic Material Details Table with 14pt content font
-        - Table header grey (#d1d5db) matching invoice PDF with bold text
-        - No colored shading on rows (clean white background)
-        - Vertical lines ONLY in table headers and on the left side of the QR code
-        - Totals and Amount in words
-        - HSN Tax Summary Breakdown
-        - Curved top border, sharp straight square bottom border ending immediately above the seal
+        Matches the exact revised layout from user specification:
+        - Header: Purchase Order badge (top-left) & Nexus Company Logo (top-right)
+        - Supplier Details & PO Details (two-column section)
+        - Bill To & Ship To (two-column section)
+        - PO Item Details Table (11 columns with nested CGST & SGST headers)
+        - Bottom Summary Section (Rupees in Words on left, Totals breakdown on right)
+        - Adaptive page border: curved top, straight sharp square bottom edge ending immediately above the seal
         - Official circular seal asset at bottom-right outside the bordered content area (no wording above or below)
+        - Exact table header grey (#d1d5db); 14pt content font; vertical lines only in table headers
         """
         po = self.db.query(Purchase).filter(Purchase.id == po_id).first()
         if not po:
@@ -393,7 +385,11 @@ class PurchaseOrderPdfService:
         # Totals computation
         total_basic = sum(it["amount"] for it in items)
         gst_pct = float(po.gst_rate or 18.0)
-        is_igst = "IGST" in (po.gst_type or "").upper() or (vendor_info["state"].lower() != "tamil nadu")
+        is_igst = (
+            "IGST" in (po.gst_type or "").upper()
+            or float(po.igst_amount or 0.0) > 0
+            or (vendor_info.get("state") and vendor_info["state"].strip().lower() not in ["tamil nadu", "tamilnadu", "tn"])
+        )
 
         if is_igst:
             total_cgst = 0.0
@@ -415,12 +411,8 @@ class PurchaseOrderPdfService:
         po_no_display = po.po_no or f"PO-2026-{po.id:04d}"
         today_str = datetime.now().strftime("%d/%m/%Y")
         po_date_display = po.po_date.strftime("%d/%m/%Y") if po.po_date else today_str
-        pr_no_display = po.pr_no or "PR-2026-0001"
-        pr_date_display = po.request_date.strftime("%d/%m/%Y") if po.request_date else po_date_display
-
-        transport_scope_display = po.transport_scope or "Vendor Scope"
-        payment_terms_display = po.payment_terms or "30 Days Credit"
-        logistic_name_display = po.logistic_name or "VRL Logistics / SafeXpress"
+        rfq_ref_display = po.rfq_no or po.rfq_id or po.pr_no or f"RFQ-2026-{po.id:04d}"
+        rfq_date_display = po.request_date.strftime("%d/%m/%Y") if po.request_date else po_date_display
 
         # Initialize PDF Canvas
         buf = io.BytesIO()
@@ -439,111 +431,86 @@ class PurchaseOrderPdfService:
         # Column Content styles: exactly 14pt
         style_bold = ParagraphStyle('Bld', fontName=FONT_BOLD, fontSize=14, leading=18, textColor=TEXT_BLACK)
         style_norm = ParagraphStyle('Nrm', fontName=FONT_NORMAL, fontSize=14, leading=18, textColor=TEXT_BLACK)
-        style_muted = ParagraphStyle('Mut', fontName=FONT_NORMAL, fontSize=13, leading=17, textColor=TEXT_MUTED)
         style_cell_c = ParagraphStyle('CellC', fontName=FONT_NORMAL, fontSize=14, leading=18, textColor=TEXT_BLACK, alignment=1)
         style_cell_r = ParagraphStyle('CellR', fontName=FONT_NORMAL, fontSize=14, leading=18, textColor=TEXT_BLACK, alignment=2)
         style_cell_bold_r = ParagraphStyle('CellBR', fontName=FONT_BOLD, fontSize=14, leading=18, textColor=TEXT_BLACK, alignment=2)
         style_cell_l = ParagraphStyle('CellL', fontName=FONT_NORMAL, fontSize=14, leading=18, textColor=TEXT_BLACK, alignment=0)
-        style_words = ParagraphStyle('Words', fontName=FONT_NORMAL, fontSize=14, leading=18, textColor=TEXT_BLACK)
+        style_words = ParagraphStyle('Words', fontName=FONT_NORMAL, fontSize=14, leading=19, textColor=TEXT_BLACK)
+
+        half_w = TABLE_W / 2.0
 
         # ---------------------------------------------------------------------
-        # 1. SELLER DETAILS BLOCK WITH 2D QR CODE (Vertical line left of QR code)
+        # 1. SUPPLIER DETAILS & PO DETAILS (Two-Column Section)
         # ---------------------------------------------------------------------
-        qr_data = (
-            f"PO:{po_no_display}\n"
-            f"DATE:{po_date_display}\n"
-            f"VENDOR:{vendor_info['name']}\n"
-            f"GSTIN:{vendor_info['gst_number']}\n"
-            f"TOTAL:{grand_total:.2f}"
-        )
-        qr_widget = QrCodeWidget(qr_data)
-        qr_bounds = qr_widget.getBounds()
-        qw = qr_bounds[2] - qr_bounds[0]
-        qh = qr_bounds[3] - qr_bounds[1]
-        qr_size = 120.0
-        qr_drawing = Drawing(qr_size, qr_size)
-        if qw > 0 and qh > 0:
-            qr_drawing.transform = [qr_size / qw, 0, 0, qr_size / qh, 0, 0]
-        qr_drawing.add(qr_widget)
+        style_addr_name = ParagraphStyle('AddrName', fontName=FONT_BOLD, fontSize=14, leading=18, textColor=TEXT_BLACK, spaceAfter=4)
+        style_addr_body = ParagraphStyle('AddrBody', fontName=FONT_NORMAL, fontSize=14, leading=18, textColor=TEXT_BLACK, spaceAfter=4)
+        style_addr_gst = ParagraphStyle('AddrGst', fontName=FONT_NORMAL, fontSize=14, leading=18, textColor=TEXT_BLACK)
 
-        left_w = TABLE_W - 150.0
-        right_w = 150.0
-
-        seller_text = [
-            Paragraph(f"<b>{vendor_info['name'].upper()}</b>", style_bold),
-            Paragraph(f"{vendor_info['address']}", style_norm),
-            Paragraph(f"<b>GSTIN:</b> {vendor_info['gst_number']} &nbsp;&nbsp; <b>PAN:</b> {vendor_info['pan_number']}", style_norm)
+        supplier_details_content = [
+            Paragraph(vendor_info['name'], style_addr_name),
+            Paragraph(vendor_info['address'], style_addr_body),
+            Paragraph(f"<b>GST No :</b> {vendor_info['gst_number']}", style_addr_gst),
         ]
 
-        # Meta grid below seller (no vertical lines between columns)
-        col_w = TABLE_W / 4.0
-        meta_data = [
-            [
-                Paragraph("<b>PO No:</b> " + po_no_display, style_norm),
-                Paragraph("<b>PO Date:</b> " + po_date_display, style_norm),
-                Paragraph("<b>PR No:</b> " + pr_no_display, style_norm),
-                Paragraph("<b>PR Date:</b> " + pr_date_display, style_norm)
-            ],
-            [
-                Paragraph("<b>Transport Scope:</b> " + transport_scope_display, style_norm),
-                Paragraph("<b>Payment Terms:</b> " + payment_terms_display, style_norm),
-                Paragraph("<b>Logistics:</b> " + logistic_name_display, style_norm),
-                Paragraph(f"<b>Transport Charges:</b> ₹{format_currency_inr(transport_charges)}", style_norm)
-            ]
+        po_details_table_data = [
+            [Paragraph("<b>RFQ Ref #</b>", style_norm), Paragraph("<b>:</b>", style_norm), Paragraph(str(rfq_ref_display), style_norm)],
+            [Paragraph("<b>RFQ Date</b>", style_norm), Paragraph("<b>:</b>", style_norm), Paragraph(str(rfq_date_display), style_norm)],
+            [Paragraph("<b>PO No</b>", style_norm), Paragraph("<b>:</b>", style_norm), Paragraph(str(po_no_display), style_norm)],
+            [Paragraph("<b>PO Date</b>", style_norm), Paragraph("<b>:</b>", style_norm), Paragraph(str(po_date_display), style_norm)],
         ]
-
-        t_seller = Table(
-            [
-                [Paragraph("<b>Seller / Vendor Details</b>", style_sec_hdr), ""],
-                [seller_text, qr_drawing]
-            ],
-            colWidths=[left_w, right_w]
-        )
-        t_seller.setStyle(TableStyle([
-            ('SPAN', (0, 0), (1, 0)),
-            ('BACKGROUND', (0, 0), (1, 0), TABLE_HEADER_GREY),
-            ('ALIGN', (0, 0), (1, 0), 'CENTER'),
+        t_po_meta = Table(po_details_table_data, colWidths=[85.0, 15.0, half_w - 16.0 - 100.0])
+        t_po_meta.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ('LEFTPADDING', (0, 0), (-1, -1), 8),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-            ('LINEBELOW', (0, 0), (-1, 0), 0.75, LINE_GREY),
-            # Vertical line on left side of QR code (between col 0 and col 1 in content row)
-            ('LINEAFTER', (0, 1), (0, 1), 0.75, LINE_GREY),
-            ('LINEBELOW', (0, 1), (-1, 1), 0.75, LINE_GREY),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('LEFTPADDING', (0, 0), (0, -1), 0),
+            ('RIGHTPADDING', (0, 0), (0, -1), 0),
+            ('LEFTPADDING', (1, 0), (1, -1), 2),
+            ('RIGHTPADDING', (1, 0), (1, -1), 2),
+            ('LEFTPADDING', (2, 0), (2, -1), 8),
+            ('RIGHTPADDING', (2, 0), (2, -1), 0),
+            ('LINEBELOW', (0, 0), (-1, -2), 0.5, LINE_GREY),
         ]))
 
-        t_meta = Table(meta_data, colWidths=[col_w, col_w, col_w, col_w])
-        t_meta.setStyle(TableStyle([
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        t_supplier_po = Table(
+            [
+                [Paragraph("<b>Supplier Details</b>", style_sec_hdr), Paragraph("<b>PO Details</b>", style_sec_hdr)],
+                [supplier_details_content, t_po_meta]
+            ],
+            colWidths=[half_w, half_w]
+        )
+        t_supplier_po.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (0, 0), TABLE_HEADER_GREY),
+            ('BACKGROUND', (1, 0), (1, 0), TABLE_HEADER_GREY),
+            ('LINEAFTER', (0, 0), (0, 0), 0.75, HEADER_DIVIDER),  # Vertical line only in header
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('TOPPADDING', (0, 0), (-1, -1), 6),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
             ('LEFTPADDING', (0, 0), (-1, -1), 8),
             ('RIGHTPADDING', (0, 0), (-1, -1), 8),
-            ('LINEBELOW', (0, 0), (-1, -1), 0.5, LINE_GREY),
+            ('LINEBELOW', (0, 0), (-1, 0), 0.75, LINE_GREY),
+            ('LINEBELOW', (0, 1), (-1, 1), 0.75, LINE_GREY),
         ]))
 
         # ---------------------------------------------------------------------
-        # 2. BILL TO & SHIP TO SECTION
+        # 2. BILL TO & SHIP TO (Two-Column Section)
         # ---------------------------------------------------------------------
-        half_w = TABLE_W / 2.0
         bill_to_content = [
-            Paragraph(f"<b>{company_assets['company_legal_name']}</b>", style_bold),
-            Paragraph(company_assets['registered_address'], style_norm),
-            Paragraph(f"<b>GSTIN:</b> {company_assets['gst_number']} &nbsp;&nbsp; <b>PAN:</b> {company_assets['pan_number']}", style_norm),
+            Paragraph(company_assets['company_legal_name'], style_addr_name),
+            Paragraph(company_assets['registered_address'], style_addr_body),
+            Paragraph(f"<b>GST No :</b> {company_assets['gst_number']}", style_addr_gst),
         ]
 
         wh_addr = po.ship_to or "Nexus Central Warehouse, Plot 14, Guindy Industrial Estate, Chennai, Tamil Nadu - 600032"
         ship_to_content = [
-            Paragraph(f"<b>{company_assets['company_name']} - Telecom Delivery Site / Warehouse</b>", style_bold),
-            Paragraph(wh_addr, style_norm),
-            Paragraph(f"<b>GSTIN:</b> {company_assets['gst_number']}", style_norm),
+            Paragraph(f"{company_assets['company_name']} - Delivery Site", style_addr_name),
+            Paragraph(wh_addr, style_addr_body),
+            Paragraph(f"<b>GST No :</b> {company_assets['gst_number']}", style_addr_gst),
         ]
 
         t_bill_ship = Table(
             [
-                [Paragraph("<b>Bill To (Buyer)</b>", style_sec_hdr), Paragraph("<b>Ship To (Delivery Site)</b>", style_sec_hdr)],
+                [Paragraph("<b>Bill To</b>", style_sec_hdr), Paragraph("<b>Ship To</b>", style_sec_hdr)],
                 [bill_to_content, ship_to_content]
             ],
             colWidths=[half_w, half_w]
@@ -562,194 +529,275 @@ class PurchaseOrderPdfService:
         ]))
 
         # ---------------------------------------------------------------------
-        # 3. ITEM DETAILS TABLE
+        # 3. PO ITEM DETAILS TABLE
         # ---------------------------------------------------------------------
-        col_w_items = [45.0, 420.0, 120.0, 75.0, 85.0, 125.0, 100.0, 184.25]
-
-        items_table_data = [
-            [
-                Paragraph("<b>Sl #</b>", style_tbl_hdr),
-                Paragraph("<b>Item Description</b>", style_tbl_hdr),
-                Paragraph("<b>HSN Code</b>", style_tbl_hdr),
-                Paragraph("<b>UOM</b>", style_tbl_hdr),
-                Paragraph("<b>Qty</b>", style_tbl_hdr),
-                Paragraph("<b>Rate (₹)</b>", style_tbl_hdr),
-                Paragraph("<b>GST Rate %</b>", style_tbl_hdr),
-                Paragraph("<b>Amount (₹)</b>", style_tbl_hdr),
-            ]
-        ]
-
-        for it in items:
-            items_table_data.append([
-                Paragraph(str(it["sl"]), style_cell_c),
-                Paragraph(it["description"], style_cell_l),
-                Paragraph(str(it["hsn"]), style_cell_c),
-                Paragraph(str(it["uom"]), style_cell_c),
-                Paragraph(f"{it['qty']:.2f}", style_cell_r),
-                Paragraph(format_currency_inr(it["rate"]), style_cell_r),
-                Paragraph(f"{it['gst_pct']:.2f}%", style_cell_c),
-                Paragraph(format_currency_inr(it["amount"]), style_cell_r),
-            ])
-
-        # Financial Totals rows
-        items_table_data.append([
-            "", Paragraph("<b>Total (Taxable Amount)</b>", style_bold), "", "", "", "", "",
-            Paragraph(format_currency_inr(total_basic), style_cell_bold_r)
-        ])
-
         if is_igst:
-            items_table_data.append([
-                "", Paragraph(f"<b>Total IGST @ {gst_pct:.1f}%</b>", style_bold), "", "", "", "", "",
-                Paragraph(format_currency_inr(total_igst), style_cell_bold_r)
-            ])
+            # 9 Columns: Sl #, HSN Code, Description, UOM, Qty, Rate, IGST (%, ₹), Amount
+            col_w_items = [50.0, 90.0, 450.0, 70.0, 90.0, 110.0, 70.0, 120.0, 154.25]
+            items_table_data = [
+                # Header Row 0
+                [
+                    Paragraph("<b>Sl #</b>", style_tbl_hdr),
+                    Paragraph("<b>HSN Code</b>", style_tbl_hdr),
+                    Paragraph("<b>Description</b>", style_tbl_hdr),
+                    Paragraph("<b>UOM</b>", style_tbl_hdr),
+                    Paragraph("<b>Qty</b>", style_tbl_hdr),
+                    Paragraph("<b>Rate</b>", style_tbl_hdr),
+                    Paragraph("<b>IGST</b>", style_tbl_hdr),
+                    "",
+                    Paragraph("<b>Amount</b>", style_tbl_hdr),
+                ],
+                # Header Row 1
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    Paragraph("<b>%</b>", style_tbl_hdr),
+                    Paragraph("<b>₹</b>", style_tbl_hdr),
+                    "",
+                ]
+            ]
+
+            for it in items:
+                igst_amt = round(it["amount"] * (it["gst_pct"] / 100.0), 2)
+                items_table_data.append([
+                    Paragraph(str(it["sl"]), style_cell_c),
+                    Paragraph(str(it["hsn"]), style_cell_c),
+                    Paragraph(it["description"], style_cell_l),
+                    Paragraph(str(it["uom"]), style_cell_c),
+                    Paragraph(f"{it['qty']:.2f}", style_cell_r),
+                    Paragraph(format_currency_inr(it["rate"]), style_cell_r),
+                    Paragraph(f"{it['gst_pct']:.1f}%", style_cell_c),
+                    Paragraph(format_currency_inr(igst_amt), style_cell_r),
+                    Paragraph(format_currency_inr(it["amount"]), style_cell_r),
+                ])
+
+            t_items_style = [
+                ('BACKGROUND', (0, 0), (-1, 1), TABLE_HEADER_GREY),
+                ('SPAN', (0, 0), (0, 1)),
+                ('SPAN', (1, 0), (1, 1)),
+                ('SPAN', (2, 0), (2, 1)),
+                ('SPAN', (3, 0), (3, 1)),
+                ('SPAN', (4, 0), (4, 1)),
+                ('SPAN', (5, 0), (5, 1)),
+                ('SPAN', (6, 0), (7, 0)),
+                ('SPAN', (8, 0), (8, 1)),
+                ('LINEAFTER', (0, 0), (0, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (1, 0), (1, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (2, 0), (2, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (3, 0), (3, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (4, 0), (4, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (5, 0), (5, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (7, 0), (7, 0), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (6, 1), (6, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (7, 1), (7, 1), 0.75, HEADER_DIVIDER),
+                ('LINEBELOW', (6, 0), (7, 0), 0.75, HEADER_DIVIDER),
+                ('LINEBELOW', (0, 1), (-1, 1), 0.75, LINE_GREY),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING', (0, 0), (-1, -1), 5),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('LINEBELOW', (0, 2), (-1, -1), 0.5, LINE_GREY),
+            ]
         else:
-            half_gst = gst_pct / 2.0
-            items_table_data.append([
-                "", Paragraph(f"<b>Total CGST @ {half_gst:.1f}%</b>", style_bold), "", "", "", "", "",
-                Paragraph(format_currency_inr(total_cgst), style_cell_bold_r)
-            ])
-            items_table_data.append([
-                "", Paragraph(f"<b>Total SGST @ {half_gst:.1f}%</b>", style_bold), "", "", "", "", "",
-                Paragraph(format_currency_inr(total_sgst), style_cell_bold_r)
-            ])
+            # 11 Columns: Sl #, HSN Code, Description, UOM, Qty, Rate, CGST (%, ₹), SGST (%, ₹), Amount
+            col_w_items = [50.0, 90.0, 320.0, 65.0, 80.0, 95.0, 55.0, 95.0, 55.0, 95.0, 154.25]
+            items_table_data = [
+                # Header Row 0
+                [
+                    Paragraph("<b>Sl #</b>", style_tbl_hdr),
+                    Paragraph("<b>HSN Code</b>", style_tbl_hdr),
+                    Paragraph("<b>Description</b>", style_tbl_hdr),
+                    Paragraph("<b>UOM</b>", style_tbl_hdr),
+                    Paragraph("<b>Qty</b>", style_tbl_hdr),
+                    Paragraph("<b>Rate</b>", style_tbl_hdr),
+                    Paragraph("<b>CGST</b>", style_tbl_hdr),
+                    "",
+                    Paragraph("<b>SGST</b>", style_tbl_hdr),
+                    "",
+                    Paragraph("<b>Amount</b>", style_tbl_hdr),
+                ],
+                # Header Row 1
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    Paragraph("<b>%</b>", style_tbl_hdr),
+                    Paragraph("<b>₹</b>", style_tbl_hdr),
+                    Paragraph("<b>%</b>", style_tbl_hdr),
+                    Paragraph("<b>₹</b>", style_tbl_hdr),
+                    "",
+                ]
+            ]
 
-        if transport_charges > 0:
-            items_table_data.append([
-                "", Paragraph("<b>Transport & Logistics Charges</b>", style_bold), "", "", "", "", "",
-                Paragraph(format_currency_inr(transport_charges), style_cell_bold_r)
-            ])
+            for it in items:
+                half_gst = it["gst_pct"] / 2.0
+                items_table_data.append([
+                    Paragraph(str(it["sl"]), style_cell_c),
+                    Paragraph(str(it["hsn"]), style_cell_c),
+                    Paragraph(it["description"], style_cell_l),
+                    Paragraph(str(it["uom"]), style_cell_c),
+                    Paragraph(f"{it['qty']:.2f}", style_cell_r),
+                    Paragraph(format_currency_inr(it["rate"]), style_cell_r),
+                    Paragraph(f"{half_gst:.1f}%", style_cell_c),
+                    Paragraph(format_currency_inr(it["cgst_amt"]), style_cell_r),
+                    Paragraph(f"{half_gst:.1f}%", style_cell_c),
+                    Paragraph(format_currency_inr(it["sgst_amt"]), style_cell_r),
+                    Paragraph(format_currency_inr(it["amount"]), style_cell_r),
+                ])
 
-        items_table_data.append([
-            "", Paragraph("<b>Grand Total</b>", style_bold), "", "", "", "", "",
-            Paragraph(f"<b>₹{format_currency_inr(grand_total)}</b>", style_cell_bold_r)
-        ])
+            t_items_style = [
+                ('BACKGROUND', (0, 0), (-1, 1), TABLE_HEADER_GREY),
+                ('SPAN', (0, 0), (0, 1)),
+                ('SPAN', (1, 0), (1, 1)),
+                ('SPAN', (2, 0), (2, 1)),
+                ('SPAN', (3, 0), (3, 1)),
+                ('SPAN', (4, 0), (4, 1)),
+                ('SPAN', (5, 0), (5, 1)),
+                ('SPAN', (6, 0), (7, 0)),
+                ('SPAN', (8, 0), (9, 0)),
+                ('SPAN', (10, 0), (10, 1)),
+                ('LINEAFTER', (0, 0), (0, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (1, 0), (1, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (2, 0), (2, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (3, 0), (3, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (4, 0), (4, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (5, 0), (5, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (7, 0), (7, 0), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (6, 1), (6, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (7, 1), (7, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (8, 1), (8, 1), 0.75, HEADER_DIVIDER),
+                ('LINEAFTER', (9, 0), (9, 1), 0.75, HEADER_DIVIDER),
+                ('LINEBELOW', (6, 0), (7, 0), 0.75, HEADER_DIVIDER),
+                ('LINEBELOW', (8, 0), (9, 0), 0.75, HEADER_DIVIDER),
+                ('LINEBELOW', (0, 1), (-1, 1), 0.75, LINE_GREY),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING', (0, 0), (-1, -1), 5),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('LINEBELOW', (0, 2), (-1, -1), 0.5, LINE_GREY),
+            ]
 
-        # Words row
-        items_table_data.append([
-            Paragraph(f"<b>Amount in Words:</b> {amount_words}", style_words),
-            "", "", "", "", "", "", ""
-        ])
-
-        start_totals_idx = len(items) + 1
-        t_items = Table(items_table_data, colWidths=col_w_items)
-        t_items_style = [
-            ('BACKGROUND', (0, 0), (-1, 0), TABLE_HEADER_GREY),
-            ('LINEAFTER', (0, 0), (-2, 0), 0.75, HEADER_DIVIDER),  # Vertical lines ONLY in table header
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-            ('LEFTPADDING', (0, 0), (-1, -1), 6),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-            ('LINEBELOW', (0, 0), (-1, 0), 0.75, LINE_GREY),
-            ('LINEBELOW', (0, 1), (-1, -1), 0.5, LINE_GREY),  # Horizontal dividers only for rows
-        ]
-
-        curr_row = start_totals_idx
-        total_rows_count = len(items_table_data) - start_totals_idx - 1
-        for _ in range(total_rows_count):
-            t_items_style.append(('SPAN', (1, curr_row), (6, curr_row)))
-            curr_row += 1
-
-        words_row_idx = len(items_table_data) - 1
-        t_items_style.append(('SPAN', (0, words_row_idx), (-1, words_row_idx)))
-        t_items_style.append(('TOPPADDING', (0, words_row_idx), (-1, words_row_idx), 6))
-        t_items_style.append(('BOTTOMPADDING', (0, words_row_idx), (-1, words_row_idx), 6))
-
+        t_items = Table(items_table_data, colWidths=col_w_items, repeatRows=2)
         t_items.setStyle(TableStyle(t_items_style))
 
         # ---------------------------------------------------------------------
-        # 4. TAX BREAKDOWN TABLE (BY HSN)
+        # 4. BOTTOM SUMMARY SECTION (Two-Column Summary Area)
+        # Left: Words (without 'Rupees in Words' wording)
+        # Right: Total Basic Amount, (Total CGST & SGST or Total IGST), Total PO Amount
         # ---------------------------------------------------------------------
-        col_w_tax = [160.0, 180.0, 130.0, 180.0, 130.0, 180.0, 194.25]
-        tax_table_data = [
-            [
-                Paragraph("<b>HSN Code</b>", style_tbl_hdr),
-                Paragraph("<b>Taxable Value (₹)</b>", style_tbl_hdr),
-                Paragraph("<b>CGST %</b>", style_tbl_hdr),
-                Paragraph("<b>CGST Value (₹)</b>", style_tbl_hdr),
-                Paragraph("<b>SGST %</b>", style_tbl_hdr),
-                Paragraph("<b>SGST Value (₹)</b>", style_tbl_hdr),
-                Paragraph("<b>Total Tax (₹)</b>", style_tbl_hdr),
+        summary_left_w = TABLE_W - 400.0
+        summary_right_lbl_w = 240.0
+        summary_right_val_w = 160.0
+
+        if is_igst:
+            # 3 rows: Total Basic Amount, Total IGST On Basic, Total PO Amount
+            summary_table_data = [
+                [
+                    Paragraph(amount_words, style_words),
+                    Paragraph("<b>Total Basic Amount</b>", style_norm),
+                    Paragraph(f"₹{format_currency_inr(total_basic)}", style_cell_bold_r)
+                ],
+                [
+                    "",
+                    Paragraph("<b>Total IGST On Basic</b>", style_norm),
+                    Paragraph(f"₹{format_currency_inr(total_igst)}", style_cell_bold_r)
+                ],
+                [
+                    "",
+                    Paragraph("<b>Total PO Amount</b>", style_bold),
+                    Paragraph(f"<b>₹{format_currency_inr(grand_total)}</b>", style_cell_bold_r)
+                ],
             ]
-        ]
-
-        hsn_groups: Dict[str, Dict[str, float]] = {}
-        for it in items:
-            h = it["hsn"]
-            if h not in hsn_groups:
-                hsn_groups[h] = {"basic": 0.0, "cgst": 0.0, "sgst": 0.0, "total": 0.0, "rate": it["gst_pct"]}
-            hsn_groups[h]["basic"] += it["amount"]
-            hsn_groups[h]["cgst"] += it["cgst_amt"]
-            hsn_groups[h]["sgst"] += it["sgst_amt"]
-            hsn_groups[h]["total"] += (it["cgst_amt"] + it["sgst_amt"])
-
-        total_tax_amount = 0.0
-        for h, v in hsn_groups.items():
-            tot_tax = v["cgst"] + v["sgst"]
-            total_tax_amount += tot_tax
-            half_r = v["rate"] / 2.0
-            tax_table_data.append([
-                Paragraph(h, style_cell_c),
-                Paragraph(format_currency_inr(v["basic"]), style_cell_r),
-                Paragraph(f"{half_r:.1f}%", style_cell_c),
-                Paragraph(format_currency_inr(v["cgst"]), style_cell_r),
-                Paragraph(f"{half_r:.1f}%", style_cell_c),
-                Paragraph(format_currency_inr(v["sgst"]), style_cell_r),
-                Paragraph(format_currency_inr(tot_tax), style_cell_r),
-            ])
-
-        tax_words = number_to_indian_rupees_words(total_tax_amount)
-        tax_table_data.append([
-            Paragraph(f"<b>Tax Amount in Words:</b> {tax_words}", style_words),
-            "", "", "", "", "", ""
-        ])
-
-        t_tax = Table(tax_table_data, colWidths=col_w_tax)
-        tax_words_idx = len(tax_table_data) - 1
-        t_tax.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), TABLE_HEADER_GREY),
-            ('LINEAFTER', (0, 0), (-2, 0), 0.75, HEADER_DIVIDER),  # Vertical lines ONLY in table header
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 4),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-            ('LEFTPADDING', (0, 0), (-1, -1), 6),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-            ('LINEBELOW', (0, 0), (-1, 0), 0.75, LINE_GREY),
-            ('LINEBELOW', (0, 1), (-1, -1), 0.5, LINE_GREY),  # Horizontal dividers only for rows
-            ('SPAN', (0, tax_words_idx), (-1, tax_words_idx)),
-        ]))
+            t_summary = Table(
+                summary_table_data,
+                colWidths=[summary_left_w, summary_right_lbl_w, summary_right_val_w]
+            )
+            t_summary.setStyle(TableStyle([
+                ('SPAN', (0, 0), (0, 2)),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('LINEBELOW', (1, 0), (-1, 1), 0.5, LINE_GREY),
+                ('LINEBELOW', (0, 2), (-1, 2), 0.75, LINE_GREY),
+                ('LINEAFTER', (0, 0), (0, 2), 0.5, LINE_GREY),
+            ]))
+        else:
+            # 4 rows: Total Basic Amount, Total CGST On Basic, Total SGST On Basic, Total PO Amount
+            summary_table_data = [
+                [
+                    Paragraph(amount_words, style_words),
+                    Paragraph("<b>Total Basic Amount</b>", style_norm),
+                    Paragraph(f"₹{format_currency_inr(total_basic)}", style_cell_bold_r)
+                ],
+                [
+                    "",
+                    Paragraph("<b>Total CGST On Basic</b>", style_norm),
+                    Paragraph(f"₹{format_currency_inr(total_cgst)}", style_cell_bold_r)
+                ],
+                [
+                    "",
+                    Paragraph("<b>Total SGST On Basic</b>", style_norm),
+                    Paragraph(f"₹{format_currency_inr(total_sgst)}", style_cell_bold_r)
+                ],
+                [
+                    "",
+                    Paragraph("<b>Total PO Amount</b>", style_bold),
+                    Paragraph(f"<b>₹{format_currency_inr(grand_total)}</b>", style_cell_bold_r)
+                ],
+            ]
+            t_summary = Table(
+                summary_table_data,
+                colWidths=[summary_left_w, summary_right_lbl_w, summary_right_val_w]
+            )
+            t_summary.setStyle(TableStyle([
+                ('SPAN', (0, 0), (0, 3)),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('LINEBELOW', (1, 0), (-1, 2), 0.5, LINE_GREY),
+                ('LINEBELOW', (0, 3), (-1, 3), 0.75, LINE_GREY),
+                ('LINEAFTER', (0, 0), (0, 3), 0.5, LINE_GREY),
+            ]))
 
         # ---------------------------------------------------------------------
         # LAYOUT FLOWABLES AND DRAW ON CANVAS
         # ---------------------------------------------------------------------
         curr_y = PAGE_HEIGHT - BORDER_INSET - HEADER_H - 12.0
 
-        # Wrap & Draw Seller
-        _, h_seller = t_seller.wrap(TABLE_W, 300)
-        curr_y -= h_seller
-        t_seller.drawOn(canv, TABLE_X, curr_y)
+        # Wrap & Draw Supplier & PO Details
+        _, h_supp_po = t_supplier_po.wrap(TABLE_W, 300)
+        curr_y -= h_supp_po
+        t_supplier_po.drawOn(canv, TABLE_X, curr_y)
 
-        # Wrap & Draw Meta
-        _, h_meta = t_meta.wrap(TABLE_W, 100)
-        curr_y -= h_meta
-        t_meta.drawOn(canv, TABLE_X, curr_y)
-
-        # Wrap & Draw Bill/Ship
+        # Wrap & Draw Bill To & Ship To
         _, h_bill_ship = t_bill_ship.wrap(TABLE_W, 200)
         curr_y -= h_bill_ship
         t_bill_ship.drawOn(canv, TABLE_X, curr_y)
 
-        # Wrap & Draw Items
-        _, h_items = t_items.wrap(TABLE_W, 600)
+        # Wrap & Draw Items Table
+        _, h_items = t_items.wrap(TABLE_W, 500)
         curr_y -= h_items
         t_items.drawOn(canv, TABLE_X, curr_y)
 
-        # Wrap & Draw Tax Breakdown
-        _, h_tax = t_tax.wrap(TABLE_W, 250)
-        curr_y -= h_tax
-        t_tax.drawOn(canv, TABLE_X, curr_y)
+        # Wrap & Draw Bottom Summary Section
+        _, h_summary = t_summary.wrap(TABLE_W, 200)
+        curr_y -= h_summary
+        t_summary.drawOn(canv, TABLE_X, curr_y)
 
-        # The bordered table section ends here
+        # The bordered content ends immediately here
         table_bottom_y = curr_y
 
         # Draw adaptive page border with curved top, and sharp straight square bottom
@@ -757,7 +805,7 @@ class PurchaseOrderPdfService:
 
         # ---------------------------------------------------------------------
         # 5. COMPANY SEAL AREA (OUTSIDE BORDER AT BOTTOM-RIGHT)
-        # Note: No text/wording above or below the seal; increased size
+        # Positioned below bordered content with no wording above or below
         # ---------------------------------------------------------------------
         seal_w = 145.0
         seal_h = 145.0

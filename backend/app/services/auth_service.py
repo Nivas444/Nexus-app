@@ -183,22 +183,24 @@ class AuthService:
             user_agent=(request.headers.get("user-agent") or "")[:255],
         )
         db.add(session_row)
+        db.add(
+            AuthAuditLog(
+                event_type="login_success",
+                user_id=db_user.id,
+                email=db_user.email,
+                ip_address=client_ip,
+                method=request.method,
+                path=str(request.url.path)[:255],
+                status_code=status.HTTP_200_OK,
+                detail=f"Authenticated with roles: {', '.join(auth_user.roles)}",
+            )
+        )
         db.commit()
 
         set_auth_cookies(
             response,
             access_token=access_token,
             refresh_token=refresh_token,
-        )
-
-        log_security_event(
-            db,
-            "login_success",
-            user_id=db_user.id,
-            email=db_user.email,
-            request=request,
-            status_code=status.HTTP_200_OK,
-            detail=f"Authenticated with roles: {', '.join(auth_user.roles)}",
         )
 
         return LoginResponse(

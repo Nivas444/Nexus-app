@@ -386,6 +386,12 @@
               return { healthy: true, attempts };
             }
 
+            // If health route returns 404 (e.g. proxy/server doesn't expose /api/health yet),
+            // do not stall login for 120s — proceed directly to /api/v1/auth/login.
+            if (result.status === 404) {
+              return { healthy: true, attempts, skipped: true };
+            }
+
             if (result.networkError) {
               if (typeof navigator !== 'undefined' && navigator.onLine === false) {
                 const err = new Error('Unable to connect to the server. Please check your connection and try again.');

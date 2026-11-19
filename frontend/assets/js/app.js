@@ -255,14 +255,16 @@ function getLoginLoaderElements() {
   };
 }
 
-function showLoginLoader(titleText, subtitleText) {
+function showLoginLoader(titleText) {
   const el = getLoginLoaderElements();
   if (!el.overlay) return;
   if (el.spinnerWrap) el.spinnerWrap.hidden = false;
-  if (el.errorIconWrap) el.errorIconWrap.hidden = true;
+  if (el.subtitle) {
+    el.subtitle.textContent = '';
+    el.subtitle.hidden = true;
+  }
   if (el.actions) el.actions.hidden = true;
-  if (el.title) el.title.textContent = titleText;
-  if (el.subtitle) el.subtitle.textContent = subtitleText;
+  if (el.title) el.title.textContent = titleText || 'Loading...';
   el.overlay.setAttribute('aria-busy', 'true');
   el.overlay.hidden = false;
   requestAnimationFrame(() => el.overlay.classList.add('active'));
@@ -272,10 +274,12 @@ function showLoginLoaderError(titleText, subtitleText) {
   const el = getLoginLoaderElements();
   if (!el.overlay) return;
   if (el.spinnerWrap) el.spinnerWrap.hidden = true;
-  if (el.errorIconWrap) el.errorIconWrap.hidden = false;
+  if (el.title) el.title.textContent = titleText || 'Connection Error';
+  if (el.subtitle) {
+    el.subtitle.textContent = subtitleText || '';
+    el.subtitle.hidden = !subtitleText;
+  }
   if (el.actions) el.actions.hidden = false;
-  if (el.title) el.title.textContent = titleText;
-  if (el.subtitle) el.subtitle.textContent = subtitleText;
   el.overlay.setAttribute('aria-busy', 'false');
   el.overlay.hidden = false;
   requestAnimationFrame(() => el.overlay.classList.add('active'));

@@ -30,6 +30,7 @@ class AccountPurchase(Base):
     paid_date = Column(Date, nullable=True)
     payment_receipt_number = Column(String(150), nullable=True)
     partial_payment = Column(Boolean, nullable=True, default=False)
+    gstr2b_status = Column(String(50), nullable=True, default="Pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

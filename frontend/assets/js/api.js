@@ -39,6 +39,65 @@
   let _wakeUpPromise = null;
   let _isRedirectingToLogin = false;
 
+  // Performance: in-flight GET deduplication & short-TTL GET response cache (auto-invalidated on writes)
+  const _inflightGetRequests = new Map();
+  const _clientGetCache = new Map();
+  const CLIENT_GET_CACHE_TTL_MS = 20000;
+  const _activeActionLocks = new Set();
+
+  // Lightweight frontend performance telemetry (never logs tokens, passwords, or PII)
+  const _perfMetrics = {
+    requests: [],
+    marks: {},
+    recordRequest(entry) {
+      this.requests.push(entry);
+      if (this.requests.length > 200) this.requests.shift();
+    },
+    mark(name, durationMs) {
+      this.marks[name] = { durationMs: Number(durationMs.toFixed(1)), at: Date.now() };
+    },
+    getSummary() {
+      const slow = this.requests.filter(r => r.durationMs >= 500).sort((a, b) => b.durationMs - a.durationMs);
+      return {
+        totalRequests: this.requests.length,
+        cacheHits: this.requests.filter(r => r.cacheHit).length,
+        slowestRequests: slow.slice(0, 10),
+        marks: { ...this.marks }
+      };
+    },
+    async guardAction(actionKey, fn) {
+      if (_activeActionLocks.has(actionKey)) return null;
+      _activeActionLocks.add(actionKey);
+      try {
+        return await fn();
+      } finally {
+        _activeActionLocks.delete(actionKey);
+      }
+    }
+  };
+  if (typeof window !== 'undefined') {
+    window.NexusPerf = _perfMetrics;
+  }
+
+  function _generateRequestId() {
+    return 'req-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+  }
+
+  function _isCacheableGet(endpoint) {
+    if (!endpoint || endpoint.includes('/auth/') || endpoint.includes('/health')) return false;
+    return true;
+  }
+
+  function clearClientApiCache(prefix) {
+    if (!prefix) {
+      _clientGetCache.clear();
+      return;
+    }
+    for (const k of _clientGetCache.keys()) {
+      if (k.includes(prefix)) _clientGetCache.delete(k);
+    }
+  }
+
   // Purge any legacy insecure localStorage token keys
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -86,6 +145,8 @@
 
   function clearSessionState() {
     _memoryAccessToken = null;
+    clearClientApiCache();
+    _inflightGetRequests.clear();
     try {
       if (window.sessionStorage) {
         window.sessionStorage.removeItem('nexus_user');
@@ -234,8 +295,34 @@
 
   async function request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    const method = (options.method || 'GET').toUpperCase();
+    const bypassCache = Boolean(options.bypassCache);
+    const cacheKey = `${method}:${url}`;
+
+    // Invalidate cached GETs on any mutating operation so data stays strictly consistent
+    if (method !== 'GET') {
+      clearClientApiCache();
+    } else if (!bypassCache && _isCacheableGet(endpoint)) {
+      const cached = _clientGetCache.get(cacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        _perfMetrics.recordRequest({
+          method,
+          endpoint,
+          status: 200,
+          durationMs: 0.1,
+          cacheHit: true
+        });
+        return typeof structuredClone === 'function' ? structuredClone(cached.data) : JSON.parse(JSON.stringify(cached.data));
+      }
+      if (_inflightGetRequests.has(cacheKey)) {
+        return _inflightGetRequests.get(cacheKey);
+      }
+    }
+
+    const reqId = _generateRequestId();
     const defaultHeaders = {
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'X-Request-Id': reqId
     };
 
     const token = getAccessToken();
@@ -256,52 +343,84 @@
       }
     };
 
-    try {
-      const response = await fetch(url, config);
+    const execPromise = (async () => {
+      const t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      try {
+        const response = await fetch(url, config);
+        const durationMs = ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - t0;
+        const serverMs = response.headers ? parseFloat(response.headers.get('X-Process-Time-Ms') || '0') : 0;
 
-      // Handle 204 No Content
-      if (response.status === 204) {
-        return null;
-      }
+        _perfMetrics.recordRequest({
+          requestId: reqId,
+          method,
+          endpoint,
+          status: response.status,
+          durationMs: Number(durationMs.toFixed(1)),
+          serverMs: isNaN(serverMs) ? 0 : serverMs,
+          cacheHit: false
+        });
 
-      let data;
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        data = await response.text();
-      }
-
-      if (!response.ok) {
-        let errorDetail = (data && data.detail) || (data && data.message) || response.statusText;
-        if (Array.isArray(errorDetail)) {
-          errorDetail = errorDetail.map(e => `${e.loc ? e.loc.join('.') + ': ' : ''}${e.msg}`).join(', ');
-        } else if (typeof errorDetail === 'object') {
-          errorDetail = JSON.stringify(errorDetail);
+        // Handle 204 No Content
+        if (response.status === 204) {
+          return null;
         }
-        const err = new Error(errorDetail || `Request failed (HTTP ${response.status})`);
-        err.status = response.status;
-        err.statusCode = response.status;
-        err.detail = errorDetail;
-        err.data = data;
-        err.isConflict = (response.status === 409);
-        throw err;
-      }
 
-      return data;
-    } catch (error) {
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        const friendlyMsg = `Cannot connect to FastAPI backend at ${API_BASE_URL}. Please ensure the backend service is running.`;
-        console.error(friendlyMsg, error);
-        const err = new Error(friendlyMsg);
-        err.status = 503;
-        err.statusCode = 503;
-        err.code = 503;
-        throw err;
+        let data;
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          data = await response.text();
+        }
+
+        if (!response.ok) {
+          let errorDetail = (data && data.detail) || (data && data.message) || response.statusText;
+          if (Array.isArray(errorDetail)) {
+            errorDetail = errorDetail.map(e => `${e.loc ? e.loc.join('.') + ': ' : ''}${e.msg}`).join(', ');
+          } else if (typeof errorDetail === 'object') {
+            errorDetail = JSON.stringify(errorDetail);
+          }
+          const err = new Error(errorDetail || `Request failed (HTTP ${response.status})`);
+          err.status = response.status;
+          err.statusCode = response.status;
+          err.detail = errorDetail;
+          err.data = data;
+          err.isConflict = (response.status === 409);
+          throw err;
+        }
+
+        if (method === 'GET' && _isCacheableGet(endpoint) && data !== undefined) {
+          _clientGetCache.set(cacheKey, {
+            expiresAt: Date.now() + CLIENT_GET_CACHE_TTL_MS,
+            data
+          });
+        }
+
+        return data;
+      } catch (error) {
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          const friendlyMsg = `Cannot connect to FastAPI backend at ${API_BASE_URL}. Please ensure the backend service is running.`;
+          console.error(friendlyMsg, error);
+          const err = new Error(friendlyMsg);
+          err.status = 503;
+          err.statusCode = 503;
+          err.code = 503;
+          throw err;
+        }
+        console.error(`API Request failed for ${url}:`, error);
+        throw error;
+      } finally {
+        if (method === 'GET') {
+          _inflightGetRequests.delete(cacheKey);
+        }
       }
-      console.error(`API Request failed for ${url}:`, error);
-      throw error;
+    })();
+
+    if (method === 'GET' && _isCacheableGet(endpoint)) {
+      _inflightGetRequests.set(cacheKey, execPromise);
     }
+
+    return execPromise;
   }
 
   function sleep(ms) {
@@ -2437,7 +2556,73 @@
           method: 'GET'
         });
       }
-    }
+    },
+
+    accounts: {
+      async getPayments() {
+        return await request('/accounts/payments', {
+          method: 'GET'
+        });
+      },
+      async createPayment(payload) {
+        return await request('/accounts/payments', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async submitPayments(payload) {
+        return await request('/accounts/payments/submit', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async getBankEntries() {
+        return await request('/accounts/bank', {
+          method: 'GET'
+        });
+      },
+      async createBankEntry(payload) {
+        return await request('/accounts/bank', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async submitBankEntries(payload) {
+        return await request('/accounts/bank/submit', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async getReceivables() {
+        return await request('/accounts/receivable', {
+          method: 'GET'
+        });
+      },
+      async getGstr1() {
+        return await request('/accounts/gstr1', {
+          method: 'GET'
+        });
+      },
+      async submitGstr1(payload) {
+        return await request('/accounts/gstr1/submit', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async getGstr2b() {
+        return await request('/accounts/gstr2b', {
+          method: 'GET'
+        });
+      },
+      async submitGstr2b(payload) {
+        return await request('/accounts/gstr2b/submit', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
+    },
+
+    clearCache: clearClientApiCache
   };
 
   window.NexusApi = NexusApi;

@@ -4,6 +4,7 @@ from app.core.security import (
     require_method_permissions,
     require_route_permission_map,
 )
+from app.api.v1.accounts import router as accounts_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.commercial_jms import router as commercial_jms_router
 from app.api.v1.commercial_project import router as commercial_project_router
@@ -231,6 +232,21 @@ api_router.include_router(
                 ],
                 default_read=("purchase.view",),
                 default_write=("purchase.manage",),
+            )
+        )
+    ],
+)
+
+# ---------------------------------------------------------------------------
+# Accounts Worklist Router (Payment & Bank linked to Nexus_Accounts DB)
+# ---------------------------------------------------------------------------
+api_router.include_router(
+    accounts_router,
+    dependencies=[
+        Depends(
+            require_method_permissions(
+                read=("accounts.view", "master.view"),
+                write=("accounts.manage", "master.manage"),
             )
         )
     ],

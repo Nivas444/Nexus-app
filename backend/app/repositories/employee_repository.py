@@ -1,6 +1,6 @@
 import re
 from typing import List, Optional, Tuple
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 from sqlalchemy import or_, desc, asc, func
 from app.models.employee import CompanyEmployee, CompanyEmployeeDocument
 
@@ -130,9 +130,28 @@ class EmployeeRepository:
     # --- Document operations ---
 
     def get_documents_by_employee_id(self, employee_id: int) -> List[CompanyEmployeeDocument]:
-        return self.db.query(CompanyEmployeeDocument).filter(
-            CompanyEmployeeDocument.employee_id == employee_id
-        ).order_by(asc(CompanyEmployeeDocument.id)).all()
+        return (
+            self.db.query(CompanyEmployeeDocument)
+            .options(defer(CompanyEmployeeDocument.file_data))
+            .filter(CompanyEmployeeDocument.employee_id == employee_id)
+            .order_by(asc(CompanyEmployeeDocument.id))
+            .all()
+        )
+
+    def get_documents_by_employee_ids(self, employee_ids: List[int]) -> dict:
+        if not employee_ids:
+            return {}
+        docs = (
+            self.db.query(CompanyEmployeeDocument)
+            .options(defer(CompanyEmployeeDocument.file_data))
+            .filter(CompanyEmployeeDocument.employee_id.in_(employee_ids))
+            .order_by(asc(CompanyEmployeeDocument.id))
+            .all()
+        )
+        grouped = {}
+        for d in docs:
+            grouped.setdefault(d.employee_id, []).append(d)
+        return grouped
 
     def get_document_by_type(self, employee_id: int, document_type: str) -> Optional[CompanyEmployeeDocument]:
         return self.db.query(CompanyEmployeeDocument).filter(

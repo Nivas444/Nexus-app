@@ -38,6 +38,8 @@ class Sales(Base):
     received_amount = Column(Numeric, nullable=True)
     received_date = Column(Date, nullable=True)
     ageing = Column(Integer, nullable=True)
+    invoice_status = Column(String(100), nullable=True)
+    gstr1_status = Column(String(50), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 

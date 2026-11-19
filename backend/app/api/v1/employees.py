@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Path, UploadFile, File, Form, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import reference_data_cache
 from app.db.session import get_db
 from app.services.employee_service import EmployeeService
 from app.schemas.employee import (
@@ -30,14 +31,18 @@ def list_employees(
     """
     Retrieve real employee records from PostgreSQL `company_employee_details` with filtering and pagination.
     """
-    service = EmployeeService(db)
     skip = (page - 1) * page_size
-    return service.get_employees(
-        skip=skip,
-        limit=page_size,
-        search=search,
-        employee_type=employee_type,
-        status=status
+    cache_key = f"master:employees:{page}:{page_size}:{search}:{employee_type}:{status}"
+    return reference_data_cache.get_or_set(
+        cache_key,
+        lambda: EmployeeService(db).get_employees(
+            skip=skip,
+            limit=page_size,
+            search=search,
+            employee_type=employee_type,
+            status=status
+        ),
+        ttl=60.0,
     )
 
 

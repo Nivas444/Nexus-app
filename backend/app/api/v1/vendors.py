@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Path, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import reference_data_cache
 from app.db.session import get_db
 from app.services.vendor_service import VendorService
 from app.schemas.vendor import (
@@ -36,16 +37,20 @@ def list_vendors(
     sort_desc: bool = Query(True, description="Sort descending if true"),
     db: Session = Depends(get_db)
 ):
-    service = VendorService(db)
-    return service.get_vendors_list(
-        page=page,
-        page_size=page_size,
-        search=search,
-        business_type=business_type,
-        service_type=service_type,
-        status_filter=status,
-        sort_by=sort_by,
-        sort_desc=sort_desc
+    cache_key = f"master:vendors:{page}:{page_size}:{search}:{business_type}:{service_type}:{status}:{sort_by}:{sort_desc}"
+    return reference_data_cache.get_or_set(
+        cache_key,
+        lambda: VendorService(db).get_vendors_list(
+            page=page,
+            page_size=page_size,
+            search=search,
+            business_type=business_type,
+            service_type=service_type,
+            status_filter=status,
+            sort_by=sort_by,
+            sort_desc=sort_desc
+        ),
+        ttl=60.0,
     )
 
 @router.get("/master/vendors/{vendor_id}", response_model=VendorResponse, summary="Get Vendor Details")

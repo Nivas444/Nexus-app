@@ -36,6 +36,7 @@ from app.models.commercial_project import (
 from app.models.purchase import PurchaseRequest, Purchase
 from app.models.account_payment import AccountPayment
 from app.models.account_purchase import AccountPurchase
+from app.models.account_bank import AccountBank
 from app.models.admin_transport import AdminTransport
 from app.models.admin_ewaybill import AdminEWayBill
 
@@ -81,6 +82,7 @@ __all__ = [
     "Purchase",
     "AccountPayment",
     "AccountPurchase",
+    "AccountBank",
     "AdminTransport",
     "AdminEWayBill"
 ]

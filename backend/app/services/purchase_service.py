@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict, Any
 from datetime import date
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer
 from sqlalchemy import or_, and_
 from fastapi import HTTPException, status
 
@@ -221,13 +221,26 @@ class PurchaseService:
     # -------------------------------------------------------------------------
     # PO METHODS
     # -------------------------------------------------------------------------
-    def get_po_list(self) -> List[Purchase]:
-        items = self.db.query(Purchase).filter(
+    def get_po_list(self, include_documents: bool = False) -> List[Purchase]:
+        q = self.db.query(Purchase).filter(
             and_(
                 Purchase.po_no.isnot(None),
                 Purchase.po_no != ""
             )
-        ).order_by(Purchase.id.asc()).all()
+        )
+        if not include_documents:
+            q = q.options(
+                defer(Purchase.po_document),
+                defer(Purchase.lr_documents),
+                defer(Purchase.invoice_document),
+            )
+        items = q.order_by(Purchase.id.asc()).all()
+        if not include_documents:
+            for item in items:
+                self.db.expunge(item)
+                item.__dict__["po_document"] = None
+                item.__dict__["lr_documents"] = None
+                item.__dict__["invoice_document"] = None
         return items
 
     def get_po_by_id(self, po_id: int) -> Purchase:

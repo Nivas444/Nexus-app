@@ -27,11 +27,12 @@ from typing import Callable, Deque, Dict, FrozenSet, Iterable, List, Optional, S
 
 import jwt
 from fastapi import Depends, HTTPException, Request, Response, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
+from app.core.cache import auth_user_cache
 from app.core.config import settings
 from app.db.session import get_db
-from app.models.security import AuthAuditLog, AuthTokenSession, AuthUser
+from app.models.security import AuthAuditLog, AuthRole, AuthTokenSession, AuthUser
 
 logger = logging.getLogger("nexus.security")
 
@@ -508,6 +509,22 @@ def build_authenticated_user(
     )
 
 
+def invalidate_auth_cache(
+    *,
+    user_id: Optional[int] = None,
+    jti: Optional[str] = None,
+) -> None:
+    """Immediately evict cached authentication contexts on logout, revoke, or role/status change."""
+    if jti:
+        auth_user_cache.invalidate_prefix(f"jti:{jti}:")
+    if user_id is not None:
+        auth_user_cache.invalidate_prefix(f"uid:{user_id}:")
+        # Also clear jti-keyed entries for this user by scanning safely
+        auth_user_cache.clear()
+    if not jti and user_id is None:
+        auth_user_cache.clear()
+
+
 def get_current_user(
     request: Request,
     db: Session = Depends(get_db),
@@ -515,7 +532,8 @@ def get_current_user(
     """
     Centralized authentication dependency.
     Validates JWT, checks revocation, verifies CSRF (for cookie auth),
-    and loads live user, roles, and permissions from PostgreSQL.
+    and loads live user, roles, and permissions from PostgreSQL (with short-TTL cache
+    evicted immediately on logout/revoke/role changes).
     """
     # Reuse per-request cached user if already resolved by an earlier dependency
     cached = getattr(request.state, "authenticated_user", None)
@@ -535,11 +553,22 @@ def get_current_user(
 
     payload = decode_jwt_token(token, expected_type="access")
     jti = payload.get("jti")
+    sub_key = str(payload.get("sub") or payload.get("email") or "")
+    cache_key = f"jti:{jti}:src:{source}" if jti else f"uid:{sub_key}:src:{source}"
+
+    # Strictly bypass auth cache on mutating requests (POST/PUT/PATCH/DELETE) so
+    # logout, role changes, and account disabling take effect immediately across all instances.
+    is_read_method = request.method.upper() in ("GET", "HEAD", "OPTIONS")
+    if is_read_method:
+        cached_auth = auth_user_cache.get(cache_key)
+        if isinstance(cached_auth, AuthenticatedUser):
+            request.state.authenticated_user = cached_auth
+            return cached_auth
 
     # Check if access token was explicitly revoked (logout)
     if jti:
         revoked = (
-            db.query(AuthTokenSession)
+            db.query(AuthTokenSession.id)
             .filter(
                 AuthTokenSession.jti == jti,
                 AuthTokenSession.revoked_at.isnot(None),
@@ -553,16 +582,19 @@ def get_current_user(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-    # Load user from trusted backend database (never trust frontend role claims)
+    # Eager-load user + roles + permissions in a SINGLE SQL query (eliminates N+1 lazy loads)
+    user_query = db.query(AuthUser).options(
+        joinedload(AuthUser.roles).joinedload(AuthRole.permissions)
+    )
     db_user: Optional[AuthUser] = None
     if payload.get("_provider") == "supabase":
         email = (payload.get("email") or "").strip().lower()
         if email:
-            db_user = db.query(AuthUser).filter(AuthUser.email == email).first()
+            db_user = user_query.filter(AuthUser.email == email).first()
     else:
         try:
             user_id = int(payload["sub"])
-            db_user = db.query(AuthUser).filter(AuthUser.id == user_id).first()
+            db_user = user_query.filter(AuthUser.id == user_id).first()
         except (ValueError, KeyError, TypeError):
             db_user = None
 
@@ -574,6 +606,8 @@ def get_current_user(
         )
 
     auth_user = build_authenticated_user(db_user, jti=jti, auth_source=source)
+    if is_read_method:
+        auth_user_cache.set(cache_key, auth_user, ttl=5.0)
     request.state.authenticated_user = auth_user
     return auth_user
 

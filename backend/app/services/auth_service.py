@@ -26,6 +26,7 @@ from app.core.security import (
     decode_jwt_token,
     get_client_ip,
     hash_password,
+    invalidate_auth_cache,
     log_security_event,
     login_rate_limiter,
     set_auth_cookies,
@@ -332,6 +333,7 @@ class AuthService:
                 pass
 
         db.commit()
+        invalidate_auth_cache(jti=current_user.jti, user_id=current_user.id)
         clear_auth_cookies(response)
 
         log_security_event(
@@ -520,6 +522,7 @@ class AuthService:
         )
 
         au = build_authenticated_user(target)
+        invalidate_auth_cache(user_id=target.id)
         return AdminUserRecord(
             id=au.id,
             user_uid=au.user_uid,
@@ -578,6 +581,7 @@ class AuthService:
         )
 
         au = build_authenticated_user(target)
+        invalidate_auth_cache(user_id=target.id)
         return AdminUserRecord(
             id=au.id,
             user_uid=au.user_uid,

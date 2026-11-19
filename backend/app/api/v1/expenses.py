@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Query, Path, UploadFile, File, Response,
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 
+from app.core.cache import reference_data_cache
 from app.db.session import get_db
 from app.services.expense_service import ExpenseService
 from app.schemas.expense import (
@@ -30,16 +31,20 @@ def list_expenses(
     """
     Retrieve real expense records from PostgreSQL with filtering, search, and pagination.
     """
-    service = ExpenseService(db)
-    return service.get_expenses_list(
-        page=page,
-        page_size=page_size,
-        search=search,
-        category=category,
-        head=head,
-        status_filter=status,
-        sort_by=sort_by,
-        sort_desc=sort_desc
+    cache_key = f"master:expenses:{page}:{page_size}:{search}:{category}:{head}:{status}:{sort_by}:{sort_desc}"
+    return reference_data_cache.get_or_set(
+        cache_key,
+        lambda: ExpenseService(db).get_expenses_list(
+            page=page,
+            page_size=page_size,
+            search=search,
+            category=category,
+            head=head,
+            status_filter=status,
+            sort_by=sort_by,
+            sort_desc=sort_desc
+        ),
+        ttl=60.0,
     )
 
 @router.get("/template", summary="Download Bulk Expense CSV Template")

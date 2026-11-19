@@ -69,8 +69,6 @@ class ProductRepository:
         if status:
             query = query.filter(CompanyProduct.status.ilike(status.strip()))
 
-        total = query.count()
-
         # Dynamic sorting
         sort_column = getattr(CompanyProduct, sort_by, CompanyProduct.material_id)
         if sort_desc:
@@ -78,7 +76,19 @@ class ProductRepository:
         else:
             query = query.order_by(asc(sort_column))
 
-        items = query.offset(skip).limit(limit).all()
+        # Single SQL query combining paginated rows + window total count
+        rows_with_total = (
+            query.add_columns(func.count().over().label("_total_count"))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+        if rows_with_total:
+            items = [row[0] for row in rows_with_total]
+            total = int(rows_with_total[0][1])
+        else:
+            items = []
+            total = 0 if skip == 0 else query.count()
         return items, total
 
     def create(self, product: CompanyProduct) -> CompanyProduct:

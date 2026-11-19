@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Path, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import reference_data_cache
 from app.db.session import get_db
 from app.services.customer_service import CustomerService
 from app.schemas.customer import (
@@ -38,15 +39,19 @@ def list_customers(
     """
     Retrieve real customer records from PostgreSQL `customer` table with filtering, search, and pagination.
     """
-    service = CustomerService(db)
-    return service.get_customers_list(
-        page=page,
-        page_size=page_size,
-        search=search,
-        business_type=business_type,
-        status_filter=status,
-        sort_by=sort_by,
-        sort_desc=sort_desc
+    cache_key = f"master:customers:{page}:{page_size}:{search}:{business_type}:{status}:{sort_by}:{sort_desc}"
+    return reference_data_cache.get_or_set(
+        cache_key,
+        lambda: CustomerService(db).get_customers_list(
+            page=page,
+            page_size=page_size,
+            search=search,
+            business_type=business_type,
+            status_filter=status,
+            sort_by=sort_by,
+            sort_desc=sort_desc
+        ),
+        ttl=60.0,
     )
 
 @router.get("/master/customers/{customer_id}", response_model=CustomerResponse, summary="Get Customer Details")

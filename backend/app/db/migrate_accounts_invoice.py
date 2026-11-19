@@ -42,6 +42,13 @@ def run_accounts_migration():
             conn.execute(text("ALTER TABLE receipt_indus ADD COLUMN receivable NUMERIC;"))
             conn.commit()
 
+        # 3. Ensure sales.invoice_status and sales.gstr1_status exist
+        conn.execute(text("ALTER TABLE nexus_accounts.sales ADD COLUMN IF NOT EXISTS invoice_status VARCHAR(100);"))
+        conn.execute(text("ALTER TABLE nexus_accounts.sales ADD COLUMN IF NOT EXISTS gstr1_status VARCHAR(50);"))
+        # 4. Ensure purchase.gstr2b_status exists
+        conn.execute(text("ALTER TABLE nexus_accounts.purchase ADD COLUMN IF NOT EXISTS gstr2b_status VARCHAR(50) DEFAULT 'Pending';"))
+        conn.commit()
+
         print("Accounts migration check completed successfully.")
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ from typing import Optional, List, Union
 from fastapi import APIRouter, Depends, Query, Path, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import reference_data_cache
 from app.db.session import get_db
 from app.services.company_service import CompanyService
 from app.schemas.company import (
@@ -44,8 +45,11 @@ def get_company(
     summary="List All Companies"
 )
 def list_companies(db: Session = Depends(get_db)):
-    service = CompanyService(db)
-    return service.list_companies()
+    return reference_data_cache.get_or_set(
+        "master:companies:all",
+        lambda: CompanyService(db).list_companies(),
+        ttl=60.0,
+    )
 
 
 @router.get(

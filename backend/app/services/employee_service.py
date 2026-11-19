@@ -167,7 +167,9 @@ class EmployeeService:
     ) -> CompanyEmployeeListResponse:
         records = self.repository.get_all(skip, limit, search, employee_type, status)
         total = self.repository.count_all(search, employee_type, status)
-        items = [self._to_response_dto(emp) for emp in records]
+        emp_ids = [emp.employee_id for emp in records]
+        docs_by_emp = self.repository.get_documents_by_employee_ids(emp_ids)
+        items = [self._to_response_dto(emp, docs=docs_by_emp.get(emp.employee_id, [])) for emp in records]
         return CompanyEmployeeListResponse(items=items, total=total, skip=skip, limit=limit)
 
     def get_employee_by_id(self, employee_id: int) -> CompanyEmployeeResponse:

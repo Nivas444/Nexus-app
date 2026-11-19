@@ -79,9 +79,12 @@ def save_rfq_terms(payload: PurchaseTermsRequest, db: Session = Depends(get_db))
 # =============================================================================
 
 @router.get("/po", response_model=PurchaseListResponse, summary="List PO Records")
-def list_po_records(db: Session = Depends(get_db)):
+def list_po_records(
+    include_documents: bool = Query(False, description="Include large base64 PDF document columns"),
+    db: Session = Depends(get_db),
+):
     service = PurchaseService(db)
-    items = service.get_po_list()
+    items = service.get_po_list(include_documents=include_documents)
     return {"success": True, "total": len(items), "items": items}
 
 @router.get("/po/{po_id}", response_model=PurchaseResponse, summary="Get PO Record by ID")

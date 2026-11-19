@@ -11632,45 +11632,90 @@ function parseUrlAndApplyState() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Centralized Authentication Guard: verify live JWT/cookie session with FastAPI backend
-  if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.me === 'function') {
-    const verifiedUser = await NexusApi.auth.me();
-    if (!verifiedUser) {
-      window.location.href = 'index.html';
-      return;
-    }
-  } else {
-    const hasSession = sessionStorage.getItem('nexus_user') && sessionStorage.getItem('nexus_token');
-    if (!hasSession) {
+  const bootStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  const hasCachedSession = Boolean(sessionStorage.getItem('nexus_user') && sessionStorage.getItem('nexus_token'));
+
+  // If no cached tab session exists, verify live session synchronously before rendering
+  if (!hasCachedSession) {
+    if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.me === 'function') {
+      const verifiedUser = await NexusApi.auth.me();
+      if (!verifiedUser) {
+        window.location.href = 'index.html';
+        return;
+      }
+    } else {
       window.location.href = 'index.html';
       return;
     }
   }
 
+  // 1. Render dashboard structure immediately (non-blocking)
   parseUrlAndApplyState();
-  if (typeof loadCommercialProjectsFromApi === 'function') {
-    const activeRole = getAuthenticatedUserRole();
-    if (['Master', 'Commercial Manager', 'Project Manager'].includes(activeRole)) {
-      loadCommercialProjectsFromApi();
-    }
-  }
-  if (typeof window.loadMasterPaymentDataFromApi === 'function') {
-    const activeRole = getAuthenticatedUserRole();
-    if (['Master', 'Accounts Manager', 'Purchase Manager'].includes(activeRole)) {
-      window.loadMasterPaymentDataFromApi(false);
-    }
-  }
-  if (currentProjectsView === 'project_material' && typeof window.loadProjectMaterialsFromApi === 'function') {
-    window.loadProjectMaterialsFromApi();
-  }
-  if (currentWorklistView === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
-    loadWorklistSrnFromApi();
+  if (typeof window.NexusModuleLoader !== 'undefined' && !window.NexusModuleLoader.isModuleLoaded(currentModule)) {
+    await window.NexusModuleLoader.loadModule(currentModule);
   }
   applyRoleBasedNavigation();
   initNavEventListeners();
   initExcelFilterSystem();
   initSideFormEvents();
   renderApp();
+
+  if (window.NexusPerf && typeof window.NexusPerf.mark === 'function') {
+    const shellMs = ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - bootStart;
+    window.NexusPerf.mark('dashboard_shell_render', shellMs);
+  }
+
+  // 2. Verify live auth session in parallel with ONLY the currently active view's essential data
+  const activeRole = getAuthenticatedUserRole();
+  const startupTasks = [];
+
+  if (hasCachedSession && typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.me === 'function') {
+    startupTasks.push(
+      NexusApi.auth.me().then((verifiedUser) => {
+        if (!verifiedUser) {
+          window.location.href = 'index.html';
+        }
+      })
+    );
+  }
+
+  if (activeRole === 'Accounts Manager') {
+    if (currentWorklistView === 'payment' && typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
+      startupTasks.push(window.loadAccountsManagerPaymentsFromApi(true));
+    } else if (currentWorklistView === 'receivable' && typeof window.loadAccountsManagerReceivableFromApi === 'function') {
+      startupTasks.push(window.loadAccountsManagerReceivableFromApi(true));
+    } else if (currentWorklistView === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
+      startupTasks.push(window.loadAccountsManagerBankFromApi(true));
+    } else if (currentWorklistView === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
+      startupTasks.push(window.loadAccountsManagerGstr1FromApi(true));
+    } else if (currentWorklistView === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
+      startupTasks.push(window.loadAccountsManagerGstr2bFromApi(true));
+    }
+  } else {
+    if (typeof loadCommercialProjectsFromApi === 'function' && ['Commercial Manager', 'Project Manager'].includes(activeRole)) {
+      startupTasks.push(loadCommercialProjectsFromApi());
+    } else if (typeof loadCommercialProjectsFromApi === 'function' && activeRole === 'Master' && currentModule === 'projects') {
+      startupTasks.push(loadCommercialProjectsFromApi());
+    }
+    if (typeof window.loadMasterPaymentDataFromApi === 'function' && ['Master', 'Purchase Manager'].includes(activeRole)) {
+      startupTasks.push(window.loadMasterPaymentDataFromApi(currentModule === 'worklist' && currentWorklistView === 'payment'));
+    }
+  }
+
+  if (currentProjectsView === 'project_material' && typeof window.loadProjectMaterialsFromApi === 'function') {
+    startupTasks.push(window.loadProjectMaterialsFromApi());
+  }
+  if (currentWorklistView === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
+    startupTasks.push(loadWorklistSrnFromApi());
+  }
+
+  if (startupTasks.length > 0) {
+    await Promise.allSettled(startupTasks);
+    if (window.NexusPerf && typeof window.NexusPerf.mark === 'function') {
+      const dataMs = ((typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now()) - bootStart;
+      window.NexusPerf.mark('dashboard_initial_data', dataMs);
+    }
+  }
 });
 
 window.addEventListener('popstate', () => {
@@ -11939,8 +11984,18 @@ function initNavEventListeners() {
   }
 }
 
-function switchModule(moduleName) {
+async function switchModule(moduleName) {
   const role = getAuthenticatedUserRole();
+  if (typeof window.NexusModuleLoader !== 'undefined' && !window.NexusModuleLoader.isModuleLoaded(moduleName)) {
+    try {
+      await window.NexusModuleLoader.loadModule(moduleName);
+    } catch (err) {
+      if (typeof showToast === 'function') {
+        showToast('Failed to load module resources. Please try again.', 'error');
+      }
+      return;
+    }
+  }
   if (role === 'Project Manager') {
     const allowedModules = ['worklist', 'projects', 'profile'];
     if (!allowedModules.includes(moduleName)) {
@@ -12013,10 +12068,16 @@ function switchModule(moduleName) {
       currentWorklistView = 'attendance';
     } else if (role === 'Accounts Manager') {
       currentWorklistView = 'payment';
+      if (typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
+        window.loadAccountsManagerPaymentsFromApi(true);
+      }
+      if (typeof window.loadAccountsManagerBankFromApi === 'function') {
+        window.loadAccountsManagerBankFromApi(false);
+      }
     } else {
       currentWorklistView = (role === 'Project Manager' || role === 'Commercial Manager') ? 'new_project' : 'payment';
     }
-    if (currentWorklistView === 'payment' && typeof window.loadMasterPaymentDataFromApi === 'function') {
+    if (role !== 'Accounts Manager' && currentWorklistView === 'payment' && typeof window.loadMasterPaymentDataFromApi === 'function') {
       window.loadMasterPaymentDataFromApi(true);
     }
     try {
@@ -34707,267 +34768,80 @@ window.saveAdminPaymentRequest = function() {
 // ==========================================================================
 // Accounts Manager Worklist Data Stores & Handlers
 // ==========================================================================
-let accountsManagerPaymentStore = [
-  {
-    id: 'ACC-PAY-001',
-    selected: false,
-    date: '14/10/2026',
-    expenseType: 'IFT',
-    remarks: 'From HDFC Bank To SBI Bank',
-    transferTo: 'SBI Bank - A/C 9876',
-    amount: 150000.00,
-    ageing: '3 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-002',
-    selected: false,
-    date: '12/10/2026',
-    expenseType: 'Travelling',
-    remarks: 'From Chennai To Bangalore',
-    transferTo: 'Ramesh Kumar (Site Engineer)',
-    amount: 12500.00,
-    ageing: '5 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-003',
-    selected: false,
-    date: '11/10/2026',
-    expenseType: 'Taxes',
-    remarks: 'GST',
-    transferTo: 'GST Portal - State Tax',
-    amount: 84000.00,
-    ageing: '6 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-004',
-    selected: false,
-    date: '10/10/2026',
-    expenseType: 'Salary Advance',
-    remarks: 'Salary Advance for Suresh Babu',
-    transferTo: 'Suresh Babu (Technician)',
-    amount: 25000.00,
-    ageing: '7 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-005',
-    selected: false,
-    date: '08/10/2026',
-    expenseType: 'IFT',
-    remarks: 'From ICICI Bank To Axis Bank',
-    transferTo: 'Axis Bank - A/C 4532',
-    amount: 200000.00,
-    ageing: '9 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-006',
-    selected: false,
-    date: '06/10/2026',
-    expenseType: 'Travelling',
-    remarks: 'From Mumbai To Delhi',
-    transferTo: 'Travel Desk Operations',
-    amount: 18400.00,
-    ageing: '11 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-007',
-    selected: false,
-    date: '05/10/2026',
-    expenseType: 'Taxes',
-    remarks: 'TDS',
-    transferTo: 'Income Tax Department (TDS)',
-    amount: 45000.00,
-    ageing: '12 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-008',
-    selected: false,
-    date: '03/10/2026',
-    expenseType: 'Taxes',
-    remarks: 'Income Tax',
-    transferTo: 'Advance Tax Central Account',
-    amount: 120000.00,
-    ageing: '14 Days',
-    status: 'Pending with'
-  },
-  {
-    id: 'ACC-PAY-009',
-    selected: false,
-    date: '01/10/2026',
-    expenseType: 'Salary Advance',
-    remarks: 'Festival Advance - Site Staff',
-    transferTo: 'Vijayawada Site Supervisor',
-    amount: 35000.00,
-    ageing: '16 Days',
-    status: 'Pending with'
-  }
-];
+let accountsManagerPaymentStore = [];
 
-let accountsManagerReceivableStore = [
-  {
-    id: 'ACC-REC-001',
-    customerName: 'Indus Towers Ltd',
-    invoiceNo: 'INV-2026-0891',
-    invoiceDate: '10/09/2026',
-    dueDate: '10/10/2026',
-    invoiceAmount: 550000.00,
-    deduction: 15000.00,
-    approvedAmount: 535000.00,
-    receivedAmount: 350000.00,
-    receivable: 185000.00,
-    status: 'Partially Paid',
-    ageing: '7 Days',
-    taxBreakup: { basic: 466101.69, cgst: 41949.15, sgst: 41949.16, igst: 0.00 },
-    deductionBreakup: { tds: 11000.00, dn: 0.00, discount: 4000.00, tredsFee: 0.00 },
-    receipts: [
-      { date: '25/09/2026', amount: 200000.00 },
-      { date: '08/10/2026', amount: 150000.00 }
-    ]
-  },
-  {
-    id: 'ACC-REC-002',
-    customerName: 'Bharti Airtel Ltd',
-    invoiceNo: 'INV-2026-0924',
-    invoiceDate: '15/09/2026',
-    dueDate: '15/10/2026',
-    invoiceAmount: 820000.00,
-    deduction: 22000.00,
-    approvedAmount: 798000.00,
-    receivedAmount: 500000.00,
-    receivable: 298000.00,
-    status: 'Partially Paid',
-    ageing: '2 Days',
-    taxBreakup: { basic: 694915.25, cgst: 62542.37, sgst: 62542.38, igst: 0.00 },
-    deductionBreakup: { tds: 16400.00, dn: 3000.00, discount: 0.00, tredsFee: 2600.00 },
-    receipts: [
-      { date: '30/09/2026', amount: 300000.00 },
-      { date: '12/10/2026', amount: 200000.00 }
-    ]
-  },
-  {
-    id: 'ACC-REC-003',
-    customerName: 'Reliance Jio Infocomm',
-    invoiceNo: 'INV-2026-1045',
-    invoiceDate: '22/09/2026',
-    dueDate: '22/10/2026',
-    invoiceAmount: 420000.00,
-    deduction: 10000.00,
-    approvedAmount: 410000.00,
-    receivedAmount: 200000.00,
-    receivable: 210000.00,
-    status: 'Pending',
-    ageing: '0 Days',
-    taxBreakup: { basic: 355932.20, cgst: 0.00, sgst: 0.00, igst: 64067.80 },
-    deductionBreakup: { tds: 8400.00, dn: 0.00, discount: 0.00, tredsFee: 1600.00 },
-    receipts: [
-      { date: '05/10/2026', amount: 200000.00 }
-    ]
-  },
-  {
-    id: 'ACC-REC-004',
-    customerName: 'ATC Telecom Infra',
-    invoiceNo: 'INV-2026-1102',
-    invoiceDate: '28/08/2026',
-    dueDate: '28/09/2026',
-    invoiceAmount: 1250000.00,
-    deduction: 45000.00,
-    approvedAmount: 1205000.00,
-    receivedAmount: 750000.00,
-    receivable: 455000.00,
-    status: 'Overdue',
-    ageing: '19 Days',
-    taxBreakup: { basic: 1059322.03, cgst: 95338.98, sgst: 95338.99, igst: 0.00 },
-    deductionBreakup: { tds: 25000.00, dn: 12000.00, discount: 5000.00, tredsFee: 3000.00 },
-    receipts: [
-      { date: '15/09/2026', amount: 450000.00 },
-      { date: '28/09/2026', amount: 300000.00 }
-    ]
-  },
-  {
-    id: 'ACC-REC-005',
-    customerName: 'Vodafone Idea Ltd',
-    invoiceNo: 'INV-2026-1188',
-    invoiceDate: '05/09/2026',
-    dueDate: '05/10/2026',
-    invoiceAmount: 680000.00,
-    deduction: 18000.00,
-    approvedAmount: 662000.00,
-    receivedAmount: 400000.00,
-    receivable: 262000.00,
-    status: 'Partially Paid',
-    ageing: '12 Days',
-    taxBreakup: { basic: 576271.19, cgst: 51864.40, sgst: 51864.41, igst: 0.00 },
-    deductionBreakup: { tds: 13600.00, dn: 0.00, discount: 4400.00, tredsFee: 0.00 },
-    receipts: [
-      { date: '20/09/2026', amount: 250000.00 },
-      { date: '02/10/2026', amount: 150000.00 }
-    ]
+window.loadAccountsManagerPaymentsFromApi = async function(shouldRender = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || typeof NexusApi.accounts.getPayments !== 'function') {
+    return;
   }
-];
+  try {
+    const res = await NexusApi.accounts.getPayments();
+    if (res && Array.isArray(res.data)) {
+      accountsManagerPaymentStore = res.data.map(row => ({
+        ...row,
+        selected: false
+      }));
+      if (shouldRender && currentModule === 'worklist' && getAuthenticatedUserRole() === 'Accounts Manager' && currentWorklistView === 'payment') {
+        currentDataset = [...accountsManagerPaymentStore];
+        filteredDataset = [...currentDataset];
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load Accounts Manager payments from API:', err);
+  }
+};
 
-let accountsManagerBankStore = [
-  {
-    id: 'ACC-BNK-001',
-    selected: false,
-    date: '14/10/2026',
-    bankName: 'HDFC Bank - 0019',
-    particulars: 'IFT to SBI Current A/c',
-    refNo: 'TXN98421045',
-    withdrawal: 150000.00,
-    deposit: 0.00,
-    balance: 1425000.00
-  },
-  {
-    id: 'ACC-BNK-002',
-    selected: false,
-    date: '13/10/2026',
-    bankName: 'State Bank of India - 5421',
-    particulars: 'Client RTGS - Indus Towers',
-    refNo: 'CMS88210943',
-    withdrawal: 0.00,
-    deposit: 350000.00,
-    balance: 1775000.00
-  },
-  {
-    id: 'ACC-BNK-003',
-    selected: false,
-    date: '12/10/2026',
-    bankName: 'ICICI Bank - 8812',
-    particulars: 'Vendor NEFT - Steel Suppliers',
-    refNo: 'NEFT77120934',
-    withdrawal: 74000.00,
-    deposit: 0.00,
-    balance: 1701000.00
-  },
-  {
-    id: 'ACC-BNK-004',
-    selected: false,
-    date: '10/10/2026',
-    bankName: 'Axis Bank - 3390',
-    particulars: 'GST Tax Payment October',
-    refNo: 'UPI33910842',
-    withdrawal: 84000.00,
-    deposit: 0.00,
-    balance: 1617000.00
-  },
-  {
-    id: 'ACC-BNK-005',
-    selected: false,
-    date: '08/10/2026',
-    bankName: 'HDFC Bank - 0019',
-    particulars: 'Client NEFT - Bharti Airtel',
-    refNo: 'RTGS55920194',
-    withdrawal: 0.00,
-    deposit: 500000.00,
-    balance: 2117000.00
+let accountsManagerReceivableStore = [];
+
+window.loadAccountsManagerReceivableFromApi = async function(shouldRender = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || typeof NexusApi.accounts.getReceivables !== 'function') {
+    return;
   }
-];
+  try {
+    const res = await NexusApi.accounts.getReceivables();
+    if (res && Array.isArray(res.data)) {
+      accountsManagerReceivableStore = res.data.map(row => ({ ...row }));
+      if (shouldRender && currentModule === 'worklist' && getAuthenticatedUserRole() === 'Accounts Manager' && currentWorklistView === 'receivable') {
+        currentDataset = [...accountsManagerReceivableStore];
+        filteredDataset = [...currentDataset];
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load Accounts Manager receivables from API:', err);
+  }
+};
+
+let accountsManagerBankStore = [];
+
+window.loadAccountsManagerBankFromApi = async function(shouldRender = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || typeof NexusApi.accounts.getBankEntries !== 'function') {
+    return;
+  }
+  try {
+    const res = await NexusApi.accounts.getBankEntries();
+    if (res && Array.isArray(res.data)) {
+      accountsManagerBankStore = res.data.map(row => ({
+        ...row,
+        selected: false
+      }));
+      if (shouldRender && currentModule === 'worklist' && getAuthenticatedUserRole() === 'Accounts Manager' && currentWorklistView === 'bank') {
+        currentDataset = [...accountsManagerBankStore];
+        filteredDataset = [...currentDataset];
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load Accounts Manager bank entries from API:', err);
+  }
+};
 
 let accountsManagerTdsStore = [
   {
@@ -35017,141 +34891,68 @@ let accountsManagerTdsStore = [
   }
 ];
 
-let accountsManagerGstr1Store = [
-  {
-    id: 'ACC-GST1-001',
-    customerName: 'Indus Towers Ltd',
-    customerGstNo: '33AABCI1234F1Z5',
-    invoiceNo: 'INV-26-0891',
-    invoiceDate: '05/10/2026',
-    taxableAmount: 350000.00,
-    cgst: 31500.00,
-    sgst: 31500.00,
-    igst: 0.00,
-    totalAmount: 413000.00
-  },
-  {
-    id: 'ACC-GST1-002',
-    customerName: 'Bharti Airtel Ltd',
-    customerGstNo: '33AABCB5678G1Z2',
-    invoiceNo: 'INV-26-0924',
-    invoiceDate: '08/10/2026',
-    taxableAmount: 500000.00,
-    cgst: 0.00,
-    sgst: 0.00,
-    igst: 90000.00,
-    totalAmount: 590000.00
-  },
-  {
-    id: 'ACC-GST1-003',
-    customerName: 'Reliance Jio Infocomm',
-    customerGstNo: '33AABCR9012H1Z9',
-    invoiceNo: 'INV-26-1045',
-    invoiceDate: '11/10/2026',
-    taxableAmount: 280000.00,
-    cgst: 25200.00,
-    sgst: 25200.00,
-    igst: 0.00,
-    totalAmount: 330400.00
-  },
-  {
-    id: 'ACC-GST1-004',
-    customerName: 'ATC Telecom Infra',
-    customerGstNo: '33AABCA3456J1Z6',
-    invoiceNo: 'INV-26-1102',
-    invoiceDate: '13/10/2026',
-    taxableAmount: 420000.00,
-    cgst: 37800.00,
-    sgst: 37800.00,
-    igst: 0.00,
-    totalAmount: 495600.00
-  },
-  {
-    id: 'ACC-GST1-005',
-    customerName: 'Vodafone Idea Ltd',
-    customerGstNo: '33AABCV7890K1Z3',
-    invoiceNo: 'INV-26-1188',
-    invoiceDate: '15/10/2026',
-    taxableAmount: 180000.00,
-    cgst: 16200.00,
-    sgst: 16200.00,
-    igst: 0.00,
-    totalAmount: 212400.00
-  }
-];
+let accountsManagerGstr1Store = [];
 
-let accountsManagerGstr2bStore = [
-  {
-    id: 'ACC-GST2B-001',
-    vendorName: 'Tata Steel Limited',
-    vendorGstNo: '27AAACT2727Q1ZW',
-    invoiceNo: 'TSL-2026-441',
-    invoiceDate: '02/10/2026',
-    taxableAmount: 480000.00,
-    cgst: 43200.00,
-    sgst: 43200.00,
-    igst: 0.00,
-    totalAmount: 566400.00,
-    ageing: '5 Days',
-    status: 'Pending'
-  },
-  {
-    id: 'ACC-GST2B-002',
-    vendorName: 'Polycab India Ltd',
-    vendorGstNo: '24AAACP4920E1ZT',
-    invoiceNo: 'POL-88910',
-    invoiceDate: '06/10/2026',
-    taxableAmount: 260000.00,
-    cgst: 23400.00,
-    sgst: 23400.00,
-    igst: 0.00,
-    totalAmount: 306800.00,
-    ageing: '8 Days',
-    status: 'Pending'
-  },
-  {
-    id: 'ACC-GST2B-003',
-    vendorName: 'Schneider Electric India',
-    vendorGstNo: '29AAACS6354G1Z8',
-    invoiceNo: 'SE-55214',
-    invoiceDate: '09/10/2026',
-    taxableAmount: 190000.00,
-    cgst: 0.00,
-    sgst: 0.00,
-    igst: 34200.00,
-    totalAmount: 224200.00,
-    ageing: '11 Days',
-    status: 'Pending'
-  },
-  {
-    id: 'ACC-GST2B-004',
-    vendorName: 'KEC International',
-    vendorGstNo: '27AAACK1104P1Z3',
-    invoiceNo: 'KEC-0982',
-    invoiceDate: '12/10/2026',
-    taxableAmount: 550000.00,
-    cgst: 49500.00,
-    sgst: 49500.00,
-    igst: 0.00,
-    totalAmount: 649000.00,
-    ageing: '14 Days',
-    status: 'Pending'
-  },
-  {
-    id: 'ACC-GST2B-005',
-    vendorName: 'Havells India Limited',
-    vendorGstNo: '07AAACH0813K1Z1',
-    invoiceNo: 'HVL-3319',
-    invoiceDate: '14/10/2026',
-    taxableAmount: 140000.00,
-    cgst: 0.00,
-    sgst: 0.00,
-    igst: 25200.00,
-    totalAmount: 165200.00,
-    ageing: '17 Days',
-    status: 'Pending'
+window.loadAccountsManagerGstr1FromApi = async function(shouldRender = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || typeof NexusApi.accounts.getGstr1 !== 'function') {
+    return;
   }
-];
+  try {
+    const res = await NexusApi.accounts.getGstr1();
+    if (res && Array.isArray(res.data)) {
+      accountsManagerGstr1Store = res.data.map(row => ({
+        ...row,
+        selected: false
+      }));
+      if (shouldRender && currentModule === 'worklist' && getAuthenticatedUserRole() === 'Accounts Manager' && currentWorklistView === 'gstr_1') {
+        currentDataset = [...accountsManagerGstr1Store];
+        filteredDataset = [...currentDataset];
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load Accounts Manager GSTR 1 from API:', err);
+  }
+};
+
+let accountsManagerGstr2bStore = [];
+
+window.loadAccountsManagerGstr2bFromApi = async function(shouldRender = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || typeof NexusApi.accounts.getGstr2b !== 'function') {
+    return;
+  }
+  try {
+    const res = await NexusApi.accounts.getGstr2b();
+    if (res && Array.isArray(res.data)) {
+      accountsManagerGstr2bStore = res.data.map(row => ({
+        ...row,
+        selected: false
+      }));
+      if (shouldRender && currentModule === 'worklist' && getAuthenticatedUserRole() === 'Accounts Manager' && currentWorklistView === 'gstr_2b') {
+        currentDataset = [...accountsManagerGstr2bStore];
+        filteredDataset = [...currentDataset];
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load Accounts Manager GSTR 2B from API:', err);
+  }
+};
+
+window.handleAccGstr2bRefresh = function() {
+  activeColumnFilters = {};
+  if (typeof NexusApi !== 'undefined' && typeof NexusApi.clearCache === 'function') {
+    NexusApi.clearCache('/accounts/gstr2b');
+  }
+  if (typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
+    window.loadAccountsManagerGstr2bFromApi(true);
+    showToast('GSTR 2B refreshed.');
+  }
+};
 
 let accountsManagerGstr3bStore = [
   {
@@ -35205,7 +35006,7 @@ window.toggleAccountsBankRowSelect = function(rowId) {
 };
 
 window.toggleAccountsGstr1RowSelect = function(rowId) {
-  const row = (currentDataset || accountsManagerGstr1Store || []).find(r => r.id === rowId);
+  const row = (accountsManagerGstr1Store || []).find(r => r.id === rowId) || (currentDataset || []).find(r => r.id === rowId);
   if (row) {
     row.selected = !row.selected;
   }
@@ -35213,7 +35014,7 @@ window.toggleAccountsGstr1RowSelect = function(rowId) {
 };
 
 window.toggleAccountsGstr2bRowSelect = function(rowId) {
-  const row = (currentDataset || accountsManagerGstr2bStore || []).find(r => r.id === rowId);
+  const row = (accountsManagerGstr2bStore || []).find(r => r.id === rowId) || (currentDataset || []).find(r => r.id === rowId);
   if (row) {
     row.selected = !row.selected;
   }
@@ -35274,9 +35075,40 @@ window.exportAccGstr2bCsv = () => exportAccountsCsv('gstr_2b');
 
 window.handlePageRefresh = function() {
   activeColumnFilters = {};
+  if (typeof NexusApi !== 'undefined' && typeof NexusApi.clearCache === 'function') {
+    NexusApi.clearCache();
+  }
+  const activeRole = getAuthenticatedUserRole();
   if (currentProjectsView === 'project_material' && typeof window.refreshProjectMaterials === 'function') {
     window.refreshProjectMaterials();
     return;
+  }
+  if (currentModule === 'worklist' && activeRole === 'Accounts Manager') {
+    if (currentWorklistView === 'payment' && typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
+      window.loadAccountsManagerPaymentsFromApi(true);
+      showToast('Payment data refreshed.');
+      return;
+    }
+    if (currentWorklistView === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
+      window.loadAccountsManagerBankFromApi(true);
+      showToast('Bank data refreshed.');
+      return;
+    }
+    if (currentWorklistView === 'receivable' && typeof window.loadAccountsManagerReceivableFromApi === 'function') {
+      window.loadAccountsManagerReceivableFromApi(true);
+      showToast('Receivable data refreshed.');
+      return;
+    }
+    if (currentWorklistView === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
+      window.loadAccountsManagerGstr1FromApi(true);
+      showToast('GSTR 1 refreshed.');
+      return;
+    }
+    if (currentWorklistView === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
+      window.loadAccountsManagerGstr2bFromApi(true);
+      showToast('GSTR 2B refreshed.');
+      return;
+    }
   }
   showToast('Refreshing page data...');
   setTimeout(() => {
@@ -35441,7 +35273,7 @@ window.handleAccPaymentAdd = function() {
   if (card) card.style.display = 'block';
 };
 
-window.submitAccPaymentRequest = function() {
+window.submitAccPaymentRequest = async function() {
   const typeSel = document.getElementById('selAccPaymentExpenseType');
   const expenseType = typeSel ? typeSel.value : 'IFT';
   const isTravelling = expenseType.toLowerCase() === 'travelling';
@@ -35492,19 +35324,25 @@ window.submitAccPaymentRequest = function() {
 
   let transferToStr = toVal || fromVal || descVal || 'Department Account';
 
-  const newEntry = {
-    id: `ACC-PAY-${Date.now().toString().slice(-4)}`,
-    selected: false,
-    date: dateFormatted,
-    expenseType: expenseType,
-    remarks: remarksStr,
-    transferTo: transferToStr,
-    amount: amountVal,
-    ageing: '0 Days',
-    status: 'Pending with'
-  };
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.createPayment === 'function') {
+      const res = await NexusApi.accounts.createPayment({
+        date: dateFormatted,
+        expenseType: expenseType,
+        remarks: remarksStr,
+        transferTo: transferToStr,
+        amount: amountVal
+      });
+      if (res && res.data) {
+        accountsManagerPaymentStore.unshift({ ...res.data, selected: false });
+      }
+    }
+  } catch (err) {
+    console.error('Failed to save payment request:', err);
+    showToast('Failed to save payment request.', 'error');
+    return;
+  }
 
-  accountsManagerPaymentStore.unshift(newEntry);
   currentDataset = [...accountsManagerPaymentStore];
   applyFiltersAndRender();
   closeSideForm();
@@ -35557,7 +35395,7 @@ window.handleAccBankAdd = function() {
   if (card) card.style.display = 'block';
 };
 
-window.submitAccBankEntry = function() {
+window.submitAccBankEntry = async function() {
   const selBank = document.getElementById('selAccBankSelect');
   const inpDate = document.getElementById('inpAccBankDate');
   const inpPart = document.getElementById('inpAccBankParticulars');
@@ -35603,23 +35441,27 @@ window.submitAccBankEntry = function() {
     dateFormatted = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
   }
 
-  const lastEntry = accountsManagerBankStore[0];
-  const lastBalance = lastEntry ? (Number(lastEntry.balance) || 1500000) : 1500000;
-  const newBalance = lastBalance + amount;
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.createBankEntry === 'function') {
+      const res = await NexusApi.accounts.createBankEntry({
+        bankName: bankName,
+        date: dateFormatted,
+        particulars: particulars,
+        refNo: refNo,
+        txnType: txnType,
+        deposit: amount,
+        withdrawal: 0.0
+      });
+      if (res && res.data) {
+        accountsManagerBankStore.unshift({ ...res.data, selected: false });
+      }
+    }
+  } catch (err) {
+    console.error('Failed to save bank entry:', err);
+    showToast('Failed to save bank entry.', 'error');
+    return;
+  }
 
-  const newEntry = {
-    id: `ACC-BNK-${Date.now().toString().slice(-4)}`,
-    selected: false,
-    date: dateFormatted,
-    bankName: bankName,
-    particulars: particulars,
-    refNo: refNo,
-    withdrawal: 0.00,
-    deposit: amount,
-    balance: newBalance
-  };
-
-  accountsManagerBankStore.unshift(newEntry);
   currentDataset = [...accountsManagerBankStore];
   applyFiltersAndRender();
   closeSideForm();
@@ -35631,7 +35473,7 @@ window.submitAccBankEntry = function() {
   }
 };
 
-window.handleAccountsManagerSubmit = function() {
+window.handleAccountsManagerSubmit = async function() {
   if (currentWorklistView === 'payment') {
     const selectedRows = (accountsManagerPaymentStore || []).filter(r => r.selected);
     if (selectedRows.length === 0) {
@@ -35643,6 +35485,17 @@ window.handleAccountsManagerSubmit = function() {
     const selectedRows = (accountsManagerBankStore || []).filter(r => r.selected);
     if (selectedRows.length === 0) {
       showToast('Please select at least one row to submit.', 'warning');
+      return;
+    }
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.submitBankEntries === 'function') {
+        await NexusApi.accounts.submitBankEntries({
+          bankIds: selectedRows.map(r => r.bankId || r.id)
+        });
+      }
+    } catch (err) {
+      console.error('Failed to submit bank entries:', err);
+      showToast('Failed to submit bank entries.', 'error');
       return;
     }
     (accountsManagerBankStore || []).forEach(r => { if (r.selected) r.selected = false; });
@@ -35663,6 +35516,17 @@ window.handleAccountsManagerSubmit = function() {
       showToast('Please select at least one row to submit.', 'warning');
       return;
     }
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.submitGstr1 === 'function') {
+        await NexusApi.accounts.submitGstr1({
+          salesIds: selectedRows.map(r => r.salesId || r.id)
+        });
+      }
+    } catch (err) {
+      console.error('Failed to submit GSTR 1 rows:', err);
+      showToast('Failed to submit GSTR 1 rows.', 'error');
+      return;
+    }
     accountsManagerGstr1Store = accountsManagerGstr1Store.filter(r => !r.selected);
     currentDataset = [...accountsManagerGstr1Store];
     applyFiltersAndRender();
@@ -35672,17 +35536,35 @@ window.handleAccountsManagerSubmit = function() {
       showToast('GSTR 1 submitted successfully!');
     }
   } else if (currentWorklistView === 'gstr_2b') {
-    const selectedRows = (accountsManagerGstr2bStore || []).filter(r => r.selected);
+    const selectedRows = (accountsManagerGstr2bStore || []).filter(
+      r => r.selected && String(r.status || 'Pending').trim().toLowerCase() === 'pending'
+    );
     if (selectedRows.length === 0) {
-      showToast('Please select at least one row to submit.', 'warning');
+      showToast('Please select at least one pending row to submit.', 'warning');
       return;
     }
-    (accountsManagerGstr2bStore || []).forEach(r => { 
-      if (r.selected) {
+    try {
+      if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.submitGstr2b === 'function') {
+        await NexusApi.accounts.submitGstr2b({
+          purchaseIds: selectedRows.map(r => r.purchaseId || r.id)
+        });
+      }
+    } catch (err) {
+      console.error('Failed to submit GSTR 2B rows:', err);
+      showToast('Failed to submit GSTR 2B rows.', 'error');
+      return;
+    }
+    const submittedIds = new Set(selectedRows.map(r => r.id));
+    (accountsManagerGstr2bStore || []).forEach(r => {
+      if (submittedIds.has(r.id)) {
         r.selected = false;
-        r.status = 'Submitted';
+        r.status = 'Completed';
       }
     });
+    // Completed rows exit from the GSTR 2B table
+    accountsManagerGstr2bStore = (accountsManagerGstr2bStore || []).filter(
+      r => String(r.status || 'Pending').trim().toLowerCase() !== 'completed'
+    );
     currentDataset = [...accountsManagerGstr2bStore];
     applyFiltersAndRender();
     if (typeof showSvgSuccessPopup === 'function') {
@@ -35712,7 +35594,7 @@ window.openAccTxnDetailsModal = function() {
   if (card) card.style.display = 'block';
 };
 
-window.submitAccTxnDetails = function() {
+window.submitAccTxnDetails = async function() {
   const utrInput = document.getElementById('inpAccTxnUtrNumber');
   const dateInput = document.getElementById('inpAccTxnDate');
   const utrVal = utrInput ? utrInput.value.trim() : '';
@@ -35727,15 +35609,28 @@ window.submitAccTxnDetails = function() {
     return;
   }
 
-  (accountsManagerPaymentStore || []).forEach(r => {
-    if (r.selected) {
-      r.selected = false;
-      r.utrNumber = utrVal;
-      r.txnDate = dateVal;
-      r.status = 'Approved';
-    }
-  });
+  const selectedRows = (accountsManagerPaymentStore || []).filter(r => r.selected);
+  if (selectedRows.length === 0) {
+    showToast('Please select at least one row to submit.', 'warning');
+    return;
+  }
 
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.submitPayments === 'function') {
+      await NexusApi.accounts.submitPayments({
+        items: selectedRows,
+        utrNumber: utrVal,
+        txnDate: dateVal
+      });
+    }
+  } catch (err) {
+    console.error('Failed to submit payment transaction details:', err);
+    showToast('Failed to submit transaction details.', 'error');
+    return;
+  }
+
+  // Remove submitted rows from the Accounts Payment table
+  accountsManagerPaymentStore = (accountsManagerPaymentStore || []).filter(r => !r.selected);
   currentDataset = [...accountsManagerPaymentStore];
   applyFiltersAndRender();
   closeSideForm();
@@ -38387,6 +38282,11 @@ function renderWorklistToolbar() {
             onclick="exportAccGstr2bCsv()">
             <img src="icons/CSV download.svg" alt="Export CSV" width="28" height="28">
           </button>
+          <button type="button" class="toolbar-icon-btn" id="btnAccGstr2bRefresh" title="Refresh"
+            style="cursor: pointer; background: transparent; border: none; padding: 4px; display: inline-flex; align-items: center; justify-content: center;"
+            onclick="handleAccGstr2bRefresh()">
+            <img src="icons/Refresh.svg" alt="Refresh" width="28" height="28">
+          </button>
         </div>
       `;
       return;
@@ -39762,6 +39662,21 @@ function renderWorklistFooter() {
         if (currentWorklistView !== tab.view) {
           currentWorklistView = tab.view;
           activeColumnFilters = {};
+          if (tab.view === 'payment' && typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
+            window.loadAccountsManagerPaymentsFromApi(true);
+          }
+          if (tab.view === 'receivable' && typeof window.loadAccountsManagerReceivableFromApi === 'function') {
+            window.loadAccountsManagerReceivableFromApi(true);
+          }
+          if (tab.view === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
+            window.loadAccountsManagerBankFromApi(true);
+          }
+          if (tab.view === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
+            window.loadAccountsManagerGstr1FromApi(true);
+          }
+          if (tab.view === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
+            window.loadAccountsManagerGstr2bFromApi(true);
+          }
           if (tab.view === 'stn' && typeof window.loadWmStnFromApi === 'function') {
             window.loadWmStnFromApi();
           }
@@ -40062,17 +39977,8 @@ function renderWorklistFooter() {
   }
 
   if ((currentWorklistView.endsWith('_payment') && currentWorklistView !== 'payment') || currentWorklistView === 'project_payment' || currentWorklistView === 'purchase_payment' || currentWorklistView === 'employee_payment' || currentWorklistView === 'transport_payment' || currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
-    footer.style.display = 'flex';
-    footer.style.justifyContent = 'center';
-    footer.style.alignItems = 'center';
-    footer.style.width = '100%';
-    footer.style.setProperty('margin-top', '12px', 'important');
-    footer.style.setProperty('padding', '12px 0 16px 0', 'important');
-    footer.innerHTML = `
-      <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openRemarksModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-        <img src="icons/Submit.svg" alt="Submit" width="32" height="32">
-      </button>
-    `;
+    footer.style.display = 'none';
+    footer.innerHTML = '';
     return;
   }
 
@@ -42967,19 +42873,27 @@ function applyFiltersAndRender() {
 
   const role = getAuthenticatedUserRole();
   if (currentModule === 'worklist' && role === 'Accounts Manager') {
+    // Submit icon is rendered below the last row inside the table for payment, bank, tds, gstr_1, gstr_2b, gstr_3b
+    // and CSV download icon below the table in gstr_2b is removed.
     if (accGstr2bDownloadArea) {
-      accGstr2bDownloadArea.style.display = (currentWorklistView === 'gstr_2b') ? 'flex' : 'none';
+      accGstr2bDownloadArea.style.display = 'none';
     }
     if (accSubmitArea) {
-      if (['tds', 'gstr_3b'].includes(currentWorklistView)) {
-        accSubmitArea.style.display = 'flex';
-      } else if (['gstr_1', 'payment', 'bank'].includes(currentWorklistView)) {
-        const hasSelected = (currentDataset || []).some(r => r.selected);
-        accSubmitArea.style.display = hasSelected ? 'flex' : 'none';
-      } else {
-        accSubmitArea.style.display = 'none';
-      }
+      accSubmitArea.style.display = 'none';
     }
+
+    const buildAccManagerSubmitRow = (colspan, show) => {
+      if (!show) return '';
+      return `
+        <tr id="accManagerTableSubmitRow">
+          <td colspan="${colspan}" style="text-align: center !important; padding: 18px 0; border: none !important; background: transparent !important;">
+            <button type="button" id="btnAccManagerSubmitTable" onclick="handleAccManagerSubmit()" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
+              <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+            </button>
+          </td>
+        </tr>
+      `;
+    };
 
     filteredDataset = (currentDataset || []).filter(row => {
       for (const [colKey, allowedSet] of Object.entries(activeColumnFilters)) {
@@ -43044,7 +42958,7 @@ function applyFiltersAndRender() {
             </td>
           </tr>
         `;
-      }).join('');
+      }).join('') + buildAccManagerSubmitRow(8, filteredDataset.some(r => r.selected));
       return;
     }
 
@@ -43141,7 +43055,7 @@ function applyFiltersAndRender() {
             </td>
           </tr>
         `;
-      }).join('');
+      }).join('') + buildAccManagerSubmitRow(8, filteredDataset.some(r => r.selected));
       return;
     }
 
@@ -43175,7 +43089,7 @@ function applyFiltersAndRender() {
             </td>
           </tr>
         `;
-      }).join('');
+      }).join('') + buildAccManagerSubmitRow(6, true);
       return;
     }
 
@@ -43226,11 +43140,14 @@ function applyFiltersAndRender() {
             </td>
           </tr>
         `;
-      }).join('');
+      }).join('') + buildAccManagerSubmitRow(10, filteredDataset.some(r => r.selected));
       return;
     }
 
     if (currentWorklistView === 'gstr_2b') {
+      const hasSelectedPending = filteredDataset.some(
+        r => r.selected && String(r.status || 'Pending').trim().toLowerCase() === 'pending'
+      );
       tbody.innerHTML = filteredDataset.map(row => {
         const rowBg = row.selected ? '#f0fdf4 !important' : '#ffffff';
         return `
@@ -43285,7 +43202,7 @@ function applyFiltersAndRender() {
             </td>
           </tr>
         `;
-      }).join('');
+      }).join('') + buildAccManagerSubmitRow(12, hasSelectedPending);
       return;
     }
 
@@ -43315,7 +43232,7 @@ function applyFiltersAndRender() {
             </td>
           </tr>
         `;
-      }).join('');
+      }).join('') + buildAccManagerSubmitRow(5, true);
       return;
     }
 
@@ -47013,6 +46930,19 @@ function applyFiltersAndRender() {
       `).join('');
     }
   } else if (currentModule === 'worklist') {
+    const worklistRole = getAuthenticatedUserRole();
+    const buildMasterPaymentSubpageSubmitRow = (colspan) => {
+      if (worklistRole === 'Project Manager') return '';
+      return `
+        <tr id="masterPaymentSubpageSubmitRow">
+          <td colspan="${colspan}" style="text-align: center !important; padding: 18px 0; border: none !important; background: transparent !important;">
+            <button type="button" class="toolbar-icon-btn btn-submit-action" id="btnPaymentSubpageSubmit" aria-label="Submit" onclick="openRemarksModal()" style="cursor: pointer; background: transparent; border: none; padding: 6px; display: inline-flex; align-items: center; justify-content: center; margin: 0 auto;">
+              <img src="icons/Submit.svg" alt="Submit" width="32" height="32">
+            </button>
+          </td>
+        </tr>
+      `;
+    };
     if (currentWorklistView === 'project_payment') {
       tbody.innerHTML = filteredDataset.map((row, idx) => {
         const isSelected = row.selected;
@@ -47041,11 +46971,11 @@ function applyFiltersAndRender() {
             <td class="td-amount">${row.amountTotal || ''}</td>
           </tr>
         `;
-      }).join('');
+      }).join('') + buildMasterPaymentSubpageSubmitRow(11);
     } else if (currentWorklistView === 'purchase_payment') {
       const validItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.hsnCode && item.hsnCode.trim() !== ''));
       if (validItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>` + buildMasterPaymentSubpageSubmitRow(10);
       } else {
         tbody.innerHTML = validItems.map(item => {
           return `
@@ -47064,12 +46994,12 @@ function applyFiltersAndRender() {
             <td class="td-amount" style="padding: 8px 10px; text-align: right !important; font-weight: 600;">${item.totalAmt || ''}</td>
           </tr>
         `;
-        }).join('');
+        }).join('') + buildMasterPaymentSubpageSubmitRow(10);
       }
     } else if (currentWorklistView === 'employee_payment') {
       const empItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== ''));
       if (empItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>` + buildMasterPaymentSubpageSubmitRow(5);
       } else {
         tbody.innerHTML = empItems.map(item => {
           const isSelected = item.selected;
@@ -47084,12 +47014,12 @@ function applyFiltersAndRender() {
             <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtApproved || ''}</td>
           </tr>
         `;
-        }).join('');
+        }).join('') + buildMasterPaymentSubpageSubmitRow(5);
       }
     } else if (currentWorklistView === 'transport_payment') {
       const transItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.vehicleType && item.vehicleType.trim() !== ''));
       if (transItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>` + buildMasterPaymentSubpageSubmitRow(8);
       } else {
         tbody.innerHTML = transItems.map(item => {
           const isSelected = item.selected;
@@ -47107,12 +47037,12 @@ function applyFiltersAndRender() {
             <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtApproved || ''}</td>
           </tr>
         `;
-        }).join('');
+        }).join('') + buildMasterPaymentSubpageSubmitRow(8);
       }
     } else if (currentWorklistView === 'accounts_payment' || currentWorklistView === 'admin_payment' || currentWorklistView === 'statutory_payment') {
       const subItems = (filteredDataset || []).filter(item => (item.description && item.description.trim() !== '') || (item.expenseType && item.expenseType.trim() !== ''));
       if (subItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 24px; color: #94a3b8;">No line items available</td></tr>` + buildMasterPaymentSubpageSubmitRow(5);
       } else {
         tbody.innerHTML = subItems.map(item => {
           const isSelected = item.selected;
@@ -47127,7 +47057,7 @@ function applyFiltersAndRender() {
             <td class="td-amount" style="width: 15ch; max-width: 15ch; min-width: 15ch; padding: 8px 10px; text-align: right !important; white-space: nowrap;">${item.amtApproved || ''}</td>
           </tr>
         `;
-        }).join('');
+        }).join('') + buildMasterPaymentSubpageSubmitRow(5);
       }
     } else if (currentWorklistView === 'po_supplier') {
       const rowsHtml = filteredDataset.map((row, idx) => {
@@ -54993,10 +54923,13 @@ window.openWorklistProjectPayment = async function(reqCode, rowId) {
       const amt = (it.raw_approved !== undefined && it.raw_approved !== null) ? Number(it.raw_approved) : (parseFloat(String(it.approved || it.amount || 0).replace(/,/g, '')) || 0);
       const isGst = !!it.gst;
       const itQty = (it.qty !== undefined && it.qty !== null && String(it.qty).trim() !== '') ? String(it.qty) : "1.00";
+      const isApprovedStatus = String(it.status || '').trim().toLowerCase() === 'approved';
       return {
         id: `wpp-${it.expenseId || idx}`,
         expenseId: it.expenseId,
-        selected: false,
+        selected: isApprovedStatus,
+        approved: isApprovedStatus,
+        status: it.status || 'Pending',
         expenseType: it.expenseHead || it.expenseType || "Operational Expenses",
         boqName: it.expenseDescription || it.expenseName || "Project Line Item",
         uom: it.uom || "Nos",
@@ -55270,15 +55203,39 @@ window.toggleProjectPaymentRowSelect = function(rowId) {
   }
 };
 
-window.approveSelectedProjectPaymentRows = function() {
+window.approveSelectedProjectPaymentRows = async function() {
   const selectedRows = worklistProjectPaymentItems.filter(i => i.selected);
   if (selectedRows.length === 0) {
     showToast('Please select a row to approve');
     return;
   }
+  const updatePromises = [];
   selectedRows.forEach(item => {
     item.approved = true;
+    item.status = 'Approved';
+    const expId = item.expenseId || (item.id && item.id.startsWith('wpp-') ? item.id.replace('wpp-', '') : null);
+    if (expId && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+      const parsedId = parseInt(expId, 10);
+      if (!isNaN(parsedId)) {
+        updatePromises.push(
+          window.NexusApi.commercial.saveProjectExpense({
+            expense_management_id: parsedId,
+            status: 'Approved'
+          })
+        );
+      }
+    }
   });
+  if (updatePromises.length > 0) {
+    try {
+      await Promise.all(updatePromises);
+      if (typeof window.loadMasterPaymentDataFromApi === 'function') {
+        window.loadMasterPaymentDataFromApi(false);
+      }
+    } catch (e) {
+      console.error('Error persisting project payment approval:', e);
+    }
+  }
   applyFiltersAndRender();
   showToast(`${selectedRows.length} row(s) approved & highlighted permanently`);
 };
@@ -65036,9 +64993,41 @@ window.closeRemarksModal = function() {
   if (typeof closeSideForm === 'function') closeSideForm();
 };
 
-window.submitRemarksModal = function() {
+window.submitRemarksModal = async function() {
   const txt = document.getElementById('inpPaymentRemarksText');
   const remarks = txt ? txt.value.trim() : '';
+
+  if (currentWorklistView === 'project_payment' && Array.isArray(worklistProjectPaymentItems)) {
+    const approvedRows = worklistProjectPaymentItems.filter(i => i.approved || i.selected);
+    const updatePromises = [];
+    approvedRows.forEach(item => {
+      if (item.approved) {
+        const expId = item.expenseId || (item.id && item.id.startsWith('wpp-') ? item.id.replace('wpp-', '') : null);
+        if (expId && window.NexusApi && window.NexusApi.commercial && typeof window.NexusApi.commercial.saveProjectExpense === 'function') {
+          const parsedId = parseInt(expId, 10);
+          if (!isNaN(parsedId)) {
+            updatePromises.push(
+              window.NexusApi.commercial.saveProjectExpense({
+                expense_management_id: parsedId,
+                status: 'Approved'
+              })
+            );
+          }
+        }
+      }
+    });
+    if (updatePromises.length > 0) {
+      try {
+        await Promise.all(updatePromises);
+        if (typeof window.loadMasterPaymentDataFromApi === 'function') {
+          window.loadMasterPaymentDataFromApi(false);
+        }
+      } catch (e) {
+        console.error('Error persisting approved payment rows on submit:', e);
+      }
+    }
+  }
+
   window.closeRemarksModal();
   if (typeof showSvgSuccessPopup === 'function') {
     showSvgSuccessPopup('Remarks submitted successfully!', 'Task Completed');

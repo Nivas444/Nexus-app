@@ -2,6 +2,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, Path, UploadFile, File, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.cache import reference_data_cache
 from app.db.session import get_db
 from app.services.product_service import ProductService
 from app.schemas.product import (
@@ -29,16 +30,20 @@ def list_products(
     """
     Retrieve real product records from PostgreSQL company_products with filtering, search, and pagination.
     """
-    service = ProductService(db)
-    return service.get_products_list(
-        page=page,
-        page_size=page_size,
-        search=search,
-        category=category,
-        head=head,
-        status_filter=status,
-        sort_by=sort_by,
-        sort_desc=sort_desc
+    cache_key = f"master:products:{page}:{page_size}:{search}:{category}:{head}:{status}:{sort_by}:{sort_desc}"
+    return reference_data_cache.get_or_set(
+        cache_key,
+        lambda: ProductService(db).get_products_list(
+            page=page,
+            page_size=page_size,
+            search=search,
+            category=category,
+            head=head,
+            status_filter=status,
+            sort_by=sort_by,
+            sort_desc=sort_desc
+        ),
+        ttl=60.0,
     )
 
 @router.get("/{product_id}", response_model=ProductResponse, summary="Get Product Details")

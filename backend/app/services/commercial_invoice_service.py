@@ -3,7 +3,7 @@ from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional, Dict, Any, List, Union
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer, load_only
 from sqlalchemy import text, or_
 
 from app.db.session import ProjectSessionLocal, AccountsSessionLocal, SessionLocal
@@ -86,22 +86,29 @@ class CommercialInvoiceService:
         pdb = self.get_project_db()
         adb = self.get_accounts_db()
 
-        # 1. Fetch sales and receipt_indus records from Nexus_Accounts DB
-        sales_records = adb.query(Sales).all()
+        # 1. Fetch sales and receipt_indus records from Nexus_Accounts DB (defer multi-MB BYTEA PDFs!)
+        sales_rows_with_flag = (
+            adb.query(Sales, Sales.invoice_document.isnot(None).label("has_pdf_flag"))
+            .options(defer(Sales.invoice_document))
+            .all()
+        )
+        sales_records = [s for s, _ in sales_rows_with_flag]
         sales_by_voucher: Dict[str, Sales] = {}
-        for s in sales_records:
+        sales_has_pdf: Dict[int, bool] = {}
+        for s, has_pdf_flag in sales_rows_with_flag:
+            sales_has_pdf[s.sales_id] = bool(has_pdf_flag)
             if s.voucher_number:
                 sales_by_voucher[s.voucher_number.strip()] = s
             if s.document_no:
                 sales_by_voucher[s.document_no.strip()] = s
 
-        receipt_records = adb.query(ReceiptIndus).all()
+        receipt_records = adb.query(ReceiptIndus.invoice_no, ReceiptIndus.voucher_number).all()
         received_invoices = set()
-        for r in receipt_records:
-            if r.invoice_no:
-                received_invoices.add(r.invoice_no.strip().lower())
-            if r.voucher_number:
-                received_invoices.add(r.voucher_number.strip().lower())
+        for r_inv_no, r_voucher_no in receipt_records:
+            if r_inv_no:
+                received_invoices.add(r_inv_no.strip().lower())
+            if r_voucher_no:
+                received_invoices.add(r_voucher_no.strip().lower())
 
         # 2. Fetch projects from telecom_project
         projects = pdb.query(TelecomProject).order_by(TelecomProject.project_id.asc()).all()
@@ -199,7 +206,7 @@ class CommercialInvoiceService:
             irn_no = (sales_row.irn_no if sales_row and sales_row.irn_no else None) or f"IRN98324701239854{72 + idx}"
             ers_no = p.ers_no or (sales_row.acknowledgement_no if sales_row else None) or f"ERS-IND-880{idx + 1}"
 
-            has_pdf = bool(sales_row and sales_row.invoice_document is not None)
+            has_pdf = bool(sales_row and sales_has_pdf.get(sales_row.sales_id, False))
 
             items.append(CommercialInvoiceItem(
                 id=f"prj-{p.project_id}",
@@ -255,7 +262,7 @@ class CommercialInvoiceService:
                 dueDate=doc_date_str,
                 customerName=s.customer_name or "Indus Towers Limited",
                 companyName=s.company_name or "Nexus Power Limited",
-                pdfStored=bool(s.invoice_document is not None)
+                pdfStored=bool(sales_has_pdf.get(s.sales_id, False))
             ))
 
         return CommercialInvoiceListResponse(items=items, total=len(items))
@@ -272,7 +279,7 @@ class CommercialInvoiceService:
         pdb = self.get_project_db()
 
         receipt_records = adb.query(ReceiptIndus).order_by(ReceiptIndus.receipt_id.desc()).all()
-        sales_records = adb.query(Sales).all()
+        sales_records = adb.query(Sales).options(defer(Sales.invoice_document)).all()
         sales_map: Dict[str, Sales] = {}
         for s in sales_records:
             if s.voucher_number:
@@ -280,7 +287,26 @@ class CommercialInvoiceService:
             if s.document_no:
                 sales_map[s.document_no.strip()] = s
 
-        projects = pdb.query(TelecomProject).all()
+        projects = (
+            pdb.query(TelecomProject)
+            .options(
+                load_only(
+                    TelecomProject.project_id,
+                    TelecomProject.project_code,
+                    TelecomProject.po_no,
+                    TelecomProject.site_id,
+                    TelecomProject.site_name,
+                    TelecomProject.project_type,
+                    TelecomProject.sub_project_type,
+                    TelecomProject.customer_name,
+                    TelecomProject.receipt_date,
+                    TelecomProject.completion_date,
+                    TelecomProject.po_amount,
+                    TelecomProject.wcc_amount,
+                )
+            )
+            .all()
+        )
         po_map = {p.po_no.strip(): p for p in projects if p.po_no}
 
         items: List[CommercialReceivableItem] = []
@@ -716,13 +742,33 @@ class CommercialInvoiceService:
             )
             adb.add(receipt)
 
-        # Update sales table tds_deduction and approved_amount
+        # Update or create sales table record with tds_deduction, approved_amount, and invoice_status='Validated'
         sales_record = adb.query(Sales).filter(
             or_(Sales.voucher_number == payload.invoiceNo, Sales.document_no == payload.invoiceNo)
         ).first()
         if sales_record:
             sales_record.tds_deduction = raw_tds
             sales_record.approved_amount = raw_recv
+            sales_record.invoice_status = "Validated"
+        else:
+            sales_record = Sales(
+                company_name=payload.companyName or "Nexus Power Limited",
+                customer_name=payload.customerName or "Indus Towers Limited",
+                voucher_number=payload.invoiceNo,
+                document_no=payload.invoiceNo,
+                document_date=date.today(),
+                basic_amount=raw_inv,
+                cgst=Decimal("0.00"),
+                sgst=Decimal("0.00"),
+                igst=Decimal("0.00"),
+                total_amount=raw_inv,
+                tds_deduction=raw_tds,
+                approved_amount=raw_recv,
+                received_amount=Decimal("0.00"),
+                ageing=0,
+                invoice_status="Validated",
+            )
+            adb.add(sales_record)
 
         adb.commit()
         adb.refresh(receipt)

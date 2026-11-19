@@ -279,7 +279,7 @@
         } else if (typeof errorDetail === 'object') {
           errorDetail = JSON.stringify(errorDetail);
         }
-        const err = new Error(errorDetail || 'Request failed');
+        const err = new Error(errorDetail || `Request failed (HTTP ${response.status})`);
         err.status = response.status;
         err.statusCode = response.status;
         err.detail = errorDetail;

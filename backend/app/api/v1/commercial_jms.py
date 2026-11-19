@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db, get_project_db
 from app.services.jms_service import JmsService
 from app.services.wcc_pdf_service import WccPdfService
-from app.services.auth_service import auth_service
+from app.core.security import AuthenticatedUser, get_current_user
 from app.schemas.commercial_project import (
     JmsPoDetailResponse,
     JmsLineItem,
@@ -36,28 +36,13 @@ from app.schemas.commercial_project import (
 router = APIRouter(prefix="/commercial/jms", tags=["Commercial Manager - JMS Workflow"])
 
 
-def verify_jms_access(authorization: Optional[str] = Header(None)):
-    """
-    Ensure the request is authenticated and authorized for Commercial Manager, Project Manager, or Admin.
-    """
-    if authorization:
-        token = authorization.replace("Bearer ", "").strip()
-        user = auth_service.get_user_by_token(token)
-        if user and user.role not in ["Commercial Manager", "Project Manager", "Admin", "Master"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access restricted: Commercial/Project Manager authorization required."
-            )
-    return True
-
-
 @router.get("/po-details", response_model=JmsPoDetailResponse, summary="Get JMS PO Details & Line Items")
 def get_jms_po_details(
     po_no: str = Query(..., description="PO Number"),
     site_id: Optional[str] = Query(None, description="Site ID"),
     project_db: Session = Depends(get_project_db),
     master_db: Session = Depends(get_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db, master_db)
     return service.get_jms_po_details(po_no, site_id)
@@ -68,7 +53,7 @@ def update_jms_qty(
     line_item_id: int,
     payload: JmsQtyUpdateRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.update_line_item_qty(line_item_id, payload.jmsQty)
@@ -78,7 +63,7 @@ def update_jms_qty(
 def approve_jms_rows(
     payload: JmsRowApprovalRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.update_row_approvals(payload.lineItemIds, payload.status)
@@ -91,7 +76,7 @@ def get_eligible_gbpa_items(
     search: Optional[str] = Query(None, description="Search term for item code or description"),
     project_db: Session = Depends(get_project_db),
     master_db: Session = Depends(get_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db, master_db)
     return service.get_eligible_gbpa_items(po_no, site_id, search)
@@ -104,7 +89,7 @@ def check_jms_line_item(
     item_code: str = Query(...),
     project_db: Session = Depends(get_project_db),
     master_db: Session = Depends(get_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db, master_db)
     return service.check_gbpa_item(po_no, site_id, item_code)
@@ -115,7 +100,7 @@ def add_jms_line_item(
     payload: JmsAddLineItemRequest,
     project_db: Session = Depends(get_project_db),
     master_db: Session = Depends(get_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db, master_db)
     return service.add_line_item(payload.poNo, payload.siteId, payload.itemCode, payload.qty or 1.0)
@@ -125,7 +110,7 @@ def add_jms_line_item(
 def submit_jms(
     payload: JmsSubmitRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.submit_jms_to_pm(payload.poNo, payload.siteId)
@@ -136,7 +121,7 @@ def list_jms_documents(
     po_no: Optional[str] = Query(None),
     site_id: Optional[str] = Query(None),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.get_documents(po_no or "", site_id)
@@ -150,7 +135,7 @@ async def upload_jms_document(
     doc_type: Optional[str] = Form("STN Document"),
     doc_details: Optional[str] = Form(""),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     content = await file.read()
     service = JmsService(project_db)
@@ -168,7 +153,7 @@ async def upload_jms_document(
 def delete_jms_document(
     document_id: int,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.delete_document(document_id)
@@ -178,7 +163,7 @@ def delete_jms_document(
 def download_jms_document(
     document_id: int,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     file_info = service.get_document_file(document_id)
@@ -197,7 +182,7 @@ def get_jms_expenses(
     po_no: str = Query(...),
     site_id: Optional[str] = Query(None),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.get_project_expenses(po_no, site_id)
@@ -208,7 +193,7 @@ def get_jms_expenses(
 def process_jms_to_be_process(
     payload: JmsProcessRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.process_jms_to_be_process(payload.poNo, payload.siteId, payload.lineItemIds)
@@ -219,7 +204,7 @@ def get_wcc_po_details(
     po_no: str = Query(...),
     site_id: Optional[str] = Query(None),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.get_wcc_po_details(po_no, site_id)
@@ -230,7 +215,7 @@ def get_po_amend_po_details(
     po_no: str = Query(...),
     site_id: Optional[str] = Query(None),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.get_po_amend_po_details(po_no, site_id)
@@ -241,7 +226,7 @@ def get_po_amend_po_details(
 def submit_select_works(
     payload: SelectWorksSubmitRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Submits Select Works choices, generates 3-page WCC PDF (Annexure, BOQ, Work Completion Certificate),
@@ -274,7 +259,7 @@ def update_po_amend_line_item_qty(
     line_item_id: str,
     payload: PoAmendQtyUpdateRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.update_po_amend_line_item_qty(
@@ -291,7 +276,7 @@ def update_wcc_line_item_qty(
     line_item_id: str,
     payload: PoAmendQtyUpdateRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.update_wcc_line_item_qty(
@@ -306,7 +291,7 @@ def update_wcc_line_item_qty(
 def submit_po_amend_reference(
     payload: PoAmendSubmitReferenceRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     ref_val = payload.get_ref_id()
     if not ref_val:
@@ -322,7 +307,7 @@ def submit_po_amend_reference(
 def submit_wcc_details(
     payload: WccSubmitDetailsRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.submit_wcc_details(
@@ -340,7 +325,7 @@ def submit_wcc_details(
 def submit_wcc_receipt(
     payload: WccSubmitReceiptRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.submit_wcc_receipt(
@@ -356,7 +341,7 @@ def submit_wcc_receipt(
 def reject_po_workflow_row(
     payload: PoRowRejectRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.reject_po_workflow_row(payload.poNo, payload.siteId, payload.workflow or "po_amend")
@@ -366,7 +351,7 @@ def reject_po_workflow_row(
 def submit_amendment_status(
     payload: SubmitAmendmentStatusRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     service = JmsService(project_db)
     return service.submit_amendment_status(
@@ -382,7 +367,7 @@ def submit_amendment_status(
 def process_pdf_regeneration(
     payload: PdfProcessRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     pdf_service = WccPdfService(project_db)
     try:
@@ -413,7 +398,7 @@ def download_generated_pdf(
     site_id: Optional[str] = Query(None, description="Site ID"),
     doc_type: Optional[str] = Query(None, description="Document type: 'jms' or 'wcc' / 'po_amend'"),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Downloads the persisted binary PDF from PostgreSQL database:
@@ -518,7 +503,7 @@ def download_jms_pdf(
     po_no: str = Query(..., description="PO Number"),
     site_id: Optional[str] = Query(None, description="Site ID"),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     return download_generated_pdf(
         po_no=po_no,
@@ -539,7 +524,7 @@ def download_commercial_invoice_pdf_alias(
     invoice_date: Optional[str] = Query(None, description="Invoice Date"),
     gst_type: Optional[str] = Query(None, description="GST Type: SGST or IGST"),
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_jms_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     from app.services.invoice_pdf_service import CommercialInvoicePdfService
 

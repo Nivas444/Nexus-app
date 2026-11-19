@@ -947,3 +947,148 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   height: 0 !important;
 }
 
+/* ==========================================================================
+   LOGIN WAKE-UP & AUTHENTICATION LOADING OVERLAY
+   ========================================================================== */
+.login-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1800;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.login-loading-overlay.active {
+  opacity: 1;
+}
+
+.login-loading-overlay[hidden] {
+  display: none !important;
+}
+
+.login-loading-card {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: var(--radius-modal);
+  padding: 36px 28px 30px 28px;
+  text-align: center;
+  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(0, 191, 165, 0.16);
+}
+
+.login-spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.login-spinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 4px solid rgba(0, 191, 165, 0.18);
+  border-top-color: var(--primary-green);
+  border-right-color: var(--primary-green-dark);
+  animation: nexusLoginSpin 0.85s linear infinite;
+}
+
+@keyframes nexusLoginSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-error-icon-wrap {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 18px auto;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-error-icon-wrap svg {
+  width: 30px;
+  height: 30px;
+  stroke: currentColor;
+}
+
+.login-loading-title {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.login-loading-subtitle {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.login-loading-actions {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-loader-retry,
+.btn-loader-cancel {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  border: none;
+}
+
+.btn-loader-retry {
+  background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+  color: #ffffff;
+  box-shadow: 0 8px 18px -6px rgba(0, 150, 136, 0.55);
+}
+
+.btn-loader-retry:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px -6px rgba(0, 150, 136, 0.65);
+}
+
+.btn-loader-cancel {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.btn-loader-cancel:hover {
+  background: #e2e8f0;
+}
+
+@media (max-width: 480px) {
+  .login-loading-card {
+    padding: 28px 20px 24px 20px;
+  }
+
+  .login-loading-title {
+    font-size: 1.08rem;
+  }
+}
+

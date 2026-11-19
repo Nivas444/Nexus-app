@@ -1,5 +1,8 @@
 .vscode
 .env
+.env.*
+!.env.example
+!backend/.env.example
 .pytest_cache
 Nexus-MCP/
 

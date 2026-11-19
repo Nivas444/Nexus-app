@@ -1,3 +1,4 @@
+import logging
 import os
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,35 +8,61 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.api.v1.router import api_router
 
+logger = logging.getLogger("nexus.app")
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    description="FastAPI Backend for Nexus ERP Master &bull; Expenses Module"
+    openapi_url=None if settings.is_production else f"{settings.API_V1_STR}/openapi.json",
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    description="FastAPI Backend for Nexus ERP (Centralized JWT & RBAC Security)",
 )
 
-# Configure CORS Middleware for development & frontend integration
+# Strict CORS Middleware (explicit approved origins only; never wildcard with credentials)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins for flexible local development
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-CSRF-Token", "X-Requested-With"],
+    expose_headers=["Content-Disposition"],
 )
 
-# Global Exception Handler for clean error feedback
+
+# Security Response Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if request.url.path.startswith(settings.API_V1_STR):
+        response.headers.setdefault("Cache-Control", "no-store")
+    return response
+
+
+# Global Exception Handler (never leak secrets, stack traces, or DB credentials)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    content = {
+        "success": False,
+        "detail": "An internal server error occurred.",
+    }
+    if settings.DEBUG and not settings.is_production:
+        content["error"] = exc.__class__.__name__
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"success": False, "detail": "An internal server error occurred.", "error": str(exc)}
+        content=content,
     )
 
-# Root Health Check & Information
+
+# Public Health Check (lightweight, unauthenticated, exposes no internal details)
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"], include_in_schema=False)
 def health_check():
-    return {"status": "healthy", "project": settings.PROJECT_NAME}
+    return {"status": "ok"}
+
 
 # Register Version 1 Routers
 app.include_router(api_router, prefix=settings.API_V1_STR)

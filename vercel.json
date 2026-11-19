@@ -1,5 +1,13 @@
 {
   "rewrites": [
+    {
+      "source": "/api/health",
+      "destination": "https://nexus-app-g2i9.onrender.com/health"
+    },
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://nexus-app-g2i9.onrender.com/api/v1/:path*"
+    },
     { "source": "/", "destination": "/frontend/index.html" },
     { "source": "/index.html", "destination": "/frontend/index.html" },
     { "source": "/home.html", "destination": "/frontend/home.html" },

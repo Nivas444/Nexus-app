@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db, get_project_db, get_accounts_db
 from app.services.commercial_project_service import CommercialProjectService
 from app.services.commercial_invoice_service import CommercialInvoiceService
-from app.services.auth_service import auth_service
+from app.core.security import AuthenticatedUser, get_current_user
 from app.schemas.commercial_project import (
     CommercialProjectListResponse,
     CommercialPoToBeOpenListResponse,
@@ -30,26 +30,10 @@ from app.schemas.commercial_project import (
 router = APIRouter(prefix="/commercial", tags=["Commercial Manager - New Project & PO"])
 
 
-def verify_commercial_access(authorization: Optional[str] = Header(None)):
-    """
-    Ensure the request is authenticated and authorized for Commercial Manager or Admin.
-    Allows graceful fallback if session headers are sent or in testing mode.
-    """
-    if authorization:
-        token = authorization.replace("Bearer ", "").strip()
-        user = auth_service.get_user_by_token(token)
-        if user and user.role not in ["Commercial Manager", "Project Manager", "Admin", "Master"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access restricted: Commercial/Project Manager authorization required."
-            )
-    return True
-
-
 @router.get("/projects", response_model=CommercialProjectListResponse, summary="List New Projects from telecom_project")
 def list_commercial_projects(
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Retrieves real Project records from PostgreSQL table `telecom_project` in `Nexus_Project DB`.
@@ -62,7 +46,7 @@ def list_commercial_projects(
 def delete_commercial_project(
     project_id: str,
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Deletes a project record from PostgreSQL `telecom_project` table in `Nexus_Project DB`.
@@ -81,7 +65,7 @@ def delete_commercial_project(
 def bulk_delete_commercial_projects(
     payload: CommercialProjectDeleteRequest,
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Bulk deletes projects from PostgreSQL `telecom_project` table in `Nexus_Project DB`.
@@ -99,7 +83,7 @@ def bulk_delete_commercial_projects(
 def save_pm_project_details(
     payload: SavePmProjectDetailsRequest,
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Saves PM toggles, tower specs, planning BOQ and moves project to YTS/WIP/Project Update.
@@ -112,7 +96,7 @@ def save_pm_project_details(
 def edit_project_update(
     payload: dict,
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Updates project status, support required, pending with, and remarks in `telecom_project` table.
@@ -125,7 +109,7 @@ def edit_project_update(
 async def bulk_upload_commercial_projects(
     file: UploadFile = File(..., description="Excel (.xlsx) file matching the Project template"),
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Upload and parse Excel file into PostgreSQL `telecom_project` table in `Nexus_Project DB`.
@@ -139,7 +123,7 @@ async def bulk_upload_commercial_projects(
 async def bulk_upload_commercial_po(
     file: UploadFile = File(..., description="Excel (.xlsx) file matching the PO template"),
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Upload and parse Excel file into PostgreSQL `telecom_indus_po` table in `Nexus_Project DB`.
@@ -155,7 +139,7 @@ async def bulk_upload_commercial_unified(
     file: UploadFile = File(..., description="Excel (.xlsx) file"),
     upload_type: str = Form("projects", description="'projects' or 'po'"),
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Unified endpoint accepting upload_type ('projects' or 'po') and dispatching to the respective processor.
@@ -175,7 +159,7 @@ async def bulk_upload_commercial_unified(
 @router.get("/po-amend/projects", response_model=CommercialProjectListResponse, summary="List PO Amend Projects from telecom_project")
 def list_po_amend_projects(
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Retrieves real Project records from PostgreSQL table `telecom_project` in `Nexus_Project DB` for PO Amend workflow.
@@ -188,7 +172,7 @@ def list_po_amend_projects(
 async def bulk_upload_commercial_po_amend(
     file: UploadFile = File(..., description="CSV or Excel (.xlsx) file matching the PO Amendment template"),
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Upload and parse CSV or Excel file to update PO Revision Number, Amendment Completion Date,
@@ -202,7 +186,7 @@ async def bulk_upload_commercial_po_amend(
 @router.get("/wcc/projects", response_model=CommercialProjectListResponse, summary="List WCC Projects from telecom_project")
 def list_wcc_projects(
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Retrieves real Project records from PostgreSQL table `telecom_project` in `Nexus_Project DB` for WCC workflow.
@@ -214,7 +198,7 @@ def list_wcc_projects(
 @router.get("/po-to-be-open/projects", response_model=CommercialPoToBeOpenListResponse, summary="List PO To Be Open Projects from telecom_project")
 def list_po_to_be_open_projects(
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Retrieves real Project records from PostgreSQL `telecom_project` and `project_expenses` in `Nexus_Project DB`
@@ -232,7 +216,7 @@ def list_po_to_be_open_projects(
 def submit_wcc_details_commercial(
     payload: WccSubmitDetailsRequest,
     project_db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     from app.services.jms_service import JmsService
     service = JmsService(project_db)
@@ -258,7 +242,7 @@ def download_commercial_invoice_pdf(
     gst_type: Optional[str] = Query(None, description="GST Type (SGST or IGST)"),
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Generates and downloads the official Tax Invoice PDF matching Invoice CGST_SGST.pdf layout.
@@ -315,7 +299,7 @@ def download_commercial_invoice_pdf(
 def list_commercial_invoices(
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Retrieves real Invoice records from PostgreSQL table `telecom_project` in `Nexus_Project DB`
@@ -330,7 +314,7 @@ def submit_commercial_invoice_details(
     payload: CommercialInvoiceSubmitDetailsRequest,
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Submits invoice details (ERS No, IRN No, Due Date), updates task status to 'Approval Pending'
@@ -345,7 +329,7 @@ def submit_commercial_invoice_hash(
     payload: CommercialInvoiceSubmitHashRequest,
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Persists invoice amount, TDS, and receivable from the 'Invoice#' tab into table `receipt_indus`
@@ -359,7 +343,7 @@ def submit_commercial_invoice_hash(
 def list_commercial_receivables(
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Retrieves real Receivable records from PostgreSQL table `receipt_indus` in `Nexus_Accounts DB`
@@ -374,7 +358,7 @@ def update_receivable_invoice_amount(
     payload: CommercialReceivableUpdateInvoiceAmountRequest,
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Updates invoice amount details in PostgreSQL table `sales` in `Nexus_Accounts DB`.
@@ -395,7 +379,7 @@ def update_receivable_deduction(
     payload: CommercialReceivableUpdateDeductionRequest,
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Updates deduction subtab details in PostgreSQL table `receipt_indus` and `tds_deduction` in `sales`.
@@ -415,7 +399,7 @@ def update_receivable_received_amount(
     payload: CommercialReceivableUpdateReceivedAmountRequest,
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Updates received amount and date in PostgreSQL table `receipt_indus` in `Nexus_Accounts DB`.
@@ -432,7 +416,7 @@ def submit_indus_payment_receipt(
     payload: CommercialIndusPaymentReceiptRequest,
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Stores Indus Payment Receipt into PostgreSQL table `receipt_indus`.
@@ -447,7 +431,7 @@ def submit_m1_payment_receipt(
     payload: CommercialM1PaymentReceiptRequest,
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Stores M1 Payment Receipt into PostgreSQL table `receipt_indus` and `sales`.
@@ -462,7 +446,7 @@ async def bulk_upload_commercial_receivable(
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV file"),
     project_db: Session = Depends(get_project_db),
     accounts_db: Session = Depends(get_accounts_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Parses and processes bulk upload file for Receivable.
@@ -477,7 +461,7 @@ def get_project_expenses(
     po_no: Optional[str] = Query(None, description="PO Number to filter expenses"),
     site_id: Optional[str] = Query(None, description="Site ID to filter expenses"),
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Returns expenses from project_expenses table linked to the specified PO Number.
@@ -492,7 +476,7 @@ def get_po_line_items(
     po_no: str = Query(..., description="PO Number"),
     q: Optional[str] = Query(None, description="Search query for autocomplete"),
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Returns Capex / Opex line items from telecom_indus_po for autocomplete search.
@@ -506,7 +490,7 @@ def get_po_line_items(
 def create_project_expense(
     payload: dict,
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Saves a new expense record in project_expenses table.
@@ -521,7 +505,7 @@ def get_project_materials(
     po_no: Optional[str] = Query(None, description="PO Number to filter materials"),
     site_id: Optional[str] = Query(None, description="Site ID to filter materials"),
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Returns materials from project_materials table mapped with telecom_indus_po.
@@ -535,7 +519,7 @@ def get_project_materials(
 def create_project_material(
     payload: dict,
     db: Session = Depends(get_project_db),
-    _auth: bool = Depends(verify_commercial_access)
+    _auth: AuthenticatedUser = Depends(get_current_user)
 ):
     """
     Saves a new material record in project_materials table.

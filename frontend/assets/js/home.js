@@ -11631,13 +11631,34 @@ function parseUrlAndApplyState() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Centralized Authentication Guard: verify live JWT/cookie session with FastAPI backend
+  if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.me === 'function') {
+    const verifiedUser = await NexusApi.auth.me();
+    if (!verifiedUser) {
+      window.location.href = 'index.html';
+      return;
+    }
+  } else {
+    const hasSession = sessionStorage.getItem('nexus_user') && sessionStorage.getItem('nexus_token');
+    if (!hasSession) {
+      window.location.href = 'index.html';
+      return;
+    }
+  }
+
   parseUrlAndApplyState();
   if (typeof loadCommercialProjectsFromApi === 'function') {
-    loadCommercialProjectsFromApi();
+    const activeRole = getAuthenticatedUserRole();
+    if (['Master', 'Commercial Manager', 'Project Manager'].includes(activeRole)) {
+      loadCommercialProjectsFromApi();
+    }
   }
   if (typeof window.loadMasterPaymentDataFromApi === 'function') {
-    window.loadMasterPaymentDataFromApi(false);
+    const activeRole = getAuthenticatedUserRole();
+    if (['Master', 'Accounts Manager', 'Purchase Manager'].includes(activeRole)) {
+      window.loadMasterPaymentDataFromApi(false);
+    }
   }
   if (currentProjectsView === 'project_material' && typeof window.loadProjectMaterialsFromApi === 'function') {
     window.loadProjectMaterialsFromApi();
@@ -11662,20 +11683,17 @@ window.addEventListener('popstate', () => {
 // ==========================================================================
 function getAuthenticatedUserRole() {
   if (typeof NexusApi !== 'undefined' && NexusApi.auth && typeof NexusApi.auth.getUserRole === 'function') {
-    return NexusApi.auth.getUserRole();
+    return NexusApi.auth.getUserRole() || '';
   }
   try {
     const raw = sessionStorage.getItem('nexus_user');
     if (raw && raw.startsWith('{')) {
       const u = JSON.parse(raw);
-      if (u.role === 'Admin') return 'Master';
-      return u.role || 'Master';
+      return u.role || '';
     }
-    const role = sessionStorage.getItem('nexus_role');
-    if (role === 'Admin') return 'Master';
-    return role || 'Master';
+    return sessionStorage.getItem('nexus_role') || '';
   } catch (e) {
-    return 'Master';
+    return '';
   }
 }
 
@@ -11858,14 +11876,38 @@ function applyRoleBasedNavigation() {
       currentWorklistView = 'payment';
       updateURL();
     }
-  } else {
-    // Master role (and legacy Admin): All 10 navigation items are visible and accessible
+  } else if (role === 'Master') {
+    // Master (Super Admin) role: All 10 navigation items are visible and accessible
     [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh, navProfile, btnSignout].forEach(btn => {
       if (btn) {
         btn.style.display = 'inline-flex';
         btn.style.order = '';
       }
     });
+  } else if (role === 'MIS' || role === 'MIS Manager') {
+    [navMaster, navProjects, navAccounts, navAdmin, navPurchase, navInventory, navInfraWh].forEach(btn => {
+      if (btn) btn.style.display = 'none';
+    });
+    if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '1'; }
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '2'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+    const allowedModules = ['worklist', 'profile'];
+    if (!allowedModules.includes(currentModule)) {
+      currentModule = 'worklist';
+      currentWorklistView = 'ptw';
+      updateURL();
+    }
+  } else {
+    // Least-privilege fallback (e.g. Employee): Profile + Sign Out only
+    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh].forEach(btn => {
+      if (btn) btn.style.display = 'none';
+    });
+    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '1'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '2'; }
+    if (currentModule !== 'profile') {
+      currentModule = 'profile';
+      updateURL();
+    }
   }
 }
 

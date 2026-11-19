@@ -1,19 +1,236 @@
 /**
  * Nexus ERP API Client Module
- * Handles HTTP communications with FastAPI backend (/api/v1).
+ * Handles authenticated HTTP communications with FastAPI backend (/api/v1).
+ *
+ * Security notes:
+ * - Zero database credentials, Supabase keys, or hardcoded user passwords/hashes.
+ * - Uses HttpOnly cookies (with double-submit CSRF token) + short-lived session access token.
+ * - Never stores long-lived tokens in localStorage.
+ * - Automatically handles 401 token refresh/redirect and 403 authorization feedback.
  */
 (function(window) {
   'use strict';
 
-  const isLocal = typeof window !== 'undefined' && window.location && (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname === '' ||
-    window.location.protocol === 'file:'
+  const isLocalDifferentOrigin = typeof window !== 'undefined' && window.location && (
+    window.location.protocol === 'file:' ||
+    ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+      window.location.port !== '8000' && window.location.port !== '')
   );
 
-  const storedApiUrl = (typeof window !== 'undefined' && window.localStorage) ? window.localStorage.getItem('API_BASE_URL') : null;
-  const API_BASE_URL = window.API_BASE_URL || storedApiUrl || (isLocal ? 'http://127.0.0.1:8000/api/v1' : '/api/v1');
+  // Public same-origin API base URL (/api/v1 via Vercel rewrites in production)
+  const metaApiBase = (typeof document !== 'undefined')
+    ? (document.querySelector('meta[name="nexus-api-base"]')?.getAttribute('content') || '').trim()
+    : '';
+  const API_BASE_URL = (
+    window.API_BASE_URL ||
+    metaApiBase ||
+    (isLocalDifferentOrigin ? 'http://127.0.0.1:8000/api/v1' : '/api/v1')
+  ).replace(/\/+$/, '');
+
+  // Public lightweight health-check endpoint (/api/health via Vercel rewrite -> Render /health)
+  const HEALTH_URL = (
+    window.HEALTH_CHECK_URL ||
+    (isLocalDifferentOrigin ? 'http://127.0.0.1:8000/health' : '/api/health')
+  );
+
+  // In-memory access token (backed by sessionStorage for page navigation within the same tab; never localStorage)
+  let _memoryAccessToken = null;
+  let _refreshPromise = null;
+  let _wakeUpPromise = null;
+  let _isRedirectingToLogin = false;
+
+  // Purge any legacy insecure localStorage token keys
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.removeItem('nexus_token');
+      window.localStorage.removeItem('nexus_user');
+      window.localStorage.removeItem('nexus_role');
+      window.localStorage.removeItem('nxtkn_commercial');
+    }
+  } catch (e) {}
+
+  function getCookie(name) {
+    if (typeof document === 'undefined' || !document.cookie) return null;
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
+  function getAccessToken() {
+    if (_memoryAccessToken) return _memoryAccessToken;
+    try {
+      const tok = window.sessionStorage ? window.sessionStorage.getItem('nexus_token') : null;
+      if (tok) {
+        _memoryAccessToken = tok;
+        return tok;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function setSessionState(userProfile) {
+    if (!userProfile) return;
+    if (userProfile.token) {
+      _memoryAccessToken = userProfile.token;
+    }
+    try {
+      if (window.sessionStorage) {
+        // Store profile without duplicating raw token unnecessarily, keep short-lived token in sessionStorage for tab navigation
+        const safeProfile = { ...userProfile };
+        delete safeProfile.token;
+        window.sessionStorage.setItem('nexus_user', JSON.stringify(safeProfile));
+        if (safeProfile.role) window.sessionStorage.setItem('nexus_role', safeProfile.role);
+        if (_memoryAccessToken) window.sessionStorage.setItem('nexus_token', _memoryAccessToken);
+      }
+    } catch (e) {}
+  }
+
+  function clearSessionState() {
+    _memoryAccessToken = null;
+    try {
+      if (window.sessionStorage) {
+        window.sessionStorage.removeItem('nexus_user');
+        window.sessionStorage.removeItem('nexus_role');
+        window.sessionStorage.removeItem('nexus_token');
+      }
+      if (window.localStorage) {
+        window.localStorage.removeItem('nexus_user');
+        window.localStorage.removeItem('nexus_role');
+        window.localStorage.removeItem('nexus_token');
+        window.localStorage.removeItem('nxtkn_commercial');
+      }
+    } catch (e) {}
+  }
+
+  function isLoginPage() {
+    if (typeof window === 'undefined' || !window.location) return false;
+    const p = (window.location.pathname || '').toLowerCase();
+    return p === '/' || p.endsWith('/index.html') || p.endsWith('index.html');
+  }
+
+  function redirectToLogin() {
+    clearSessionState();
+    if (!isLoginPage() && !_isRedirectingToLogin) {
+      _isRedirectingToLogin = true;
+      window.location.href = 'index.html';
+    }
+  }
+
+  function isProtectedApiUrl(urlStr) {
+    if (!urlStr || typeof urlStr !== 'string') return false;
+    return (
+      urlStr.startsWith(API_BASE_URL) ||
+      urlStr.startsWith('/api/v1') ||
+      urlStr.includes('/api/v1/')
+    );
+  }
+
+  function isAuthEndpoint(urlStr) {
+    return (
+      urlStr.includes('/auth/login') ||
+      urlStr.includes('/auth/refresh') ||
+      urlStr.includes('/auth/logout')
+    );
+  }
+
+  // Keep reference to native fetch before wrapping
+  const _nativeFetch = (typeof window !== 'undefined' && typeof window.fetch === 'function')
+    ? window.fetch.bind(window)
+    : null;
+
+  async function tryRefreshSession() {
+    if (!_nativeFetch) return false;
+    if (_refreshPromise) return _refreshPromise;
+
+    _refreshPromise = (async () => {
+      try {
+        const csrfToken = getCookie('nexus_csrf_token');
+        const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+        if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
+        const res = await _nativeFetch(`${API_BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+          headers,
+          body: JSON.stringify({})
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (data && data.success && data.user) {
+          setSessionState(data.user);
+          return true;
+        }
+        return false;
+      } catch (e) {
+        return false;
+      } finally {
+        _refreshPromise = null;
+      }
+    })();
+
+    return _refreshPromise;
+  }
+
+  // Global fetch wrapper so even legacy direct fetch('/api/v1/...') calls in home.js
+  // automatically send JWT + HttpOnly cookies + CSRF token and handle 401/403 centrally.
+  if (_nativeFetch) {
+    window.fetch = async function nexusAuthenticatedFetch(input, init = {}) {
+      const urlStr = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+      if (!isProtectedApiUrl(urlStr)) {
+        return _nativeFetch(input, init);
+      }
+
+      const method = ((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+      const headers = new Headers(init && init.headers ? init.headers : (input instanceof Request ? input.headers : undefined));
+
+      // Never allow frontend code to spoof role via untrusted header
+      headers.delete('x-user-role');
+      headers.delete('X-User-Role');
+
+      const token = getAccessToken();
+      if (token && !headers.has('Authorization')) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+
+      if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+        const csrfToken = getCookie('nexus_csrf_token');
+        if (csrfToken && !headers.has('X-CSRF-Token')) {
+          headers.set('X-CSRF-Token', csrfToken);
+        }
+      }
+
+      const mergedInit = {
+        ...init,
+        credentials: 'include',
+        headers
+      };
+
+      let response = await _nativeFetch(input, mergedInit);
+
+      // Handle 401 Unauthorized: attempt one silent refresh, then redirect to login
+      if (response.status === 401 && !isAuthEndpoint(urlStr)) {
+        const refreshed = await tryRefreshSession();
+        if (refreshed) {
+          const retryHeaders = new Headers(headers);
+          const newToken = getAccessToken();
+          if (newToken) retryHeaders.set('Authorization', `Bearer ${newToken}`);
+          const newCsrf = getCookie('nexus_csrf_token');
+          if (newCsrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+            retryHeaders.set('X-CSRF-Token', newCsrf);
+          }
+          response = await _nativeFetch(input, { ...mergedInit, headers: retryHeaders });
+        }
+        if (response.status === 401) {
+          redirectToLogin();
+        }
+      } else if (response.status === 403 && !isAuthEndpoint(urlStr)) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Access forbidden: you do not have permission for this action.', 'error');
+        }
+      }
+
+      return response;
+    };
+  }
 
   async function request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -21,7 +238,7 @@
       'Accept': 'application/json'
     };
 
-    const token = (typeof window !== 'undefined' && window.localStorage) ? (window.localStorage.getItem('nexus_token') || (window.sessionStorage && window.sessionStorage.getItem('nexus_token'))) : null;
+    const token = getAccessToken();
     if (token) {
       defaultHeaders['Authorization'] = `Bearer ${token}`;
     }
@@ -31,6 +248,7 @@
     }
 
     const config = {
+      credentials: 'include',
       ...options,
       headers: {
         ...defaultHeaders,
@@ -40,7 +258,7 @@
 
     try {
       const response = await fetch(url, config);
-      
+
       // Handle 204 No Content
       if (response.status === 204) {
         return null;
@@ -73,7 +291,7 @@
       return data;
     } catch (error) {
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        const friendlyMsg = `Cannot connect to FastAPI backend at ${API_BASE_URL}. Please ensure backend is running via: python -m uvicorn app.main:app --port 8000`;
+        const friendlyMsg = `Cannot connect to FastAPI backend at ${API_BASE_URL}. Please ensure the backend service is running.`;
         console.error(friendlyMsg, error);
         const err = new Error(friendlyMsg);
         err.status = 503;
@@ -86,322 +304,174 @@
     }
   }
 
-  function computePureSha256(ascii) {
-    function rightRotate(value, amount) {
-      return (value >>> amount) | (value << (32 - amount));
-    }
-    const mathPow = Math.pow;
-    const maxWord = mathPow(2, 32);
-    const lengthProperty = 'length';
-    let i, j;
-    let result = '';
-    const words = [];
-    const asciiBitLength = ascii[lengthProperty] * 8;
-    const hash = [
-      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-      0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
-    ];
-    const k = [
-      0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-      0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-      0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-      0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-      0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-      0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-      0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-      0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-    ];
-
-    let primeCounter = 0;
-    let candidate = 2;
-    while (primeCounter < 64) {
-      let isPrime = true;
-      for (let factor = 2; factor <= Math.sqrt(candidate); factor++) {
-        if (candidate % factor === 0) {
-          isPrime = false;
-          break;
-        }
-      }
-      if (isPrime) {
-        if (primeCounter < 8) {
-          hash[primeCounter] = (mathPow(candidate, 1/2) * maxWord) | 0;
-        }
-        k[primeCounter] = (mathPow(candidate, 1/3) * maxWord) | 0;
-        primeCounter++;
-      }
-      candidate++;
-    }
-
-    ascii += '\x80';
-    while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
-    for (i = 0; i < ascii[lengthProperty]; i++) {
-      j = ascii.charCodeAt(i);
-      if (j >> 8) return '';
-      words[i >> 2] |= j << ((3 - i) % 4) * 8;
-    }
-    words[words[lengthProperty]] = ((asciiBitLength / maxWord) | 0);
-    words[words[lengthProperty]] = (asciiBitLength);
-    for (j = 0; j < words[lengthProperty];) {
-      const w = words.slice(j, j += 16);
-      const oldHash = hash;
-      hash = hash.slice(0, 8);
-      for (i = 0; i < 64; i++) {
-        const w15 = w[i - 15], w2 = w[i - 2];
-        const a = hash[0], e = hash[4];
-        const temp1 = hash[7]
-          + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
-          + ((e & hash[5]) ^ ((~e) & hash[6]))
-          + k[i]
-          + (w[i] = (i < 16) ? w[i] : (
-              w[i - 16]
-              + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
-              + w[i - 7]
-              + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
-            ) | 0
-          );
-        const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
-          + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
-        hash = [(temp1 + temp2) | 0].concat(hash);
-        hash[4] = (hash[4] + temp1) | 0;
-      }
-      for (i = 0; i < 8; i++) {
-        hash[i] = (hash[i] + oldHash[i]) | 0;
-      }
-    }
-    for (i = 0; i < 8; i++) {
-      for (j = 3; j >= 0; j--) {
-        const b = (hash[i] >> (j * 8)) & 255;
-        result += ((b < 16) ? 0 : '') + b.toString(16);
-      }
-    }
-    return result;
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
-
-  async function sha256Hex(str) {
-    if (typeof crypto !== 'undefined' && crypto.subtle && crypto.subtle.digest) {
-      try {
-        const buffer = new TextEncoder().encode(str);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-      } catch (e) {
-        // Fall back to pure JS
-      }
-    }
-    return computePureSha256(str);
-  }
-
-  const FRONTEND_USERS_CONFIG = [
-    {
-      email: 'master@nexus.com',
-      aliases: ['master', 'master@nexus.com'],
-      pwdHash: 'e7bc2f973afb8dfaf00fadfb19596741108be08ab4a107c6a799c429b684c64a',
-      name: 'Master',
-      role: 'Master',
-      department: 'Executive Management',
-      phone: '+91 98765 43210',
-      location: 'Chennai, India'
-    },
-    {
-      email: 'admin@nexus.com',
-      aliases: ['admin', 'admin@nexus.com'],
-      pwdHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
-      name: 'Admin Manager',
-      role: 'Admin Manager',
-      department: 'Administration',
-      phone: '+91 98765 00001',
-      location: 'Chennai, India'
-    },
-    {
-      email: 'commercial@nexus.com',
-      aliases: ['commercial', 'commercial@nexus.com'],
-      pwdHash: '3488284c50e56274fc34504f6c6b8d336f79ccf32eb602b083df00f6757af40d',
-      name: 'Commercial Manager',
-      role: 'Commercial Manager',
-      department: 'Commercial Operations',
-      phone: '+91 98765 00002',
-      location: 'Chennai, India'
-    },
-    {
-      email: 'project@nexus.com',
-      aliases: ['project', 'project@nexus.com'],
-      pwdHash: '801572e25ac195aa08115b40a1bfc8a5dafb9992982676244eaac5ef87e932f8',
-      name: 'Project Manager',
-      role: 'Project Manager',
-      department: 'Project Management',
-      phone: '+91 98765 00003',
-      location: 'Chennai, India'
-    },
-    {
-      email: 'warehouse@nexus.com',
-      aliases: ['warehouse', 'warehouse@nexus.com'],
-      pwdHash: '0e842cbe0341154ee33e0ed3bc18282cd69e016a8d56fda05ec92e7ff20a0f31',
-      name: 'Warehouse Manager',
-      role: 'Warehouse Manager',
-      department: 'Warehouse Operations',
-      phone: '+91 98765 00004',
-      location: 'Chennai, India'
-    },
-    {
-      email: 'purchase@nexus.com',
-      aliases: ['purchase', 'purchase@nexus.com'],
-      pwdHash: '4747443f7b0863d63c33a567bd84ebc73495aed21f4d81db502b7a04cb5c1df8',
-      name: 'Purchase Manager',
-      role: 'Purchase Manager',
-      department: 'Purchase Operations',
-      phone: '+91 98765 00005',
-      location: 'Chennai, India'
-    },
-    {
-      email: 'account@nexus.com',
-      aliases: ['account', 'account@nexus.com'],
-      pwdHash: '9e6ffcced54981a34671f4f7f3632585461d610e38da76aa63296b3e37b4f0a7',
-      name: 'Accounts Manager',
-      role: 'Accounts Manager',
-      department: 'Finance & Accounts',
-      phone: '+91 98765 00006',
-      location: 'Chennai, India'
-    },
-    {
-      email: 'mis@nexus.com',
-      aliases: ['mis', 'mis@nexus.com'],
-      pwdHash: 'c2c92b10e40913ce064253a19ec504a40cdc25e40ca8a1757a8e10852ded10ec',
-      name: 'MIS',
-      role: 'MIS',
-      department: 'Management Information System',
-      phone: '+91 98765 00007',
-      location: 'Chennai, India'
-    }
-  ];
 
   const NexusApi = {
     baseUrl: API_BASE_URL,
+    healthUrl: HEALTH_URL,
+
+    health: {
+      /**
+       * Lightweight unauthenticated GET to /api/health (never sends credentials).
+       */
+      async check(timeoutMs = 8000) {
+        const fetchFn = _nativeFetch || window.fetch.bind(window);
+        const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        const timerId = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+        const startedAt = Date.now();
+
+        try {
+          const response = await fetchFn(HEALTH_URL, {
+            method: 'GET',
+            cache: 'no-store',
+            credentials: 'omit',
+            headers: { 'Accept': 'application/json' },
+            signal: controller ? controller.signal : undefined
+          });
+          if (timerId) clearTimeout(timerId);
+
+          if (response.status === 200) {
+            try {
+              const body = await response.json();
+              if (body && (body.status === 'ok' || body.status === 'healthy')) {
+                return { healthy: true, status: 200, networkError: false, aborted: false, elapsedMs: Date.now() - startedAt };
+              }
+            } catch (e) {
+              // Non-JSON 200 (e.g. HTML error page) is not a healthy API response
+            }
+          }
+          return { healthy: false, status: response.status, networkError: false, aborted: false, elapsedMs: Date.now() - startedAt };
+        } catch (err) {
+          if (timerId) clearTimeout(timerId);
+          const isAbort = Boolean(err && err.name === 'AbortError');
+          return { healthy: false, status: 0, networkError: !isAbort, aborted: isAbort, elapsedMs: Date.now() - startedAt };
+        }
+      },
+
+      /**
+       * Wake up sleeping Render backend by polling /api/health every 2.5s up to 120s.
+       * Single-flight guarded so duplicate calls never spawn parallel polling loops.
+       */
+      async waitUntilReady(options = {}) {
+        if (_wakeUpPromise) {
+          return _wakeUpPromise;
+        }
+
+        const pollIntervalMs = Number(options.pollIntervalMs) || 2500;
+        const maxWaitMs = Number(options.maxWaitMs) || 120000;
+        const perRequestTimeoutMs = Number(options.perRequestTimeoutMs) || 10000;
+        const onAttempt = typeof options.onAttempt === 'function' ? options.onAttempt : null;
+
+        _wakeUpPromise = (async () => {
+          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            const err = new Error('Unable to connect to the server. Please check your connection and try again.');
+            err.code = 'BACKEND_UNAVAILABLE';
+            throw err;
+          }
+
+          const deadline = Date.now() + maxWaitMs;
+          let attempts = 0;
+          let consecutiveFastNetworkErrors = 0;
+
+          while (Date.now() < deadline) {
+            attempts += 1;
+            if (onAttempt) onAttempt(attempts);
+
+            const remainingMs = Math.max(1000, deadline - Date.now());
+            const result = await NexusApi.health.check(Math.min(perRequestTimeoutMs, remainingMs));
+
+            if (result.healthy) {
+              return { healthy: true, attempts };
+            }
+
+            if (result.networkError) {
+              if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+                const err = new Error('Unable to connect to the server. Please check your connection and try again.');
+                err.code = 'BACKEND_UNAVAILABLE';
+                throw err;
+              }
+              if (result.elapsedMs < 1500) {
+                consecutiveFastNetworkErrors += 1;
+              } else {
+                consecutiveFastNetworkErrors = 0;
+              }
+              if (consecutiveFastNetworkErrors >= 3) {
+                const err = new Error('Unable to connect to the server. Please check your connection and try again.');
+                err.code = 'BACKEND_UNAVAILABLE';
+                throw err;
+              }
+            } else {
+              consecutiveFastNetworkErrors = 0;
+            }
+
+            const timeLeft = deadline - Date.now();
+            if (timeLeft <= 0) {
+              break;
+            }
+            await sleep(Math.min(pollIntervalMs, timeLeft));
+          }
+
+          const timeoutErr = new Error('Server is taking longer than expected to start. Please try again.');
+          timeoutErr.code = 'WAKEUP_TIMEOUT';
+          throw timeoutErr;
+        })();
+
+        try {
+          return await _wakeUpPromise;
+        } finally {
+          _wakeUpPromise = null;
+        }
+      }
+    },
 
     auth: {
       async login(email, password) {
         const normalized = (email || '').trim().toLowerCase();
-
-        // Frontend-only authentication for MIS credential as requested
-        if (normalized === 'mis@nexus.com' || normalized === 'mis') {
-          const user = FRONTEND_USERS_CONFIG.find(u => 
-            u.email.toLowerCase() === normalized || 
-            (u.aliases && u.aliases.includes(normalized))
-          );
-          const inputHash = await sha256Hex(password);
-          if (!user || user.pwdHash !== inputHash) {
-            const err = new Error('Invalid email or password');
-            err.status = 401;
-            err.detail = 'Invalid email or password';
-            throw err;
-          }
-          const profile = {
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            department: user.department,
-            phone: user.phone,
-            location: user.location,
-            token: 'offline_token_' + Date.now()
-          };
-          sessionStorage.setItem('nexus_user', JSON.stringify(profile));
-          sessionStorage.setItem('nexus_role', profile.role);
-          sessionStorage.setItem('nexus_token', profile.token);
-          localStorage.setItem('nexus_user', JSON.stringify(profile));
-          localStorage.setItem('nexus_role', profile.role);
-          localStorage.setItem('nexus_token', profile.token);
-          return { success: true, user: profile };
-        }
-
-        // 1. Attempt backend API authentication first
-        try {
-          const apiRes = await request('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email: normalized, password })
-          });
-          if (apiRes && apiRes.success && apiRes.user) {
-            const feUser = FRONTEND_USERS_CONFIG.find(u => 
-              u.email.toLowerCase() === normalized || 
-              (u.aliases && u.aliases.includes(normalized))
-            );
-            const effectiveRole = feUser ? feUser.role : (apiRes.user.role === 'Admin' ? 'Master' : apiRes.user.role);
-            const effectiveName = feUser ? feUser.name : (apiRes.user.role === 'Admin' ? 'Master' : apiRes.user.name);
-            const profile = {
-              id: apiRes.user.id,
-              email: apiRes.user.email,
-              name: effectiveName,
-              role: effectiveRole,
-              token: apiRes.user.token,
-              permissions: apiRes.user.permissions || [],
-              department: effectiveRole === 'Admin Manager' ? 'Administration' : (effectiveRole === 'Project Manager' ? 'Project Management' : (effectiveRole === 'Commercial Manager' ? 'Commercial Operations' : (effectiveRole === 'Warehouse Manager' ? 'Warehouse Operations' : (effectiveRole === 'Purchase Manager' ? 'Purchase Operations' : (effectiveRole === 'Accounts Manager' ? 'Finance & Accounts' : 'Executive Management'))))),
-              phone: effectiveRole === 'Admin Manager' ? '+91 98765 00001' : (effectiveRole === 'Project Manager' ? '+91 98765 00003' : (effectiveRole === 'Commercial Manager' ? '+91 98765 00002' : (effectiveRole === 'Warehouse Manager' ? '+91 98765 00004' : (effectiveRole === 'Purchase Manager' ? '+91 98765 00005' : (effectiveRole === 'Accounts Manager' ? '+91 98765 00006' : '+91 98765 43210'))))),
-              location: 'Chennai, India'
-            };
-            sessionStorage.setItem('nexus_user', JSON.stringify(profile));
-            sessionStorage.setItem('nexus_role', profile.role);
-            sessionStorage.setItem('nexus_token', profile.token);
-            localStorage.setItem('nexus_user', JSON.stringify(profile));
-            localStorage.setItem('nexus_role', profile.role);
-            localStorage.setItem('nexus_token', profile.token);
-            return { success: true, user: profile };
-          }
-        } catch (apiErr) {
-          // If backend returned 401 Unauthorized, check if email is in FRONTEND_USERS_CONFIG before rejecting
-          const isFrontendUser = FRONTEND_USERS_CONFIG.some(u => 
-            u.email.toLowerCase() === normalized || 
-            (u.aliases && u.aliases.includes(normalized))
-          );
-          if (!isFrontendUser && apiErr && (apiErr.status === 401 || apiErr.statusCode === 401)) {
-            const err = new Error('Invalid email or password');
-            err.status = 401;
-            err.detail = 'Invalid email or password';
-            throw err;
-          }
-        }
-
-        // 2. Offline fallback (uses secure hash comparison, no passwords in source)
-        const user = FRONTEND_USERS_CONFIG.find(u => 
-          u.email.toLowerCase() === normalized || 
-          (u.aliases && u.aliases.includes(normalized))
-        );
-        const inputHash = await sha256Hex(password);
-        if (!user || user.pwdHash !== inputHash) {
+        const apiRes = await request('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: normalized, password })
+        });
+        if (!apiRes || !apiRes.success || !apiRes.user) {
           const err = new Error('Invalid email or password');
           err.status = 401;
           err.detail = 'Invalid email or password';
           throw err;
         }
-        const profile = {
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          department: user.department,
-          phone: user.phone,
-          location: user.location,
-          token: 'offline_token_' + Date.now()
-        };
-        sessionStorage.setItem('nexus_user', JSON.stringify(profile));
-        sessionStorage.setItem('nexus_role', profile.role);
-        sessionStorage.setItem('nexus_token', profile.token);
-        localStorage.setItem('nexus_user', JSON.stringify(profile));
-        localStorage.setItem('nexus_role', profile.role);
-        localStorage.setItem('nexus_token', profile.token);
-        return { success: true, user: profile };
+        setSessionState(apiRes.user);
+        return { success: true, user: apiRes.user };
+      },
+
+      async refresh() {
+        const ok = await tryRefreshSession();
+        return ok ? this.getStoredUser() : null;
       },
 
       async me() {
-        return this.getStoredUser();
+        try {
+          const user = await request('/auth/me', { method: 'GET' });
+          if (user) {
+            setSessionState(user);
+            return user;
+          }
+          return null;
+        } catch (err) {
+          if (err && (err.status === 401 || err.statusCode === 401)) {
+            clearSessionState();
+          }
+          return null;
+        }
       },
 
       getStoredUser() {
         try {
-          const raw = sessionStorage.getItem('nexus_user') || localStorage.getItem('nexus_user');
+          const raw = window.sessionStorage ? window.sessionStorage.getItem('nexus_user') : null;
           if (!raw) return null;
           if (raw.startsWith('{')) {
-            const parsed = JSON.parse(raw);
-            if (parsed && parsed.role === 'Admin') parsed.role = 'Master';
-            return parsed;
+            return JSON.parse(raw);
           }
-          const role = sessionStorage.getItem('nexus_role') || localStorage.getItem('nexus_role') || 'Master';
-          return { email: raw, role: role === 'Admin' ? 'Master' : role, name: raw };
+          return null;
         } catch (e) {
           return null;
         }
@@ -409,19 +479,37 @@
 
       getUserRole() {
         const user = this.getStoredUser();
-        if (user && user.role) return user.role === 'Admin' ? 'Master' : user.role;
-        const role = sessionStorage.getItem('nexus_role') || localStorage.getItem('nexus_role');
-        if (role) return role === 'Admin' ? 'Master' : role;
-        return 'Master';
+        if (user && user.role) return user.role;
+        try {
+          const role = window.sessionStorage ? window.sessionStorage.getItem('nexus_role') : null;
+          if (role) return role;
+        } catch (e) {}
+        return null;
       },
 
-      logout() {
-        sessionStorage.removeItem('nexus_user');
-        sessionStorage.removeItem('nexus_role');
-        sessionStorage.removeItem('nexus_token');
-        localStorage.removeItem('nexus_user');
-        localStorage.removeItem('nexus_role');
-        localStorage.removeItem('nexus_token');
+      getPermissions() {
+        const user = this.getStoredUser();
+        return (user && Array.isArray(user.permissions)) ? user.permissions : [];
+      },
+
+      hasPermission(permissionCode) {
+        const user = this.getStoredUser();
+        if (!user) return false;
+        if (user.is_super_admin || user.role === 'Master') return true;
+        return Array.isArray(user.permissions) && user.permissions.includes(permissionCode);
+      },
+
+      isAuthenticated() {
+        return Boolean(getAccessToken() || this.getStoredUser());
+      },
+
+      async logout() {
+        try {
+          await request('/auth/logout', { method: 'POST' });
+        } catch (e) {
+          // Proceed with local cleanup even if token was already expired
+        }
+        clearSessionState();
         window.location.href = 'index.html';
       }
     },

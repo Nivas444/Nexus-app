@@ -209,6 +209,26 @@
     </div>
   </div>
 
+  <!-- MODAL 3: Secure Server Wake-Up & Authentication Loading Overlay -->
+  <div class="login-loading-overlay" id="loginLoadingOverlay" role="dialog" aria-modal="true" aria-labelledby="loginLoadingTitle" aria-describedby="loginLoadingSubtitle" aria-busy="true" hidden>
+    <div class="login-loading-card" role="status" aria-live="polite">
+      <div class="login-spinner-wrap" id="loginSpinnerWrap">
+        <div class="login-spinner" aria-hidden="true"></div>
+      </div>
+      <div class="login-error-icon-wrap" id="loginErrorIconWrap" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+      </div>
+      <h2 class="login-loading-title" id="loginLoadingTitle">Waking up secure server...</h2>
+      <p class="login-loading-subtitle" id="loginLoadingSubtitle">Please wait while we establish a secure connection.</p>
+      <div class="login-loading-actions" id="loginLoadingActions" hidden>
+        <button type="button" class="btn-loader-retry" id="btnLoginRetry">Retry</button>
+        <button type="button" class="btn-loader-cancel" id="btnLoginLoaderClose">Back to Login</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/js/api.js"></script>
   <script src="assets/js/app.js"></script>
 </body>

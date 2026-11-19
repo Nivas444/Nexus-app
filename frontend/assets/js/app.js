@@ -240,78 +240,191 @@ function initModals() {
   }
 }
 
+let isLoginInProgress = false;
+
+function getLoginLoaderElements() {
+  return {
+    overlay: document.getElementById('loginLoadingOverlay'),
+    spinnerWrap: document.getElementById('loginSpinnerWrap'),
+    errorIconWrap: document.getElementById('loginErrorIconWrap'),
+    title: document.getElementById('loginLoadingTitle'),
+    subtitle: document.getElementById('loginLoadingSubtitle'),
+    actions: document.getElementById('loginLoadingActions'),
+    btnRetry: document.getElementById('btnLoginRetry'),
+    btnClose: document.getElementById('btnLoginLoaderClose')
+  };
+}
+
+function showLoginLoader(titleText, subtitleText) {
+  const el = getLoginLoaderElements();
+  if (!el.overlay) return;
+  if (el.spinnerWrap) el.spinnerWrap.hidden = false;
+  if (el.errorIconWrap) el.errorIconWrap.hidden = true;
+  if (el.actions) el.actions.hidden = true;
+  if (el.title) el.title.textContent = titleText;
+  if (el.subtitle) el.subtitle.textContent = subtitleText;
+  el.overlay.setAttribute('aria-busy', 'true');
+  el.overlay.hidden = false;
+  requestAnimationFrame(() => el.overlay.classList.add('active'));
+}
+
+function showLoginLoaderError(titleText, subtitleText) {
+  const el = getLoginLoaderElements();
+  if (!el.overlay) return;
+  if (el.spinnerWrap) el.spinnerWrap.hidden = true;
+  if (el.errorIconWrap) el.errorIconWrap.hidden = false;
+  if (el.actions) el.actions.hidden = false;
+  if (el.title) el.title.textContent = titleText;
+  if (el.subtitle) el.subtitle.textContent = subtitleText;
+  el.overlay.setAttribute('aria-busy', 'false');
+  el.overlay.hidden = false;
+  requestAnimationFrame(() => el.overlay.classList.add('active'));
+}
+
+function hideLoginLoader() {
+  const el = getLoginLoaderElements();
+  if (!el.overlay) return;
+  el.overlay.classList.remove('active');
+  el.overlay.setAttribute('aria-busy', 'false');
+  el.overlay.hidden = true;
+}
+
 function initFormSubmission() {
   const loginForm = document.getElementById('loginForm');
   const usernameInput = document.getElementById('usernameInput');
   const passwordInput = document.getElementById('passwordInput');
   const btnSubmit = document.getElementById('btnLoginSubmit');
+  const loaderEl = getLoginLoaderElements();
+
+  function setFormDisabled(disabled) {
+    if (btnSubmit) {
+      btnSubmit.disabled = disabled;
+      btnSubmit.style.opacity = disabled ? '0.7' : '1';
+      btnSubmit.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    }
+    if (usernameInput) usernameInput.disabled = disabled;
+    if (passwordInput) passwordInput.disabled = disabled;
+  }
+
+  async function executeLoginFlow() {
+    if (isLoginInProgress) return;
+
+    const username = usernameInput ? usernameInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
+
+    if (!username) {
+      showToast('Please enter your username or email', 'warning');
+      if (usernameInput) usernameInput.focus();
+      return;
+    }
+
+    if (!password) {
+      showToast('Please enter your password', 'warning');
+      if (passwordInput) passwordInput.focus();
+      return;
+    }
+
+    isLoginInProgress = true;
+    setFormDisabled(true);
+
+    try {
+      if (typeof NexusApi === 'undefined' || !NexusApi.auth || !NexusApi.auth.login) {
+        throw new Error('Authentication service unavailable');
+      }
+
+      // Step 1: Wake up Render backend via lightweight unauthenticated /api/health
+      showLoginLoader(
+        'Waking up secure server...',
+        'Please wait while we establish a secure connection.'
+      );
+
+      if (NexusApi.health && typeof NexusApi.health.waitUntilReady === 'function') {
+        await NexusApi.health.waitUntilReady({
+          pollIntervalMs: 2500,
+          maxWaitMs: 120000
+        });
+      }
+
+      // Step 2: Backend is healthy -> submit credentials to /api/v1/auth/login
+      showLoginLoader(
+        'Authenticating...',
+        'Verifying your credentials.'
+      );
+
+      const authResult = await NexusApi.auth.login(username, password);
+      const userProfile = authResult.user;
+
+      hideLoginLoader();
+      showToast(`Welcome ${userProfile.name}! Logging in as ${userProfile.role}...`, 'success');
+
+      setTimeout(() => {
+        if (userProfile.role === 'Project Manager') {
+          window.location.href = 'home.html?module=worklist&view=new_project';
+        } else if (userProfile.role === 'Commercial Manager') {
+          window.location.href = 'home.html?module=worklist&view=new_project';
+        } else if (userProfile.role === 'Warehouse Manager') {
+          window.location.href = 'home.html?module=worklist&view=pr';
+        } else if (userProfile.role === 'Purchase Manager') {
+          window.location.href = 'home.html?module=worklist&view=pr';
+        } else if (userProfile.role === 'Admin Manager') {
+          window.location.href = 'home.html?module=worklist&view=attendance';
+        } else if (userProfile.role === 'Accounts Manager') {
+          window.location.href = 'home.html?module=worklist&view=payment';
+        } else if (userProfile.role === 'MIS' || userProfile.role === 'MIS Manager') {
+          window.location.href = 'home.html?module=worklist&view=ptw';
+        } else {
+          window.location.href = 'home.html?module=worklist&view=payment';
+        }
+      }, 450);
+
+    } catch (err) {
+      isLoginInProgress = false;
+      setFormDisabled(false);
+
+      if (err && err.code === 'WAKEUP_TIMEOUT') {
+        showLoginLoaderError(
+          'Server Startup Delayed',
+          'Server is taking longer than expected to start. Please try again.'
+        );
+        return;
+      }
+
+      if (err && (err.code === 'BACKEND_UNAVAILABLE' || err.status === 503 || err.statusCode === 503)) {
+        showLoginLoaderError(
+          'Connection Unavailable',
+          'Unable to connect to the server. Please check your connection and try again.'
+        );
+        return;
+      }
+
+      // Preserve existing authentication error messages (invalid credentials, lockout, etc.)
+      hideLoginLoader();
+      showToast((err && err.message) || 'Invalid email or password', 'error');
+      if (passwordInput) {
+        passwordInput.value = '';
+        passwordInput.focus();
+      }
+    }
+  }
+
+  if (loaderEl.btnRetry) {
+    loaderEl.btnRetry.addEventListener('click', () => {
+      executeLoginFlow();
+    });
+  }
+
+  if (loaderEl.btnClose) {
+    loaderEl.btnClose.addEventListener('click', () => {
+      hideLoginLoader();
+      isLoginInProgress = false;
+      setFormDisabled(false);
+    });
+  }
 
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const username = usernameInput ? usernameInput.value.trim() : '';
-      const password = passwordInput ? passwordInput.value : '';
-
-      if (!username) {
-        showToast('Please enter your username or email', 'warning');
-        if (usernameInput) usernameInput.focus();
-        return;
-      }
-
-      if (!password) {
-        showToast('Please enter your password', 'warning');
-        if (passwordInput) passwordInput.focus();
-        return;
-      }
-
-      if (btnSubmit) {
-        btnSubmit.disabled = true;
-        btnSubmit.style.opacity = '0.7';
-      }
-
-      try {
-        let authResult = null;
-        if (typeof NexusApi !== 'undefined' && NexusApi.auth && NexusApi.auth.login) {
-          authResult = await NexusApi.auth.login(username, password);
-        } else {
-          throw new Error('Authentication service unavailable');
-        }
-
-        const userProfile = authResult.user;
-        showToast(`Welcome ${userProfile.name}! Logging in as ${userProfile.role}...`, 'success');
-
-        setTimeout(() => {
-          if (userProfile.role === 'Project Manager') {
-            window.location.href = 'home.html?module=worklist&view=new_project';
-          } else if (userProfile.role === 'Commercial Manager') {
-            window.location.href = 'home.html?module=worklist&view=new_project';
-          } else if (userProfile.role === 'Warehouse Manager') {
-            window.location.href = 'home.html?module=worklist&view=pr';
-          } else if (userProfile.role === 'Purchase Manager') {
-            window.location.href = 'home.html?module=worklist&view=pr';
-          } else if (userProfile.role === 'Admin Manager') {
-            window.location.href = 'home.html?module=worklist&view=attendance';
-          } else if (userProfile.role === 'Accounts Manager') {
-            window.location.href = 'home.html?module=worklist&view=payment';
-          } else if (userProfile.role === 'MIS' || userProfile.role === 'MIS Manager') {
-            window.location.href = 'home.html?module=worklist&view=ptw';
-          } else {
-            window.location.href = 'home.html?module=worklist&view=payment';
-          }
-        }, 700);
-
-      } catch (err) {
-        showToast(err.message || 'Invalid email or password', 'error');
-        if (passwordInput) {
-          passwordInput.value = '';
-          passwordInput.focus();
-        }
-        if (btnSubmit) {
-          btnSubmit.disabled = false;
-          btnSubmit.style.opacity = '1';
-        }
-      }
+      await executeLoginFlow();
     });
   }
 }

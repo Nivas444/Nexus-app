@@ -86,7 +86,9 @@ var isVendorFormEditing = window.isVendorFormEditing || false;
 var isVendorBankEditing = window.isVendorBankEditing || false;
 var loadMasterVendorsFromApi = window.loadMasterVendorsFromApi;
 var loadVendorPricingFromApi = window.loadVendorPricingFromApi;
-var getEffectiveVendorContext = window.getEffectiveVendorContext;
+var getEffectiveVendorContext = window.getEffectiveVendorContext || function() {
+  return { contacts: [], supplyScope: [], serviceProjectScope: [], serviceTransportScope: [], serviceOthersScope: [], bank: {} };
+};
 var loadVendorBankDataToForm = window.loadVendorBankDataToForm;
 var saveVendorBankDataFromForm = window.saveVendorBankDataFromForm;
 
@@ -11565,10 +11567,10 @@ function parseUrlAndApplyState() {
       const warehouseViews = ['pr', 'grn', 'min', 'min_detail', 'mrn', 'mrn_detail', 'mtn', 'stn', 'srn', 'payment', 'supply'];
       currentWorklistView = warehouseViews.includes(viewParam) ? viewParam : 'pr';
       if (viewParam === 'min_detail') {
-        const siteParam = urlParams.get('site_id');
+        const siteParam = params.get('site_id');
         if (siteParam) activeWmMinRowId = siteParam;
       } else if (viewParam === 'mrn_detail') {
-        const siteParam = urlParams.get('site_id');
+        const siteParam = params.get('site_id');
         if (siteParam) activeWmMrnRowId = siteParam;
       }
     } else if (role === 'Purchase Manager') {
@@ -11632,6 +11634,122 @@ function parseUrlAndApplyState() {
   }
 }
 
+window.loadCurrentViewDataFromApi = async function(forceRefresh = false) {
+  if (forceRefresh && typeof NexusApi !== 'undefined' && typeof NexusApi.clearCache === 'function') {
+    NexusApi.clearCache();
+  }
+  const activeRole = getAuthenticatedUserRole();
+  const tasks = [];
+
+  if (typeof window.NexusModuleLoader !== 'undefined' && !window.NexusModuleLoader.isModuleLoaded(currentModule)) {
+    try {
+      await window.NexusModuleLoader.loadModule(currentModule);
+    } catch (e) {
+      console.error('Failed to lazy-load module on refresh:', currentModule, e);
+    }
+  }
+
+  if (currentModule === 'accounts') {
+    if (typeof window.loadAccountsModuleViewFromApi === 'function') {
+      const viewKey = currentAccountsView === 'main' ? (currentAccountsSubpage || 'sales') : currentAccountsView;
+      tasks.push(window.loadAccountsModuleViewFromApi(viewKey, true));
+    }
+  } else if (currentModule === 'worklist') {
+    if (activeRole === 'Accounts Manager') {
+      if (currentWorklistView === 'payment' && typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
+        tasks.push(window.loadAccountsManagerPaymentsFromApi(true));
+      } else if (currentWorklistView === 'receivable' && typeof window.loadAccountsManagerReceivableFromApi === 'function') {
+        tasks.push(window.loadAccountsManagerReceivableFromApi(true));
+      } else if (currentWorklistView === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
+        tasks.push(window.loadAccountsManagerBankFromApi(true));
+      } else if (currentWorklistView === 'tds' && typeof window.loadAccountsManagerTdsFromApi === 'function') {
+        tasks.push(window.loadAccountsManagerTdsFromApi(true));
+      } else if (currentWorklistView === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
+        tasks.push(window.loadAccountsManagerGstr1FromApi(true));
+      } else if (currentWorklistView === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
+        tasks.push(window.loadAccountsManagerGstr2bFromApi(true));
+      } else if (currentWorklistView === 'gstr_3b' && typeof window.loadAccountsManagerGstr3bFromApi === 'function') {
+        tasks.push(window.loadAccountsManagerGstr3bFromApi(true));
+      }
+    } else if (['Commercial Manager', 'Project Manager'].includes(activeRole)) {
+      if (currentWorklistView === 'jms_detail' && typeof loadJmsDetailFromApi === 'function' && window.selectedJmsPoNo) {
+        tasks.push(loadJmsDetailFromApi(window.selectedJmsPoNo, window.selectedJmsSiteId));
+      } else if (currentWorklistView === 'po_amend_detail' && typeof loadPoAmendDetailFromApi === 'function' && window.selectedPoAmendPoNo) {
+        tasks.push(loadPoAmendDetailFromApi(window.selectedPoAmendPoNo, window.selectedPoAmendSiteId));
+      } else if (currentWorklistView === 'wcc_detail' && typeof loadWccDetailFromApi === 'function' && window.selectedWccPoNo) {
+        tasks.push(loadWccDetailFromApi(window.selectedWccPoNo, window.selectedWccSiteId));
+      } else if (currentWorklistView === 'materials' && typeof window.loadPmWorklistMaterialsFromApi === 'function') {
+        tasks.push(window.loadPmWorklistMaterialsFromApi(true));
+      } else if (currentWorklistView === 'stn' && typeof loadWorklistStnFromApi === 'function') {
+        tasks.push(loadWorklistStnFromApi());
+      } else if (currentWorklistView === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
+        tasks.push(loadWorklistSrnFromApi());
+      } else if (typeof loadCommercialProjectsFromApi === 'function') {
+        tasks.push(loadCommercialProjectsFromApi());
+      }
+    } else if (activeRole === 'Warehouse Manager') {
+      if ((currentWorklistView === 'min' || currentWorklistView === 'min_detail') && typeof window.loadInventoryStockFromApi === 'function') {
+        window._inventoryStockLoaded = false;
+        tasks.push(window.loadInventoryStockFromApi());
+      } else if ((currentWorklistView === 'mrn' || currentWorklistView === 'mrn_detail') && typeof window.loadMrnMaterialsFromApi === 'function') {
+        window._mrnMaterialsLoaded = false;
+        tasks.push(window.loadMrnMaterialsFromApi());
+      } else if (currentWorklistView === 'stn' && typeof window.loadWmStnFromApi === 'function') {
+        window._wmStnLoadedFromApi = false;
+        tasks.push(window.loadWmStnFromApi());
+      } else if (currentWorklistView === 'srn' && typeof window.loadWmSrnFromApi === 'function') {
+        window._wmSrnLoadedFromApi = false;
+        tasks.push(window.loadWmSrnFromApi());
+      }
+    } else if (['Master', 'Purchase Manager'].includes(activeRole)) {
+      if (typeof window.loadMasterPaymentDataFromApi === 'function') {
+        tasks.push(window.loadMasterPaymentDataFromApi(currentWorklistView === 'payment'));
+      }
+    }
+  } else if (currentModule === 'master') {
+    if (currentMasterView === 'hr_policies') {
+      if (typeof loadCompanyHrDataset === 'function') loadCompanyHrDataset();
+    } else if (currentMasterSubpage === 'employee' && typeof loadMasterEmployeesFromApi === 'function') {
+      tasks.push(loadMasterEmployeesFromApi());
+    } else if (currentMasterSubpage === 'customer' && typeof loadMasterCustomersFromApi === 'function') {
+      tasks.push(loadMasterCustomersFromApi());
+    } else if (currentMasterSubpage === 'vendor' && typeof loadMasterVendorsFromApi === 'function') {
+      tasks.push(loadMasterVendorsFromApi());
+    } else if (currentMasterSubpage === 'products' && typeof loadMasterProductsFromApi === 'function') {
+      tasks.push(loadMasterProductsFromApi());
+    } else if (currentMasterSubpage === 'expenses' && typeof loadMasterExpensesFromApi === 'function') {
+      tasks.push(loadMasterExpensesFromApi());
+    }
+  } else if (currentModule === 'indus_towers') {
+    if (typeof loadIndusDataset === 'function') {
+      loadIndusDataset();
+    }
+  } else if (currentModule === 'projects') {
+    if (currentProjectsView === 'project_material' && typeof window.loadProjectMaterialsFromApi === 'function') {
+      tasks.push(window.loadProjectMaterialsFromApi());
+    } else if (currentProjectsView === 'project_infra' && typeof window.loadProjectInfraFromApi === 'function') {
+      window._projectInfraLoaded = false;
+      tasks.push(window.loadProjectInfraFromApi());
+    } else if (currentProjectsView === 'project_dpr' && typeof window.loadProjectDprDataFromApi === 'function') {
+      tasks.push(window.loadProjectDprDataFromApi());
+    } else if (typeof loadCommercialProjectsFromApi === 'function' && ['Commercial Manager', 'Project Manager', 'Master'].includes(activeRole)) {
+      tasks.push(loadCommercialProjectsFromApi());
+    }
+  } else if (currentModule === 'inventory') {
+    if (typeof window.loadInventoryStockFromApi === 'function') {
+      window._inventoryStockLoaded = false;
+      tasks.push(window.loadInventoryStockFromApi());
+    }
+  }
+
+  if (tasks.length > 0) {
+    await Promise.allSettled(tasks);
+  }
+  if (typeof renderApp === 'function') {
+    renderApp();
+  }
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
   const bootStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
   const hasCachedSession = Boolean(sessionStorage.getItem('nexus_user') && sessionStorage.getItem('nexus_token'));
@@ -11658,7 +11776,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyRoleBasedNavigation();
   initNavEventListeners();
   initExcelFilterSystem();
-  initSideFormEvents();
+  try {
+    initSideFormEvents();
+  } catch (err) {
+    console.error('initSideFormEvents error:', err);
+  }
   renderApp();
 
   if (window.NexusPerf && typeof window.NexusPerf.mark === 'function') {
@@ -11680,41 +11802,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
   }
 
-  if (currentModule === 'accounts' && typeof window.loadAccountsModuleViewFromApi === 'function') {
-    const viewKey = currentAccountsView === 'main' ? 'sales' : currentAccountsView;
-    startupTasks.push(window.loadAccountsModuleViewFromApi(viewKey, true));
-  } else if (activeRole === 'Accounts Manager') {
-    if (currentWorklistView === 'payment' && typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
-      startupTasks.push(window.loadAccountsManagerPaymentsFromApi(true));
-    } else if (currentWorklistView === 'receivable' && typeof window.loadAccountsManagerReceivableFromApi === 'function') {
-      startupTasks.push(window.loadAccountsManagerReceivableFromApi(true));
-    } else if (currentWorklistView === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
-      startupTasks.push(window.loadAccountsManagerBankFromApi(true));
-    } else if (currentWorklistView === 'tds' && typeof window.loadAccountsManagerTdsFromApi === 'function') {
-      startupTasks.push(window.loadAccountsManagerTdsFromApi(true));
-    } else if (currentWorklistView === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
-      startupTasks.push(window.loadAccountsManagerGstr1FromApi(true));
-    } else if (currentWorklistView === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
-      startupTasks.push(window.loadAccountsManagerGstr2bFromApi(true));
-    } else if (currentWorklistView === 'gstr_3b' && typeof window.loadAccountsManagerGstr3bFromApi === 'function') {
-      startupTasks.push(window.loadAccountsManagerGstr3bFromApi(true));
-    }
-  } else {
-    if (typeof loadCommercialProjectsFromApi === 'function' && ['Commercial Manager', 'Project Manager'].includes(activeRole)) {
-      startupTasks.push(loadCommercialProjectsFromApi());
-    } else if (typeof loadCommercialProjectsFromApi === 'function' && activeRole === 'Master' && currentModule === 'projects') {
-      startupTasks.push(loadCommercialProjectsFromApi());
-    }
-    if (typeof window.loadMasterPaymentDataFromApi === 'function' && ['Master', 'Purchase Manager'].includes(activeRole)) {
-      startupTasks.push(window.loadMasterPaymentDataFromApi(currentModule === 'worklist' && currentWorklistView === 'payment'));
-    }
-  }
-
-  if (currentProjectsView === 'project_material' && typeof window.loadProjectMaterialsFromApi === 'function') {
-    startupTasks.push(window.loadProjectMaterialsFromApi());
-  }
-  if (currentWorklistView === 'srn' && typeof loadWorklistSrnFromApi === 'function') {
-    startupTasks.push(loadWorklistSrnFromApi());
+  if (typeof window.loadCurrentViewDataFromApi === 'function') {
+    startupTasks.push(window.loadCurrentViewDataFromApi(false));
   }
 
   if (startupTasks.length > 0) {
@@ -11729,6 +11818,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.addEventListener('popstate', () => {
   parseUrlAndApplyState();
   renderApp();
+  if (typeof window.loadCurrentViewDataFromApi === 'function') {
+    window.loadCurrentViewDataFromApi(false);
+  }
 });
 
 // ==========================================================================
@@ -24088,6 +24180,8 @@ window.loadAccountsModuleViewFromApi = async function(viewKey, shouldRender = tr
 
     if (shouldRender && currentModule === 'accounts') {
       loadAccountsDataset();
+      if (typeof renderAccountsToolbar === 'function') renderAccountsToolbar();
+      if (typeof renderAccountsFooter === 'function') renderAccountsFooter();
       if (typeof applyFiltersAndRender === 'function') {
         applyFiltersAndRender();
       }
@@ -35148,57 +35242,22 @@ window.exportAccTdsCsv = () => exportAccountsCsv('tds');
 window.exportAccGstr1Csv = () => exportAccountsCsv('gstr_1');
 window.exportAccGstr2bCsv = () => exportAccountsCsv('gstr_2b');
 
-window.handlePageRefresh = function() {
+window.handlePageRefresh = async function() {
   activeColumnFilters = {};
   if (typeof NexusApi !== 'undefined' && typeof NexusApi.clearCache === 'function') {
     NexusApi.clearCache();
   }
-  const activeRole = getAuthenticatedUserRole();
   if (currentProjectsView === 'project_material' && typeof window.refreshProjectMaterials === 'function') {
     window.refreshProjectMaterials();
     return;
   }
-  if (currentModule === 'worklist' && activeRole === 'Accounts Manager') {
-    if (currentWorklistView === 'payment' && typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
-      window.loadAccountsManagerPaymentsFromApi(true);
-      showToast('Payment data refreshed.');
-      return;
-    }
-    if (currentWorklistView === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
-      window.loadAccountsManagerBankFromApi(true);
-      showToast('Bank data refreshed.');
-      return;
-    }
-    if (currentWorklistView === 'receivable' && typeof window.loadAccountsManagerReceivableFromApi === 'function') {
-      window.loadAccountsManagerReceivableFromApi(true);
-      showToast('Receivable data refreshed.');
-      return;
-    }
-    if (currentWorklistView === 'tds' && typeof window.loadAccountsManagerTdsFromApi === 'function') {
-      window.loadAccountsManagerTdsFromApi(true);
-      showToast('TDS data refreshed.');
-      return;
-    }
-    if (currentWorklistView === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
-      window.loadAccountsManagerGstr1FromApi(true);
-      showToast('GSTR 1 refreshed.');
-      return;
-    }
-    if (currentWorklistView === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
-      window.loadAccountsManagerGstr2bFromApi(true);
-      showToast('GSTR 2B refreshed.');
-      return;
-    }
-    if (currentWorklistView === 'gstr_3b' && typeof window.loadAccountsManagerGstr3bFromApi === 'function') {
-      window.loadAccountsManagerGstr3bFromApi(true);
-      showToast('GSTR 3B refreshed.');
-      return;
-    }
+  if (typeof window.loadCurrentViewDataFromApi === 'function') {
+    await window.loadCurrentViewDataFromApi(true);
+    showToast('Page data refreshed.');
+    return;
   }
-  showToast('Refreshing page data...');
-  setTimeout(() => {
-    window.location.reload();
-  }, 250);
+  renderApp();
+  showToast('Page data refreshed.');
 };
 
 window.handleAccPaymentExpenseTypeChange = function(type) {
@@ -35740,7 +35799,7 @@ window.openAccTdsChallanDetailsModal = function() {
   if (inpDate) {
     const today = new Date();
     const pad = (n) => String(n).padStart(2, '0');
-    inpDate.value = `${pad(today.getDate())} - ${pad(today.getMonth() + 1)} - ${today.getFullYear()}`;
+    inpDate.value = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
   }
   const fileLbl = document.getElementById('lblAccTdsChallanFileName');
   const fileInp = document.getElementById('inpAccTdsChallanPdf');
@@ -39304,15 +39363,19 @@ function renderWorklistToolbar() {
       });
     }
 
-    document.getElementById('btnCommercialWorklistRefresh')?.addEventListener('click', () => {
+    document.getElementById('btnCommercialWorklistRefresh')?.addEventListener('click', async () => {
       const btn = document.getElementById('btnCommercialWorklistRefresh');
       const img = btn ? btn.querySelector('img') : null;
       if (img) img.classList.add('spin-refresh-icon');
-      activeColumnFilters = {};
-      showToast('Refreshing page data...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 250);
+      try {
+        if (typeof window.handlePageRefresh === 'function') {
+          await window.handlePageRefresh();
+        }
+      } finally {
+        setTimeout(() => {
+          if (img) img.classList.remove('spin-refresh-icon');
+        }, 600);
+      }
     });
 
     initWorklistToolbarEvents();
@@ -42968,20 +43031,23 @@ function initWorklistToolbarEvents() {
 
   const btnRefresh = document.getElementById('btnPaymentRefresh');
   if (btnRefresh) {
-    btnRefresh.addEventListener('click', () => {
+    btnRefresh.addEventListener('click', async () => {
       const img = btnRefresh.querySelector('img');
       if (img) img.classList.add('spin-refresh-icon');
 
-      activeColumnFilters = {};
-      renderApp();
-
-
-
-      setTimeout(() => {
-        if (img) img.classList.remove('spin-refresh-icon');
-      }, 600);
-
-      showToast('Payment numbers & table data refreshed successfully!');
+      try {
+        if (typeof window.handlePageRefresh === 'function') {
+          await window.handlePageRefresh();
+        } else {
+          activeColumnFilters = {};
+          renderApp();
+          showToast('Payment numbers & table data refreshed successfully!');
+        }
+      } finally {
+        setTimeout(() => {
+          if (img) img.classList.remove('spin-refresh-icon');
+        }, 600);
+      }
     });
   }
 
@@ -51591,6 +51657,8 @@ function initSideFormEvents() {
           !e.target.closest('.nexus-cal-input') &&
           !e.target.closest('#btnAccBankDateCalendar') &&
           !e.target.closest('#inpAccBankDate') &&
+          !e.target.closest('#btnAccTdsPaidDateCalendar') &&
+          !e.target.closest('#inpAccTdsPaidDate') &&
           !e.target.closest('#btnPmTaskDateCalendar') &&
           !e.target.closest('#inpPmTaskDate') &&
           !e.target.closest('.btn-sub-project-calendar')) {

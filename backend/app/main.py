@@ -60,6 +60,12 @@ async def add_security_and_perf_headers(request: Request, call_next):
         if request.method in ("POST", "PUT", "PATCH", "DELETE") and response.status_code < 400:
             if "/master/" in path:
                 reference_data_cache.invalidate_prefix("master:")
+    elif not settings.is_production:
+        # Disable browser caching for local development static assets (HTML/CSS/JS)
+        # so edits appear immediately on refresh without pushing to GitHub
+        if path == "/" or path.endswith((".html", ".js", ".css")):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
 
     if elapsed_ms >= 500.0:
         perf_logger.warning(

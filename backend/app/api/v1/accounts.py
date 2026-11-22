@@ -733,15 +733,24 @@ def list_accounts_tds(
                     "tdsCode": (tds_code or "").strip(),
                     "tdsRate": float(tds_rate) if tds_rate is not None else 0.0,
                 }
-                if v_name:
-                    mapping[v_name.strip().lower()] = info
-                if acc_name:
+                if v_name and v_name.strip():
+                    key = v_name.strip().lower()
+                    # Prefer entries that have panNumber or tdsCode populated
+                    existing = mapping.get(key)
+                    if not existing or (not existing.get("tdsCode") and info["tdsCode"]) or (not existing.get("panNumber") and info["panNumber"]):
+                        mapping[key] = info
+                if acc_name and acc_name.strip():
                     mapping.setdefault(acc_name.strip().lower(), info)
+                if pan_no and pan_no.strip():
+                    pan_key = pan_no.strip().lower()
+                    existing_p = mapping.get(pan_key)
+                    if not existing_p or (not existing_p.get("tdsCode") and info["tdsCode"]):
+                        mapping[pan_key] = info
         except Exception:
             pass
         return mapping
 
-    vendor_tds_map = reference_data_cache.get_or_set("master:vendor_tds_map", _load_vendor_tds_map, ttl=60.0)
+    vendor_tds_map = reference_data_cache.get_or_set("master:vendor_tds_map_v2", _load_vendor_tds_map, ttl=60.0)
 
     items: List[Dict[str, Any]] = []
     for p in rows:
@@ -750,6 +759,11 @@ def list_accounts_tds(
             continue
         pay_dt = p.paid_date or p.voucher_date or p.request_date
         v_info = vendor_tds_map.get(transfer_to.lower(), {})
+        pan_number = v_info.get("panNumber", "")
+        if not v_info.get("tdsCode") and pan_number:
+            pan_info = vendor_tds_map.get(pan_number.lower(), {})
+            if pan_info.get("tdsCode"):
+                v_info = {**v_info, "tdsCode": pan_info["tdsCode"]}
         taxable = float(
             p.paid_amount
             if p.paid_amount is not None and float(p.paid_amount) > 0
@@ -764,8 +778,8 @@ def list_accounts_tds(
             "paymentId": p.payment_id,
             "paymentDate": pay_dt.strftime("%d/%m/%Y") if pay_dt else "",
             "panName": transfer_to,
-            "panNumber": v_info.get("panNumber", ""),
-            "tdsCode": v_info.get("tdsCode") or p.expense_type or p.account_head or "",
+            "panNumber": pan_number,
+            "tdsCode": v_info.get("tdsCode", ""),
             "taxableAmount": taxable,
             "tdsRate": rate_str,
             "tdsAmount": tds_amt,
@@ -1413,15 +1427,23 @@ def list_accounts_module_tds(
                     "tdsCode": (tds_code or "").strip(),
                     "tdsRate": float(tds_rate) if tds_rate is not None else 0.0,
                 }
-                if v_name:
-                    mapping[v_name.strip().lower()] = info
-                if acc_name:
+                if v_name and v_name.strip():
+                    key = v_name.strip().lower()
+                    existing = mapping.get(key)
+                    if not existing or (not existing.get("tdsCode") and info["tdsCode"]) or (not existing.get("panNumber") and info["panNumber"]):
+                        mapping[key] = info
+                if acc_name and acc_name.strip():
                     mapping.setdefault(acc_name.strip().lower(), info)
+                if pan_no and pan_no.strip():
+                    pan_key = pan_no.strip().lower()
+                    existing_p = mapping.get(pan_key)
+                    if not existing_p or (not existing_p.get("tdsCode") and info["tdsCode"]):
+                        mapping[pan_key] = info
         except Exception:
             pass
         return mapping
 
-    vendor_tds_map = reference_data_cache.get_or_set("master:vendor_tds_map", _load_vendor_tds_map, ttl=60.0)
+    vendor_tds_map = reference_data_cache.get_or_set("master:vendor_tds_map_v2", _load_vendor_tds_map, ttl=60.0)
 
     # Customer PAN lookup map
     cust_pan_map: Dict[str, str] = {}
@@ -1531,13 +1553,17 @@ def list_accounts_module_tds(
         bucket["taxablePayable"] += taxable
         bucket["deductedPayable"] += ded_amt
         if t_to:
+            pan_number = v_info.get("panNumber", "")
+            tds_code_val = v_info.get("tdsCode", "")
+            if not tds_code_val and pan_number:
+                tds_code_val = vendor_tds_map.get(pan_number.lower(), {}).get("tdsCode", "")
             tds_payable_list.append({
                 "id": f"tds-pay-sub-{p.payment_id}",
                 "year": str(dt.year),
                 "quarter": _quarter_from_month(dt.month),
                 "panName": t_to,
-                "panNumber": v_info.get("panNumber", ""),
-                "tdsCode": v_info.get("tdsCode") or p.expense_type or p.account_head or "",
+                "panNumber": pan_number,
+                "tdsCode": tds_code_val,
                 "taxableAmount": _fmt_inr(taxable),
                 "tdsRate": f"{rate_val:g}%",
                 "deductedAmount": _fmt_inr(ded_amt),

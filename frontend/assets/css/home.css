@@ -3384,7 +3384,11 @@ td.col-master-vendor-status {
 #invoiceDueDatePanel .side-form-close-btn:hover,
 #btnCloseInvoiceDueDatePanel:hover,
 #accAttachChallanCard .side-form-close-btn:hover,
-#btnCloseAccAttachChallan:hover {
+#btnCloseAccAttachChallan:hover,
+#accAttachReturnsCard .side-form-close-btn:hover,
+#btnCloseAccAttachReturns:hover,
+#accTdsChallanDetailsCard .side-form-close-btn:hover,
+#btnCloseAccTdsChallanDetails:hover {
   transform: none !important;
   color: #dc2626 !important;
 }
@@ -6101,4 +6105,30 @@ th.wm-supply-sub-header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Remove bottom horizontal line below inline submit icon row in Accounts Manager tables */
+#accManagerTableSubmitRow,
+#accManagerTableSubmitRow td {
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Accounts Icon -> TDS 2-row header: crisp 1px white divider with zero thick white gap */
+tr.accounts-tds-head-r1 th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 12 !important;
+  height: 36px !important;
+  box-sizing: border-box !important;
+  border-bottom: 1px solid #ffffff !important;
+}
+tr.accounts-tds-head-r2 th {
+  position: sticky !important;
+  top: 36px !important;
+  z-index: 11 !important;
+  box-sizing: border-box !important;
+  border-top: 1px solid #ffffff !important;
 }

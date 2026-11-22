@@ -10072,6 +10072,10 @@ const defaultPoToBeOpenItems = [
 let commercialPoToBeOpenData = [];
 
 async function loadCommercialPoToBeOpenFromApi() {
+  const activeRole = typeof getAuthenticatedUserRole === 'function' ? getAuthenticatedUserRole() : '';
+  if (!['Commercial Manager', 'Project Manager', 'Master'].includes(activeRole)) {
+    return commercialPoToBeOpenData;
+  }
   if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poToBeOpen && typeof NexusApi.commercial.poToBeOpen.getProjects === 'function') {
     try {
       const response = await NexusApi.commercial.poToBeOpen.getProjects();
@@ -10620,9 +10624,6 @@ try {
   if (typeof syncCommercialWccDataWithNewProject === 'function') syncCommercialWccDataWithNewProject();
   if (typeof syncCommercialInvoiceDataWithNewProject === 'function') syncCommercialInvoiceDataWithNewProject();
   if (typeof syncCommercialReceivableDataWithNewProject === 'function') syncCommercialReceivableDataWithNewProject();
-  if (typeof loadCommercialPoToBeOpenFromApi === 'function') {
-    loadCommercialPoToBeOpenFromApi().catch(e => console.error('Failed to load PO To Be Open from API:', e));
-  }
   if (typeof syncCommercialPoToBeOpenDataWithNewProject === 'function') syncCommercialPoToBeOpenDataWithNewProject();
   if (typeof syncCommercialEmailDataWithNewProject === 'function') syncCommercialEmailDataWithNewProject();
 } catch (e) {}
@@ -11679,17 +11680,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
   }
 
-  if (activeRole === 'Accounts Manager') {
+  if (currentModule === 'accounts' && typeof window.loadAccountsModuleViewFromApi === 'function') {
+    const viewKey = currentAccountsView === 'main' ? 'sales' : currentAccountsView;
+    startupTasks.push(window.loadAccountsModuleViewFromApi(viewKey, true));
+  } else if (activeRole === 'Accounts Manager') {
     if (currentWorklistView === 'payment' && typeof window.loadAccountsManagerPaymentsFromApi === 'function') {
       startupTasks.push(window.loadAccountsManagerPaymentsFromApi(true));
     } else if (currentWorklistView === 'receivable' && typeof window.loadAccountsManagerReceivableFromApi === 'function') {
       startupTasks.push(window.loadAccountsManagerReceivableFromApi(true));
     } else if (currentWorklistView === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
       startupTasks.push(window.loadAccountsManagerBankFromApi(true));
+    } else if (currentWorklistView === 'tds' && typeof window.loadAccountsManagerTdsFromApi === 'function') {
+      startupTasks.push(window.loadAccountsManagerTdsFromApi(true));
     } else if (currentWorklistView === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
       startupTasks.push(window.loadAccountsManagerGstr1FromApi(true));
     } else if (currentWorklistView === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
       startupTasks.push(window.loadAccountsManagerGstr2bFromApi(true));
+    } else if (currentWorklistView === 'gstr_3b' && typeof window.loadAccountsManagerGstr3bFromApi === 'function') {
+      startupTasks.push(window.loadAccountsManagerGstr3bFromApi(true));
     }
   } else {
     if (typeof loadCommercialProjectsFromApi === 'function' && ['Commercial Manager', 'Project Manager'].includes(activeRole)) {
@@ -12124,6 +12132,9 @@ async function switchModule(moduleName) {
     window.projectNavigationContext = null;
     window.projectWorklistOrigin = null;
     window.lastPmWorklistView = null;
+    if (typeof window.loadAccountsModuleViewFromApi === 'function') {
+      window.loadAccountsModuleViewFromApi('sales', true);
+    }
     try {
       sessionStorage.removeItem('nexus_project_context');
       sessionStorage.removeItem('nexus_project_worklist_origin');
@@ -24005,8 +24016,87 @@ function renderAdminFooter() {
 }
 
 // ==========================================================================
-// ACCOUNTS MODULE RENDERERS
+// ACCOUNTS MODULE RENDERERS (Linked to Nexus_Accounts DB — Mock Data Cleared)
 // ==========================================================================
+if (typeof accountsSalesData !== 'undefined' && Array.isArray(accountsSalesData)) accountsSalesData.length = 0;
+if (typeof accountsGstData !== 'undefined' && Array.isArray(accountsGstData)) accountsGstData.length = 0;
+if (typeof accountsBankData !== 'undefined' && Array.isArray(accountsBankData)) accountsBankData.length = 0;
+if (typeof accountsReceiptData !== 'undefined' && Array.isArray(accountsReceiptData)) accountsReceiptData.length = 0;
+if (typeof accountsPaymentData !== 'undefined' && Array.isArray(accountsPaymentData)) accountsPaymentData.length = 0;
+if (typeof accountsPurchaseData !== 'undefined' && Array.isArray(accountsPurchaseData)) accountsPurchaseData.length = 0;
+if (typeof accountsTdsData !== 'undefined' && Array.isArray(accountsTdsData)) accountsTdsData.length = 0;
+if (typeof accountsTdsPayableData !== 'undefined' && Array.isArray(accountsTdsPayableData)) accountsTdsPayableData.length = 0;
+if (typeof accountsTdsReceivableData !== 'undefined' && Array.isArray(accountsTdsReceivableData)) accountsTdsReceivableData.length = 0;
+
+window.loadAccountsModuleViewFromApi = async function(viewKey, shouldRender = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || !NexusApi.accounts.module) {
+    return;
+  }
+  const key = (viewKey || 'sales').toLowerCase();
+  try {
+    if (key === 'sales' || key === 'main') {
+      const res = await NexusApi.accounts.module.getSales();
+      if (res && Array.isArray(res.data)) {
+        accountsSalesData.length = 0;
+        accountsSalesData.push(...res.data);
+      }
+    } else if (key === 'purchase') {
+      const res = await NexusApi.accounts.module.getPurchase();
+      if (res && Array.isArray(res.data)) {
+        accountsPurchaseData.length = 0;
+        accountsPurchaseData.push(...res.data);
+      }
+    } else if (key === 'payment') {
+      const res = await NexusApi.accounts.module.getPayment();
+      if (res && Array.isArray(res.data)) {
+        accountsPaymentData.length = 0;
+        accountsPaymentData.push(...res.data);
+      }
+    } else if (key === 'receipt') {
+      const res = await NexusApi.accounts.module.getReceipt();
+      if (res && Array.isArray(res.data)) {
+        accountsReceiptData.length = 0;
+        accountsReceiptData.push(...res.data);
+      }
+    } else if (key === 'bank') {
+      const res = await NexusApi.accounts.module.getBank();
+      if (res && Array.isArray(res.data)) {
+        accountsBankData.length = 0;
+        accountsBankData.push(...res.data);
+      }
+    } else if (key === 'tds' || key === 'tds_payable' || key === 'tds_receivable') {
+      const res = await NexusApi.accounts.module.getTds();
+      if (res && Array.isArray(res.data)) {
+        accountsTdsData.length = 0;
+        accountsTdsData.push(...res.data);
+      }
+      if (res && Array.isArray(res.tdsReceivable) && typeof accountsTdsReceivableData !== 'undefined') {
+        accountsTdsReceivableData.length = 0;
+        accountsTdsReceivableData.push(...res.tdsReceivable);
+      }
+      if (res && Array.isArray(res.tdsPayable) && typeof accountsTdsPayableData !== 'undefined') {
+        accountsTdsPayableData.length = 0;
+        accountsTdsPayableData.push(...res.tdsPayable);
+      }
+    } else if (key === 'gst') {
+      const res = await NexusApi.accounts.module.getGst();
+      if (res && Array.isArray(res.data)) {
+        accountsGstData.length = 0;
+        accountsGstData.push(...res.data);
+      }
+    }
+
+    if (shouldRender && currentModule === 'accounts') {
+      loadAccountsDataset();
+      if (typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      }
+    }
+  } catch (err) {
+    console.error(`Failed to load Accounts module [${key}] from API:`, err);
+  }
+};
+
 function openAccountsPage(subpage) {
   currentModule = 'accounts';
   currentAccountsView = 'main';
@@ -24014,6 +24104,7 @@ function openAccountsPage(subpage) {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('sales', true);
   showToast(`Navigated to Accounts`);
 }
 
@@ -24023,6 +24114,7 @@ function openAccountsGstPage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('gst', true);
   showToast('Navigated to GST Page');
 }
 
@@ -24032,6 +24124,7 @@ function openAccountsBankPage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('bank', true);
   showToast('Navigated to Bank Page');
 }
 
@@ -24041,6 +24134,7 @@ function openAccountsReceiptPage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('receipt', true);
   showToast('Navigated to Receipt Page');
 }
 
@@ -24050,6 +24144,7 @@ function openAccountsPaymentPage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('payment', true);
   showToast('Navigated to Payment Page');
 }
 
@@ -24059,6 +24154,7 @@ function openAccountsPurchasePage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('purchase', true);
   showToast('Navigated to Purchase Page');
 }
 
@@ -24069,6 +24165,7 @@ function openAccountsTdsPage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('tds', true);
   showToast('Navigated to TDS Page');
 }
 window.openAccountsTdsPage = openAccountsTdsPage;
@@ -24080,6 +24177,7 @@ function openAccountsTdsPayablePage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('tds_payable', true);
   showToast('Navigated to TDS Payable Page');
 }
 window.openAccountsTdsPayablePage = openAccountsTdsPayablePage;
@@ -24091,6 +24189,7 @@ function openAccountsTdsReceivablePage() {
   activeColumnFilters = {};
   updateURL();
   renderApp();
+  window.loadAccountsModuleViewFromApi('tds_receivable', true);
   showToast('Navigated to TDS Receivable Page');
 }
 window.openAccountsTdsReceivablePage = openAccountsTdsReceivablePage;
@@ -24344,50 +24443,57 @@ function renderAccountsTableHead() {
   }
 
   if (currentAccountsView === 'tds') {
+    const tableEl = thead.closest('table');
+    if (tableEl) {
+      tableEl.style.width = '100%';
+      tableEl.style.minWidth = '1340px';
+      tableEl.style.tableLayout = 'fixed';
+      tableEl.style.borderCollapse = 'collapse';
+    }
     thead.innerHTML = `
-      <tr class="master-view-header accounts-view-header">
-        <th rowspan="2" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+      <tr class="master-view-header accounts-view-header accounts-tds-head-r1">
+        <th rowspan="2" style="width: 10ch; min-width: 10ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
           <span>Year</span>
         </th>
-        <th rowspan="2" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+        <th rowspan="2" style="width: 12ch; min-width: 12ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <span>Quater</span>
+            <span>Quarter</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['quarter'] ? 'has-active-filter' : ''}" data-filter-col="quarter" title="Filter Quarter">&#9660;</button>
           </div>
         </th>
-        <th rowspan="2" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
+        <th rowspan="2" style="width: 12ch; min-width: 12ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 8px 6px;">
           <div class="th-content-wrap" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
             <span>Month</span>
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['month'] ? 'has-active-filter' : ''}" data-filter-col="month" title="Filter Month">&#9660;</button>
           </div>
         </th>
-        <th colspan="4" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th colspan="4" style="height: 36px; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 8px;">
           <span>TDS Receivable</span>
         </th>
-        <th colspan="3" style="text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th colspan="3" style="height: 36px; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-bottom: 1px solid #ffffff !important; padding: 6px 8px;">
           <span>TDS Payable</span>
         </th>
       </tr>
-      <tr class="master-view-header accounts-view-header tr-sub-headers">
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+      <tr class="master-view-header accounts-view-header accounts-tds-head-r2">
+        <th style="width: 16ch; min-width: 16ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
           <span>Taxable Amount</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
           <span>TDS Amount</span>
         </th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th style="width: 18ch; min-width: 18ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
           <span>TDS Receivable</span>
         </th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th style="width: 20ch; min-width: 20ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
           <span>TDS Credit Available</span>
         </th>
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th style="width: 16ch; min-width: 16ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
           <span>Taxable Amount</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th style="width: 16ch; min-width: 16ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
           <span>Deducted Amount</span>
         </th>
-        <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; border-top: 1px solid #ffffff !important; padding: 8px 6px;">
+        <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 8px;">
           <span>Paid Amount</span>
         </th>
       </tr>
@@ -34843,53 +34949,28 @@ window.loadAccountsManagerBankFromApi = async function(shouldRender = true) {
   }
 };
 
-let accountsManagerTdsStore = [
-  {
-    id: 'ACC-TDS-001',
-    panName: 'Precision Infra Pvt Ltd',
-    panNumber: 'AABCP8821K',
-    tdsCode: '194C - Contractors & Sub-contractors',
-    taxableAmount: 250000.00,
-    tdsRate: '2%',
-    tdsAmount: 5000.00
-  },
-  {
-    id: 'ACC-TDS-002',
-    panName: 'Shree Logistics Transport',
-    panNumber: 'AAECS9912M',
-    tdsCode: '194C - Contractors & Sub-contractors',
-    taxableAmount: 180000.00,
-    tdsRate: '2%',
-    tdsAmount: 3600.00
-  },
-  {
-    id: 'ACC-TDS-003',
-    panName: 'Apex Engineering Works',
-    panNumber: 'AACCA4451D',
-    tdsCode: '194J - Fees for Professional Services',
-    taxableAmount: 420000.00,
-    tdsRate: '10%',
-    tdsAmount: 42000.00
-  },
-  {
-    id: 'ACC-TDS-004',
-    panName: 'Balaji Electricals',
-    panNumber: 'BBKPL6620Q',
-    tdsCode: '194I - Rent for Plant & Equipment',
-    taxableAmount: 95000.00,
-    tdsRate: '2%',
-    tdsAmount: 1900.00
-  },
-  {
-    id: 'ACC-TDS-005',
-    panName: 'Ramesh Kumar & Associates',
-    panNumber: 'AABPR1109R',
-    tdsCode: '194J - Fees for Professional Services',
-    taxableAmount: 310000.00,
-    tdsRate: '10%',
-    tdsAmount: 31000.00
+let accountsManagerTdsStore = [];
+
+window.loadAccountsManagerTdsFromApi = async function(shouldRender = true) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || typeof NexusApi.accounts.getTds !== 'function') {
+    return;
   }
-];
+  try {
+    const res = await NexusApi.accounts.getTds();
+    if (res && Array.isArray(res.data)) {
+      accountsManagerTdsStore = res.data.map(row => ({ ...row }));
+      if (shouldRender && currentModule === 'worklist' && getAuthenticatedUserRole() === 'Accounts Manager' && currentWorklistView === 'tds') {
+        currentDataset = [...accountsManagerTdsStore];
+        filteredDataset = [...currentDataset];
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load Accounts Manager TDS from API:', err);
+  }
+};
 
 let accountsManagerGstr1Store = [];
 
@@ -34954,40 +35035,34 @@ window.handleAccGstr2bRefresh = function() {
   }
 };
 
-let accountsManagerGstr3bStore = [
-  {
-    id: 'ACC-GST3B-001',
-    gstType: 'GSTR 1A',
-    basic: 2450000.00,
-    cgst: 220500.00,
-    sgst: 220500.00,
-    igst: 145000.00
-  },
-  {
-    id: 'ACC-GST3B-002',
-    gstType: 'GSTR 2A',
-    basic: 1820000.00,
-    cgst: 163800.00,
-    sgst: 163800.00,
-    igst: 85000.00
-  },
-  {
-    id: 'ACC-GST3B-003',
-    gstType: 'RCB',
-    basic: 350000.00,
-    cgst: 31500.00,
-    sgst: 31500.00,
-    igst: 18000.00
-  },
-  {
-    id: 'ACC-GST3B-004',
-    gstType: 'GSTR 3B',
-    basic: 630000.00,
-    cgst: 56700.00,
-    sgst: 56700.00,
-    igst: 42000.00
+let accountsManagerGstr3bStore = [];
+window._accGstr3bPeriod = null;
+
+window.loadAccountsManagerGstr3bFromApi = async function(shouldRender = true, year = null, month = null) {
+  if (typeof NexusApi === 'undefined' || !NexusApi.accounts || typeof NexusApi.accounts.getGstr3b !== 'function') {
+    return;
   }
-];
+  try {
+    const res = await NexusApi.accounts.getGstr3b(year, month);
+    if (res && Array.isArray(res.data)) {
+      accountsManagerGstr3bStore = res.data.map(row => ({ ...row }));
+      window._accGstr3bPeriod = {
+        year: res.year,
+        month: res.month,
+        monthName: res.monthName
+      };
+      if (shouldRender && currentModule === 'worklist' && getAuthenticatedUserRole() === 'Accounts Manager' && currentWorklistView === 'gstr_3b') {
+        currentDataset = [...accountsManagerGstr3bStore];
+        filteredDataset = [...currentDataset];
+        if (typeof applyFiltersAndRender === 'function') {
+          applyFiltersAndRender();
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load Accounts Manager GSTR 3B from API:', err);
+  }
+};
 
 window.toggleAccountsPaymentRowSelect = function(rowId) {
   const row = accountsManagerPaymentStore.find(r => r.id === rowId);
@@ -35037,8 +35112,8 @@ window.exportAccountsCsv = function(type) {
     headers = ['Date', 'Bank Name', 'Particulars', 'Ref. No', 'Withdrawal (Dr)', 'Deposit (Cr)', 'Balance'];
     keys = ['date', 'bankName', 'particulars', 'refNo', 'withdrawal', 'deposit', 'balance'];
   } else if (type === 'tds') {
-    headers = ['PAN Name', 'PAN Number', 'TDS Code', 'Taxable Amount', 'TDS Rate', 'TDS Amount'];
-    keys = ['panName', 'panNumber', 'tdsCode', 'taxableAmount', 'tdsRate', 'tdsAmount'];
+    headers = ['Payment Date', 'PAN Name', 'PAN Number', 'TDS Code', 'Taxable Amount', 'TDS Rate', 'TDS Amount'];
+    keys = ['paymentDate', 'panName', 'panNumber', 'tdsCode', 'taxableAmount', 'tdsRate', 'tdsAmount'];
   } else if (type === 'gstr_1') {
     headers = ['Customer Name', 'Customer GST No', 'Invoice No', 'Invoice Date', 'Taxable Amount', 'CGST', 'SGST', 'IGST', 'Total Amount'];
     keys = ['customerName', 'customerGstNo', 'invoiceNo', 'invoiceDate', 'taxableAmount', 'cgst', 'sgst', 'igst', 'totalAmount'];
@@ -35099,6 +35174,11 @@ window.handlePageRefresh = function() {
       showToast('Receivable data refreshed.');
       return;
     }
+    if (currentWorklistView === 'tds' && typeof window.loadAccountsManagerTdsFromApi === 'function') {
+      window.loadAccountsManagerTdsFromApi(true);
+      showToast('TDS data refreshed.');
+      return;
+    }
     if (currentWorklistView === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
       window.loadAccountsManagerGstr1FromApi(true);
       showToast('GSTR 1 refreshed.');
@@ -35107,6 +35187,11 @@ window.handlePageRefresh = function() {
     if (currentWorklistView === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
       window.loadAccountsManagerGstr2bFromApi(true);
       showToast('GSTR 2B refreshed.');
+      return;
+    }
+    if (currentWorklistView === 'gstr_3b' && typeof window.loadAccountsManagerGstr3bFromApi === 'function') {
+      window.loadAccountsManagerGstr3bFromApi(true);
+      showToast('GSTR 3B refreshed.');
       return;
     }
   }
@@ -35507,7 +35592,7 @@ window.handleAccountsManagerSubmit = async function() {
       showToast('Bank transaction submitted successfully!');
     }
   } else if (currentWorklistView === 'tds') {
-    openAccAttachChallanModal();
+    openAccTdsChallanDetailsModal();
   } else if (currentWorklistView === 'gstr_3b') {
     openAccAttachReturnsModal();
   } else if (currentWorklistView === 'gstr_1') {
@@ -35642,14 +35727,24 @@ window.submitAccTxnDetails = async function() {
   }
 };
 
-window.openAccAttachChallanModal = function() {
+window._accTdsChallanDocData = null;
+
+window.openAccTdsChallanDetailsModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
-  const card = document.getElementById('accAttachChallanCard');
-  const saveBtn = document.getElementById('btnSaveAccChallan');
-  const fileLbl = document.getElementById('lblAccChallanFileName');
-  const fileInp = document.getElementById('inpAccChallanPdf');
+  const card = document.getElementById('accTdsChallanDetailsCard');
+  const frm = document.getElementById('frmAccTdsChallanDetails');
+  if (frm) frm.reset();
+  window._accTdsChallanDocData = null;
+
+  const inpDate = document.getElementById('inpAccTdsPaidDate');
+  if (inpDate) {
+    const today = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    inpDate.value = `${pad(today.getDate())} - ${pad(today.getMonth() + 1)} - ${today.getFullYear()}`;
+  }
+  const fileLbl = document.getElementById('lblAccTdsChallanFileName');
+  const fileInp = document.getElementById('inpAccTdsChallanPdf');
   if (fileInp) fileInp.value = '';
-  if (saveBtn) saveBtn.style.display = 'none';
   if (fileLbl) fileLbl.textContent = 'Click to Upload PDF';
 
   if (overlay) {
@@ -35659,24 +35754,72 @@ window.openAccAttachChallanModal = function() {
   if (card) card.style.display = 'block';
 };
 
-window.handleAccChallanPdfSelected = function(input) {
-  if (input.files && input.files[0]) {
-    const fileName = input.files[0].name;
-    const fileLbl = document.getElementById('lblAccChallanFileName');
-    const saveBtn = document.getElementById('btnSaveAccChallan');
-    if (fileLbl) fileLbl.textContent = fileName;
-    if (saveBtn) saveBtn.style.display = 'inline-flex';
+window.handleAccTdsChallanPdfSelected = function(input) {
+  if (input && input.files && input.files[0]) {
+    const file = input.files[0];
+    const fileLbl = document.getElementById('lblAccTdsChallanFileName');
+    if (fileLbl) fileLbl.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      window._accTdsChallanDocData = ev.target && ev.target.result ? String(ev.target.result) : file.name;
+    };
+    reader.readAsDataURL(file);
   }
 };
 
-window.saveAccChallanPdf = function() {
+window.submitAccTdsChallanDetails = async function() {
+  const challanInp = document.getElementById('inpAccTdsChallanNumber');
+  const dateInp = document.getElementById('inpAccTdsPaidDate');
+  const fileInp = document.getElementById('inpAccTdsChallanPdf');
+
+  const challanNumber = challanInp ? challanInp.value.trim() : '';
+  const paidDateRaw = dateInp ? dateInp.value.trim() : '';
+
+  if (!challanNumber) {
+    showToast('Please enter TDS Challan Number.', 'warning');
+    return;
+  }
+  if (!paidDateRaw) {
+    showToast('Please select TDS Paid Date.', 'warning');
+    return;
+  }
+
+  let challanDoc = window._accTdsChallanDocData;
+  if (!challanDoc && fileInp && fileInp.files && fileInp.files[0]) {
+    challanDoc = fileInp.files[0].name;
+  }
+
+  const totalTdsAmount = (filteredDataset || accountsManagerTdsStore || []).reduce(
+    (sum, r) => sum + (Number(r.tdsAmount !== undefined ? r.tdsAmount : r.tdsDeducted) || 0),
+    0
+  );
+
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.submitTdsChallan === 'function') {
+      await NexusApi.accounts.submitTdsChallan({
+        tdsChallanNumber: challanNumber,
+        tdsPaidDate: paidDateRaw,
+        challanDocuments: challanDoc || '',
+        tdsDeductedAmount: totalTdsAmount,
+        tdsPaidAmount: totalTdsAmount
+      });
+    }
+  } catch (err) {
+    console.error('Failed to save TDS Challan Details:', err);
+    showToast('Failed to save TDS Challan Details.', 'error');
+    return;
+  }
+
+  window._accTdsChallanDocData = null;
   closeSideForm();
   if (typeof showSvgSuccessPopup === 'function') {
-    showSvgSuccessPopup('Payment Challan attached successfully!', 'Task Completed');
+    showSvgSuccessPopup('TDS Challan details saved successfully!', 'Task Completed');
   } else {
-    showToast('Payment Challan attached successfully!');
+    showToast('TDS Challan details saved successfully!');
   }
 };
+
+window._accReturnsPdfData = null;
 
 window.openAccAttachReturnsModal = function() {
   const overlay = document.getElementById('sideFormOverlay');
@@ -35684,6 +35827,7 @@ window.openAccAttachReturnsModal = function() {
   const saveBtn = document.getElementById('btnSaveAccReturns');
   const fileLbl = document.getElementById('lblAccReturnsFileName');
   const fileInp = document.getElementById('inpAccReturnsPdf');
+  window._accReturnsPdfData = null;
   if (fileInp) fileInp.value = '';
   if (saveBtn) saveBtn.style.display = 'none';
   if (fileLbl) fileLbl.textContent = 'Click to Upload PDF';
@@ -35696,16 +35840,54 @@ window.openAccAttachReturnsModal = function() {
 };
 
 window.handleAccReturnsPdfSelected = function(input) {
-  if (input.files && input.files[0]) {
-    const fileName = input.files[0].name;
+  if (input && input.files && input.files[0]) {
+    const file = input.files[0];
     const fileLbl = document.getElementById('lblAccReturnsFileName');
     const saveBtn = document.getElementById('btnSaveAccReturns');
-    if (fileLbl) fileLbl.textContent = fileName;
+    if (fileLbl) fileLbl.textContent = file.name;
     if (saveBtn) saveBtn.style.display = 'inline-flex';
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      window._accReturnsPdfData = ev.target && ev.target.result ? String(ev.target.result) : file.name;
+    };
+    reader.readAsDataURL(file);
   }
 };
 
-window.saveAccReturnsPdf = function() {
+window.saveAccReturnsPdf = async function() {
+  const fileInp = document.getElementById('inpAccReturnsPdf');
+  let docData = window._accReturnsPdfData;
+  if (!docData && fileInp && fileInp.files && fileInp.files[0]) {
+    docData = fileInp.files[0].name;
+  }
+  if (!docData) {
+    showToast('Please upload a PDF document first.', 'warning');
+    return;
+  }
+
+  const taxableRow = (accountsManagerGstr3bStore || []).find(
+    r => String(r.gstType || '').trim().toLowerCase().startsWith('taxable')
+  );
+  const period = window._accGstr3bPeriod || {};
+
+  try {
+    if (typeof NexusApi !== 'undefined' && NexusApi.accounts && typeof NexusApi.accounts.submitGstr3bReturns === 'function') {
+      await NexusApi.accounts.submitGstr3bReturns({
+        documents3b: docData,
+        year: period.year,
+        month: period.monthName || period.month,
+        cgstPayable: taxableRow ? Number(taxableRow.cgst || 0) : 0,
+        sgstPayable: taxableRow ? Number(taxableRow.sgst || 0) : 0,
+        igstPayable: taxableRow ? Number(taxableRow.igst || 0) : 0
+      });
+    }
+  } catch (err) {
+    console.error('Failed to save GSTR 3B return document:', err);
+    showToast('Failed to save Payment Returns document.', 'error');
+    return;
+  }
+
+  window._accReturnsPdfData = null;
   closeSideForm();
   if (typeof showSvgSuccessPopup === 'function') {
     showSvgSuccessPopup('Payment Returns attached successfully!', 'Task Completed');
@@ -39671,11 +39853,17 @@ function renderWorklistFooter() {
           if (tab.view === 'bank' && typeof window.loadAccountsManagerBankFromApi === 'function') {
             window.loadAccountsManagerBankFromApi(true);
           }
+          if (tab.view === 'tds' && typeof window.loadAccountsManagerTdsFromApi === 'function') {
+            window.loadAccountsManagerTdsFromApi(true);
+          }
           if (tab.view === 'gstr_1' && typeof window.loadAccountsManagerGstr1FromApi === 'function') {
             window.loadAccountsManagerGstr1FromApi(true);
           }
           if (tab.view === 'gstr_2b' && typeof window.loadAccountsManagerGstr2bFromApi === 'function') {
             window.loadAccountsManagerGstr2bFromApi(true);
+          }
+          if (tab.view === 'gstr_3b' && typeof window.loadAccountsManagerGstr3bFromApi === 'function') {
+            window.loadAccountsManagerGstr3bFromApi(true);
           }
           if (tab.view === 'stn' && typeof window.loadWmStnFromApi === 'function') {
             window.loadWmStnFromApi();
@@ -40079,40 +40267,40 @@ function renderWorklistTableHead() {
 
     if (currentWorklistView === 'payment') {
       if (tableEl) {
-        tableEl.style.minWidth = '1350px';
+        tableEl.style.minWidth = '1220px';
         tableEl.style.width = '100%';
         tableEl.style.tableLayout = 'fixed';
       }
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 60px; min-width: 60px; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Select</span>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Date</span>
           </th>
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Expense Type</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['expenseType'] ? 'has-active-filter' : ''}" data-filter-col="expenseType" title="Filter Expense Type">&#9660;</button>
             </div>
           </th>
-          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 30ch; min-width: 30ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Remarks</span>
           </th>
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Transfer To</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['transferTo'] ? 'has-active-filter' : ''}" data-filter-col="transferTo" title="Filter Transfer To">&#9660;</button>
             </div>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Amount</span>
           </th>
-          <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 10ch; min-width: 10ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Ageing</span>
           </th>
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Status</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['status'] ? 'has-active-filter' : ''}" data-filter-col="status" title="Filter Status">&#9660;</button>
@@ -40188,40 +40376,40 @@ function renderWorklistTableHead() {
 
     if (currentWorklistView === 'bank') {
       if (tableEl) {
-        tableEl.style.minWidth = '1250px';
+        tableEl.style.minWidth = '1180px';
         tableEl.style.width = '100%';
         tableEl.style.tableLayout = 'fixed';
       }
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 60px; min-width: 60px; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Select</span>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Date</span>
           </th>
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Bank Name</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['bankName'] ? 'has-active-filter' : ''}" data-filter-col="bankName" title="Filter Bank Name">&#9660;</button>
             </div>
           </th>
-          <th style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 30ch; min-width: 30ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>Particulars</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['particulars'] ? 'has-active-filter' : ''}" data-filter-col="particulars" title="Filter Particulars">&#9660;</button>
             </div>
           </th>
-          <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 20ch; min-width: 20ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Ref. No</span>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Withdrawal (Dr)</span>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Deposit (Cr)</span>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Balance</span>
           </th>
         </tr>
@@ -40232,34 +40420,37 @@ function renderWorklistTableHead() {
 
     if (currentWorklistView === 'tds') {
       if (tableEl) {
-        tableEl.style.minWidth = '1150px';
+        tableEl.style.minWidth = '1250px';
         tableEl.style.width = '100%';
         tableEl.style.tableLayout = 'fixed';
       }
       thead.innerHTML = `
         <tr class="master-view-header">
-          <th style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+            <span>Payment Date</span>
+          </th>
+          <th style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>PAN Name</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['panName'] ? 'has-active-filter' : ''}" data-filter-col="panName" title="Filter PAN Name">&#9660;</button>
             </div>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>PAN Number</span>
           </th>
-          <th style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 35ch; min-width: 35ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
               <span>TDS Code</span>
               <button type="button" class="filter-funnel-btn ${activeColumnFilters['tdsCode'] ? 'has-active-filter' : ''}" data-filter-col="tdsCode" title="Filter TDS Code">&#9660;</button>
             </div>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>Taxable Amount</span>
           </th>
-          <th style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 12ch; min-width: 12ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>TDS Rate</span>
           </th>
-          <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
+          <th style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; padding: 6px 10px;">
             <span>TDS Amount</span>
           </th>
         </tr>
@@ -42885,8 +43076,8 @@ function applyFiltersAndRender() {
     const buildAccManagerSubmitRow = (colspan, show) => {
       if (!show) return '';
       return `
-        <tr id="accManagerTableSubmitRow">
-          <td colspan="${colspan}" style="text-align: center !important; padding: 18px 0; border: none !important; background: transparent !important;">
+        <tr id="accManagerTableSubmitRow" style="border: none !important; border-bottom: none !important; background: transparent !important;">
+          <td colspan="${colspan}" style="text-align: center !important; padding: 18px 0; border: none !important; border-bottom: none !important; background: transparent !important;">
             <button type="button" id="btnAccManagerSubmitTable" onclick="handleAccManagerSubmit()" title="Submit" aria-label="Submit" style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s ease;">
               <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
             </button>
@@ -42907,13 +43098,23 @@ function applyFiltersAndRender() {
     renderWorklistToolbar();
 
     if (!filteredDataset || filteredDataset.length === 0) {
+      const emptyColspanMap = {
+        payment: 8,
+        receivable: 11,
+        bank: 8,
+        tds: 7,
+        gstr_1: 10,
+        gstr_2b: 12,
+        gstr_3b: 5
+      };
+      const emptyColspan = emptyColspanMap[currentWorklistView] || 8;
       tbody.innerHTML = `
-        <tr>
-          <td colspan="12" class="empty-data-row" style="text-align: center; padding: 48px 24px; border: none; color: #64748b; font-size: 0.95rem;">
+        <tr style="border: none !important;">
+          <td colspan="${emptyColspan}" class="empty-data-row" style="text-align: center; padding: 48px 24px; border: none !important; color: #64748b; font-size: 0.95rem;">
             No records found matching current filters.
           </td>
         </tr>
-      `;
+      ` + (['tds', 'gstr_3b'].includes(currentWorklistView) ? buildAccManagerSubmitRow(emptyColspan, true) : '');
       return;
     }
 
@@ -42925,35 +43126,35 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; transition: background-color 0.15s ease;">
             <!-- 1. Select: 60px, center circle radio with green marker, multiselect -->
-            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+            <td style="width: 60px; min-width: 60px; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
               <input type="checkbox" class="pr-circle-checkbox acc-payment-checkbox" data-row-id="${row.id}" ${row.selected ? 'checked' : ''} onchange="toggleAccountsPaymentRowSelect('${row.id}')">
             </td>
             <!-- 2. Date: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
               ${row.date || ''}
             </td>
             <!-- 3. Expense Type: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.expenseType || '').replace(/"/g, '&quot;')}">
+            <td style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.expenseType || '').replace(/"/g, '&quot;')}">
               ${row.expenseType || ''}
             </td>
             <!-- 4. Remarks: 30ch & left -->
-            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
+            <td style="width: 30ch; min-width: 30ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.remarks || '').replace(/"/g, '&quot;')}">
               ${row.remarks || ''}
             </td>
             <!-- 5. Transfer To: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.transferTo || '').replace(/"/g, '&quot;')}">
+            <td style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.transferTo || '').replace(/"/g, '&quot;')}">
               ${row.transferTo || ''}
             </td>
             <!-- 6. Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
               ${formatCurrency(row.amount)}
             </td>
             <!-- 7. Ageing: 10ch & center -->
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.9rem;">
+            <td style="width: 10ch; min-width: 10ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-size: 0.9rem;">
               ${row.ageing || ''}
             </td>
             <!-- 8. Status: 25ch & center (Only category: Pending with) -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+            <td style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
               <span style="color: #64748b; font-weight: 500; font-size: 0.9rem;">${row.status || 'Pending with'}</span>
             </td>
           </tr>
@@ -43022,35 +43223,35 @@ function applyFiltersAndRender() {
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: ${rowBg}; transition: background-color 0.15s ease;">
             <!-- 1. Select: 60px, center circle radio with green marker, multiselect -->
-            <td style="width: 60px; min-width: 60px; max-width: 60px; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
+            <td style="width: 60px; min-width: 60px; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px;">
               <input type="checkbox" class="pr-circle-checkbox acc-bank-checkbox" data-row-id="${row.id}" ${row.selected ? 'checked' : ''} onchange="toggleAccountsBankRowSelect('${row.id}')">
             </td>
             <!-- 2. Date: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
               ${row.date || ''}
             </td>
             <!-- 3. Bank Name: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.bankName || '').replace(/"/g, '&quot;')}">
+            <td style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.bankName || '').replace(/"/g, '&quot;')}">
               ${row.bankName || ''}
             </td>
             <!-- 4. Particulars: 30ch & left -->
-            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.particulars || '').replace(/"/g, '&quot;')}">
+            <td style="width: 30ch; min-width: 30ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.particulars || '').replace(/"/g, '&quot;')}">
               ${row.particulars || ''}
             </td>
             <!-- 5. Ref. No: 20ch & left -->
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-family: monospace;">
+            <td style="width: 20ch; min-width: 20ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #64748b; font-family: monospace;">
               ${row.refNo || ''}
             </td>
             <!-- 6. Withdrawal (Dr): 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: ${Number(row.withdrawal) > 0 ? '#dc2626' : '#64748b'};">
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: ${Number(row.withdrawal) > 0 ? '#dc2626' : '#64748b'};">
               ${Number(row.withdrawal) > 0 ? formatCurrency(row.withdrawal) : '-'}
             </td>
             <!-- 7. Deposit (Cr): 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: ${Number(row.deposit) > 0 ? '#16a34a' : '#64748b'};">
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: ${Number(row.deposit) > 0 ? '#16a34a' : '#64748b'};">
               ${Number(row.deposit) > 0 ? formatCurrency(row.deposit) : '-'}
             </td>
             <!-- 8. Balance: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 700;">
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 700;">
               ${formatCurrency(row.balance)}
             </td>
           </tr>
@@ -43063,33 +43264,37 @@ function applyFiltersAndRender() {
       tbody.innerHTML = filteredDataset.map(row => {
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff; transition: background-color 0.15s ease;">
-            <!-- 1. PAN Name: 25ch & left -->
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.panName || '').replace(/"/g, '&quot;')}">
+            <!-- 1. Payment Date: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b;">
+              ${row.paymentDate || ''}
+            </td>
+            <!-- 2. PAN Name: 25ch & left -->
+            <td style="width: 25ch; min-width: 25ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.panName || '').replace(/"/g, '&quot;')}">
               ${row.panName || ''}
             </td>
-            <!-- 2. PAN Number: 15ch & center -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-family: monospace; font-weight: 600;">
+            <!-- 3. PAN Number: 15ch & center -->
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #64748b; font-family: monospace; font-weight: 600;">
               ${row.panNumber || ''}
             </td>
-            <!-- 3. TDS Code: 35ch & left -->
-            <td style="width: 35ch; min-width: 35ch; max-width: 35ch; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.tdsCode || '').replace(/"/g, '&quot;')}">
+            <!-- 4. TDS Code: 35ch & left -->
+            <td style="width: 35ch; min-width: 35ch; box-sizing: border-box; text-align: left !important; vertical-align: middle; padding: 10px 12px; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${(row.tdsCode || '').replace(/"/g, '&quot;')}">
               ${row.tdsCode || ''}
             </td>
-            <!-- 4. Taxable Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
+            <!-- 5. Taxable Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #1e293b; font-weight: 600;">
               ${formatCurrency(row.taxableAmount)}
             </td>
-            <!-- 5. TDS Rate: 12ch & center -->
-            <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
+            <!-- 6. TDS Rate: 12ch & center -->
+            <td style="width: 12ch; min-width: 12ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 8px; color: #1e293b; font-weight: 500;">
               ${row.tdsRate || ''}
             </td>
-            <!-- 6. TDS Amount: 15ch & right -->
-            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #dc2626; font-weight: 600;">
+            <!-- 7. TDS Amount: 15ch & right -->
+            <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 12px; color: #dc2626; font-weight: 600;">
               ${formatCurrency(row.tdsAmount !== undefined ? row.tdsAmount : row.tdsDeducted)}
             </td>
           </tr>
         `;
-      }).join('') + buildAccManagerSubmitRow(6, true);
+      }).join('') + buildAccManagerSubmitRow(7, true);
       return;
     }
 
@@ -43208,15 +43413,19 @@ function applyFiltersAndRender() {
 
     if (currentWorklistView === 'gstr_3b') {
       tbody.innerHTML = filteredDataset.map(row => {
+        const isTaxableCash = String(row.gstType || '').trim().toLowerCase().startsWith('taxable');
+        const basicDisplay = (isTaxableCash || row.basic === null || row.basic === undefined || row.basic === '')
+          ? ''
+          : formatCurrency(row.basic);
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0; background-color: #ffffff; transition: background-color 0.15s ease;">
-            <!-- 1. GST Type: 10ch & center (Categories: GSTR 1A / GSTR 2A / RCB / GSTR 3B) -->
+            <!-- 1. GST Type: 10ch & center (Categories: GSTR 1A / GSTR 2A / RCM / Taxable- Cash) -->
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 12px 10px; color: #64748b; font-weight: 500;">
               ${row.gstType || ''}
             </td>
-            <!-- 2. Basic: 15ch & right -->
+            <!-- 2. Basic: 15ch & right (blank for Taxable- Cash) -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 12px 14px; color: #1e293b; font-weight: 600;">
-              ${formatCurrency(row.basic)}
+              ${basicDisplay}
             </td>
             <!-- 3. CGST: 15ch & right -->
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; vertical-align: middle; padding: 12px 14px; color: #475569;">
@@ -47686,28 +47895,28 @@ function applyFiltersAndRender() {
           rowsHtml += `
             <tr class="accounts-tds-row" data-row-id="${m.id}" style="border-bottom: 1px solid #e2e8f0;">
               ${idx === 0 ? `
-                <td rowspan="${rowCount}" style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.year}</td>
-                <td rowspan="${rowCount}" style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; vertical-align: middle; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.quarter}</td>
+                <td rowspan="${rowCount}" style="width: 10ch; min-width: 10ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.year}</td>
+                <td rowspan="${rowCount}" style="width: 12ch; min-width: 12ch; box-sizing: border-box; text-align: center !important; vertical-align: middle; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.quarter}</td>
               ` : ''}
-              <td style="width: 12ch; min-width: 12ch; max-width: 12ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.month}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.taxableAmountReceivable || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.tdsAmountReceivable || ''}</td>
+              <td style="width: 12ch; min-width: 12ch; box-sizing: border-box; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.month}</td>
+              <td style="width: 16ch; min-width: 16ch; box-sizing: border-box; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.taxableAmountReceivable || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.tdsAmountReceivable || ''}</td>
               ${idx === 0 ? `
-                <td rowspan="${rowCount}" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.tdsReceivable || ''}</td>
-                <td rowspan="${rowCount}" style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500; border-right: 1px solid #e2e8f0;">
+                <td rowspan="${rowCount}" style="width: 18ch; min-width: 18ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${q.tdsReceivable || ''}</td>
+                <td rowspan="${rowCount}" style="width: 20ch; min-width: 20ch; box-sizing: border-box; text-align: right !important; vertical-align: middle; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500; border-right: 1px solid #e2e8f0;">
                   <span style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600;">${q.tdsCreditAvailable || ''}</span>
                 </td>
               ` : ''}
-              <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: right !important; padding: 10px 8px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.taxableAmountPayable || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.deductedAmount || ''}</td>
-              <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500;">
+              <td style="width: 16ch; min-width: 16ch; box-sizing: border-box; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.taxableAmountPayable || ''}</td>
+              <td style="width: 16ch; min-width: 16ch; box-sizing: border-box; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #1e293b; font-weight: 500; border-right: 1px solid #e2e8f0;">${m.deductedAmount || ''}</td>
+              <td style="width: 15ch; min-width: 15ch; box-sizing: border-box; text-align: right !important; padding: 10px 10px; white-space: nowrap; color: #0454e4; font-weight: 500;">
                 <span style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600;">${m.paidAmount || ''}</span>
               </td>
             </tr>
           `;
         });
       });
-      tbody.innerHTML = rowsHtml;
+      tbody.innerHTML = rowsHtml || `<tr><td colspan="10" style="text-align: center; padding: 36px; color: #64748b;">No TDS records found.</td></tr>`;
     } else if (currentAccountsView === 'tds_receivable') {
       tbody.innerHTML = filteredDataset.map(row => `
         <tr class="accounts-tds-receivable-row" data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">

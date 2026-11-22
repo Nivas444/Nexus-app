@@ -2619,6 +2619,55 @@
           method: 'POST',
           body: JSON.stringify(payload)
         });
+      },
+      async getTds() {
+        return await request('/accounts/tds', {
+          method: 'GET'
+        });
+      },
+      async submitTdsChallan(payload) {
+        return await request('/accounts/tds/challan', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async getGstr3b(year, month) {
+        const params = [];
+        if (year) params.push(`year=${encodeURIComponent(year)}`);
+        if (month) params.push(`month=${encodeURIComponent(month)}`);
+        const qs = params.length ? `?${params.join('&')}` : '';
+        return await request(`/accounts/gstr3b${qs}`, {
+          method: 'GET'
+        });
+      },
+      async submitGstr3bReturns(payload) {
+        return await request('/accounts/gstr3b/submit', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      module: {
+        async getSales() {
+          return await request('/accounts/module/sales', { method: 'GET' });
+        },
+        async getPurchase() {
+          return await request('/accounts/module/purchase', { method: 'GET' });
+        },
+        async getPayment() {
+          return await request('/accounts/module/payment', { method: 'GET' });
+        },
+        async getReceipt() {
+          return await request('/accounts/module/receipt', { method: 'GET' });
+        },
+        async getBank() {
+          return await request('/accounts/module/bank', { method: 'GET' });
+        },
+        async getTds() {
+          return await request('/accounts/module/tds', { method: 'GET' });
+        },
+        async getGst() {
+          return await request('/accounts/module/gst', { method: 'GET' });
+        }
       }
     },
 

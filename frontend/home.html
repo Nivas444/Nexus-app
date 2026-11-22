@@ -9519,7 +9519,7 @@
               Add Payment Request
             </div>
             <div class="side-header-top-icons" style="margin-left: auto;">
-              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 
@@ -9663,7 +9663,7 @@
               Add Entry
             </div>
             <div class="side-header-top-icons" style="margin-left: auto;">
-              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 
@@ -9742,29 +9742,62 @@
           </form>
         </div>
 
-        <!-- Accounts Manager -> Attach Payment Challan Card (TDS) -->
-        <div class="side-form-card" id="accAttachChallanCard" style="display: none; width: 480px; max-width: 95vw;">
+        <!-- Accounts Manager -> TDS Challan Details Card (TDS) -->
+        <div class="side-form-card" id="accTdsChallanDetailsCard" style="display: none; width: 520px; max-width: 95vw;">
           <div class="side-form-header" style="position: relative; width: 100%; height: 52px; display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 0 8px 0 0; margin-bottom: 20px;">
-            <div class="side-form-title-badge" id="lblAccAttachChallanTitle"
+            <div class="side-form-title-badge" id="lblAccTdsChallanDetailsTitle"
               style="background-color: #00cba0; color: #ffffff; font-weight: 700; font-size: 1.15rem; padding: 0 54px 0 24px; clip-path: polygon(0 0, 100% 0, calc(100% - 36px) 100%, 0 100%); height: 52px; display: flex; align-items: center; margin: 0;">
-              Attach Payment Challan
+              TDS Challan Details
             </div>
             <div class="side-header-top-icons" style="display: flex; align-items: center; gap: 14px; margin-left: auto;">
-              <!-- Save Icon: initially hidden, appears near close icon after PDF upload -->
-              <button type="button" class="side-top-icon-btn" id="btnSaveAccChallan" onclick="saveAccChallanPdf()" title="Save Challan" style="background: none; border: none; cursor: pointer; padding: 2px; display: none; align-items: center; justify-content: center;">
-                <img src="icons/Save.svg" alt="Save" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
-              </button>
-              <button type="button" class="side-form-close-btn" id="btnCloseAccAttachChallan" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAccTdsChallanDetails" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 
-          <div class="side-form-body" style="padding: 24px 24px 36px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <input type="file" id="inpAccChallanPdf" accept=".pdf, application/pdf" style="display: none;" onchange="handleAccChallanPdfSelected(this)">
-            <button type="button" class="bulk-upload-dropzone-btn" id="btnTriggerAccChallanPdf" onclick="document.getElementById('inpAccChallanPdf').click();" title="Upload PDF" style="background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; transition: transform 0.2s ease;">
-              <img src="icons/PDF Upload.svg" alt="PDF Upload" width="68" height="68" style="width: 68px; height: 68px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0, 203, 160, 0.25));">
-              <span id="lblAccChallanFileName" style="font-size: 0.95rem; font-weight: 600; color: #475569;">Click to Upload PDF</span>
-            </button>
-          </div>
+          <form class="side-form-body" id="frmAccTdsChallanDetails" onsubmit="event.preventDefault(); submitAccTdsChallanDetails();" style="padding: 16px 24px 28px 24px; display: flex; flex-direction: column; gap: 18px;">
+            <!-- 1. TDS Challan Number (Typeable Input) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpAccTdsChallanNumber" style="flex: 0 0 175px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">TDS Challan Number</label>
+              <div class="form-input-wrap" style="flex: 1;">
+                <input type="text" class="form-input-control" id="inpAccTdsChallanNumber" placeholder="Enter TDS Challan Number" required style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 14px; font-size: 0.95rem; background: #ffffff; color: #0f172a;">
+              </div>
+            </div>
+
+            <!-- 2. TDS Paid Date (With Calendar Icon & Functionality) -->
+            <div class="form-row-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;">
+              <label class="form-label" for="inpAccTdsPaidDate" style="flex: 0 0 175px; font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0;">TDS Paid Date</label>
+              <div class="form-input-wrap with-action-badge" style="flex: 1; position: relative; display: flex; align-items: center;">
+                <input type="text" class="form-input-control date-picker-input nexus-cal-input" id="inpAccTdsPaidDate" placeholder="DD - MM - YYYY" readonly
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(this, document.getElementById('btnAccTdsPaidDateCalendar')); }"
+                  style="width: 100%; height: 42px; border-radius: 8px; border: 1.5px solid #cbd5e1; padding: 0 46px 0 14px; font-size: 0.95rem; background: #ffffff; cursor: pointer; color: #0f172a;">
+                <button type="button" class="input-pdf-badge btn-calendar-trigger" id="btnAccTdsPaidDateCalendar"
+                  onclick="event.stopPropagation(); if(typeof openNexusCalendar === 'function') { openNexusCalendar(document.getElementById('inpAccTdsPaidDate'), this); }"
+                  title="Select TDS Paid Date" aria-label="Select TDS Paid Date"
+                  style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; z-index: 5;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="24" height="24" style="width: 24px; height: 24px; pointer-events: none; display: block; object-fit: contain;">
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. TDS Challan Document (PDF Upload Icon Centered) -->
+            <div class="form-row-group" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding-top: 4px;">
+              <label class="form-label" style="font-size: 0.95rem; font-weight: 600; color: #334155; margin-bottom: 0; text-align: center;">TDS Challan Document</label>
+              <input type="file" id="inpAccTdsChallanPdf" accept=".pdf, application/pdf" style="display: none;" onchange="handleAccTdsChallanPdfSelected(this)">
+              <button type="button" class="bulk-upload-dropzone-btn" id="btnTriggerAccTdsChallanPdf" onclick="document.getElementById('inpAccTdsChallanPdf').click();" title="Upload TDS Challan PDF"
+                style="background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; transition: transform 0.2s ease;">
+                <img src="icons/PDF Upload.svg" alt="PDF Upload" width="54" height="54" style="width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0, 203, 160, 0.25));">
+                <span id="lblAccTdsChallanFileName" style="font-size: 0.9rem; font-weight: 600; color: #475569;">Click to Upload PDF</span>
+              </button>
+            </div>
+
+            <!-- 4. Centered Submit Icon Below Last Field -->
+            <div style="display: flex; justify-content: center; align-items: center; padding-top: 6px;">
+              <button type="submit" id="btnSubmitAccTdsChallan" title="Submit TDS Challan Details" aria-label="Submit TDS Challan Details"
+                style="background: transparent; border: none; padding: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                <img src="icons/Submit.svg" alt="Submit" width="34" height="34" style="display: block;">
+              </button>
+            </div>
+          </form>
         </div>
 
         <!-- Accounts Manager -> Attach Payment Returns Card (GSTR 3B) -->
@@ -9779,7 +9812,7 @@
               <button type="button" class="side-top-icon-btn" id="btnSaveAccReturns" onclick="saveAccReturnsPdf()" title="Save Returns" style="background: none; border: none; cursor: pointer; padding: 2px; display: none; align-items: center; justify-content: center;">
                 <img src="icons/Save.svg" alt="Save" width="28" height="28" style="width: 28px; height: 28px; object-fit: contain;">
               </button>
-              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+              <button type="button" class="side-form-close-btn" id="btnCloseAccAttachReturns" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 
@@ -9807,7 +9840,7 @@
               </div>
             </div>
             <div class="side-header-top-icons" style="margin-left: auto;">
-              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 
@@ -9858,7 +9891,7 @@
               </div>
             </div>
             <div class="side-header-top-icons" style="margin-left: auto;">
-              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 
@@ -9902,7 +9935,7 @@
               INV-2026-0891
             </div>
             <div class="side-header-top-icons" style="margin-left: auto;">
-              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center;">&times;</button>
+              <button type="button" class="side-form-close-btn" onclick="closeSideForm()" aria-label="Close form" style="color: #ef4444; font-size: 32px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px; display: flex; align-items: center; justify-content: center; transform: none !important;">&times;</button>
             </div>
           </div>
 

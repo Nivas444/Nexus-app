@@ -47,6 +47,8 @@ def run_accounts_migration():
         conn.execute(text("ALTER TABLE nexus_accounts.sales ADD COLUMN IF NOT EXISTS gstr1_status VARCHAR(50);"))
         # 4. Ensure purchase.gstr2b_status exists
         conn.execute(text("ALTER TABLE nexus_accounts.purchase ADD COLUMN IF NOT EXISTS gstr2b_status VARCHAR(50) DEFAULT 'Pending';"))
+        # 5. Ensure gst_payment."3b_documents" exists
+        conn.execute(text('ALTER TABLE nexus_accounts.gst_payment ADD COLUMN IF NOT EXISTS "3b_documents" TEXT;'))
         conn.commit()
 
         print("Accounts migration check completed successfully.")

@@ -37,6 +37,8 @@ from app.models.purchase import PurchaseRequest, Purchase
 from app.models.account_payment import AccountPayment
 from app.models.account_purchase import AccountPurchase
 from app.models.account_bank import AccountBank
+from app.models.account_tds_payable import AccountTdsPayable
+from app.models.account_gst_payment import AccountGstPayment
 from app.models.admin_transport import AdminTransport
 from app.models.admin_ewaybill import AdminEWayBill
 
@@ -83,6 +85,8 @@ __all__ = [
     "AccountPayment",
     "AccountPurchase",
     "AccountBank",
+    "AccountTdsPayable",
+    "AccountGstPayment",
     "AdminTransport",
     "AdminEWayBill"
 ]

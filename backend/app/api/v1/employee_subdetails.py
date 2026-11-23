@@ -10,9 +10,11 @@ from app.schemas.employee_subdetails import (
     EmployeeBankDetailResponse,
     EmployeeBankDocumentMetadata,
     EmployeeAssetDetailCreate,
+    EmployeeAssetDetailUpdate,
     EmployeeAssetDetailResponse,
     EmployeeAssetTotalResponse,
     EmployeeSalaryDetailCreate,
+    EmployeeSalaryDetailUpdate,
     EmployeeSalaryDetailResponse
 )
 
@@ -361,8 +363,29 @@ def get_all_assets_total(
     return service.get_asset_total(employee_id_or_code=employee_id)
 
 
+@router.put(
+    "/master/employee-assets/{asset_id}",
+    response_model=EmployeeAssetDetailResponse,
+    summary="Update Employee Asset Record"
+)
+@router.put(
+    "/employee-assets/{asset_id}",
+    response_model=EmployeeAssetDetailResponse,
+    summary="Update Employee Asset Record (Alias)",
+    include_in_schema=False
+)
+def update_employee_asset(
+    asset_id: int = Path(..., ge=1, description="Primary key of asset detail"),
+    payload: EmployeeAssetDetailUpdate = ...,
+    db: Session = Depends(get_db)
+):
+    """Update an existing employee asset record in PostgreSQL `employee_assets_details`."""
+    service = EmployeeSubdetailsService(db)
+    return service.update_asset_detail(asset_id, payload)
+
+
 # ==============================================================================
-# Salary Details Endpoints (Add-Only)
+# Salary Details Endpoints
 # ==============================================================================
 
 @router.post(
@@ -456,3 +479,24 @@ def list_all_salary_details(
     """
     service = EmployeeSubdetailsService(db)
     return service.get_salary_details(employee_id_or_code=employee_id)
+
+
+@router.put(
+    "/master/employee-salary-details/{salary_id}",
+    response_model=EmployeeSalaryDetailResponse,
+    summary="Update Employee Salary Details"
+)
+@router.put(
+    "/employee-salary-details/{salary_id}",
+    response_model=EmployeeSalaryDetailResponse,
+    summary="Update Employee Salary Details (Alias)",
+    include_in_schema=False
+)
+def update_employee_salary_detail(
+    salary_id: int = Path(..., ge=1, description="Primary key of salary detail"),
+    payload: EmployeeSalaryDetailUpdate = ...,
+    db: Session = Depends(get_db)
+):
+    """Update an existing employee salary record in PostgreSQL `employee_salary_details`."""
+    service = EmployeeSubdetailsService(db)
+    return service.update_salary_detail(salary_id, payload)

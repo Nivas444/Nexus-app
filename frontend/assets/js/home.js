@@ -50732,7 +50732,7 @@ function initSideFormEvents() {
       bankPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
-        const activeEmp = currentViewedEmpId;
+        const activeEmp = window.currentViewedEmpId || currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
         if (activeEmp && window.loadEmployeeBankData) {
           window.loadEmployeeBankData(activeEmp);
         } else {
@@ -50758,7 +50758,7 @@ function initSideFormEvents() {
       salaryPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
-        const activeEmp = currentViewedEmpId;
+        const activeEmp = window.currentViewedEmpId || currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
         if (activeEmp && window.loadEmployeeSalaryData) {
           window.loadEmployeeSalaryData(activeEmp);
         } else {
@@ -50783,7 +50783,7 @@ function initSideFormEvents() {
       assetPanel.style.display = isHidden ? 'flex' : 'none';
       updateCardDimmedState();
       if (isHidden) {
-        const activeEmp = currentViewedEmpId;
+        const activeEmp = window.currentViewedEmpId || currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
         if (activeEmp && window.loadEmployeeAssetData) {
           window.loadEmployeeAssetData(activeEmp);
         } else {
@@ -51783,10 +51783,81 @@ function initSideFormEvents() {
   const addSalaryCard = document.getElementById('addSalaryCard');
   const btnCloseAddSalaryCard = document.getElementById('btnCloseAddSalaryCard');
   const btnSubmitAddSalary = document.getElementById('btnSubmitAddSalary');
+  const btnSalaryCardEditToggle = document.getElementById('btnSalaryCardEditToggle');
+
+  window._editingEmpSalaryId = null;
+
+  function setSalaryFormDisabled(disabled) {
+    const frm = document.getElementById('frmAddSalary');
+    if (!frm) return;
+    frm.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.classList.contains('nexus-cal-input')) {
+        el.style.pointerEvents = disabled ? 'none' : 'auto';
+        el.disabled = disabled;
+      } else {
+        el.disabled = disabled;
+      }
+    });
+    frm.querySelectorAll('.btn-calendar-trigger').forEach(btn => {
+      btn.disabled = disabled;
+      btn.style.pointerEvents = disabled ? 'none' : 'auto';
+    });
+    const saveWrap = frm.querySelector('.form-submit-inside-wrap');
+    if (saveWrap) saveWrap.style.display = disabled ? 'none' : 'flex';
+  }
+
+  window.openViewEmployeeSalaryCard = function(salaryId) {
+    const list = window._empSalaryRecordsCache || [];
+    const rec = list.find(r => String(r.salary_id || r.id) === String(salaryId));
+    if (!rec || !addSalaryCard) return;
+
+    window._editingEmpSalaryId = rec.salary_id || rec.id;
+    const lblTitle = document.getElementById('lblAddSalaryCardTitle');
+    if (lblTitle) lblTitle.innerText = 'View Salary';
+    if (btnSalaryCardEditToggle) btnSalaryCardEditToggle.style.display = 'inline-flex';
+
+    const fmtDate = (d) => {
+      if (!d) return '';
+      const s = String(d).split('T')[0];
+      const parts = s.split('-');
+      return (parts.length === 3 && parts[0].length === 4) ? `${parts[2]} - ${parts[1]} - ${parts[0]}` : s;
+    };
+    const inpFrom = document.getElementById('inpAddSalaryFrom');
+    const inpTo = document.getElementById('inpAddSalaryTo');
+    const inpGross = document.getElementById('inpAddSalaryGross');
+    const inpStatus = document.getElementById('inpAddSalaryStatus');
+    if (inpFrom) inpFrom.value = fmtDate(rec.from_date || rec.fromDate);
+    if (inpTo) inpTo.value = fmtDate(rec.to_date || rec.toDate);
+    if (inpGross) inpGross.value = rec.gross_salary !== undefined ? rec.gross_salary : (rec.grossSalary || '');
+    const isInactive = String(rec.status || '').toLowerCase().includes('in') || String(rec.status || '').toLowerCase().includes('de');
+    if (inpStatus) inpStatus.checked = !isInactive;
+
+    setSalaryFormDisabled(true);
+    if (salaryPanel) salaryPanel.classList.add('card-dimmed-blurred');
+    addSalaryCard.style.display = 'block';
+    updateCardDimmedState();
+  };
+
+  if (btnSalaryCardEditToggle) {
+    btnSalaryCardEditToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const lblTitle = document.getElementById('lblAddSalaryCardTitle');
+      if (lblTitle) lblTitle.innerText = 'Edit Salary';
+      btnSalaryCardEditToggle.style.display = 'none';
+      setSalaryFormDisabled(false);
+      showToast('Edit mode enabled for Salary');
+    });
+  }
 
   if (btnSalaryAddRow && addSalaryCard && salaryPanel) {
     btnSalaryAddRow.addEventListener('click', (e) => {
       e.stopPropagation();
+      window._editingEmpSalaryId = null;
+      document.getElementById('frmAddSalary')?.reset();
+      const lblTitle = document.getElementById('lblAddSalaryCardTitle');
+      if (lblTitle) lblTitle.innerText = 'Add Salary';
+      if (btnSalaryCardEditToggle) btnSalaryCardEditToggle.style.display = 'none';
+      setSalaryFormDisabled(false);
       salaryPanel.classList.add('card-dimmed-blurred');
       addSalaryCard.style.display = 'block';
       showToast('Add Salary Form opened');
@@ -51795,6 +51866,7 @@ function initSideFormEvents() {
 
   if (btnCloseAddSalaryCard && addSalaryCard && salaryPanel) {
     btnCloseAddSalaryCard.addEventListener('click', () => {
+      window._editingEmpSalaryId = null;
       addSalaryCard.style.display = 'none';
       closeNexusCalendar();
       salaryPanel.classList.remove('card-dimmed-blurred');
@@ -51824,7 +51896,7 @@ function initSideFormEvents() {
       const grossVal = parseFloat(document.getElementById('inpAddSalaryGross')?.value) || 0;
       const isStatusActive = document.getElementById('inpAddSalaryStatus')?.checked ?? true;
 
-      const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+      const activeEmp = window.currentViewedEmpId || currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
       const payload = {
         from_date: fromVal || '2026-01-01',
         to_date: toVal || '2026-12-31',
@@ -51834,7 +51906,13 @@ function initSideFormEvents() {
 
       if (typeof NexusApi !== 'undefined' && NexusApi.employeeSalary) {
         try {
-          await NexusApi.employeeSalary.create(payload, activeEmp);
+          const isEditing = Boolean(window._editingEmpSalaryId);
+          if (isEditing && typeof NexusApi.employeeSalary.update === 'function') {
+            await NexusApi.employeeSalary.update(window._editingEmpSalaryId, payload);
+          } else {
+            await NexusApi.employeeSalary.create(payload, activeEmp);
+          }
+          window._editingEmpSalaryId = null;
           document.getElementById('frmAddSalary')?.reset();
           if (window.loadEmployeeSalaryData) await window.loadEmployeeSalaryData(activeEmp);
 
@@ -51843,14 +51921,15 @@ function initSideFormEvents() {
           salaryPanel.classList.remove('card-dimmed-blurred');
           updateCardDimmedState();
 
+          const successMsg = isEditing ? 'Salary details updated successfully!' : 'Salary details added successfully!';
           if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup('Salary details added successfully!', 'Task Completed');
+            showSvgSuccessPopup(successMsg, 'Task Completed');
           } else {
-            showToast('Salary details added successfully!');
+            showToast(successMsg);
           }
         } catch (err) {
           console.error('Failed to save salary details via API:', err);
-          const msg = err.detail || err.message || 'Failed to add salary details.';
+          const msg = err.detail || err.message || 'Failed to save salary details.';
           if (typeof showSvgErrorPopup === 'function') {
             showSvgErrorPopup(msg, 'Error Message!');
           } else {
@@ -51864,9 +51943,9 @@ function initSideFormEvents() {
         salaryPanel.classList.remove('card-dimmed-blurred');
         updateCardDimmedState();
         if (typeof showSvgSuccessPopup === 'function') {
-          showSvgSuccessPopup('Salary details added successfully!', 'Task Completed');
+          showSvgSuccessPopup('Salary details saved successfully!', 'Task Completed');
         } else {
-          showToast('Salary details added successfully!');
+          showToast('Salary details saved successfully!');
         }
       }
     });
@@ -51876,6 +51955,76 @@ function initSideFormEvents() {
   const addAssetCard = document.getElementById('addAssetCard');
   const btnCloseAddAssetCard = document.getElementById('btnCloseAddAssetCard');
   const btnSubmitAddAsset = document.getElementById('btnSubmitAddAsset');
+  const btnAssetCardEditToggle = document.getElementById('btnAssetCardEditToggle');
+
+  window._editingEmpAssetId = null;
+
+  function setAssetFormDisabled(disabled) {
+    const frm = document.getElementById('frmAddAsset');
+    if (!frm) return;
+    frm.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.classList.contains('nexus-cal-input')) {
+        el.style.pointerEvents = disabled ? 'none' : 'auto';
+        el.disabled = disabled;
+      } else {
+        el.disabled = disabled;
+      }
+    });
+    frm.querySelectorAll('.btn-calendar-trigger').forEach(btn => {
+      btn.disabled = disabled;
+      btn.style.pointerEvents = disabled ? 'none' : 'auto';
+    });
+    const saveWrap = frm.querySelector('.form-submit-inside-wrap');
+    if (saveWrap) saveWrap.style.display = disabled ? 'none' : 'flex';
+  }
+
+  window.openViewEmployeeAssetCard = function(assetId) {
+    const list = window._empAssetRecordsCache || [];
+    const rec = list.find(r => String(r.asset_id || r.id) === String(assetId));
+    if (!rec || !addAssetCard) return;
+
+    window._editingEmpAssetId = rec.asset_id || rec.id;
+    const lblTitle = document.getElementById('lblAddAssetCardTitle');
+    if (lblTitle) lblTitle.innerText = 'View Asset';
+    if (btnAssetCardEditToggle) btnAssetCardEditToggle.style.display = 'inline-flex';
+
+    const fmtDate = (d) => {
+      if (!d) return '';
+      const s = String(d).split('T')[0];
+      const parts = s.split('-');
+      return (parts.length === 3 && parts[0].length === 4) ? `${parts[2]} - ${parts[1]} - ${parts[0]}` : s;
+    };
+    const inpDate = document.getElementById('inpAddAssetDate');
+    const inpDet = document.getElementById('inpAddAssetDetails');
+    const inpUom = document.getElementById('inpAddAssetUom');
+    const inpQ = document.getElementById('inpAddAssetQty');
+    const inpR = document.getElementById('inpAddAssetRate');
+    const inpA = document.getElementById('inpAddAssetAmount');
+    const inpExp = document.getElementById('inpAddAssetExpiryDate');
+    if (inpDate) inpDate.value = fmtDate(rec.date);
+    if (inpDet) inpDet.value = rec.asset_details || rec.assetDetails || '';
+    if (inpUom) inpUom.value = rec.uom || 'Nos';
+    if (inpQ) inpQ.value = rec.qty !== undefined ? rec.qty : '1';
+    if (inpR) inpR.value = rec.rate !== undefined ? rec.rate : '0';
+    if (inpA) inpA.value = rec.amount !== undefined ? rec.amount : '0';
+    if (inpExp) inpExp.value = fmtDate(rec.expiry_date || rec.expiryDate);
+
+    setAssetFormDisabled(true);
+    if (assetPanel) assetPanel.classList.add('card-dimmed-blurred');
+    addAssetCard.style.display = 'block';
+    updateCardDimmedState();
+  };
+
+  if (btnAssetCardEditToggle) {
+    btnAssetCardEditToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const lblTitle = document.getElementById('lblAddAssetCardTitle');
+      if (lblTitle) lblTitle.innerText = 'Edit Asset';
+      btnAssetCardEditToggle.style.display = 'none';
+      setAssetFormDisabled(false);
+      showToast('Edit mode enabled for Asset');
+    });
+  }
 
   // Auto-calculate amount in Add Asset Form
   const inpAssetQty = document.getElementById('inpAddAssetQty');
@@ -51894,6 +52043,12 @@ function initSideFormEvents() {
   if (btnAssetAddRow && addAssetCard && assetPanel) {
     btnAssetAddRow.addEventListener('click', (e) => {
       e.stopPropagation();
+      window._editingEmpAssetId = null;
+      document.getElementById('frmAddAsset')?.reset();
+      const lblTitle = document.getElementById('lblAddAssetCardTitle');
+      if (lblTitle) lblTitle.innerText = 'Add Asset';
+      if (btnAssetCardEditToggle) btnAssetCardEditToggle.style.display = 'none';
+      setAssetFormDisabled(false);
       assetPanel.classList.add('card-dimmed-blurred');
       addAssetCard.style.display = 'block';
       updateCardDimmedState();
@@ -51904,6 +52059,7 @@ function initSideFormEvents() {
   if (btnCloseAddAssetCard && addAssetCard && assetPanel) {
     btnCloseAddAssetCard.addEventListener('click', (e) => {
       if (e) e.stopPropagation();
+      window._editingEmpAssetId = null;
       addAssetCard.style.display = 'none';
       closeNexusCalendar();
       assetPanel.classList.remove('card-dimmed-blurred');
@@ -51934,7 +52090,7 @@ function initSideFormEvents() {
         return;
       }
 
-      const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
+      const activeEmp = window.currentViewedEmpId || currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
       const payload = {
         date: date || '2026-01-01',
         asset_details: details,
@@ -51947,7 +52103,13 @@ function initSideFormEvents() {
 
       if (typeof NexusApi !== 'undefined' && NexusApi.employeeAssets) {
         try {
-          await NexusApi.employeeAssets.create(payload, activeEmp);
+          const isEditing = Boolean(window._editingEmpAssetId);
+          if (isEditing && typeof NexusApi.employeeAssets.update === 'function') {
+            await NexusApi.employeeAssets.update(window._editingEmpAssetId, payload);
+          } else {
+            await NexusApi.employeeAssets.create(payload, activeEmp);
+          }
+          window._editingEmpAssetId = null;
           document.getElementById('frmAddAsset')?.reset();
           if (window.loadEmployeeAssetData) await window.loadEmployeeAssetData(activeEmp);
 
@@ -51956,14 +52118,15 @@ function initSideFormEvents() {
           assetPanel.classList.remove('card-dimmed-blurred');
           updateCardDimmedState();
 
+          const successMsg = isEditing ? 'Asset details updated successfully!' : 'Asset details added successfully!';
           if (typeof showSvgSuccessPopup === 'function') {
-            showSvgSuccessPopup('Asset details added successfully!', 'Task Completed');
+            showSvgSuccessPopup(successMsg, 'Task Completed');
           } else {
-            showToast('Asset details added successfully!');
+            showToast(successMsg);
           }
         } catch (err) {
           console.error('Failed to save asset details via API:', err);
-          const msg = err.detail || err.message || 'Failed to add asset details.';
+          const msg = err.detail || err.message || 'Failed to save asset details.';
           if (typeof showSvgErrorPopup === 'function') {
             showSvgErrorPopup(msg, 'Error Message!');
           } else {
@@ -51977,9 +52140,9 @@ function initSideFormEvents() {
         assetPanel.classList.remove('card-dimmed-blurred');
         updateCardDimmedState();
         if (typeof showSvgSuccessPopup === 'function') {
-          showSvgSuccessPopup('Asset details added successfully!', 'Task Completed');
+          showSvgSuccessPopup('Asset details saved successfully!', 'Task Completed');
         } else {
-          showToast('Asset details added successfully!');
+          showToast('Asset details saved successfully!');
         }
       }
     });
@@ -53549,6 +53712,7 @@ window.loadEmployeeAssetData = async function(empId = null) {
         NexusApi.employeeAssets.getTotal(empId)
       ]);
       const assets = Array.isArray(records) ? records : [];
+      window._empAssetRecordsCache = assets;
       let totalSum = 0;
       assets.forEach(r => {
         totalSum += (parseFloat(r.amount) || 0);
@@ -53568,10 +53732,13 @@ window.loadEmployeeAssetData = async function(empId = null) {
             const qtyVal = r.qty !== undefined ? r.qty : '1';
             const rateVal = r.rate !== undefined ? parseFloat(r.rate).toFixed(2) : '0.00';
             const amtVal = r.amount !== undefined ? parseFloat(r.amount).toFixed(2) : '0.00';
+            const assetRowId = r.asset_id || r.id || '';
             return `
-              <tr>
+              <tr data-asset-id="${assetRowId}">
                 <td class="col-asset-date">${dt}</td>
-                <td class="col-asset-detail">${r.asset_details || r.assetDetails || ''}</td>
+                <td class="col-asset-detail">
+                  <a href="#" class="req-link td-link-blue" onclick="openViewEmployeeAssetCard('${assetRowId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${r.asset_details || r.assetDetails || ''}</a>
+                </td>
                 <td class="col-asset-uom">${r.uom || 'Nos'}</td>
                 <td class="col-asset-qty">${qtyVal}</td>
                 <td class="col-asset-rate">${rateVal}</td>
@@ -53602,6 +53769,7 @@ window.loadEmployeeSalaryData = async function(empId = null) {
     try {
       const records = await NexusApi.employeeSalary.getAll(empId);
       const salaries = Array.isArray(records) ? records : [];
+      window._empSalaryRecordsCache = salaries;
       if (tbody) {
         if (salaries.length === 0) {
           tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #64748b; padding: 18px;">No salary structure records found.</td></tr>`;
@@ -53617,9 +53785,12 @@ window.loadEmployeeSalaryData = async function(empId = null) {
             const sa = r.sa !== undefined ? parseFloat(r.sa).toFixed(2) : '0.00';
             const total = r.gross_salary !== undefined ? parseFloat(r.gross_salary).toFixed(2) : '0.00';
             const isInactive = (r.status || '').toLowerCase().includes('in') || (r.status || '').toLowerCase().includes('de');
+            const salaryRowId = r.salary_id || r.id || '';
             return `
-              <tr>
-                <td class="col-salary-year">${fromYear}</td>
+              <tr data-salary-id="${salaryRowId}">
+                <td class="col-salary-year">
+                  <a href="#" class="req-link td-link-blue" onclick="openViewEmployeeSalaryCard('${salaryRowId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${fromYear}</a>
+                </td>
                 <td class="col-salary-month">${fromMonth}</td>
                 <td class="col-salary-year">${toYear}</td>
                 <td class="col-salary-month">${toMonth}</td>
@@ -53627,7 +53798,9 @@ window.loadEmployeeSalaryData = async function(empId = null) {
                 <td class="col-salary-sub col-salary-hra">${hra}</td>
                 <td class="col-salary-sub col-salary-da">${da}</td>
                 <td class="col-salary-sub col-salary-sa">${sa}</td>
-                <td class="col-salary-sub col-salary-total">${total}</td>
+                <td class="col-salary-sub col-salary-total">
+                  <a href="#" class="req-link td-link-blue" onclick="openViewEmployeeSalaryCard('${salaryRowId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 600; cursor: pointer;">${total}</a>
+                </td>
                 <td class="col-salary-status">
                   <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'De-Active' : 'Active'}</span>
                 </td>

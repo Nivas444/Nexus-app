@@ -304,6 +304,7 @@
     }
   
     currentViewedEmpId = emp.employee_id || emp.id;
+    window.currentViewedEmpId = currentViewedEmpId;
     isEmployeeFormEditing = false;
   
     const overlay = document.getElementById('sideFormOverlay');
@@ -319,13 +320,13 @@
     const lblTitle = document.getElementById('lblEmployeeCardTitle');
     if (lblTitle) lblTitle.innerText = emp.employeeName || emp.employee_name || 'View Employee';
   
-    // Hide Bank, Asset, Salary action icons in View Employee tab
+    // Show Bank, Asset, Salary action icons in View Employee tab
     const btnEmpBank = document.getElementById('btnEmpBankDetails');
     const btnEmpAsset = document.getElementById('btnEmpAssetDetails');
     const btnEmpSalary = document.getElementById('btnEmpSalaryDetails');
-    if (btnEmpBank) btnEmpBank.style.display = 'none';
-    if (btnEmpAsset) btnEmpAsset.style.display = 'none';
-    if (btnEmpSalary) btnEmpSalary.style.display = 'none';
+    if (btnEmpBank) btnEmpBank.style.display = 'inline-flex';
+    if (btnEmpAsset) btnEmpAsset.style.display = 'inline-flex';
+    if (btnEmpSalary) btnEmpSalary.style.display = 'inline-flex';
   
     // Show Edit button with Blue Pencil icon
     const btnEditToggle = document.getElementById('btnEmpCardEditToggle');

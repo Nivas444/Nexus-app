@@ -11153,10 +11153,10 @@
         <div class="side-form-card" id="addSalaryCard" style="display: none; width: 440px;">
           <!-- Header Ribbon Badge: Add Salary -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Salary</div>
+            <div class="side-form-title-badge" id="lblAddSalaryCardTitle">Add Salary</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-top-icon-btn" title="Edit Info">
-                <img src="icons/Edit.svg" alt="Edit" width="24" height="24">
+              <button type="button" class="side-top-icon-btn" id="btnSalaryCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgSalaryCardEditIcon" alt="Edit" width="24" height="24">
               </button>
               <button type="button" class="side-form-close-btn" id="btnCloseAddSalaryCard"
                 aria-label="Close form">&times;</button>
@@ -11262,8 +11262,11 @@
         <div class="side-form-card" id="addAssetCard" style="display: none; width: 440px;">
           <!-- Header Ribbon Badge: Add Asset -->
           <div class="side-form-header">
-            <div class="side-form-title-badge">Add Asset</div>
+            <div class="side-form-title-badge" id="lblAddAssetCardTitle">Add Asset</div>
             <div class="side-header-top-icons">
+              <button type="button" class="side-top-icon-btn" id="btnAssetCardEditToggle" title="Edit Info" style="display: none;">
+                <img src="icons/Edit.svg" id="imgAssetCardEditIcon" alt="Edit" width="24" height="24">
+              </button>
               <button type="button" class="side-form-close-btn" id="btnCloseAddAssetCard"
                 aria-label="Close form">&times;</button>
             </div>

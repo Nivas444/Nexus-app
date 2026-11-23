@@ -230,6 +230,47 @@ class EmployeeAssetDetailCreate(EmployeeAssetDetailBase):
         return data
 
 
+class EmployeeAssetDetailUpdate(BaseModel):
+    date: Optional[Union[dt_date, str]] = None
+    asset_details: Optional[str] = None
+    serial_number: Optional[str] = None
+    uom: Optional[str] = None
+    qty: Optional[Union[Decimal, float, int, str]] = None
+    rate: Optional[Union[Decimal, float, int, str]] = None
+    amount: Optional[Union[Decimal, float, int, str]] = None
+    expiry_date: Optional[Union[dt_date, str]] = None
+    returned_status: Optional[str] = None
+    returned_date: Optional[Union[dt_date, str]] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def map_and_parse(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "assetDetails" in data and "asset_details" not in data:
+                data["asset_details"] = data.get("assetDetails")
+            if "serialNumber" in data and "serial_number" not in data:
+                data["serial_number"] = data.get("serialNumber")
+            if "expiryDate" in data and "expiry_date" not in data:
+                data["expiry_date"] = data.get("expiryDate")
+            if "returnedStatus" in data and "returned_status" not in data:
+                data["returned_status"] = data.get("returnedStatus")
+            if "returnedDate" in data and "returned_date" not in data:
+                data["returned_date"] = data.get("returnedDate")
+            if "date" in data:
+                data["date"] = parse_sub_date(data.get("date"))
+            if "expiry_date" in data:
+                data["expiry_date"] = parse_sub_date(data.get("expiry_date"))
+            if "returned_date" in data:
+                data["returned_date"] = parse_sub_date(data.get("returned_date"))
+            if "qty" in data and data.get("qty") is not None:
+                data["qty"] = parse_sub_decimal(data.get("qty"), Decimal("1.00"))
+            if "rate" in data and data.get("rate") is not None:
+                data["rate"] = parse_sub_decimal(data.get("rate"), Decimal("0.00"))
+            if "amount" in data and data.get("amount") is not None:
+                data["amount"] = parse_sub_decimal(data.get("amount"), Decimal("0.00"))
+        return data
+
+
 class EmployeeAssetDetailResponse(BaseModel):
     asset_id: int
     company_name: Optional[str] = "Nexus"
@@ -329,6 +370,49 @@ class EmployeeSalaryDetailCreate(EmployeeSalaryDetailBase):
             data["sa"] = sa
 
             if "status" in data:
+                data["status"] = parse_sub_status(data.get("status"))
+        return data
+
+
+class EmployeeSalaryDetailUpdate(BaseModel):
+    from_date: Optional[Union[dt_date, str]] = None
+    to_date: Optional[Union[dt_date, str]] = None
+    gross_salary: Optional[Union[Decimal, float, int, str]] = None
+    basic_salary: Optional[Union[Decimal, float, int, str]] = None
+    hra: Optional[Union[Decimal, float, int, str]] = None
+    da: Optional[Union[Decimal, float, int, str]] = None
+    sa: Optional[Union[Decimal, float, int, str]] = None
+    status: Optional[str] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def map_and_parse(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "fromDate" in data and "from_date" not in data:
+                data["from_date"] = data.get("fromDate")
+            if "toDate" in data and "to_date" not in data:
+                data["to_date"] = data.get("toDate")
+            if "grossSalary" in data and "gross_salary" not in data:
+                data["gross_salary"] = data.get("grossSalary")
+            if "basicSalary" in data and "basic_salary" not in data:
+                data["basic_salary"] = data.get("basicSalary")
+            if "from_date" in data:
+                data["from_date"] = parse_sub_date(data.get("from_date"))
+            if "to_date" in data:
+                data["to_date"] = parse_sub_date(data.get("to_date"))
+            if "gross_salary" in data and data.get("gross_salary") is not None:
+                gross = parse_sub_decimal(data.get("gross_salary"), Decimal("0.00"))
+                data["gross_salary"] = gross
+                if data.get("basic_salary") is None:
+                    data["basic_salary"] = (gross * Decimal("0.55")).quantize(Decimal("0.01"))
+                    data["hra"] = (gross * Decimal("0.25")).quantize(Decimal("0.01"))
+                    data["da"] = (gross * Decimal("0.12")).quantize(Decimal("0.01"))
+                    data["sa"] = (gross * Decimal("0.08")).quantize(Decimal("0.01"))
+            else:
+                for field_name in ("basic_salary", "hra", "da", "sa"):
+                    if field_name in data and data.get(field_name) is not None:
+                        data[field_name] = parse_sub_decimal(data.get(field_name), Decimal("0.00"))
+            if "status" in data and data.get("status") is not None:
                 data["status"] = parse_sub_status(data.get("status"))
         return data
 

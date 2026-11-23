@@ -18,9 +18,11 @@ from app.schemas.employee_subdetails import (
     EmployeeBankDetailResponse,
     EmployeeBankDocumentMetadata,
     EmployeeAssetDetailCreate,
+    EmployeeAssetDetailUpdate,
     EmployeeAssetDetailResponse,
     EmployeeAssetTotalResponse,
     EmployeeSalaryDetailCreate,
+    EmployeeSalaryDetailUpdate,
     EmployeeSalaryDetailResponse
 )
 
@@ -338,6 +340,34 @@ class EmployeeSubdetailsService:
         records = query.order_by(desc(EmployeeAssetDetail.asset_id)).all()
         return [EmployeeAssetDetailResponse.model_validate(r) for r in records]
 
+    def update_asset_detail(self, asset_id: int, payload: EmployeeAssetDetailUpdate) -> EmployeeAssetDetailResponse:
+        """Update an existing employee asset record in employee_assets_details."""
+        record = self.db.query(EmployeeAssetDetail).filter(
+            EmployeeAssetDetail.asset_id == asset_id
+        ).first()
+        if not record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Asset detail with ID {asset_id} not found."
+            )
+        update_data = payload.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            if hasattr(record, key):
+                setattr(record, key, value)
+        # Keep amount consistent with qty * rate if amount wasn't explicitly overridden
+        if ("qty" in update_data or "rate" in update_data) and "amount" not in update_data:
+            record.amount = (record.qty or Decimal("1.00")) * (record.rate or Decimal("0.00"))
+        try:
+            self.db.commit()
+            self.db.refresh(record)
+        except Exception as ex:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to update asset detail: {str(ex)}"
+            ) from ex
+        return EmployeeAssetDetailResponse.model_validate(record)
+
     def get_asset_total(self, employee_id_or_code: Optional[str] = None) -> EmployeeAssetTotalResponse:
         """Calculate the total amount sum from employee_assets_details using PostgreSQL aggregate function."""
         query = self.db.query(
@@ -438,3 +468,28 @@ class EmployeeSubdetailsService:
 
         records = query.order_by(desc(EmployeeSalaryDetail.salary_id)).all()
         return [EmployeeSalaryDetailResponse.model_validate(r) for r in records]
+
+    def update_salary_detail(self, salary_id: int, payload: EmployeeSalaryDetailUpdate) -> EmployeeSalaryDetailResponse:
+        """Update an existing employee salary record in employee_salary_details."""
+        record = self.db.query(EmployeeSalaryDetail).filter(
+            EmployeeSalaryDetail.salary_id == salary_id
+        ).first()
+        if not record:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Salary detail with ID {salary_id} not found."
+            )
+        update_data = payload.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            if hasattr(record, key) and value is not None:
+                setattr(record, key, value)
+        try:
+            self.db.commit()
+            self.db.refresh(record)
+        except Exception as ex:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to update salary detail: {str(ex)}"
+            ) from ex
+        return EmployeeSalaryDetailResponse.model_validate(record)

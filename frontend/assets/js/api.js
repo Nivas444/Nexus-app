@@ -1040,6 +1040,13 @@
         });
       },
 
+      async update(assetId, payload) {
+        return await request(`/master/employee-assets/${assetId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
       async getTotal(employeeId = null) {
         if (employeeId) {
           return await request(`/master/employees/${employeeId}/assets/total`, { method: 'GET' });
@@ -1068,6 +1075,13 @@
         }
         return await request('/master/employee-salary-details', {
           method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      async update(salaryId, payload) {
+        return await request(`/master/employee-salary-details/${salaryId}`, {
+          method: 'PUT',
           body: JSON.stringify(payload)
         });
       }

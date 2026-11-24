@@ -261,7 +261,7 @@ body {
    RIGHT HALF (40% WIDTH) - EMERALD GREEN (Form + Copyright on Right)
    ========================================================================== */
 .split-side-right {
-  background: linear-gradient(145deg, #00cba0 0%, #00b094 50%, #009688 100%);
+  background: linear-gradient(145deg, var(--banner-green, #00cba0) 0%, var(--primary-green, #00b094) 50%, var(--primary-green-dark, #009688) 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;

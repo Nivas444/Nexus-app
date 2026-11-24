@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexus &bull; Ecosystem</title>
   <link rel="icon" type="image/png" href="assets/images/image.png">
-  <link rel="stylesheet" href="assets/css/home.css?v=20261122_01">
+  <link rel="stylesheet" href="assets/css/home.css?v=20261124_01">
+  <script src="assets/js/utils/theme.js?v=20261124_01"></script>
 </head>
 
 <body>
@@ -2994,8 +2995,8 @@
                     <div class="slide-dynamic-wrap" id="wrapIndusHexColor" style="display: none; width: 100%; align-items: center; gap: 8px;">
                       <div style="position: relative; flex: 1; width: 100%;">
                         <input type="text" class="form-input-control" id="txtPlatformHexColor"
-                          placeholder="#0454e4" value="#0454e4" style="width: 100%; padding-right: 38px; font-family: monospace; text-transform: uppercase;"
-                          onchange="applyPlatformThemeColor(this.value)">
+                          placeholder="#00cba0" value="#00cba0" style="width: 100%; padding-right: 38px; font-family: monospace; text-transform: uppercase;"
+                          oninput="if (/^#[0-9A-Fa-f]{6}$/.test(this.value.trim())) document.getElementById('pickerPlatformHexColor').value = this.value.trim();">
                         <input type="file" id="fileIndusHexColor" accept="application/pdf" style="display: none;"
                           onchange="handleIndusPdfUpload(this, 'txtPlatformHexColor')">
                         <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusHexColor')"
@@ -3003,9 +3004,9 @@
                           <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
                         </span>
                       </div>
-                      <input type="color" id="pickerPlatformHexColor" value="#0454e4"
+                      <input type="color" id="pickerPlatformHexColor" value="#00cba0"
                         style="width: 32px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0; background: none; cursor: pointer;"
-                        oninput="document.getElementById('txtPlatformHexColor').value = this.value; applyPlatformThemeColor(this.value);">
+                        oninput="document.getElementById('txtPlatformHexColor').value = this.value;">
                       <button type="button" class="btn-toggle-revert"
                         onclick="handleIndusToggleReappear('inpIndusHexColorToggle', 'toggleWrapIndusHexColor', 'wrapIndusHexColor')"
                         title="Cancel / Reset"

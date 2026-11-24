@@ -162,3 +162,14 @@ def list_audit_logs(
     db: Session = Depends(get_db),
 ) -> List[AuditLogRecord]:
     return auth_service.list_audit_logs(db, limit=limit)
+
+
+@router.get("/theme", summary="Get active company platform theme color (public)")
+def get_public_company_theme(db: Session = Depends(get_db)):
+    """Public read-only endpoint returning the configured company hex color for login & ERP pages."""
+    from app.services.company_theme import get_company_theme_hex, DEFAULT_THEME_HEX
+    hex_code = get_company_theme_hex(db=db)
+    return {
+        "hex_color_code": hex_code,
+        "default_hex_color_code": DEFAULT_THEME_HEX,
+    }

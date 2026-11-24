@@ -66,6 +66,7 @@ from app.services.wcc_pdf_service import (
     _draw_page_border,
     _extract_city_pin
 )
+from app.services.company_theme import get_pdf_header_color
 
 logger = logging.getLogger(__name__)
 
@@ -835,7 +836,7 @@ class CommercialInvoicePdfService:
                 rowHeights=[34.0]
             )
             t_tax_inv_bar.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), BANNER_GREEN),
+                ('BACKGROUND', (0, 0), (-1, -1), get_pdf_header_color(BANNER_GREEN)),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('TOPPADDING', (0, 0), (-1, -1), 5),

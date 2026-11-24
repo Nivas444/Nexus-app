@@ -14153,6 +14153,109 @@ function loadMasterDataset() {
   }
 }
 
+function downloadMasterSubpageCsv(subpage) {
+  const escapeCsv = (val) => {
+    if (val === null || val === undefined) return '""';
+    return `"${String(val).replace(/"/g, '""')}"`;
+  };
+
+  const data = (Array.isArray(filteredDataset) && filteredDataset.length > 0)
+    ? filteredDataset
+    : (Array.isArray(currentDataset) ? currentDataset : []);
+
+  const configMap = {
+    employee: {
+      label: 'Employee',
+      filePrefix: 'Master_Employee',
+      headers: ['Employee Name', 'Employee ID', 'Employee Type', 'Designation', 'Contact Number', 'Email', 'Status'],
+      mapRow: (row) => [
+        row.employeeName || row.employee_name || '',
+        row.employeeId || row.employee_code || '',
+        (row.employeeType || row.employee_type || 'On-Roll') === 'Permanent' ? 'On-Roll' : (row.employeeType || row.employee_type || 'On-Roll'),
+        row.designation || '',
+        row.contactNumber || row.mobile_number || '',
+        row.email || '',
+        row.status || 'Active'
+      ]
+    },
+    customer: {
+      label: 'Customer',
+      filePrefix: 'Master_Customer',
+      headers: ['Customer Name', 'Customer ID', 'Business Type', 'GST Number', 'GST Type', 'Invoice Type', 'Status'],
+      mapRow: (row) => [
+        row.customerName || row.customer_name || row.legal_name || '',
+        row.customerId || row.customer_code || row.customer_id || '',
+        row.businessType || row.business_type || '',
+        row.gstNumber || row.gst_number || '',
+        row.gstType || row.gst_type || '',
+        row.invoiceType || row.invoice_type || '',
+        row.status || 'Active'
+      ]
+    },
+    vendor: {
+      label: 'Vendor',
+      filePrefix: 'Master_Vendor',
+      headers: ['Vendor Name', 'Business Type', 'Service Type', 'GST Number', 'PAN Number', 'GST Type', 'Status'],
+      mapRow: (row) => [
+        row.vendorName || row.vendor_name || '',
+        row.businessType || row.vendorType || row.business_type || '',
+        row.serviceType || row.service_type || '',
+        row.gstNumber || row.gst_number || '',
+        row.panNumber || row.pan_number || '',
+        row.gstType || row.gst_type || '',
+        row.status || 'Active'
+      ]
+    },
+    products: {
+      label: 'Products',
+      filePrefix: 'Master_Products',
+      headers: ['Product Name', 'Product Category', 'Product Head', 'Product Code', 'HSN Code', 'GST', 'Price'],
+      mapRow: (row) => [
+        row.productName || row.productHead || '',
+        row.productCategory || row.category || 'Telecom',
+        row.productHead || row.productName || '',
+        row.productCode || '',
+        row.hsnCode || '',
+        row.gst || row.gstRate || '18%',
+        row.price || row.stockPrices || ''
+      ]
+    },
+    expenses: {
+      label: 'Expenses',
+      filePrefix: 'Master_Expenses',
+      headers: ['Expense Name', 'Expense Category', 'Expense Head', 'GST', 'Status'],
+      mapRow: (row) => [
+        row.expenseName || row.expenseDescription || row.expenseHead || '',
+        row.expenseCategory || 'Direct Operations',
+        row.expenseHead || '',
+        row.gst || row.gstRate || '18%',
+        row.status || 'Active'
+      ]
+    }
+  };
+
+  const cfg = configMap[subpage];
+  if (!cfg) return;
+
+  if (data.length === 0) {
+    showToast(`No ${cfg.label} records available to download.`);
+    return;
+  }
+
+  const csvRows = data.map(row => cfg.mapRow(row).map(escapeCsv).join(','));
+  const csvContent = [cfg.headers.map(escapeCsv).join(','), ...csvRows].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${cfg.filePrefix}_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast(`${cfg.label} CSV downloaded successfully!`);
+}
+
 function renderMasterToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
   if (!toolbar) return;
@@ -14175,13 +14278,13 @@ function renderMasterToolbar() {
   }
 
   if (currentMasterSubpage === 'employee') {
-    // Employee Toolbar: Green CSV Upload Icon + Orange Bulk Upload Icon + Blue Add (+) Button on Right
+    // Employee Toolbar: Green CSV Download Icon + Orange Bulk Upload Icon + Blue Add (+) Button on Right
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
-        <!-- Green CSV Upload Icon -->
-        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        <!-- Green CSV Download Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Download" aria-label="CSV Download">
+          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -14193,8 +14296,10 @@ function renderMasterToolbar() {
         </button>
       </div>
     `;
-    document.getElementById('btnMasterCsv')?.addEventListener('click', () => {
-      triggerCsvUpload();
+    document.getElementById('btnMasterCsv')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      downloadMasterSubpageCsv('employee');
     });
     document.getElementById('btnMasterDocUpload')?.addEventListener('click', () => {
       triggerBulkUpload('Employee');
@@ -14206,14 +14311,14 @@ function renderMasterToolbar() {
   }
 
   if (currentMasterSubpage === 'products' || currentMasterSubpage === 'expenses') {
-    // Toolbar: Green CSV Upload + Orange Bulk Upload + Blue Add (+) Button on Right (No Backward icon)
+    // Toolbar: Green CSV Download + Orange Bulk Upload + Blue Add (+) Button on Right (No Backward icon)
     const pageLabel = currentMasterSubpage === 'products' ? 'Products' : 'Expense';
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
-        <!-- Green CSV Upload Icon -->
-        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        <!-- Green CSV Download Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Download" aria-label="CSV Download">
+          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Orange Bulk Upload Icon -->
         <button type="button" class="toolbar-icon-btn btn-doc-upload-action" id="btnMasterDocUpload" data-tooltip="Bulk Upload" aria-label="Bulk Upload">
@@ -14230,13 +14335,13 @@ function renderMasterToolbar() {
       triggerBulkUpload(pageLabel);
     });
   } else {
-    // Master Customer and Vendor Toolbar: Green CSV Upload + Blue Add (+) Button on Right (No Bulk Upload, No Backward icon)
+    // Master Customer and Vendor Toolbar: Green CSV Download + Blue Add (+) Button on Right (No Bulk Upload, No Backward icon)
     toolbar.innerHTML = `
       <div class="toolbar-left"></div>
       <div class="toolbar-right">
-        <!-- Green CSV Upload Icon -->
-        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Upload" aria-label="CSV Upload">
-          <img src="icons/CSV download.svg" alt="CSV Upload" class="toolbar-icon-img" width="30" height="30">
+        <!-- Green CSV Download Icon -->
+        <button type="button" class="toolbar-icon-btn btn-csv-action" id="btnMasterCsv" data-tooltip="CSV Download" aria-label="CSV Download">
+          <img src="icons/CSV download.svg" alt="CSV Download" class="toolbar-icon-img" width="30" height="30">
         </button>
         <!-- Blue Add (+) Button -->
         <button type="button" class="toolbar-icon-btn btn-add-action" id="btnMasterAdd" data-tooltip="Add New ${currentMasterSubpage === 'vendor' ? 'Vendor' : 'Record'}" aria-label="Add Record">
@@ -14251,8 +14356,10 @@ function renderMasterToolbar() {
     openSideForm();
   });
 
-  document.getElementById('btnMasterCsv')?.addEventListener('click', () => {
-    triggerCsvUpload();
+  document.getElementById('btnMasterCsv')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    downloadMasterSubpageCsv(currentMasterSubpage);
   });
 }
 
@@ -53218,18 +53325,7 @@ window.handleIndusPdfUpload = function(fileInput, textInputId) {
   }
 };
 
-window.applyPlatformThemeColor = function(colorHex) {
-  if (!colorHex) return;
-  const trimmed = colorHex.trim();
-  if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(trimmed)) {
-    document.documentElement.style.setProperty('--brand-primary', trimmed);
-    const badges = document.querySelectorAll('.side-form-title-badge');
-    badges.forEach(b => {
-      b.style.backgroundColor = trimmed;
-    });
-    showToast('Platform theme color updated to ' + trimmed);
-  }
-};
+// Dynamic platform theme engine is provided by assets/js/utils/theme.js (window.applyPlatformThemeColor)
 
 function setIndusTowerFormReadOnly(isReadOnly) {
   const form = document.getElementById('frmAddIndusTower');
@@ -53343,10 +53439,14 @@ window.loadCompanyMasterFromApi = async function(companyNameOrId = null) {
         if (document.getElementById('txtIndusESig')) document.getElementById('txtIndusESig').value = co.e_signature_file || '';
         if (document.getElementById('txtIndusSsl')) document.getElementById('txtIndusSsl').value = co.ssl_certificate_file || '';
         if (document.getElementById('txtPlatformHexColor')) {
-          document.getElementById('txtPlatformHexColor').value = co.hex_color_code || '#0454e4';
-          if (typeof applyPlatformThemeColor === 'function' && co.hex_color_code) applyPlatformThemeColor(co.hex_color_code);
+          document.getElementById('txtPlatformHexColor').value = co.hex_color_code || '#00cba0';
+          if (typeof applyPlatformThemeColor === 'function') {
+            applyPlatformThemeColor(co.hex_color_code || null, { persist: true, silent: true });
+          }
         }
-        if (document.getElementById('pickerPlatformHexColor')) document.getElementById('pickerPlatformHexColor').value = co.hex_color_code || '#0454e4';
+        if (document.getElementById('pickerPlatformHexColor')) {
+          document.getElementById('pickerPlatformHexColor').value = co.hex_color_code || '#00cba0';
+        }
 
         if (document.getElementById('inpIndusEInvoiceToggle')) document.getElementById('inpIndusEInvoiceToggle').checked = Boolean(co.e_invoice);
         if (document.getElementById('inpIndusMultiGstToggle')) document.getElementById('inpIndusMultiGstToggle').checked = Boolean(co.gst_multi_state);
@@ -53432,7 +53532,9 @@ window.saveCompanyMasterToApi = async function() {
     dsc_file: document.getElementById('txtIndusDsc')?.value.trim() || null,
     e_signature_file: document.getElementById('txtIndusESig')?.value.trim() || null,
     ssl_certificate_file: document.getElementById('txtIndusSsl')?.value.trim() || null,
-    hex_color_code: document.getElementById('txtPlatformHexColor')?.value.trim() || null,
+    hex_color_code: document.getElementById('inpIndusHexColorToggle')?.checked
+      ? (document.getElementById('txtPlatformHexColor')?.value.trim() || null)
+      : null,
     e_invoice: Boolean(document.getElementById('inpIndusEInvoiceToggle')?.checked),
     gst_multi_state: Boolean(document.getElementById('inpIndusMultiGstToggle')?.checked)
   };
@@ -53454,6 +53556,10 @@ window.saveCompanyMasterToApi = async function() {
     if (imgIcon) {
       imgIcon.src = 'icons/Edit.svg';
       imgIcon.title = 'Edit Info';
+    }
+
+    if (typeof window.applyPlatformThemeColor === 'function') {
+      window.applyPlatformThemeColor(updated.hex_color_code || null, { persist: true, silent: false });
     }
 
     if (typeof showSvgSuccessPopup === 'function') {
@@ -53587,9 +53693,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnHrPolicies = document.getElementById('btnIndusTowerHrPolicies');
   if (btnHrPolicies) {
-    btnHrPolicies.addEventListener('click', (e) => {
+    btnHrPolicies.addEventListener('click', async (e) => {
       e.stopPropagation();
-      openCompanyHrPoliciesPage('epf');
+      if (typeof openCompanyHrPoliciesPage !== 'function' && window.NexusModuleLoader && typeof window.NexusModuleLoader.loadModule === 'function') {
+        await window.NexusModuleLoader.loadModule('master');
+      }
+      if (typeof openCompanyHrPoliciesPage === 'function') {
+        openCompanyHrPoliciesPage('epf');
+      }
     });
   }
 
@@ -59491,8 +59602,8 @@ document.addEventListener('click', (e) => {
     return;
   }
 
-  const csvBtn = e.target.closest('.btn-csv-action, #btnIndusCsv, #btnMasterCsv, #btnCsvAction');
-  if (csvBtn) {
+  const csvBtn = e.target.closest('.btn-csv-action, #btnIndusCsv, #btnCsvAction');
+  if (csvBtn && csvBtn.id !== 'btnMasterCsv') {
     e.preventDefault();
     triggerCsvUpload();
     return;

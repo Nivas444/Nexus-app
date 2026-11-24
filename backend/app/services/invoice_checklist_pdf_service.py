@@ -144,7 +144,8 @@ def _draw_checklist_header_badge(canv: canvas.Canvas, title: str = "Invoice Chec
         title_size -= 0.5
 
     canv.saveState()
-    canv.setFillColor(HEADER_TEAL)
+    from app.services.company_theme import get_pdf_header_color
+    canv.setFillColor(get_pdf_header_color(HEADER_TEAL))
     p = canv.beginPath()
     p.moveTo(x0, y_bottom)
     p.lineTo(x0, y_top - r)

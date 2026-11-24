@@ -7,18 +7,19 @@
   'use strict';
 
   function openCompanyHrPoliciesPage(tab) {
-    if (typeof window.closeSideForm === 'function') window.closeSideForm();
-    window.currentModule = 'master';
-    window.currentMasterView = 'hr_policies';
-    window.currentCompanyHrTab = tab || 'epf';
-    window.activeColumnFilters = {};
-    if (typeof window.updateURL === 'function') window.updateURL();
-    if (typeof window.renderApp === 'function') window.renderApp();
-    if (typeof window.fetchCompanyHrDataFromBackend === 'function') {
-      window.fetchCompanyHrDataFromBackend(window.currentCompanyHrTab);
+    if (typeof closeSideForm === 'function') closeSideForm();
+    const targetTab = tab || 'epf';
+    if (typeof currentModule !== 'undefined') currentModule = 'master';
+    if (typeof currentMasterView !== 'undefined') currentMasterView = 'hr_policies';
+    if (typeof currentCompanyHrTab !== 'undefined') currentCompanyHrTab = targetTab;
+    if (typeof activeColumnFilters !== 'undefined') activeColumnFilters = {};
+    if (typeof updateURL === 'function') updateURL();
+    if (typeof renderApp === 'function') renderApp();
+    if (typeof fetchCompanyHrDataFromBackend === 'function') {
+      fetchCompanyHrDataFromBackend(targetTab);
     }
-    if (typeof window.showToast === 'function') {
-      window.showToast(`Opened Company HR Policies • ${(window.currentCompanyHrTab || 'epf').toUpperCase()}`);
+    if (typeof showToast === 'function') {
+      showToast(`Opened Company HR Policies • ${targetTab.toUpperCase()}`);
     }
   }
 
@@ -59,8 +60,8 @@
   async function saveCompanyHrCompliance(complianceType) {
     if (isSubmittingHrCompliance) return;
 
-    const companyName = (typeof window.currentCompanyMasterName !== 'undefined' && window.currentCompanyMasterName)
-      ? window.currentCompanyMasterName
+    const companyName = (typeof currentCompanyMasterName !== 'undefined' && currentCompanyMasterName)
+      ? currentCompanyMasterName
       : 'Nexus';
 
     let payload = {
@@ -308,7 +309,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrEpfCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrEpfData !== 'undefined') && window.companyHrEpfData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrEpfData !== 'undefined') && companyHrEpfData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpEpfFromDate')) document.getElementById('inpEpfFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpEpfToDate')) document.getElementById('inpEpfToDate').value = row ? (row.to || '') : '';
@@ -348,7 +349,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrEsiCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrEsiData !== 'undefined') && window.companyHrEsiData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrEsiData !== 'undefined') && companyHrEsiData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpEsiFromDate')) document.getElementById('inpEsiFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpEsiToDate')) document.getElementById('inpEsiToDate').value = row ? (row.to || '') : '';
@@ -386,7 +387,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrPtCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrPtData !== 'undefined') && window.companyHrPtData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrPtData !== 'undefined') && companyHrPtData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpPtFromDate')) document.getElementById('inpPtFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpPtToDate')) document.getElementById('inpPtToDate').value = row ? (row.to || '') : '';
@@ -424,7 +425,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrLwfCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrLwfData !== 'undefined') && window.companyHrLwfData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrLwfData !== 'undefined') && companyHrLwfData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpLwfFromDate')) document.getElementById('inpLwfFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpLwfToDate')) document.getElementById('inpLwfToDate').value = row ? (row.to || '') : '';
@@ -462,7 +463,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrTdsCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrTdsData !== 'undefined') && window.companyHrTdsData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrTdsData !== 'undefined') && companyHrTdsData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpTdsFromDate')) document.getElementById('inpTdsFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpTdsToDate')) document.getElementById('inpTdsToDate').value = row ? (row.to || '') : '';
@@ -503,7 +504,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrLeaveCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrLeaveData !== 'undefined') && window.companyHrLeaveData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrLeaveData !== 'undefined') && companyHrLeaveData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpLeaveFromDate')) document.getElementById('inpLeaveFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpLeaveToDate')) document.getElementById('inpLeaveToDate').value = row ? (row.to || '') : '';
@@ -540,7 +541,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrBonusCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrBonusData !== 'undefined') && window.companyHrBonusData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrBonusData !== 'undefined') && companyHrBonusData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpBonusFromDate')) document.getElementById('inpBonusFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpBonusToDate')) document.getElementById('inpBonusToDate').value = row ? (row.to || '') : '';
@@ -576,7 +577,7 @@
     overlay.querySelectorAll('.side-form-card, .side-contact-popup').forEach(c => {
       if (c.id !== 'companyHrMedicalInsuranceCard') c.style.display = 'none';
     });
-    const row = (rowId && (typeof window.companyHrMedicalInsuranceData !== 'undefined') && window.companyHrMedicalInsuranceData.find(r => r.id === rowId)) || null;
+    const row = (rowId && (typeof companyHrMedicalInsuranceData !== 'undefined') && companyHrMedicalInsuranceData.find(r => r.id === rowId)) || null;
 
     if (document.getElementById('inpMedFromDate')) document.getElementById('inpMedFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpMedToDate')) document.getElementById('inpMedToDate').value = row ? (row.to || '') : '';

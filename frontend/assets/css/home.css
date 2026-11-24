@@ -222,7 +222,7 @@ body {
   position: relative;
   z-index: 1;
   width: 100% !important;
-  background: #00cba0 !important;
+  background: var(--banner-green, #00cba0) !important;
   padding: 10px 0 !important;
   box-shadow: 0 2px 8px rgba(0, 191, 165, 0.15);
   display: block !important;
@@ -301,9 +301,9 @@ body {
 }
 
 .toolbar-back-btn:hover {
-  background: #00cba0 !important;
+  background: var(--banner-green, #00cba0) !important;
   color: #ffffff !important;
-  border-color: #00cba0 !important;
+  border-color: var(--banner-green, #00cba0) !important;
   transform: translateX(-3px);
   box-shadow: 0 3px 8px rgba(0, 203, 160, 0.3);
 }
@@ -764,7 +764,7 @@ tr.tr-sub-headers.projects-view-header th {
 }
 
 .prod-details-btn:hover {
-  background: #00cba0;
+  background: var(--banner-green, #00cba0);
   color: #ffffff;
 }
 
@@ -972,12 +972,12 @@ input[type="radio"].gbpa-row-radio {
 }
 
 input[type="radio"].gbpa-row-radio:hover {
-  border-color: #00cba0 !important;
+  border-color: var(--banner-green, #00cba0) !important;
 }
 
 input[type="radio"].gbpa-row-radio:checked {
-  border-color: #00cba0 !important;
-  background: #00cba0 !important;
+  border-color: var(--banner-green, #00cba0) !important;
+  background: var(--banner-green, #00cba0) !important;
   box-shadow: inset 0 0 0 3.5px #ffffff !important;
 }
 
@@ -1011,13 +1011,13 @@ input[type="checkbox"].pr-circle-checkbox {
 
 .pr-circle-checkbox:hover,
 input[type="checkbox"].pr-circle-checkbox:hover {
-  border-color: #00cba0 !important;
+  border-color: var(--banner-green, #00cba0) !important;
 }
 
 .pr-circle-checkbox:checked,
 input[type="checkbox"].pr-circle-checkbox:checked {
-  border-color: #00cba0 !important;
-  background-color: #00cba0 !important;
+  border-color: var(--banner-green, #00cba0) !important;
+  background-color: var(--banner-green, #00cba0) !important;
   box-shadow: inset 0 0 0 3.5px #ffffff !important;
 }
 
@@ -1158,12 +1158,12 @@ input[type="checkbox"].pr-circle-checkbox:focus-visible {
 
 /* Active Button State: Vibrant Green with White Text */
 .segmented-btn.active {
-  background: #00cba0 !important;
+  background: var(--banner-green, #00cba0) !important;
   color: #ffffff !important;
 }
 
 .segmented-btn.active:hover {
-  background: #00a884 !important;
+  background: var(--primary-green-dark, #00a884) !important;
   color: #ffffff !important;
 }
 
@@ -1262,7 +1262,7 @@ input[type="checkbox"].pr-circle-checkbox:focus-visible {
   width: 100% !important;
   height: 36px !important;
   padding: 6px 12px !important;
-  border: 1.5px solid #00cba0 !important;
+  border: 1.5px solid var(--banner-green, #00cba0) !important;
   border-radius: 8px !important;
   font-size: 0.85rem !important;
   background-color: #ffffff !important;
@@ -1885,7 +1885,7 @@ input[type="checkbox"].pr-circle-checkbox:focus-visible {
   display: flex !important;
   align-items: center !important;
   clip-path: polygon(0 0, 100% 0, calc(100% - 40px) 100%, 0 100%) !important;
-  background: #00cba0 !important;
+  background: var(--banner-green, #00cba0) !important;
   color: #ffffff !important;
   font-weight: 700 !important;
   font-size: 1.15rem !important;
@@ -3330,7 +3330,7 @@ td.col-master-vendor-status {
 }
 
 .side-form-title-badge {
-  background: #00cba0 !important;
+  background: var(--banner-green, #00cba0) !important;
   color: #ffffff !important;
   font-family: 'Outfit', sans-serif !important;
   font-weight: 700 !important;
@@ -3796,7 +3796,7 @@ input[type="date"].date-picker-control {
 }
 
 .cal-nav-btn:hover {
-  background: #00bfa5;
+  background: var(--primary-green, #00bfa5);
   color: #ffffff;
 }
 
@@ -3820,7 +3820,7 @@ input[type="date"].date-picker-control {
 
 .cal-select-month:focus,
 .cal-select-year:focus {
-  border-color: #00bfa5;
+  border-color: var(--primary-green, #00bfa5);
 }
 
 .cal-weekdays {
@@ -3859,13 +3859,13 @@ input[type="date"].date-picker-control {
 }
 
 .cal-day-cell.selected {
-  background: #00bfa5 !important;
+  background: var(--primary-green, #00bfa5) !important;
   color: #ffffff !important;
   font-weight: 700;
 }
 
 .cal-day-cell.today {
-  border: 1.5px solid #00bfa5;
+  border: 1.5px solid var(--primary-green, #00bfa5);
   font-weight: 700;
 }
 
@@ -3894,7 +3894,7 @@ input[type="date"].date-picker-control {
 }
 
 .cal-btn-today {
-  color: #00bfa5;
+  color: var(--primary-green, #00bfa5);
 }
 
 .cal-btn-today:hover {
@@ -3972,8 +3972,8 @@ input[type="date"].date-picker-control {
 }
 
 .excel-checkbox-item input[type="checkbox"]:checked {
-  border-color: #00cba0;
-  background: #00cba0;
+  border-color: var(--banner-green, #00cba0);
+  background: var(--banner-green, #00cba0);
   box-shadow: inset 0 0 0 3.5px #ffffff;
   /* Crisp circular radio dot */
 }
@@ -4879,7 +4879,7 @@ a:visited,
 }
 
 .btn-projects-tab.active {
-  background-color: #00cba0 !important;
+  background-color: var(--banner-green, #00cba0) !important;
   color: #ffffff !important;
   box-shadow: 0 2px 6px rgba(0, 203, 160, 0.35);
 }
@@ -5098,7 +5098,7 @@ tr td.cell-payable span {
 
 /* Active State: Green */
 .project-info-toggle-switch input:checked + .project-info-toggle-slider {
-  background-color: #00cba0 !important;
+  background-color: var(--banner-green, #00cba0) !important;
 }
 
 .project-info-toggle-switch input:checked + .project-info-toggle-slider::before {
@@ -5145,7 +5145,7 @@ tr td.cell-payable span {
 .filter-funnel-btn.has-active-filter,
 .contact-th-filter-btn.has-active-filter,
 button.has-active-filter {
-  color: #00cba0 !important;
+  color: var(--banner-green, #00cba0) !important;
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
@@ -5156,7 +5156,7 @@ button.has-active-filter {
 
 .filter-funnel-btn.has-active-filter svg,
 .contact-th-filter-btn.has-active-filter svg {
-  stroke: #00cba0 !important;
+  stroke: var(--banner-green, #00cba0) !important;
   filter: none !important;
 }
 
@@ -5690,8 +5690,8 @@ body.standalone-mode .worklist-main-full {
 #pmAddStnMaterialsModal input:focus,
 #pmAddStnMaterialsModal select:focus,
 #pmAddStnMaterialsModal .pm-custom-select:focus {
-  border: 1.5px solid #00cba0 !important;
-  border-color: #00cba0 !important;
+  border: 1.5px solid var(--banner-green, #00cba0) !important;
+  border-color: var(--banner-green, #00cba0) !important;
   outline: none !important;
   box-shadow: 0 0 0 2px rgba(0, 203, 160, 0.15) !important;
 }
@@ -5867,17 +5867,17 @@ body.standalone-mode .worklist-main-full {
   background: #ffffff;
   display: inline-block;
   margin: 0 auto;
-  accent-color: #00cba0;
+  accent-color: var(--banner-green, #00cba0);
 }
 
 .pm-circle-radio:checked {
-  border-color: #00cba0 !important;
-  background-color: #00cba0 !important;
+  border-color: var(--banner-green, #00cba0) !important;
+  background-color: var(--banner-green, #00cba0) !important;
   box-shadow: inset 0 0 0 3px #ffffff !important;
 }
 
 .pm-circle-radio:hover {
-  border-color: #00cba0 !important;
+  border-color: var(--banner-green, #00cba0) !important;
 }
 
 /* Vehicle Circle Radio Checkbox (Green marker, multiple select allowed) */

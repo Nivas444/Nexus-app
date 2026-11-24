@@ -386,55 +386,45 @@ async function loadCommercialProjectsFromApi() {
 }
 window.loadCommercialProjectsFromApi = loadCommercialProjectsFromApi;
 
-// Master -> Transport Dataset
-let masterTransportData = [
-  {
-    id: "trans-1",
-    transportName: "SRS Travels",
-    transportType: "Contract",
-    vehicleType: "Tata Ace",
-    vehicleNumber: "TN 01 AB 1234",
-    rentalType: "Per Day",
-    rentalAmount: "2,500.00",
-    haltRent: "500.00",
-    status: "Active"
-  },
-  {
-    id: "trans-2",
-    transportName: "VRL Logistics",
-    transportType: "Dedicated",
-    vehicleType: "Eicher 17ft",
-    vehicleNumber: "KA 04 CD 5678",
-    rentalType: "Per KM",
-    rentalAmount: "45.00",
-    haltRent: "800.00",
-    status: "Active"
-  },
-  {
-    id: "trans-3",
-    transportName: "Navata Road Transport",
-    transportType: "Owned",
-    vehicleType: "Bolero Maxi Truck",
-    vehicleNumber: "AP 09 EF 9012",
-    rentalType: "Monthly",
-    rentalAmount: "45,000.00",
-    haltRent: "0.00",
-    status: "Active"
-  },
-  {
-    id: "trans-4",
-    transportName: "SafeXpress",
-    transportType: "Leased",
-    vehicleType: "Trailer 40ft",
-    vehicleNumber: "MH 12 GH 3456",
-    rentalType: "Per Trip",
-    rentalAmount: "18,000.00",
-    haltRent: "1,200.00",
-    status: "Active"
-  }
-];
+// Master -> Transport Dataset (Loaded dynamically from PostgreSQL nexus_master.transport)
+let masterTransportData = [];
 let currentViewedVehicleId = null;
 window.currentViewedVehicleId = null;
+
+window.loadMasterTransportFromApi = async function() {
+  if (typeof NexusApi !== 'undefined' && NexusApi.transport) {
+    try {
+      const response = await NexusApi.transport.getAll({ limit: 500 });
+      const items = (response && Array.isArray(response.items)) ? response.items : (Array.isArray(response) ? response : []);
+      masterTransportData = items.map(t => ({
+        ...t,
+        id: t.id,
+        transportName: t.transportName || t.transport_name || '',
+        transportType: t.transportType || t.transport_type || '',
+        vehicleType: t.vehicleType || t.vehicle_type || '',
+        vehicleNumber: t.vehicleNumber || t.vehicle_number || '',
+        rentalType: t.rentalType || t.rental_type || '',
+        rentalAmount: t.rentalAmount || (t.rental_amount != null ? String(t.rental_amount) : '0.00'),
+        haltRent: t.haltRent || (t.halt_rent != null ? String(t.halt_rent) : '0.00'),
+        status: t.status || t.transport_status || 'Active',
+        documents: Array.isArray(t.documents) ? t.documents : [],
+        contacts: Array.isArray(t.contacts) ? t.contacts : [],
+        banks: Array.isArray(t.banks) ? t.banks : []
+      }));
+    } catch (err) {
+      console.error('Error fetching master transport from API:', err);
+      if (typeof showToast === 'function') {
+        showToast('Could not load Transport database.');
+      }
+    }
+  }
+  if (typeof currentModule !== 'undefined' && currentModule === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'transport') {
+    currentDataset = [...masterTransportData];
+    if (typeof applyFiltersAndRender === 'function') {
+      applyFiltersAndRender();
+    }
+  }
+};
 
 
 // Company HR Policies Datasets (Loaded dynamically from PostgreSQL hr_compliance)
@@ -11719,6 +11709,8 @@ window.loadCurrentViewDataFromApi = async function(forceRefresh = false) {
       tasks.push(loadMasterProductsFromApi());
     } else if (currentMasterSubpage === 'expenses' && typeof loadMasterExpensesFromApi === 'function') {
       tasks.push(loadMasterExpensesFromApi());
+    } else if (currentMasterSubpage === 'transport' && typeof loadMasterTransportFromApi === 'function') {
+      tasks.push(loadMasterTransportFromApi());
     }
   } else if (currentModule === 'indus_towers') {
     if (typeof loadIndusDataset === 'function') {
@@ -13340,12 +13332,29 @@ function renderApp() {
 // INDUS TOWERS MODULE RENDERERS
 // ==========================================================================
 // Indus Towers Module Renderers & Navigation (Modularized into frontend/assets/js/modules/indus/indus-towers.js)
-var fetchIndusSites = window.fetchIndusSites;
-var fetchIndusGbpa = window.fetchIndusGbpa;
-var fetchIndusInfra = window.fetchIndusInfra;
-var fetchIndusEsh = window.fetchIndusEsh;
-var openIndusTowersPage = window.openIndusTowersPage;
-var loadIndusDataset = window.loadIndusDataset;
+var fetchIndusSites = (...args) => window.fetchIndusSites?.(...args);
+var fetchIndusGbpa = (...args) => window.fetchIndusGbpa?.(...args);
+var fetchIndusInfra = (...args) => window.fetchIndusInfra?.(...args);
+var fetchIndusEsh = (...args) => window.fetchIndusEsh?.(...args);
+var loadIndusDataset = (...args) => window.loadIndusDataset?.(...args);
+async function openIndusTowersPage() {
+  if (typeof window.openIndusTowersPage === 'function' && window.openIndusTowersPage !== openIndusTowersPage) {
+    return window.openIndusTowersPage();
+  }
+  if (window.NexusModuleLoader && typeof window.NexusModuleLoader.loadModule === 'function') {
+    await window.NexusModuleLoader.loadModule('indus_towers');
+  }
+  if (typeof window.openIndusTowersPage === 'function' && window.openIndusTowersPage !== openIndusTowersPage) {
+    return window.openIndusTowersPage();
+  }
+  currentModule = 'indus_towers';
+  currentIndusSubpage = 'site';
+  activeColumnFilters = {};
+  updateURL();
+  renderApp();
+  if (typeof window.fetchIndusSites === 'function') window.fetchIndusSites(true);
+}
+window._openIndusTowersPageFallback = openIndusTowersPage;
 
 function renderIndusToolbar() {
   const toolbar = document.getElementById('worklistToolbar');
@@ -14150,6 +14159,9 @@ function loadMasterDataset() {
     }
   } else if (currentMasterSubpage === 'transport') {
     currentDataset = [...masterTransportData];
+    if (typeof loadMasterTransportFromApi === 'function') {
+      loadMasterTransportFromApi();
+    }
   }
 }
 
@@ -14272,6 +14284,9 @@ function renderMasterToolbar() {
     `;
     document.getElementById('btnMasterAdd')?.addEventListener('click', () => {
       window.currentViewedVehicleId = null;
+      if (typeof vehicleDocumentsData !== 'undefined') vehicleDocumentsData = [];
+      if (typeof vehicleContactsData !== 'undefined') vehicleContactsData = [];
+      if (typeof vehicleBankData !== 'undefined') vehicleBankData = [];
       openSideForm();
     });
     return;
@@ -47270,7 +47285,7 @@ function applyFiltersAndRender() {
         const tName = row.transportName || '';
         return `
           <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
-            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b; font-weight: 500;" title="${tName.replace(/"/g, '&quot;')}">${tName}</td>
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; text-align: left !important; padding: 10px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0454e4; font-weight: 500;" title="${tName.replace(/"/g, '&quot;')}"><a href="#" class="req-link td-link-blue" onclick="openViewVehicleCard(${JSON.stringify(row.id)}); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${tName}</a></td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #64748b; font-weight: 500;">${row.transportType || ''}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #64748b; font-weight: 500;">${row.vehicleType || ''}</td>
             <td style="width: 40ch; min-width: 40ch; max-width: 40ch; text-align: center !important; padding: 10px 8px; white-space: nowrap; color: #64748b; font-weight: 500; font-family: monospace;">${row.vehicleNumber || ''}</td>
@@ -48816,15 +48831,74 @@ function initSideFormEvents() {
     });
   }
 
+  // Populate Add Product Scope dropdowns (Product Category & Product Name) from Master -> Products table
+  window.populateVendorProductScopeDropdowns = async function() {
+    const selCat = document.getElementById('selAddProductCategory');
+    const selName = document.getElementById('selAddProductName');
+    if (!selCat || !selName) return;
+
+    if ((!Array.isArray(masterProductsData) || masterProductsData.length === 0) && typeof loadMasterProductsFromApi === 'function') {
+      try {
+        await loadMasterProductsFromApi();
+      } catch (e) {}
+    }
+
+    const products = Array.isArray(masterProductsData) ? masterProductsData : [];
+    const categories = Array.from(new Set(
+      products
+        .map(p => (p.productCategory || p.material_category || p.category || '').trim())
+        .filter(Boolean)
+    ));
+
+    if (categories.length === 0) {
+      selCat.innerHTML = '<option value="">No Categories Found</option>';
+      selName.innerHTML = '<option value="">No Products Found</option>';
+      return;
+    }
+
+    selCat.innerHTML = categories
+      .map((cat, idx) => `<option value="${cat.replace(/"/g, '&quot;')}" ${idx === 0 ? 'selected' : ''}>${cat}</option>`)
+      .join('');
+
+    const renderProductNamesForCategory = (selectedCat) => {
+      const matched = products.filter(p => (p.productCategory || p.material_category || p.category || '').trim() === selectedCat);
+      const list = matched.length > 0 ? matched : products;
+      const names = Array.from(new Set(
+        list
+          .map(p => (p.productName || p.product_name || p.productHead || '').trim())
+          .filter(Boolean)
+      ));
+      if (names.length === 0) {
+        selName.innerHTML = '<option value="">No Products Found</option>';
+      } else {
+        selName.innerHTML = names
+          .map((n, idx) => `<option value="${n.replace(/"/g, '&quot;')}" ${idx === 0 ? 'selected' : ''}>${n}</option>`)
+          .join('');
+      }
+    };
+
+    renderProductNamesForCategory(selCat.value);
+    if (!selCat.dataset.productsBound) {
+      selCat.dataset.productsBound = 'true';
+      selCat.addEventListener('change', () => {
+        renderProductNamesForCategory(selCat.value);
+      });
+    }
+  };
+
   // Plus icon in Supply Scope -> opens Add Products form tab
   const btnSupplyScopeAdd = document.getElementById('btnSupplyScopeAddRow');
   if (btnSupplyScopeAdd) {
-    btnSupplyScopeAdd.addEventListener('click', () => {
+    btnSupplyScopeAdd.addEventListener('click', async () => {
       const scopePanel = document.getElementById('vendorSupplyScopeSidePanel');
       if (scopePanel) scopePanel.classList.add('card-dimmed-blurred');
 
       const addProductCard = document.getElementById('addProductScopeCard');
       if (addProductCard) addProductCard.style.display = 'block';
+
+      if (typeof window.populateVendorProductScopeDropdowns === 'function') {
+        await window.populateVendorProductScopeDropdowns();
+      }
 
       showToast('Add Products form opened');
     });
@@ -49808,8 +49882,8 @@ function initSideFormEvents() {
   if (btnSubmitProjectTransport) btnSubmitProjectTransport.addEventListener('click', handleFormSave);
   if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
   if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
-  // Save or Update Master -> Transport Vehicle Record
-  function saveVehicleRecord() {
+  // Save or Update Master -> Transport Vehicle Record (persisted to PostgreSQL nexus_master.transport)
+  async function saveVehicleRecord() {
     const transportName = document.getElementById('inpVehicleTransportName')?.value?.trim();
     const transportType = document.getElementById('inpVehicleTransportType')?.value?.trim();
     const vehicleType = document.getElementById('inpVehicleType')?.value?.trim();
@@ -49827,49 +49901,88 @@ function initSideFormEvents() {
       return;
     }
 
-    if (window.currentViewedVehicleId) {
-      const idx = masterTransportData.findIndex(v => v.id === window.currentViewedVehicleId);
-      if (idx !== -1) {
-        masterTransportData[idx] = {
-          ...masterTransportData[idx],
-          transportName: transportName,
-          transportType: transportType || 'Contract',
-          vehicleType: vehicleType || 'Tata Ace',
-          vehicleNumber: vehicleNumber,
-          rentalType: rentalType || 'Per Day',
-          rentalAmount: rentalAmount || '0.00',
-          haltRent: haltRent || '0.00'
-        };
+    const latestContact = (Array.isArray(vehicleContactsData) && vehicleContactsData.length > 0) ? vehicleContactsData[0] : null;
+    const latestBank = (Array.isArray(vehicleBankData) && vehicleBankData.length > 0) ? vehicleBankData[0] : null;
+    const latestDocExp = (Array.isArray(vehicleDocumentsData) && vehicleDocumentsData.length > 0 && vehicleDocumentsData[0].expiryDate && vehicleDocumentsData[0].expiryDate !== '-')
+      ? vehicleDocumentsData[0].expiryDate
+      : null;
+
+    const payload = {
+      company_name: 'Nexus',
+      transport_name: transportName,
+      transport_type: transportType || 'Contract',
+      vehicle_type: vehicleType || 'Tata Ace',
+      vehicle_number: vehicleNumber,
+      rental_type: rentalType || 'Per Day',
+      rental_amount: rentalAmount || '0.00',
+      halt_rent: haltRent || '0.00',
+      transport_status: 'Active',
+      expiry_date: latestDocExp
+    };
+    if (latestContact) {
+      payload.name = latestContact.name || '';
+      payload.designation = latestContact.designation || '';
+      payload.mobile_number = latestContact.contactNumber || '';
+      payload.contact_status = latestContact.status || 'Active';
+    }
+    if (latestBank) {
+      payload.account_name = latestBank.accountName || '';
+      payload.account_number = latestBank.accountNumber || '';
+      payload.bank_name = latestBank.bankName || '';
+      payload.ifsc_code = latestBank.ifscCode || '';
+      payload.account_status = latestBank.status || 'Active';
+    }
+
+    if (typeof NexusApi === 'undefined' || !NexusApi.transport) {
+      if (typeof showToast === 'function') showToast('Transport API client unavailable.');
+      return;
+    }
+
+    try {
+      let savedRecord;
+      const numericId = parseInt(window.currentViewedVehicleId, 10);
+      if (window.currentViewedVehicleId && !isNaN(numericId)) {
+        savedRecord = await NexusApi.transport.update(numericId, payload);
+      } else {
+        savedRecord = await NexusApi.transport.create(payload);
       }
+
+      const savedId = savedRecord && savedRecord.id;
+      // Upload any staged PDF documents for this transport record
+      if (savedId && Array.isArray(vehicleDocumentsData)) {
+        for (const doc of vehicleDocumentsData) {
+          if (doc && doc.pendingFile) {
+            try {
+              await NexusApi.transport.uploadDocument(
+                savedId,
+                doc.docName,
+                doc.pendingFile,
+                (doc.expiryDate && doc.expiryDate !== '-') ? doc.expiryDate : ''
+              );
+              doc.pendingFile = null;
+            } catch (docErr) {
+              console.error('Failed to upload transport document:', doc.docName, docErr);
+            }
+          }
+        }
+      }
+
+      const wasUpdate = Boolean(window.currentViewedVehicleId && !isNaN(numericId));
       window.currentViewedVehicleId = null;
-      currentDataset = [...masterTransportData];
-      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+      await window.loadMasterTransportFromApi();
       closeSideForm();
       if (typeof showSvgSuccessPopup === 'function') {
-        showSvgSuccessPopup('Vehicle details updated successfully!', 'Task Completed');
+        showSvgSuccessPopup(wasUpdate ? 'Vehicle details updated successfully!' : 'Vehicle added successfully!', 'Task Completed');
       } else if (typeof showToast === 'function') {
-        showToast('Vehicle updated successfully!');
+        showToast(wasUpdate ? 'Vehicle updated successfully!' : 'Vehicle added successfully!');
       }
-    } else {
-      const newRecord = {
-        id: 'trans-' + Date.now(),
-        transportName: transportName,
-        transportType: transportType || 'Contract',
-        vehicleType: vehicleType || 'Tata Ace',
-        vehicleNumber: vehicleNumber,
-        rentalType: rentalType || 'Per Day',
-        rentalAmount: rentalAmount || '0.00',
-        haltRent: haltRent || '0.00',
-        status: 'Active'
-      };
-      masterTransportData.unshift(newRecord);
-      currentDataset = [...masterTransportData];
-      if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
-      closeSideForm();
-      if (typeof showSvgSuccessPopup === 'function') {
-        showSvgSuccessPopup('Vehicle added successfully!', 'Task Completed');
+    } catch (err) {
+      console.error('Failed to save transport record:', err);
+      const msg = (err && (err.detail || err.message)) || 'Failed to save vehicle details.';
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(msg, 'Error Message!');
       } else if (typeof showToast === 'function') {
-        showToast('Vehicle added successfully!');
+        showToast('Error: ' + msg);
       }
     }
   }
@@ -49877,10 +49990,10 @@ function initSideFormEvents() {
 
   // View / Edit Master -> Transport Vehicle Record
   function openViewVehicleCard(id) {
-    const rec = masterTransportData.find(v => v.id === id);
+    const rec = masterTransportData.find(v => String(v.id) === String(id));
     if (!rec) return;
 
-    window.currentViewedVehicleId = id;
+    window.currentViewedVehicleId = rec.id;
     openSideForm();
 
     const lblTitle = document.getElementById('lblVehicleCardTitle');
@@ -49898,6 +50011,10 @@ function initSideFormEvents() {
     setVal('inpVehicleRentalType', rec.rentalType);
     setVal('inpVehicleRentalAmount', rec.rentalAmount);
     setVal('inpVehicleHaltRent', rec.haltRent);
+
+    vehicleDocumentsData = Array.isArray(rec.documents) ? rec.documents.map(d => ({ ...d })) : [];
+    vehicleContactsData = Array.isArray(rec.contacts) ? rec.contacts.map(c => ({ ...c })) : [];
+    vehicleBankData = Array.isArray(rec.banks) ? rec.banks.map(b => ({ ...b })) : [];
   }
   window.openViewVehicleCard = openViewVehicleCard;
 
@@ -49905,25 +50022,10 @@ function initSideFormEvents() {
   if (btnSubmitTransportVehicle) btnSubmitTransportVehicle.addEventListener('click', saveVehicleRecord);
   const btnCloseVehicleForm = document.getElementById('btnCloseVehicleForm');
   if (btnCloseVehicleForm) btnCloseVehicleForm.addEventListener('click', closeSideForm);
-  // --- Master -> Transport: Vehicle Documents, Contacts, & Bank Details Logic ---
-  let vehicleDocumentsData = [
-    { id: 'vdoc-1', docName: 'RC Copy', expiryDate: '2027-05-15' },
-    { id: 'vdoc-2', docName: 'Vehicle Insurance Certificate', expiryDate: '2026-12-31' },
-    { id: 'vdoc-3', docName: 'Fitness Certificate (FC)', expiryDate: '2027-02-28' },
-    { id: 'vdoc-4', docName: 'Pollution Certificate (PUC)', expiryDate: '2026-11-20' },
-    { id: 'vdoc-5', docName: 'State Goods Permit', expiryDate: '2028-04-10' }
-  ];
-
-  let vehicleContactsData = [
-    { id: 'vc-1', name: 'Ramasamy K', designation: 'Driver', contactNumber: '+91 98765 43210' },
-    { id: 'vc-2', name: 'Murugan P', designation: 'Owner', contactNumber: '+91 94433 11223' },
-    { id: 'vc-3', name: 'Senthil Velan', designation: 'Driver', contactNumber: '+91 98401 23456' }
-  ];
-
-  let vehicleBankData = [
-    { id: 'vb-1', accountName: 'SRS Logistics Pvt Ltd', accountNumber: '50200012345678', bankName: 'HDFC Bank', ifscCode: 'HDFC0001234' },
-    { id: 'vb-2', accountName: 'Murugan P', accountNumber: '30458899120', bankName: 'State Bank of India', ifscCode: 'SBIN0004567' }
-  ];
+  // --- Master -> Transport: Vehicle Documents, Contacts, & Bank Details Logic (DB-linked, zero mock data) ---
+  let vehicleDocumentsData = [];
+  let vehicleContactsData = [];
+  let vehicleBankData = [];
 
   let selectedVehicleContactIds = new Set();
   let selectedVehicleBankIds = new Set();
@@ -49991,6 +50093,8 @@ function initSideFormEvents() {
       card.style.display = 'block';
       const frm = document.getElementById('frmAddVehicleDoc');
       if (frm) frm.reset();
+      const lblPdf = document.getElementById('lblVehicleDocPdfFileName');
+      if (lblPdf) lblPdf.textContent = '';
       document.getElementById('inpVehicleDocName')?.focus();
     }
   }
@@ -50003,21 +50107,46 @@ function initSideFormEvents() {
   }
   window.closeAddVehicleDocCard = closeAddVehicleDocCard;
 
-  function submitNewVehicleDoc() {
+  async function submitNewVehicleDoc() {
     const docName = document.getElementById('inpVehicleDocName')?.value?.trim();
     const expiryDate = document.getElementById('inpVehicleDocExpiry')?.value?.trim();
+    const pdfInput = document.getElementById('inpVehicleDocPdfFile');
+    const pdfFile = pdfInput && pdfInput.files && pdfInput.files[0] ? pdfInput.files[0] : null;
     if (!docName) {
-      if (typeof showToast === 'function') showToast('Please enter Document Name');
+      if (typeof showToast === 'function') showToast('Please select Document Name');
       return;
     }
+
+    const numericId = parseInt(window.currentViewedVehicleId, 10);
+    if (window.currentViewedVehicleId && !isNaN(numericId) && typeof NexusApi !== 'undefined' && NexusApi.transport) {
+      if (!pdfFile) {
+        if (typeof showToast === 'function') showToast('Please upload a PDF document.');
+        return;
+      }
+      try {
+        const updated = await NexusApi.transport.uploadDocument(numericId, docName, pdfFile, expiryDate || '');
+        vehicleDocumentsData = Array.isArray(updated.documents) ? updated.documents : [];
+        await window.loadMasterTransportFromApi();
+        renderVehicleDocsTable();
+        closeAddVehicleDocCard();
+        if (typeof showToast === 'function') showToast('Document uploaded & saved to database');
+      } catch (err) {
+        console.error('Failed to upload vehicle document:', err);
+        if (typeof showToast === 'function') showToast('Error: ' + ((err && (err.detail || err.message)) || 'Upload failed'));
+      }
+      return;
+    }
+
     vehicleDocumentsData.unshift({
       id: 'vdoc-' + Date.now(),
       docName: docName,
-      expiryDate: expiryDate || '-'
+      expiryDate: expiryDate || '-',
+      fileName: pdfFile ? pdfFile.name : '',
+      pendingFile: pdfFile || null
     });
     renderVehicleDocsTable();
     closeAddVehicleDocCard();
-    if (typeof showToast === 'function') showToast('Document added successfully');
+    if (typeof showToast === 'function') showToast('Document staged (will save with vehicle)');
   }
   window.submitNewVehicleDoc = submitNewVehicleDoc;
 
@@ -50132,7 +50261,7 @@ function initSideFormEvents() {
   }
   window.closeAddVehicleContactCard = closeAddVehicleContactCard;
 
-  function submitNewVehicleContact() {
+  async function submitNewVehicleContact() {
     const name = document.getElementById('inpVehicleContactName')?.value?.trim();
     const designation = document.getElementById('inpVehicleContactDesignation')?.value?.trim() || 'Driver';
     const phone = document.getElementById('inpVehicleContactPhone')?.value?.trim();
@@ -50141,6 +50270,27 @@ function initSideFormEvents() {
       if (typeof showToast === 'function') showToast('Please enter Name');
       return;
     }
+
+    const numericId = parseInt(window.currentViewedVehicleId, 10);
+    if (window.currentViewedVehicleId && !isNaN(numericId) && typeof NexusApi !== 'undefined' && NexusApi.transport) {
+      try {
+        const updated = await NexusApi.transport.update(numericId, {
+          name: name,
+          designation: designation,
+          mobile_number: phone || '',
+          contact_status: 'Active'
+        });
+        vehicleContactsData = Array.isArray(updated.contacts) ? updated.contacts : [];
+        await window.loadMasterTransportFromApi();
+        renderVehicleContactTable();
+        closeAddVehicleContactCard();
+        if (typeof showToast === 'function') showToast('Contact saved to database');
+      } catch (err) {
+        if (typeof showToast === 'function') showToast('Error: ' + ((err && (err.detail || err.message)) || 'Save failed'));
+      }
+      return;
+    }
+
     vehicleContactsData.unshift({
       id: 'vc-' + Date.now(),
       name: name,
@@ -50149,7 +50299,7 @@ function initSideFormEvents() {
     });
     renderVehicleContactTable();
     closeAddVehicleContactCard();
-    if (typeof showToast === 'function') showToast('Contact added successfully');
+    if (typeof showToast === 'function') showToast('Contact staged (will save with vehicle)');
   }
   window.submitNewVehicleContact = submitNewVehicleContact;
 
@@ -50265,7 +50415,7 @@ function initSideFormEvents() {
   }
   window.closeAddVehicleBankCard = closeAddVehicleBankCard;
 
-  function submitNewVehicleBank() {
+  async function submitNewVehicleBank() {
     const accName = document.getElementById('inpVehicleAccountName')?.value?.trim();
     const accNum = document.getElementById('inpVehicleAccountNumber')?.value?.trim();
     const bankName = document.getElementById('inpVehicleBankName')?.value?.trim();
@@ -50279,6 +50429,28 @@ function initSideFormEvents() {
       if (typeof showToast === 'function') showToast('Please enter Account Number');
       return;
     }
+
+    const numericId = parseInt(window.currentViewedVehicleId, 10);
+    if (window.currentViewedVehicleId && !isNaN(numericId) && typeof NexusApi !== 'undefined' && NexusApi.transport) {
+      try {
+        const updated = await NexusApi.transport.update(numericId, {
+          account_name: accName,
+          account_number: accNum,
+          bank_name: bankName || '',
+          ifsc_code: ifsc || '',
+          account_status: 'Active'
+        });
+        vehicleBankData = Array.isArray(updated.banks) ? updated.banks : [];
+        await window.loadMasterTransportFromApi();
+        renderVehicleBankTable();
+        closeAddVehicleBankCard();
+        if (typeof showToast === 'function') showToast('Bank details saved to database');
+      } catch (err) {
+        if (typeof showToast === 'function') showToast('Error: ' + ((err && (err.detail || err.message)) || 'Save failed'));
+      }
+      return;
+    }
+
     vehicleBankData.unshift({
       id: 'vb-' + Date.now(),
       accountName: accName,
@@ -50288,7 +50460,7 @@ function initSideFormEvents() {
     });
     renderVehicleBankTable();
     closeAddVehicleBankCard();
-    if (typeof showToast === 'function') showToast('Bank details added successfully');
+    if (typeof showToast === 'function') showToast('Bank details staged (will save with vehicle)');
   }
   window.submitNewVehicleBank = submitNewVehicleBank;
 
@@ -50795,7 +50967,9 @@ function initSideFormEvents() {
   if (btnSubmitVendorBank) {
     btnSubmitVendorBank.addEventListener('click', async (e) => {
       e.preventDefault();
-      saveVendorBankDataFromForm();
+      if (typeof window.saveVendorBankDataFromForm === 'function') {
+        window.saveVendorBankDataFromForm();
+      }
       const vb = document.getElementById('vendorBankSideCard');
       if (vb) vb.style.display = 'none';
       const vendorCard = document.getElementById('addVendorCard');
@@ -50806,7 +50980,7 @@ function initSideFormEvents() {
       const numericVendorId = parseInt(currentViewedVendorId, 10);
       if (currentViewedVendorId && !isNaN(numericVendorId) && typeof NexusApi !== 'undefined' && NexusApi.vendors) {
         try {
-          const ctx = getEffectiveVendorContext();
+          const ctx = (typeof window.getEffectiveVendorContext === 'function') ? window.getEffectiveVendorContext() : {};
           await NexusApi.vendors.updateBank(numericVendorId, {
             account_name: ctx.bank?.accountName || '',
             account_number: ctx.bank?.accountNumber || '',
@@ -52261,38 +52435,9 @@ function initSideFormEvents() {
   document.getElementById('inpVendorGstToggle')?.addEventListener('change', updateVendorConditionalFields);
   document.getElementById('inpTdsDeductionToggle')?.addEventListener('change', updateVendorConditionalFields);
 
-  // saveVendorForm is modularized into frontend/assets/js/modules/master/master-vendors.js
-  var saveVendorForm = window.saveVendorForm;
-
-  const btnVendorCardEditToggle = document.getElementById('btnVendorCardEditToggle');
-  if (btnVendorCardEditToggle) {
-    btnVendorCardEditToggle.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const imgIcon = document.getElementById('imgVendorCardEditIcon');
-      if (!isVendorFormEditing) {
-        isVendorFormEditing = true;
-        setVendorFormReadOnly(false, true);
-        if (imgIcon) {
-          imgIcon.src = 'icons/Save.svg';
-          imgIcon.className = 'icon-green';
-          imgIcon.title = 'Save';
-        }
-        const btnSaveWrap = document.querySelector('#frmAddVendor .form-submit-inside-wrap');
-        if (btnSaveWrap) btnSaveWrap.style.display = 'flex';
-        showToast('Vendor form is now editable');
-      } else {
-        await saveVendorForm(false);
-      }
-    });
-  }
-
-  const btnSubmitVendor = document.getElementById('btnSubmitVendor');
-  if (btnSubmitVendor) {
-    btnSubmitVendor.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await saveVendorForm(true);
-    });
-  }
+  // saveVendorForm, btnVendorCardEditToggle, and btnSubmitVendor listeners are managed in
+  // frontend/assets/js/modules/master/master-vendors.js (single binding prevents double-submit & edit auto-save).
+  var saveVendorForm = (...args) => window.saveVendorForm?.(...args);
 
   const btnVendorGstProcess = document.getElementById('btnVendorGstProcess');
   if (btnVendorGstProcess) {
@@ -53167,10 +53312,14 @@ window.openVendorBankSidePanel = function() {
   }
 
   // Load bank data for currently selected vendor
-  loadVendorBankDataToForm();
+  if (typeof window.loadVendorBankDataToForm === 'function') {
+    window.loadVendorBankDataToForm();
+  }
 
   // If viewing an existing vendor, start in read-only mode; if adding new, start in edit mode
-  setVendorBankEditingState(!currentViewedVendorId);
+  if (typeof window.setVendorBankEditingState === 'function') {
+    window.setVendorBankEditingState(!currentViewedVendorId);
+  }
 
   overlay.style.display = 'flex';
   showToast('Bank details opened');

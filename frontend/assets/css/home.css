@@ -3388,7 +3388,13 @@ td.col-master-vendor-status {
 #accAttachReturnsCard .side-form-close-btn:hover,
 #btnCloseAccAttachReturns:hover,
 #accTdsChallanDetailsCard .side-form-close-btn:hover,
-#btnCloseAccTdsChallanDetails:hover {
+#btnCloseAccTdsChallanDetails:hover,
+#addExpenseCard .side-form-close-btn:hover,
+#btnCloseExpenseForm:hover,
+#addVehicleDocCard .side-form-close-btn:hover,
+#btnCloseAddVehicleDocCard:hover,
+#vehicleDocsSidePanel .side-form-close-btn:hover,
+#btnCloseVehicleDocsPanel:hover {
   transform: none !important;
   color: #dc2626 !important;
 }

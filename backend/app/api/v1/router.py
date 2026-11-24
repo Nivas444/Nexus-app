@@ -22,6 +22,7 @@ from app.api.v1.indus_project import router as indus_project_router
 from app.api.v1.indus_site import router as indus_site_router
 from app.api.v1.products import router as products_router
 from app.api.v1.purchase import router as purchase_router
+from app.api.v1.transport import router as transport_router
 from app.api.v1.vendors import router as vendors_router
 
 api_router = APIRouter()
@@ -72,6 +73,17 @@ api_router.include_router(
             require_method_permissions(
                 read=("master.view", "purchase.view", "accounts.view"),
                 write=("master.manage",),
+            )
+        )
+    ],
+)
+api_router.include_router(
+    transport_router,
+    dependencies=[
+        Depends(
+            require_method_permissions(
+                read=("master.view", "admin.view", "projects.view", "warehouse.view"),
+                write=("master.manage", "admin.manage"),
             )
         )
     ],

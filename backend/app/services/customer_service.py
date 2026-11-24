@@ -153,20 +153,14 @@ class CustomerService:
                     detail="Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable."
                 )
 
-        # Uniqueness checks
-        if self.repository.get_by_name(c_name):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Customer name already exists. Please use a different name."
-            )
-
+        # Uniqueness check on Customer Legal Name only (duplicate customer_name is permitted)
         if self.repository.get_by_legal_name(l_name):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Legal name already exists. Please use a different legal name."
+                detail="Customer legal name already exists. Please use a different legal name."
             )
 
-        c_code = (data.customer_code or data.customerId or f"23051068{abs(hash(c_name)) % 1000:03d}").strip()
+        c_code = (data.customer_code or data.customerId or f"23051068{abs(hash(l_name)) % 1000:03d}").strip()
         if self.repository.get_by_code(c_code):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,

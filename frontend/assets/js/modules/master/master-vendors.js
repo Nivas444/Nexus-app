@@ -193,8 +193,8 @@
   
   function getEffectiveVendorContext() {
     if (currentViewedVendorId) {
-      if (!vendorSubDataStore[currentViewedVendorId]) {
-        vendorSubDataStore[currentViewedVendorId] = {
+      if (!window.vendorSubDataStore[currentViewedVendorId]) {
+        window.vendorSubDataStore[currentViewedVendorId] = {
           bank: null,
           contacts: [],
           supplyScope: [],
@@ -203,14 +203,38 @@
           serviceOthersScope: []
         };
       }
-      return vendorSubDataStore[currentViewedVendorId];
+      return window.vendorSubDataStore[currentViewedVendorId];
     }
-    return newVendorTempSubData;
+    if (!window.newVendorTempSubData) {
+      window.newVendorTempSubData = {
+        bank: null,
+        contacts: [],
+        supplyScope: [],
+        serviceProjectScope: [],
+        serviceTransportScope: [],
+        serviceOthersScope: []
+      };
+    }
+    return window.newVendorTempSubData;
   }
   
   function loadVendorBankDataToForm() {
     const ctx = getEffectiveVendorContext();
-    const bank = ctx.bank;
+    let bank = ctx && ctx.bank ? ctx.bank : null;
+    if (!bank && currentViewedVendorId && Array.isArray(masterVendorData)) {
+      const vend = masterVendorData.find(v => String(v.vendor_id || v.id) === String(currentViewedVendorId));
+      if (vend && (vend.account_name || vend.account_number || vend.bank_name || vend.ifsc_code)) {
+        bank = {
+          accountName: vend.account_name || vend.accountName || '',
+          accountNumber: vend.account_number || vend.accountNumber || '',
+          bankName: vend.bank_name || vend.bankName || '',
+          accountType: vend.account_type || vend.accountType || '',
+          ifscCode: vend.ifsc_code || vend.ifscCode || '',
+          status: vend.status || 'Active'
+        };
+        if (ctx) ctx.bank = bank;
+      }
+    }
     const inpName = document.getElementById('inpVendorBankAccountName');
     const inpNum = document.getElementById('inpVendorBankAccountNumber');
     const inpIfsc = document.getElementById('inpVendorBankIfsc');
@@ -221,8 +245,16 @@
       if (inpName) inpName.value = bank.accountName || '';
       if (inpNum) inpNum.value = bank.accountNumber || '';
       if (inpIfsc) inpIfsc.value = bank.ifscCode || '';
-      if (selBank) selBank.value = bank.bankName || '';
-      if (chkStatus) chkStatus.checked = (bank.status || '').toLowerCase() === 'active';
+      if (selBank) {
+        if (bank.bankName && !Array.from(selBank.options).some(o => o.value === bank.bankName)) {
+          const opt = document.createElement('option');
+          opt.value = bank.bankName;
+          opt.textContent = bank.bankName;
+          selBank.appendChild(opt);
+        }
+        selBank.value = bank.bankName || '';
+      }
+      if (chkStatus) chkStatus.checked = (bank.status || 'Active').toLowerCase() === 'active';
     } else {
       if (inpName) inpName.value = '';
       if (inpNum) inpNum.value = '';
@@ -531,8 +563,13 @@
   }
 
 
+  let _isSavingVendorForm = false;
+
   // Save Vendor Form (Create & Update)
     async function saveVendorForm(isFormSubmit = true) {
+      if (_isSavingVendorForm) return false;
+      _isSavingVendorForm = true;
+      try {
       const vName = document.getElementById('inpVendorName')?.value.trim();
       if (!vName) {
         if (typeof showSvgErrorPopup === 'function') {
@@ -646,17 +683,18 @@
           status: status
         };
   
-        if (newVendorTempSubData.bank) {
-          createPayload.account_name = newVendorTempSubData.bank.accountName;
-          createPayload.account_number = newVendorTempSubData.bank.accountNumber;
-          createPayload.bank_name = newVendorTempSubData.bank.bankName;
-          createPayload.ifsc_code = newVendorTempSubData.bank.ifscCode;
-          createPayload.account_type = newVendorTempSubData.bank.accountType;
+        const tempSub = window.newVendorTempSubData || newVendorTempSubData || {};
+        if (tempSub.bank) {
+          createPayload.account_name = tempSub.bank.accountName;
+          createPayload.account_number = tempSub.bank.accountNumber;
+          createPayload.bank_name = tempSub.bank.bankName;
+          createPayload.ifsc_code = tempSub.bank.ifscCode;
+          createPayload.account_type = tempSub.bank.accountType;
         }
-        if (newVendorTempSubData.contacts && newVendorTempSubData.contacts.length > 0) {
-          createPayload.contact_name = newVendorTempSubData.contacts[0].name;
-          createPayload.contact_number = newVendorTempSubData.contacts[0].phone;
-          createPayload.email = newVendorTempSubData.contacts[0].email;
+        if (tempSub.contacts && tempSub.contacts.length > 0) {
+          createPayload.contact_name = tempSub.contacts[0].name;
+          createPayload.contact_number = tempSub.contacts[0].phone;
+          createPayload.email = tempSub.contacts[0].email;
         }
   
         if (typeof NexusApi !== 'undefined' && NexusApi.vendors) {
@@ -708,7 +746,7 @@
               }
             }
   
-            newVendorTempSubData = {
+            window.newVendorTempSubData = {
               bank: null,
               contacts: [],
               supplyScope: [],
@@ -716,6 +754,7 @@
               serviceTransportScope: [],
               serviceOthersScope: []
             };
+            newVendorTempSubData = window.newVendorTempSubData;
   
             await loadMasterVendorsFromApi();
             closeSideForm();
@@ -737,6 +776,9 @@
             return false;
           }
         }
+      }
+      } finally {
+        _isSavingVendorForm = false;
       }
     }
 

@@ -977,20 +977,18 @@
         }
       }
   
-      // Check general duplicate customer name in active dataset
-      const normEnteredName = effectiveCustomerName.trim().toLowerCase();
+      // Check duplicate customer legal name only (duplicate customer name is allowed)
       const normEnteredLegal = effectiveLegalName.trim().toLowerCase();
       const existingDup = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {
-        const cn = (c.customerName || c.customer_name || '').trim().toLowerCase();
         const ln = (c.legalName || c.legal_name || '').trim().toLowerCase();
-        return (cn && cn === normEnteredName) || (ln && ln === normEnteredLegal);
+        return ln && ln === normEnteredLegal;
       }) : null;
-  
+
       if (existingDup) {
         if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup("Customer name already exists. Please use a different name.", "Duplicate Error!");
+          showSvgErrorPopup("Customer legal name already exists. Please use a different legal name.", "Duplicate Error!");
         } else {
-          showToast("Customer name already exists.");
+          showToast("Customer legal name already exists.");
         }
         return;
       }

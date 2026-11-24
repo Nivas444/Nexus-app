@@ -1275,6 +1275,48 @@
     },
 
     /**
+     * Master Transport API (nexus_master.transport)
+     */
+    transport: {
+      async getAll(params = {}) {
+        const query = new URLSearchParams();
+        if (params.page) query.set('page', params.page);
+        if (params.page_size || params.limit) query.set('page_size', params.page_size || params.limit);
+        if (params.transport_name) query.set('transport_name', params.transport_name);
+        const qs = query.toString();
+        return await request(`/master/transport${qs ? '?' + qs : ''}`, { method: 'GET' });
+      },
+      async create(payload) {
+        return await request('/master/transport', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+      async update(transportId, payload) {
+        return await request(`/master/transport/${transportId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+      async uploadDocument(transportId, documentType, file, expiryDate = '') {
+        const formData = new FormData();
+        formData.append('document_type', documentType);
+        if (expiryDate) formData.append('expiry_date', expiryDate);
+        formData.append('file', file);
+        return await request(`/master/transport/${transportId}/documents`, {
+          method: 'POST',
+          body: formData
+        });
+      },
+      getDocumentUrl(transportId, docColumn) {
+        return `${API_BASE_URL}/master/transport/${transportId}/documents/${docColumn}`;
+      },
+      async delete(transportId) {
+        return await request(`/master/transport/${transportId}`, { method: 'DELETE' });
+      }
+    },
+
+    /**
      * Master Employees API
      */
     employees: {

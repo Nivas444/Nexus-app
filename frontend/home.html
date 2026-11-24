@@ -1302,19 +1302,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProductCategory">Product Category</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProductCategory">
-                  <option value="" selected></option>
-                  <option value="Tower Infrastructure">Tower Infrastructure</option>
-                  <option value="Optical Cables">Optical Cables</option>
-                  <option value="Electrical Equipment">Electrical Equipment</option>
-                  <option value="Power Backup">Power Backup</option>
-                  <option value="Energy Storage">Energy Storage</option>
-                  <option value="Earthing & Protection">Earthing & Protection</option>
-                  <option value="Telecom Equipment">Telecom Equipment</option>
-                  <option value="Civil Works">Civil Works</option>
-                  <option value="Hardware & Fasteners">Hardware & Fasteners</option>
-                  <option value="Consumables">Consumables</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProductCategory" placeholder="">
               </div>
             </div>
 
@@ -1322,15 +1310,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProductHead">Product Head</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpProductHead">
-                  <option value="" selected></option>
-                  <option value="Civil">Civil</option>
-                  <option value="Electrical">Electrical</option>
-                  <option value="Mechanical">Mechanical</option>
-                  <option value="Telecom">Telecom</option>
-                  <option value="IT">IT</option>
-                  <option value="General">General</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpProductHead" placeholder="">
               </div>
             </div>
 
@@ -1541,16 +1521,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpExpenseCategory">Expense Category</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpExpenseCategory">
-                  <option value="" disabled selected hidden></option>
-                  <option value="Direct Operations">Direct Operations</option>
-                  <option value="Material Procurement">Material Procurement</option>
-                  <option value="Human Resources">Human Resources</option>
-                  <option value="Logistics & Transport">Logistics & Transport</option>
-                  <option value="Administrative Support">Administrative Support</option>
-                  <option value="Professional Services">Professional Services</option>
-                  <option value="Regulatory Compliance">Regulatory Compliance</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpExpenseCategory" placeholder="">
               </div>
             </div>
 
@@ -1558,17 +1529,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpExpenseSubCategory">Expense Sub-Category</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpExpenseSubCategory">
-                  <option value="" disabled selected hidden></option>
-                  <option value="Civil Works">Civil Works</option>
-                  <option value="Electrical Works">Electrical Works</option>
-                  <option value="Hardware Consumables">Hardware Consumables</option>
-                  <option value="Travel Allowances">Travel Allowances</option>
-                  <option value="Fuel & Freight">Fuel & Freight</option>
-                  <option value="Office Utilities">Office Utilities</option>
-                  <option value="Audit & Legal">Audit & Legal</option>
-                  <option value="Licensing">Licensing</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpExpenseSubCategory" placeholder="">
               </div>
             </div>
 
@@ -1576,11 +1537,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpExpenseHead">Expense Head</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpExpenseHead">
-                  <option value="" disabled selected hidden></option>
-                  <option value="Capex">Capex</option>
-                  <option value="Opex">Opex</option>
-                </select>
+                <input type="text" class="form-input-control" id="inpExpenseHead" placeholder="" oninput="if (typeof handleExpenseHeadChange === 'function') handleExpenseHeadChange();">
               </div>
             </div>
 
@@ -1816,13 +1773,41 @@
             <div class="form-row-group">
               <label class="form-label" for="inpVehicleDocName">Document Name</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpVehicleDocName" placeholder="e.g. RC Copy">
+                <select class="form-select-control" id="inpVehicleDocName">
+                  <option value="" disabled selected hidden>Select Document Name</option>
+                  <option value="RC Copy">RC Copy</option>
+                  <option value="Vehicle Insurance Certificate">Vehicle Insurance Certificate</option>
+                  <option value="Fitness Certificate (FC)">Fitness Certificate (FC)</option>
+                  <option value="Pollution Certificate (PUC)">Pollution Certificate (PUC)</option>
+                  <option value="Goods Carriage Permit">Goods Carriage Permit</option>
+                  <option value="Commercial Driving Licence">Commercial Driving Licence</option>
+                  <option value="Road Tax Receipt">Road Tax Receipt</option>
+                  <option value="FASTag">FASTag</option>
+                </select>
               </div>
             </div>
             <div class="form-row-group">
               <label class="form-label" for="inpVehicleDocExpiry">Expiry Date</label>
-              <div class="form-input-wrap">
-                <input type="date" class="form-input-control" id="inpVehicleDocExpiry">
+              <div class="form-input-wrap" style="position: relative; display: flex; align-items: center;">
+                <input type="date" class="form-input-control date-picker-control" id="inpVehicleDocExpiry" style="width: 100%; padding-right: 40px;">
+                <button type="button" id="btnVehicleDocExpiryCalendar" class="input-pdf-badge btn-calendar-trigger" title="Select Expiry Date" aria-label="Select Expiry Date"
+                  onclick="(function(){ const el = document.getElementById('inpVehicleDocExpiry'); if (!el) return; if (typeof el.showPicker === 'function') { el.showPicker(); } else { el.focus(); el.click(); } })()"
+                  style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px; z-index: 5;">
+                  <img src="icons/google-calendar.svg" alt="Calendar" width="22" height="22" style="display: block; pointer-events: none;">
+                </button>
+              </div>
+            </div>
+            <div class="form-row-group">
+              <label class="form-label" for="inpVehicleDocPdfFile">Upload Document</label>
+              <div class="form-input-wrap" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+                <input type="file" id="inpVehicleDocPdfFile" accept=".pdf,application/pdf" style="display: none;"
+                  onchange="(function(inp){ const f = inp.files && inp.files[0]; const lbl = document.getElementById('lblVehicleDocPdfFileName'); if (f) { if (!f.name.toLowerCase().endsWith('.pdf')) { if (typeof showToast === 'function') showToast('Please select a PDF file.'); inp.value = ''; if (lbl) lbl.textContent = ''; return; } if (lbl) lbl.textContent = f.name; if (typeof showToast === 'function') showToast('PDF selected: ' + f.name); } })(this)">
+                <button type="button" id="btnVehicleDocPdfUpload" title="Upload PDF Document" aria-label="Upload PDF Document"
+                  onclick="document.getElementById('inpVehicleDocPdfFile')?.click();"
+                  style="background: transparent; border: none; cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center;">
+                  <img src="icons/PDF Upload.svg" alt="Upload PDF" width="28" height="28" style="display: block;">
+                </button>
+                <span id="lblVehicleDocPdfFileName" style="font-size: 11px; color: #0454e4; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
               </div>
             </div>
             <div class="form-submit-inside-wrap" style="display: flex; justify-content: center; margin-top: 24px; margin-bottom: 12px;">

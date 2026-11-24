@@ -65,6 +65,28 @@
     styleEl.textContent = cssText;
   }
 
+  function ensureNavIconSvgFilter(colorHex) {
+    let svgEl = document.getElementById('nexusThemeSvgFilters');
+    if (!colorHex) {
+      if (svgEl) svgEl.remove();
+      return;
+    }
+    if (!svgEl) {
+      svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgEl.id = 'nexusThemeSvgFilters';
+      svgEl.setAttribute('aria-hidden', 'true');
+      svgEl.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;';
+      (document.body || document.documentElement).appendChild(svgEl);
+    }
+    svgEl.innerHTML =
+      '<defs>' +
+        '<filter id="nexusNavIconColorFilter" color-interpolation-filters="sRGB">' +
+          '<feFlood flood-color="' + colorHex + '" result="flood" />' +
+          '<feComposite in="flood" in2="SourceAlpha" operator="in" />' +
+        '</filter>' +
+      '</defs>';
+  }
+
   function applyPlatformThemeColor(colorHex, options) {
     const opts = options || {};
     const persist = opts.persist !== false;
@@ -82,6 +104,7 @@
       root.style.removeProperty('--brand-primary');
       root.style.removeProperty('--accent-emerald');
       ensureDynamicStyleTag('');
+      ensureNavIconSvgFilter(null);
       if (persist) {
         try {
           window.localStorage.removeItem(STORAGE_KEY);
@@ -107,17 +130,10 @@
     root.style.setProperty('--brand-primary', normalized);
     root.style.setProperty('--accent-emerald', normalized);
 
-    // Override inline #00cba0 / #00bfa5 styles on modal badges, banners, active pills, and toggles
+    ensureNavIconSvgFilter(normalized);
+
+    // Override inline #00cba0 styles & tint active/hovered navbar icons; keep ALL active toggles green (#22c55e)
     ensureDynamicStyleTag(`
-      .side-form-title-badge,
-      .worklist-banner-bar,
-      .banner-bar,
-      .segmented-btn.active,
-      .toggle-slide-switch input:checked + .toggle-slide-slider,
-      .form-input-control:focus,
-      .form-select-control:focus {
-        --nexus-theme-active: ${normalized};
-      }
       .side-form-title-badge[style*="#00cba0"],
       .side-form-title-badge[style*="rgb(0, 203, 160)"],
       .side-form-title-badge {
@@ -131,8 +147,14 @@
         background: ${normalized} !important;
         border-color: ${normalized} !important;
       }
-      .toggle-slide-switch input:checked + .toggle-slide-slider {
-        background-color: ${normalized} !important;
+      .nav-icon-item:hover .nav-icon-img {
+        filter: url(#nexusNavIconColorFilter) drop-shadow(0 0 10px rgba(${r}, ${g}, ${b}, 0.8)) drop-shadow(0 0 18px rgba(${r}, ${g}, ${b}, 0.5)) !important;
+      }
+      .nav-icon-item.active-nav-tab .nav-icon-img {
+        filter: url(#nexusNavIconColorFilter) drop-shadow(0 2px 8px rgba(${r}, ${g}, ${b}, 0.45)) !important;
+      }
+      .toggle-slide-switch:not(.toggle-coral) input:checked + .toggle-slide-slider {
+        background-color: #22c55e !important;
       }
       .split-side-right {
         background: linear-gradient(145deg, ${normalized} 0%, ${darkShade} 60%, ${deepShade} 100%) !important;

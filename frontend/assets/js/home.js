@@ -464,11 +464,12 @@ function mapHrComplianceRecordToRow(r, type) {
   };
 
   if (t === 'epf') {
+    const sealingVal = (r.basic_da_sa !== null && r.basic_da_sa !== undefined) ? r.basic_da_sa : r.epf_sealing_amount;
     return {
       ...base,
       fillingFrequency: r.epf_filling_frequency || 'Monthly',
       fillingDueDate: formatHrDateToUI(r.epf_filling_due_date) || (r.epf_filling_due_date ? String(r.epf_filling_due_date) : ''),
-      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : '',
+      sealingAmount: sealingVal !== null && sealingVal !== undefined ? formatHrAmount(sealingVal) : '',
       employee: r.epf_employee_contribution !== null && r.epf_employee_contribution !== undefined ? `${r.epf_employee_contribution}%` : '',
       epf: r.epf_employer_contribution !== null && r.epf_employer_contribution !== undefined ? `${r.epf_employer_contribution}%` : '',
       eps: r.eps_employer_contribution !== null && r.eps_employer_contribution !== undefined ? `${r.eps_employer_contribution}%` : '',
@@ -477,11 +478,12 @@ function mapHrComplianceRecordToRow(r, type) {
       status: r.epf_status || 'Active'
     };
   } else if (t === 'esi') {
+    const sealingVal = (r.basic_da_sa !== null && r.basic_da_sa !== undefined) ? r.basic_da_sa : r.esi_sealing_amount;
     return {
       ...base,
       fillingFrequency: r.esi_filling_frequency || 'Monthly',
       fillingDueDate: formatHrDateToUI(r.esi_filling_date) || (r.esi_filling_date ? String(r.esi_filling_date) : ''),
-      sealingAmount: r.esi_sealing_amount !== null && r.esi_sealing_amount !== undefined ? formatHrAmount(r.esi_sealing_amount) : '',
+      sealingAmount: sealingVal !== null && sealingVal !== undefined ? formatHrAmount(sealingVal) : '',
       employee: r.esi_employee_contribution !== null && r.esi_employee_contribution !== undefined ? `${r.esi_employee_contribution}%` : '',
       employer: r.esi_employer_contribution !== null && r.esi_employer_contribution !== undefined ? `${r.esi_employer_contribution}%` : '',
       status: r.esi_status || 'Active'
@@ -546,18 +548,20 @@ function mapHrComplianceRecordToRow(r, type) {
   } else if (t === 'bonus') {
     const bType = r.state || r.bonus_type || (r.performance_bonus !== null && r.performance_bonus !== undefined ? 'Performance Bonus' : 'Statutory Bonus');
     const bVal = r.statutory_bonus !== null && r.statutory_bonus !== undefined ? r.statutory_bonus : r.performance_bonus;
+    const sealingVal = (r.basic_da_sa !== null && r.basic_da_sa !== undefined) ? r.basic_da_sa : r.statutory_bonus_sealing_amount;
     return {
       ...base,
       bonusType: bType,
-      sealingAmount: r.statutory_bonus_sealing_amount !== null && r.statutory_bonus_sealing_amount !== undefined ? formatHrAmount(r.statutory_bonus_sealing_amount) : '',
+      sealingAmount: sealingVal !== null && sealingVal !== undefined ? formatHrAmount(sealingVal) : '',
       bonusPercent: bVal !== null && bVal !== undefined ? `${bVal}%` : '',
       status: r.bonus_status || 'Active'
     };
   } else if (t === 'medical_insurance') {
+    const sealingVal = (r.basic_da_sa !== null && r.basic_da_sa !== undefined) ? r.basic_da_sa : r.epf_sealing_amount;
     return {
       ...base,
       insuranceCompany: r.medical_insurance_company_name || '',
-      sealingAmount: r.epf_sealing_amount !== null && r.epf_sealing_amount !== undefined ? formatHrAmount(r.epf_sealing_amount) : '',
+      sealingAmount: sealingVal !== null && sealingVal !== undefined ? formatHrAmount(sealingVal) : '',
       employee: r.medical_insurance_employee_contribution !== null && r.medical_insurance_employee_contribution !== undefined ? `${r.medical_insurance_employee_contribution}%` : '0.00%',
       employer: r.medical_insurance_employer_contribution !== null && r.medical_insurance_employer_contribution !== undefined ? `${r.medical_insurance_employer_contribution}%` : '100%',
       status: r.medical_insurance_status || 'Active'
@@ -14785,16 +14789,16 @@ function renderCompanyHrTableHead() {
         <th rowspan="2" ${thStyle('20ch')}><span>Filling Due Date</span></th>
         <th rowspan="2" ${thStyle('13ch')}><span>Sealing Amount</span></th>
         <th rowspan="2" ${thStyle('10ch')}><span>Employee</span></th>
-        <th colspan="4" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="4" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
           <span>Employer</span>
         </th>
         <th rowspan="2" ${thStyle('10ch')}><span>Status</span></th>
       </tr>
       <tr class="master-view-header company-hr-header tr-sub-headers">
-        <th ${thStyle('7ch', 'border-top: 1.5px solid #ffffff !important;')}><span>EPF</span></th>
-        <th ${thStyle('7ch', 'border-top: 1.5px solid #ffffff !important;')}><span>EPS</span></th>
-        <th ${thStyle('7ch', 'border-top: 1.5px solid #ffffff !important;')}><span>EDLI</span></th>
-        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Admin Charges</span></th>
+        <th ${thStyle('7ch', 'border-top: none !important;')}><span>EPF</span></th>
+        <th ${thStyle('7ch', 'border-top: none !important;')}><span>EPS</span></th>
+        <th ${thStyle('7ch', 'border-top: none !important;')}><span>EDLI</span></th>
+        <th ${thStyle('15ch', 'border-top: none !important;')}><span>Admin Charges</span></th>
       </tr>
     `;
   } else if (currentCompanyHrTab === 'esi') {
@@ -14857,25 +14861,25 @@ function renderCompanyHrTableHead() {
       <tr class="master-view-header company-hr-header">
         <th rowspan="2" ${thStyle('15ch')}><span>From</span></th>
         <th rowspan="2" ${thStyle('15ch')}><span>To</span></th>
-        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
           <span>CL</span>
         </th>
-        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
           <span>SL</span>
         </th>
-        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1.5px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
           <span>EL</span>
         </th>
         <th rowspan="2" ${thStyle('20ch')}><span>Sandwich Leave Policy</span></th>
         <th rowspan="2" ${thStyle('10ch')}><span>Status</span></th>
       </tr>
       <tr class="master-view-header company-hr-header tr-sub-headers">
-        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Eligible working days</span></th>
-        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Claimable day</span></th>
-        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Eligible working days</span></th>
-        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Claimable day</span></th>
-        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Eligible working days</span></th>
-        <th ${thStyle('15ch', 'border-top: 1.5px solid #ffffff !important;')}><span>Claimable day</span></th>
+        <th ${thStyle('15ch', 'border-top: none !important;')}><span>Eligible working days</span></th>
+        <th ${thStyle('15ch', 'border-top: none !important;')}><span>Claimable day</span></th>
+        <th ${thStyle('15ch', 'border-top: none !important;')}><span>Eligible working days</span></th>
+        <th ${thStyle('15ch', 'border-top: none !important;')}><span>Claimable day</span></th>
+        <th ${thStyle('15ch', 'border-top: none !important;')}><span>Eligible working days</span></th>
+        <th ${thStyle('15ch', 'border-top: none !important;')}><span>Claimable day</span></th>
       </tr>
     `;
   } else if (currentCompanyHrTab === 'bonus') {
@@ -50852,6 +50856,8 @@ function initSideFormEvents() {
     const vendorServiceOthers = document.getElementById('vendorServiceOthersScopeSidePanel');
     const bulkUploadPanel = document.getElementById('bulkUploadSidePanel');
     const addBulkUploadCard = document.getElementById('addBulkUploadCard');
+    const addOfficeCard = document.getElementById('addOfficeLocationCard');
+    const viewOfficeCard = document.getElementById('viewOfficeLocationCard');
 
     const isAnyPopupOpen = 
       (bankPanel && bankPanel.style.display !== 'none' && bankPanel.style.display !== '') ||
@@ -50860,6 +50866,8 @@ function initSideFormEvents() {
       (assetPanel && assetPanel.style.display !== 'none' && assetPanel.style.display !== '') ||
       (contactPanel && contactPanel.style.display !== 'none' && contactPanel.style.display !== '') ||
       (locationPanel && locationPanel.style.display !== 'none' && locationPanel.style.display !== '') ||
+      (addOfficeCard && addOfficeCard.style.display !== 'none' && addOfficeCard.style.display !== '') ||
+      (viewOfficeCard && viewOfficeCard.style.display !== 'none' && viewOfficeCard.style.display !== '') ||
       (addBankCard && addBankCard.style.display !== 'none' && addBankCard.style.display !== '') ||
       (viewBankCard && viewBankCard.style.display !== 'none' && viewBankCard.style.display !== '') ||
       (addSalaryCard && addSalaryCard.style.display !== 'none' && addSalaryCard.style.display !== '') ||
@@ -50919,8 +50927,14 @@ function initSideFormEvents() {
 
   const btnCloseLocationCard = document.getElementById('btnCloseLocationCard');
   if (btnCloseLocationCard && locationPanel) {
-    btnCloseLocationCard.addEventListener('click', () => {
+    btnCloseLocationCard.addEventListener('click', (e) => {
+      if (e) e.stopPropagation();
       locationPanel.style.display = 'none';
+      locationPanel.classList.remove('card-dimmed-blurred');
+      const addOff = document.getElementById('addOfficeLocationCard');
+      if (addOff) addOff.style.display = 'none';
+      const viewOff = document.getElementById('viewOfficeLocationCard');
+      if (viewOff) viewOff.style.display = 'none';
       const indusCard = document.getElementById('addIndusTowerCard');
       if (indusCard) indusCard.classList.remove('card-dimmed-blurred');
       updateCardDimmedState();
@@ -51085,21 +51099,37 @@ function initSideFormEvents() {
   const btnCloseAddBankCard = document.getElementById('btnCloseAddBankCard');
   const btnSubmitAddBank = document.getElementById('btnSubmitAddBank');
 
-  function populateAddBankResponsibleDropdown() {
-    const sel = document.getElementById('inpAddBankResponsible');
-    if (!sel) return;
-    const empNames = (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData) && masterEmployeeData.length > 0)
-      ? masterEmployeeData.map(e => e.employeeName || e.employee_name).filter(Boolean)
-      : ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Suresh Reddy', 'John Doe', 'Sarah Jenkins'];
+  function configureBankContextFields() {
+    const indusCard = document.getElementById('addIndusTowerCard');
+    const isCompanyContext = Boolean(indusCard && indusCard.style.display !== 'none');
+    const options = isCompanyContext
+      ? ['Current', 'OD', 'CC', 'Saving', 'Expenses', 'Credit Card']
+      : ['Saving', 'Salary', 'Expense'];
 
-    sel.innerHTML = '<option value="">Select Responsible</option>' + empNames.map(n => `<option value="${n}">${n}</option>`).join('');
+    ['inpAddBankAccountType', 'inpViewBankAccountType'].forEach(selId => {
+      const sel = document.getElementById(selId);
+      if (!sel) return;
+      const prevVal = sel.value;
+      sel.innerHTML = options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+      if (prevVal && options.includes(prevVal)) sel.value = prevVal;
+    });
+
+    const rowAddInCharge = document.getElementById('rowAddBankInCharge');
+    const rowViewInCharge = document.getElementById('rowViewBankInCharge');
+    const thInCharge = document.getElementById('thBankInCharge');
+    if (rowAddInCharge) rowAddInCharge.style.display = isCompanyContext ? 'flex' : 'none';
+    if (rowViewInCharge) rowViewInCharge.style.display = isCompanyContext ? 'flex' : 'none';
+    if (thInCharge) thInCharge.style.display = isCompanyContext ? '' : 'none';
+    return isCompanyContext;
   }
+  window.configureBankContextFields = configureBankContextFields;
 
   if (btnBankAddRow && addBankCard && bankPanel) {
     btnBankAddRow.addEventListener('click', (e) => {
       e.stopPropagation();
       bankPanel.classList.add('card-dimmed-blurred');
-      populateAddBankResponsibleDropdown();
+      document.getElementById('frmAddBank')?.reset();
+      configureBankContextFields();
       addBankCard.style.display = 'block';
       updateCardDimmedState();
       showToast('Add Bank Form opened');
@@ -51121,13 +51151,14 @@ function initSideFormEvents() {
         e.preventDefault();
         e.stopPropagation();
       }
+      const accType = document.getElementById('inpAddBankAccountType')?.value.trim() || 'Saving';
       const accName = document.getElementById('inpAddBankAccountName')?.value.trim();
       const accNum = document.getElementById('inpAddBankAccountNumber')?.value.trim();
       const bankName = document.getElementById('inpAddBankName')?.value.trim();
+      const branchName = document.getElementById('inpAddBankBranchName')?.value.trim() || '';
       const ifsc = document.getElementById('inpAddBankIfsc')?.value.trim();
-      const responsible = document.getElementById('inpAddBankResponsible')?.value.trim();
+      const inCharge = document.getElementById('inpAddBankInCharge')?.value.trim() || '';
       const isStatusActive = document.getElementById('inpAddBankStatus')?.checked ?? true;
-      const fileInput = document.getElementById('fileAddBankDoc');
 
       if (!accName) {
         if (typeof showSvgErrorPopup === 'function') {
@@ -51151,11 +51182,13 @@ function initSideFormEvents() {
       const isCompanyContext = Boolean(indusCard && indusCard.style.display !== 'none');
 
       const payload = {
+        account_type: accType,
         account_name: accName,
         account_number: accNum,
         bank_name: bankName || accName,
+        branch_name: branchName,
         ifsc_code: ifsc || '',
-        responsible: responsible || '',
+        responsible: isCompanyContext ? inCharge : '',
         status: isStatusActive ? 'Active' : 'De-Active'
       };
 
@@ -51187,16 +51220,6 @@ function initSideFormEvents() {
         const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
         try {
           const created = await NexusApi.employeeBank.create(payload, activeEmp);
-          const bankId = created.employee_bank_account_id || created.id;
-
-          if (fileInput && fileInput.files && fileInput.files[0] && bankId) {
-            try {
-              await NexusApi.employeeBank.uploadDocument(bankId, fileInput.files[0]);
-              fileInput.value = '';
-            } catch (docErr) {
-              console.error('Failed to upload bank document:', docErr);
-            }
-          }
 
           document.getElementById('frmAddBank')?.reset();
           if (window.loadEmployeeBankData) await window.loadEmployeeBankData(activeEmp);
@@ -51268,25 +51291,28 @@ function initSideFormEvents() {
       } else {
         // Save changes
         const bankId = document.getElementById('inpViewBankId')?.value || currentViewedBankId;
+        const accType = document.getElementById('inpViewBankAccountType')?.value.trim() || 'Saving';
         const accName = document.getElementById('inpViewBankAccountName')?.value.trim();
         const accNum = document.getElementById('inpViewBankAccountNumber')?.value.trim();
         const bName = document.getElementById('inpViewBankName')?.value.trim();
+        const branchName = document.getElementById('inpViewBankBranchName')?.value.trim() || '';
         const ifsc = document.getElementById('inpViewBankIfsc')?.value.trim();
-        const responsible = document.getElementById('selViewBankResponsible')?.value;
+        const inCharge = document.getElementById('inpViewBankInCharge')?.value.trim() || '';
         const isAct = document.getElementById('inpViewBankStatus')?.checked ?? true;
-        const fileInput = document.getElementById('fileViewBankDoc');
-
-        const updatePayload = {
-          account_name: accName,
-          account_number: accNum,
-          bank_name: bName,
-          ifsc_code: ifsc,
-          responsible: responsible,
-          status: isAct ? 'Active' : 'De-Active'
-        };
 
         const indusCard = document.getElementById('addIndusTowerCard');
         const isCompanyContext = Boolean(indusCard && indusCard.style.display !== 'none');
+
+        const updatePayload = {
+          account_type: accType,
+          account_name: accName,
+          account_number: accNum,
+          bank_name: bName,
+          branch_name: branchName,
+          ifsc_code: ifsc,
+          responsible: isCompanyContext ? inCharge : undefined,
+          status: isAct ? 'Active' : 'De-Active'
+        };
 
         if (isCompanyContext && typeof NexusApi !== 'undefined' && NexusApi.companyBank && bankId) {
           try {
@@ -51317,15 +51343,6 @@ function initSideFormEvents() {
         } else if (typeof NexusApi !== 'undefined' && NexusApi.employeeBank && bankId) {
           try {
             await NexusApi.employeeBank.update(bankId, updatePayload);
-
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-              try {
-                await NexusApi.employeeBank.uploadDocument(bankId, fileInput.files[0]);
-                fileInput.value = '';
-              } catch (docErr) {
-                console.error('Failed to upload replacement bank document:', docErr);
-              }
-            }
 
             const activeEmp = currentViewedEmpId || document.getElementById('inpEmpId')?.value.trim() || null;
             if (window.loadEmployeeBankData) await window.loadEmployeeBankData(activeEmp);
@@ -51628,9 +51645,15 @@ function initSideFormEvents() {
   }
 
   if (btnCloseAddOfficeLocationCard && addOfficeLocationCard && locationPanel) {
-    btnCloseAddOfficeLocationCard.addEventListener('click', () => {
+    btnCloseAddOfficeLocationCard.addEventListener('click', (e) => {
+      if (e) e.stopPropagation();
       addOfficeLocationCard.style.display = 'none';
-      locationPanel.classList.remove('card-dimmed-blurred');
+      const locPanel = document.getElementById('locationDetailsSidePanel');
+      if (locPanel) locPanel.classList.remove('card-dimmed-blurred');
+      const indusCard = document.getElementById('addIndusTowerCard');
+      if (!locPanel || locPanel.style.display === 'none' || locPanel.style.display === '') {
+        if (indusCard) indusCard.classList.remove('card-dimmed-blurred');
+      }
       updateCardDimmedState();
     });
   }
@@ -53627,7 +53650,7 @@ window.loadCompanyMasterFromApi = async function(companyNameOrId = null) {
             if (wrap) wrap.style.setProperty('display', 'flex', 'important');
           } else {
             if (wrap) wrap.style.setProperty('display', 'none', 'important');
-            if (toggleWrap) toggleWrap.style.setProperty('display', 'block', 'important');
+            if (toggleWrap) toggleWrap.style.setProperty('display', 'flex', 'important');
           }
         });
 
@@ -54092,14 +54115,20 @@ function setViewBankFormReadOnly(isReadOnly) {
     }
   });
 
-  const selResp = document.getElementById('selViewBankResponsible');
-  if (selResp) selResp.disabled = isReadOnly;
+  const selAccType = document.getElementById('inpViewBankAccountType');
+  if (selAccType) selAccType.disabled = isReadOnly;
+
+  ['inpViewBankAccountNumber', 'inpViewBankIfsc', 'inpViewBankAccountName', 'inpViewBankName', 'inpViewBankBranchName', 'inpViewBankInCharge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.readOnly = isReadOnly;
+      if (isReadOnly) el.classList.remove('editable-active');
+      else el.classList.add('editable-active');
+    }
+  });
 
   const chkStatus = document.getElementById('inpViewBankStatus');
   if (chkStatus) chkStatus.disabled = isReadOnly;
-
-  const badgePdf = document.getElementById('badgeViewBankPdf');
-  if (badgePdf) badgePdf.style.display = isReadOnly ? 'none' : 'inline-flex';
 }
 
 function openViewCompanyBankCard(bankId) {
@@ -54113,26 +54142,27 @@ function openViewCompanyBankCard(bankId) {
   currentViewedBankId = bank.bank_account_id || bank.employee_bank_account_id || bank.id;
   isViewBankEditing = false;
 
+  if (typeof window.configureBankContextFields === 'function') {
+    window.configureBankContextFields();
+  }
+
   const lblTitle = document.getElementById('lblViewBankTitle');
   if (lblTitle) lblTitle.innerText = bank.bank_name || bank.bankName || 'Bank Details';
 
-  // Populate Responsible dropdown with Employee Names from masterEmployeeData
-  const selResp = document.getElementById('selViewBankResponsible');
-  if (selResp) {
-    const empNames = (typeof masterEmployeeData !== 'undefined' && Array.isArray(masterEmployeeData))
-      ? masterEmployeeData.map(e => e.employeeName || e.employee_name).filter(Boolean)
-      : ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Suresh Reddy', 'John Doe', 'Sarah Jenkins'];
-
-    const respVal = bank.employee_name || bank.responsible;
-    if (respVal && !empNames.includes(respVal)) {
-      empNames.unshift(respVal);
-    }
-
-    selResp.innerHTML = empNames.map(name => `<option value="${name}" ${name === respVal ? 'selected' : ''}>${name}</option>`).join('');
-  }
-
   const inpId = document.getElementById('inpViewBankId');
   if (inpId) inpId.value = currentViewedBankId;
+
+  const selAccType = document.getElementById('inpViewBankAccountType');
+  if (selAccType) {
+    const accTypeVal = bank.account_type || bank.accountType || '';
+    if (accTypeVal && !Array.from(selAccType.options).some(o => o.value === accTypeVal)) {
+      const opt = document.createElement('option');
+      opt.value = accTypeVal;
+      opt.textContent = accTypeVal;
+      selAccType.appendChild(opt);
+    }
+    if (accTypeVal) selAccType.value = accTypeVal;
+  }
 
   const inpAccName = document.getElementById('inpViewBankAccountName');
   if (inpAccName) inpAccName.value = bank.account_name || bank.accountName || '';
@@ -54143,8 +54173,14 @@ function openViewCompanyBankCard(bankId) {
   const inpBName = document.getElementById('inpViewBankName');
   if (inpBName) inpBName.value = bank.bank_name || bank.bankName || '';
 
+  const inpBranch = document.getElementById('inpViewBankBranchName');
+  if (inpBranch) inpBranch.value = bank.branch_name || bank.branchName || '';
+
   const inpIfsc = document.getElementById('inpViewBankIfsc');
   if (inpIfsc) inpIfsc.value = bank.ifsc_code || bank.ifscCode || '';
+
+  const inpInCharge = document.getElementById('inpViewBankInCharge');
+  if (inpInCharge) inpInCharge.value = bank.responsible || bank.in_charge || bank.employee_name || '';
 
   const chkStatus = document.getElementById('inpViewBankStatus');
   if (chkStatus) {
@@ -54166,6 +54202,11 @@ function renderCompanyBankTable() {
   const tbody = document.getElementById('tbodyBankDetails');
   if (!tbody) return;
 
+  const isCompanyContext = (typeof window.configureBankContextFields === 'function')
+    ? window.configureBankContextFields()
+    : Boolean(document.getElementById('addIndusTowerCard')?.style.display !== 'none');
+  const colSpanCount = isCompanyContext ? 8 : 7;
+
   let filtered = companyBankData.filter(row => {
     for (const [colKey, allowedSet] of Object.entries(activeCompanyBankFilters)) {
       const cellVal = String(row[colKey] !== undefined ? row[colKey] : '');
@@ -54175,7 +54216,7 @@ function renderCompanyBankTable() {
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; padding: 18px;">No matching bank records found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${colSpanCount}" style="text-align: center; color: #64748b; padding: 18px;">No matching bank records found.</td></tr>`;
     updateCompanyBankFilterBtnStates();
     return;
   }
@@ -54183,18 +54224,26 @@ function renderCompanyBankTable() {
   tbody.innerHTML = filtered.map(row => {
     const isInactive = (row.status || '').toLowerCase().includes('in') || (row.status || '').toLowerCase().includes('de');
     const bankId = row.bank_account_id || row.employee_bank_account_id || row.id;
+    const accType = row.account_type || row.accountType || '';
     const accNum = row.account_number || row.accountNumber || '';
-    const hasDoc = Boolean(row.has_document || row.cancelled_cheque);
+    const ifsc = row.ifsc_code || row.ifscCode || '';
+    const accName = row.account_name || row.accountName || '';
+    const bankName = row.bank_name || row.bankName || '';
+    const branchName = row.branch_name || row.branchName || '';
+    const inCharge = row.responsible || row.in_charge || '';
     return `
       <tr data-bank-id="${bankId}">
-        <td class="col-bank-acc-name" style="text-align: left !important; padding-left: 14px;">
-          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyBankCard('${bankId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${row.account_name || row.accountName || ''}</a>
-        </td>
+        <td class="col-bank-acc-type" style="text-align: left !important; padding-left: 14px;">${accType}</td>
         <td class="col-bank-acc-num" style="text-align: left !important; padding-left: 14px;">
-          <a href="#" class="req-link td-link-blue" onclick="${hasDoc ? `window.downloadBankDocument('${bankId}', '${accNum}');` : `if(typeof showSvgErrorPopup === 'function') { showSvgErrorPopup('No PDF document uploaded for this account number.', 'Document Not Found'); } else { showToast('No document attached.'); }`} return false;" style="color: #0454e4; text-decoration: underline !important; text-underline-offset: 3px; font-weight: 500; cursor: pointer;" title="${hasDoc ? 'Click to download account PDF' : 'No document attached'}">${accNum}</a>
+          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyBankCard('${bankId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${accNum}</a>
         </td>
-        <td class="col-bank-name" style="text-align: left !important; padding-left: 14px;">${row.bank_name || row.bankName || ''}</td>
-        <td class="col-bank-ifsc" style="text-align: center !important;">${row.ifsc_code || row.ifscCode || ''}</td>
+        <td class="col-bank-ifsc" style="text-align: center !important;">${ifsc}</td>
+        <td class="col-bank-acc-name" style="text-align: left !important; padding-left: 14px;">
+          <a href="#" class="req-link td-link-blue" onclick="openViewCompanyBankCard('${bankId}'); return false;" style="color: #0454e4; text-decoration: none; font-weight: 500; cursor: pointer;">${accName}</a>
+        </td>
+        <td class="col-bank-name" style="text-align: left !important; padding-left: 14px;">${bankName}</td>
+        <td class="col-bank-branch" style="text-align: left !important; padding-left: 14px;">${branchName}</td>
+        ${isCompanyContext ? `<td class="col-bank-responsible" style="text-align: left !important; padding-left: 14px;">${inCharge}</td>` : ''}
         <td class="col-bank-status td-center">
           <span class="status-badge ${isInactive ? 'status-inactive' : 'status-active'}">${isInactive ? 'De-Active' : 'Active'}</span>
         </td>

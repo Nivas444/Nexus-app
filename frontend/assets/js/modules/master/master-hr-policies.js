@@ -69,13 +69,25 @@
       company_name: companyName
     };
 
+    const cardIdMap = {
+      'EPF': 'companyHrEpfCard',
+      'ESI': 'companyHrEsiCard',
+      'PT': 'companyHrPtCard',
+      'LWF': 'companyHrLwfCard',
+      'TDS': 'companyHrTdsCard',
+      'Leave': 'companyHrLeaveCard',
+      'Bonus': 'companyHrBonusCard',
+      'Medical Insurance': 'companyHrMedicalInsuranceCard'
+    };
+    const activeCard = document.getElementById(cardIdMap[complianceType] || '');
+
     const getVal = id => {
-      const el = document.getElementById(id);
+      const el = (activeCard && activeCard.querySelector(`#${id}`)) || document.getElementById(id);
       return el ? el.value.trim() : '';
     };
 
     const getChecked = id => {
-      const el = document.getElementById(id);
+      const el = (activeCard && activeCard.querySelector(`#${id}`)) || document.getElementById(id);
       return el ? el.checked : true;
     };
 
@@ -90,10 +102,13 @@
         }
         return;
       }
+      const epfSealing = getVal('inpEpfSealingAmount') || null;
       payload.from_date = fromDate;
       payload.to_date = toDate;
+      payload.epf_filling_frequency = getVal('inpEpfFillingFrequency') || 'Monthly';
       payload.epf_filling_due_date = getVal('inpEpfFillingDueDate') || null;
-      payload.epf_sealing_amount = getVal('inpEpfSealingAmount') || null;
+      payload.basic_da_sa = epfSealing;
+      payload.epf_sealing_amount = epfSealing;
       payload.epf_employee_contribution = getVal('inpEpfEmpContribution') || null;
       payload.epf_employer_contribution = getVal('inpEpfEmployerContribution') || null;
       payload.eps_employer_contribution = getVal('inpEpsEmployerContribution') || null;
@@ -111,11 +126,13 @@
         }
         return;
       }
+      const esiSealing = getVal('inpEsiSealingAmount') || null;
       payload.from_date = fromDate;
       payload.to_date = toDate;
       payload.esi_filling_frequency = getVal('inpEsiFillingFrequency') || 'Monthly';
       payload.esi_filling_date = getVal('inpEsiFillingDueDate') || null;
-      payload.esi_sealing_amount = getVal('inpEsiSealingAmount') || null;
+      payload.basic_da_sa = esiSealing;
+      payload.esi_sealing_amount = esiSealing;
       payload.esi_employee_contribution = getVal('inpEsiEmpContribution') || null;
       payload.esi_employer_contribution = getVal('inpEsiEmployerContribution') || null;
       payload.esi_status = getChecked('inpEsiStatusToggle') ? 'Active' : 'In - Active';
@@ -225,11 +242,13 @@
       }
       const bonusType = getVal('inpBonusType') || 'Statutory Bonus';
       const bonusVal = getVal('inpBonusPercent') || null;
+      const bonusSealing = getVal('inpBonusSealingAmount') || null;
       payload.from_date = fromDate;
       payload.to_date = toDate;
       payload.state = bonusType;
       payload.bonus_type = bonusType;
-      payload.statutory_bonus_sealing_amount = getVal('inpBonusSealingAmount') || null;
+      payload.basic_da_sa = bonusSealing;
+      payload.statutory_bonus_sealing_amount = bonusSealing;
       if (bonusType === 'Performance Bonus') {
         payload.performance_bonus = bonusVal;
         payload.statutory_bonus = bonusVal;
@@ -251,7 +270,7 @@
       payload.from_date = fromDate;
       payload.to_date = toDate;
       payload.medical_insurance_company_name = getVal('inpMedInsuranceCompany') || null;
-      payload.epf_sealing_amount = getVal('inpMedSealingAmount') || null;
+      payload.basic_da_sa = getVal('inpMedSealingAmount') || null;
       payload.medical_insurance_employee_contribution = getVal('inpMedEmpContribution') || null;
       payload.medical_insurance_employer_contribution = getVal('inpMedEmployerContribution') || null;
       payload.medical_insurance_status = getChecked('inpMedStatusToggle') ? 'Active' : 'In - Active';
@@ -465,17 +484,20 @@
     });
     const row = (rowId && (typeof companyHrTdsData !== 'undefined') && companyHrTdsData.find(r => r.id === rowId)) || null;
 
-    if (document.getElementById('inpTdsFromDate')) document.getElementById('inpTdsFromDate').value = row ? (row.from || '') : '';
-    if (document.getElementById('inpTdsToDate')) document.getElementById('inpTdsToDate').value = row ? (row.to || '') : '';
-    if (document.getElementById('inpTdsFillingFrequency')) document.getElementById('inpTdsFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
-    if (document.getElementById('inpTdsFillingDueDate')) document.getElementById('inpTdsFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
-    if (document.getElementById('inpTdsCode')) document.getElementById('inpTdsCode').value = row ? (row.tdsCode || '') : '';
-    if (document.getElementById('inpTdsCategory')) document.getElementById('inpTdsCategory').value = row ? (row.category || '') : '';
-    if (document.getElementById('inpTdsThresholdLimit')) document.getElementById('inpTdsThresholdLimit').value = row ? String(row.thresholdLimit || '').replace('₹', '').trim() : '';
-    if (document.getElementById('inpTdsStandardDeduction')) document.getElementById('inpTdsStandardDeduction').value = row ? String(row.standardDeduction || '').replace('₹', '').trim() : '';
-    if (document.getElementById('inpTdsRate')) document.getElementById('inpTdsRate').value = row ? String(row.tdsRate || '').replace('%', '').trim() : '';
-    if (document.getElementById('inpTdsHealthCess')) document.getElementById('inpTdsHealthCess').value = row ? String(row.healthCess || '').replace('%', '').trim() : '';
-    if (document.getElementById('inpTdsStatusToggle')) document.getElementById('inpTdsStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
+    const tdsCard = document.getElementById('companyHrTdsCard');
+    const qTds = id => (tdsCard && tdsCard.querySelector(`#${id}`)) || document.getElementById(id);
+
+    if (qTds('inpTdsFromDate')) qTds('inpTdsFromDate').value = row ? (row.from || '') : '';
+    if (qTds('inpTdsToDate')) qTds('inpTdsToDate').value = row ? (row.to || '') : '';
+    if (qTds('inpTdsFillingFrequency')) qTds('inpTdsFillingFrequency').value = row ? (row.fillingFrequency || '') : '';
+    if (qTds('inpTdsFillingDueDate')) qTds('inpTdsFillingDueDate').value = row ? (row.fillingDueDate || '') : '';
+    if (qTds('inpTdsCode')) qTds('inpTdsCode').value = row ? (row.tdsCode || '') : '';
+    if (qTds('inpTdsCategory')) qTds('inpTdsCategory').value = row ? (row.tdsCategory || row.category || '') : '';
+    if (qTds('inpTdsThresholdLimit')) qTds('inpTdsThresholdLimit').value = row ? String(row.thresholdLimit || '').replace('₹', '').trim() : '';
+    if (qTds('inpTdsStandardDeduction')) qTds('inpTdsStandardDeduction').value = row ? String(row.standardDeduction || '').replace('₹', '').trim() : '';
+    if (qTds('inpTdsRate')) qTds('inpTdsRate').value = row ? String(row.tdsRate || '').replace('%', '').trim() : '';
+    if (qTds('inpTdsHealthCess')) qTds('inpTdsHealthCess').value = row ? String(row.healthEducationCess || row.healthCess || '').replace('%', '').trim() : '';
+    if (qTds('inpTdsStatusToggle')) qTds('inpTdsStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
     genericSetHrReadOnly('frmCompanyHrTds', 'inpTdsStatusToggle', false);
 
@@ -506,12 +528,15 @@
     });
     const row = (rowId && (typeof companyHrLeaveData !== 'undefined') && companyHrLeaveData.find(r => r.id === rowId)) || null;
 
+    const lType = row ? (row.leaveType || 'Casual Leave') : 'Casual Leave';
+    const rawElig = row ? (row.eligibleWorkingDays || (lType === 'Sick Leave' ? row.slEligible : (lType === 'Earning Leave' ? row.elEligible : row.clEligible)) || '') : '';
+    const rawClaim = row ? (row.claimablePeriod || (lType === 'Sick Leave' ? row.slClaimable : (lType === 'Earning Leave' ? row.elClaimable : row.clClaimable)) || '') : '';
     if (document.getElementById('inpLeaveFromDate')) document.getElementById('inpLeaveFromDate').value = row ? (row.from || '') : '';
     if (document.getElementById('inpLeaveToDate')) document.getElementById('inpLeaveToDate').value = row ? (row.to || '') : '';
-    if (document.getElementById('inpLeaveType')) document.getElementById('inpLeaveType').value = row ? (row.leaveType || 'Casual Leave') : 'Casual Leave';
-    if (document.getElementById('inpLeaveEligibleWorkingDays')) document.getElementById('inpLeaveEligibleWorkingDays').value = row ? (row.eligibleWorkingDays || '') : '';
-    if (document.getElementById('inpLeaveClaimablePeriod')) document.getElementById('inpLeaveClaimablePeriod').value = row ? (row.claimablePeriod || '') : '';
-    if (document.getElementById('inpLeaveSandwichPolicy')) document.getElementById('inpLeaveSandwichPolicy').value = row ? (row.sandwichPolicy || 'No') : 'No';
+    if (document.getElementById('inpLeaveType')) document.getElementById('inpLeaveType').value = lType;
+    if (document.getElementById('inpLeaveEligibleWorkingDays')) document.getElementById('inpLeaveEligibleWorkingDays').value = String(rawElig).replace(/Days/i, '').trim();
+    if (document.getElementById('inpLeaveClaimablePeriod')) document.getElementById('inpLeaveClaimablePeriod').value = String(rawClaim).replace(/\/\s*Month/i, '').trim();
+    if (document.getElementById('inpLeaveSandwichPolicy')) document.getElementById('inpLeaveSandwichPolicy').value = row ? (row.sandwichLeavePolicy || row.sandwichPolicy || 'No') : 'No';
     if (document.getElementById('inpLeaveStatusToggle')) document.getElementById('inpLeaveStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
     genericSetHrReadOnly('frmCompanyHrLeave', 'inpLeaveStatusToggle', false);

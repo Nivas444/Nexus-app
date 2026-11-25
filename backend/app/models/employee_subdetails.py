@@ -17,6 +17,7 @@ class EmployeeBankDetail(Base):
     account_number = Column(String(100), nullable=True)
     account_type = Column(String(50), nullable=True)
     bank_name = Column(String(255), nullable=True)
+    branch_name = Column(String(255), nullable=True)
     ifsc_code = Column(String(20), nullable=True)
     cancelled_cheque = Column(Text, nullable=True)
     status = Column(String(50), nullable=True, default="Active")

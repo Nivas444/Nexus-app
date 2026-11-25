@@ -223,60 +223,63 @@
     let bank = ctx && ctx.bank ? ctx.bank : null;
     if (!bank && currentViewedVendorId && Array.isArray(masterVendorData)) {
       const vend = masterVendorData.find(v => String(v.vendor_id || v.id) === String(currentViewedVendorId));
-      if (vend && (vend.account_name || vend.account_number || vend.bank_name || vend.ifsc_code)) {
+      if (vend && (vend.account_name || vend.account_number || vend.bank_name || vend.ifsc_code || vend.branch_name || vend.account_type)) {
         bank = {
+          accountType: vend.account_type || vend.accountType || 'Current',
           accountName: vend.account_name || vend.accountName || '',
           accountNumber: vend.account_number || vend.accountNumber || '',
           bankName: vend.bank_name || vend.bankName || '',
-          accountType: vend.account_type || vend.accountType || '',
+          branchName: vend.branch_name || vend.branchName || '',
           ifscCode: vend.ifsc_code || vend.ifscCode || '',
           status: vend.status || 'Active'
         };
         if (ctx) ctx.bank = bank;
       }
     }
+    const selAccType = document.getElementById('inpVendorBankAccountType');
     const inpName = document.getElementById('inpVendorBankAccountName');
     const inpNum = document.getElementById('inpVendorBankAccountNumber');
     const inpIfsc = document.getElementById('inpVendorBankIfsc');
-    const selBank = document.getElementById('inpVendorBankName');
+    const inpBank = document.getElementById('inpVendorBankName');
+    const inpBranch = document.getElementById('inpVendorBankBranchName');
     const chkStatus = document.getElementById('inpVendorBankStatusToggle');
   
     if (bank) {
+      if (selAccType) selAccType.value = bank.accountType || 'Current';
       if (inpName) inpName.value = bank.accountName || '';
       if (inpNum) inpNum.value = bank.accountNumber || '';
       if (inpIfsc) inpIfsc.value = bank.ifscCode || '';
-      if (selBank) {
-        if (bank.bankName && !Array.from(selBank.options).some(o => o.value === bank.bankName)) {
-          const opt = document.createElement('option');
-          opt.value = bank.bankName;
-          opt.textContent = bank.bankName;
-          selBank.appendChild(opt);
-        }
-        selBank.value = bank.bankName || '';
-      }
+      if (inpBank) inpBank.value = bank.bankName || '';
+      if (inpBranch) inpBranch.value = bank.branchName || '';
       if (chkStatus) chkStatus.checked = (bank.status || 'Active').toLowerCase() === 'active';
     } else {
+      if (selAccType) selAccType.value = 'Current';
       if (inpName) inpName.value = '';
       if (inpNum) inpNum.value = '';
       if (inpIfsc) inpIfsc.value = '';
-      if (selBank) selBank.value = '';
+      if (inpBank) inpBank.value = '';
+      if (inpBranch) inpBranch.value = '';
       if (chkStatus) chkStatus.checked = true;
     }
   }
   
   function saveVendorBankDataFromForm() {
     const ctx = getEffectiveVendorContext();
+    const selAccType = document.getElementById('inpVendorBankAccountType');
     const inpName = document.getElementById('inpVendorBankAccountName');
     const inpNum = document.getElementById('inpVendorBankAccountNumber');
     const inpIfsc = document.getElementById('inpVendorBankIfsc');
-    const selBank = document.getElementById('inpVendorBankName');
+    const inpBank = document.getElementById('inpVendorBankName');
+    const inpBranch = document.getElementById('inpVendorBankBranchName');
     const chkStatus = document.getElementById('inpVendorBankStatusToggle');
   
     ctx.bank = {
+      accountType: selAccType ? selAccType.value : 'Current',
       accountName: inpName ? inpName.value.trim() : '',
       accountNumber: inpNum ? inpNum.value.trim() : '',
       ifscCode: inpIfsc ? inpIfsc.value.trim() : '',
-      bankName: selBank ? selBank.value : '',
+      bankName: inpBank ? inpBank.value.trim() : '',
+      branchName: inpBranch ? inpBranch.value.trim() : '',
       status: (chkStatus && chkStatus.checked) ? 'Active' : 'In - Active'
     };
   }
@@ -619,6 +622,7 @@
           updatePayload.account_name = ctx.bank.accountName;
           updatePayload.account_number = ctx.bank.accountNumber;
           updatePayload.bank_name = ctx.bank.bankName;
+          updatePayload.branch_name = ctx.bank.branchName;
           updatePayload.ifsc_code = ctx.bank.ifscCode;
           updatePayload.account_type = ctx.bank.accountType;
         }
@@ -688,6 +692,7 @@
           createPayload.account_name = tempSub.bank.accountName;
           createPayload.account_number = tempSub.bank.accountNumber;
           createPayload.bank_name = tempSub.bank.bankName;
+          createPayload.branch_name = tempSub.bank.branchName;
           createPayload.ifsc_code = tempSub.bank.ifscCode;
           createPayload.account_type = tempSub.bank.accountType;
         }

@@ -356,6 +356,9 @@
     if (document.getElementById('inpEmpPrevExp')) document.getElementById('inpEmpPrevExp').value = emp.prevExp || '';
     if (document.getElementById('inpEmpCurrExp')) document.getElementById('inpEmpCurrExp').value = emp.currentExp || '';
     if (document.getElementById('inpEmpTotalExp')) document.getElementById('inpEmpTotalExp').value = emp.totalExp || '';
+    if (typeof window.calculateEmployeeExperience === 'function') {
+      window.calculateEmployeeExperience();
+    }
     if (document.getElementById('inpEmpDesignation')) document.getElementById('inpEmpDesignation').value = emp.designation || '';
   
     // Populate toggle fields (PAN, Aadhar, DL, Passport, EPF, ESI)
@@ -855,7 +858,96 @@
         }
       });
     }
+
+    const inpDoj = document.getElementById('inpEmpDoj');
+    const inpPrev = document.getElementById('inpEmpPrevExp');
+    if (inpDoj && !inpDoj.dataset.expBound) {
+      inpDoj.dataset.expBound = 'true';
+      inpDoj.addEventListener('change', window.calculateEmployeeExperience);
+      inpDoj.addEventListener('input', window.calculateEmployeeExperience);
+    }
+    if (inpPrev && !inpPrev.dataset.expBound) {
+      inpPrev.dataset.expBound = 'true';
+      inpPrev.addEventListener('input', window.calculateEmployeeExperience);
+      inpPrev.addEventListener('change', window.calculateEmployeeExperience);
+    }
   }
+
+  function parseExpToMonths(expStr) {
+    if (!expStr) return 0;
+    const s = String(expStr).trim();
+    if (!s) return 0;
+    // Formats: "YY - MM", "YYYY - MM", "2 - 5", "2.5", "2y 5m"
+    const dashMatch = s.match(/^(\d+)\s*[-:]\s*(\d+)$/);
+    if (dashMatch) {
+      return (parseInt(dashMatch[1], 10) || 0) * 12 + (parseInt(dashMatch[2], 10) || 0);
+    }
+    const ymMatch = s.match(/(\d+)\s*(?:yrs?|years?|y)\s*(\d+)?\s*(?:mos?|months?|m)?/i);
+    if (ymMatch) {
+      return (parseInt(ymMatch[1], 10) || 0) * 12 + (parseInt(ymMatch[2] || '0', 10) || 0);
+    }
+    const num = parseFloat(s);
+    if (!isNaN(num)) {
+      const yrs = Math.floor(num);
+      const mos = Math.round((num - yrs) * 12);
+      return yrs * 12 + mos;
+    }
+    return 0;
+  }
+
+  function formatMonthsAsYYMM(totalMonths) {
+    const safeMonths = Math.max(0, Math.floor(totalMonths || 0));
+    const yrs = Math.floor(safeMonths / 12);
+    const mos = safeMonths % 12;
+    return `${String(yrs).padStart(2, '0')} - ${String(mos).padStart(2, '0')}`;
+  }
+
+  function parseDojDate(dojVal) {
+    if (!dojVal) return null;
+    const s = String(dojVal).trim();
+    if (!s) return null;
+    const parts = s.replace(/\//g, '-').split('-').map(p => p.trim()).filter(Boolean);
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        return isNaN(d.getTime()) ? null : d;
+      }
+      if (parts[2].length === 4) {
+        const d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+        return isNaN(d.getTime()) ? null : d;
+      }
+    }
+    const fallback = new Date(s);
+    return isNaN(fallback.getTime()) ? null : fallback;
+  }
+
+  window.calculateEmployeeExperience = function() {
+    const dojEl = document.getElementById('inpEmpDoj');
+    const prevEl = document.getElementById('inpEmpPrevExp');
+    const currEl = document.getElementById('inpEmpCurrExp');
+    const totalEl = document.getElementById('inpEmpTotalExp');
+    if (!currEl && !totalEl) return;
+
+    let currMonths = 0;
+    const dojDate = parseDojDate(dojEl ? dojEl.value : '');
+    if (dojDate) {
+      const today = new Date();
+      let months = (today.getFullYear() - dojDate.getFullYear()) * 12 + (today.getMonth() - dojDate.getMonth());
+      if (today.getDate() < dojDate.getDate()) {
+        months -= 1;
+      }
+      currMonths = Math.max(0, months);
+      if (currEl) currEl.value = formatMonthsAsYYMM(currMonths);
+    } else if (currEl && currEl.value) {
+      currMonths = parseExpToMonths(currEl.value);
+    }
+
+    const prevMonths = parseExpToMonths(prevEl ? prevEl.value : '');
+    const totalMonths = prevMonths + currMonths;
+    if (totalEl && (dojDate || prevMonths > 0 || currMonths > 0)) {
+      totalEl.value = formatMonthsAsYYMM(totalMonths);
+    }
+  };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initEmployeeEventListeners);

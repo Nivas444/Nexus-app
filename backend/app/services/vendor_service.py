@@ -94,6 +94,7 @@ class VendorService:
             "account_name": payload.account_name,
             "account_number": payload.account_number,
             "bank_name": payload.bank_name,
+            "branch_name": payload.branch_name,
             "account_type": payload.account_type,
             "ifsc_code": payload.ifsc_code,
             "cancelled_cheque": payload.cancelled_cheque,
@@ -171,6 +172,8 @@ class VendorService:
             vendor.account_number = payload.account_number
         if payload.bank_name is not None:
             vendor.bank_name = payload.bank_name
+        if payload.branch_name is not None:
+            vendor.branch_name = payload.branch_name
         if payload.account_type is not None:
             vendor.account_type = payload.account_type
         if payload.ifsc_code is not None:

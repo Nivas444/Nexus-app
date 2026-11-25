@@ -173,6 +173,27 @@ class HRComplianceBase(BaseModel):
             if b_type == "Performance Bonus":
                 if data.get("statutory_bonus") is not None and data.get("performance_bonus") is None:
                     data["performance_bonus"] = data["statutory_bonus"]
+
+            # Always map Sealing Amount to basic_da_sa (and keep type-specific sealing columns synced)
+            c_type = str(data.get("compliance_type") or "").strip()
+            sealing_key_map = {
+                "EPF": "epf_sealing_amount",
+                "ESI": "esi_sealing_amount",
+                "Bonus": "statutory_bonus_sealing_amount",
+            }
+            specific_key = sealing_key_map.get(c_type)
+            if data.get("basic_da_sa") is not None and str(data.get("basic_da_sa")).strip() != "":
+                if specific_key and (data.get(specific_key) is None or str(data.get(specific_key)).strip() == ""):
+                    data[specific_key] = data["basic_da_sa"]
+            elif specific_key and data.get(specific_key) is not None and str(data.get(specific_key)).strip() != "":
+                data["basic_da_sa"] = data[specific_key]
+            elif c_type == "Medical Insurance" and data.get("epf_sealing_amount") is not None:
+                data["basic_da_sa"] = data["epf_sealing_amount"]
+                data["epf_sealing_amount"] = None
+
+            # Default EPF filling frequency to Monthly if omitted
+            if c_type == "EPF" and not data.get("epf_filling_frequency"):
+                data["epf_filling_frequency"] = "Monthly"
         return data
 
     @field_validator("compliance_type")

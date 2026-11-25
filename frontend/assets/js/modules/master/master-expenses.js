@@ -33,10 +33,16 @@
       }
     }
 
-    if (typeof window.currentModule !== 'undefined' && window.currentModule === 'master' &&
-        typeof window.currentMasterSubpage !== 'undefined' && window.currentMasterSubpage === 'expenses') {
+    const activeMod = (typeof currentModule !== 'undefined') ? currentModule : window.currentModule;
+    const activeSub = (typeof currentMasterSubpage !== 'undefined') ? currentMasterSubpage : window.currentMasterSubpage;
+    if (activeMod === 'master' && activeSub === 'expenses') {
+      if (typeof currentDataset !== 'undefined') {
+        currentDataset = [...masterExpensesData];
+      }
       window.currentDataset = [...masterExpensesData];
-      if (typeof window.applyFiltersAndRender === 'function') {
+      if (typeof applyFiltersAndRender === 'function') {
+        applyFiltersAndRender();
+      } else if (typeof window.applyFiltersAndRender === 'function') {
         window.applyFiltersAndRender();
       }
     }
@@ -155,6 +161,9 @@
       document.getElementById('inpExpenseHead').value = exp.expenseHead || exp.expense_head || 'Capex';
       handleExpenseHeadChange();
     }
+    if (document.getElementById('inpExpenseCode')) {
+      document.getElementById('inpExpenseCode').value = exp.expense_code || exp.expenseCode || '';
+    }
     if (document.getElementById('inpExpenseGst')) {
       document.getElementById('inpExpenseGst').value = exp.gst || (exp.gst_rate != null ? exp.gst_rate + '%' : '18%');
     }
@@ -208,6 +217,7 @@
     const expenseCategory = document.getElementById('inpExpenseCategory')?.value || "Direct Operations";
     const expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value || "";
     const expenseHead = document.getElementById('inpExpenseHead')?.value || "Capex";
+    const expenseCode = document.getElementById('inpExpenseCode')?.value?.trim() || "";
     const gst = document.getElementById('inpExpenseGst')?.value || "18%";
     const depreciation = document.getElementById('inpExpenseDepreciation')?.value || "10%";
     const expenseRcmToggle = document.getElementById('inpExpenseRcmToggle');
@@ -215,11 +225,34 @@
     const expenseStatusToggle = document.getElementById('inpExpenseStatusToggle');
     const status = (expenseStatusToggle && expenseStatusToggle.checked) ? "Active" : "In - Active";
 
+    // Frontend duplicate check on Expense Name and Expense Code only
+    const dupName = masterExpensesData.find(e =>
+      (e.expenseName || e.expense_name || '').trim().toLowerCase() === expenseName.toLowerCase()
+    );
+    if (dupName) {
+      const msg = 'Expense name already exists.';
+      if (typeof window.showSvgErrorPopup === 'function') window.showSvgErrorPopup(msg, 'Duplicate Error!');
+      else if (typeof window.showToast === 'function') window.showToast(msg);
+      return;
+    }
+    if (expenseCode) {
+      const dupCode = masterExpensesData.find(e =>
+        (e.expense_code || e.expenseCode || '').trim().toLowerCase() === expenseCode.toLowerCase()
+      );
+      if (dupCode) {
+        const msg = 'Expense code already exists.';
+        if (typeof window.showSvgErrorPopup === 'function') window.showSvgErrorPopup(msg, 'Duplicate Error!');
+        else if (typeof window.showToast === 'function') window.showToast(msg);
+        return;
+      }
+    }
+
     const payload = {
       expenseName,
       expenseCategory,
       expenseSubCategory,
       expenseHead,
+      expense_code: expenseCode || undefined,
       gst,
       depreciation_rate: (expenseHead.toLowerCase() === 'capex' ? depreciation : '0%'),
       rcm,
@@ -231,8 +264,10 @@
         const newRecord = await window.NexusApi.expenses.create(payload);
         masterExpensesData.unshift(newRecord);
         window.masterExpensesData = masterExpensesData;
+        if (typeof currentDataset !== 'undefined') currentDataset = [...masterExpensesData];
         window.currentDataset = [...masterExpensesData];
-        if (typeof window.applyFiltersAndRender === 'function') window.applyFiltersAndRender();
+        if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+        else if (typeof window.applyFiltersAndRender === 'function') window.applyFiltersAndRender();
         if (typeof window.closeSideForm === 'function') window.closeSideForm();
 
         if (typeof window.showSvgSuccessPopup === 'function') {
@@ -281,6 +316,7 @@
     const expenseCategory = document.getElementById('inpExpenseCategory')?.value;
     const expenseSubCategory = document.getElementById('inpExpenseSubCategory')?.value;
     const expenseHead = document.getElementById('inpExpenseHead')?.value;
+    const expenseCode = document.getElementById('inpExpenseCode')?.value?.trim();
     const gst = document.getElementById('inpExpenseGst')?.value;
     const depreciation = document.getElementById('inpExpenseDepreciation')?.value;
     const rcmToggle = document.getElementById('inpExpenseRcmToggle');
@@ -291,6 +327,7 @@
       expenseCategory,
       expenseSubCategory,
       expenseHead,
+      expense_code: expenseCode || undefined,
       gst,
       depreciation_rate: (expenseHead?.toLowerCase() === 'capex' ? depreciation : '0%'),
       rcm: (rcmToggle && rcmToggle.checked),
@@ -314,8 +351,10 @@
           masterExpensesData.unshift(updatedRecord);
         }
         window.masterExpensesData = masterExpensesData;
+        if (typeof currentDataset !== 'undefined') currentDataset = [...masterExpensesData];
         window.currentDataset = [...masterExpensesData];
-        if (typeof window.applyFiltersAndRender === 'function') window.applyFiltersAndRender();
+        if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+        else if (typeof window.applyFiltersAndRender === 'function') window.applyFiltersAndRender();
 
         isExpenseFormEditing = false;
         window.isExpenseFormEditing = false;

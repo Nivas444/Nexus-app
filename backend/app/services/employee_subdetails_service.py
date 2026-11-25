@@ -66,11 +66,12 @@ class EmployeeSubdetailsService:
         bank_record = EmployeeBankDetail(
             company_name=payload.company_name or "Nexus",
             employee_id=emp_code,
-            employee_name=emp_name or payload.responsible or payload.account_name,
+            employee_name=emp_name or getattr(payload, "responsible", None) or payload.account_name,
             account_name=payload.account_name or payload.bank_name,
             account_number=payload.account_number,
-            account_type=payload.account_type or "Savings",
+            account_type=payload.account_type or "Saving",
             bank_name=payload.bank_name,
+            branch_name=payload.branch_name,
             ifsc_code=payload.ifsc_code,
             cancelled_cheque=payload.cancelled_cheque,
             status=payload.status or "Active"

@@ -670,21 +670,30 @@
                 <div class="form-row-group emp-row-item emp-row-totalexp emp-row-other">
                   <label class="form-label" for="inpEmpTotalExp">Total Experience</label>
                   <div class="form-input-wrap">
-                    <input type="text" class="form-input-control" id="inpEmpTotalExp" placeholder="YYYY - MM">
+                    <input type="text" class="form-input-control" id="inpEmpTotalExp" placeholder="YYYY - MM" readonly>
                   </div>
                 </div>
 
-                <!-- 4. Photo with Image Upload Badge -->
+                <!-- 4. Marital Status -->
+                <div class="form-row-group emp-row-item emp-row-marital emp-row-other">
+                  <label class="form-label" for="inpEmpMaritalStatus">Marital Status</label>
+                  <div class="form-input-wrap">
+                    <select class="form-select-control" id="inpEmpMaritalStatus">
+                      <option value="Single" selected>Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Divorced">Divorced</option>
+                      <option value="Widowed">Widowed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 5. Photo -->
                 <div class="form-row-group emp-row-item emp-row-photo emp-row-other">
                   <label class="form-label" for="inpEmpPhoto">Photo</label>
-                  <div class="form-input-wrap with-action-badge">
-                    <input type="text" class="form-input-control" id="inpEmpPhoto" placeholder="Select Photo" readonly>
+                  <div class="form-input-wrap">
+                    <input type="text" class="form-input-control" id="inpEmpPhoto" placeholder="Select Photo" readonly onclick="triggerEmpPdf('fileEmpPhoto')" style="cursor: pointer;">
                     <input type="file" id="fileEmpPhoto" accept="image/*" style="display: none;"
                       onchange="handleEmpPhotoUpload(this, 'inpEmpPhoto')">
-                    <span class="input-pdf-badge btn-emp-img-trigger" id="btnEmpPhotoUpload" title="Upload Photo" onclick="triggerEmpPdf('fileEmpPhoto')">
-                      <img src="icons/Image Upload.svg" alt="Upload Photo" class="input-pdf-icon" width="24"
-                        height="24">
-                    </span>
                   </div>
                 </div>
 
@@ -835,19 +844,6 @@
                         title="Cancel / Reset"
                         style="background: transparent; border: none; color: #ef4444; font-size: 22px; font-weight: 700; line-height: 1; cursor: pointer; padding: 0 2px; display: flex; align-items: center; justify-content: center;">&times;</button>
                     </div>
-                  </div>
-                </div>
-
-                <!-- 9. Marital Status -->
-                <div class="form-row-group emp-row-item emp-row-marital emp-row-other">
-                  <label class="form-label" for="inpEmpMaritalStatus">Marital Status</label>
-                  <div class="form-input-wrap">
-                    <select class="form-select-control" id="inpEmpMaritalStatus">
-                      <option value="Single" selected>Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Divorced">Divorced</option>
-                      <option value="Widowed">Widowed</option>
-                    </select>
                   </div>
                 </div>
 
@@ -1525,9 +1521,9 @@
               </div>
             </div>
 
-            <!-- 3. Expense Sub-Category -->
+            <!-- 3. Expense Type -->
             <div class="form-row-group">
-              <label class="form-label" for="inpExpenseSubCategory">Expense Sub-Category</label>
+              <label class="form-label" for="inpExpenseSubCategory">Expense Type</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpExpenseSubCategory" placeholder="">
               </div>
@@ -1538,6 +1534,14 @@
               <label class="form-label" for="inpExpenseHead">Expense Head</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpExpenseHead" placeholder="" oninput="if (typeof handleExpenseHeadChange === 'function') handleExpenseHeadChange();">
+              </div>
+            </div>
+
+            <!-- 4B. Expense Code -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpExpenseCode">Expense Code</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpExpenseCode" placeholder="">
               </div>
             </div>
 
@@ -1611,9 +1615,6 @@
           <div class="side-form-header">
             <div class="side-form-title-badge" id="lblVehicleCardTitle">Add Vehicle</div>
             <div class="side-header-top-icons">
-              <button type="button" class="side-top-icon-btn" id="btnVehicleCardBank" title="Bank Details">
-                <img src="icons/Bank.svg" alt="Bank" width="28" height="28">
-              </button>
               <button type="button" class="side-top-icon-btn" id="btnVehicleCardContact" title="Contact Details">
                 <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="28" height="28">
               </button>
@@ -1687,37 +1688,6 @@
               <label class="form-label" for="inpVehicleNumber">Vehicle Number</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpVehicleNumber" placeholder="e.g. TN 01 AB 1234">
-              </div>
-            </div>
-
-            <!-- 5. Rental Type -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVehicleRentalType">Rental Type</label>
-              <div class="form-input-wrap">
-                <select class="form-select-control" id="inpVehicleRentalType">
-                  <option value="" disabled selected hidden>Select Rental Type</option>
-                  <option value="Per Day" selected>Per Day</option>
-                  <option value="Per KM">Per KM</option>
-                  <option value="Per Trip">Per Trip</option>
-                  <option value="Monthly">Monthly</option>
-                  <option value="Fixed Rate">Fixed Rate</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- 6. Rental Amount -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVehicleRentalAmount">Rental Amount</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpVehicleRentalAmount" placeholder="e.g. 2,500.00">
-              </div>
-            </div>
-
-            <!-- 7. Halt Rent -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpVehicleHaltRent">Halt Rent</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpVehicleHaltRent" placeholder="e.g. 500.00">
               </div>
             </div>
 
@@ -2980,14 +2950,8 @@
                     <div class="slide-dynamic-wrap" id="wrapIndusHexColor" style="display: none; width: 100%; align-items: center; gap: 8px;">
                       <div style="position: relative; flex: 1; width: 100%;">
                         <input type="text" class="form-input-control" id="txtPlatformHexColor"
-                          placeholder="#00cba0" value="#00cba0" style="width: 100%; padding-right: 38px; font-family: monospace; text-transform: uppercase;"
+                          placeholder="#00cba0" value="#00cba0" style="width: 100%; font-family: monospace; text-transform: uppercase;"
                           oninput="if (/^#[0-9A-Fa-f]{6}$/.test(this.value.trim())) document.getElementById('pickerPlatformHexColor').value = this.value.trim();">
-                        <input type="file" id="fileIndusHexColor" accept="application/pdf" style="display: none;"
-                          onchange="handleIndusPdfUpload(this, 'txtPlatformHexColor')">
-                        <span class="input-pdf-badge" title="Upload PDF" onclick="triggerIndusPdf('fileIndusHexColor')"
-                          style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 2px;">
-                          <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="22" height="22">
-                        </span>
                       </div>
                       <input type="color" id="pickerPlatformHexColor" value="#00cba0"
                         style="width: 32px; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 0; background: none; cursor: pointer;"
@@ -4016,21 +3980,32 @@
             <table class="contact-custom-table" id="tblBankDetailsPopup">
               <thead>
                 <tr>
+                  <th class="col-bank-acc-type">
+                    <span>Account Type</span>
+                    <button type="button" class="contact-th-filter-btn" data-filter-col="accountType"
+                      title="Filter Account Type">▼</button>
+                  </th>
+                  <th class="col-bank-acc-num">
+                    <span>Account Number</span>
+                  </th>
+                  <th class="col-bank-ifsc">
+                    <span>IFSC Code</span>
+                  </th>
                   <th class="col-bank-acc-name">
                     <span>Account Name</span>
                     <button type="button" class="contact-th-filter-btn" data-filter-col="accountName"
                       title="Filter Account Name">▼</button>
-                  </th>
-                  <th class="col-bank-acc-num">
-                    <span>Account Number</span>
                   </th>
                   <th class="col-bank-name">
                     <span>Bank Name</span>
                     <button type="button" class="contact-th-filter-btn" data-filter-col="bankName"
                       title="Filter Bank Name">▼</button>
                   </th>
-                  <th class="col-bank-ifsc">
-                    <span>IFSC Code</span>
+                  <th class="col-bank-branch">
+                    <span>Branch Name</span>
+                  </th>
+                  <th class="col-bank-responsible col-bank-incharge-company" id="thBankInCharge" style="display: none;">
+                    <span>In-Charge</span>
                   </th>
                   <th class="col-bank-status">
                     <span>Status</span>
@@ -8552,11 +8527,15 @@
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddBank" onsubmit="event.preventDefault();"
             style="padding: 16px 24px 20px 24px;">
-            <!-- 1. Account Name -->
+            <!-- 1. Account Type -->
             <div class="form-row-group">
-              <label class="form-label" for="inpAddBankAccountName">Account Name</label>
+              <label class="form-label" for="inpAddBankAccountType">Account Type</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpAddBankAccountName" placeholder="">
+                <select class="form-select-control" id="inpAddBankAccountType">
+                  <option value="Saving">Saving</option>
+                  <option value="Salary">Salary</option>
+                  <option value="Expense">Expense</option>
+                </select>
               </div>
             </div>
 
@@ -8565,24 +8544,13 @@
               <label class="form-label" for="inpAddBankAccountNumber">Account Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control" id="inpAddBankAccountNumber" placeholder="">
-                <input type="file" id="fileAddBankDoc" accept="application/pdf" style="display: none;"
-                  onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                <span class="input-pdf-badge" title="Upload PDF"
-                  onclick="document.getElementById('fileAddBankDoc').click();" style="cursor: pointer;">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                <span class="input-process-badge" title="Process" style="cursor: pointer;">
+                  <img src="icons/Process .svg" alt="Process" class="input-process-icon" width="22" height="22">
                 </span>
               </div>
             </div>
 
-            <!-- 3. Bank Name -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpAddBankName">Bank Name</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpAddBankName" placeholder="">
-              </div>
-            </div>
-
-            <!-- 4. IFSC Code -->
+            <!-- 3. IFSC Code -->
             <div class="form-row-group">
               <label class="form-label" for="inpAddBankIfsc">IFSC Code</label>
               <div class="form-input-wrap">
@@ -8590,7 +8558,39 @@
               </div>
             </div>
 
-            <!-- 5. Status (Slide Switch) -->
+            <!-- 4. Account Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankAccountName">Account Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankAccountName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 5. Bank Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 6. Branch Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpAddBankBranchName">Branch Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankBranchName" placeholder="">
+              </div>
+            </div>
+
+            <!-- 7. In-Charge (Company Bank only) -->
+            <div class="form-row-group" id="rowAddBankInCharge" style="display: none;">
+              <label class="form-label" for="inpAddBankInCharge">In-Charge</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpAddBankInCharge" placeholder="">
+              </div>
+            </div>
+
+            <!-- 8. Status (Slide Switch) -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">
@@ -8627,11 +8627,15 @@
           <!-- Form Body -->
           <form class="side-form-body" id="frmViewBank" onsubmit="event.preventDefault();" style="padding: 16px 24px 20px 24px;">
             <input type="hidden" id="inpViewBankId">
-            <!-- 1. Account Name -->
+            <!-- 1. Account Type -->
             <div class="form-row-group">
-              <label class="form-label" for="inpViewBankAccountName">Account Name</label>
+              <label class="form-label" for="inpViewBankAccountType">Account Type</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpViewBankAccountName" readonly>
+                <select class="form-select-control" id="inpViewBankAccountType" disabled>
+                  <option value="Saving">Saving</option>
+                  <option value="Salary">Salary</option>
+                  <option value="Expense">Expense</option>
+                </select>
               </div>
             </div>
 
@@ -8640,24 +8644,13 @@
               <label class="form-label" for="inpViewBankAccountNumber">Account Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control" id="inpViewBankAccountNumber" readonly>
-                <input type="file" id="fileViewBankDoc" accept="application/pdf" style="display: none;"
-                  onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                <span class="input-pdf-badge" id="badgeViewBankPdf" title="Upload PDF"
-                  onclick="if(!document.getElementById('inpViewBankAccountNumber').readOnly) document.getElementById('fileViewBankDoc').click();" style="display: none; cursor: pointer;">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                <span class="input-process-badge" id="badgeViewBankProcess" title="Process" style="cursor: pointer;">
+                  <img src="icons/Process .svg" alt="Process" class="input-process-icon" width="22" height="22">
                 </span>
               </div>
             </div>
 
-            <!-- 3. Bank Name -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpViewBankName">Bank Name</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpViewBankName" readonly>
-              </div>
-            </div>
-
-            <!-- 4. IFSC Code -->
+            <!-- 3. IFSC Code -->
             <div class="form-row-group">
               <label class="form-label" for="inpViewBankIfsc">IFSC Code</label>
               <div class="form-input-wrap">
@@ -8665,7 +8658,39 @@
               </div>
             </div>
 
-            <!-- 5. Status (Slide Switch) -->
+            <!-- 4. Account Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewBankAccountName">Account Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewBankAccountName" readonly>
+              </div>
+            </div>
+
+            <!-- 5. Bank Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewBankName" readonly>
+              </div>
+            </div>
+
+            <!-- 6. Branch Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpViewBankBranchName">Branch Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewBankBranchName" readonly>
+              </div>
+            </div>
+
+            <!-- 7. In-Charge (Company Bank only) -->
+            <div class="form-row-group" id="rowViewBankInCharge" style="display: none;">
+              <label class="form-label" for="inpViewBankInCharge">In-Charge</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control" id="inpViewBankInCharge" readonly>
+              </div>
+            </div>
+
+            <!-- 8. Status (Slide Switch) -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap" style="display: flex; justify-content: center; align-items: center;">
@@ -11495,26 +11520,27 @@
           <!-- Form Body -->
           <form class="side-form-body" id="frmVendorBank" onsubmit="event.preventDefault();"
             style="padding: 16px 24px 20px 24px;">
-            <!-- 1. Account Name -->
+            <!-- 1. Account Type -->
             <div class="form-row-group">
-              <label class="form-label" for="inpVendorBankAccountName">Account Name</label>
+              <label class="form-label" for="inpVendorBankAccountType">Account Type</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankAccountName"
-                  placeholder="" style="background-color: #ffffff;">
+                <select class="form-select-control vendor-bank-field" id="inpVendorBankAccountType" style="background-color: #ffffff;">
+                  <option value="Current">Current</option>
+                  <option value="OD">OD</option>
+                  <option value="CC">CC</option>
+                  <option value="Saving">Saving</option>
+                </select>
               </div>
             </div>
 
-            <!-- 2. Account Number (with PDF upload badge) -->
+            <!-- 2. Account Number (with Process icon) -->
             <div class="form-row-group">
               <label class="form-label" for="inpVendorBankAccountNumber">Account Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankAccountNumber"
                   placeholder="" style="background-color: #ffffff;">
-                <input type="file" id="fileVendorBankDoc" accept="application/pdf" style="display: none;"
-                  onchange="if(this.files[0]) showToast('PDF Selected: ' + this.files[0].name);">
-                <span class="input-pdf-badge" title="Upload PDF"
-                  onclick="document.getElementById('fileVendorBankDoc').click();" style="cursor: pointer;">
-                  <img src="icons/PDF Upload.svg" alt="PDF Upload" class="input-pdf-icon" width="26" height="26">
+                <span class="input-process-badge" title="Process" style="cursor: pointer;">
+                  <img src="icons/Process .svg" alt="Process" class="input-process-icon" width="22" height="22">
                 </span>
               </div>
             </div>
@@ -11528,27 +11554,34 @@
               </div>
             </div>
 
-            <!-- 4. Bank Name (Dropdown) -->
+            <!-- 4. Account Name -->
             <div class="form-row-group">
-              <label class="form-label" for="inpVendorBankName">Bank Name</label>
+              <label class="form-label" for="inpVendorBankAccountName">Account Name</label>
               <div class="form-input-wrap">
-                <select class="form-select-control vendor-bank-field" id="inpVendorBankName" style="background-color: #ffffff;">
-                  <option value="" selected></option>
-                  <option value="State Bank of India">State Bank of India</option>
-                  <option value="HDFC Bank">HDFC Bank</option>
-                  <option value="ICICI Bank">ICICI Bank</option>
-                  <option value="Axis Bank">Axis Bank</option>
-                  <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
-                  <option value="Punjab National Bank">Punjab National Bank</option>
-                  <option value="Bank of Baroda">Bank of Baroda</option>
-                  <option value="Canara Bank">Canara Bank</option>
-                  <option value="Union Bank of India">Union Bank of India</option>
-                  <option value="IndusInd Bank">IndusInd Bank</option>
-                </select>
+                <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankAccountName"
+                  placeholder="" style="background-color: #ffffff;">
               </div>
             </div>
 
-            <!-- 5. Status (Slide Switch) -->
+            <!-- 5. Bank Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorBankName">Bank Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankName" placeholder=""
+                  style="background-color: #ffffff;">
+              </div>
+            </div>
+
+            <!-- 6. Branch Name -->
+            <div class="form-row-group">
+              <label class="form-label" for="inpVendorBankBranchName">Branch Name</label>
+              <div class="form-input-wrap">
+                <input type="text" class="form-input-control vendor-bank-field" id="inpVendorBankBranchName" placeholder=""
+                  style="background-color: #ffffff;">
+              </div>
+            </div>
+
+            <!-- 7. Status (Slide Switch) -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
               <div class="form-input-wrap slider-wrap">

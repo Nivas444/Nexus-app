@@ -83,8 +83,9 @@ class EmployeeBankDetailBase(BaseModel):
     employee_name: Optional[str] = Field(None, description="Employee / Responsible Name")
     account_name: Optional[str] = Field(None, description="Account Name")
     account_number: Optional[str] = Field(None, description="Account Number")
-    account_type: Optional[str] = Field("Savings", description="Account Type")
+    account_type: Optional[str] = Field("Saving", description="Account Type")
     bank_name: Optional[str] = Field(None, description="Bank Name")
+    branch_name: Optional[str] = Field(None, description="Branch Name")
     ifsc_code: Optional[str] = Field(None, description="IFSC Code")
     cancelled_cheque: Optional[str] = Field(None, description="Cancelled Cheque file name")
     status: Optional[str] = Field("Active", description="Status (Active / De-Active)")
@@ -104,6 +105,8 @@ class EmployeeBankDetailCreate(EmployeeBankDetailBase):
                 data["account_type"] = data.get("accountType")
             if "bankName" in data and "bank_name" not in data:
                 data["bank_name"] = data.get("bankName")
+            if "branchName" in data and "branch_name" not in data:
+                data["branch_name"] = data.get("branchName")
             if "ifscCode" in data and "ifsc_code" not in data:
                 data["ifsc_code"] = data.get("ifscCode")
             if "responsible" in data and "employee_name" not in data:
@@ -121,6 +124,7 @@ class EmployeeBankDetailUpdate(BaseModel):
     account_number: Optional[str] = None
     account_type: Optional[str] = None
     bank_name: Optional[str] = None
+    branch_name: Optional[str] = None
     ifsc_code: Optional[str] = None
     cancelled_cheque: Optional[str] = None
     status: Optional[str] = None
@@ -137,6 +141,8 @@ class EmployeeBankDetailUpdate(BaseModel):
                 data["account_type"] = data.get("accountType")
             if "bankName" in data and "bank_name" not in data:
                 data["bank_name"] = data.get("bankName")
+            if "branchName" in data and "branch_name" not in data:
+                data["branch_name"] = data.get("branchName")
             if "ifscCode" in data and "ifsc_code" not in data:
                 data["ifsc_code"] = data.get("ifscCode")
             if "responsible" in data and "employee_name" not in data:
@@ -155,9 +161,11 @@ class EmployeeBankDetailResponse(EmployeeBankDetailBase):
 
     # Aliases for frontend compatibility
     id: Optional[int] = None
+    accountType: Optional[str] = None
     accountName: Optional[str] = None
     accountNumber: Optional[str] = None
     bankName: Optional[str] = None
+    branchName: Optional[str] = None
     ifscCode: Optional[str] = None
     responsible: Optional[str] = None
 
@@ -166,9 +174,11 @@ class EmployeeBankDetailResponse(EmployeeBankDetailBase):
     @model_validator(mode="after")
     def populate_aliases(self) -> "EmployeeBankDetailResponse":
         self.id = self.employee_bank_account_id
+        self.accountType = self.account_type
         self.accountName = self.account_name
         self.accountNumber = self.account_number
         self.bankName = self.bank_name
+        self.branchName = self.branch_name
         self.ifscCode = self.ifsc_code
         self.responsible = self.employee_name
         return self

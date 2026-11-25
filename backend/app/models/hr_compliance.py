@@ -25,7 +25,7 @@ class HRCompliance(Base):
     eps_employer_contribution = Column(Numeric(15, 2), nullable=True)
     edli_employer_contribution = Column(Numeric(15, 2), nullable=True)
     epf_admin_charges = Column(Numeric(15, 2), nullable=True)
-    epf_status = Column(String(50), default="Active", nullable=True)
+    epf_status = Column(String(50), nullable=True)
 
     # ESI Specific fields
     esi_filling_frequency = Column(String(50), nullable=True)
@@ -33,21 +33,21 @@ class HRCompliance(Base):
     esi_sealing_amount = Column(Numeric(15, 2), nullable=True)
     esi_employee_contribution = Column(Numeric(15, 2), nullable=True)
     esi_employer_contribution = Column(Numeric(15, 2), nullable=True)
-    esi_status = Column(String(50), default="Active", nullable=True)
+    esi_status = Column(String(50), nullable=True)
 
     # PT Specific fields
     state = Column(String(100), nullable=True)
     pt_filling_frequency = Column(String(50), nullable=True)
     pt_filling_due_date = Column(Date, nullable=True)
     pt_employee_deduction = Column(Numeric(15, 2), nullable=True)
-    pt_status = Column(String(50), default="Active", nullable=True)
+    pt_status = Column(String(50), nullable=True)
 
     # LWF Specific fields
     lwf_filling_frequency = Column(String(50), nullable=True)
     lwf_filling_due_date = Column(Date, nullable=True)
     lwf_employee_contribution = Column(Numeric(15, 2), nullable=True)
     lwf_employer_contribution = Column(Numeric(15, 2), nullable=True)
-    lwf_status = Column(String(50), default="Active", nullable=True)
+    lwf_status = Column(String(50), nullable=True)
 
     # TDS Specific fields
     gross_salary_from = Column(Numeric(15, 2), nullable=True)
@@ -58,7 +58,7 @@ class HRCompliance(Base):
     tds_deduction_amount = Column(Numeric(15, 2), nullable=True)
     tds_deduction_percentage = Column(Numeric(5, 2), nullable=True)
     health_and_education_cess = Column(Numeric(15, 2), nullable=True)
-    tds_status = Column(String(50), default="Active", nullable=True)
+    tds_status = Column(String(50), nullable=True)
 
     # Leave Specific fields
     cl_available = Column(Numeric(5, 2), nullable=True)
@@ -73,20 +73,20 @@ class HRCompliance(Base):
     ml_available = Column(Numeric(5, 2), nullable=True)
     ml_eligible = Column(Numeric(5, 2), nullable=True)
     sandwich_leave_policy = Column(Text, nullable=True)
-    leave_status = Column(String(50), default="Active", nullable=True)
+    leave_status = Column(String(50), nullable=True)
 
     # Bonus Specific fields
     statutory_bonus_sealing_amount = Column(Numeric(15, 2), nullable=True)
     statutory_bonus = Column(Numeric(15, 2), nullable=True)
     performance_bonus = Column(Numeric(15, 2), nullable=True)
     company_bonus = Column(Numeric(15, 2), nullable=True)
-    bonus_status = Column(String(50), default="Active", nullable=True)
+    bonus_status = Column(String(50), nullable=True)
 
     # Medical Insurance Specific fields
     medical_insurance_company_name = Column(String(255), nullable=True)
     medical_insurance_employee_contribution = Column(Numeric(15, 2), nullable=True)
     medical_insurance_employer_contribution = Column(Numeric(15, 2), nullable=True)
-    medical_insurance_status = Column(String(50), default="Active", nullable=True)
+    medical_insurance_status = Column(String(50), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

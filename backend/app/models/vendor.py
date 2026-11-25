@@ -30,6 +30,7 @@ class VendorMaster(Base):
     account_name = Column(String(255), nullable=True)
     account_number = Column(String(100), nullable=True)
     bank_name = Column(String(255), nullable=True)
+    branch_name = Column(String(255), nullable=True)
     account_type = Column(String(50), nullable=True)
     ifsc_code = Column(String(20), nullable=True)
     cancelled_cheque = Column(Text, nullable=True)

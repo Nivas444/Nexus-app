@@ -74,6 +74,7 @@ class VendorBase(BaseModel):
     account_name: Optional[str] = Field(None, description="Bank Account Name")
     account_number: Optional[str] = Field(None, description="Bank Account Number")
     bank_name: Optional[str] = Field(None, description="Bank Name")
+    branch_name: Optional[str] = Field(None, description="Branch Name")
     account_type: Optional[str] = Field(None, description="Bank Account Type")
     ifsc_code: Optional[str] = Field(None, description="IFSC Code")
     cancelled_cheque: Optional[str] = Field(None, description="Cancelled Cheque Document")
@@ -104,6 +105,7 @@ class VendorCreate(VendorBase):
     accountName: Optional[str] = None
     accountNumber: Optional[str] = None
     bankName: Optional[str] = None
+    branchName: Optional[str] = None
     accountType: Optional[str] = None
     ifscCode: Optional[str] = None
     contactName: Optional[str] = None
@@ -130,6 +132,7 @@ class VendorCreate(VendorBase):
                 "accountName": "account_name",
                 "accountNumber": "account_number",
                 "bankName": "bank_name",
+                "branchName": "branch_name",
                 "accountType": "account_type",
                 "ifscCode": "ifsc_code",
                 "contactName": "contact_name",
@@ -167,6 +170,7 @@ class VendorUpdate(BaseModel):
     account_name: Optional[str] = None
     account_number: Optional[str] = None
     bank_name: Optional[str] = None
+    branch_name: Optional[str] = None
     account_type: Optional[str] = None
     ifsc_code: Optional[str] = None
     cancelled_cheque: Optional[str] = None
@@ -193,6 +197,7 @@ class VendorUpdate(BaseModel):
     accountName: Optional[str] = None
     accountNumber: Optional[str] = None
     bankName: Optional[str] = None
+    branchName: Optional[str] = None
     accountType: Optional[str] = None
     ifscCode: Optional[str] = None
     contactName: Optional[str] = None
@@ -219,6 +224,7 @@ class VendorUpdate(BaseModel):
                 "accountName": "account_name",
                 "accountNumber": "account_number",
                 "bankName": "bank_name",
+                "branchName": "branch_name",
                 "accountType": "account_type",
                 "ifscCode": "ifsc_code",
                 "contactName": "contact_name",
@@ -239,6 +245,7 @@ class VendorBankUpdate(BaseModel):
     account_name: Optional[str] = None
     account_number: Optional[str] = None
     bank_name: Optional[str] = None
+    branch_name: Optional[str] = None
     account_type: Optional[str] = None
     ifsc_code: Optional[str] = None
     cancelled_cheque: Optional[str] = None
@@ -247,6 +254,7 @@ class VendorBankUpdate(BaseModel):
     accountName: Optional[str] = None
     accountNumber: Optional[str] = None
     bankName: Optional[str] = None
+    branchName: Optional[str] = None
     accountType: Optional[str] = None
     ifscCode: Optional[str] = None
 
@@ -260,6 +268,8 @@ class VendorBankUpdate(BaseModel):
                 data["account_number"] = data["accountNumber"]
             if "bankName" in data and not data.get("bank_name"):
                 data["bank_name"] = data["bankName"]
+            if "branchName" in data and not data.get("branch_name"):
+                data["branch_name"] = data["branchName"]
             if "accountType" in data and not data.get("account_type"):
                 data["account_type"] = data["accountType"]
             if "ifscCode" in data and not data.get("ifsc_code"):
@@ -327,6 +337,7 @@ class VendorResponse(VendorBase):
     accountName: Optional[str] = None
     accountNumber: Optional[str] = None
     bankName: Optional[str] = None
+    branchName: Optional[str] = None
     accountType: Optional[str] = None
     ifscCode: Optional[str] = None
     contactName: Optional[str] = None
@@ -351,6 +362,7 @@ class VendorResponse(VendorBase):
         self.accountName = self.account_name
         self.accountNumber = self.account_number
         self.bankName = self.bank_name
+        self.branchName = self.branch_name
         self.accountType = self.account_type
         self.ifscCode = self.ifsc_code
         self.contactName = self.contact_name

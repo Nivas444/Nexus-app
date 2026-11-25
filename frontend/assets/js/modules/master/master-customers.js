@@ -977,18 +977,18 @@
         }
       }
   
-      // Check duplicate customer legal name only (duplicate customer name is allowed)
-      const normEnteredLegal = effectiveLegalName.trim().toLowerCase();
+      // Check duplicate customer name only (duplicate customer legal name is allowed)
+      const normEnteredName = effectiveCustomerName.trim().toLowerCase();
       const existingDup = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {
-        const ln = (c.legalName || c.legal_name || '').trim().toLowerCase();
-        return ln && ln === normEnteredLegal;
+        const cn = (c.customerName || c.customer_name || '').trim().toLowerCase();
+        return cn && cn === normEnteredName;
       }) : null;
 
       if (existingDup) {
         if (typeof showSvgErrorPopup === 'function') {
-          showSvgErrorPopup("Customer legal name already exists. Please use a different legal name.", "Duplicate Error!");
+          showSvgErrorPopup("Customer name already exists. Please use a different customer name.", "Duplicate Error!");
         } else {
-          showToast("Customer legal name already exists.");
+          showToast("Customer name already exists.");
         }
         return;
       }

@@ -291,6 +291,7 @@ class CompanyBankAccountBase(BaseModel):
     account_number: Optional[str] = None
     account_type: Optional[str] = None
     bank_name: Optional[str] = None
+    branch_name: Optional[str] = None
     ifsc_code: Optional[str] = None
     cancelled_cheque: Optional[str] = None
     responsible: Optional[str] = None
@@ -312,6 +313,7 @@ class CompanyBankAccountUpdate(BaseModel):
     account_number: Optional[str] = None
     account_type: Optional[str] = None
     bank_name: Optional[str] = None
+    branch_name: Optional[str] = None
     ifsc_code: Optional[str] = None
     cancelled_cheque: Optional[str] = None
     responsible: Optional[str] = None

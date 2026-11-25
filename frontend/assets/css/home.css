@@ -2500,9 +2500,20 @@ td.col-loc-status {
   max-width: 96vw !important;
 }
 
+.col-bank-acc-type {
+  min-width: 135px !important;
+  width: 135px !important;
+}
+
+td.col-bank-acc-type {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+
 .col-bank-acc-name {
-  min-width: 255px !important;
-  width: 255px !important;
+  min-width: 210px !important;
+  width: 210px !important;
 }
 
 td.col-bank-acc-name {
@@ -2512,8 +2523,8 @@ td.col-bank-acc-name {
 }
 
 .col-bank-acc-num {
-  min-width: 230px !important;
-  width: 230px !important;
+  min-width: 195px !important;
+  width: 195px !important;
 }
 
 td.col-bank-acc-num {
@@ -2523,11 +2534,22 @@ td.col-bank-acc-num {
 }
 
 .col-bank-name {
-  min-width: 255px !important;
-  width: 255px !important;
+  min-width: 195px !important;
+  width: 195px !important;
 }
 
 td.col-bank-name {
+  text-align: left !important;
+  padding-left: 14px !important;
+  white-space: nowrap !important;
+}
+
+.col-bank-branch {
+  min-width: 175px !important;
+  width: 175px !important;
+}
+
+td.col-bank-branch {
   text-align: left !important;
   padding-left: 14px !important;
   white-space: nowrap !important;
@@ -2564,9 +2586,9 @@ td.col-bank-status {
   text-align: center !important;
 }
 
-/* Holidays Popup & Columns (Extended to 25 chars for Holiday Name) */
+/* Holidays Popup & Columns (Extended to 25 chars for Holiday Name & +5ch for Date) */
 #holidaysSidePanel {
-  width: 800px !important;
+  width: 860px !important;
   max-width: 96vw !important;
 }
 
@@ -2590,8 +2612,8 @@ td.col-holiday-month {
 }
 
 .col-holiday-date {
-  min-width: 85px !important;
-  width: 85px !important;
+  min-width: calc(85px + 5ch) !important;
+  width: calc(85px + 5ch) !important;
 }
 
 td.col-holiday-date {

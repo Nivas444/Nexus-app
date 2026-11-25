@@ -35,6 +35,22 @@ class HRComplianceService:
         record_data["company_name"] = target_company
         record_data["compliance_type"] = c_type
 
+        # Keep unrelated compliance tabs' status columns NULL instead of defaulting all 8 to 'Active'
+        status_col_map = {
+            "EPF": "epf_status",
+            "ESI": "esi_status",
+            "PT": "pt_status",
+            "LWF": "lwf_status",
+            "TDS": "tds_status",
+            "Leave": "leave_status",
+            "Bonus": "bonus_status",
+            "Medical Insurance": "medical_insurance_status",
+        }
+        active_status_col = status_col_map.get(c_type)
+        for t_key, s_col in status_col_map.items():
+            if s_col != active_status_col:
+                record_data[s_col] = None
+
         # Filter record_data to existing model columns
         valid_cols = {c.name for c in HRCompliance.__table__.columns}
         filtered_data = {k: v for k, v in record_data.items() if k in valid_cols}

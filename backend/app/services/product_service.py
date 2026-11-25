@@ -144,18 +144,13 @@ class ProductService:
             )
 
         m_head = (data.material_head or data.productHead or p_name).strip()
-        # Check duplicate material head
-        if self.repository.get_by_material_head(m_head):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Material head already exists."
-            )
 
-        m_code = (data.material_code or data.productCode or f"PRD-{abs(hash(p_name)) % 10000:04d}").strip()
-        if data.material_code and self.repository.get_by_material_code(m_code):
+        raw_code = (data.material_code or data.productCode or "").strip()
+        m_code = raw_code or f"PRD-{abs(hash(p_name)) % 10000:04d}"
+        if self.repository.get_by_material_code(m_code):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Material code already exists."
+                detail="Product code already exists."
             )
 
         category = (data.material_category or data.productCategory or "Tower Infrastructure").strip()

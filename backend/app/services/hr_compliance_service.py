@@ -66,6 +66,46 @@ class HRComplianceService:
                 detail=f"Failed to persist HR compliance record: {str(e)}"
             )
 
+    def update_compliance(
+        self,
+        compliance_id: int,
+        data: HRComplianceCreate,
+        company_name: Optional[str] = None
+    ) -> HRComplianceResponse:
+        existing = self.repo.get_by_id(compliance_id)
+        if not existing:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"HR Compliance record {compliance_id} not found."
+            )
+
+        c_type = data.compliance_type.strip() if data.compliance_type else existing.compliance_type
+        if c_type not in ALLOWED_COMPLIANCE_TYPES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid compliance_type '{c_type}'. Supported types: {', '.join(ALLOWED_COMPLIANCE_TYPES)}"
+            )
+
+        record_data = data.model_dump(exclude={"compliance_id"}, exclude_unset=True)
+        if company_name:
+            record_data["company_name"] = company_name
+        record_data["compliance_type"] = c_type
+
+        valid_cols = {c.name for c in HRCompliance.__table__.columns}
+        for k, v in record_data.items():
+            if k in valid_cols and k != "compliance_id":
+                setattr(existing, k, v)
+
+        try:
+            updated = self.repo.update(existing)
+            return HRComplianceResponse.model_validate(updated)
+        except Exception as e:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to update HR compliance record: {str(e)}"
+            )
+
     def list_compliance(
         self,
         company_name: Optional[str] = None,

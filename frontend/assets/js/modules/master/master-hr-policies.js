@@ -29,8 +29,11 @@
     const inputs = form.querySelectorAll('input:not([type="checkbox"])');
     inputs.forEach(inp => {
       inp.readOnly = isReadOnly;
-      inp.style.backgroundColor = '#ffffff';
-      inp.style.cursor = isReadOnly ? 'default' : 'text';
+      inp.style.backgroundColor = isReadOnly ? '#f8fafc' : '#ffffff';
+      inp.style.cursor = isReadOnly ? 'default' : (inp.classList.contains('nexus-cal-input') ? 'pointer' : 'text');
+      if (inp.classList.contains('nexus-cal-input')) {
+        inp.style.pointerEvents = isReadOnly ? 'none' : 'auto';
+      }
     });
     const selects = form.querySelectorAll('select');
     selects.forEach(sel => {
@@ -56,6 +59,39 @@
   }
 
   let isSubmittingHrCompliance = false;
+  let currentHrEditRecordId = null;
+  let isHrViewMode = false;
+  let isHrEditActive = false;
+
+  const HR_MODAL_META = {
+    'EPF': { formId: 'frmCompanyHrEpf', toggleId: 'inpEpfStatusToggle', imgId: 'imgCompanyHrEpfEditIcon', btnId: 'btnCompanyHrEpfEditToggle', titleId: 'lblCompanyHrEpfCardTitle', label: 'EPF' },
+    'ESI': { formId: 'frmCompanyHrEsi', toggleId: 'inpEsiStatusToggle', imgId: 'imgCompanyHrEsiEditIcon', btnId: 'btnCompanyHrEsiEditToggle', titleId: 'lblCompanyHrEsiCardTitle', label: 'ESI' },
+    'PT': { formId: 'frmCompanyHrPt', toggleId: 'inpPtStatusToggle', imgId: 'imgCompanyHrPtEditIcon', btnId: 'btnCompanyHrPtEditToggle', titleId: 'lblCompanyHrPtCardTitle', label: 'PT' }
+  };
+
+  async function handleHrEditOrSaveClick(complianceType) {
+    const meta = HR_MODAL_META[complianceType];
+    if (meta && isHrViewMode && !isHrEditActive) {
+      isHrEditActive = true;
+      genericSetHrReadOnly(meta.formId, meta.toggleId, false);
+      const imgIcon = document.getElementById(meta.imgId);
+      const btn = document.getElementById(meta.btnId);
+      const lbl = document.getElementById(meta.titleId);
+      if (imgIcon) {
+        imgIcon.src = 'icons/Save.svg';
+        imgIcon.className = 'icon-green';
+        imgIcon.alt = 'Save';
+        imgIcon.title = 'Save';
+      }
+      if (btn) btn.title = 'Save';
+      if (lbl) lbl.textContent = `Edit ${meta.label}`;
+      if (typeof window.showToast === 'function') {
+        window.showToast(`${meta.label} form is now editable`);
+      }
+      return;
+    }
+    await saveCompanyHrCompliance(complianceType);
+  }
 
   async function saveCompanyHrCompliance(complianceType) {
     if (isSubmittingHrCompliance) return;
@@ -281,9 +317,23 @@
       if (!window.NexusApi || !window.NexusApi.hrCompliance) {
         throw new Error('HR Compliance API is not available.');
       }
-      await window.NexusApi.hrCompliance.create(payload, companyName);
+      const isUpdate = Boolean(currentHrEditRecordId);
+      if (isUpdate && typeof window.NexusApi.hrCompliance.update === 'function') {
+        await window.NexusApi.hrCompliance.update(currentHrEditRecordId, payload, companyName);
+      } else {
+        await window.NexusApi.hrCompliance.create(payload, companyName);
+      }
+      currentHrEditRecordId = null;
+      isHrViewMode = false;
+      isHrEditActive = false;
+
       if (typeof window.showSvgSuccessPopup === 'function') {
-        window.showSvgSuccessPopup(`${complianceType} compliance details added successfully!`, 'Task Completed');
+        window.showSvgSuccessPopup(
+          isUpdate
+            ? `${complianceType} compliance details updated successfully!`
+            : `${complianceType} compliance details added successfully!`,
+          'Task Completed'
+        );
       }
 
       const closeFns = {
@@ -341,14 +391,26 @@
     if (document.getElementById('inpEpfAdminCharges')) document.getElementById('inpEpfAdminCharges').value = row ? String(row.adminCharges || '').replace('%', '').trim() : '';
     if (document.getElementById('inpEpfStatusToggle')) document.getElementById('inpEpfStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
-    genericSetHrReadOnly('frmCompanyHrEpf', 'inpEpfStatusToggle', false);
+    const isView = Boolean(row);
+    currentHrEditRecordId = isView ? (row.compliance_id || parseInt(String(row.id || '').replace(/^hr-/, ''), 10) || null) : null;
+    isHrViewMode = isView;
+    isHrEditActive = !isView;
 
+    genericSetHrReadOnly('frmCompanyHrEpf', 'inpEpfStatusToggle', isView);
+
+    const lblTitle = document.getElementById('lblCompanyHrEpfCardTitle');
+    if (lblTitle) lblTitle.textContent = isView ? 'View EPF' : 'EPF';
+
+    const btnToggle = document.getElementById('btnCompanyHrEpfEditToggle');
     const imgIcon = document.getElementById('imgCompanyHrEpfEditIcon');
     if (imgIcon) {
-      imgIcon.src = 'icons/Save.svg';
-      imgIcon.className = 'icon-green';
-      imgIcon.title = 'Save';
+      imgIcon.src = isView ? 'icons/Edit.svg' : 'icons/Save.svg';
+      imgIcon.className = isView ? 'icon-blue' : 'icon-green';
+      imgIcon.alt = isView ? 'Edit' : 'Save';
+      imgIcon.title = isView ? 'Edit' : 'Save';
     }
+    if (btnToggle) btnToggle.title = isView ? 'Edit' : 'Save';
+
     const modal = document.getElementById('companyHrEpfCard');
     if (modal) {
       modal.style.display = 'block';
@@ -357,6 +419,9 @@
   }
 
   function closeCompanyHrEpfModal() {
+    currentHrEditRecordId = null;
+    isHrViewMode = false;
+    isHrEditActive = false;
     document.getElementById('companyHrEpfCard')?.style.setProperty('display', 'none');
     document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
   }
@@ -379,14 +444,26 @@
     if (document.getElementById('inpEsiEmployerContribution')) document.getElementById('inpEsiEmployerContribution').value = row ? String(row.employer || '').replace('%', '').trim() : '';
     if (document.getElementById('inpEsiStatusToggle')) document.getElementById('inpEsiStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
-    genericSetHrReadOnly('frmCompanyHrEsi', 'inpEsiStatusToggle', false);
+    const isView = Boolean(row);
+    currentHrEditRecordId = isView ? (row.compliance_id || parseInt(String(row.id || '').replace(/^hr-/, ''), 10) || null) : null;
+    isHrViewMode = isView;
+    isHrEditActive = !isView;
 
+    genericSetHrReadOnly('frmCompanyHrEsi', 'inpEsiStatusToggle', isView);
+
+    const lblTitle = document.getElementById('lblCompanyHrEsiCardTitle');
+    if (lblTitle) lblTitle.textContent = isView ? 'View ESI' : 'ESI';
+
+    const btnToggle = document.getElementById('btnCompanyHrEsiEditToggle');
     const imgIcon = document.getElementById('imgCompanyHrEsiEditIcon');
     if (imgIcon) {
-      imgIcon.src = 'icons/Save.svg';
-      imgIcon.className = 'icon-green';
-      imgIcon.title = 'Save';
+      imgIcon.src = isView ? 'icons/Edit.svg' : 'icons/Save.svg';
+      imgIcon.className = isView ? 'icon-blue' : 'icon-green';
+      imgIcon.alt = isView ? 'Edit' : 'Save';
+      imgIcon.title = isView ? 'Edit' : 'Save';
     }
+    if (btnToggle) btnToggle.title = isView ? 'Edit' : 'Save';
+
     const modal = document.getElementById('companyHrEsiCard');
     if (modal) {
       modal.style.display = 'block';
@@ -395,6 +472,9 @@
   }
 
   function closeCompanyHrEsiModal() {
+    currentHrEditRecordId = null;
+    isHrViewMode = false;
+    isHrEditActive = false;
     document.getElementById('companyHrEsiCard')?.style.setProperty('display', 'none');
     document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
   }
@@ -417,14 +497,26 @@
     if (document.getElementById('inpPtEmpContribution')) document.getElementById('inpPtEmpContribution').value = row ? String(row.employee || '').replace('₹', '').trim() : '';
     if (document.getElementById('inpPtStatusToggle')) document.getElementById('inpPtStatusToggle').checked = row ? !((row.status || '').toLowerCase().includes('in')) : true;
 
-    genericSetHrReadOnly('frmCompanyHrPt', 'inpPtStatusToggle', false);
+    const isView = Boolean(row);
+    currentHrEditRecordId = isView ? (row.compliance_id || parseInt(String(row.id || '').replace(/^hr-/, ''), 10) || null) : null;
+    isHrViewMode = isView;
+    isHrEditActive = !isView;
 
+    genericSetHrReadOnly('frmCompanyHrPt', 'inpPtStatusToggle', isView);
+
+    const lblTitle = document.getElementById('lblCompanyHrPtCardTitle');
+    if (lblTitle) lblTitle.textContent = isView ? 'View PT' : 'PT';
+
+    const btnToggle = document.getElementById('btnCompanyHrPtEditToggle');
     const imgIcon = document.getElementById('imgCompanyHrPtEditIcon');
     if (imgIcon) {
-      imgIcon.src = 'icons/Save.svg';
-      imgIcon.className = 'icon-green';
-      imgIcon.title = 'Save';
+      imgIcon.src = isView ? 'icons/Edit.svg' : 'icons/Save.svg';
+      imgIcon.className = isView ? 'icon-blue' : 'icon-green';
+      imgIcon.alt = isView ? 'Edit' : 'Save';
+      imgIcon.title = isView ? 'Edit' : 'Save';
     }
+    if (btnToggle) btnToggle.title = isView ? 'Edit' : 'Save';
+
     const modal = document.getElementById('companyHrPtCard');
     if (modal) {
       modal.style.display = 'block';
@@ -433,6 +525,9 @@
   }
 
   function closeCompanyHrPtModal() {
+    currentHrEditRecordId = null;
+    isHrViewMode = false;
+    isHrEditActive = false;
     document.getElementById('companyHrPtCard')?.style.setProperty('display', 'none');
     document.getElementById('sideFormOverlay')?.style.setProperty('display', 'none');
   }
@@ -635,6 +730,7 @@
   // Export globally
   window.openCompanyHrPoliciesPage = openCompanyHrPoliciesPage;
   window.genericSetHrReadOnly = genericSetHrReadOnly;
+  window.handleHrEditOrSaveClick = handleHrEditOrSaveClick;
   window.saveCompanyHrCompliance = saveCompanyHrCompliance;
   window.openCompanyHrEpfModal = openCompanyHrEpfModal;
   window.closeCompanyHrEpfModal = closeCompanyHrEpfModal;

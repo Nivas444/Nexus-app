@@ -1691,6 +1691,15 @@
           method: 'POST',
           body: JSON.stringify(payload)
         });
+      },
+      async update(complianceId, payload, companyName = 'Nexus') {
+        const query = new URLSearchParams();
+        if (companyName) query.set('company_name', companyName);
+        const qs = query.toString();
+        return await request(`/master/hr-compliance/${complianceId}${qs ? '?' + qs : ''}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
       }
     },
 

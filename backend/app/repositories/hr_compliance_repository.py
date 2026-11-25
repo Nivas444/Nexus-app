@@ -16,6 +16,11 @@ class HRComplianceRepository:
     def get_by_id(self, compliance_id: int) -> Optional[HRCompliance]:
         return self.db.query(HRCompliance).filter(HRCompliance.compliance_id == compliance_id).first()
 
+    def update(self, record: HRCompliance) -> HRCompliance:
+        self.db.commit()
+        self.db.refresh(record)
+        return record
+
     def list_by_company_and_type(
         self,
         company_name: Optional[str] = None,

@@ -47041,9 +47041,10 @@ function applyFiltersAndRender() {
       if (currentCompanyHrTab === 'epf') {
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
+          const fromLink = `<a href="#" class="req-link td-link-blue" onclick="openCompanyHrEpfModal('${row.id}'); return false;" style="color: #0454e4; font-weight: 500; cursor: pointer;">${row.from || ''}</a>`;
           return `
-            <tr data-row-id="${row.id}" onclick="openCompanyHrEpfModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
-              ${tdC('15ch', row.from)}
+            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+              ${tdC('15ch', fromLink)}
               ${tdC('15ch', row.to)}
               ${tdC('20ch', row.fillingFrequency)}
               ${tdC('20ch', row.fillingDueDate)}
@@ -47061,9 +47062,10 @@ function applyFiltersAndRender() {
       } else if (currentCompanyHrTab === 'esi') {
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
+          const fromLink = `<a href="#" class="req-link td-link-blue" onclick="openCompanyHrEsiModal('${row.id}'); return false;" style="color: #0454e4; font-weight: 500; cursor: pointer;">${row.from || ''}</a>`;
           return `
-            <tr data-row-id="${row.id}" onclick="openCompanyHrEsiModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
-              ${tdC('15ch', row.from)}
+            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+              ${tdC('15ch', fromLink)}
               ${tdC('15ch', row.to)}
               ${tdC('20ch', row.fillingFrequency)}
               ${tdC('20ch', row.fillingDueDate)}
@@ -47078,9 +47080,10 @@ function applyFiltersAndRender() {
       } else if (currentCompanyHrTab === 'pt') {
         tbody.innerHTML = filteredDataset.map(row => {
           const isInactive = (row.status || '').toLowerCase().includes('in');
+          const fromLink = `<a href="#" class="req-link td-link-blue" onclick="openCompanyHrPtModal('${row.id}'); return false;" style="color: #0454e4; font-weight: 500; cursor: pointer;">${row.from || ''}</a>`;
           return `
-            <tr data-row-id="${row.id}" onclick="openCompanyHrPtModal('${row.id}')" style="border-bottom: 1px solid #e2e8f0; cursor: pointer;">
-              ${tdC('15ch', row.from)}
+            <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+              ${tdC('15ch', fromLink)}
               ${tdC('15ch', row.to)}
               ${tdC('20ch', row.state)}
               ${tdC('20ch', row.fillingFrequency)}
@@ -52068,7 +52071,9 @@ function initSideFormEvents() {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       e.preventDefault();
-      if (typeof window.saveCompanyHrCompliance === 'function') {
+      if (typeof window.handleHrEditOrSaveClick === 'function') {
+        await window.handleHrEditOrSaveClick(name);
+      } else if (typeof window.saveCompanyHrCompliance === 'function') {
         await window.saveCompanyHrCompliance(name);
       }
     });

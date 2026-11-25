@@ -596,32 +596,28 @@
           }
   
           if (currentIndusProductSubpage === 'infra') {
-            const infraCode = document.getElementById('inpProdInfraCode')?.value?.trim() || '';
             const infraCategory = document.getElementById('inpProdInfraCategory')?.value?.trim() || '';
             const infraDescription = document.getElementById('inpProdInfraDescription')?.value?.trim() || '';
             const typeSelect = document.getElementById('inpProdInfraType');
             const type = (typeSelect && typeSelect.value !== "Parent / Child") ? typeSelect.value : "Parent";
             const prodInfraStatusToggle = document.getElementById('inpProdInfraStatusToggle');
             const status = (prodInfraStatusToggle && prodInfraStatusToggle.checked) ? "Active" : "In - Active";
-  
-            if (!infraCode) {
-              if (typeof showSvgErrorPopup === 'function') {
-                showSvgErrorPopup('Please enter Infra Code.', 'Validation Error');
-              } else {
-                showToast('Please enter Infra Code');
-              }
-              return;
-            }
-  
+
             if (!infraCategory) {
               if (typeof showSvgErrorPopup === 'function') {
-                showSvgErrorPopup('Please enter Infra Category.', 'Validation Error');
+                showSvgErrorPopup('Please select Infra Category.', 'Validation Error');
               } else {
-                showToast('Please enter Infra Category');
+                showToast('Please select Infra Category');
               }
               return;
             }
-  
+
+            const matchedInfra = (Array.isArray(window.indusInfraData) ? window.indusInfraData : []).find(i =>
+              (i.infra_category || i.infraCategory || '') === infraCategory &&
+              (!infraDescription || (i.infra_description || i.infraDescription || '') === infraDescription)
+            );
+            const infraCode = (matchedInfra && (matchedInfra.infra_code || matchedInfra.infraCode)) || `INF-${Date.now().toString().slice(-6)}`;
+
             const payload = {
               customer_name: getActiveGbpaCustomerName(),
               infra_code: infraCode,
@@ -856,6 +852,9 @@
           const budgetAmount = document.getElementById('inpGbpaBudgetAmount')?.value?.trim() || '';
           const nonStandardToggle = document.getElementById('inpGbpaNonStandardToggle');
           const nonStandard = Boolean(nonStandardToggle && nonStandardToggle.checked);
+          const materialsToggle = document.getElementById('inpGbpaMaterialsToggle');
+          const expensesToggle = document.getElementById('inpGbpaExpensesToggle');
+          const infraToggle = document.getElementById('inpGbpaInfraToggle');
           const statusToggle = document.getElementById('inpGbpaStatusToggle');
           const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
   
@@ -892,6 +891,9 @@
             budget_amount: budgetAmount,
             non_standard: nonStandard,
             nonStandard: nonStandard,
+            materials_enabled: Boolean(materialsToggle && materialsToggle.checked),
+            expenses_enabled: Boolean(expensesToggle && expensesToggle.checked),
+            infra_enabled: Boolean(infraToggle && infraToggle.checked),
             status: status
           };
   

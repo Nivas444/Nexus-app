@@ -674,20 +674,38 @@ function openIndusProjectTypeDetails(projectTypeName) {
   showToast(`Navigated to ${selectedProjectType} / Sub - Project Type`);
 }
 
+function getActiveGbpaProductFlags() {
+  const prod = (typeof indusProductsData !== 'undefined' && Array.isArray(indusProductsData))
+    ? indusProductsData.find(p => (p.item_name || p.itemName || p.productName) === selectedProductName)
+    : null;
+  if (!prod) return { materials: true, expenses: true, infra: true };
+  return {
+    materials: prod.materials_enabled === undefined || prod.materials_enabled === null ? true : Boolean(prod.materials_enabled),
+    expenses: prod.expenses_enabled === undefined || prod.expenses_enabled === null ? true : Boolean(prod.expenses_enabled),
+    infra: prod.infra_enabled === undefined || prod.infra_enabled === null ? true : Boolean(prod.infra_enabled)
+  };
+}
+window.getActiveGbpaProductFlags = getActiveGbpaProductFlags;
+
 function openIndusProductDetails(productName, custName) {
   if (custName && String(custName).trim()) {
     window.currentCustomerName = String(custName).trim();
   }
   currentModule = 'indus_towers';
   currentIndusSubpage = 'product_details';
-  currentIndusProductSubpage = 'materials';
   selectedProductName = productName || 'Product Name';
+  const flags = getActiveGbpaProductFlags();
+  const enabledTabs = [];
+  if (flags.materials) enabledTabs.push('materials');
+  if (flags.expenses) enabledTabs.push('expenses');
+  if (flags.infra) enabledTabs.push('infra');
+  currentIndusProductSubpage = enabledTabs[0] || 'materials';
   activeColumnFilters = {};
   updateURL();
   renderApp();
-  if (typeof fetchGbpaMaterials === 'function') fetchGbpaMaterials(true);
-  if (typeof fetchGbpaExpenses === 'function') fetchGbpaExpenses(false);
-  if (typeof fetchGbpaInfra === 'function') fetchGbpaInfra(false);
+  if (flags.materials && typeof fetchGbpaMaterials === 'function') fetchGbpaMaterials(currentIndusProductSubpage === 'materials');
+  if (flags.expenses && typeof fetchGbpaExpenses === 'function') fetchGbpaExpenses(currentIndusProductSubpage === 'expenses');
+  if (flags.infra && typeof fetchGbpaInfra === 'function') fetchGbpaInfra(currentIndusProductSubpage === 'infra');
   showToast(`Opened Product Details for ${selectedProductName}`);
 }
 
@@ -14046,13 +14064,19 @@ function renderIndusFooter() {
   }
 
   if (currentIndusSubpage === 'product_details') {
-    const prodSubpages = [
-      { key: 'materials', label: 'Materials' },
-      { key: 'expenses', label: 'Expenses' },
-      { key: 'infra', label: 'Infra' }
-    ];
+    const flags = (typeof getActiveGbpaProductFlags === 'function')
+      ? getActiveGbpaProductFlags()
+      : { materials: true, expenses: true, infra: true };
+    const prodSubpages = [];
+    if (flags.materials) prodSubpages.push({ key: 'materials', label: 'Materials' });
+    if (flags.expenses) prodSubpages.push({ key: 'expenses', label: 'Expenses' });
+    if (flags.infra) prodSubpages.push({ key: 'infra', label: 'Infra' });
 
-    footer.innerHTML = `
+    if (prodSubpages.length > 0 && !prodSubpages.some(sp => sp.key === currentIndusProductSubpage)) {
+      currentIndusProductSubpage = prodSubpages[0].key;
+    }
+
+    footer.innerHTML = prodSubpages.length === 0 ? '' : `
       <div class="segmented-toggle-group master-segmented-group indus-segmented-group">
         ${prodSubpages.map((sp, idx) => `
           <button type="button" class="segmented-btn ${currentIndusProductSubpage === sp.key ? 'active' : ''}" data-prod-subpage="${sp.key}">
@@ -47206,7 +47230,8 @@ function applyFiltersAndRender() {
         const gstNum = row.gstNumber || row.gst_number || '';
         const gstT = row.gstType || row.gst_type || '';
         const invT = row.invoiceType || row.invoice_type || '';
-        const isIndus = cName.toLowerCase().includes('indus');
+        const lName = row.legal_name || row.legalName || '';
+        const isIndus = (cName + ' ' + lName).toLowerCase().includes('indus');
         const nameCellHtml = isIndus
           ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Indus Towers details" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${cName}</a>`
           : `<span style="color: #1e293b; font-weight: 500;">${cName}</span>`;
@@ -49889,15 +49914,26 @@ function initSideFormEvents() {
   if (btnSubmitProjectTransport) btnSubmitProjectTransport.addEventListener('click', handleFormSave);
   if (btnSubmitProduct) btnSubmitProduct.addEventListener('click', handleFormSave);
   if (btnSubmitExpense) btnSubmitExpense.addEventListener('click', handleFormSave);
+  // Show/hide Leased-only Rental fields in Master -> Transport Add/View Vehicle
+  function toggleVehicleLeasedFields() {
+    const typeSel = document.getElementById('inpVehicleTransportType');
+    const wrap = document.getElementById('wrapVehicleLeasedFields');
+    if (!wrap) return;
+    const isLeased = (typeSel?.value || '').trim().toLowerCase() === 'leased';
+    wrap.style.display = isLeased ? 'flex' : 'none';
+  }
+  window.toggleVehicleLeasedFields = toggleVehicleLeasedFields;
+
   // Save or Update Master -> Transport Vehicle Record (persisted to PostgreSQL nexus_master.transport)
   async function saveVehicleRecord() {
     const transportName = document.getElementById('inpVehicleTransportName')?.value?.trim();
     const transportType = document.getElementById('inpVehicleTransportType')?.value?.trim();
     const vehicleType = document.getElementById('inpVehicleType')?.value?.trim();
     const vehicleNumber = document.getElementById('inpVehicleNumber')?.value?.trim();
-    const rentalType = document.getElementById('inpVehicleRentalType')?.value?.trim();
-    const rentalAmount = document.getElementById('inpVehicleRentalAmount')?.value?.trim();
-    const haltRent = document.getElementById('inpVehicleHaltRent')?.value?.trim();
+    const isLeased = (transportType || '').toLowerCase() === 'leased';
+    const rentalType = isLeased ? (document.getElementById('inpVehicleRentalType')?.value?.trim() || '') : '';
+    const rentalAmount = isLeased ? (document.getElementById('inpVehicleRentalAmount')?.value?.trim() || '0.00') : '0.00';
+    const haltRent = isLeased ? (document.getElementById('inpVehicleHaltRent')?.value?.trim() || '0.00') : '0.00';
 
     if (!transportName) {
       if (typeof showToast === 'function') showToast('Please select Transport Name');
@@ -50018,6 +50054,7 @@ function initSideFormEvents() {
     setVal('inpVehicleRentalType', rec.rentalType);
     setVal('inpVehicleRentalAmount', rec.rentalAmount);
     setVal('inpVehicleHaltRent', rec.haltRent);
+    toggleVehicleLeasedFields();
 
     vehicleDocumentsData = Array.isArray(rec.documents) ? rec.documents.map(d => ({ ...d })) : [];
     vehicleContactsData = Array.isArray(rec.contacts) ? rec.contacts.map(c => ({ ...c })) : [];
@@ -52627,6 +52664,7 @@ function openSideForm() {
           if (frm) frm.reset();
           const stToggle = document.getElementById('inpProdInfraStatusToggle');
           if (stToggle) stToggle.checked = true;
+          if (typeof populateGbpaInfraDropdowns === 'function') populateGbpaInfraDropdowns();
           setProductInfraFormReadOnly(false);
           currentViewedProductInfraId = null;
           isProductInfraFormEditing = false;
@@ -52644,6 +52682,7 @@ function openSideForm() {
           if (frm) frm.reset();
           const stToggle = document.getElementById('inpProdExpenseStatusToggle');
           if (stToggle) stToggle.checked = true;
+          if (typeof populateGbpaExpenseDropdowns === 'function') populateGbpaExpenseDropdowns();
           setProductExpenseFormReadOnly(false);
           currentViewedGbpaExpenseId = null;
           isGbpaExpenseFormEditing = false;
@@ -52661,6 +52700,7 @@ function openSideForm() {
           if (frm) frm.reset();
           const stToggle = document.getElementById('inpMaterialStatusToggle');
           if (stToggle) stToggle.checked = true;
+          if (typeof populateGbpaMaterialDropdowns === 'function') populateGbpaMaterialDropdowns();
           setMaterialFormReadOnly(false);
           currentViewedMaterialId = null;
           isMaterialFormEditing = false;
@@ -53172,7 +53212,7 @@ window.openVendorSupplyScopeSidePanel = function() {
   const scopeTitle = document.getElementById('lblSupplyScopeTitle');
   if (scopeTitle) {
     const vName = vendorNameInput ? vendorNameInput.value.trim() : '';
-    scopeTitle.textContent = vName ? `Supply ${vName}` : 'Supply Vendor Name';
+    scopeTitle.textContent = vName || 'Vendor Name';
   }
 
   activeSupplyScopeFilters = {};
@@ -57246,7 +57286,7 @@ window.handleSiteClick = async function(siteId, siteName) {
   if (card) card.style.display = 'block';
 
   const lblTitle = document.getElementById('lblSiteCardTitle');
-  if (lblTitle) lblTitle.innerText = site.site_code || site.siteId || site.site_name || 'Site Details';
+  if (lblTitle) lblTitle.innerText = site.site_name || site.siteName || site.site_code || site.siteId || 'Site Details';
 
   const btnEditToggle = document.getElementById('btnSiteCardEditToggle');
   const btnSiteMsg = document.getElementById('btnSiteCardMessageIcon');
@@ -58065,6 +58105,15 @@ window.openViewGbpaCard = async function(itemId) {
     const isNs = Boolean(item.non_standard === true || item.nonStandard === true || String(item.non_standard).toLowerCase() === 'true' || String(item.non_standard).toLowerCase() === 'active');
     document.getElementById('inpGbpaNonStandardToggle').checked = isNs;
   }
+  if (document.getElementById('inpGbpaMaterialsToggle')) {
+    document.getElementById('inpGbpaMaterialsToggle').checked = item.materials_enabled === undefined || item.materials_enabled === null ? true : Boolean(item.materials_enabled);
+  }
+  if (document.getElementById('inpGbpaExpensesToggle')) {
+    document.getElementById('inpGbpaExpensesToggle').checked = item.expenses_enabled === undefined || item.expenses_enabled === null ? true : Boolean(item.expenses_enabled);
+  }
+  if (document.getElementById('inpGbpaInfraToggle')) {
+    document.getElementById('inpGbpaInfraToggle').checked = item.infra_enabled === undefined || item.infra_enabled === null ? true : Boolean(item.infra_enabled);
+  }
 
   if (document.getElementById('inpGbpaStatusToggle')) {
     document.getElementById('inpGbpaStatusToggle').checked = !((item.status || '').toLowerCase().includes('in'));
@@ -58074,8 +58123,83 @@ window.openViewGbpaCard = async function(itemId) {
   showToast(`Viewing GBPA item: ${dispTitle}`);
 };
 
+// Auto-calculate GBPA Budget (₹) = (Budget (%) / 100) * Rate (₹)
+function calculateGbpaBudgetAmount() {
+  const rateEl = document.getElementById('inpGbpaRate');
+  const pctEl = document.getElementById('inpGbpaBudgetPercent');
+  const amtEl = document.getElementById('inpGbpaBudgetAmount');
+  if (!rateEl || !pctEl || !amtEl) return;
+  const rate = parseFloat(String(rateEl.value || '').replace(/[^0-9.-]/g, ''));
+  const pct = parseFloat(String(pctEl.value || '').replace(/[^0-9.-]/g, ''));
+  if (!isNaN(rate) && !isNaN(pct)) {
+    amtEl.value = ((pct / 100) * rate).toFixed(2);
+  } else if (!String(pctEl.value || '').trim() || !String(rateEl.value || '').trim()) {
+    amtEl.value = '';
+  }
+}
+window.calculateGbpaBudgetAmount = calculateGbpaBudgetAmount;
+
+function _populateSelectUnique(selectEl, values, placeholder, selectedVal) {
+  if (!selectEl) return;
+  const uniq = Array.from(new Set(values.map(v => String(v || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+  if (selectedVal && !uniq.includes(selectedVal)) uniq.unshift(selectedVal);
+  selectEl.innerHTML = `<option value="">${placeholder}</option>` + uniq.map(v => `<option value="${v.replace(/"/g, '&quot;')}">${v}</option>`).join('');
+  if (selectedVal) selectEl.value = selectedVal;
+}
+
+async function populateGbpaMaterialDropdowns(selectedHead = '', selectedCat = '') {
+  let products = (typeof masterProductsData !== 'undefined' && Array.isArray(masterProductsData)) ? masterProductsData : (window.masterProductsData || []);
+  if ((!products || products.length === 0) && typeof NexusApi !== 'undefined' && NexusApi.products) {
+    try {
+      const resp = await NexusApi.products.getAll({ limit: 500 });
+      products = Array.isArray(resp) ? resp : (resp?.items || []);
+      if (typeof masterProductsData !== 'undefined') masterProductsData = products;
+      window.masterProductsData = products;
+    } catch (e) { console.warn('Failed to load master products for GBPA Material dropdowns:', e); }
+  }
+  const heads = products.map(p => p.material_head || p.productHead || p.product_head);
+  const cats = products.map(p => p.material_category || p.productCategory || p.product_category);
+  _populateSelectUnique(document.getElementById('inpMaterialHead'), heads, 'Select Material Head', selectedHead);
+  _populateSelectUnique(document.getElementById('inpMaterialCategory'), cats, 'Select Material Category', selectedCat);
+}
+window.populateGbpaMaterialDropdowns = populateGbpaMaterialDropdowns;
+
+async function populateGbpaExpenseDropdowns(selectedHead = '', selectedType = '') {
+  let expenses = (typeof masterExpensesData !== 'undefined' && Array.isArray(masterExpensesData)) ? masterExpensesData : (window.masterExpensesData || []);
+  if ((!expenses || expenses.length === 0) && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
+    try {
+      const resp = await NexusApi.expenses.getAll({ limit: 500 });
+      expenses = Array.isArray(resp) ? resp : (resp?.items || []);
+      window.masterExpensesData = expenses;
+    } catch (e) { console.warn('Failed to load master expenses for GBPA Expense dropdowns:', e); }
+  }
+  const heads = expenses.map(e => e.expense_head || e.expenseHead);
+  const types = expenses.map(e => e.expense_sub_category || e.expenseSubCategory || e.expense_description);
+  _populateSelectUnique(document.getElementById('inpProdExpenseHead'), heads, 'Select Expense Head', selectedHead);
+  _populateSelectUnique(document.getElementById('inpProdExpenseCategory'), types, 'Select Expense Type', selectedType);
+}
+window.populateGbpaExpenseDropdowns = populateGbpaExpenseDropdowns;
+
+async function populateGbpaInfraDropdowns(selectedCat = '', selectedDesc = '') {
+  let infras = (typeof indusInfraData !== 'undefined' && Array.isArray(indusInfraData)) ? indusInfraData : (window.indusInfraData || []);
+  if ((!infras || infras.length === 0) && typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
+    try {
+      const resp = await NexusApi.indusInfra.getAll({ customer_name: 'Indus Tower Ltd', page: 1, page_size: 500 });
+      infras = Array.isArray(resp) ? resp : (resp?.items || []);
+      window.indusInfraData = infras;
+    } catch (e) { console.warn('Failed to load Indus infra for GBPA Infra dropdowns:', e); }
+  }
+  const cats = infras.map(i => i.infra_category || i.infraCategory);
+  const descs = infras.map(i => i.infra_description || i.infraDescription);
+  _populateSelectUnique(document.getElementById('inpProdInfraCategory'), cats, 'Select Infra Category', selectedCat);
+  _populateSelectUnique(document.getElementById('inpProdInfraDescription'), descs, 'Select Infra Description', selectedDesc);
+}
+window.populateGbpaInfraDropdowns = populateGbpaInfraDropdowns;
+
 // GBPA Card Edit / Save Toggle Listener
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('inpGbpaRate')?.addEventListener('input', calculateGbpaBudgetAmount);
+  document.getElementById('inpGbpaBudgetPercent')?.addEventListener('input', calculateGbpaBudgetAmount);
   document.getElementById('btnGbpaCardEditToggle')?.addEventListener('click', async () => {
     const activeId = currentViewedGbpaId || window.currentViewedGbpaId;
     let item = indusProductsData.find(p => String(p.item_id || p.id) === String(activeId));
@@ -58118,6 +58242,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const nsChk = document.getElementById('inpGbpaNonStandardToggle');
       const nonStandard = Boolean(nsChk && nsChk.checked);
+      const matChk = document.getElementById('inpGbpaMaterialsToggle');
+      const expChk = document.getElementById('inpGbpaExpensesToggle');
+      const infChk = document.getElementById('inpGbpaInfraToggle');
 
       const updatePayload = {
         item_name: productName,
@@ -58130,6 +58257,9 @@ document.addEventListener('DOMContentLoaded', () => {
         budget_percentage: budgetPercent,
         budget_amount: budgetAmount,
         non_standard: nonStandard,
+        materials_enabled: Boolean(matChk && matChk.checked),
+        expenses_enabled: Boolean(expChk && expChk.checked),
+        infra_enabled: Boolean(infChk && infChk.checked),
         status: status
       };
 
@@ -58282,8 +58412,7 @@ window.openViewGbpaMaterialCard = async function(matId) {
   const btnSaveWrap = document.querySelector('#frmAddMaterials .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpMaterialHead')) document.getElementById('inpMaterialHead').value = mat.material_head || mat.materialHead || '';
-  if (document.getElementById('inpMaterialCategory')) document.getElementById('inpMaterialCategory').value = mat.material_category || mat.materialCategory || '';
+  await populateGbpaMaterialDropdowns(mat.material_head || mat.materialHead || '', mat.material_category || mat.materialCategory || '');
   if (document.getElementById('inpMaterialDescription')) document.getElementById('inpMaterialDescription').value = mat.material_description || mat.materialDescription || '';
   if (document.getElementById('inpMaterialMake')) document.getElementById('inpMaterialMake').value = mat.company_name || mat.companyName || mat.make || '';
   if (document.getElementById('inpMaterialType')) document.getElementById('inpMaterialType').value = mat.material_type || mat.materialType || mat.type || 'Parent';
@@ -58467,8 +58596,7 @@ window.openViewGbpaExpenseCard = async function(expId) {
   const btnSaveWrap = document.querySelector('#frmAddProductExpense .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpProdExpenseHead')) document.getElementById('inpProdExpenseHead').value = exp.expense_head || exp.expenseHead || '';
-  if (document.getElementById('inpProdExpenseCategory')) document.getElementById('inpProdExpenseCategory').value = exp.expense_category || exp.expenseCategory || '';
+  await populateGbpaExpenseDropdowns(exp.expense_head || exp.expenseHead || '', exp.expense_category || exp.expenseCategory || '');
   if (document.getElementById('inpProdExpenseDescription')) document.getElementById('inpProdExpenseDescription').value = exp.expense_description || exp.expenseDescription || '';
   if (document.getElementById('inpProdExpenseType')) document.getElementById('inpProdExpenseType').value = exp.expense_type || exp.expenseType || exp.type || 'Parent';
 
@@ -58659,9 +58787,7 @@ window.openViewGbpaProductInfraCard = async function(prodInfraId) {
   const btnSaveWrap = document.querySelector('#frmAddProductInfra .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  if (document.getElementById('inpProdInfraCode')) document.getElementById('inpProdInfraCode').value = infra.infra_code || infra.infraCode || '';
-  if (document.getElementById('inpProdInfraCategory')) document.getElementById('inpProdInfraCategory').value = infra.infra_category || infra.infraCategory || '';
-  if (document.getElementById('inpProdInfraDescription')) document.getElementById('inpProdInfraDescription').value = infra.infra_description || infra.infraDescription || '';
+  await populateGbpaInfraDropdowns(infra.infra_category || infra.infraCategory || '', infra.infra_description || infra.infraDescription || '');
   if (document.getElementById('inpProdInfraType')) document.getElementById('inpProdInfraType').value = infra.infra_type || infra.infraType || infra.type || 'Parent';
 
   if (document.getElementById('inpProdInfraStatusToggle')) {

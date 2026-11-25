@@ -258,34 +258,14 @@
           #nexusGlobalLoaderOverlay.active {
             display: flex;
           }
-          .nexus-loader-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            min-width: 150px;
-            padding: 20px 28px;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
-            border: 1px solid rgba(148, 163, 184, 0.22);
-          }
           .nexus-loader-spinner {
-            width: 38px;
-            height: 38px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            border: 3.5px solid #e2e8f0;
+            border: 4px solid rgba(255, 255, 255, 0.35);
             border-top-color: var(--banner-green, #00cba0);
             border-right-color: var(--banner-green, #00cba0);
             animation: nexusGlobalSpin 0.75s linear infinite;
-          }
-          .nexus-loader-text {
-            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #334155;
-            letter-spacing: 0.01em;
           }
           @keyframes nexusGlobalSpin {
             to { transform: rotate(360deg); }
@@ -298,12 +278,7 @@
       overlay.setAttribute('role', 'status');
       overlay.setAttribute('aria-live', 'polite');
       overlay.setAttribute('aria-busy', 'true');
-      overlay.innerHTML = `
-        <div class="nexus-loader-card">
-          <div class="nexus-loader-spinner"></div>
-          <div class="nexus-loader-text" id="nexusGlobalLoaderText">Processing...</div>
-        </div>
-      `;
+      overlay.innerHTML = `<div class="nexus-loader-spinner" aria-label="Loading"></div>`;
       document.body.appendChild(overlay);
     }
     return overlay;
@@ -390,6 +365,16 @@
     };
   }
 
+  function _hasVisiblePageData() {
+    if (typeof document === 'undefined') return false;
+    const tbody = document.getElementById('worklistTableBody');
+    if (!tbody) return false;
+    const rows = tbody.querySelectorAll('tr');
+    if (rows.length === 0) return false;
+    if (rows.length === 1 && rows[0].querySelector('td[colspan]')) return false;
+    return true;
+  }
+
   // Global fetch wrapper so even legacy direct fetch('/api/v1/...') calls in home.js
   // automatically send JWT + HttpOnly cookies + CSRF token, show the activity loader, and handle 401/403 centrally.
   if (_nativeFetch) {
@@ -400,9 +385,13 @@
       }
 
       const method = ((init && init.method) || (input && input.method) || 'GET').toUpperCase();
-      const useLoader = !_shouldSkipGlobalLoader(urlStr, init);
+      const isMutation = method !== 'GET';
+      const useLoader = !_shouldSkipGlobalLoader(urlStr, init) && (
+        isMutation ||
+        Boolean(init && init.forceLoader) ||
+        !_hasVisiblePageData()
+      );
       if (useLoader) {
-        const isMutation = method !== 'GET';
         _beginGlobalLoader(_getLoaderLabelForMethod(method), isMutation);
       }
 

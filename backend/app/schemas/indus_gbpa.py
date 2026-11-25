@@ -20,6 +20,9 @@ class IndusGbpaBase(BaseModel):
     status: Optional[str] = Field("Active", max_length=50)
     non_standard: Optional[Union[bool, str]] = Field(default=False)
     nonStandard: Optional[Union[bool, str]] = None
+    materials_enabled: Optional[Union[bool, str]] = Field(default=True)
+    expenses_enabled: Optional[Union[bool, str]] = Field(default=True)
+    infra_enabled: Optional[Union[bool, str]] = Field(default=True)
 
 class IndusGbpaCreate(IndusGbpaBase):
     item_name: str = Field(..., min_length=1, max_length=255, description="Item / Product Name")
@@ -42,6 +45,9 @@ class IndusGbpaUpdate(BaseModel):
     status: Optional[str] = None
     non_standard: Optional[Union[bool, str]] = None
     nonStandard: Optional[Union[bool, str]] = None
+    materials_enabled: Optional[Union[bool, str]] = None
+    expenses_enabled: Optional[Union[bool, str]] = None
+    infra_enabled: Optional[Union[bool, str]] = None
 
 class IndusGbpaResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -76,6 +82,9 @@ class IndusGbpaResponse(BaseModel):
     status: Optional[str] = "Active"
     non_standard: Optional[bool] = False
     nonStandard: Optional[bool] = False
+    materials_enabled: Optional[bool] = True
+    expenses_enabled: Optional[bool] = True
+    infra_enabled: Optional[bool] = True
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

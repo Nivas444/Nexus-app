@@ -24,6 +24,9 @@ class IndusCustomerGbpa(Base):
     budget_amount = Column(Numeric(14, 2), nullable=True)
     status = Column(String(50), default="Active", nullable=True)
     non_standard = Column(Boolean, default=False, nullable=True)
+    materials_enabled = Column(Boolean, default=True, nullable=True)
+    expenses_enabled = Column(Boolean, default=True, nullable=True)
+    infra_enabled = Column(Boolean, default=True, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

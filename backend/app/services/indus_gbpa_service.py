@@ -85,6 +85,9 @@ def _format_gbpa_response(item: IndusCustomerGbpa) -> IndusGbpaResponse:
         status=item.status or "Active",
         non_standard=ns_bool,
         nonStandard=ns_bool,
+        materials_enabled=True if item.materials_enabled is None else bool(item.materials_enabled),
+        expenses_enabled=True if item.expenses_enabled is None else bool(item.expenses_enabled),
+        infra_enabled=True if item.infra_enabled is None else bool(item.infra_enabled),
         created_at=item.created_at,
         updated_at=item.updated_at
     )
@@ -169,6 +172,9 @@ class IndusGbpaService:
             "budget_percentage": _parse_numeric(payload.budget_percentage),
             "budget_amount": _parse_numeric(payload.budget_amount),
             "non_standard": _parse_bool(payload.non_standard if payload.non_standard is not None else payload.nonStandard),
+            "materials_enabled": _parse_bool(payload.materials_enabled) if payload.materials_enabled is not None else True,
+            "expenses_enabled": _parse_bool(payload.expenses_enabled) if payload.expenses_enabled is not None else True,
+            "infra_enabled": _parse_bool(payload.infra_enabled) if payload.infra_enabled is not None else True,
             "status": payload.status.strip() if payload.status else "Active"
         }
 
@@ -233,6 +239,12 @@ class IndusGbpaService:
         if payload.non_standard is not None or payload.nonStandard is not None:
             ns_val = payload.non_standard if payload.non_standard is not None else payload.nonStandard
             update_dict["non_standard"] = _parse_bool(ns_val)
+        if payload.materials_enabled is not None:
+            update_dict["materials_enabled"] = _parse_bool(payload.materials_enabled)
+        if payload.expenses_enabled is not None:
+            update_dict["expenses_enabled"] = _parse_bool(payload.expenses_enabled)
+        if payload.infra_enabled is not None:
+            update_dict["infra_enabled"] = _parse_bool(payload.infra_enabled)
 
         updated = self.repo.update(item_id, update_dict)
         return _format_gbpa_response(updated)

@@ -958,25 +958,8 @@
       const effectiveCustomerName = customerName || legalName;
       const effectiveLegalName = legalName || customerName;
   
-      // Check Indus Towers variant uniqueness (Only 1 Indus Towers record is allowable)
       const isIndusVariant = (effectiveCustomerName + ' ' + effectiveLegalName).toLowerCase().replace(/[^a-z0-9]/g, '').includes('industower');
-      if (isIndusVariant) {
-        const existingIndus = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {
-          const cn = (c.customerName || c.customer_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          const ln = (c.legalName || c.legal_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-          return cn.includes('industower') || ln.includes('industower');
-        }) : null;
-  
-        if (existingIndus) {
-          if (typeof showSvgErrorPopup === 'function') {
-            showSvgErrorPopup("Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable.", "Duplicate Error!");
-          } else {
-            showToast("Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable.");
-          }
-          return;
-        }
-      }
-  
+
       // Check duplicate customer name only (duplicate customer legal name is allowed)
       const normEnteredName = effectiveCustomerName.trim().toLowerCase();
       const existingDup = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData.find(c => {

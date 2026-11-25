@@ -1650,7 +1650,7 @@
             <div class="form-row-group">
               <label class="form-label" for="inpVehicleTransportType">Transport Type</label>
               <div class="form-input-wrap">
-                <select class="form-select-control" id="inpVehicleTransportType">
+                <select class="form-select-control" id="inpVehicleTransportType" onchange="if (typeof toggleVehicleLeasedFields === 'function') toggleVehicleLeasedFields();">
                   <option value="" disabled selected hidden>Select Transport Type</option>
                   <option value="Contract" selected>Contract</option>
                   <option value="Owned">Owned</option>
@@ -1688,6 +1688,28 @@
               <label class="form-label" for="inpVehicleNumber">Vehicle Number</label>
               <div class="form-input-wrap">
                 <input type="text" class="form-input-control" id="inpVehicleNumber" placeholder="e.g. TN 01 AB 1234">
+              </div>
+            </div>
+
+            <!-- Leased-only Rental Fields -->
+            <div id="wrapVehicleLeasedFields" style="display: none; flex-direction: column; gap: 12px;">
+              <div class="form-row-group">
+                <label class="form-label" for="inpVehicleRentalType">Rental Type</label>
+                <div class="form-input-wrap">
+                  <input type="text" class="form-input-control" id="inpVehicleRentalType" placeholder="e.g. Per Day / Monthly">
+                </div>
+              </div>
+              <div class="form-row-group">
+                <label class="form-label" for="inpVehicleRentalAmount">Rental Amount</label>
+                <div class="form-input-wrap">
+                  <input type="text" class="form-input-control" id="inpVehicleRentalAmount" placeholder="e.g. 2500.00">
+                </div>
+              </div>
+              <div class="form-row-group">
+                <label class="form-label" for="inpVehicleHaltRent">Halt Rental Amount</label>
+                <div class="form-input-wrap">
+                  <input type="text" class="form-input-control" id="inpVehicleHaltRent" placeholder="e.g. 500.00">
+                </div>
               </div>
             </div>
 
@@ -3121,6 +3143,39 @@
               </div>
             </div>
 
+            <!-- 11B. Materials Toggle -->
+            <div class="form-row-group">
+              <label class="form-label">Materials</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpGbpaMaterialsToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 11C. Expenses Toggle -->
+            <div class="form-row-group">
+              <label class="form-label">Expenses</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpGbpaExpensesToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 11D. Infra Toggle -->
+            <div class="form-row-group">
+              <label class="form-label">Infra</label>
+              <div class="form-input-wrap slider-wrap">
+                <label class="toggle-slide-switch">
+                  <input type="checkbox" id="inpGbpaInfraToggle">
+                  <span class="toggle-slide-slider"></span>
+                </label>
+              </div>
+            </div>
+
             <!-- 12. Status -->
             <div class="form-row-group">
               <label class="form-label">Status</label>
@@ -3165,7 +3220,9 @@
             <div class="form-row-group">
               <label class="form-label" for="inpMaterialHead">Material Head</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpMaterialHead" placeholder="">
+                <select class="form-select-control" id="inpMaterialHead">
+                  <option value="">Select Material Head</option>
+                </select>
               </div>
             </div>
 
@@ -3173,7 +3230,9 @@
             <div class="form-row-group">
               <label class="form-label" for="inpMaterialCategory">Material Category</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpMaterialCategory" placeholder="">
+                <select class="form-select-control" id="inpMaterialCategory">
+                  <option value="">Select Material Category</option>
+                </select>
               </div>
             </div>
 
@@ -3258,15 +3317,19 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProdExpenseHead">Expense Head</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProdExpenseHead" placeholder="">
+                <select class="form-select-control" id="inpProdExpenseHead">
+                  <option value="">Select Expense Head</option>
+                </select>
               </div>
             </div>
 
-            <!-- 2. Expense Category -->
+            <!-- 2. Expense Type -->
             <div class="form-row-group">
-              <label class="form-label" for="inpProdExpenseCategory">Expense Category</label>
+              <label class="form-label" for="inpProdExpenseCategory">Expense Type</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProdExpenseCategory" placeholder="">
+                <select class="form-select-control" id="inpProdExpenseCategory">
+                  <option value="">Select Expense Type</option>
+                </select>
               </div>
             </div>
 
@@ -3331,27 +3394,23 @@
 
           <!-- Form Body -->
           <form class="side-form-body" id="frmAddProductInfra" onsubmit="event.preventDefault();">
-            <!-- 1. Infra Code -->
-            <div class="form-row-group">
-              <label class="form-label" for="inpProdInfraCode">Infra Code</label>
-              <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProdInfraCode" placeholder="">
-              </div>
-            </div>
-
-            <!-- 2. Infra Category -->
+            <!-- 1. Infra Category -->
             <div class="form-row-group">
               <label class="form-label" for="inpProdInfraCategory">Infra Category</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProdInfraCategory" placeholder="">
+                <select class="form-select-control" id="inpProdInfraCategory">
+                  <option value="">Select Infra Category</option>
+                </select>
               </div>
             </div>
 
-            <!-- 3. Infra Description -->
+            <!-- 2. Infra Description -->
             <div class="form-row-group">
               <label class="form-label" for="inpProdInfraDescription">Infra Description</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProdInfraDescription" placeholder="">
+                <select class="form-select-control" id="inpProdInfraDescription">
+                  <option value="">Select Infra Description</option>
+                </select>
               </div>
             </div>
 
@@ -11681,7 +11740,7 @@
 
           <!-- Header with Standard Slanted Ribbon Badge in Existing Green (#2fd19f) -->
           <div class="side-form-header">
-            <div class="side-form-title-badge" id="lblSupplyScopeTitle">Supply Vendor Name</div>
+            <div class="side-form-title-badge" id="lblSupplyScopeTitle">Vendor Name</div>
             <div class="side-header-top-icons">
               <button type="button" class="side-top-icon-btn" id="btnSupplyScopeCsvUpload" title="Upload CSV / Excel"
                 aria-label="Upload CSV or Excel">

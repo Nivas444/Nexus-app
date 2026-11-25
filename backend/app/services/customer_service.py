@@ -143,16 +143,6 @@ class CustomerService:
                 detail="Customer Name is required."
             )
 
-        # Indus Towers variant special check (Only 1 Indus Towers record allowable in entire system)
-        from app.repositories.customer_repository import is_indus_variant
-        if is_indus_variant(c_name) or is_indus_variant(l_name):
-            existing_indus = self.repository.get_existing_indus()
-            if existing_indus:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable."
-                )
-
         # Uniqueness check on Customer Name only (duplicate legal_name is permitted)
         if self.repository.get_by_name(c_name):
             raise HTTPException(
@@ -233,14 +223,6 @@ class CustomerService:
         c_name = data.customer_name or data.customerName
         if c_name is not None and c_name.strip():
             c_name_clean = c_name.strip()
-            from app.repositories.customer_repository import is_indus_variant
-            if is_indus_variant(c_name_clean):
-                existing_indus = self.repository.get_existing_indus(exclude_id=customer_id)
-                if existing_indus:
-                    raise HTTPException(
-                        status_code=status.HTTP_409_CONFLICT,
-                        detail="Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable."
-                    )
             existing = self.repository.get_by_name(c_name_clean, exclude_id=customer_id)
             if existing:
                 raise HTTPException(
@@ -252,14 +234,6 @@ class CustomerService:
         l_name = data.legal_name or data.legalName
         if l_name is not None and l_name.strip():
             l_name_clean = l_name.strip()
-            from app.repositories.customer_repository import is_indus_variant
-            if is_indus_variant(l_name_clean):
-                existing_indus = self.repository.get_existing_indus(exclude_id=customer_id)
-                if existing_indus:
-                    raise HTTPException(
-                        status_code=status.HTTP_409_CONFLICT,
-                        detail="Indus Towers Ltd already exists. Only one Indus Towers customer record is allowable."
-                    )
             c.legal_name = l_name_clean
 
         c_code = data.customer_code or data.customerId or data.customerCode

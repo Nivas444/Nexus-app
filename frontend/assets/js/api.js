@@ -231,8 +231,167 @@
     return _refreshPromise;
   }
 
+  // Global Activity Loader Spinner (auto-shown during backend API operations)
+  let _loaderCount = 0;
+  let _loaderDelayTimer = null;
+
+  function _ensureGlobalLoaderDom() {
+    if (typeof document === 'undefined' || !document.body) return null;
+    let overlay = document.getElementById('nexusGlobalLoaderOverlay');
+    if (!overlay) {
+      if (!document.getElementById('nexusGlobalLoaderStyle')) {
+        const style = document.createElement('style');
+        style.id = 'nexusGlobalLoaderStyle';
+        style.textContent = `
+          #nexusGlobalLoaderOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.28);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            transition: opacity 0.15s ease;
+          }
+          #nexusGlobalLoaderOverlay.active {
+            display: flex;
+          }
+          .nexus-loader-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 150px;
+            padding: 20px 28px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.22);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+          }
+          .nexus-loader-spinner {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 3.5px solid #e2e8f0;
+            border-top-color: var(--banner-green, #00cba0);
+            border-right-color: var(--banner-green, #00cba0);
+            animation: nexusGlobalSpin 0.75s linear infinite;
+          }
+          .nexus-loader-text {
+            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+            letter-spacing: 0.01em;
+          }
+          @keyframes nexusGlobalSpin {
+            to { transform: rotate(360deg); }
+          }
+        `;
+        (document.head || document.documentElement).appendChild(style);
+      }
+      overlay = document.createElement('div');
+      overlay.id = 'nexusGlobalLoaderOverlay';
+      overlay.setAttribute('role', 'status');
+      overlay.setAttribute('aria-live', 'polite');
+      overlay.setAttribute('aria-busy', 'true');
+      overlay.innerHTML = `
+        <div class="nexus-loader-card">
+          <div class="nexus-loader-spinner"></div>
+          <div class="nexus-loader-text" id="nexusGlobalLoaderText">Processing...</div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    return overlay;
+  }
+
+  function _shouldSkipGlobalLoader(urlStr, init) {
+    if (init && init.skipLoader) return true;
+    const u = String(urlStr || '').toLowerCase();
+    if (!u) return true;
+    // Skip silent background endpoints and login (login has its own dedicated overlay)
+    if (u.includes('/health') || u.includes('/auth/refresh') || u.includes('/auth/theme') || u.includes('/auth/login')) {
+      return true;
+    }
+    const loginOverlay = (typeof document !== 'undefined') ? document.getElementById('loginLoadingOverlay') : null;
+    if (loginOverlay && !loginOverlay.hidden && loginOverlay.classList.contains('active')) {
+      return true;
+    }
+    return false;
+  }
+
+  function _getLoaderLabelForMethod(method) {
+    switch ((method || 'GET').toUpperCase()) {
+      case 'POST': return 'Saving...';
+      case 'PUT':
+      case 'PATCH': return 'Updating...';
+      case 'DELETE': return 'Deleting...';
+      default: return 'Loading...';
+    }
+  }
+
+  function _beginGlobalLoader(label = 'Processing...', immediate = true) {
+    _loaderCount += 1;
+    const showNow = () => {
+      if (_loaderCount <= 0) return;
+      const overlay = _ensureGlobalLoaderDom();
+      if (!overlay) return;
+      const lbl = document.getElementById('nexusGlobalLoaderText');
+      if (lbl && label) lbl.textContent = label;
+      overlay.classList.add('active');
+    };
+    if (immediate) {
+      if (_loaderDelayTimer) {
+        clearTimeout(_loaderDelayTimer);
+        _loaderDelayTimer = null;
+      }
+      showNow();
+    } else if (!_loaderDelayTimer) {
+      const overlay = (typeof document !== 'undefined') ? document.getElementById('nexusGlobalLoaderOverlay') : null;
+      if (overlay && overlay.classList.contains('active')) {
+        return;
+      }
+      _loaderDelayTimer = setTimeout(() => {
+        _loaderDelayTimer = null;
+        showNow();
+      }, 180);
+    }
+  }
+
+  function _endGlobalLoader() {
+    _loaderCount = Math.max(0, _loaderCount - 1);
+    if (_loaderCount === 0) {
+      if (_loaderDelayTimer) {
+        clearTimeout(_loaderDelayTimer);
+        _loaderDelayTimer = null;
+      }
+      const overlay = (typeof document !== 'undefined') ? document.getElementById('nexusGlobalLoaderOverlay') : null;
+      if (overlay) overlay.classList.remove('active');
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.NexusLoader = {
+      show(label = 'Processing...') { _beginGlobalLoader(label, true); },
+      hide() { _endGlobalLoader(); },
+      forceHide() {
+        _loaderCount = 0;
+        if (_loaderDelayTimer) {
+          clearTimeout(_loaderDelayTimer);
+          _loaderDelayTimer = null;
+        }
+        const overlay = (typeof document !== 'undefined') ? document.getElementById('nexusGlobalLoaderOverlay') : null;
+        if (overlay) overlay.classList.remove('active');
+      }
+    };
+  }
+
   // Global fetch wrapper so even legacy direct fetch('/api/v1/...') calls in home.js
-  // automatically send JWT + HttpOnly cookies + CSRF token and handle 401/403 centrally.
+  // automatically send JWT + HttpOnly cookies + CSRF token, show the activity loader, and handle 401/403 centrally.
   if (_nativeFetch) {
     window.fetch = async function nexusAuthenticatedFetch(input, init = {}) {
       const urlStr = typeof input === 'string' ? input : (input && input.url ? input.url : '');
@@ -241,6 +400,13 @@
       }
 
       const method = ((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+      const useLoader = !_shouldSkipGlobalLoader(urlStr, init);
+      if (useLoader) {
+        const isMutation = method !== 'GET';
+        _beginGlobalLoader(_getLoaderLabelForMethod(method), isMutation);
+      }
+
+      try {
       const headers = new Headers(init && init.headers ? init.headers : (input instanceof Request ? input.headers : undefined));
 
       // Never allow frontend code to spoof role via untrusted header
@@ -290,6 +456,11 @@
       }
 
       return response;
+      } finally {
+        if (useLoader) {
+          _endGlobalLoader();
+        }
+      }
     };
   }
 

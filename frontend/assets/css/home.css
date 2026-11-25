@@ -5200,6 +5200,26 @@ button.has-active-filter {
   letter-spacing: 0.02em;
 }
 
+.worklist-table-full thead tr.company-hr-header th[colspan] {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 12 !important;
+  height: 39px !important;
+  min-height: 39px !important;
+  max-height: 39px !important;
+  box-sizing: border-box !important;
+  border-bottom: none !important;
+  box-shadow: inset 0 -1px 0 #ffffff !important;
+}
+
+.worklist-table-full thead tr.company-hr-header.tr-sub-headers th {
+  position: sticky !important;
+  top: 39px !important;
+  z-index: 11 !important;
+  border-top: none !important;
+  box-shadow: none !important;
+}
+
 /* Icon Color Helpers */
 .icon-green,
 .green-icon {

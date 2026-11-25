@@ -14789,7 +14789,7 @@ function renderCompanyHrTableHead() {
         <th rowspan="2" ${thStyle('20ch')}><span>Filling Due Date</span></th>
         <th rowspan="2" ${thStyle('13ch')}><span>Sealing Amount</span></th>
         <th rowspan="2" ${thStyle('10ch')}><span>Employee</span></th>
-        <th colspan="4" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="4" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: none !important; box-shadow: inset 0 -1px 0 #ffffff !important; height: 39px !important; box-sizing: border-box !important; padding: 8px 6px; white-space: nowrap;">
           <span>Employer</span>
         </th>
         <th rowspan="2" ${thStyle('10ch')}><span>Status</span></th>
@@ -14861,13 +14861,13 @@ function renderCompanyHrTableHead() {
       <tr class="master-view-header company-hr-header">
         <th rowspan="2" ${thStyle('15ch')}><span>From</span></th>
         <th rowspan="2" ${thStyle('15ch')}><span>To</span></th>
-        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: none !important; box-shadow: inset 0 -1px 0 #ffffff !important; height: 39px !important; box-sizing: border-box !important; padding: 8px 6px; white-space: nowrap;">
           <span>CL</span>
         </th>
-        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: none !important; box-shadow: inset 0 -1px 0 #ffffff !important; height: 39px !important; box-sizing: border-box !important; padding: 8px 6px; white-space: nowrap;">
           <span>SL</span>
         </th>
-        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: 1px solid #ffffff !important; padding: 8px 6px; white-space: nowrap;">
+        <th colspan="2" style="text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff !important; border-bottom: none !important; box-shadow: inset 0 -1px 0 #ffffff !important; height: 39px !important; box-sizing: border-box !important; padding: 8px 6px; white-space: nowrap;">
           <span>EL</span>
         </th>
         <th rowspan="2" ${thStyle('20ch')}><span>Sandwich Leave Policy</span></th>

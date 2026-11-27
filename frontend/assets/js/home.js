@@ -11876,12 +11876,11 @@ function applyRoleBasedNavigation() {
   });
 
   if (role === 'Project Manager') {
-    // Exactly 4 items visible for Project Manager in order:
-    // 1. Worklist, 2. Home (Projects), 3. Profile, 4. Sign Out
+    // 1. Worklist, 2. Home (Projects), 3. Sign Out
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '1'; }
     if (navProjects) { navProjects.style.display = 'inline-flex'; navProjects.style.order = '2'; }
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
+    if (navProfile) navProfile.style.display = 'none';
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
@@ -11907,12 +11906,11 @@ function applyRoleBasedNavigation() {
       if (btn) btn.style.order = '';
     });
 
-    // Exactly 5 items visible for Commercial Manager:
-    // 1. Master, 2. Home (Projects), 3. Worklist, 4. Profile, 5. Signout
+    // 1. Master, 2. Home (Projects), 3. Worklist, 4. Signout
     if (navMaster) navMaster.style.display = 'inline-flex';
     if (navProjects) navProjects.style.display = 'inline-flex';
     if (navWorklist) navWorklist.style.display = 'inline-flex';
-    if (navProfile) navProfile.style.display = 'inline-flex';
+    if (navProfile) navProfile.style.display = 'none';
     if (btnSignout) btnSignout.style.display = 'inline-flex';
 
     // Hide Admin-only navigation items
@@ -11933,11 +11931,11 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Warehouse Manager') {
-    // Exactly 4 navigation icons in order: Inventory, Worklist, Profile, Sign Out
+    // Navigation icons in order: Inventory, Worklist, Sign Out
     if (navInventory) { navInventory.style.display = 'inline-flex'; navInventory.style.order = '1'; }
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
+    if (navProfile) navProfile.style.display = 'none';
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
@@ -11958,11 +11956,11 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Purchase Manager') {
-    // Exactly 4 navigation icons in order: Purchase, Worklist, Profile, Sign Out
+    // Navigation icons in order: Purchase, Worklist, Sign Out
     if (navPurchase) { navPurchase.style.display = 'inline-flex'; navPurchase.style.order = '1'; }
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
+    if (navProfile) navProfile.style.display = 'none';
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
@@ -11983,11 +11981,11 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Admin Manager') {
-    // Exactly 4 navigation icons in order: Admin, Worklist, Profile, Sign Out
+    // Navigation icons in order: Admin, Worklist, Sign Out
     if (navAdmin) { navAdmin.style.display = 'inline-flex'; navAdmin.style.order = '1'; }
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
+    if (navProfile) navProfile.style.display = 'none';
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
@@ -12008,11 +12006,11 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Accounts Manager') {
-    // Exactly 4 navigation icons in order: Accounts, Worklist, Profile, Sign Out
+    // Navigation icons in order: Accounts, Worklist, Sign Out
     if (navAccounts) { navAccounts.style.display = 'inline-flex'; navAccounts.style.order = '1'; }
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '2'; }
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '3'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '4'; }
+    if (navProfile) navProfile.style.display = 'none';
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
 
     // Hide unauthorized navigation items
     if (navMaster) navMaster.style.display = 'none';
@@ -12036,20 +12034,21 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else if (role === 'Master') {
-    // Master (Super Admin) role: All 10 navigation items are visible and accessible
-    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh, navProfile, btnSignout].forEach(btn => {
+    // Master (Super Admin) role: All navigation items except Profile are visible and accessible
+    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh, btnSignout].forEach(btn => {
       if (btn) {
         btn.style.display = 'inline-flex';
         btn.style.order = '';
       }
     });
+    if (navProfile) navProfile.style.display = 'none';
   } else if (role === 'MIS' || role === 'MIS Manager') {
     [navMaster, navProjects, navAccounts, navAdmin, navPurchase, navInventory, navInfraWh].forEach(btn => {
       if (btn) btn.style.display = 'none';
     });
     if (navWorklist) { navWorklist.style.display = 'inline-flex'; navWorklist.style.order = '1'; }
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '2'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '3'; }
+    if (navProfile) navProfile.style.display = 'none';
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '2'; }
     const allowedModules = ['worklist', 'profile'];
     if (!allowedModules.includes(currentModule)) {
       currentModule = 'worklist';
@@ -12057,12 +12056,11 @@ function applyRoleBasedNavigation() {
       updateURL();
     }
   } else {
-    // Least-privilege fallback (e.g. Employee): Profile + Sign Out only
-    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh].forEach(btn => {
+    // Least-privilege fallback (e.g. Employee): Sign Out only (Profile icon hidden)
+    [navMaster, navProjects, navAccounts, navAdmin, navWorklist, navPurchase, navInventory, navInfraWh, navProfile].forEach(btn => {
       if (btn) btn.style.display = 'none';
     });
-    if (navProfile) { navProfile.style.display = 'inline-flex'; navProfile.style.order = '1'; }
-    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '2'; }
+    if (btnSignout) { btnSignout.style.display = 'inline-flex'; btnSignout.style.order = '1'; }
     if (currentModule !== 'profile') {
       currentModule = 'profile';
       updateURL();
@@ -58717,13 +58715,13 @@ function setProductInfraFormReadOnly(isReadOnly, isEditMode = false) {
       el.style.color = '#64748b';
       el.style.cursor = 'not-allowed';
     } else {
-      if (editableFieldIds.includes(id)) {
+      if (!isEditMode || editableFieldIds.includes(id)) {
         if (el.tagName === 'SELECT') el.removeAttribute('disabled');
         else el.removeAttribute('readonly');
         el.classList.remove('field-non-editable-dark');
         el.style.backgroundColor = '#ffffff';
         el.style.color = '#1e293b';
-        el.style.cursor = 'auto';
+        el.style.cursor = el.tagName === 'SELECT' ? 'pointer' : 'auto';
       } else {
         if (el.tagName === 'SELECT') el.setAttribute('disabled', 'true');
         else el.setAttribute('readonly', 'true');
@@ -59302,9 +59300,9 @@ function updateCustomerConditionalFields() {
 
     // Hide GST toggle for Projects
     if (rowGstToggle) rowGstToggle.style.setProperty('display', 'none', 'important');
-    // Also hide GST sub-fields
-    if (rowGstType) rowGstType.style.setProperty('display', 'none', 'important');
-    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'none', 'important');
+    // Show GST Type and GST Number directly for Projects
+    if (rowGstType) rowGstType.style.setProperty('display', 'flex', 'important');
+    if (rowGstNumber) rowGstNumber.style.setProperty('display', 'flex', 'important');
 
     // 2. Customer Legal Name & Project Name logic:
     const projName = (document.getElementById('inpCustomerProjectName')?.value || '').trim().toLowerCase();

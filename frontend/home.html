@@ -73,9 +73,9 @@
           <img src="icons/Infra WH.svg?v=20261020" alt="Infra WH" class="nav-icon-img" width="40" height="40">
         </button>
 
-        <!-- 9. Profile Icon -->
+        <!-- 9. Profile Icon (Hidden across all logins) -->
         <button type="button" class="nav-icon-item" id="navBtnProfile" data-module="profile" data-tooltip="Profile"
-          aria-label="Profile">
+          aria-label="Profile" style="display: none;">
           <img src="icons/Profile.svg" alt="Profile" class="nav-icon-img" width="40" height="40">
         </button>
 
@@ -986,20 +986,20 @@
               </div>
             </div>
 
-            <!-- 4. GST Type (Shown when GST is enabled) -->
-            <div class="form-row-group" id="rowCustomerGstType" style="display: none;">
+            <!-- 4. GST Type -->
+            <div class="form-row-group" id="rowCustomerGstType">
               <label class="form-label" for="inpGstType">GST Type</label>
               <div class="form-input-wrap">
                 <select class="form-select-control" id="inpGstType">
                   <option value="SGST" selected>SGST</option>
+                  <option value="CGST">CGST</option>
                   <option value="IGST">IGST</option>
-                  <option value="NA">NA</option>
                 </select>
               </div>
             </div>
 
-            <!-- 5. GST Number with Process badge (Shown when GST is enabled) -->
-            <div class="form-row-group" id="rowCustomerGstNumber" style="display: none;">
+            <!-- 5. GST Number with Process badge -->
+            <div class="form-row-group" id="rowCustomerGstNumber">
               <label class="form-label" for="inpGstNumber">GST Number</label>
               <div class="form-input-wrap with-action-badge">
                 <input type="text" class="form-input-control form-input-highlight" id="inpGstNumber"

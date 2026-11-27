@@ -976,7 +976,9 @@
         return;
       }
   
-      const isGstOn = document.getElementById('inpCustomerGstToggle')?.checked || false;
+      const isGstOn = businessType === 'Projects'
+        ? true
+        : (document.getElementById('inpCustomerGstToggle')?.checked || false);
       const gstType = isGstOn ? (document.getElementById('inpGstType')?.value || "SGST") : "NA";
       const gstNumber = isGstOn ? (document.getElementById('inpGstNumber')?.value?.trim() || "NA") : "NA";
       const panNumber = businessType === 'Projects' ? (document.getElementById('inpPanNumber')?.value?.trim() || "") : "";

@@ -56,13 +56,6 @@
     }
   }
   
-  let currentIndusProductSubpage = 'materials';
-  let selectedProductName = 'Product Name';
-  
-  let indusProductMaterialsData = [];
-  let indusProductExpensesData = [];
-  let indusProductInfraData = [];
-  
   function getActiveGbpaCustomerName() {
     if (window.currentCustomerName && String(window.currentCustomerName).trim()) {
       return String(window.currentCustomerName).trim();
@@ -665,18 +658,18 @@
   
             if (!expenseHead) {
               if (typeof showSvgErrorPopup === 'function') {
-                showSvgErrorPopup('Please enter Expense Head.', 'Validation Error');
+                showSvgErrorPopup('Please select Expense Head.', 'Validation Error');
               } else {
-                showToast('Please enter Expense Head');
+                showToast('Please select Expense Head');
               }
               return;
             }
   
             if (!expenseCategory) {
               if (typeof showSvgErrorPopup === 'function') {
-                showSvgErrorPopup('Please enter Expense Category.', 'Validation Error');
+                showSvgErrorPopup('Please select Expense Type.', 'Validation Error');
               } else {
-                showToast('Please enter Expense Category');
+                showToast('Please select Expense Type');
               }
               return;
             }

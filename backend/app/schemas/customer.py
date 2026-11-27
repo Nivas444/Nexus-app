@@ -19,7 +19,7 @@ class CustomerBase(BaseModel):
     legal_name: Optional[str] = Field(None, description="Unique legal name")
     customer_code: Optional[str] = Field(None, description="Unique customer code / ID")
     business_type: Optional[str] = Field("Projects", description="Business Type: Projects / Supply")
-    gst_type: Optional[str] = Field("SGST", description="GST Type: SGST / IGST / NA")
+    gst_type: Optional[str] = Field("SGST", description="GST Type: SGST / CGST / IGST / NA")
     gst_number: Optional[str] = Field(None, description="GST Number")
     pan_number: Optional[str] = Field(None, description="PAN Number")
     invoice_type: Optional[str] = Field("B2B", description="Invoice Type: B2B / B2C / Cash")

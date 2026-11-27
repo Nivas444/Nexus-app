@@ -3416,7 +3416,13 @@ td.col-master-vendor-status {
 #addVehicleDocCard .side-form-close-btn:hover,
 #btnCloseAddVehicleDocCard:hover,
 #vehicleDocsSidePanel .side-form-close-btn:hover,
-#btnCloseVehicleDocsPanel:hover {
+#btnCloseVehicleDocsPanel:hover,
+#addMaterialsCard .side-form-close-btn:hover,
+#btnCloseMaterialsForm:hover,
+#addProductExpenseCard .side-form-close-btn:hover,
+#btnCloseProductExpenseForm:hover,
+#addProductInfraCard .side-form-close-btn:hover,
+#btnCloseProductInfraForm:hover {
   transform: none !important;
   color: #dc2626 !important;
 }

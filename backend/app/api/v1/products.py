@@ -116,4 +116,6 @@ async def bulk_upload_products(
     """
     content = await file.read()
     service = ProductService(db)
-    return service.process_bulk_upload(content, file.filename or "")
+    result = service.process_bulk_upload(content, file.filename or "")
+    reference_data_cache.invalidate_prefix("master:products:")
+    return result

@@ -58139,10 +58139,23 @@ window.calculateGbpaBudgetAmount = calculateGbpaBudgetAmount;
 
 function _populateSelectUnique(selectEl, values, placeholder, selectedVal) {
   if (!selectEl) return;
-  const uniq = Array.from(new Set(values.map(v => String(v || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
-  if (selectedVal && !uniq.includes(selectedVal)) uniq.unshift(selectedVal);
+  const seen = new Map();
+  values.forEach(v => {
+    const cleaned = String(v || '').trim().replace(/\s+/g, ' ');
+    if (!cleaned) return;
+    const key = cleaned.toLowerCase();
+    if (!seen.has(key)) seen.set(key, cleaned);
+  });
+  const uniq = Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+  const cleanSelected = String(selectedVal || '').trim().replace(/\s+/g, ' ');
+  if (cleanSelected && !seen.has(cleanSelected.toLowerCase())) {
+    uniq.unshift(cleanSelected);
+  }
   selectEl.innerHTML = `<option value="">${placeholder}</option>` + uniq.map(v => `<option value="${v.replace(/"/g, '&quot;')}">${v}</option>`).join('');
-  if (selectedVal) selectEl.value = selectedVal;
+  if (cleanSelected) {
+    const matched = seen.get(cleanSelected.toLowerCase()) || cleanSelected;
+    selectEl.value = matched;
+  }
 }
 
 async function populateGbpaMaterialDropdowns(selectedHead = '', selectedCat = '') {
@@ -58162,7 +58175,7 @@ async function populateGbpaMaterialDropdowns(selectedHead = '', selectedCat = ''
 }
 window.populateGbpaMaterialDropdowns = populateGbpaMaterialDropdowns;
 
-async function populateGbpaExpenseDropdowns(selectedHead = '', selectedType = '') {
+async function populateGbpaExpenseDropdowns(selectedHead = '', selectedType = '', selectedDesc = '') {
   let expenses = (typeof masterExpensesData !== 'undefined' && Array.isArray(masterExpensesData)) ? masterExpensesData : (window.masterExpensesData || []);
   if ((!expenses || expenses.length === 0) && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
     try {
@@ -58173,8 +58186,10 @@ async function populateGbpaExpenseDropdowns(selectedHead = '', selectedType = ''
   }
   const heads = expenses.map(e => e.expense_head || e.expenseHead);
   const types = expenses.map(e => e.expense_sub_category || e.expenseSubCategory || e.expense_description);
+  const descs = expenses.map(e => e.expense_name || e.expenseName || e.expense_description || e.expenseDescription);
   _populateSelectUnique(document.getElementById('inpProdExpenseHead'), heads, 'Select Expense Head', selectedHead);
   _populateSelectUnique(document.getElementById('inpProdExpenseCategory'), types, 'Select Expense Type', selectedType);
+  _populateSelectUnique(document.getElementById('inpProdExpenseDescription'), descs, 'Select Expense Description', selectedDesc);
 }
 window.populateGbpaExpenseDropdowns = populateGbpaExpenseDropdowns;
 
@@ -58594,8 +58609,11 @@ window.openViewGbpaExpenseCard = async function(expId) {
   const btnSaveWrap = document.querySelector('#frmAddProductExpense .form-submit-inside-wrap');
   if (btnSaveWrap) btnSaveWrap.style.display = 'none';
 
-  await populateGbpaExpenseDropdowns(exp.expense_head || exp.expenseHead || '', exp.expense_category || exp.expenseCategory || '');
-  if (document.getElementById('inpProdExpenseDescription')) document.getElementById('inpProdExpenseDescription').value = exp.expense_description || exp.expenseDescription || '';
+  await populateGbpaExpenseDropdowns(
+    exp.expense_head || exp.expenseHead || '',
+    exp.expense_category || exp.expenseCategory || '',
+    exp.expense_description || exp.expenseDescription || ''
+  );
   if (document.getElementById('inpProdExpenseType')) document.getElementById('inpProdExpenseType').value = exp.expense_type || exp.expenseType || exp.type || 'Parent';
 
   if (document.getElementById('inpProdExpenseStatusToggle')) {
@@ -58854,9 +58872,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         console.error('Failed to update GBPA infrastructure:', err);
         const isConflict = err.isConflict || (err.statusCode === 409) || (err.message && err.message.toLowerCase().includes('already exists'));
-        const errMsg = isConflict
-          ? 'This Infra Code already exists. Please use a unique Infra Code.'
-          : (err.detail || err.message || 'Failed to update GBPA infrastructure.');
+        const errMsg = err.detail || err.message || (isConflict
+          ? 'This Infra record already exists.'
+          : 'Failed to update GBPA infrastructure.');
         if (typeof showSvgErrorPopup === 'function') {
           showSvgErrorPopup(errMsg, isConflict ? 'Validation Error' : 'Database Error');
         } else {
@@ -59897,7 +59915,7 @@ function getCurrentBulkPageLabel() {
   if (typeof currentModule !== 'undefined' && (currentModule === 'indus' || currentModule === 'indus_towers' || currentModule === 'customer')) {
     if (currentIndusSubpage === 'product_details') {
       if (currentIndusProductSubpage === 'materials') return 'Materials';
-      if (currentIndusProductSubpage === 'expenses') return 'Expenses';
+      if (currentIndusProductSubpage === 'expenses') return 'GBPA Expenses';
     }
     if (currentIndusSubpage === 'products') return 'GBPA';
     if (currentIndusSubpage === 'infra') return 'Infra';
@@ -63617,11 +63635,41 @@ window.handleBulkCsvFileSelected = async function(input) {
     }
 
     const triggerBtn = document.getElementById('btnTriggerBulkCsvUpload');
+    const loaderOverlay = document.getElementById('bulkUploadLoaderOverlay');
+    const loaderText = document.getElementById('lblBulkUploadLoaderText');
     if (triggerBtn) {
       triggerBtn.style.pointerEvents = 'none';
       triggerBtn.style.opacity = '0.6';
     }
     isBulkUploadingActive = true;
+
+    // Show loader spinner only if extraction/DB insert takes >250ms (avoids unnecessary flash on fast uploads)
+    let bulkLoaderTimer = setTimeout(() => {
+      if (loaderOverlay && isBulkUploadingActive) {
+        if (loaderText) loaderText.textContent = `Extracting & saving ${currentBulkUploadPageName || 'records'}...`;
+        loaderOverlay.style.display = 'flex';
+      }
+    }, 250);
+
+    const hideBulkUploadLoader = () => {
+      if (bulkLoaderTimer) {
+        clearTimeout(bulkLoaderTimer);
+        bulkLoaderTimer = null;
+      }
+      if (loaderOverlay) loaderOverlay.style.display = 'none';
+      if (triggerBtn) {
+        triggerBtn.style.pointerEvents = 'auto';
+        triggerBtn.style.opacity = '1';
+      }
+      input.value = '';
+      isBulkUploadingActive = false;
+    };
+
+    const persistBulkHistory = () => {
+      try {
+        localStorage.setItem('nexus_bulk_upload_history', JSON.stringify(bulkUploadHistoryData));
+      } catch (e) {}
+    };
 
     const now = new Date();
     const pad = (n) => String(n).padStart(2, '0');
@@ -63635,20 +63683,32 @@ window.handleBulkCsvFileSelected = async function(input) {
 
     try {
       const pageKey = (currentBulkUploadPageName || '').trim().toLowerCase();
-      showToast(`Uploading "${file.name}" to PostgreSQL for ${currentBulkUploadPageName}...`);
+      const isIndusProductExpenses = (pageKey.includes('gbpa') && pageKey.includes('expense')) ||
+        (pageKey === 'expenses' && typeof currentModule !== 'undefined' && (currentModule === 'indus_towers' || currentModule === 'indus') && typeof currentIndusSubpage !== 'undefined' && currentIndusSubpage === 'product_details');
+      const isIndusProductMaterials = (pageKey.includes('gbpa') && pageKey.includes('material')) || pageKey.includes('material');
+
+      showToast(`Uploading "${file.name}" for ${currentBulkUploadPageName}...`);
 
       let result = null;
       if (pageKey.includes('employee') && typeof NexusApi !== 'undefined' && NexusApi.employees) {
         result = await NexusApi.employees.bulkUpload(file);
-        if (typeof fetchMasterDataset === 'function') {
-          await fetchMasterDataset(true);
-        } else if (typeof loadMasterEmployeesFromApi === 'function') {
+        if (typeof loadMasterEmployeesFromApi === 'function') {
           await loadMasterEmployeesFromApi();
         }
-      } else if (pageKey.includes('product') && typeof NexusApi !== 'undefined' && NexusApi.products) {
+      } else if (pageKey.includes('product') && !pageKey.includes('gbpa') && typeof NexusApi !== 'undefined' && NexusApi.products) {
         result = await NexusApi.products.bulkUpload(file);
         if (typeof loadMasterProductsFromApi === 'function') {
           await loadMasterProductsFromApi();
+        }
+      } else if (isIndusProductMaterials && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
+        result = await NexusApi.indusGbpaMaterials.bulkUpload(file);
+        if (typeof fetchGbpaMaterials === 'function') {
+          await fetchGbpaMaterials(true);
+        }
+      } else if (isIndusProductExpenses && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
+        result = await NexusApi.indusGbpaExpenses.bulkUpload(file);
+        if (typeof fetchGbpaExpenses === 'function') {
+          await fetchGbpaExpenses(true);
         }
       } else if ((pageKey === 'expense' || pageKey === 'expenses') && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
         result = await NexusApi.expenses.bulkUpload(file);
@@ -63657,33 +63717,18 @@ window.handleBulkCsvFileSelected = async function(input) {
         }
       } else if (pageKey.includes('site') && typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
         result = await NexusApi.indusSites.bulkUpload(file);
-        if (typeof loadIndusSitesFromApi === 'function') {
-          await loadIndusSitesFromApi();
-        }
-      } else if (pageKey.includes('gbpa') && (pageKey.includes('material') || pageKey.includes('materials')) && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
-        result = await NexusApi.indusGbpaMaterials.bulkUpload(file);
-        if (typeof loadIndusGbpaMaterialsFromApi === 'function') {
-          await loadIndusGbpaMaterialsFromApi();
-        }
-      } else if (pageKey.includes('gbpa') && pageKey.includes('expense') && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
-        result = await NexusApi.indusGbpaExpenses.bulkUpload(file);
-        if (typeof loadIndusGbpaExpensesFromApi === 'function') {
-          await loadIndusGbpaExpensesFromApi();
+        if (typeof fetchIndusSites === 'function') {
+          await fetchIndusSites(true);
         }
       } else if (pageKey.includes('gbpa') && typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
         result = await NexusApi.indusGbpa.bulkUpload(file);
-        if (typeof loadIndusGbpaFromApi === 'function') {
-          await loadIndusGbpaFromApi();
+        if (typeof fetchIndusGbpa === 'function') {
+          await fetchIndusGbpa(true);
         }
       } else if (pageKey.includes('infra') && typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
         result = await NexusApi.indusInfra.bulkUpload(file);
-        if (typeof loadIndusInfraFromApi === 'function') {
-          await loadIndusInfraFromApi();
-        }
-      } else if (pageKey.includes('material') && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
-        result = await NexusApi.indusGbpaMaterials.bulkUpload(file);
-        if (typeof loadIndusGbpaMaterialsFromApi === 'function') {
-          await loadIndusGbpaMaterialsFromApi();
+        if (typeof fetchIndusInfra === 'function') {
+          await fetchIndusInfra(true);
         }
       } else if (pageKey.includes('po amend') || pageKey.includes('po amendment') || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'po_amend')) {
         if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poAmend && NexusApi.commercial.poAmend.uploadPoAmend) {
@@ -63767,6 +63812,7 @@ window.handleBulkCsvFileSelected = async function(input) {
       const failedLog = {
         id: `blk-${Date.now()}`,
         page: currentBulkUploadPageName,
+        fileName: file.name,
         started: startedStr,
         completed: completedStr,
         totalCount: String(total),
@@ -63777,6 +63823,8 @@ window.handleBulkCsvFileSelected = async function(input) {
       };
 
       bulkUploadHistoryData.unshift(failedLog);
+      persistBulkHistory();
+      hideBulkUploadLoader();
       closeAddBulkUploadModal();
       renderBulkUploadTable();
 
@@ -63784,21 +63832,16 @@ window.handleBulkCsvFileSelected = async function(input) {
       if (typeof showSvgErrorPopup === 'function') {
         showSvgErrorPopup(errMsg, 'Bulk Upload Error');
       }
-      input.value = '';
-      if (triggerBtn) {
-        triggerBtn.style.pointerEvents = 'auto';
-        triggerBtn.style.opacity = '1';
-      }
-      isBulkUploadingActive = false;
       return;
     }
 
-    const completedDate = new Date(Date.now() + 1000);
+    const completedDate = new Date();
     const completedStr = `${pad(completedDate.getDate())}/${pad(completedDate.getMonth() + 1)}/${completedDate.getFullYear()} ${pad(completedDate.getHours())}:${pad(completedDate.getMinutes())}:${pad(completedDate.getSeconds())}`;
 
     const newLog = {
       id: `blk-${Date.now()}`,
       page: currentBulkUploadPageName,
+      fileName: file.name,
       started: startedStr,
       completed: completedStr,
       totalCount: String(total),
@@ -63809,13 +63852,8 @@ window.handleBulkCsvFileSelected = async function(input) {
     };
 
     bulkUploadHistoryData.unshift(newLog);
-
-    input.value = '';
-    if (triggerBtn) {
-      triggerBtn.style.pointerEvents = 'auto';
-      triggerBtn.style.opacity = '1';
-    }
-    isBulkUploadingActive = false;
+    persistBulkHistory();
+    hideBulkUploadLoader();
 
     closeAddBulkUploadModal();
     renderBulkUploadTable();

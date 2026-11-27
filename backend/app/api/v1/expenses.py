@@ -129,4 +129,6 @@ async def bulk_upload_expenses(
     """
     content = await file.read()
     service = ExpenseService(db)
-    return service.process_bulk_upload(content, file.filename or "")
+    result = service.process_bulk_upload(content, file.filename or "")
+    reference_data_cache.invalidate_prefix("master:expenses:")
+    return result

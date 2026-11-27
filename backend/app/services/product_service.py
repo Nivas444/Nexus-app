@@ -327,80 +327,23 @@ class ProductService:
 
     def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
         """Parses Excel or CSV content and bulk-inserts records into company_products."""
-        if not file_content:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Uploaded file is empty."
-            )
-
-        rows_dict_list: List[Dict[str, Any]] = []
-        raw_headers: List[str] = []
-        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
-
-        if is_excel:
-            try:
-                import openpyxl
-                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
-                sheet = wb.active
-                if sheet is None:
-                    raise ValueError("Excel file contains no active sheet.")
-                
-                for col in range(1, sheet.max_column + 1):
-                    val = sheet.cell(1, col).value
-                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
-
-                for row_idx in range(2, sheet.max_row + 1):
-                    row_data = {}
-                    has_data = False
-                    for col_idx, header in enumerate(raw_headers, start=1):
-                        cell_val = sheet.cell(row_idx, col_idx).value
-                        if cell_val is not None and str(cell_val).strip():
-                            has_data = True
-                        row_data[header] = cell_val
-                    if has_data:
-                        rows_dict_list.append(row_data)
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
-                )
-        else:
-            try:
-                try:
-                    decoded = file_content.decode("utf-8-sig")
-                except UnicodeDecodeError:
-                    decoded = file_content.decode("latin-1")
-                
-                reader = csv.DictReader(io.StringIO(decoded))
-                raw_headers = reader.fieldnames or []
-                for r in reader:
-                    if any(v and str(v).strip() for v in r.values()):
-                        rows_dict_list.append(r)
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Failed to read CSV file: {str(e)}"
-                )
-
-        # Template Header Validation
         import re
+        from app.core.bulk_upload_utils import extract_bulk_upload_rows
+
+        PRODUCTS_TEMPLATE_HEADERS = [
+            "Material Head", "Material Categry", "Material Code", "Material Description",
+            "Uom", "Sale Uom", "GST Rate", "UCF", "MSQ", "MOQ", "Margin", "OH", "Status",
+        ]
+
+        raw_headers, rows_dict_list = extract_bulk_upload_rows(
+            file_content=file_content,
+            filename=filename,
+            template_label="Products",
+            expected_header_sets=[PRODUCTS_TEMPLATE_HEADERS],
+        )
+
         def norm(h: str) -> str:
             return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
-
-        norm_headers = [norm(h) for h in raw_headers if h is not None]
-        has_material_or_product = any("material" in nh or "product" in nh for nh in norm_headers)
-
-        if not has_material_or_product:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid Products Upload Template. Please use the official Products Upload Template."
-            )
-
-        if not rows_dict_list:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No product data rows found in uploaded file."
-            )
 
         new_records: List[CompanyProduct] = []
         row_errors: List[str] = []

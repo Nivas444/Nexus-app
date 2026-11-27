@@ -605,6 +605,28 @@
               return;
             }
 
+            if (!infraDescription) {
+              if (typeof showSvgErrorPopup === 'function') {
+                showSvgErrorPopup('Please select Infra Description.', 'Validation Error');
+              } else {
+                showToast('Please select Infra Description');
+              }
+              return;
+            }
+
+            const normDesc = infraDescription.trim().replace(/\s+/g, ' ').toLowerCase();
+            const existingDupInfra = (Array.isArray(window.indusProductInfraData) ? window.indusProductInfraData : []).find(i =>
+              String(i.infra_description || i.infraDescription || '').trim().replace(/\s+/g, ' ').toLowerCase() === normDesc
+            );
+            if (existingDupInfra) {
+              if (typeof showSvgErrorPopup === 'function') {
+                showSvgErrorPopup('This Infra Description already exists. Please select a unique Infra Description.', 'Duplicate Error');
+              } else {
+                showToast('This Infra Description already exists.');
+              }
+              return;
+            }
+
             const matchedInfra = (Array.isArray(window.indusInfraData) ? window.indusInfraData : []).find(i =>
               (i.infra_category || i.infraCategory || '') === infraCategory &&
               (!infraDescription || (i.infra_description || i.infraDescription || '') === infraDescription)
@@ -635,11 +657,11 @@
             } catch (err) {
               console.error('Failed to create GBPA infrastructure:', err);
               const isConflict = err.isConflict || (err.statusCode === 409) || (err.message && err.message.toLowerCase().includes('already exists'));
-              const errMsg = isConflict
-                ? 'This Infra Code already exists. Please use a unique Infra Code.'
-                : (err.detail || err.message || 'Failed to save GBPA infrastructure.');
+              const errMsg = err.detail || err.message || (isConflict
+                ? 'This Infra record already exists.'
+                : 'Failed to save GBPA infrastructure.');
               if (typeof showSvgErrorPopup === 'function') {
-                showSvgErrorPopup(errMsg, isConflict ? 'Validation Error' : 'Database Error');
+                showSvgErrorPopup(errMsg, isConflict ? 'Duplicate Error' : 'Database Error');
               } else {
                 showToast(errMsg);
               }

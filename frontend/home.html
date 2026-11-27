@@ -3337,7 +3337,9 @@
             <div class="form-row-group">
               <label class="form-label" for="inpProdExpenseDescription">Expense Description</label>
               <div class="form-input-wrap">
-                <input type="text" class="form-input-control" id="inpProdExpenseDescription" placeholder="">
+                <select class="form-select-control" id="inpProdExpenseDescription">
+                  <option value="">Select Expense Description</option>
+                </select>
               </div>
             </div>
 
@@ -9368,12 +9370,18 @@
             </div>
 
             <!-- Centered CSV Upload Area Below all of these -->
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; margin-top: 6px;">
+            <div style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; margin-top: 6px;">
               <input type="file" id="inpBulkCsvFilePicker" accept=".csv, .xlsx, .xls, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;" onchange="handleBulkCsvFileSelected(this)">
               <button type="button" class="bulk-upload-dropzone-btn" id="btnTriggerBulkCsvUpload" onclick="document.getElementById('inpBulkCsvFilePicker').click();" title="Upload CSV / Excel" style="background: transparent; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 18px 30px; transition: transform 0.2s ease;">
                 <img src="icons/CSV upload.svg" alt="CSV Upload" width="60" height="60" style="width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0, 203, 160, 0.25)); transition: transform 0.2s ease;">
                 <span id="lblBulkCsvFileName" style="font-size: 0.95rem; font-weight: 600; color: #475569;">Click to Upload CSV / Excel</span>
               </button>
+
+              <!-- Delayed Loader Spinner (shown only when extraction/upload takes noticeable time) -->
+              <div id="bulkUploadLoaderOverlay" style="display: none; position: absolute; inset: 0; background: rgba(255, 255, 255, 0.92); border-radius: 10px; z-index: 15; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px;">
+                <div class="bulk-upload-spinner-ring" aria-label="Loading"></div>
+                <span id="lblBulkUploadLoaderText" style="font-size: 0.9rem; font-weight: 600; color: #0f172a;">Extracting & saving records...</span>
+              </div>
 
               <!-- Submit button below CSV upload icon as centered (for Receivable bulk upload) -->
               <div id="wrapBulkUploadReceivableSubmit" style="display: none; justify-content: center; align-items: center; width: 100%; margin-top: 14px;">

@@ -213,4 +213,6 @@ async def bulk_upload_employees(
     """
     content = await file.read()
     service = EmployeeService(db)
-    return service.process_bulk_upload(content, file.filename or "")
+    result = service.process_bulk_upload(content, file.filename or "")
+    reference_data_cache.invalidate_prefix("master:employees:")
+    return result

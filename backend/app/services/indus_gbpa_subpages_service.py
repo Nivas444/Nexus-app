@@ -242,83 +242,23 @@ class GbpaMaterialsService:
 
     def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
         """Parses Excel or CSV content and bulk-inserts records into indus_customer_gpba_materials."""
-        import io
-        import csv
         import re
+        from app.core.bulk_upload_utils import extract_bulk_upload_rows
 
-        if not file_content:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Uploaded file is empty."
-            )
+        GBPA_MATERIALS_HEADERS = [
+            "Customer", "Item Code", "Material Head", "Material Categry",
+            "Material Type", "Material Code", "Material Description",
+        ]
 
-        rows_dict_list = []
-        raw_headers = []
-        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
-
-        if is_excel:
-            try:
-                import openpyxl
-                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
-                sheet = wb.active
-                if sheet is None:
-                    raise ValueError("Excel file contains no active sheet.")
-                
-                for col in range(1, sheet.max_column + 1):
-                    val = sheet.cell(1, col).value
-                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
-
-                for row_idx in range(2, sheet.max_row + 1):
-                    row_data = {}
-                    has_data = False
-                    for col_idx, header in enumerate(raw_headers, start=1):
-                        cell_val = sheet.cell(row_idx, col_idx).value
-                        if cell_val is not None and str(cell_val).strip():
-                            has_data = True
-                        row_data[header] = cell_val
-                    if has_data:
-                        rows_dict_list.append(row_data)
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
-                )
-        else:
-            try:
-                try:
-                    decoded = file_content.decode("utf-8-sig")
-                except UnicodeDecodeError:
-                    decoded = file_content.decode("latin-1")
-                
-                reader = csv.DictReader(io.StringIO(decoded))
-                raw_headers = reader.fieldnames or []
-                for r in reader:
-                    if any(v and str(v).strip() for v in r.values()):
-                        rows_dict_list.append(r)
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Failed to read CSV file: {str(e)}"
-                )
+        raw_headers, rows_dict_list = extract_bulk_upload_rows(
+            file_content=file_content,
+            filename=filename,
+            template_label="GBPA Materials",
+            expected_header_sets=[GBPA_MATERIALS_HEADERS],
+        )
 
         def norm(h: str) -> str:
             return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
-
-        norm_headers = [norm(h) for h in raw_headers if h is not None]
-        # Must have material head/code and material category/type
-        has_mat_structure = any("materialhead" in nh or "materialcode" in nh or "material" in nh for nh in norm_headers) and any("materialcategry" in nh or "category" in nh or "materialtype" in nh or "type" in nh for nh in norm_headers)
-
-        if not has_mat_structure:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid GBPA Materials Upload Template. Please use the official GBPA Materials Upload Template."
-            )
-
-        if not rows_dict_list:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No GBPA Material data rows found in uploaded file."
-            )
 
         new_records = []
         row_errors = []
@@ -563,83 +503,23 @@ class GbpaExpensesService:
 
     def process_bulk_upload(self, file_content: bytes, filename: str = "") -> Dict[str, Any]:
         """Parses Excel or CSV content and bulk-inserts records into indus_customer_gbpa_expenses."""
-        import io
-        import csv
         import re
+        from app.core.bulk_upload_utils import extract_bulk_upload_rows
 
-        if not file_content:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Uploaded file is empty."
-            )
+        GBPA_EXPENSES_HEADERS = [
+            "Customer", "Item Code", "Expense Head", "Expense Categry",
+            "Expense Type", "Expense Code", "Expense Description",
+        ]
 
-        rows_dict_list = []
-        raw_headers = []
-        is_excel = filename.lower().endswith((".xlsx", ".xls")) or file_content.startswith(b"PK\x03\x04")
-
-        if is_excel:
-            try:
-                import openpyxl
-                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
-                sheet = wb.active
-                if sheet is None:
-                    raise ValueError("Excel file contains no active sheet.")
-                
-                for col in range(1, sheet.max_column + 1):
-                    val = sheet.cell(1, col).value
-                    raw_headers.append(str(val).strip() if val is not None else f"col_{col}")
-
-                for row_idx in range(2, sheet.max_row + 1):
-                    row_data = {}
-                    has_data = False
-                    for col_idx, header in enumerate(raw_headers, start=1):
-                        cell_val = sheet.cell(row_idx, col_idx).value
-                        if cell_val is not None and str(cell_val).strip():
-                            has_data = True
-                        row_data[header] = cell_val
-                    if has_data:
-                        rows_dict_list.append(row_data)
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid Excel file or corrupted workbook: {str(e)}"
-                )
-        else:
-            try:
-                try:
-                    decoded = file_content.decode("utf-8-sig")
-                except UnicodeDecodeError:
-                    decoded = file_content.decode("latin-1")
-                
-                reader = csv.DictReader(io.StringIO(decoded))
-                raw_headers = reader.fieldnames or []
-                for r in reader:
-                    if any(v and str(v).strip() for v in r.values()):
-                        rows_dict_list.append(r)
-            except Exception as e:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Failed to read CSV file: {str(e)}"
-                )
+        raw_headers, rows_dict_list = extract_bulk_upload_rows(
+            file_content=file_content,
+            filename=filename,
+            template_label="GBPA Expenses",
+            expected_header_sets=[GBPA_EXPENSES_HEADERS],
+        )
 
         def norm(h: str) -> str:
             return re.sub(r'[^a-zA-Z0-9]', '', str(h)).lower()
-
-        norm_headers = [norm(h) for h in raw_headers if h is not None]
-        # Must have expense head/code and expense category/type
-        has_exp_structure = any("expensehead" in nh or "expensecode" in nh or "expense" in nh for nh in norm_headers) and any("expensecategry" in nh or "category" in nh or "expensetype" in nh or "type" in nh for nh in norm_headers)
-
-        if not has_exp_structure:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid GBPA Expenses Upload Template. Please use the official GBPA Expenses Upload Template."
-            )
-
-        if not rows_dict_list:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No GBPA Expense data rows found in uploaded file."
-            )
 
         new_records = []
         row_errors = []
@@ -815,6 +695,20 @@ class GbpaInfraService:
         inf_desc = (payload.infra_description or payload.infraDescription or "").strip()
         inf_type = (payload.type or payload.infra_type or "Parent").strip()
 
+        # Enforce unique Infra Description (case-insensitive, whitespace-normalized)
+        if inf_desc:
+            from sqlalchemy import func
+            norm_desc = " ".join(inf_desc.split()).lower()
+            existing_descs = self.db.query(IndusCustomerGbpaInfra).filter(
+                func.lower(func.trim(IndusCustomerGbpaInfra.customer_name)) == customer_name.strip().lower()
+            ).all()
+            for row in existing_descs:
+                if row.infra_description and " ".join(row.infra_description.split()).lower() == norm_desc:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="This Infra Description already exists. Please select a unique Infra Description."
+                    )
+
         data = {
             "company_name": payload.company_name or "Nexus",
             "customer_name": customer_name,
@@ -881,7 +775,22 @@ class GbpaInfraService:
 
         inf_desc = payload.infra_description or payload.infraDescription
         if inf_desc is not None:
-            update_dict["infra_description"] = inf_desc.strip() if inf_desc else None
+            inf_desc_clean = inf_desc.strip()
+            if inf_desc_clean:
+                from sqlalchemy import func
+                target_cust = update_dict.get("customer_name") or item.customer_name or "Indus Tower Ltd"
+                norm_desc = " ".join(inf_desc_clean.split()).lower()
+                existing_descs = self.db.query(IndusCustomerGbpaInfra).filter(
+                    IndusCustomerGbpaInfra.item_infrastructure_id != infra_id,
+                    func.lower(func.trim(IndusCustomerGbpaInfra.customer_name)) == target_cust.strip().lower()
+                ).all()
+                for row in existing_descs:
+                    if row.infra_description and " ".join(row.infra_description.split()).lower() == norm_desc:
+                        raise HTTPException(
+                            status_code=status.HTTP_409_CONFLICT,
+                            detail="This Infra Description already exists. Please select a unique Infra Description."
+                        )
+            update_dict["infra_description"] = inf_desc_clean if inf_desc_clean else None
 
         inf_type = payload.type or payload.infra_type
         if inf_type is not None:

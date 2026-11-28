@@ -1371,6 +1371,16 @@
       },
 
       /**
+       * Update contact
+       */
+      async updateContact(contactId, payload) {
+        return await request(`/customer-contacts/${contactId}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
        * Delete contact
        */
       async deleteContact(contactId) {
@@ -1420,6 +1430,16 @@
         }
         return await request('/customer-locations', {
           method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      },
+
+      /**
+       * Update office location
+       */
+      async updateLocation(officeId, payload) {
+        return await request(`/customer-locations/${officeId}`, {
+          method: 'PUT',
           body: JSON.stringify(payload)
         });
       },

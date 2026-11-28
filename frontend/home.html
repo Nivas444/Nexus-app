@@ -15489,6 +15489,12 @@
               <button type="button" class="side-top-icon-btn" id="btnTelecomDetailsEditToggle" onclick="toggleTelecomDetailsEdit()" title="Edit Info" style="background: none; border: none; cursor: pointer; padding: 2px;">
                 <img src="icons/Edit.svg" id="imgTelecomDetailsEditIcon" alt="Edit" width="24" height="24">
               </button>
+              <button type="button" class="side-top-icon-btn" id="btnTelecomCustomerLocation" onclick="openCustomerLocationModal('telecomDetailsCard')" title="Office Locations" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Location.svg" alt="Location" width="24" height="24">
+              </button>
+              <button type="button" class="side-top-icon-btn" id="btnTelecomCustomerContact" onclick="openCustomerContactModal('telecomDetailsCard')" title="Contact Details" style="background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/mail-phone.svg" alt="Contact Details" class="blue-mail-phone-icon" width="24" height="24">
+              </button>
               <button type="button" class="side-form-close-btn" id="btnCloseTelecomDetailsCard" onclick="closeTelecomDetailsModal()" aria-label="Close" style="color: #ef4444; font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; background: transparent; border: none; padding: 0 4px;">&times;</button>
             </div>
           </div>
@@ -15597,6 +15603,10 @@
               Office Location
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="side-top-icon-btn" id="btnCustomerLocationEditToggle" onclick="toggleCustomerLocationEdit()" title="Edit Office Locations"
+                style="display: none; background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Edit.svg" id="imgCustomerLocationEditIcon" alt="Edit" width="24" height="24">
+              </button>
               <button type="button" class="side-top-icon-btn" id="btnCustomerLocationAddRow" onclick="openCustomerLocationAddForm()" title="Add Office Location"
                 style="background: none; border: none; cursor: pointer; padding: 2px;">
                 <img src="icons/Add.svg" alt="Add" width="24" height="24">
@@ -15699,6 +15709,10 @@
               Contact Details
             </div>
             <div class="side-header-top-icons" style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+              <button type="button" class="side-top-icon-btn" id="btnCustomerContactEditToggle" onclick="toggleCustomerContactEdit()" title="Edit Contact Details"
+                style="display: none; background: none; border: none; cursor: pointer; padding: 2px;">
+                <img src="icons/Edit.svg" id="imgCustomerContactEditIcon" alt="Edit" width="24" height="24">
+              </button>
               <button type="button" class="side-top-icon-btn" id="btnCustomerContactAddRow" onclick="openCustomerContactAddForm()" title="Add Contact"
                 style="background: none; border: none; cursor: pointer; padding: 2px;">
                 <img src="icons/Add.svg" alt="Add" width="24" height="24">
@@ -17390,12 +17404,12 @@
     </div>
   </div>
 
-  <script src="assets/js/api.js?v=20261122_01"></script>
-  <script src="assets/js/module-loader.js?v=20261128_01"></script>
+  <script src="assets/js/api.js?v=20261128_02"></script>
+  <script src="assets/js/module-loader.js?v=20261128_02"></script>
   <script src="assets/js/utils/toast.js?v=20261012_01"></script>
   <script src="assets/js/utils/formatters.js?v=20261012_01"></script>
   <script src="assets/js/components/excel-filters.js?v=20261012_01"></script>
-  <script src="assets/js/home.js?v=20261128_01"></script>
+  <script src="assets/js/home.js?v=20261128_02"></script>
 </body>
 
 </html>

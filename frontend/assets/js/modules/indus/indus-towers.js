@@ -299,14 +299,29 @@
   }
   window.fetchIndusEsh = fetchIndusEsh;
   
-  function openIndusTowersPage() {
+  function openIndusTowersPage(customerId, customerName) {
+    if (customerName && String(customerName).trim()) {
+      window.currentCustomerName = String(customerName).trim();
+      try { sessionStorage.setItem('nexus_active_customer_name', window.currentCustomerName); } catch (e) {}
+    }
+    if (customerId !== undefined && customerId !== null && String(customerId).trim() !== '') {
+      window.currentCustomerId = customerId;
+      try { sessionStorage.setItem('nexus_active_customer_id', String(customerId)); } catch (e) {}
+      if (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) {
+        const matched = masterCustomerData.find(c => String(c.customer_id || c.id) === String(customerId));
+        if (matched) window.currentCustomerContext = matched;
+      }
+    }
+    const displayName = window.currentCustomerName || (function() {
+      try { return sessionStorage.getItem('nexus_active_customer_name') || ''; } catch (e) { return ''; }
+    })() || 'Indus Towers Ltd';
     currentModule = 'indus_towers';
     currentIndusSubpage = 'site';
     activeColumnFilters = {};
     updateURL();
     renderApp();
     fetchIndusSites(true);
-    showToast('Navigated to Indus Towers Ltd');
+    showToast(`Navigated to ${displayName}`);
   }
   
   function loadIndusDataset() {

@@ -355,12 +355,12 @@ class IndusSiteService:
         from app.core.bulk_upload_utils import extract_bulk_upload_rows
 
         SITE_DETAILS_HEADERS = [
-            "Customer", "Site ID", "WH ID", "Site Name", "Tower Type", "District",
+            "Site ID", "WH ID", "Site Name", "Tower Type", "District",
             "Town", "Site Address", "Lattitude", "Longtitude", "Transport Zone",
             "FSE Name", "AOM Name",
         ]
         SITE_CONTACTS_HEADERS = [
-            "Customer", "Site ID", "FSE Name", "AOM Name",
+            "Site ID", "FSE Name", "AOM Name",
         ]
 
         raw_headers, rows_dict_list = extract_bulk_upload_rows(

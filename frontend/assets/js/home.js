@@ -12847,7 +12847,11 @@ function renderApp() {
     } else if (currentIndusSubpage === 'project_type_details') {
       if (bannerTitle) bannerTitle.innerHTML = `<span class="banner-title-underline">${selectedProjectType || 'Project Type'} / Sub - Project Type</span>`;
     } else {
-      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openTelecomDetailsModal(); return false;" title="Indus Towers Details" style="cursor: pointer; text-decoration: underline; text-underline-offset: 4px;">Indus Towers Ltd</a>`;
+      const activeCustName = window.currentCustomerName || (function() {
+        try { return sessionStorage.getItem('nexus_active_customer_name') || ''; } catch (e) { return ''; }
+      })() || 'Indus Towers Ltd';
+      const safeCustBanner = String(activeCustName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      if (bannerTitle) bannerTitle.innerHTML = `<a href="#" class="banner-title-link banner-title-underline" onclick="openTelecomDetailsModal(); return false;" title="${safeCustBanner} Details" style="cursor: pointer; text-decoration: underline; text-underline-offset: 4px;">${safeCustBanner}</a>`;
     }
     loadIndusDataset();
     renderIndusToolbar();
@@ -13359,15 +13363,27 @@ var fetchIndusGbpa = (...args) => window.fetchIndusGbpa?.(...args);
 var fetchIndusInfra = (...args) => window.fetchIndusInfra?.(...args);
 var fetchIndusEsh = (...args) => window.fetchIndusEsh?.(...args);
 var loadIndusDataset = (...args) => window.loadIndusDataset?.(...args);
-async function openIndusTowersPage() {
+async function openIndusTowersPage(customerId, customerName) {
+  if (customerName && String(customerName).trim()) {
+    window.currentCustomerName = String(customerName).trim();
+    try { sessionStorage.setItem('nexus_active_customer_name', window.currentCustomerName); } catch (e) {}
+  }
+  if (customerId !== undefined && customerId !== null && String(customerId).trim() !== '') {
+    window.currentCustomerId = customerId;
+    try { sessionStorage.setItem('nexus_active_customer_id', String(customerId)); } catch (e) {}
+    if (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) {
+      const matched = masterCustomerData.find(c => String(c.customer_id || c.id) === String(customerId));
+      if (matched) window.currentCustomerContext = matched;
+    }
+  }
   if (typeof window.openIndusTowersPage === 'function' && window.openIndusTowersPage !== openIndusTowersPage) {
-    return window.openIndusTowersPage();
+    return window.openIndusTowersPage(customerId, customerName);
   }
   if (window.NexusModuleLoader && typeof window.NexusModuleLoader.loadModule === 'function') {
     await window.NexusModuleLoader.loadModule('indus_towers');
   }
   if (typeof window.openIndusTowersPage === 'function' && window.openIndusTowersPage !== openIndusTowersPage) {
-    return window.openIndusTowersPage();
+    return window.openIndusTowersPage(customerId, customerName);
   }
   currentModule = 'indus_towers';
   currentIndusSubpage = 'site';
@@ -13968,10 +13984,10 @@ function renderIndusTableHead() {
   } else {
     thead.innerHTML = `
       <tr class="master-view-header">
-        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
+        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-            <span>Site ID</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
+            <span>Site Name</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
           </div>
         </th>
         <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
@@ -13980,10 +13996,10 @@ function renderIndusTableHead() {
             <button type="button" class="filter-funnel-btn ${activeColumnFilters['whId'] ? 'has-active-filter' : ''}" data-filter-col="whId" title="Filter WH ID">&#9660;</button>
           </div>
         </th>
-        <th style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
+        <th style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 6px;">
           <div class="th-content-wrap" style="justify-content: center; display: flex; align-items: center; gap: 4px;">
-            <span>Site Name</span>
-            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteName'] ? 'has-active-filter' : ''}" data-filter-col="siteName" title="Filter Site Name">&#9660;</button>
+            <span>Site ID</span>
+            <button type="button" class="filter-funnel-btn ${activeColumnFilters['siteId'] ? 'has-active-filter' : ''}" data-filter-col="siteId" title="Filter Site ID">&#9660;</button>
           </div>
         </th>
         <th style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: center !important; vertical-align: middle; background-color: #8c9399 !important; color: #ffffff !important; font-weight: 700; border: 1px solid #ffffff; white-space: nowrap; padding: 10px 8px;">
@@ -47039,11 +47055,11 @@ function applyFiltersAndRender() {
 
         return `
           <tr data-row-id="${rowKey}" style="border-bottom: 1px solid #e2e8f0;">
-            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap;">
-              <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${rowKey}', '${safeSiteName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;" title="View Site Details">${siteCodeDisplay}</a>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${siteNameDisplay.replace(/"/g, '&quot;')}">
+              <a href="#" class="req-link td-link-blue" onclick="handleSiteClick('${rowKey}', '${safeSiteName}'); return false;" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;" title="View Site Details">${siteNameDisplay}</a>
             </td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${whIdDisplay}</td>
-            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; text-align: left !important; padding: 10px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b; font-weight: 500;" title="${siteNameDisplay.replace(/"/g, '&quot;')}">${siteNameDisplay}</td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b; font-weight: 500;">${siteCodeDisplay}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${districtDisplay.replace(/"/g, '&quot;')}">${districtDisplay}</td>
             <td style="width: 15ch; min-width: 15ch; max-width: 15ch; text-align: left !important; padding: 10px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e293b;" title="${townDisplay.replace(/"/g, '&quot;')}">${townDisplay}</td>
             <td style="width: 10ch; min-width: 10ch; max-width: 10ch; text-align: center !important; padding: 10px 6px; white-space: nowrap; color: #1e293b;">${latDisplay}</td>
@@ -47232,8 +47248,10 @@ function applyFiltersAndRender() {
         const invT = row.invoiceType || row.invoice_type || '';
         const lName = row.legal_name || row.legalName || '';
         const isIndus = (cName + ' ' + lName).toLowerCase().includes('indus');
+        const rowCustId = row.customer_id || row.id || '';
+        const safeCustNameArg = String(cName).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const nameCellHtml = isIndus
-          ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage(); return false;" title="View Indus Towers details" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${cName}</a>`
+          ? `<a href="#" class="business-type-link td-link-blue" onclick="openIndusTowersPage('${rowCustId}', '${safeCustNameArg}'); return false;" title="View ${cName.replace(/"/g, '&quot;')} details" style="color: #0454e4; text-decoration: underline; text-decoration-color: #0454e4; text-underline-offset: 3px; font-weight: 600; cursor: pointer;">${cName}</a>`
           : `<span style="color: #1e293b; font-weight: 500;">${cName}</span>`;
         return `
           <tr data-row-id="${row.id || row.customer_id}" style="border-bottom: 1px solid #e2e8f0;">

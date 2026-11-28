@@ -172,6 +172,19 @@ class CustomerRepository:
             self.db.rollback()
             raise
 
+    def get_contact_by_id(self, contact_id: int) -> Optional[CustomerContact]:
+        return self.db.query(CustomerContact).filter(CustomerContact.contact_id == contact_id).first()
+
+    def update_contact(self, contact: CustomerContact) -> CustomerContact:
+        try:
+            self.db.add(contact)
+            self.db.commit()
+            self.db.refresh(contact)
+            return contact
+        except Exception:
+            self.db.rollback()
+            raise
+
     def delete_contact(self, contact_id: int) -> bool:
         c = self.db.query(CustomerContact).filter(CustomerContact.contact_id == contact_id).first()
         if c:
@@ -199,6 +212,19 @@ class CustomerRepository:
         return query.order_by(desc(CustomerOfficeLocation.office_id)).all()
 
     def create_location(self, loc: CustomerOfficeLocation) -> CustomerOfficeLocation:
+        try:
+            self.db.add(loc)
+            self.db.commit()
+            self.db.refresh(loc)
+            return loc
+        except Exception:
+            self.db.rollback()
+            raise
+
+    def get_location_by_id(self, office_id: int) -> Optional[CustomerOfficeLocation]:
+        return self.db.query(CustomerOfficeLocation).filter(CustomerOfficeLocation.office_id == office_id).first()
+
+    def update_location(self, loc: CustomerOfficeLocation) -> CustomerOfficeLocation:
         try:
             self.db.add(loc)
             self.db.commit()

@@ -447,6 +447,26 @@ class CustomerService:
         saved = self.repository.create_contact(new_c)
         return self._to_contact_dto(saved)
 
+    def update_contact(self, contact_id: int, data: CustomerContactCreate) -> CustomerContactResponse:
+        existing = self.repository.get_contact_by_id(contact_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail=f"Contact {contact_id} not found")
+        if data.name is not None:
+            if not data.name.strip():
+                raise HTTPException(status_code=422, detail="Contact Name is required.")
+            existing.name = data.name.strip()
+        if data.designation is not None:
+            existing.designation = data.designation.strip()
+        contact_num = data.contact_number if data.contact_number is not None else data.contact
+        if contact_num is not None:
+            existing.contact_number = contact_num.strip()
+        if data.email is not None:
+            existing.email = data.email.strip()
+        if data.status is not None:
+            existing.status = parse_status_field(data.status)
+        saved = self.repository.update_contact(existing)
+        return self._to_contact_dto(saved)
+
     def delete_contact(self, contact_id: int) -> Dict[str, Any]:
         success = self.repository.delete_contact(contact_id)
         if not success:
@@ -494,6 +514,26 @@ class CustomerService:
             company_name="Nexus"
         )
         saved = self.repository.create_location(new_loc)
+        return self._to_location_dto(saved)
+
+    def update_location(self, office_id: int, data: CustomerLocationCreate) -> CustomerLocationResponse:
+        existing = self.repository.get_location_by_id(office_id)
+        if not existing:
+            raise HTTPException(status_code=404, detail=f"Location {office_id} not found")
+        off_name = data.office_name if data.office_name is not None else data.officeName
+        if off_name is not None:
+            if not off_name.strip():
+                raise HTTPException(status_code=422, detail="Office Name is required.")
+            existing.office_name = off_name.strip()
+        if data.latitude is not None:
+            lat_str = str(data.latitude).strip()
+            existing.latitude = lat_str if lat_str else None
+        if data.longitude is not None:
+            lng_str = str(data.longitude).strip()
+            existing.longitude = lng_str if lng_str else None
+        if data.status is not None:
+            existing.status = parse_status_field(data.status)
+        saved = self.repository.update_location(existing)
         return self._to_location_dto(saved)
 
     def delete_location(self, office_id: int) -> Dict[str, Any]:

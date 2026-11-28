@@ -209,6 +209,33 @@
     }
   };
   
+  function resolveActiveCustomerRecord() {
+    const list = (typeof masterCustomerData !== 'undefined' && Array.isArray(masterCustomerData)) ? masterCustomerData : [];
+    let savedId = window.currentCustomerId || (window.currentCustomerContext && (window.currentCustomerContext.customer_id || window.currentCustomerContext.id)) || null;
+    let savedName = window.currentCustomerName || (window.currentCustomerContext && (window.currentCustomerContext.customerName || window.currentCustomerContext.customer_name || window.currentCustomerContext.legalName)) || '';
+    if (!savedId) {
+      try { savedId = sessionStorage.getItem('nexus_active_customer_id') || null; } catch (e) {}
+    }
+    if (!savedName) {
+      try { savedName = sessionStorage.getItem('nexus_active_customer_name') || ''; } catch (e) {}
+    }
+    let found = null;
+    if (savedId) {
+      found = list.find(c => String(c.customer_id || c.id) === String(savedId));
+    }
+    if (!found && savedName) {
+      const target = String(savedName).trim().toLowerCase();
+      found = list.find(c =>
+        String(c.customerName || c.customer_name || '').trim().toLowerCase() === target ||
+        String(c.legalName || c.legal_name || '').trim().toLowerCase() === target
+      );
+    }
+    if (!found) {
+      found = list.find(c => ((c.customerName || c.customer_name || '').toLowerCase().includes('indus'))) || list[0] || null;
+    }
+    return found;
+  }
+
   window.openTelecomDetailsModal = function() {
     const overlay = document.getElementById('sideFormOverlay');
     if (!overlay) return;
@@ -218,25 +245,31 @@
       if (card.id !== 'telecomDetailsCard') card.style.display = 'none';
     });
   
-    const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => ((c.customerName || c.customer_name || '').toLowerCase().includes('indus')))) || 
-                 (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]) || {
-                   customerName: "Indus Towers Ltd",
-                   customerId: "230510678",
-                   businessType: "Projects",
-                   panNumber: "33ASMPM8643F",
-                   poDigits: "450",
-                   gstNumber: "33ASMPM8643F1Z5",
-                   gstType: "SGST",
-                   address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
-                   status: "Active",
-                   gstEnabled: true
-                 };
+    const cust = resolveActiveCustomerRecord() || {
+      customerName: window.currentCustomerName || "Indus Towers Ltd",
+      customerId: "230510678",
+      businessType: "Projects",
+      panNumber: "33ASMPM8643F",
+      poDigits: "450",
+      gstNumber: "33ASMPM8643F1Z5",
+      gstType: "SGST",
+      address: "Building 10, DLF Cyber City, Gurugram, Haryana - 122002",
+      status: "Active",
+      gstEnabled: true
+    };
+
+    const resolvedName = cust.customerName || cust.customer_name || window.currentCustomerName || 'Indus Towers Ltd';
+    window.currentCustomerContext = cust;
+    window.currentCustomerName = resolvedName;
+    if (cust.customer_id || cust.id) {
+      window.currentCustomerId = cust.customer_id || cust.id;
+    }
   
     const inpType = document.getElementById('inpTelecomBusinessType');
     if (inpType) inpType.value = cust.businessType || cust.business_type || 'Projects';
   
     const inpName = document.getElementById('inpTelecomCustomerName');
-    if (inpName) inpName.value = cust.customerName || cust.customer_name || 'Indus Towers Ltd';
+    if (inpName) inpName.value = resolvedName;
   
     const inpDigits = document.getElementById('inpTelecomPoDigits');
     if (inpDigits) inpDigits.value = cust.poDigits || cust.po_stating_3_digits || '450';
@@ -267,14 +300,14 @@
     setTelecomDetailsReadOnly(true);
   
     const lblCardTitle = document.getElementById('lblTelecomDetailsCardTitle');
-    if (lblCardTitle) lblCardTitle.innerText = cust.customerName || cust.customer_name || 'Indus Towers Ltd';
+    if (lblCardTitle) lblCardTitle.innerText = resolvedName;
   
     const modal = document.getElementById('telecomDetailsCard');
     if (modal) {
       modal.style.display = 'block';
       overlay.style.display = 'flex';
     }
-    showToast('Opened Indus Towers Ltd Details');
+    showToast(`Opened ${resolvedName} Details`);
   };
   
   window.closeTelecomDetailsModal = function() {
@@ -300,8 +333,7 @@
       const statusToggle = document.getElementById('inpTelecomStatusToggle');
       const status = (statusToggle && statusToggle.checked) ? 'Active' : 'In - Active';
   
-      const cust = (typeof masterCustomerData !== 'undefined' && masterCustomerData.find(c => ((c.customerName || c.customer_name || '').toLowerCase().includes('indus')))) || 
-                   (typeof masterCustomerData !== 'undefined' && masterCustomerData[0]);
+      const cust = resolveActiveCustomerRecord();
   
       const payload = {
         gstEnabled: isGstOn,
@@ -363,10 +395,52 @@
 
 
   // Customer Location & Contact Handlers
+  let customerSubPanelReturnTarget = 'addCustomerCard';
+  let isCustomerLocationEditing = false;
+  let isCustomerContactEditing = false;
+
+  function isOpenedFromViewCustomer() {
+    if (customerSubPanelReturnTarget === 'telecomDetailsCard') return true;
+    const lblTitle = document.getElementById('lblCustomerCardTitle');
+    return Boolean(lblTitle && (lblTitle.innerText || '').trim().toLowerCase().includes('view'));
+  }
+
+  function updateCustomerLocationEditBtnUI() {
+    const btn = document.getElementById('btnCustomerLocationEditToggle');
+    const img = document.getElementById('imgCustomerLocationEditIcon');
+    if (!btn) return;
+    btn.style.display = isOpenedFromViewCustomer() ? 'inline-flex' : 'none';
+    if (img) {
+      img.src = isCustomerLocationEditing ? 'icons/Save.svg' : 'icons/Edit.svg';
+      img.alt = isCustomerLocationEditing ? 'Save' : 'Edit';
+    }
+    btn.title = isCustomerLocationEditing ? 'Save Office Locations' : 'Edit Office Locations';
+  }
+
+  function updateCustomerContactEditBtnUI() {
+    const btn = document.getElementById('btnCustomerContactEditToggle');
+    const img = document.getElementById('imgCustomerContactEditIcon');
+    if (!btn) return;
+    btn.style.display = isOpenedFromViewCustomer() ? 'inline-flex' : 'none';
+    if (img) {
+      img.src = isCustomerContactEditing ? 'icons/Save.svg' : 'icons/Edit.svg';
+      img.alt = isCustomerContactEditing ? 'Save' : 'Edit';
+    }
+    btn.title = isCustomerContactEditing ? 'Save Contact Details' : 'Edit Contact Details';
+  }
+
   function getCurrentCustomerContext() {
-    const inpName = document.getElementById('inpCustomerName')?.value?.trim();
-    const inpProj = document.getElementById('inpCustomerProjectName')?.value?.trim();
-    const name = inpName || inpProj || window.currentCustomerName || (window.currentCustomerContext && (window.currentCustomerContext.customerName || window.currentCustomerContext.customer_name || window.currentCustomerContext.legalName)) || '';
+    if (customerSubPanelReturnTarget === 'telecomDetailsCard') {
+      const cust = resolveActiveCustomerRecord();
+      const name = (cust && (cust.customerName || cust.customer_name || cust.legalName)) || window.currentCustomerName || '';
+      const id = (cust && (cust.customer_id || cust.id)) || window.currentCustomerId || null;
+      return { customer_name: name, customer_id: id };
+    }
+    const addCard = document.getElementById('addCustomerCard');
+    const isAddVisible = addCard && addCard.style.display !== 'none';
+    const inpName = isAddVisible ? document.getElementById('inpCustomerName')?.value?.trim() : '';
+    const inpProj = isAddVisible ? document.getElementById('inpCustomerProjectName')?.value?.trim() : '';
+    const name = inpProj || inpName || window.currentCustomerName || (window.currentCustomerContext && (window.currentCustomerContext.customerName || window.currentCustomerContext.customer_name || window.currentCustomerContext.legalName)) || '';
     const id = window.currentCustomerId || (window.currentCustomerContext && (window.currentCustomerContext.customer_id || window.currentCustomerContext.id)) || null;
     return { customer_name: name, customer_id: id };
   }
@@ -403,9 +477,12 @@
     renderCustomerLocationTable();
   };
   
-  window.openCustomerLocationModal = function() {
+  window.openCustomerLocationModal = function(returnTarget) {
     const overlay = document.getElementById('sideFormOverlay');
     if (!overlay) return;
+
+    customerSubPanelReturnTarget = returnTarget || 'addCustomerCard';
+    isCustomerLocationEditing = false;
   
     const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
     cards.forEach(card => {
@@ -417,20 +494,92 @@
       modal.style.display = 'block';
       overlay.style.display = 'flex';
     }
+    updateCustomerLocationEditBtnUI();
     activeCustomerLocFilters = {};
     currentCustomerLocFilterCol = null;
     loadCustomerLocationsFromApi();
   };
   
   window.closeCustomerLocationModal = function() {
+    isCustomerLocationEditing = false;
+    updateCustomerLocationEditBtnUI();
     const modal = document.getElementById('customerLocationSidePanel');
     if (modal) modal.style.display = 'none';
+    if (customerSubPanelReturnTarget === 'telecomDetailsCard') {
+      const telecomCard = document.getElementById('telecomDetailsCard');
+      if (telecomCard) {
+        telecomCard.style.display = 'block';
+        return;
+      }
+    }
     const customerCard = document.getElementById('addCustomerCard');
     if (customerCard && currentModule === 'master' && currentMasterSubpage === 'customer') {
       customerCard.style.display = 'block';
     } else {
       const overlay = document.getElementById('sideFormOverlay');
       if (overlay) overlay.style.display = 'none';
+    }
+  };
+
+  window.toggleCustomerLocationEdit = async function() {
+    if (!isCustomerLocationEditing) {
+      if (!Array.isArray(customerLocationData) || customerLocationData.length === 0) {
+        showToast('No office locations available to edit.');
+        return;
+      }
+      isCustomerLocationEditing = true;
+      updateCustomerLocationEditBtnUI();
+      renderCustomerLocationTable();
+      showToast('Edit mode enabled for Office Locations');
+      return;
+    }
+
+    const tbody = document.getElementById('tbodyCustomerLocationDetails');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr[data-row-id]'));
+    const updates = [];
+    for (const tr of rows) {
+      const rowId = tr.getAttribute('data-row-id');
+      const officeName = tr.querySelector('.inp-edit-cust-loc-name')?.value?.trim() || '';
+      const latitude = tr.querySelector('.inp-edit-cust-loc-lat')?.value?.trim() || '';
+      const longitude = tr.querySelector('.inp-edit-cust-loc-lng')?.value?.trim() || '';
+      const status = tr.querySelector('.sel-edit-cust-loc-status')?.value || 'Active';
+      if (!officeName) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Office Name cannot be empty.', 'Validation Error');
+        } else {
+          showToast('Office Name cannot be empty.');
+        }
+        return;
+      }
+      updates.push({ rowId, payload: { office_name: officeName, latitude: latitude || null, longitude: longitude || null, status } });
+    }
+
+    try {
+      for (const item of updates) {
+        if (typeof NexusApi !== 'undefined' && NexusApi.customers && typeof NexusApi.customers.updateLocation === 'function') {
+          await NexusApi.customers.updateLocation(item.rowId, item.payload);
+        }
+      }
+      if (typeof NexusApi !== 'undefined' && typeof NexusApi.clearCache === 'function') {
+        NexusApi.clearCache();
+      }
+      isCustomerLocationEditing = false;
+      updateCustomerLocationEditBtnUI();
+      await loadCustomerLocationsFromApi();
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Office locations updated successfully!', 'Task Completed');
+      } else {
+        showToast('Office locations updated successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to update customer locations:', err);
+      const msg = (err && (err.message || err.detail)) || 'Failed to update office locations.';
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(msg, 'Error Message!');
+      } else {
+        showToast(msg);
+      }
     }
   };
   
@@ -457,6 +606,32 @@
           </td>
         </tr>
       `;
+    } else if (isCustomerLocationEditing) {
+      tbody.innerHTML = filtered.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        const safeName = String(row.officeName || '').replace(/"/g, '&quot;');
+        const safeLat = String(row.latitude || '').replace(/"/g, '&quot;');
+        const safeLng = String(row.longitude || '').replace(/"/g, '&quot;');
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 25ch; min-width: 25ch; max-width: 25ch; padding: 6px 8px;">
+              <input type="text" class="form-input-control inp-edit-cust-loc-name" value="${safeName}" style="width: 100%; height: 32px; padding: 4px 8px; font-size: 0.85rem; border: 1px solid #00cba0; border-radius: 6px;">
+            </td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; padding: 6px 4px;">
+              <input type="text" class="form-input-control inp-edit-cust-loc-lat" value="${safeLat}" style="width: 100%; height: 32px; padding: 4px 6px; font-size: 0.82rem; text-align: center; border: 1px solid #00cba0; border-radius: 6px;">
+            </td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; padding: 6px 4px;">
+              <input type="text" class="form-input-control inp-edit-cust-loc-lng" value="${safeLng}" style="width: 100%; height: 32px; padding: 4px 6px; font-size: 0.82rem; text-align: center; border: 1px solid #00cba0; border-radius: 6px;">
+            </td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; padding: 6px 4px; text-align: center;">
+              <select class="form-select-control sel-edit-cust-loc-status" style="width: 100%; height: 32px; padding: 2px 4px; font-size: 0.82rem; border: 1px solid #00cba0; border-radius: 6px;">
+                <option value="Active" ${!isInactive ? 'selected' : ''}>Active</option>
+                <option value="In - Active" ${isInactive ? 'selected' : ''}>In - Active</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
     } else {
       tbody.innerHTML = filtered.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');
@@ -640,9 +815,12 @@
     renderCustomerContactTable();
   };
   
-  window.openCustomerContactModal = function() {
+  window.openCustomerContactModal = function(returnTarget) {
     const overlay = document.getElementById('sideFormOverlay');
     if (!overlay) return;
+
+    customerSubPanelReturnTarget = returnTarget || 'addCustomerCard';
+    isCustomerContactEditing = false;
   
     const cards = overlay.querySelectorAll('.side-form-card, .side-contact-popup');
     cards.forEach(card => {
@@ -654,20 +832,93 @@
       modal.style.display = 'block';
       overlay.style.display = 'flex';
     }
+    updateCustomerContactEditBtnUI();
     activeCustomerContactFilters = {};
     currentCustomerContactFilterCol = null;
     loadCustomerContactsFromApi();
   };
   
   window.closeCustomerContactModal = function() {
+    isCustomerContactEditing = false;
+    updateCustomerContactEditBtnUI();
     const modal = document.getElementById('customerContactSidePanel');
     if (modal) modal.style.display = 'none';
+    if (customerSubPanelReturnTarget === 'telecomDetailsCard') {
+      const telecomCard = document.getElementById('telecomDetailsCard');
+      if (telecomCard) {
+        telecomCard.style.display = 'block';
+        return;
+      }
+    }
     const customerCard = document.getElementById('addCustomerCard');
     if (customerCard && currentModule === 'master' && currentMasterSubpage === 'customer') {
       customerCard.style.display = 'block';
     } else {
       const overlay = document.getElementById('sideFormOverlay');
       if (overlay) overlay.style.display = 'none';
+    }
+  };
+
+  window.toggleCustomerContactEdit = async function() {
+    if (!isCustomerContactEditing) {
+      if (!Array.isArray(customerContactData) || customerContactData.length === 0) {
+        showToast('No contact details available to edit.');
+        return;
+      }
+      isCustomerContactEditing = true;
+      updateCustomerContactEditBtnUI();
+      renderCustomerContactTable();
+      showToast('Edit mode enabled for Contact Details');
+      return;
+    }
+
+    const tbody = document.getElementById('tbodyCustomerContactDetails');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr[data-row-id]'));
+    const updates = [];
+    for (const tr of rows) {
+      const rowId = tr.getAttribute('data-row-id');
+      const name = tr.querySelector('.inp-edit-cust-contact-name')?.value?.trim() || '';
+      const designation = tr.querySelector('.inp-edit-cust-contact-desig')?.value?.trim() || '';
+      const contact_number = tr.querySelector('.inp-edit-cust-contact-phone')?.value?.trim() || '';
+      const email = tr.querySelector('.inp-edit-cust-contact-email')?.value?.trim() || '';
+      const status = tr.querySelector('.sel-edit-cust-contact-status')?.value || 'Active';
+      if (!name) {
+        if (typeof showSvgErrorPopup === 'function') {
+          showSvgErrorPopup('Contact Name cannot be empty.', 'Validation Error');
+        } else {
+          showToast('Contact Name cannot be empty.');
+        }
+        return;
+      }
+      updates.push({ rowId, payload: { name, designation, contact_number, email, status } });
+    }
+
+    try {
+      for (const item of updates) {
+        if (typeof NexusApi !== 'undefined' && NexusApi.customers && typeof NexusApi.customers.updateContact === 'function') {
+          await NexusApi.customers.updateContact(item.rowId, item.payload);
+        }
+      }
+      if (typeof NexusApi !== 'undefined' && typeof NexusApi.clearCache === 'function') {
+        NexusApi.clearCache();
+      }
+      isCustomerContactEditing = false;
+      updateCustomerContactEditBtnUI();
+      await loadCustomerContactsFromApi();
+      if (typeof showSvgSuccessPopup === 'function') {
+        showSvgSuccessPopup('Contact details updated successfully!', 'Task Completed');
+      } else {
+        showToast('Contact details updated successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to update customer contacts:', err);
+      const msg = (err && (err.message || err.detail)) || 'Failed to update contact details.';
+      if (typeof showSvgErrorPopup === 'function') {
+        showSvgErrorPopup(msg, 'Error Message!');
+      } else {
+        showToast(msg);
+      }
     }
   };
   
@@ -694,6 +945,36 @@
           </td>
         </tr>
       `;
+    } else if (isCustomerContactEditing) {
+      tbody.innerHTML = filtered.map(row => {
+        const isInactive = (row.status || '').toLowerCase().includes('in');
+        const safeName = String(row.name || '').replace(/"/g, '&quot;');
+        const safeDesig = String(row.designation || '').replace(/"/g, '&quot;');
+        const safePhone = String(row.contact || '').replace(/"/g, '&quot;');
+        const safeEmail = String(row.email || '').replace(/"/g, '&quot;');
+        return `
+          <tr data-row-id="${row.id}" style="border-bottom: 1px solid #e2e8f0;">
+            <td style="width: 30ch; min-width: 30ch; max-width: 30ch; padding: 6px 8px;">
+              <input type="text" class="form-input-control inp-edit-cust-contact-name" value="${safeName}" style="width: 100%; height: 32px; padding: 4px 8px; font-size: 0.85rem; border: 1px solid #00cba0; border-radius: 6px;">
+            </td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; padding: 6px 6px;">
+              <input type="text" class="form-input-control inp-edit-cust-contact-desig" value="${safeDesig}" style="width: 100%; height: 32px; padding: 4px 8px; font-size: 0.85rem; border: 1px solid #00cba0; border-radius: 6px;">
+            </td>
+            <td style="width: 15ch; min-width: 15ch; max-width: 15ch; padding: 6px 6px;">
+              <input type="text" class="form-input-control inp-edit-cust-contact-phone" value="${safePhone}" style="width: 100%; height: 32px; padding: 4px 6px; font-size: 0.82rem; text-align: center; border: 1px solid #00cba0; border-radius: 6px;">
+            </td>
+            <td style="width: 20ch; min-width: 20ch; max-width: 20ch; padding: 6px 6px;">
+              <input type="email" class="form-input-control inp-edit-cust-contact-email" value="${safeEmail}" style="width: 100%; height: 32px; padding: 4px 8px; font-size: 0.85rem; border: 1px solid #00cba0; border-radius: 6px;">
+            </td>
+            <td style="width: 10ch; min-width: 10ch; max-width: 10ch; padding: 6px 4px; text-align: center;">
+              <select class="form-select-control sel-edit-cust-contact-status" style="width: 100%; height: 32px; padding: 2px 4px; font-size: 0.82rem; border: 1px solid #00cba0; border-radius: 6px;">
+                <option value="Active" ${!isInactive ? 'selected' : ''}>Active</option>
+                <option value="In - Active" ${isInactive ? 'selected' : ''}>In - Active</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      }).join('');
     } else {
       tbody.innerHTML = filtered.map(row => {
         const isInactive = (row.status || '').toLowerCase().includes('in');

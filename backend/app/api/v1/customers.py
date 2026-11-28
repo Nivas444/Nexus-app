@@ -165,6 +165,15 @@ def create_contact(
     service = CustomerService(db)
     return service.create_contact(payload, customer_id=customer_id)
 
+@router.put("/customer-contacts/{contact_id}", response_model=CustomerContactResponse, summary="Update Customer Contact")
+def update_contact(
+    payload: CustomerContactCreate,
+    contact_id: int = Path(..., ge=1),
+    db: Session = Depends(get_db)
+):
+    service = CustomerService(db)
+    return service.update_contact(contact_id, payload)
+
 @router.delete("/customer-contacts/{contact_id}", summary="Delete Customer Contact", include_in_schema=False)
 def delete_contact(
     contact_id: int = Path(..., ge=1),
@@ -206,6 +215,15 @@ def create_location(
     """
     service = CustomerService(db)
     return service.create_location(payload, customer_id=customer_id)
+
+@router.put("/customer-locations/{office_id}", response_model=CustomerLocationResponse, summary="Update Customer Location")
+def update_location(
+    payload: CustomerLocationCreate,
+    office_id: int = Path(..., ge=1),
+    db: Session = Depends(get_db)
+):
+    service = CustomerService(db)
+    return service.update_location(office_id, payload)
 
 @router.delete("/customer-locations/{office_id}", summary="Delete Customer Location", include_in_schema=False)
 def delete_location(

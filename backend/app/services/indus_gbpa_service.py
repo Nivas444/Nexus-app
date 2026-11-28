@@ -265,7 +265,8 @@ class IndusGbpaService:
 
         GBPA_TEMPLATE_HEADERS = [
             "Customer", "Item Code", "Item Name", "ItemType", "Item Description",
-            "Uom", "Rate", "HSN / SAC", "HSN / SAC Code", "Budget (%)", "Budget (₹)",
+            "Uom", "Rate", "HSN / SAC", "HSN / SAC Code", "Budget (%)",
+            "Non-standard", "Expenses", "Materials", "Infra",
         ]
 
         raw_headers, rows_dict_list = extract_bulk_upload_rows(
@@ -314,9 +315,17 @@ class IndusGbpaService:
                 hsn_sac_code = str(get_val("HSN / SAC Code", "HSN/SAC Code", "HSN Code", default="") or "").strip()
                 
                 budget_pct = _parse_numeric(get_val("Budget (%)", "Budget %", "Budget Percentage", default=None))
-                budget_amt = _parse_numeric(get_val("Budget (₹)", "Budget Amount", "Budget Rs", default=None))
-                ns_val = get_val("Non-Standard", "Non Standard", "non_standard", "nonstandard", default=None)
+                budget_amt = None
+                if rate_val is not None and budget_pct is not None:
+                    budget_amt = (rate_val * budget_pct / Decimal("100")).quantize(Decimal("0.01"))
+                ns_val = get_val("Non-standard", "Non-Standard", "Non Standard", "non_standard", "nonstandard", default=None)
                 non_standard_bool = _parse_bool(ns_val) if ns_val is not None else False
+                exp_val = get_val("Expenses", "expenses_enabled", default=None)
+                expenses_enabled_bool = _parse_bool(exp_val) if exp_val is not None else False
+                mat_val = get_val("Materials", "materials_enabled", default=None)
+                materials_enabled_bool = _parse_bool(mat_val) if mat_val is not None else False
+                inf_val = get_val("Infra", "infra_enabled", default=None)
+                infra_enabled_bool = _parse_bool(inf_val) if inf_val is not None else False
 
                 gbpa_record = IndusCustomerGbpa(
                     company_name="Nexus",
@@ -332,6 +341,9 @@ class IndusGbpaService:
                     budget_percentage=budget_pct,
                     budget_amount=budget_amt,
                     non_standard=non_standard_bool,
+                    expenses_enabled=expenses_enabled_bool,
+                    materials_enabled=materials_enabled_bool,
+                    infra_enabled=infra_enabled_bool,
                     status="Active"
                 )
                 new_records.append(gbpa_record)

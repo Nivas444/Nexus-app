@@ -11,7 +11,7 @@
       'assets/js/modules/master/master-vendors.js?v=20261012_01',
       'assets/js/modules/master/master-customers.js?v=20261012_01',
       'assets/js/modules/master/master-employees.js?v=20261012_01',
-      'assets/js/modules/master/master-expenses.js?v=20261012_01',
+      'assets/js/modules/master/master-expenses.js?v=20261128_01',
       'assets/js/modules/master/master-hr-policies.js?v=20261012_01'
     ],
     indus_towers: [

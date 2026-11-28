@@ -6,8 +6,8 @@
 (function(window) {
   'use strict';
 
-  // Module state
-  var masterExpensesData = [];
+  // Module state (shared with home.js via window.masterExpensesData)
+  window.masterExpensesData = window.masterExpensesData || [];
   var currentViewedExpenseId = null;
   var isExpenseFormEditing = false;
 
@@ -19,11 +19,10 @@
       try {
         const response = await window.NexusApi.expenses.getAll({ limit: 500 });
         if (response && Array.isArray(response.items)) {
-          masterExpensesData = response.items;
+          window.masterExpensesData = response.items;
         } else if (Array.isArray(response)) {
-          masterExpensesData = response;
+          window.masterExpensesData = response;
         }
-        window.masterExpensesData = masterExpensesData;
       } catch (err) {
         console.error('Error fetching master expenses from API:', err);
         if (typeof window.showToast === 'function') {
@@ -37,9 +36,9 @@
     const activeSub = (typeof currentMasterSubpage !== 'undefined') ? currentMasterSubpage : window.currentMasterSubpage;
     if (activeMod === 'master' && activeSub === 'expenses') {
       if (typeof currentDataset !== 'undefined') {
-        currentDataset = [...masterExpensesData];
+        currentDataset = [...window.masterExpensesData];
       }
-      window.currentDataset = [...masterExpensesData];
+      window.currentDataset = [...window.masterExpensesData];
       if (typeof applyFiltersAndRender === 'function') {
         applyFiltersAndRender();
       } else if (typeof window.applyFiltersAndRender === 'function') {

@@ -264,7 +264,7 @@ class IndusGbpaService:
         from app.core.bulk_upload_utils import extract_bulk_upload_rows
 
         GBPA_TEMPLATE_HEADERS = [
-            "Customer", "Item Code", "Item Name", "ItemType", "Item Description",
+            "Item Code", "Item Name", "ItemType", "Item Description",
             "Uom", "Rate", "HSN / SAC", "HSN / SAC Code", "Budget (%)",
             "Non-standard", "Expenses", "Materials", "Infra",
         ]

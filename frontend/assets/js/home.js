@@ -94,7 +94,7 @@ var saveVendorBankDataFromForm = window.saveVendorBankDataFromForm;
 
 
 // Master -> Products Dataset (Loaded dynamically from PostgreSQL via FastAPI)
-let masterProductsData = [];
+var masterProductsData = window.masterProductsData || [];
 
 async function loadMasterProductsFromApi() {
   if (typeof NexusApi !== 'undefined' && NexusApi.products) {
@@ -105,6 +105,7 @@ async function loadMasterProductsFromApi() {
       } else if (Array.isArray(response)) {
         masterProductsData = response;
       }
+      window.masterProductsData = masterProductsData;
     } catch (err) {
       console.error('Error fetching master products from API:', err);
       if (typeof showToast === 'function') {
@@ -123,7 +124,7 @@ async function loadMasterProductsFromApi() {
 
 
 /// Master -> Expenses Dataset (Loaded dynamically from PostgreSQL via FastAPI)
-let masterExpensesData = [];
+var masterExpensesData = window.masterExpensesData || [];
 
 async function loadMasterExpensesFromApi() {
   if (typeof NexusApi !== 'undefined' && NexusApi.expenses) {
@@ -134,6 +135,7 @@ async function loadMasterExpensesFromApi() {
       } else if (Array.isArray(response)) {
         masterExpensesData = response;
       }
+      window.masterExpensesData = masterExpensesData;
     } catch (err) {
       console.error('Error fetching master expenses from API:', err);
       if (typeof showToast === 'function') {
@@ -59931,8 +59933,8 @@ function getCurrentBulkPageLabel() {
   return 'Employee';
 }
 
-function triggerBulkUpload() {
-  const pageLabel = getCurrentBulkPageLabel();
+function triggerBulkUpload(explicitPageLabel) {
+  const pageLabel = explicitPageLabel || getCurrentBulkPageLabel();
   openBulkUploadModal(pageLabel);
 }
 
@@ -59956,6 +59958,10 @@ document.addEventListener('click', (e) => {
 
   const bulkBtn = e.target.closest('.btn-doc-upload-action, #btnIndusDocUpload, #btnMasterDocUpload');
   if (bulkBtn) {
+    if (bulkBtn.id === 'btnMasterDocUpload' || bulkBtn.id === 'btnIndusDocUpload') {
+      // Handled directly by the toolbar click listener with the exact tab label
+      return;
+    }
     const onclickAttr = bulkBtn.getAttribute('onclick') || '';
     const match = onclickAttr.match(/openBulkUploadModal\(['"]([^'"]+)['"]\)/);
     if (match && match[1]) {
@@ -62926,27 +62932,41 @@ currentBulkUploadPageName = 'Employee';
 activeBulkUploadFilters = {};
 currentBulkUploadFilterCol = null;
 
-// Initial bulk upload history records mapped by page/module (empty by default)
-bulkUploadHistoryData = [];
+function getCanonicalBulkUploadTabKey(pageName) {
+  const p = String(pageName || '').trim().toLowerCase();
+  if (!p) return 'master_employee';
+  if (p === 'employee' || p === 'master_employee' || p.includes('employee')) return 'master_employee';
+  if (p === 'products' || p === 'product' || p === 'master_products') return 'master_products';
+  if (p === 'expense' || p === 'master_expense' || p === 'master expense' || p === 'company expense' || p === 'company expenses') return 'master_expense';
+  if (p === 'materials' || p === 'gbpa materials' || p === 'indus_gbpa_materials' || (p.includes('gbpa') && p.includes('material')) || p.includes('material')) return 'indus_gbpa_materials';
+  if (p === 'gbpa expenses' || p === 'expenses' || p === 'indus_gbpa_expenses' || (p.includes('gbpa') && p.includes('expense'))) return 'indus_gbpa_expenses';
+  if (p === 'gbpa' || p === 'indus_gbpa' || p === 'customer products') return 'indus_gbpa';
+  if (p === 'infra' || p === 'indus_infra' || p.includes('infra')) return 'indus_infra';
+  if (p === 'site' || p === 'indus_site' || p === 'new site' || p === 'site contact' || p === 'site contacts' || p === 'site details') return 'indus_site';
+  if (p === 'po amend' || p === 'po amendment' || p === 'po_amend' || p === 'worklist_po_amend') return 'worklist_po_amend';
+  if (p === 'new project' || p === 'new_project' || p === 'worklist_new_project') return 'worklist_new_project';
+  if (p === 'wcc' || p === 'worklist_wcc') return 'worklist_wcc';
+  if (p === 'invoice' || p === 'worklist_invoice') return 'worklist_invoice';
+  if (p.includes('receivable')) return 'worklist_receivable';
+  if (p === 'po to be open' || p === 'po_to_be_open' || p === 'worklist_po_to_be_open') return 'worklist_po_to_be_open';
+  if (['yts', 'wip', 'hold', 'nr', 'stn', 'srn', 'jms', 'transport'].includes(p)) return `tab_${p}`;
+  return p.replace(/\s+/g, '_');
+}
+
+function getBulkUploadHistoryForCurrentTab() {
+  const targetKey = getCanonicalBulkUploadTabKey(currentBulkUploadPageName || getCurrentBulkPageLabel());
+  if (!Array.isArray(bulkUploadHistoryData)) return [];
+  return bulkUploadHistoryData.filter(r => {
+    const recKey = r.tabKey || getCanonicalBulkUploadTabKey(r.page);
+    return recKey === targetKey;
+  });
+}
 
 function renderBulkUploadTable() {
   const tbody = document.getElementById('tbodyBulkUploadDetails');
   if (!tbody) return;
 
-  const curPage = (currentBulkUploadPageName || 'Employee').trim().toLowerCase();
-  let pageRecords = bulkUploadHistoryData.filter(r => {
-    const p = (r.page || '').trim().toLowerCase();
-    if (curPage === 'materials' || curPage.includes('material')) return p === 'materials';
-    if (curPage === 'expenses' || curPage === 'gbpa expenses') return p === 'expenses' || p === 'gbpa expenses';
-    if (curPage === 'expense') return p === 'expense';
-    if (curPage === 'products') return p === 'products';
-    if (curPage === 'employee') return p === 'employee';
-    if (curPage === 'gbpa') return p === 'gbpa';
-    if (curPage === 'infra') return p === 'infra';
-    if (curPage === 'site') return p === 'site';
-    if (curPage.includes('receivable')) return p.includes('receivable');
-    return p === curPage;
-  });
+  let pageRecords = getBulkUploadHistoryForCurrentTab();
 
   if (pageRecords.length === 0) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 22px; font-size: 0.9rem;">No upload logs found for ${currentBulkUploadPageName}.</td></tr>`;
@@ -63094,20 +63114,7 @@ window.openBulkUploadStatusFilter = function(event) {
   if (!dropdown) return;
   if (searchInput) searchInput.value = '';
 
-  const curPage = (currentBulkUploadPageName || 'Employee').trim().toLowerCase();
-  const pageRecords = bulkUploadHistoryData.filter(r => {
-    const p = (r.page || '').trim().toLowerCase();
-    if (curPage === 'materials' || curPage.includes('material')) return p === 'materials';
-    if (curPage === 'expenses' || curPage === 'gbpa expenses') return p === 'expenses' || p === 'gbpa expenses';
-    if (curPage === 'expense') return p === 'expense';
-    if (curPage === 'products') return p === 'products';
-    if (curPage === 'employee') return p === 'employee';
-    if (curPage === 'gbpa') return p === 'gbpa';
-    if (curPage === 'infra') return p === 'infra';
-    if (curPage === 'site') return p === 'site';
-    if (curPage.includes('receivable')) return p.includes('receivable');
-    return p === curPage;
-  });
+  const pageRecords = getBulkUploadHistoryForCurrentTab();
 
   if (pageRecords.length === 0) {
     if (chkList) chkList.innerHTML = '<div style="padding: 12px; color: #94a3b8; font-size: 0.85rem; text-align: center;">No status available</div>';
@@ -63152,12 +63159,16 @@ window.openBulkUploadStatusFilter = function(event) {
 
 window.openBulkUploadSidePanel = function(pageName) {
   const urlParams = new URLSearchParams(window.location.search);
-  const activeView = (typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : (urlParams.get('view') || '');
+  const activeModule = (typeof currentModule !== 'undefined' && currentModule) ? currentModule : (urlParams.get('module') || '');
+  const activeView = (activeModule === 'worklist' || activeModule === 'accounts')
+    ? ((typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : (urlParams.get('view') || ''))
+    : '';
   let resolvedName = pageName;
   if (!resolvedName && activeView === 'receivable') {
     resolvedName = 'Receivable';
   }
   currentBulkUploadPageName = resolvedName || getCurrentBulkPageLabel();
+  activeBulkUploadFilters = {};
   const overlay = document.getElementById('sideFormOverlay');
   const panel = document.getElementById('bulkUploadSidePanel');
   const addCard = document.getElementById('addBulkUploadCard');
@@ -63215,25 +63226,28 @@ window.openAddBulkUploadModal = function() {
   const urlParams = new URLSearchParams(window.location.search);
   const urlView = urlParams.get('view') || '';
   const urlModule = urlParams.get('module') || '';
-  const activeView = (typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : urlView;
   const activeModule = (typeof currentModule !== 'undefined' && currentModule) ? currentModule : urlModule;
+  const isWorklistOrAccounts = (activeModule === 'worklist' || activeModule === 'accounts');
+  const activeView = isWorklistOrAccounts
+    ? ((typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : urlView)
+    : '';
 
-  let displayName = currentBulkUploadPageName || 'Employee';
+  let displayName = currentBulkUploadPageName || getCurrentBulkPageLabel() || 'Employee';
   const pageNorm = displayName.trim().toLowerCase();
 
-  if (activeView === 'receivable' || pageNorm === 'receivable') {
+  if (pageNorm === 'receivable' || (isWorklistOrAccounts && activeView === 'receivable')) {
     displayName = 'Receivable';
-  } else if (['yts', 'wip', 'hold', 'nr'].includes(activeView) || ['yts', 'wip', 'hold', 'nr'].includes(pageNorm)) {
-    displayName = (['yts', 'wip', 'hold', 'nr'].includes(activeView) ? activeView : pageNorm).toUpperCase();
-  } else if (activeView === 'po_amend' || activeView === 'po_amend_detail' || pageNorm === 'po amend' || pageNorm === 'po amendment') {
+  } else if (['yts', 'wip', 'hold', 'nr'].includes(pageNorm) || (isWorklistOrAccounts && ['yts', 'wip', 'hold', 'nr'].includes(activeView))) {
+    displayName = (['yts', 'wip', 'hold', 'nr'].includes(pageNorm) ? pageNorm : activeView).toUpperCase();
+  } else if (pageNorm === 'po amend' || pageNorm === 'po amendment' || (isWorklistOrAccounts && (activeView === 'po_amend' || activeView === 'po_amend_detail'))) {
     displayName = 'PO Amendment';
-  } else if (activeView === 'wcc' || pageNorm === 'wcc') {
+  } else if (pageNorm === 'wcc' || (isWorklistOrAccounts && activeView === 'wcc')) {
     displayName = 'WCC';
-  } else if (activeView === 'invoice' || pageNorm === 'invoice') {
+  } else if (pageNorm === 'invoice' || (isWorklistOrAccounts && activeView === 'invoice')) {
     displayName = 'Invoice';
-  } else if (activeView === 'po_to_be_open' || pageNorm === 'po to be open' || pageNorm === 'po_to_be_open') {
+  } else if (pageNorm === 'po to be open' || pageNorm === 'po_to_be_open' || (isWorklistOrAccounts && activeView === 'po_to_be_open')) {
     displayName = 'PO to be Open';
-  } else if (activeView === 'new_project' || pageNorm === 'new project' || (activeModule === 'worklist' && (activeView === 'new_project' || pageNorm === 'worklist'))) {
+  } else if (pageNorm === 'new project' || (activeModule === 'worklist' && (activeView === 'new_project' || pageNorm === 'worklist'))) {
     displayName = 'New project';
   }
 
@@ -63243,7 +63257,7 @@ window.openAddBulkUploadModal = function() {
   currentBulkUploadPageName = displayName;
 
   if (siteTypeRow) {
-    if (displayName === 'Receivable' || activeView === 'receivable') {
+    if (displayName === 'Receivable' || (isWorklistOrAccounts && activeView === 'receivable')) {
       siteTypeRow.style.display = 'none';
       if (selUploadType) {
         selUploadType.innerHTML = '';
@@ -63260,11 +63274,7 @@ window.openAddBulkUploadModal = function() {
       }
     } else if (displayName === 'PO Amendment') {
       siteTypeRow.style.display = 'none';
-    } else if (displayName === 'Receivable') {
-      siteTypeRow.style.display = 'none';
-      if (selUploadType) {
-        selUploadType.innerHTML = '';
-      }
+      if (selUploadType) selUploadType.innerHTML = '';
     } else if (displayName === 'WCC') {
       siteTypeRow.style.display = 'flex';
       if (selUploadType) {
@@ -63292,6 +63302,7 @@ window.openAddBulkUploadModal = function() {
       }
     } else {
       siteTypeRow.style.display = 'none';
+      if (selUploadType) selUploadType.innerHTML = '';
     }
   }
 
@@ -63338,12 +63349,17 @@ window.closeBulkUploadModal = function() {
 
 window.downloadBulkCsvTemplate = function() {
   const urlParams = new URLSearchParams(window.location.search);
-  const activeView = (typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : (urlParams.get('view') || '');
   const activeModule = (typeof currentModule !== 'undefined' && currentModule) ? currentModule : (urlParams.get('module') || '');
+  const isWorklistOrAccounts = (activeModule === 'worklist' || activeModule === 'accounts');
+  const activeView = isWorklistOrAccounts
+    ? ((typeof currentWorklistView !== 'undefined' && currentWorklistView) ? currentWorklistView : (urlParams.get('view') || ''))
+    : '';
   const page = (currentBulkUploadPageName || '').trim();
   const pageLower = page.toLowerCase();
+  const siteTypeRow = document.getElementById('rowBulkUploadSiteType');
   const selSiteType = document.getElementById('selBulkUploadSiteType');
-  const typeVal = (selSiteType ? selSiteType.value : '').toLowerCase();
+  const isSiteTypeVisible = Boolean(siteTypeRow && siteTypeRow.style.display !== 'none');
+  const typeVal = (isSiteTypeVisible && selSiteType ? selSiteType.value : '').toLowerCase();
 
   // 1. Check if Receivable template download
   const isReceivable = pageLower === 'receivable' ||
@@ -63538,7 +63554,8 @@ window.handleBulkCsvFileSelected = async function(input) {
     }
 
     const pageKey = (currentBulkUploadPageName || '').trim().toLowerCase();
-    if (pageKey.includes('receivable') || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'receivable')) {
+    const isWorklistOrAccounts = (typeof currentModule !== 'undefined' && (currentModule === 'worklist' || currentModule === 'accounts'));
+    if (pageKey.includes('receivable') || (isWorklistOrAccounts && typeof currentWorklistView !== 'undefined' && currentWorklistView === 'receivable')) {
       window.selectedBulkUploadReceivableFile = file;
       const lblFileName = document.getElementById('lblBulkCsvFileName');
       if (lblFileName) {
@@ -63608,6 +63625,7 @@ window.handleBulkCsvFileSelected = async function(input) {
       const newLog = {
         id: `blk-${Date.now()}`,
         page: 'Receivable',
+        tabKey: 'worklist_receivable',
         started: timestampStr,
         completed: timestampStr,
         totalCount: String(total),
@@ -63683,56 +63701,100 @@ window.handleBulkCsvFileSelected = async function(input) {
 
     try {
       const pageKey = (currentBulkUploadPageName || '').trim().toLowerCase();
+      const activeMod = (typeof currentModule !== 'undefined' && currentModule) ? currentModule : '';
+      const isWorklistOrAccounts = (activeMod === 'worklist' || activeMod === 'accounts');
+      const siteTypeRow = document.getElementById('rowBulkUploadSiteType');
+      const isSiteTypeVisible = Boolean(siteTypeRow && siteTypeRow.style.display !== 'none');
+      const visibleSiteTypeVal = isSiteTypeVisible ? (document.getElementById('selBulkUploadSiteType')?.value || '').toLowerCase() : '';
       const isIndusProductExpenses = (pageKey.includes('gbpa') && pageKey.includes('expense')) ||
-        (pageKey === 'expenses' && typeof currentModule !== 'undefined' && (currentModule === 'indus_towers' || currentModule === 'indus') && typeof currentIndusSubpage !== 'undefined' && currentIndusSubpage === 'product_details');
+        (pageKey === 'expenses' && (activeMod === 'indus_towers' || activeMod === 'indus') && typeof currentIndusSubpage !== 'undefined' && currentIndusSubpage === 'product_details');
       const isIndusProductMaterials = (pageKey.includes('gbpa') && pageKey.includes('material')) || pageKey.includes('material');
+
+      const clearApiCache = () => {
+        if (typeof NexusApi !== 'undefined' && typeof NexusApi.clearCache === 'function') {
+          NexusApi.clearCache();
+        }
+      };
+
+      const ensurePageVisibleRefresh = () => {
+        if (typeof currentPage !== 'undefined') currentPage = 1;
+        if (typeof applyFiltersAndRender === 'function') applyFiltersAndRender();
+      };
 
       showToast(`Uploading "${file.name}" for ${currentBulkUploadPageName}...`);
 
       let result = null;
       if (pageKey.includes('employee') && typeof NexusApi !== 'undefined' && NexusApi.employees) {
         result = await NexusApi.employees.bulkUpload(file);
-        if (typeof loadMasterEmployeesFromApi === 'function') {
-          await loadMasterEmployeesFromApi();
+        clearApiCache();
+        const loader = window.loadMasterEmployeesFromApi || (typeof loadMasterEmployeesFromApi === 'function' ? loadMasterEmployeesFromApi : null);
+        if (loader) {
+          await loader();
         }
+        ensurePageVisibleRefresh();
       } else if (pageKey.includes('product') && !pageKey.includes('gbpa') && typeof NexusApi !== 'undefined' && NexusApi.products) {
         result = await NexusApi.products.bulkUpload(file);
+        clearApiCache();
         if (typeof loadMasterProductsFromApi === 'function') {
           await loadMasterProductsFromApi();
         }
+        ensurePageVisibleRefresh();
       } else if (isIndusProductMaterials && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaMaterials) {
         result = await NexusApi.indusGbpaMaterials.bulkUpload(file);
-        if (typeof fetchGbpaMaterials === 'function') {
-          await fetchGbpaMaterials(true);
+        clearApiCache();
+        const loader = window.fetchGbpaMaterials || (typeof fetchGbpaMaterials === 'function' ? fetchGbpaMaterials : null);
+        if (loader) {
+          await loader(true);
         }
+        ensurePageVisibleRefresh();
       } else if (isIndusProductExpenses && typeof NexusApi !== 'undefined' && NexusApi.indusGbpaExpenses) {
         result = await NexusApi.indusGbpaExpenses.bulkUpload(file);
-        if (typeof fetchGbpaExpenses === 'function') {
-          await fetchGbpaExpenses(true);
+        clearApiCache();
+        const loader = window.fetchGbpaExpenses || (typeof fetchGbpaExpenses === 'function' ? fetchGbpaExpenses : null);
+        if (loader) {
+          await loader(true);
         }
+        ensurePageVisibleRefresh();
       } else if ((pageKey === 'expense' || pageKey === 'expenses') && typeof NexusApi !== 'undefined' && NexusApi.expenses) {
         result = await NexusApi.expenses.bulkUpload(file);
-        if (typeof loadMasterExpensesFromApi === 'function') {
-          await loadMasterExpensesFromApi();
+        clearApiCache();
+        const loader = window.loadMasterExpensesFromApi || (typeof loadMasterExpensesFromApi === 'function' ? loadMasterExpensesFromApi : null);
+        if (loader) {
+          await loader();
         }
+        if (activeMod === 'master' && typeof currentMasterSubpage !== 'undefined' && currentMasterSubpage === 'expenses') {
+          masterExpensesData = window.masterExpensesData || masterExpensesData || [];
+          currentDataset = [...masterExpensesData];
+        }
+        ensurePageVisibleRefresh();
       } else if (pageKey.includes('site') && typeof NexusApi !== 'undefined' && NexusApi.indusSites) {
         result = await NexusApi.indusSites.bulkUpload(file);
-        if (typeof fetchIndusSites === 'function') {
-          await fetchIndusSites(true);
+        clearApiCache();
+        const loader = window.fetchIndusSites || (typeof fetchIndusSites === 'function' ? fetchIndusSites : null);
+        if (loader) {
+          await loader(true);
         }
+        ensurePageVisibleRefresh();
       } else if (pageKey.includes('gbpa') && typeof NexusApi !== 'undefined' && NexusApi.indusGbpa) {
         result = await NexusApi.indusGbpa.bulkUpload(file);
-        if (typeof fetchIndusGbpa === 'function') {
-          await fetchIndusGbpa(true);
+        clearApiCache();
+        const loader = window.fetchIndusGbpa || (typeof fetchIndusGbpa === 'function' ? fetchIndusGbpa : null);
+        if (loader) {
+          await loader(true);
         }
+        ensurePageVisibleRefresh();
       } else if (pageKey.includes('infra') && typeof NexusApi !== 'undefined' && NexusApi.indusInfra) {
         result = await NexusApi.indusInfra.bulkUpload(file);
-        if (typeof fetchIndusInfra === 'function') {
-          await fetchIndusInfra(true);
+        clearApiCache();
+        const loader = window.fetchIndusInfra || (typeof fetchIndusInfra === 'function' ? fetchIndusInfra : null);
+        if (loader) {
+          await loader(true);
         }
-      } else if (pageKey.includes('po amend') || pageKey.includes('po amendment') || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'po_amend')) {
+        ensurePageVisibleRefresh();
+      } else if (pageKey.includes('po amend') || pageKey.includes('po amendment') || (isWorklistOrAccounts && typeof currentWorklistView !== 'undefined' && currentWorklistView === 'po_amend')) {
         if (typeof NexusApi !== 'undefined' && NexusApi.commercial && NexusApi.commercial.poAmend && NexusApi.commercial.poAmend.uploadPoAmend) {
           result = await NexusApi.commercial.poAmend.uploadPoAmend(file);
+          clearApiCache();
           if (typeof loadCommercialPoAmendFromApi === 'function') {
             await loadCommercialPoAmendFromApi();
           }
@@ -63740,20 +63802,20 @@ window.handleBulkCsvFileSelected = async function(input) {
             await loadCommercialProjectsFromApi();
           }
         }
-      } else if (pageKey.includes('new project') || pageKey === 'new project' || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'new_project') || (new URLSearchParams(window.location.search).get('view') === 'new_project') || ((document.getElementById('selBulkUploadSiteType')?.value || '').toLowerCase() === 'projects') || ((document.getElementById('selBulkUploadSiteType')?.value || '').toLowerCase() === 'po')) {
+      } else if (pageKey.includes('new project') || pageKey === 'new project' || (isWorklistOrAccounts && ((typeof currentWorklistView !== 'undefined' && currentWorklistView === 'new_project') || (new URLSearchParams(window.location.search).get('view') === 'new_project'))) || visibleSiteTypeVal === 'projects' || visibleSiteTypeVal === 'po') {
         if (typeof NexusApi !== 'undefined' && NexusApi.commercial) {
-          const selSiteType = document.getElementById('selBulkUploadSiteType');
-          const uploadTypeVal = (selSiteType ? selSiteType.value : 'projects').toLowerCase();
+          const uploadTypeVal = visibleSiteTypeVal || 'projects';
           if (uploadTypeVal === 'po') {
             result = await NexusApi.commercial.uploadPo(file);
           } else {
             result = await NexusApi.commercial.uploadProjects(file);
           }
+          clearApiCache();
           if (typeof loadCommercialProjectsFromApi === 'function') {
             await loadCommercialProjectsFromApi();
           }
         }
-      } else if (pageKey.includes('receivable') || (typeof currentWorklistView !== 'undefined' && currentWorklistView === 'receivable')) {
+      } else if (pageKey.includes('receivable') || (isWorklistOrAccounts && typeof currentWorklistView !== 'undefined' && currentWorklistView === 'receivable')) {
         if (typeof loadCommercialReceivableFromApi === 'function') {
           await loadCommercialReceivableFromApi();
         }
@@ -63812,6 +63874,7 @@ window.handleBulkCsvFileSelected = async function(input) {
       const failedLog = {
         id: `blk-${Date.now()}`,
         page: currentBulkUploadPageName,
+        tabKey: getCanonicalBulkUploadTabKey(currentBulkUploadPageName),
         fileName: file.name,
         started: startedStr,
         completed: completedStr,
@@ -63841,6 +63904,7 @@ window.handleBulkCsvFileSelected = async function(input) {
     const newLog = {
       id: `blk-${Date.now()}`,
       page: currentBulkUploadPageName,
+      tabKey: getCanonicalBulkUploadTabKey(currentBulkUploadPageName),
       fileName: file.name,
       started: startedStr,
       completed: completedStr,
